@@ -117,10 +117,11 @@ Implemented:
 Current implementation phase:
 
 1. SDIB-1.0 and frozen Canonical DB authority mapping completed.
-2. Implementation Plan v0.1 recorded in `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md`.
+2. Implementation Plan v0.4 recorded in `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md`.
 3. First vertical slice is the clean bootstrap kernel + schema/version/provenance verification + failure-injection tests.
-4. PostgreSQL real-server execution and any unresolved schema/index authority gap remain completion blockers.
-5. Repository technology remains outside this slice; ADR-M0-004 is still required before Repository adapter technology is frozen.
+4. PostgreSQL deterministic projection and repository-controlled external-`psql` bootstrap/verify/acceptance harness are implemented; real-server execution of the committed harness remains the current completion blocker.
+5. Repository technology remains outside this slice; no Python PostgreSQL driver/ORM was added, and ADR-M0-004 is still required before Repository adapter technology is frozen.
+6. v0.4 repository-local verification: migration 24/24, unit 33/33, contract 40/40 by file/partition; historical baseline/canonical/codegen/architecture/bootstrap gates remain PASS. Real PostgreSQL execution of the committed acceptance command is still pending.
 
 ## Closed ADRs
 

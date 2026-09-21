@@ -27,6 +27,7 @@ CODEGEN_VERIFY_GENERATED = REPO_ROOT / "tools" / "codegen" / "verify_generated.p
 CODEGEN_REGENERATE_DIFF = REPO_ROOT / "tools" / "codegen" / "regenerate_diff.py"
 ARCHITECTURE_VERIFY = REPO_ROOT / "tools" / "architecture" / "verify_dependencies.py"
 STORAGE_BOOTSTRAP = REPO_ROOT / "tools" / "storage" / "bootstrap_db.py"
+POSTGRES_STORAGE = REPO_ROOT / "tools" / "storage" / "postgres_db.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -51,6 +52,9 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
     CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from frozen schema 1.6.0 authority."),
     CommandSpec("db-verify", "M0-STO-001", "IMPLEMENTED", "Verify SQLite schema/version/provenance against frozen schema 1.6.0 authority."),
+    CommandSpec("db-postgres-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap PostgreSQL through the repository-controlled external psql harness."),
+    CommandSpec("db-postgres-verify", "M0-STO-001", "IMPLEMENTED", "Verify PostgreSQL schema/version/provenance through the external psql harness."),
+    CommandSpec("db-postgres-acceptance", "M0-STO-001", "IMPLEMENTED", "Run destructive M0-STO-001 PostgreSQL acceptance in a dedicated disposable database."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -304,6 +308,24 @@ def build_parser() -> argparse.ArgumentParser:
     db_verify = sub.add_parser("db-verify", help="Verify SQLite Desktop DB schema/version/provenance")
     db_verify.add_argument("database", type=Path)
 
+    def add_postgres_client_args(command: argparse.ArgumentParser) -> None:
+        command.add_argument("--user", default="tpaa")
+        command.add_argument("--host")
+        command.add_argument("--port", type=int)
+        command.add_argument("--psql", default="psql")
+        command.add_argument("--docker-container")
+
+    pg_bootstrap = sub.add_parser("db-postgres-bootstrap", help="Bootstrap PostgreSQL schema 1.6.0 through external psql")
+    add_postgres_client_args(pg_bootstrap)
+    pg_bootstrap.add_argument("database")
+    pg_verify = sub.add_parser("db-postgres-verify", help="Verify PostgreSQL schema/version/provenance through external psql")
+    add_postgres_client_args(pg_verify)
+    pg_verify.add_argument("database")
+    pg_acceptance = sub.add_parser("db-postgres-acceptance", help="Run destructive PostgreSQL M0-STO-001 acceptance in a disposable database")
+    add_postgres_client_args(pg_acceptance)
+    pg_acceptance.add_argument("--admin-database", default="postgres")
+    pg_acceptance.add_argument("--database", default="tpaa_m0_sto_001_acceptance")
+
     fmt = sub.add_parser("format", help="Run Ruff formatter")
     fmt.add_argument("--check", action="store_true")
     sub.add_parser("lint", help="Run Ruff linter")
@@ -369,6 +391,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "verify", str(args.database)])
+    if command in {"db-postgres-bootstrap", "db-postgres-verify", "db-postgres-acceptance"}:
+        pg_args = [sys.executable, str(POSTGRES_STORAGE)]
+        if args.user:
+            pg_args.extend(["--user", args.user])
+        if args.host:
+            pg_args.extend(["--host", args.host])
+        if args.port is not None:
+            pg_args.extend(["--port", str(args.port)])
+        if args.psql:
+            pg_args.extend(["--psql", args.psql])
+        if args.docker_container:
+            pg_args.extend(["--docker-container", args.docker_container])
+        if command == "db-postgres-acceptance":
+            pg_args.extend(["acceptance", "--admin-database", args.admin_database, "--database", args.database])
+        else:
+            action = "bootstrap" if command == "db-postgres-bootstrap" else "verify"
+            pg_args.extend([action, args.database])
+        return _run(pg_args)
     if command == "run":
         return _reserved("M0-API-002" if args.target == "api" else "M0-GUI-001", f"run {args.target}")
     reserved = {

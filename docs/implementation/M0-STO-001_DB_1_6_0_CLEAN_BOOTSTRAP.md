@@ -3,12 +3,12 @@
 **Task:** M0-STO-001  
 **Workstream:** WS-STORAGE  
 **Status:** IN PROGRESS  
-**Plan version:** v0.3
+**Plan version:** v0.4
 **Implementation baseline:** SDIB-1.0 + frozen CB-1.4.0 Canonical snapshot at repository HEAD
 
 ## 1. Objective
 
-Establish a deterministic, fail-closed clean-database bootstrap kernel for DB schema target `1.6.0` without inventing persistence semantics outside the frozen Canonical authority. The implemented slices bootstrap and verify the SQLite Desktop profile and deterministically project the same exact `CORE_LOGICAL_MODEL.json` authority to PostgreSQL DDL with FK dependency ordering. Repository-controlled PostgreSQL execution/readiness verification remains required before M0-STO-001 can be declared COMPLETE.
+Establish a deterministic, fail-closed clean-database bootstrap kernel for DB schema target `1.6.0` without inventing persistence semantics outside the frozen Canonical authority. The implemented slices bootstrap and verify the SQLite Desktop profile and deterministically project the same exact `CORE_LOGICAL_MODEL.json` authority to PostgreSQL DDL with FK dependency ordering. Repository-controlled PostgreSQL execution/readiness verification is now implemented through an external `psql` acceptance harness that deliberately does not select a Python Repository driver. Real-server execution of that committed harness remains required before M0-STO-001 can be declared COMPLETE.
 
 ## 2. SDIB acceptance criteria
 
@@ -46,6 +46,7 @@ No controlled Canonical artifact found in R3.3 defines a complete independent in
 - PostgreSQL is a required Service/CI bootstrap target before task completion.
 - v0.1 first slice uses Python standard-library `sqlite3`; this does **not** freeze the later Repository ORM/driver decision.
 - `ADR-M0-004` is not present in the current repository and is still required by SDIB for Repository DB access implementation. Repository skeleton work must not silently choose that architecture in this task.
+- M0-STO-001 PostgreSQL execution uses the platform-required external PostgreSQL client (`psql`) only as an acceptance/bootstrap transport. This does not freeze `psycopg`, `asyncpg`, SQLAlchemy, an ORM, or any Repository adapter technology.
 - SQLite physical DDL is a dialect projection of Canonical field SQL, not a second logical schema authority.
 
 ## 5. Clean bootstrap architecture
@@ -56,8 +57,9 @@ No controlled Canonical artifact found in R3.3 defines a complete independent in
 4. Create implementation metadata table `_tpaa_bootstrap_manifest` for bootstrap provenance only; it is not a business/domain object.
 5. Create every Canonical table inside one explicit transaction. PostgreSQL ordering is deterministic topological ordering with lexical tie-breaking; missing FK targets or dependency cycles fail closed before DDL execution.
 6. Persist schema target, Core Baseline, Canonical artifact SHA-256, and baseline-lock SHA-256 in the bootstrap manifest.
-7. Verify exact expected table inventory and generated DDL fingerprint before commit.
-8. Roll back and fail closed on any mismatch.
+7. PostgreSQL bootstrap additionally records a SHA-256 of a deterministic `pg_catalog` projection covering non-system schemas, relations, columns/defaults, constraints, indexes, triggers, views, and sequences.
+8. Verify exact expected schema/table inventory, baseline provenance, deterministic DDL projection hash, and current PostgreSQL catalog hash before readiness success.
+9. Roll back and fail closed on any mismatch.
 
 ## 6. Migration/bootstrap boundary
 
@@ -68,6 +70,8 @@ M0-STO-001 provides only clean bootstrap from an empty DB to `1.6.0`. It does no
 - Bootstrap is all-or-nothing.
 - SQLite foreign-key enforcement is enabled for verification/use.
 - Any DDL, provenance, or post-create verification error triggers rollback.
+- PostgreSQL bootstrap executes through one `psql` connection and one explicit transaction with `ON_ERROR_STOP`; injected mid-bootstrap failure must leave zero non-system user relations.
+- PostgreSQL readiness verification executes inside `BEGIN READ ONLY` and finishes with `ROLLBACK`; it must not repair or mutate the target database.
 - A non-empty/non-bootstrap database is rejected rather than silently adopted.
 - Re-running bootstrap on an already initialized DB is not treated as success; callers must use verification for readiness.
 
@@ -85,6 +89,7 @@ The bootstrap manifest records at minimum:
 - exact Canonical artifact SHA-256;
 - exact trusted baseline-lock SHA-256;
 - deterministic physical-schema DDL fingerprint;
+- PostgreSQL catalog-schema SHA-256 for physical drift detection on the Service profile;
 - engine profile.
 
 This creates a machine-verifiable trace from runtime DB bootstrap state back to the frozen Core/Canonical baseline without completing M0-CORE-006 runtime handshake.
@@ -228,3 +233,20 @@ Repository regression after this slice on CPython 3.13.5 / Linux x86_64:
 - M0-CORE-005 architecture dependency gate PASS;
 - `bootstrap --check-only` PASS;
 - Ruff 0.16.8 and mypy 2.3.1 execution are NOT CLAIMED on this offline host because the frozen binaries are not installed/cached.
+
+
+## 19. v0.4 revision — repository-controlled PostgreSQL execution/verification harness
+
+The PostgreSQL execution boundary is implemented without changing the dependency baseline or closing `ADR-M0-004`. `tools/storage/postgres_db.py` invokes an external `psql` client directly or through an explicitly selected Docker container. `tools/dev/tpaa_dev.py` exposes the same repository-controlled entry points.
+
+Implemented semantics:
+
+- `db-postgres-bootstrap`: clean-target guard → deterministic 77-table DDL → manifest/provenance → exact inventory guard → commit → read-only verify.
+- `db-postgres-verify`: read-only exact schema/table inventory, manifest/version/Core/Canonical/lock/projection verification, plus recomputed PostgreSQL catalog SHA-256.
+- `db-postgres-acceptance`: destructive only inside a safely named disposable database (`tpaa_m0_sto_001_*`); runs mid-bootstrap rollback injection, clean bootstrap/verify, missing-table detection, manifest tamper detection, DDL tamper detection, and unexpected-index detection, then drops the disposable database.
+- Direct client mode uses `psql`; Docker mode uses `docker exec -i <container> psql`. Neither mode introduces or implies a Python Repository driver.
+- The catalog fingerprint includes non-system schemas/relations, column types/nullability/defaults, constraints, indexes, triggers, views, and sequences, so physical drift is not reduced to file/table existence.
+
+Repository-local tests after this revision cover generated SQL transaction/read-only semantics, provenance fields, rollback-failure detection, dirty-target rejection, and acceptance database safety. Real PostgreSQL execution of the committed acceptance command is still required on the user's existing PostgreSQL 16 container before this task can move to COMPLETE.
+
+Current repository-local verification after the v0.4 implementation: migration 24/24 PASS, unit 33/33 PASS, contract 40/40 PASS by file/partition, Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap gates PASS. Ruff 0.16.8 and mypy 2.3.1 are not installed/cached on this offline host and remain NOT CLAIMED here.
