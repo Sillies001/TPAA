@@ -13,6 +13,7 @@ required-version = ">=0.10,<0.13"
 minversion = "9.0"
 addopts = ["-ra", "--strict-config", "--strict-markers"]
 testpaths = ["tests"]
+pythonpath = ["src"]
 xfail_strict = true
 
 [tool.ruff]

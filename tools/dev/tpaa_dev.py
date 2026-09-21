@@ -21,6 +21,7 @@ from typing import Sequence
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOLCHAIN_PATH = REPO_ROOT / "tools" / "dev" / "TOOLCHAIN.json"
 BASELINE_VERIFY = REPO_ROOT / "tools" / "baseline" / "verify_baseline.py"
+CANONICAL_VERIFY = REPO_ROOT / "tools" / "canonical" / "verify_loader.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -39,6 +40,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("bootstrap", "M0-DEV-001", "IMPLEMENTED", "Validate runtime/lock/baseline and sync the frozen project environment."),
     CommandSpec("generate", "M0-CORE-003", "RESERVED", "Generate governed sources from Canonical authorities."),
     CommandSpec("verify-baseline", "M0-CORE-001", "IMPLEMENTED", "Verify BASELINE_LOCK and controlled Canonical artifact hashes."),
+    CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -280,6 +282,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     sub.add_parser("verify-baseline", help="Verify frozen Canonical baseline")
+    sub.add_parser("verify-canonical", help="Verify M0-CORE-002 Canonical loader contract")
     sub.add_parser("doctor", help="Report toolchain state").add_argument("--strict", action="store_true")
     sub.add_parser("generate", help="Reserved for M0-CORE-003")
 
@@ -311,6 +314,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_bootstrap(args.check_only, args.with_quality_tools)
     if command == "verify-baseline":
         return _baseline_check()
+    if command == "verify-canonical":
+        return _run([sys.executable, str(CANONICAL_VERIFY)])
     if command == "doctor":
         return cmd_doctor(args.strict)
     if command == "format":

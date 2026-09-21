@@ -15,6 +15,24 @@ Controls already established:
 4. Missing, modified or unexpected Canonical JSON fails closed.
 5. Machine-readable evidence is generated for review.
 
+
+### M0-CORE-002 — COMPLETE
+
+**Workstream:** WS-CORE
+**Acceptance:** Canonical artifact version, schema and hash errors fail closed; errors include artifact id/version context.
+
+Implemented:
+
+1. `src/tpaa_canonical/loader.py` is the governed Canonical consumption entry point.
+2. The loader pins the approved CB-1.4.0 `BASELINE_LOCK.json` SHA-256 before trusting lock contents.
+3. A selected artifact is trusted only after exact byte-count and SHA-256 verification.
+4. Canonical JSON must be an object; declared envelope values are type-checked.
+5. Declared `core_baseline` and `db_schema_version` must agree with the frozen baseline metadata.
+6. Consumer compatibility expectations support exact artifact version, schema version and required top-level keys.
+7. Artifacts without an authority-declared independent version remain `UNVERSIONED_BY_AUTHORITY`; no implementation-only version is invented.
+8. `CanonicalArtifactError` carries deterministic engineering diagnostics including artifact id plus expected/actual version and schema context.
+9. `python tools/dev/tpaa_dev.py verify-canonical` emits machine-readable acceptance evidence.
+
 ### M0-DEV-001 — COMPLETE for backlog minimum acceptance
 
 **Workstream:** WS-DEVOPS
@@ -51,7 +69,8 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 ## Verification status for this increment
 
 - Baseline exact verification: **21/21 PASS**.
-- Contract tests: **13/13 PASS** after adding the toolchain verifier test.
+- Repository tests: **25/25 PASS** (10 unit + 15 contract).
+- Canonical loader acceptance verifier: **21/21 controlled artifacts loaded; 8/8 fail-closed negative checks PASS**.
 - Toolchain decision verifier: **13/13 checks PASS**.
 - `bootstrap --check-only`: **PASS** on CPython 3.13.5 / Linux x86_64.
 - `bootstrap` with frozen offline project sync: **PASS** on this host.
@@ -75,7 +94,6 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- M0-CORE-002 Canonical artifact loader.
 - M0-CORE-003/004 code generation and generated-source governance.
 - Database, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
@@ -84,6 +102,6 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. **M0-CORE-002 — Canonical artifact loader**.
-2. **M0-CORE-003 — code generator framework**.
-3. **M0-CORE-004 — generated-source read-only/regenerate-diff governance**.
+1. **M0-CORE-003 — code generator framework**.
+2. **M0-CORE-004 — generated-source read-only/regenerate-diff governance**.
+3. Continue the remaining M0 Core/Storage/Application/Platform backlog in SDIB dependency order.

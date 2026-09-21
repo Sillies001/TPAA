@@ -7,6 +7,7 @@ TPAA V8.0 / ED-2.0 implementation monorepo bootstrapped from **SDIB-1.0**.
 - Milestone: **M0 Engineering Bootstrap**
 - Completed tasks:
   - **M0-CORE-001** — import and lock CB-1.4.0 baseline snapshot
+  - **M0-CORE-002** — fail-closed Canonical artifact loader
   - **M0-DEV-001** — unified developer command semantics
   - **M0-DEV-002** — one cross-platform project dependency lock
 - Closed toolchain decisions:
@@ -34,6 +35,7 @@ For airborne-data processing and metric calculation, **Polars is the default Dat
 python tools/dev/tpaa_dev.py list
 python tools/dev/tpaa_dev.py bootstrap --check-only
 python tools/dev/tpaa_dev.py verify-baseline
+python tools/dev/tpaa_dev.py verify-canonical
 python tools/dev/tpaa_dev.py test-contract
 python tools/dev/tpaa_dev.py doctor
 ```
@@ -48,6 +50,15 @@ python tools/baseline/verify_baseline.py
 
 A successful run verifies the pinned `BASELINE_LOCK.json` hash, all 21 controlled artifact byte sizes and SHA-256 digests, and rejects missing or unlisted Canonical JSON artifacts.
 
+
+## Verify the Canonical artifact loader
+
+```bash
+python tools/dev/tpaa_dev.py verify-canonical
+```
+
+The loader accepts only `BASELINE_LOCK`-controlled artifacts, verifies exact bytes/hash before trusting JSON, checks declared Core/DB-schema compatibility, and supports explicit consumer version/schema expectations. Artifacts that do not declare an independent authority version remain explicitly unversioned rather than receiving an implementation-invented version. See `docs/developer/CANONICAL_LOADER.md`.
+
 ## Verify the M0 toolchain decisions
 
 ```bash
@@ -59,4 +70,4 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-The SDIB-1.0 startup sequence through step 4 is now complete. The next implementation item is **M0-CORE-002 — Canonical artifact loader**, followed by **M0-CORE-003 — code generator framework**.
+The SDIB-1.0 startup sequence now includes the completed **M0-CORE-002 Canonical artifact loader**. The next implementation item is **M0-CORE-003 — code generator framework**, followed by **M0-CORE-004 — generated-source governance**.
