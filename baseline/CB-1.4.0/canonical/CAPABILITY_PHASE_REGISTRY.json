@@ -1,0 +1,71 @@
+{
+  "registry_id": "CAPABILITY_PHASE_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "terminology": {
+    "symbol": "P",
+    "english": "Capability Phase",
+    "chinese": "能力成熟度/能力层",
+    "exclusive_meaning": "P1-P6 describe what class of evaluation/intelligence product the system is allowed to claim; they never describe project schedule, software sprint, implementation wave or Episode Stage."
+  },
+  "capability_phases": [
+    {
+      "p_code": "P1",
+      "name": "Observed Performance",
+      "purpose": "Observed aircraft and mission-system engineering performance; no context attribution or intrinsic-capability claim.",
+      "baseline_status": "CURRENT_BASELINE",
+      "frozen_extension_scope": "Aircraft and mission-system observed-performance products, evidence and numeric longitudinal trend."
+    },
+    {
+      "p_code": "P2",
+      "name": "Context Attribution & Normalization",
+      "purpose": "Attribute/normalize observed performance using frozen context/factor views.",
+      "baseline_status": "DESIGN_CONTRACT_FROZEN",
+      "frozen_extension_scope": "Factor views, attribution/normalization, adjusted estimate and identifiability governance."
+    },
+    {
+      "p_code": "P3",
+      "name": "Intrinsic Capability / Aircraft Twin",
+      "purpose": "Estimate intrinsic capability under governed as-of lifecycle/configuration semantics.",
+      "baseline_status": "DESIGN_CONTRACT_FROZEN",
+      "frozen_extension_scope": "Reference-condition longitudinal estimate, capability model/surface, aircraft twin and model profile."
+    },
+    {
+      "p_code": "P4",
+      "name": "Human-Machine Assessment",
+      "purpose": "Assess W↔P↔A↔M evidence and human-machine interaction.",
+      "baseline_status": "DESIGN_CONTRACT_FROZEN",
+      "frozen_extension_scope": "Individual/human-machine qualification, competency diagnostics, evidence and instructor-review workflow."
+    },
+    {
+      "p_code": "P5",
+      "name": "Team / Mission / System Assessment",
+      "purpose": "Multi-entity/team/mission reconstruction and assessment.",
+      "baseline_status": "DESIGN_CONTRACT_FROZEN",
+      "frozen_extension_scope": "Team/package/mission objective assessment with composition-aware longitudinal analysis."
+    },
+    {
+      "p_code": "P6",
+      "name": "Prediction / Counterfactual / Closed Loop",
+      "purpose": "Governed forecast/counterfactual products physically separated from facts.",
+      "baseline_status": "DESIGN_CONTRACT_FROZEN",
+      "frozen_extension_scope": "Forecast/counterfactual/recommendation products separated from facts and requiring explicit assumptions/approval."
+    }
+  ],
+  "admission_order": [
+    "P1 observed evidence is immutable input",
+    "P2 may consume but never overwrite P1",
+    "P3 may consume validated P2 and lifecycle/as-of data",
+    "P4 may consume C/W/P/A/J/M + metrics but does not alter facts",
+    "P5 aggregates multi-entity/team/mission evidence without copying team result to individuals",
+    "P6 consumes published history/models and remains separate from replay/facts"
+  ],
+  "legacy_delivery_mapping_note": "Legacy 1A-1G and metric 1C/1D/1E labels were historical implementation-wave labels. They are retired as current progress language and are mapped in TERMINOLOGY_REGISTRY/DEVELOPMENT_MILESTONE_REGISTRY.",
+  "p1_metric_delivery_summary": {
+    "M2_P1_FOUNDATION_32": 32,
+    "M3_P1_REMAINDER_84": 84,
+    "M4_P1_LONGITUDINAL_ELIGIBLE": 104,
+    "M4_P1_LONGITUDINAL_AIRCRAFT": 33,
+    "M4_P1_LONGITUDINAL_MISSION_SYSTEM": 71
+  }
+}

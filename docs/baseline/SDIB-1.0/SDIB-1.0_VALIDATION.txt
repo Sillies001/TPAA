@@ -1,0 +1,59 @@
+TPAA SDIB-1.0 VALIDATION
+
+Source R3.3 SHA256: 8030b988a8740fb9fc9003866b449618abc9b7048c77930b6cc22cb85fe926b9
+Document SHA256: 4931469241586d5b300ebe6e7f9797ba00bef653b2bdbd50933c15a269eb09e8
+
+PASS | Document nontrivial | bytes=80406, lines=1339
+PASS | Contains M0
+PASS | Contains M1
+PASS | Contains M2
+PASS | Contains M3
+PASS | Contains M4
+PASS | Contains M5
+PASS | Contains M6
+PASS | Contains M7
+PASS | Contains M8
+PASS | Contains M9
+PASS | Contains WS-CORE
+PASS | Contains WS-DATA
+PASS | Contains WS-WORLD
+PASS | Contains WS-METRIC
+PASS | Contains WS-OBSERVATION
+PASS | Contains WS-LONGITUDINAL
+PASS | Contains WS-ASSESS
+PASS | Contains WS-CAPABILITY
+PASS | Contains WS-STORAGE
+PASS | Contains WS-API
+PASS | Contains WS-GUI
+PASS | Contains WS-TEST
+PASS | Contains WS-PLATFORM
+PASS | Contains WS-SECURITY
+PASS | Contains WS-PERFORMANCE
+PASS | Contains WS-DEVOPS
+PASS | Contains WS-INTEROP
+PASS | Contains WS-GOVERNANCE
+PASS | Contains Basic Stage SETUP_ENTRY
+PASS | Contains Basic Stage EXECUTION
+PASS | Contains Basic Stage STABILIZATION_RECOVERY
+PASS | Contains Basic Stage COMPLETION
+PASS | Contains selected metric P1-AIR-001
+PASS | Contains selected metric P1-AIR-002
+PASS | Contains selected metric P1-AIR-003
+PASS | Contains selected metric P1-AIR-004
+PASS | Contains selected metric P1-AIR-007
+PASS | References CB-1.4.0
+PASS | References R3.3 hash
+PASS | Contains M0 backlog
+PASS | Contains M1 backlog
+PASS | No generic first-nine-stage scheme
+PASS | SNS RADAR applicability
+PASS | 116 count unchanged | 116
+PASS | Contains M0/M1 CI Gate 矩阵
+PASS | Contains Code Review 检查表
+PASS | Contains M1 E2E 验收故事
+PASS | Contains WS × M 责任矩阵
+PASS | Contains Runtime Readiness / READY 判定
+PASS | Contains Workload Envelope 模板
+PASS | Contains 实施证据的最小可追溯元数据
+
+SUMMARY 52/52 PASS

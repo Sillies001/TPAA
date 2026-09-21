@@ -1,0 +1,103 @@
+{
+  "registry_id": "ENGINEERING_WORKSTREAM_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "terminology": {
+    "symbol": "WS",
+    "english": "Engineering Workstream",
+    "chinese": "工程工作流",
+    "rule": "WS organizes work; it is not a sequential phase and may span multiple M and P codes."
+  },
+  "workstreams": [
+    {
+      "code": "WS-CORE",
+      "name": "Core Contracts & Code Generation",
+      "scope": "Core artifacts, generated types/enums, contract loading and semantic governance."
+    },
+    {
+      "code": "WS-DATA",
+      "name": "Data / Registry / Canonical",
+      "scope": "Source registry, ingest, provenance, time, entity, canonical facts and context."
+    },
+    {
+      "code": "WS-WORLD",
+      "name": "Episode / Stage / World / Event",
+      "scope": "Episode detection, Stage projection, C/W/P/A/J/M reconstruction, events and relations."
+    },
+    {
+      "code": "WS-METRIC",
+      "name": "Metric Engine",
+      "scope": "P1 metric operators, 116 metrics, input authority, evidence and metric publication."
+    },
+    {
+      "code": "WS-OBSERVATION",
+      "name": "Observation / Release / Replay",
+      "scope": "Published observations, immutable release, historical replay and provenance."
+    },
+    {
+      "code": "WS-LONGITUDINAL",
+      "name": "Longitudinal Analytics",
+      "scope": "P1 observed trend and later capability/person/team longitudinal products."
+    },
+    {
+      "code": "WS-ASSESS",
+      "name": "Training Assessment",
+      "scope": "P4/P5 qualification, competency, evidence, instructor review and team/mission assessment."
+    },
+    {
+      "code": "WS-CAPABILITY",
+      "name": "Attribution / Capability Intelligence",
+      "scope": "P2 attribution/normalization and P3 capability/twin/model profile."
+    },
+    {
+      "code": "WS-STORAGE",
+      "name": "Persistence & Migration",
+      "scope": "DB schema, migrations, repositories, object/Parquet storage and recovery."
+    },
+    {
+      "code": "WS-API",
+      "name": "Application / API / DTO",
+      "scope": "Use cases, REST, DTOs, idempotency and service integration."
+    },
+    {
+      "code": "WS-GUI",
+      "name": "GUI / Visualization / Debrief",
+      "scope": "PySide6, timeline, replay, evidence, assessment and analytics UI."
+    },
+    {
+      "code": "WS-TEST",
+      "name": "Verification / Golden / Replay",
+      "scope": "Unit, contract, Golden, replay, migration, E2E and acceptance evidence."
+    },
+    {
+      "code": "WS-PLATFORM",
+      "name": "Cross-Platform Runtime",
+      "scope": "Windows/Linux adapters, packaging, logical equivalence and runtime certification."
+    },
+    {
+      "code": "WS-SECURITY",
+      "name": "Security & Data Governance",
+      "scope": "Identity, RBAC, audit, privacy, data handling and export governance."
+    },
+    {
+      "code": "WS-PERFORMANCE",
+      "name": "Performance & Scalability",
+      "scope": "Workload envelope, profiling, concurrency, resource safety and qualification."
+    },
+    {
+      "code": "WS-DEVOPS",
+      "name": "CI/CD / Build / Release",
+      "scope": "Dependency lock, SBOM, package manifest, release, upgrade/rollback and cold-start."
+    },
+    {
+      "code": "WS-INTEROP",
+      "name": "External / LVC Interoperability",
+      "scope": "External gateways, protocol adapters, time/frame conversion and LVC integration."
+    },
+    {
+      "code": "WS-GOVERNANCE",
+      "name": "Architecture / Change Governance",
+      "scope": "Baseline lock, traceability, plugin/model/profile publication and change closure."
+    }
+  ]
+}

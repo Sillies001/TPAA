@@ -1,0 +1,266 @@
+{
+  "core_baseline": "CB-1.4.0",
+  "rebaseline": "R3.3_METRIC_DESIGN_GUIDE",
+  "gates": [
+    {
+      "id": "V-AUTH-001",
+      "name": "Single authority registry complete and one-to-one"
+    },
+    {
+      "id": "V-METRIC-001",
+      "name": "Metric count=116"
+    },
+    {
+      "id": "V-METRIC-002",
+      "name": "Metric codes unique"
+    },
+    {
+      "id": "V-METRIC-003",
+      "name": "Semantic identity/version unique"
+    },
+    {
+      "id": "V-METRIC-004",
+      "name": "P1 delivery milestones M2=32 M3=84"
+    },
+    {
+      "id": "V-METRIC-005",
+      "name": "P1 delivery batches foundation=32 remainder=84"
+    },
+    {
+      "id": "V-METRIC-006",
+      "name": "NUMERIC=107 STRUCTURED=9"
+    },
+    {
+      "id": "V-METRIC-007",
+      "name": "P1 longitudinal eligible=104"
+    },
+    {
+      "id": "V-INPUT-001",
+      "name": "Input authority bindings=661"
+    },
+    {
+      "id": "V-INPUT-002",
+      "name": "Every catalog input exact-once authority"
+    },
+    {
+      "id": "V-STAGE-001",
+      "name": "Four reference stage profiles including Strike"
+    },
+    {
+      "id": "V-STAGE-002",
+      "name": "Legacy sets are not current stage authority"
+    },
+    {
+      "id": "V-STAGE-003",
+      "name": "Strike stage sequence frozen"
+    },
+    {
+      "id": "V-CTX-001",
+      "name": "evaluation_context exists in Core model"
+    },
+    {
+      "id": "V-CTX-002",
+      "name": "Scenario/Profile nullability retained"
+    },
+    {
+      "id": "V-DTO-001",
+      "name": "EvaluationContextDTO exact source mapping"
+    },
+    {
+      "id": "V-DTO-002",
+      "name": "ContextArtifactRefDTO exact source mapping"
+    },
+    {
+      "id": "V-DTO-003",
+      "name": "MetricCatalogEntryDTO uses M/delivery terminology"
+    },
+    {
+      "id": "V-TYPE-001",
+      "name": "Structured schemas count=9"
+    },
+    {
+      "id": "V-LONG-001",
+      "name": "P1 trend subject only Aircraft/Mission-System"
+    },
+    {
+      "id": "V-LONG-002",
+      "name": "P1 structured metrics not trend eligible"
+    },
+    {
+      "id": "V-REPLAY-001",
+      "name": "Analysis release model present"
+    },
+    {
+      "id": "V-DOC-001",
+      "name": "Overall contains no executable schema syntax"
+    },
+    {
+      "id": "V-DOC-002",
+      "name": "All 10 professional volumes declare non-ownership"
+    },
+    {
+      "id": "V-DOC-003",
+      "name": "Professional volume set is A-J exactly"
+    },
+    {
+      "id": "V-AUTH-002",
+      "name": "No second current field-level authority in human documents"
+    },
+    {
+      "id": "V-LEGACY-001",
+      "name": "Legacy baseline names confined to knowledge/provenance/migration documents"
+    },
+    {
+      "id": "V-TAX-001",
+      "name": "Four training types are frozen"
+    },
+    {
+      "id": "V-TAX-002",
+      "name": "Four scopes, three output layers and competency domains frozen"
+    },
+    {
+      "id": "V-WORLD-001",
+      "name": "World capability registry contains all Basic/WVR/BVR/Strike capability modes"
+    },
+    {
+      "id": "V-EXT-001",
+      "name": "P2-P6 extension contracts are all present"
+    },
+    {
+      "id": "V-EXT-002",
+      "name": "Extension metric families are semantic-only and non-executable"
+    },
+    {
+      "id": "V-PCAP-001",
+      "name": "P1 current and P2-P6 capability contracts frozen"
+    },
+    {
+      "id": "V-KNOW-001",
+      "name": "Overall carries Basic/WVR/BVR/Strike plus team/joint/capability knowledge"
+    },
+    {
+      "id": "V-KNOW-002",
+      "name": "Gap report closes 60 R39 knowledge points"
+    },
+    {
+      "id": "V-METHOD-001",
+      "name": "03A methodology authority has restored full method depth and required chains"
+    },
+    {
+      "id": "V-METHOD-002",
+      "name": "03A contains no second executable field/schema authority"
+    },
+    {
+      "id": "V-FIDELITY-001",
+      "name": "Heading-level R39 method/visual fidelity matrix is fully closed"
+    },
+    {
+      "id": "V-SAFE-002",
+      "name": "Fact/estimate/forecast, truth/perception and attribution safety rules frozen"
+    },
+    {
+      "id": "V-SCOPE-001",
+      "name": "Team/package results cannot be copied to individuals"
+    },
+    {
+      "id": "V-INST-001",
+      "name": "Instructor override preserves immutable automatic result"
+    },
+    {
+      "id": "V-COHORT-001",
+      "name": "Cohort comparability and knowledge-time rules frozen"
+    },
+    {
+      "id": "V-PLUGIN-001",
+      "name": "Training plugin composition contract frozen"
+    },
+    {
+      "id": "V-VIS-001",
+      "name": "Visualization carries 13-page family and evidence/media/debrief expansion"
+    },
+    {
+      "id": "V-VIS-002",
+      "name": "05G preserves full legacy visualization workflow depth under R3"
+    },
+    {
+      "id": "V-VIS-003",
+      "name": "05G consumes canonical DTOs and contains no duplicate complete DTO contract"
+    },
+    {
+      "id": "V-PROV-001",
+      "name": "R39 source provenance and four semantic-source hashes recorded"
+    },
+    {
+      "id": "V-PLATFORM-001",
+      "name": "Platform registry freezes mandatory Windows/Linux certification profiles"
+    },
+    {
+      "id": "V-PLATFORM-002",
+      "name": "Platform-neutral core and adapter boundary are frozen in Core Rules"
+    },
+    {
+      "id": "V-PLATFORM-003",
+      "name": "Cross-platform logical equivalence contract covers exact and numeric governed parity"
+    },
+    {
+      "id": "V-PLATFORM-004",
+      "name": "Overall, engineering baseline and 05H contain explicit cross-platform requirements"
+    },
+    {
+      "id": "V-PLATFORM-005",
+      "name": "Windows/Linux CI and release certification matrix is mandatory"
+    },
+    {
+      "id": "V-PLATFORM-006",
+      "name": "Traceability closes platform requirement to authority, design and verification"
+    },
+    {
+      "id": "V-TERM-001",
+      "name": "P/M/WS/Stage namespaces frozen"
+    },
+    {
+      "id": "V-TERM-002",
+      "name": "Core terminology orthogonality rules frozen"
+    },
+    {
+      "id": "V-TERM-003",
+      "name": "Controlled docs contain no active legacy progress language"
+    },
+    {
+      "id": "V-TERM-004",
+      "name": "Methodology and visualization use Stage instead of generic Phase"
+    },
+    {
+      "id": "V-MILESTONE-001",
+      "name": "M0-M9 development milestone registry exact"
+    },
+    {
+      "id": "V-WS-001",
+      "name": "Engineering workstream registry closes milestone references"
+    },
+    {
+      "id": "V-LEGACYMAP-001",
+      "name": "Legacy 1A-1G maps only to M/WS"
+    },
+    {
+      "id": "V-LEGACYMAP-002",
+      "name": "Current catalog/artifacts contain no legacy progress fields/files"
+    },
+    {
+      "id": "V-TERM-TRACE-001",
+      "name": "Terminology requirements are traceable end-to-end"
+    },
+    {
+      "id": "V-METRIC-APP-001",
+      "name": "P1 metric-family applicability contracts are explicit and SNS is RADAR-only"
+    },
+    {
+      "id": "V-METRIC-DESIGN-001",
+      "name": "116-metric design-intent guide covers every current P1 metric exactly once"
+    },
+    {
+      "id": "V-HASH-001",
+      "name": "Baseline lock hashes all controlled canonical artifacts"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "registry_id": "EXTENSION_METRIC_FAMILY_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "status": "SEMANTIC_FAMILY_RESERVATION_NOT_EXECUTABLE_METRIC_CATALOG",
+  "purpose": "Preserve R39 non-P1 metric/indicator knowledge as future semantic families without creating a competing executable code/formula authority to the 116-metric P1 Catalog.",
+  "rules": [
+    "No entry in this registry is executable merely because it is listed.",
+    "Future concrete metrics require a versioned metric catalog/definition with formula, inputs, eligibility, value kind, unit, evidence and Golden validation.",
+    "Historical R39 codes may be migrated only through explicit mapping; they are not current metric codes by default."
+  ],
+  "families": {
+    "TRAINING_DATA_QUALITY": [
+      "source coverage",
+      "time synchronization",
+      "entity association",
+      "world/context capability",
+      "observation eligibility"
+    ],
+    "WORLD_RELATION": [
+      "truth-perception gap",
+      "perception-action response",
+      "action-adjudication link",
+      "team perception divergence",
+      "TPAA-M chain completeness"
+    ],
+    "BASIC_TRAINING": [
+      "flight/reference compliance",
+      "control/handling",
+      "procedure/task",
+      "safety",
+      "capture/settling/repeatability"
+    ],
+    "WVR_TRAINING": [
+      "relative geometry/state dwell",
+      "energy/control",
+      "track/information evidence",
+      "cue-response",
+      "team coordination",
+      "training action/outcome linkage"
+    ],
+    "BVR_TRAINING": [
+      "track availability/continuity/age",
+      "association/identification",
+      "cue-response",
+      "shared picture",
+      "task/role/communication",
+      "engagement/adjudication"
+    ],
+    "STRIKE_TRAINING": [
+      "route/profile execution",
+      "target information/association",
+      "designation continuity",
+      "training attack action",
+      "official range/simulator outcome",
+      "multi-aircraft assignment/deconfliction"
+    ],
+    "OUTCOME": [
+      "objective completion evidence",
+      "approved official success/validity/result class"
+    ],
+    "HUMAN_COMPETENCY": [
+      "safety discipline",
+      "aircraft control",
+      "flight/task execution",
+      "information/system management",
+      "SA evidence",
+      "decision/task management",
+      "communication",
+      "team coordination",
+      "training engagement execution",
+      "mission outcome evidence"
+    ],
+    "TEAM_MISSION": [
+      "shared picture",
+      "task handoff",
+      "role compliance",
+      "communication completion",
+      "action synchronization",
+      "separation/deconfliction",
+      "team/package objective"
+    ],
+    "P2_CONTEXT_ADJUSTED": [
+      "context-adjusted value",
+      "factor effects/candidate contributions",
+      "unexplained component",
+      "identifiability",
+      "uncertainty"
+    ],
+    "P3_CAPABILITY": [
+      "aircraft/config/model reference-condition estimate",
+      "stability",
+      "trend",
+      "change point",
+      "freshness",
+      "independent evidence count"
+    ],
+    "LONGITUDINAL_PROCESS": [
+      "TP gap trend",
+      "PA latency/response trend",
+      "AJ link trend",
+      "M availability trend",
+      "HMI effectiveness trend",
+      "team divergence trend",
+      "chain completeness trend",
+      "process-outcome divergence trend"
+    ],
+    "LONGITUDINAL_GENERAL": [
+      "EWMA",
+      "trend slope",
+      "MAD/variance",
+      "P10/P50/P90",
+      "comparable cohort percentile",
+      "recent exposure",
+      "time since last exposure",
+      "decline/retraining evidence"
+    ],
+    "MODEL_PROFILE": [
+      "aircraft count",
+      "independent episode/evidence count",
+      "mean/median",
+      "dispersion",
+      "P10/P90",
+      "model trend",
+      "block/configuration difference",
+      "outlier aircraft rate"
+    ],
+    "INSTRUCTOR": [
+      "competency grade",
+      "event tag",
+      "root-cause confirmation",
+      "Cohen/Fleiss Kappa",
+      "ICC",
+      "concordance trend"
+    ]
+  }
+}

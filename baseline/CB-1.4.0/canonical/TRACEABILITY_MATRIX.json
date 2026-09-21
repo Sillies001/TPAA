@@ -1,0 +1,236 @@
+{
+  "core_baseline": "CB-1.4.0",
+  "items": [
+    {
+      "requirement": "Session Time authority",
+      "overall": "03 §5/§13",
+      "core_authority": "CORE_RULES CR-003; CORE_LOGICAL_MODEL",
+      "engineering_volume": "05A",
+      "verification": "V-TIME external implementation tests / V-KNOW-003"
+    },
+    {
+      "requirement": "Context immutable replay",
+      "overall": "03 §10/§32",
+      "core_authority": "CR-006/007/022; CORE_LOGICAL_MODEL; DTO contracts",
+      "engineering_volume": "05A/05E/05F",
+      "verification": "V-CTX-001/002; V-DTO-001/002; V-REPLAY-001"
+    },
+    {
+      "requirement": "Episode Stage single method incl. Strike",
+      "overall": "03 §7/§17-20",
+      "core_authority": "STAGE_REGISTRY",
+      "engineering_volume": "05A/05B/05I",
+      "verification": "V-STAGE-001..003"
+    },
+    {
+      "requirement": "116 P1 executable metric authority",
+      "overall": "03 §8",
+      "core_authority": "P1_METRIC_CATALOG",
+      "engineering_volume": "05C",
+      "verification": "V-METRIC-001..006"
+    },
+    {
+      "requirement": "661 P1 input bindings",
+      "overall": "03 §8",
+      "core_authority": "METRIC_INPUT_AUTHORITY_MATRIX",
+      "engineering_volume": "05C",
+      "verification": "V-INPUT-001/002"
+    },
+    {
+      "requirement": "Typed metric result",
+      "overall": "03 §8",
+      "core_authority": "CR-008 + Catalog structured schemas",
+      "engineering_volume": "05C/05F/05G",
+      "verification": "V-TYPE-001"
+    },
+    {
+      "requirement": "Aircraft/Mission-System stable lanes",
+      "overall": "03 §9/§25",
+      "core_authority": "CR-009/010/011 + Core model",
+      "engineering_volume": "05C/05D/05G",
+      "verification": "V-LONG-001/002"
+    },
+    {
+      "requirement": "Basic/WVR/BVR/Strike training taxonomy",
+      "overall": "03 §17-21",
+      "core_authority": "TRAINING_EVALUATION_TAXONOMY; STAGE_REGISTRY",
+      "engineering_volume": "05B/05I/05G",
+      "verification": "V-TAX-001; V-STAGE-003; V-KNOW-001"
+    },
+    {
+      "requirement": "Individual/Team/Package/Joint-LVC scope separation",
+      "overall": "03 §22",
+      "core_authority": "CR-017; TRAINING_EVALUATION_TAXONOMY",
+      "engineering_volume": "05I/05G",
+      "verification": "V-TAX-002; V-SCOPE-001"
+    },
+    {
+      "requirement": "Qualification/Competency/Evidence layers",
+      "overall": "03 §23",
+      "core_authority": "TRAINING_EVALUATION_TAXONOMY",
+      "engineering_volume": "05D/05I/05G",
+      "verification": "V-TAX-002"
+    },
+    {
+      "requirement": "World capability conclusion eligibility",
+      "overall": "03 §4/§21",
+      "core_authority": "WORLD_CAPABILITY_REGISTRY; CR-018",
+      "engineering_volume": "05A/05B/05I/05G",
+      "verification": "V-WORLD-001"
+    },
+    {
+      "requirement": "Instructor annotation/override integrity",
+      "overall": "03 §24",
+      "core_authority": "CR-019; TRAINING_EVALUATION_TAXONOMY",
+      "engineering_volume": "05D/05I/05E/05F/05G",
+      "verification": "V-INST-001"
+    },
+    {
+      "requirement": "Candidate root cause and responsibility",
+      "overall": "03 §22/§24/§27",
+      "core_authority": "TRAINING_EVALUATION_TAXONOMY; CR-020",
+      "engineering_volume": "05B/05I/05J/05G",
+      "verification": "V-SAFE-002"
+    },
+    {
+      "requirement": "Human/team/course/unit longitudinal",
+      "overall": "03 §25/§28",
+      "core_authority": "EXTENSION_CONTRACT_REGISTRY; CR-021/022/023",
+      "engineering_volume": "05D/05I/05G/05H",
+      "verification": "V-COHORT-001"
+    },
+    {
+      "requirement": "P2 Context Attribution and adjusted estimate",
+      "overall": "03 §26",
+      "core_authority": "EXTENSION_CONTRACT_REGISTRY P2; CR-020",
+      "engineering_volume": "05J/05G",
+      "verification": "V-EXT-001; V-PCAP-001"
+    },
+    {
+      "requirement": "P3 Capability Model/Twin/Model Profile",
+      "overall": "03 §26",
+      "core_authority": "EXTENSION_CONTRACT_REGISTRY P3",
+      "engineering_volume": "05J/05G/05H",
+      "verification": "V-EXT-001; V-PCAP-001"
+    },
+    {
+      "requirement": "P4/P5 training assessment contracts",
+      "overall": "03 §22-25",
+      "core_authority": "EXTENSION_CONTRACT_REGISTRY P4/P5; TRAINING_EVALUATION_TAXONOMY",
+      "engineering_volume": "05I",
+      "verification": "V-EXT-001; V-PCAP-001"
+    },
+    {
+      "requirement": "P6 forecast/counterfactual/recommendation separation",
+      "overall": "03 §26/§34",
+      "core_authority": "EXTENSION_CONTRACT_REGISTRY P6; CR-016/024",
+      "engineering_volume": "05J/05G/05H",
+      "verification": "V-EXT-001; V-SAFE-002"
+    },
+    {
+      "requirement": "Non-P1 metric-family knowledge reservation",
+      "overall": "03 §21-26",
+      "core_authority": "EXTENSION_METRIC_FAMILY_REGISTRY",
+      "engineering_volume": "05C/05I/05J",
+      "verification": "V-EXT-002"
+    },
+    {
+      "requirement": "Knowledge-time integrity",
+      "overall": "03 §25/§26/§32",
+      "core_authority": "CR-022; EXTENSION_CONTRACT_REGISTRY",
+      "engineering_volume": "05A/05E/05J/05H",
+      "verification": "V-COHORT-001"
+    },
+    {
+      "requirement": "Training plugin composition",
+      "overall": "03 §31",
+      "core_authority": "CR-026; TRAINING_EVALUATION_TAXONOMY",
+      "engineering_volume": "04/05H/05G",
+      "verification": "V-PLUGIN-001"
+    },
+    {
+      "requirement": "External/Joint-LVC interoperability",
+      "overall": "03 §22/§31",
+      "core_authority": "CR-025",
+      "engineering_volume": "05B/05H",
+      "verification": "V-KNOW-001"
+    },
+    {
+      "requirement": "Debrief/media/bookmark/playlist/evidence-first UI",
+      "overall": "03 §27/§30",
+      "core_authority": "Core rules + taxonomy",
+      "engineering_volume": "05E/05F/05G",
+      "verification": "V-VIS-001"
+    },
+    {
+      "requirement": "Release/historical replay",
+      "overall": "03 §32",
+      "core_authority": "CR-007 + Core model",
+      "engineering_volume": "05E/05F",
+      "verification": "V-REPLAY-001"
+    },
+    {
+      "requirement": "R39 full-knowledge migration evidence",
+      "overall": "03 §§17-34",
+      "core_authority": "all CB-1.4.0 registries",
+      "engineering_volume": "05A-05J",
+      "verification": "V-KNOW-001/002; V-PROV-001"
+    },
+    {
+      "requirement": "Training-evaluation methodology fidelity",
+      "overall": "03A §§0-28; 03 §§17-28",
+      "core_authority": "Canonical field authorities + TRAINING_EVALUATION_TAXONOMY + CORE_RULES",
+      "engineering_volume": "05B/05C/05D/05I/05J",
+      "verification": "V-METHOD-001/002; V-FIDELITY-001"
+    },
+    {
+      "requirement": "Visualization workflow fidelity",
+      "overall": "03 §27/§30; 03A debrief/evidence sections",
+      "core_authority": "CROSS_LAYER_DTO_CONTRACTS + CORE_RULES (field authority remains canonical)",
+      "engineering_volume": "05G",
+      "verification": "V-VIS-001/002/003; V-FIDELITY-001"
+    },
+    {
+      "requirement": "Windows/Linux cross-platform portability and logical equivalence",
+      "overall": "03 §35",
+      "core_authority": "CR-027/028; PLATFORM_COMPATIBILITY_REGISTRY",
+      "engineering_volume": "04 §32; 05H §33-39",
+      "verification": "V-PLATFORM-001..006; independent IA-16..18"
+    },
+    {
+      "requirement": "P/M/WS/Stage terminology separation",
+      "overall": "03 §36",
+      "core_authority": "TERMINOLOGY_REGISTRY; CR-029/030",
+      "engineering_volume": "04 §33; 05A/05B/05H",
+      "verification": "V-TERM-001/002/003"
+    },
+    {
+      "requirement": "M0-M9 development milestone roadmap",
+      "overall": "03 §36",
+      "core_authority": "DEVELOPMENT_MILESTONE_REGISTRY",
+      "engineering_volume": "04 §34",
+      "verification": "V-MILESTONE-001"
+    },
+    {
+      "requirement": "WS engineering workstream registry",
+      "overall": "03 §36",
+      "core_authority": "ENGINEERING_WORKSTREAM_REGISTRY",
+      "engineering_volume": "04 §35",
+      "verification": "V-WS-001"
+    },
+    {
+      "requirement": "Legacy 1A-1G and 1C/1D/1E progress labels retired",
+      "overall": "03 §36",
+      "core_authority": "TERMINOLOGY_REGISTRY legacy_mappings",
+      "engineering_volume": "04 §36",
+      "verification": "V-LEGACYMAP-001"
+    },
+    {
+      "requirement": "P1 116-metric design intent, applicability and product-layer separation",
+      "overall": "03 §7 / metric overview",
+      "core_authority": "P1_METRIC_CATALOG family_applicability_contracts; CR-031",
+      "engineering_volume": "05C + 05C1",
+      "verification": "V-METRIC-APP-001 / V-METRIC-DESIGN-001"
+    }
+  ]
+}
