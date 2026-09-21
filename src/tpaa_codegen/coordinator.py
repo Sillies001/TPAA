@@ -9,10 +9,11 @@ from tpaa_canonical import CanonicalArtifactLoader
 from .errors import CodegenError, CodegenErrorContext, CodegenReason
 from .manifest import build_manifest
 from .models import GeneratedFile, GenerationResult
+from .provenance import decorate_python_source
 from .protocol import Generator
 from .rendering import render_json
 
-GENERATOR_VERSION = "0.1.0"
+GENERATOR_VERSION = "0.2.0"
 MANIFEST_PATH = PurePosixPath("src/tpaa_generated/_generation_manifest.json")
 
 
@@ -33,7 +34,31 @@ class GenerationCoordinator:
         self._generators = tuple(sorted(generators, key=lambda item: item.generator_id))
 
     def build(self) -> GenerationSummary:
-        results = tuple(generator.generate(self._loader) for generator in self._generators)
+        raw_results = tuple(generator.generate(self._loader) for generator in self._generators)
+        results: tuple[GenerationResult, ...] = tuple(
+            GenerationResult.create(
+                generator_id=result.generator_id,
+                sources=result.sources,
+                files=tuple(
+                    GeneratedFile(
+                        relative_path=file.relative_path,
+                        content=(
+                            decorate_python_source(
+                                file.content,
+                                generator_id=result.generator_id,
+                                generator_version=GENERATOR_VERSION,
+                                sources=result.sources,
+                            )
+                            if file.relative_path.suffix == ".py"
+                            else file.content
+                        ),
+                    )
+                    for file in result.files
+                ),
+                metadata=result.metadata,
+            )
+            for result in raw_results
+        )
         seen: dict[PurePosixPath, str] = {}
         for result in results:
             for file in result.files:

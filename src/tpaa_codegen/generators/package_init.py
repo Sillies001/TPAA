@@ -8,33 +8,27 @@ from ..models import GeneratedFile, GenerationResult, SourceArtifactRef
 from ..rendering import render_python
 
 
-class BaselineMetadataGenerator:
-    generator_id = "baseline-metadata"
+class GeneratedPackageInitGenerator:
+    generator_id = "generated-package-init"
 
     def generate(self, loader: CanonicalArtifactLoader) -> GenerationResult:
-        metadata = loader.baseline_metadata
-        core = str(metadata["core"])
-        db_schema = str(metadata["db_schema"])
-        lines = [
-            '"""Generated TPAA baseline metadata. Do not edit by hand."""',
-            "",
-            f'CORE_BASELINE = {core!r}',
-            f'DB_SCHEMA_VERSION = {db_schema!r}',
-            f'BASELINE_LOCK_SHA256 = {loader.trusted_lock_sha256!r}',
-        ]
+        core = str(loader.baseline_metadata["core"])
         source = SourceArtifactRef(
             artifact_id="BASELINE_LOCK",
             version=core,
             sha256=loader.trusted_lock_sha256,
         )
+        lines = [
+            '"""Deterministically generated TPAA projections. Do not edit by hand."""',
+        ]
         return GenerationResult.create(
             generator_id=self.generator_id,
             sources=(source,),
             files=(
                 GeneratedFile(
-                    relative_path=PurePosixPath("src/tpaa_generated/baseline.py"),
+                    relative_path=PurePosixPath("src/tpaa_generated/__init__.py"),
                     content=render_python(lines),
                 ),
             ),
-            metadata={"projection": "BASELINE_LOCK"},
+            metadata={"projection": "GENERATED_PACKAGE"},
         )

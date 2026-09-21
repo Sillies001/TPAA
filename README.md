@@ -9,12 +9,14 @@ TPAA V8.0 / ED-2.0 implementation monorepo bootstrapped from **SDIB-1.0**.
   - **M0-CORE-001** — import and lock CB-1.4.0 baseline snapshot
   - **M0-CORE-002** — fail-closed Canonical artifact loader
   - **M0-CORE-003** — deterministic Canonical code generator framework
+  - **M0-CORE-004** — generated-source provenance and regenerate-diff governance
   - **M0-DEV-001** — unified developer command semantics
   - **M0-DEV-002** — one cross-platform project dependency lock
 - Closed toolchain decisions:
   - **ADR-M0-001** — CPython 3.13.x runtime baseline
   - **ADR-M0-002** — uv + single `uv.lock`
   - **ADR-M0-003** — Ruff + mypy + pytest quality toolchain
+  - **ADR-M0-007** — checked-in generated source + vendor-neutral regenerate-diff
 - Capability claim: **none**. M0 does not admit P1 or any later Capability Phase.
 - DB schema target inherited from the baseline: **1.6.0**
 
@@ -39,11 +41,13 @@ python tools/dev/tpaa_dev.py verify-baseline
 python tools/dev/tpaa_dev.py verify-canonical
 python tools/dev/tpaa_dev.py generate
 python tools/dev/tpaa_dev.py generate --check
+python tools/dev/tpaa_dev.py verify-generated
+python tools/dev/tpaa_dev.py regenerate-diff
 python tools/dev/tpaa_dev.py test-contract
 python tools/dev/tpaa_dev.py doctor
 ```
 
-The command dispatcher implements `generate` for M0-CORE-003. Future command names such as `run-api`, `run-gui`, `package`, `manifest`, and `cold-start` remain reserved and fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
+The command dispatcher implements `generate` for M0-CORE-003 and `verify-generated` / `regenerate-diff` for M0-CORE-004. Future command names such as `run-api`, `run-gui`, `package`, `manifest`, and `cold-start` remain reserved and fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
 
 ## Verify the frozen baseline
 
@@ -73,4 +77,4 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-The SDIB-1.0 startup sequence now includes the completed **M0-CORE-003 code generator framework**. The next implementation item is **M0-CORE-004 — generated-source governance**.
+The SDIB-1.0 startup sequence now includes completed **M0-CORE-003 code generation** and **M0-CORE-004 generated-source governance**. The next Core item is **M0-CORE-005 — architecture dependency test**.

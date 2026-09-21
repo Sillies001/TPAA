@@ -34,7 +34,7 @@ def test_manifest_is_deterministic_and_contains_no_environment_data() -> None:
     manifest_bytes = files["src/tpaa_generated/_generation_manifest.json"]
     manifest = json.loads(manifest_bytes)
     assert manifest["manifest_type"] == "TPAA_CODEGEN_MANIFEST"
-    assert manifest["generator_version"] == "0.1.0"
+    assert manifest["generator_version"] == "0.2.0"
     forbidden = [str(REPO_ROOT), "generated_at", "timestamp", "hostname", "username"]
     text = manifest_bytes.decode()
     for value in forbidden:

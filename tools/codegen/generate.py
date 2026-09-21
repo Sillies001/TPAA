@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import sys
 from pathlib import Path
 
@@ -14,18 +13,9 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from tpaa_canonical import CanonicalArtifactLoader  # noqa: E402
-from tpaa_codegen import GenerationCoordinator  # noqa: E402
-from tpaa_codegen.generators import (  # noqa: E402
-    BaselineMetadataGenerator,
-    DtoTypesGenerator,
-    MetricRegistryGenerator,
-    ProgramRegistryGenerator,
-    StageRegistryGenerator,
-)
+from tpaa_codegen import GenerationCoordinator, default_generators  # noqa: E402
+from tpaa_codegen.governance import verify_generated_tree  # noqa: E402
 
-
-def _digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main() -> int:
@@ -38,33 +28,19 @@ def main() -> int:
     args = parser.parse_args()
 
     loader = CanonicalArtifactLoader()
-    coordinator = GenerationCoordinator(
-        loader, [
-            BaselineMetadataGenerator(),
-            ProgramRegistryGenerator(),
-            StageRegistryGenerator(),
-            MetricRegistryGenerator(),
-            DtoTypesGenerator(),
-        ]
-    )
+    coordinator = GenerationCoordinator(loader, default_generators())
     summary = coordinator.build()
 
     if args.check:
-        mismatches: list[str] = []
-        for generated in summary.files:
-            target = REPO_ROOT.joinpath(*generated.relative_path.parts)
-            if not target.is_file():
-                mismatches.append(f"missing:{generated.relative_path.as_posix()}")
-                continue
-            if target.read_bytes() != generated.content:
-                mismatches.append(
-                    f"changed:{generated.relative_path.as_posix()}:"
-                    f"expected_sha256={generated.sha256}:actual_sha256={_digest(target)}"
-                )
-        if mismatches:
-            print("CODEGEN_CHECK_FAIL " + " ".join(mismatches), file=sys.stderr)
+        try:
+            report = verify_generated_tree(REPO_ROOT, summary.files)
+        except Exception as exc:
+            print(f"CODEGEN_CHECK_FAIL {exc}", file=sys.stderr)
             return 2
-        print(f"CODEGEN_CHECK_PASS files={len(summary.files)} generator_version=0.1.0")
+        print(
+            f"CODEGEN_CHECK_PASS files={len(report.expected_files)} "
+            "governance=exact-tree+provenance"
+        )
         return 0
 
     coordinator.write(REPO_ROOT)

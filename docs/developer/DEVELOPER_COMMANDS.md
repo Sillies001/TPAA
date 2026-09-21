@@ -7,10 +7,14 @@ The Python dispatcher is the cross-platform semantic entry point. Windows and Li
 
 Run `python tools/dev/tpaa_dev.py list` to discover every governed command and its current implementation state.
 
-## Implemented in this increment
+## Implemented
 
 - `bootstrap` — validate CPython 3.13, `uv.lock`, CB-1.4.0 and optionally sync the frozen environment.
 - `verify-baseline` — M0-CORE-001 exact baseline verification.
+- `verify-canonical` — M0-CORE-002 Canonical loader verification.
+- `generate` / `generate --check` — M0-CORE-003 deterministic generation and exact-tree check.
+- `verify-generated` — M0-CORE-004 non-destructive generated-tree/provenance verification.
+- `regenerate-diff` — M0-CORE-004 CI-vendor-neutral regenerate→Git-diff gate.
 - `format` — frozen Ruff formatter entry point.
 - `lint` — frozen Ruff linter entry point.
 - `typecheck` — frozen mypy entry point.
@@ -21,7 +25,7 @@ Quality commands use an already-installed exact tool version when available. Oth
 
 ## Reserved and fail-closed
 
-`generate`, `run`/`run-api`/`run-gui`, `package`, `manifest`, and `cold-start` are intentionally discoverable now but exit with `NOT_IMPLEMENTED` until their controlling SDIB tasks are implemented. A placeholder command must never report success for a capability that does not yet exist.
+`run`/`run-api`/`run-gui`, `package`, `manifest`, and `cold-start` are intentionally discoverable now but exit with `NOT_IMPLEMENTED` until their controlling SDIB tasks are implemented. A placeholder command must never report success for a capability that does not yet exist.
 
 ## Bootstrap modes
 
@@ -30,3 +34,9 @@ Quality commands use an already-installed exact tool version when available. Oth
 Plain `bootstrap` additionally executes `uv sync --frozen --offline`; this guarantees the local environment is derived from the committed lock and never silently updates it.
 
 `bootstrap --with-quality-tools` also requires the exact Ruff/mypy/pytest versions in `tools/dev/TOOLCHAIN.json`. On a new machine those tools may need network access or a pre-populated uv cache.
+
+## Generated-source governance
+
+`verify-generated` never rewrites the worktree. It builds expected bytes in memory and verifies exact inventory, bytes and provenance under `src/tpaa_generated/`.
+
+`regenerate-diff` is the mandatory CI-compatible gate for M0-CORE-004. It refuses pre-existing uncommitted generated-tree changes, regenerates through the approved generator coordinator, verifies the governed tree, then requires `git diff --exit-code -- src/tpaa_generated`. CI providers must call this command rather than duplicating generator logic.

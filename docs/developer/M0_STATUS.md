@@ -48,7 +48,24 @@ Implemented:
 5. `python tools/dev/tpaa_dev.py generate` writes deterministic UTF-8/LF output; `generate --check` verifies byte identity against checked-in generation.
 6. Generation manifest records generator version, Core Baseline, source artifact version/hash and output hash/size.
 7. Repeated generation is byte-identical and all generated Python modules import successfully.
-8. M0-CORE-004 still owns read-only enforcement and CI regenerate-diff governance; it is not claimed complete here.
+8. M0-CORE-004 now governs the checked-in projections; M0-CORE-003 remains the generation-semantics owner.
+
+
+### M0-CORE-004 — COMPLETE
+
+**Workstream:** WS-CORE
+**Acceptance:** generated code carries source hash provenance and manual edits are blocked by regenerate-diff.
+
+Implemented:
+
+1. `GenerationCoordinator` injects deterministic generated markers, generator id/version and source artifact id/version/SHA-256 into every generated Python file.
+2. `src/tpaa_generated/__init__.py` is generated as well; the governed tree has no handwritten source exception.
+3. `verify-generated` verifies exact expected inventory, exact bytes and provenance without rewriting the worktree.
+4. `regenerate-diff` refuses pre-existing uncommitted generated changes, regenerates through the approved coordinator, verifies the tree and requires `git diff --exit-code -- src/tpaa_generated`.
+5. Fault injection rejects one-byte drift, missing output, rogue output and uncommitted manual edits.
+6. A temporary clean Git checkout proves a committed manual generated edit is rejected after regeneration.
+7. ADR-M0-007 is CLOSED on checked-in generated source plus vendor-neutral regenerate-diff enforcement.
+8. External CI-provider and Windows execution are not claimed by this task; later platform/CI evidence must invoke the same repository gate.
 
 ### M0-DEV-001 — COMPLETE for backlog minimum acceptance
 
@@ -80,13 +97,14 @@ Implemented:
 - **ADR-M0-001 — CLOSED:** CPython 3.13.x on all four governed Windows/Linux x64 profiles.
 - **ADR-M0-002 — CLOSED:** uv resolver, one universal `uv.lock`, frozen sync semantics.
 - **ADR-M0-003 — CLOSED:** Ruff 0.16.8 formatter/linter, mypy 2.3.1, pytest 9.0.2, local/CI routed through the developer dispatcher.
+- **ADR-M0-007 — CLOSED:** generated source is committed and governed by vendor-neutral verify/regenerate-diff commands.
 
 The project also records **Polars-first** as the default flight-data/DataFrame policy; Pandas is not a default dependency.
 
 ## Verification status for this increment
 
 - Baseline exact verification: **21/21 PASS**.
-- Repository tests: **43/43 PASS** at M0-CORE-003 completion on this Linux host.
+- Repository tests: **52/52 PASS** at M0-CORE-004 completion on this Linux host.
 - Canonical loader acceptance verifier: **21/21 controlled artifacts loaded; 8/8 fail-closed negative checks PASS**.
 - Toolchain decision verifier: **13/13 checks PASS**.
 - `bootstrap --check-only`: **PASS** on CPython 3.13.5 / Linux x86_64.
@@ -98,7 +116,7 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 ## Partial governance state
 
-`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001 through ADR-M0-003 are formally closed; ADR-M0-004 through ADR-M0-010 remain open and must be resolved before M0 Exit.
+`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003 and ADR-M0-007 are formally closed; ADR-M0-004/005/006/008/009/010 remain open and must be resolved before M0 Exit.
 
 ## Source-entry evidence retained
 
@@ -111,7 +129,6 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- M0-CORE-004 generated-source read-only/regenerate-diff governance.
 - Database, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
@@ -119,5 +136,5 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. **M0-CORE-004 — generated-source read-only/regenerate-diff governance**.
+1. **M0-CORE-005 — architecture dependency test**.
 2. Continue the remaining M0 Core/Storage/Application/Platform backlog in SDIB dependency order.

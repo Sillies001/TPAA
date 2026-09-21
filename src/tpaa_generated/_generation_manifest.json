@@ -1,7 +1,7 @@
 {
   "baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
   "core_baseline": "CB-1.4.0",
-  "generator_version": "0.1.0",
+  "generator_version": "0.2.0",
   "generators": [
     {
       "generator_id": "baseline-metadata",
@@ -10,12 +10,18 @@
       },
       "outputs": [
         {
-          "bytes": 207,
+          "bytes": 441,
           "path": "src/tpaa_generated/baseline.py",
-          "sha256": "37a6665349836a7f097570056f1933141446bf7b91c5c41ff098daf0853bd709"
+          "sha256": "389af8a9b0eee2ec35ff5c1ae08f363dd300f802ea30e5dc403a7be4e844e5ff"
         }
       ],
-      "sources": []
+      "sources": [
+        {
+          "artifact_id": "BASELINE_LOCK",
+          "sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+          "version": "CB-1.4.0"
+        }
+      ]
     },
     {
       "generator_id": "dto-types",
@@ -25,9 +31,9 @@
       },
       "outputs": [
         {
-          "bytes": 6090,
+          "bytes": 6344,
           "path": "src/tpaa_generated/dto.py",
-          "sha256": "e3e09ff08d4684ed5e63e6ecf43f83ffd39120b91e7f79b1b949a10240e89db3"
+          "sha256": "d89b45fc077e21b6c633cc2dfddbddd48d05643ace0f6c311246df110f204ba2"
         }
       ],
       "sources": [
@@ -39,6 +45,26 @@
       ]
     },
     {
+      "generator_id": "generated-package-init",
+      "metadata": {
+        "projection": "GENERATED_PACKAGE"
+      },
+      "outputs": [
+        {
+          "bytes": 312,
+          "path": "src/tpaa_generated/__init__.py",
+          "sha256": "cc7f88fdc02f0984b8f41f929331c709f63b4a7ec084f8f56c6c621bc7767c70"
+        }
+      ],
+      "sources": [
+        {
+          "artifact_id": "BASELINE_LOCK",
+          "sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+          "version": "CB-1.4.0"
+        }
+      ]
+    },
+    {
       "generator_id": "metric-registry",
       "metadata": {
         "metric_count": "116",
@@ -46,9 +72,9 @@
       },
       "outputs": [
         {
-          "bytes": 90096,
+          "bytes": 90330,
           "path": "src/tpaa_generated/metric_registry.py",
-          "sha256": "58b88e001b439ab5f3e3a23792b90221a7aca26463a6ff5dd490d96e93b680c3"
+          "sha256": "a26d1e5359377f8c439150243b11005eb1a123e8e3abe039308b64a02e88c6ee"
         }
       ],
       "sources": [
@@ -68,9 +94,9 @@
       },
       "outputs": [
         {
-          "bytes": 12067,
+          "bytes": 12586,
           "path": "src/tpaa_generated/program_registry.py",
-          "sha256": "75b144f21f25ec6bb25f9b850228515780bd2993b279fecb0b360c1371d99e17"
+          "sha256": "f1c9b31d74381c7e525fdacaf35e72b31d0c0f4f790a98994417b9e7fca295de"
         }
       ],
       "sources": [
@@ -99,9 +125,9 @@
       },
       "outputs": [
         {
-          "bytes": 5137,
+          "bytes": 5366,
           "path": "src/tpaa_generated/stage_registry.py",
-          "sha256": "e8f028df5b3e7b43613fd9ec2d6610db90142bf46bc3c1b92fb1054eb76ea578"
+          "sha256": "34ad73249568c84926bce54ffeb3b89bb21cbca4e7490e04e51172d1bdabbb62"
         }
       ],
       "sources": [
