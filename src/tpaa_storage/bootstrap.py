@@ -302,7 +302,7 @@ FROM (
 
   UNION ALL
 
-  SELECT 'REL|' || n.nspname || '|' || c.relname || '|' || c.relkind
+  SELECT 'REL|' || n.nspname || '|' || c.relname || '|' || c.relkind::text
   FROM pg_class c
   JOIN pg_namespace n ON n.oid = c.relnamespace
   WHERE n.nspname !~ '^pg_' AND n.nspname <> 'information_schema'
@@ -314,7 +314,7 @@ FROM (
          || a.attname || '|' || format_type(a.atttypid, a.atttypmod) || '|'
          || a.attnotnull::text || '|'
          || COALESCE(pg_get_expr(d.adbin, d.adrelid), '') || '|'
-         || a.attidentity || '|' || a.attgenerated
+         || a.attidentity::text || '|' || a.attgenerated::text
   FROM pg_attribute a
   JOIN pg_class c ON c.oid = a.attrelid
   JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -325,7 +325,7 @@ FROM (
 
   UNION ALL
 
-  SELECT 'CON|' || n.nspname || '|' || c.relname || '|' || con.contype || '|'
+  SELECT 'CON|' || n.nspname || '|' || c.relname || '|' || con.contype::text || '|'
          || pg_get_constraintdef(con.oid, true)
   FROM pg_constraint con
   JOIN pg_class c ON c.oid = con.conrelid

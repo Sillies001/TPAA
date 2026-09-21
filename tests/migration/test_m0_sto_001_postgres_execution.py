@@ -78,6 +78,19 @@ def test_postgres_verify_script_is_read_only_and_checks_catalog_hash() -> None:
     assert script.rstrip().endswith("ROLLBACK;")
 
 
+def test_postgres_catalog_projection_casts_internal_char_fields_to_text() -> None:
+    script = postgres_verify_script()
+
+    assert "c.relkind::text" in script
+    assert "a.attidentity::text" in script
+    assert "a.attgenerated::text" in script
+    assert "con.contype::text" in script
+    assert "|| c.relkind\n" not in script
+    assert "|| a.attidentity ||" not in script
+    assert "|| a.attgenerated\n" not in script
+    assert "|| con.contype ||" not in script
+
+
 def test_repository_controlled_bootstrap_executes_then_verifies() -> None:
     client = FakeClient(["", _verification_line()])
 

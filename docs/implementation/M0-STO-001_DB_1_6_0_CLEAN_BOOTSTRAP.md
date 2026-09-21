@@ -3,7 +3,7 @@
 **Task:** M0-STO-001  
 **Workstream:** WS-STORAGE  
 **Status:** IN PROGRESS  
-**Plan version:** v0.4
+**Plan version:** v0.5
 **Implementation baseline:** SDIB-1.0 + frozen CB-1.4.0 Canonical snapshot at repository HEAD
 
 ## 1. Objective
@@ -250,3 +250,11 @@ Implemented semantics:
 Repository-local tests after this revision cover generated SQL transaction/read-only semantics, provenance fields, rollback-failure detection, dirty-target rejection, and acceptance database safety. Real PostgreSQL execution of the committed acceptance command is still required on the user's existing PostgreSQL 16 container before this task can move to COMPLETE.
 
 Current repository-local verification after the v0.4 implementation: migration 24/24 PASS, unit 33/33 PASS, contract 40/40 PASS by file/partition, Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap gates PASS. Ruff 0.16.8 and mypy 2.3.1 are not installed/cached on this offline host and remain NOT CLAIMED here.
+
+## 20. v0.5 revision — PostgreSQL catalog serialization compatibility fix
+
+The first execution of the committed repository-controlled PostgreSQL acceptance harness on the user's real PostgreSQL 16.15 Docker server reached the verifier but failed while serializing `pg_catalog` metadata for the physical-schema fingerprint. PostgreSQL reported `operator is not unique: text || "char"` because several catalog fields use PostgreSQL's internal one-byte `"char"` type rather than `text`.
+
+This was an implementation defect in the verifier projection, not a Canonical schema, bootstrap, transaction, or Repository-technology decision. The catalog serializer now explicitly casts every internal `"char"` field used in concatenation to `text`: `pg_class.relkind`, `pg_attribute.attidentity`, `pg_attribute.attgenerated`, and `pg_constraint.contype`. A regression test asserts those casts so the failure cannot recur silently.
+
+M0-STO-001 remains **IN PROGRESS** until the corrected commit is re-run through the real PostgreSQL acceptance command and the full completion cycle is closed.
