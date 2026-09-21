@@ -5,6 +5,7 @@ from .bootstrap import (
     BootstrapError,
     BootstrapVerification,
     bootstrap_sqlite,
+    postgres_create_statements,
     verify_sqlite,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "BootstrapError",
     "BootstrapVerification",
     "bootstrap_sqlite",
+    "postgres_create_statements",
     "verify_sqlite",
 ]

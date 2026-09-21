@@ -3,12 +3,12 @@
 **Task:** M0-STO-001  
 **Workstream:** WS-STORAGE  
 **Status:** IN PROGRESS  
-**Plan version:** v0.2  
+**Plan version:** v0.3
 **Implementation baseline:** SDIB-1.0 + frozen CB-1.4.0 Canonical snapshot at repository HEAD
 
 ## 1. Objective
 
-Establish a deterministic, fail-closed clean-database bootstrap kernel for DB schema target `1.6.0` without inventing persistence semantics outside the frozen Canonical authority. The first vertical slice bootstraps and verifies the SQLite Desktop profile from the exact `CORE_LOGICAL_MODEL.json` controlled by `BASELINE_LOCK.json`. PostgreSQL execution/conformance remains required before M0-STO-001 can be declared COMPLETE.
+Establish a deterministic, fail-closed clean-database bootstrap kernel for DB schema target `1.6.0` without inventing persistence semantics outside the frozen Canonical authority. The implemented slices bootstrap and verify the SQLite Desktop profile and deterministically project the same exact `CORE_LOGICAL_MODEL.json` authority to PostgreSQL DDL with FK dependency ordering. Repository-controlled PostgreSQL execution/readiness verification remains required before M0-STO-001 can be declared COMPLETE.
 
 ## 2. SDIB acceptance criteria
 
@@ -36,9 +36,9 @@ Machine authority discovered from the frozen baseline:
 
 `CORE_LOGICAL_MODEL.json` declares 77 logical tables, each with ordered field SQL fragments and table-level `schema_version=1.6.0`.
 
-### Authority gap recorded by v0.1
+### Index-authority clarification from PostgreSQL feasibility work
 
-No controlled Canonical artifact found in R3.3 defines a complete independent index catalog or table-level DDL catalog. `CORE_LOGICAL_MODEL.json` contains field-level SQL fragments, including inline PK/FK/UNIQUE/CHECK/default semantics, but no explicit separate index list. Therefore this implementation MUST NOT invent performance or uniqueness indexes. M0-STO-001 cannot claim verification of unspecified indexes. If acceptance requires indexes beyond those implied by Canonical field SQL, that requires a Canonical/Baseline clarification or change before COMPLETE.
+No controlled Canonical artifact found in R3.3 defines a complete independent index catalog or table-level DDL catalog. `CORE_LOGICAL_MODEL.json` contains field-level SQL fragments, including inline PK/FK/UNIQUE/CHECK/default semantics, but no explicit separate index list. SDIB-1.0 M0-STO-001 minimum acceptance is an empty DB initialized to `1.6.0` and passing schema/hash verification; repository-wide searches found no separate index-inventory acceptance clause. Therefore M0-STO-001 verifies the schema elements actually declared by Canonical authority and MUST NOT synthesize undeclared performance indexes. A later controlled artifact may add index authority, but the absence of an independent index catalog is no longer treated as a standalone blocker for this task.
 
 ## 4. DB engine / compatibility assumptions
 
@@ -52,9 +52,9 @@ No controlled Canonical artifact found in R3.3 defines a complete independent in
 
 1. Load `CORE_LOGICAL_MODEL` through `CanonicalArtifactLoader` with expected schema `1.6.0`.
 2. Validate the logical model envelope and every table/field entry before opening a write transaction.
-3. Deterministically project Canonical field SQL to SQLite-compatible DDL while retaining logical table identity.
+3. Deterministically project Canonical field SQL to the target engine without changing the logical authority. SQLite performs the minimum documented dialect substitutions; PostgreSQL preserves native Canonical types/constraints and orders tables by the FK dependency graph.
 4. Create implementation metadata table `_tpaa_bootstrap_manifest` for bootstrap provenance only; it is not a business/domain object.
-5. Create every Canonical table inside one explicit transaction.
+5. Create every Canonical table inside one explicit transaction. PostgreSQL ordering is deterministic topological ordering with lexical tie-breaking; missing FK targets or dependency cycles fail closed before DDL execution.
 6. Persist schema target, Core Baseline, Canonical artifact SHA-256, and baseline-lock SHA-256 in the bootstrap manifest.
 7. Verify exact expected table inventory and generated DDL fingerprint before commit.
 8. Roll back and fail closed on any mismatch.
@@ -97,7 +97,9 @@ Fail closed for at least:
 - wrong DB schema version;
 - malformed/missing logical table or field declarations;
 - inconsistent per-table schema version;
-- unsupported Canonical SQL fragment in the SQLite projection;
+- unsupported Canonical SQL fragment/type in an engine projection;
+- PostgreSQL FK target missing from the Canonical table catalog;
+- PostgreSQL FK dependency cycle that prevents single-phase deterministic creation;
 - non-empty target DB;
 - missing/extra table after bootstrap;
 - DDL fingerprint mismatch;
@@ -112,10 +114,13 @@ Clean bootstrap is intentionally strict rather than silently idempotent: it acce
 
 ## 12. Test matrix
 
-First slice:
+Implemented slices:
 
-- Canonical authority extraction/version checks;
+- Canonical authority extraction/version checks independent of a specific engine type map;
 - deterministic SQLite DDL generation;
+- deterministic PostgreSQL DDL projection from the same Canonical field SQL;
+- PostgreSQL FK dependency extraction and lexical-tie-break topological ordering;
+- fail-closed missing-reference and cycle tests;
 - clean in-memory/file bootstrap;
 - exact table inventory verification;
 - manifest provenance verification;
@@ -128,9 +133,9 @@ First slice:
 
 Before COMPLETE:
 
-- PostgreSQL clean bootstrap against a real PostgreSQL instance;
+- promote PostgreSQL real-server execution from feasibility evidence into the repository-controlled acceptance harness;
+- PostgreSQL schema/version/provenance verification equivalent to the SQLite readiness contract;
 - SQLite/PostgreSQL logical schema parity/conformance evidence;
-- any authority clarification required for separate indexes/table-level constraints;
 - full repository regression and clean-clone evidence.
 
 ## 13. Explicit non-scope
@@ -149,7 +154,7 @@ Before COMPLETE:
 Repository skeleton may begin only after:
 
 1. schema authority and bootstrap contract are stable;
-2. SQLite and PostgreSQL physical mappings are explicit and verified for the required subset/full schema;
+2. SQLite and PostgreSQL physical mappings are explicit and verified for the full Canonical schema;
 3. `ADR-M0-004` is created/closed for Repository DB access implementation before concrete Repository adapter technology is frozen;
 4. bootstrap/version/provenance access is exposed below Application without leaking DB-driver types upward.
 
@@ -160,7 +165,7 @@ M0-STO-001 remains IN PROGRESS until all are true:
 - SQLite clean bootstrap to `1.6.0` PASS;
 - PostgreSQL clean bootstrap to `1.6.0` PASS on a real server;
 - machine schema/hash verification PASS on both;
-- required schema elements defined by authority are verified; unresolved authority gaps are closed at the correct baseline/governance layer;
+- required schema elements defined by authority are verified on both engines;
 - failure injection proves no silent partial success;
 - historical gates/regression PASS;
 - formal commit, clean HEAD revalidation, bundle, clean clone, machine-readable evidence, delivery ZIP and SHA-256 manifest are produced.
@@ -170,7 +175,7 @@ M0-STO-001 remains IN PROGRESS until all are true:
 - 2026-09-21: use existing fail-closed Canonical loader as the only input path for `CORE_LOGICAL_MODEL`.
 - 2026-09-21: do not add third-party DB/ORM dependencies for the SQLite kernel.
 - 2026-09-21: preserve `ADR-M0-004` as a later explicit Repository technology decision; M0-STO-001 will not close it implicitly.
-- 2026-09-21: record the missing explicit index catalog as an authority gap; do not invent indexes in code.
+- 2026-09-21: record the missing explicit index catalog; do not invent indexes in code. Subsequent SDIB/Canonical review narrowed this from a completion blocker to an explicit non-synthesis boundary because no independent index inventory is required by the M0-STO-001 acceptance text.
 
 ## 17. v0.2 revision from first vertical-slice execution
 
@@ -188,4 +193,38 @@ Observed first-slice result on CPython 3.13.5 / Linux x86_64:
 - injected invalid DDL rollback leaves zero user tables PASS.
 - focused suite: 9/9 PASS.
 
-This feedback does not alter the authority model or introduce a new schema. It confirms that dialect adaptation is required below the logical authority boundary. PostgreSQL real-server execution and the separate-index authority gap remain open before task completion.
+This feedback does not alter the authority model or introduce a new schema. It confirms that dialect adaptation is required below the logical authority boundary.
+
+## 18. v0.3 revision from PostgreSQL real-server feasibility
+
+Windows Docker Desktop with an isolated `postgres:16` container was used as a real PostgreSQL server without adding a Python PostgreSQL driver or changing the repository dependency baseline. Observed PostgreSQL version was 16.15. The feasibility sequence established:
+
+- PostgreSQL server readiness and SQL execution PASS.
+- transactional DDL rollback PASS; an intentionally created probe table left no residue after rollback.
+- native `uuid`, `jsonb`, PK, UNIQUE, and `jsonb_typeof(...)` CHECK semantics PASS.
+- valid JSON object input was rejected by the Canonical-style `jsonb_typeof(payload)='array'` CHECK, proving the constraint rather than JSON parsing was the failure boundary.
+- raw Canonical JSON table order failed because a table referenced `registry.analysis_release` before that relation existed.
+- the Canonical FK graph contains 77 tables and 125 inter-table dependency edges, with zero missing references and zero cycles.
+- deterministic topological order therefore supports single-phase PostgreSQL table creation; lexical ordering is used only to break ties between simultaneously ready tables.
+- all 77 Canonical tables created successfully inside one PostgreSQL transaction using the derived topological order, then `ROLLBACK` left zero user tables.
+
+Implementation feedback from that real execution is now reflected in code:
+
+1. Canonical authority validation is engine-neutral; SQLite type support is checked only in the SQLite projection.
+2. PostgreSQL projection preserves native Canonical field SQL after the same authority-boundary cleanup of trailing human comments.
+3. FK target absence and dependency cycles are deterministic fail-closed errors.
+4. PostgreSQL DDL generation is now repository-controlled and deterministic, but PostgreSQL connection/Repository driver selection remains outside this slice and `ADR-M0-004` remains OPEN.
+5. Real-server execution still needs to be promoted into a repository-controlled acceptance harness with PostgreSQL schema/provenance verification before M0-STO-001 can be COMPLETE.
+
+Repository regression after this slice on CPython 3.13.5 / Linux x86_64:
+
+- focused SQLite + PostgreSQL projection migration suite: 15/15 PASS;
+- unit suite: 33/33 PASS;
+- contract suite: 40/40 PASS when run by file/partition;
+- M0-CORE-001 baseline exact verification PASS;
+- M0-CORE-002 Canonical loader verification PASS;
+- codegen `generate --check` PASS;
+- generated-source governance and `regenerate-diff` PASS;
+- M0-CORE-005 architecture dependency gate PASS;
+- `bootstrap --check-only` PASS;
+- Ruff 0.16.8 and mypy 2.3.1 execution are NOT CLAIMED on this offline host because the frozen binaries are not installed/cached.

@@ -8,6 +8,7 @@ and records/verifies bootstrap provenance.
 from __future__ import annotations
 
 import hashlib
+import heapq
 import re
 import sqlite3
 from dataclasses import dataclass
@@ -21,7 +22,9 @@ CORE_MODEL_ARTIFACT_ID = "CORE_LOGICAL_MODEL"
 BOOTSTRAP_MANIFEST_TABLE = "_tpaa_bootstrap_manifest"
 SQLITE_ENGINE_PROFILE = "sqlite-desktop"
 
-_REFERENCE_RE = re.compile(r"\bREFERENCES\s+([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)")
+_REFERENCE_RE = re.compile(
+    r"\bREFERENCES\s+([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE
+)
 _WHITESPACE_RE = re.compile(r"\s+")
 
 _SQLITE_TYPE_MAP: Mapping[str, str] = {
@@ -148,9 +151,9 @@ def _load_authority(loader: CanonicalArtifactLoader | None = None) -> _SchemaAut
                     "DUPLICATE_FIELD", f"table={table_name} field={field_name}"
                 )
             seen.add(field_name)
-            if not isinstance(field_type, str) or field_type not in _SQLITE_TYPE_MAP:
+            if not isinstance(field_type, str) or not field_type.strip():
                 raise BootstrapError(
-                    "UNSUPPORTED_FIELD_TYPE",
+                    "FIELD_TYPE_INVALID",
                     f"table={table_name} field={field_name} type={field_type!r}",
                 )
             if not isinstance(field_sql, str) or not field_sql.strip():
@@ -166,7 +169,7 @@ def _load_authority(loader: CanonicalArtifactLoader | None = None) -> _SchemaAut
     )
 
 
-def _sqlite_field_sql(table_name: str, raw_field: Mapping[str, Any]) -> str:
+def _canonical_field_sql(table_name: str, raw_field: Mapping[str, Any]) -> str:
     field_name = str(raw_field["name"])
     field_type = str(raw_field["type"])
     raw_sql = str(raw_field["sql"])
@@ -177,11 +180,90 @@ def _sqlite_field_sql(table_name: str, raw_field: Mapping[str, Any]) -> str:
             "FIELD_SQL_PREFIX_MISMATCH",
             f"table={table_name} field={field_name} sql={raw_sql!r}",
         )
+    return sql
+
+
+def _sqlite_field_sql(table_name: str, raw_field: Mapping[str, Any]) -> str:
+    field_name = str(raw_field["name"])
+    field_type = str(raw_field["type"])
+    if field_type not in _SQLITE_TYPE_MAP:
+        raise BootstrapError(
+            "SQLITE_UNSUPPORTED_FIELD_TYPE",
+            f"table={table_name} field={field_name} type={field_type!r}",
+        )
+    sql = _canonical_field_sql(table_name, raw_field)
+    prefix = f"{field_name} {field_type}"
     suffix = sql[len(prefix) :]
     suffix = re.sub(r"\bDEFAULT\s+now\(\)", "DEFAULT CURRENT_TIMESTAMP", suffix, flags=re.I)
     suffix = re.sub(r"\bjsonb_typeof\s*\(", "json_type(", suffix, flags=re.I)
     suffix = _REFERENCE_RE.sub(lambda match: f'REFERENCES "{match.group(1)}"', suffix)
     return f'"{field_name}" {_SQLITE_TYPE_MAP[field_type]}{suffix}'
+
+
+def _table_dependencies(authority: _SchemaAuthority) -> dict[str, set[str]]:
+    dependencies = {table_name: set() for table_name in authority.tables}
+    for table_name, raw_table in authority.tables.items():
+        raw_fields = raw_table["fields"]
+        assert isinstance(raw_fields, list)
+        for raw_field in raw_fields:
+            field_sql = _canonical_field_sql(table_name, raw_field)
+            for target in _REFERENCE_RE.findall(field_sql):
+                if target not in authority.tables:
+                    raise BootstrapError(
+                        "REFERENCE_TARGET_MISSING",
+                        f"table={table_name} target={target}",
+                    )
+                if target != table_name:
+                    dependencies[table_name].add(target)
+    return dependencies
+
+
+def _postgres_table_order(authority: _SchemaAuthority) -> tuple[str, ...]:
+    dependencies = _table_dependencies(authority)
+    reverse: dict[str, set[str]] = {table_name: set() for table_name in authority.tables}
+    for table_name, targets in dependencies.items():
+        for target in targets:
+            reverse[target].add(table_name)
+
+    indegree = {table_name: len(targets) for table_name, targets in dependencies.items()}
+    ready = [table_name for table_name, degree in indegree.items() if degree == 0]
+    heapq.heapify(ready)
+    order: list[str] = []
+    while ready:
+        current = heapq.heappop(ready)
+        order.append(current)
+        for dependent in sorted(reverse[current]):
+            indegree[dependent] -= 1
+            if indegree[dependent] == 0:
+                heapq.heappush(ready, dependent)
+
+    if len(order) != len(authority.tables):
+        unresolved = sorted(table_name for table_name, degree in indegree.items() if degree > 0)
+        raise BootstrapError("REFERENCE_CYCLE", f"tables={unresolved!r}")
+    return tuple(order)
+
+
+def _postgres_create_statements(authority: _SchemaAuthority) -> tuple[str, ...]:
+    schemas = sorted({table_name.split(".", 1)[0] for table_name in authority.tables})
+    statements = [f'CREATE SCHEMA IF NOT EXISTS "{schema}"' for schema in schemas]
+    for table_name in _postgres_table_order(authority):
+        raw_table = authority.tables[table_name]
+        raw_fields = raw_table["fields"]
+        assert isinstance(raw_fields, list)
+        fields = [_canonical_field_sql(table_name, field) for field in raw_fields]
+        schema_name, relation_name = table_name.split(".", 1)
+        statements.append(
+            f'CREATE TABLE "{schema_name}"."{relation_name}" (\n  '
+            + ",\n  ".join(fields)
+            + "\n)"
+        )
+    return tuple(statements)
+
+
+def postgres_create_statements() -> tuple[str, ...]:
+    """Project the frozen logical schema to deterministic PostgreSQL DDL statements."""
+
+    return _postgres_create_statements(_load_authority())
 
 
 def _sqlite_create_statements(authority: _SchemaAuthority) -> tuple[str, ...]:
