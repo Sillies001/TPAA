@@ -26,6 +26,7 @@ CODEGEN_GENERATE = REPO_ROOT / "tools" / "codegen" / "generate.py"
 CODEGEN_VERIFY_GENERATED = REPO_ROOT / "tools" / "codegen" / "verify_generated.py"
 CODEGEN_REGENERATE_DIFF = REPO_ROOT / "tools" / "codegen" / "regenerate_diff.py"
 ARCHITECTURE_VERIFY = REPO_ROOT / "tools" / "architecture" / "verify_dependencies.py"
+STORAGE_BOOTSTRAP = REPO_ROOT / "tools" / "storage" / "bootstrap_db.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -48,6 +49,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-architecture", "M0-CORE-005", "IMPLEMENTED", "Verify SDIB package/layer dependency direction using the static architecture gate."),
     CommandSpec("verify-baseline", "M0-CORE-001", "IMPLEMENTED", "Verify BASELINE_LOCK and controlled Canonical artifact hashes."),
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
+    CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from frozen schema 1.6.0 authority."),
+    CommandSpec("db-verify", "M0-STO-001", "IMPLEMENTED", "Verify SQLite schema/version/provenance against frozen schema 1.6.0 authority."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -296,6 +299,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-generated", help="Verify governed generated tree without rewriting")
     sub.add_parser("regenerate-diff", help="Regenerate generated source and require zero Git diff")
     sub.add_parser("verify-architecture", help="Verify SDIB package/layer architecture dependencies")
+    db_bootstrap = sub.add_parser("db-bootstrap", help="Bootstrap empty SQLite Desktop DB to schema 1.6.0")
+    db_bootstrap.add_argument("database", type=Path)
+    db_verify = sub.add_parser("db-verify", help="Verify SQLite Desktop DB schema/version/provenance")
+    db_verify.add_argument("database", type=Path)
 
     fmt = sub.add_parser("format", help="Run Ruff formatter")
     fmt.add_argument("--check", action="store_true")
@@ -358,6 +365,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(CODEGEN_REGENERATE_DIFF)])
     if command == "verify-architecture":
         return _run([sys.executable, str(ARCHITECTURE_VERIFY)])
+    if command == "db-bootstrap":
+        return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
+    if command == "db-verify":
+        return _run([sys.executable, str(STORAGE_BOOTSTRAP), "verify", str(args.database)])
     if command == "run":
         return _reserved("M0-API-002" if args.target == "api" else "M0-GUI-001", f"run {args.target}")
     reserved = {

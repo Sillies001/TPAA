@@ -109,6 +109,19 @@ Implemented:
 - Per-OS Python lockfiles are prohibited by ADR-M0-002.
 - Current lock contains no third-party runtime package because no completed task requires one yet.
 
+### M0-STO-001 — IN PROGRESS
+
+**Workstream:** WS-STORAGE
+**Acceptance:** empty DB initializes to schema 1.6.0 and passes schema/hash verification.
+
+Current implementation phase:
+
+1. SDIB-1.0 and frozen Canonical DB authority mapping completed.
+2. Implementation Plan v0.1 recorded in `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md`.
+3. First vertical slice is the clean bootstrap kernel + schema/version/provenance verification + failure-injection tests.
+4. PostgreSQL real-server execution and any unresolved schema/index authority gap remain completion blockers.
+5. Repository technology remains outside this slice; ADR-M0-004 is still required before Repository adapter technology is frozen.
+
 ## Closed ADRs
 
 - **ADR-M0-001 — CLOSED:** CPython 3.13.x on all four governed Windows/Linux x64 profiles.
