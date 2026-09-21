@@ -15,6 +15,7 @@ Run `python tools/dev/tpaa_dev.py list` to discover every governed command and i
 - `generate` / `generate --check` — M0-CORE-003 deterministic generation and exact-tree check.
 - `verify-generated` — M0-CORE-004 non-destructive generated-tree/provenance verification.
 - `regenerate-diff` — M0-CORE-004 CI-vendor-neutral regenerate→Git-diff gate.
+- `verify-architecture` — M0-CORE-005 SDIB package/layer dependency gate.
 - `format` — frozen Ruff formatter entry point.
 - `lint` — frozen Ruff linter entry point.
 - `typecheck` — frozen mypy entry point.
@@ -40,3 +41,10 @@ Plain `bootstrap` additionally executes `uv sync --frozen --offline`; this guara
 `verify-generated` never rewrites the worktree. It builds expected bytes in memory and verifies exact inventory, bytes and provenance under `src/tpaa_generated/`.
 
 `regenerate-diff` is the mandatory CI-compatible gate for M0-CORE-004. It refuses pre-existing uncommitted generated-tree changes, regenerates through the approved generator coordinator, verifies the governed tree, then requires `git diff --exit-code -- src/tpaa_generated`. CI providers must call this command rather than duplicating generator logic.
+
+## Architecture dependency gate
+
+`verify-architecture` scans `src/` with the standard-library AST and evaluates imports against the
+SDIB-derived machine-readable policy. The same command is the required local/later-CI entry point;
+CI providers must not maintain a second dependency-rule implementation. See
+`docs/developer/ARCHITECTURE_DEPENDENCIES.md`.

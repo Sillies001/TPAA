@@ -25,6 +25,7 @@ CANONICAL_VERIFY = REPO_ROOT / "tools" / "canonical" / "verify_loader.py"
 CODEGEN_GENERATE = REPO_ROOT / "tools" / "codegen" / "generate.py"
 CODEGEN_VERIFY_GENERATED = REPO_ROOT / "tools" / "codegen" / "verify_generated.py"
 CODEGEN_REGENERATE_DIFF = REPO_ROOT / "tools" / "codegen" / "regenerate_diff.py"
+ARCHITECTURE_VERIFY = REPO_ROOT / "tools" / "architecture" / "verify_dependencies.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -44,6 +45,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
+    CommandSpec("verify-architecture", "M0-CORE-005", "IMPLEMENTED", "Verify SDIB package/layer dependency direction using the static architecture gate."),
     CommandSpec("verify-baseline", "M0-CORE-001", "IMPLEMENTED", "Verify BASELINE_LOCK and controlled Canonical artifact hashes."),
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
@@ -293,6 +295,7 @@ def build_parser() -> argparse.ArgumentParser:
     generate.add_argument("--check", action="store_true", help="Fail if checked-in generated tree/provenance differs")
     sub.add_parser("verify-generated", help="Verify governed generated tree without rewriting")
     sub.add_parser("regenerate-diff", help="Regenerate generated source and require zero Git diff")
+    sub.add_parser("verify-architecture", help="Verify SDIB package/layer architecture dependencies")
 
     fmt = sub.add_parser("format", help="Run Ruff formatter")
     fmt.add_argument("--check", action="store_true")
@@ -353,6 +356,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(CODEGEN_VERIFY_GENERATED)])
     if command == "regenerate-diff":
         return _run([sys.executable, str(CODEGEN_REGENERATE_DIFF)])
+    if command == "verify-architecture":
+        return _run([sys.executable, str(ARCHITECTURE_VERIFY)])
     if command == "run":
         return _reserved("M0-API-002" if args.target == "api" else "M0-GUI-001", f"run {args.target}")
     reserved = {

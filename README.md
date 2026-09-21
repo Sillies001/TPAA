@@ -10,6 +10,7 @@ TPAA V8.0 / ED-2.0 implementation monorepo bootstrapped from **SDIB-1.0**.
   - **M0-CORE-002** — fail-closed Canonical artifact loader
   - **M0-CORE-003** — deterministic Canonical code generator framework
   - **M0-CORE-004** — generated-source provenance and regenerate-diff governance
+  - **M0-CORE-005** — SDIB architecture dependency test
   - **M0-DEV-001** — unified developer command semantics
   - **M0-DEV-002** — one cross-platform project dependency lock
 - Closed toolchain decisions:
@@ -43,11 +44,12 @@ python tools/dev/tpaa_dev.py generate
 python tools/dev/tpaa_dev.py generate --check
 python tools/dev/tpaa_dev.py verify-generated
 python tools/dev/tpaa_dev.py regenerate-diff
+python tools/dev/tpaa_dev.py verify-architecture
 python tools/dev/tpaa_dev.py test-contract
 python tools/dev/tpaa_dev.py doctor
 ```
 
-The command dispatcher implements `generate` for M0-CORE-003 and `verify-generated` / `regenerate-diff` for M0-CORE-004. Future command names such as `run-api`, `run-gui`, `package`, `manifest`, and `cold-start` remain reserved and fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
+The command dispatcher implements `generate` for M0-CORE-003, `verify-generated` / `regenerate-diff` for M0-CORE-004, and `verify-architecture` for M0-CORE-005. Future command names such as `run-api`, `run-gui`, `package`, `manifest`, and `cold-start` remain reserved and fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
 
 ## Verify the frozen baseline
 
@@ -77,4 +79,4 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-The SDIB-1.0 startup sequence now includes completed **M0-CORE-003 code generation** and **M0-CORE-004 generated-source governance**. The next Core item is **M0-CORE-005 — architecture dependency test**.
+The repository now includes completed **M0-CORE-003 code generation**, **M0-CORE-004 generated-source governance**, and **M0-CORE-005 architecture dependency testing**. Per SDIB-1.0 §39, the next main-sequence work is the **1.6.0 DB bootstrap / Repository skeleton** before the Application/API/GUI shell and runtime handshake.

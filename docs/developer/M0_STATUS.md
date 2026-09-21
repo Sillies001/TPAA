@@ -67,6 +67,23 @@ Implemented:
 7. ADR-M0-007 is CLOSED on checked-in generated source plus vendor-neutral regenerate-diff enforcement.
 8. External CI-provider and Windows execution are not claimed by this task; later platform/CI evidence must invoke the same repository gate.
 
+### M0-CORE-005 — COMPLETE
+
+**Workstream:** WS-CORE
+**Acceptance:** lower layers cannot depend on GUI/API and business core cannot directly depend on `tpaa_platform` implementation.
+
+Implemented:
+
+1. `tools/architecture/ARCHITECTURE_POLICY.json` is the executable projection of SDIB-1.0 §7.1 / Appendix E.
+2. The standard-library AST scanner resolves static and literal dynamic imports and fails closed on Python parse errors.
+3. Governed lower packages importing `tpaa_gui` or `tpaa_api` are rejected with `LOWER_LAYER_TRANSPORT_DEPENDENCY`.
+4. Business-core packages importing `tpaa_platform` are rejected with `BUSINESS_CORE_PLATFORM_IMPLEMENTATION_DEPENDENCY`.
+5. Concrete Appendix-E reverse edges and selected framework/DB-driver leakage are also enforced.
+6. First-party identities are policy-defined, so a prohibited target is still recognized when its source directory is absent.
+7. `tpaa_generated` is constrained to Python stdlib/self imports at M0.
+8. `python tools/dev/tpaa_dev.py verify-architecture` is the single vendor-neutral local/later-CI entry point.
+9. Import scanning deliberately does not claim semantic checks that imports cannot prove; those limitations are machine-readable evidence.
+
 ### M0-DEV-001 — COMPLETE for backlog minimum acceptance
 
 **Workstream:** WS-DEVOPS
@@ -104,7 +121,7 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 ## Verification status for this increment
 
 - Baseline exact verification: **21/21 PASS**.
-- Repository tests: **52/52 PASS** at M0-CORE-004 completion on this Linux host.
+- Repository tests: **69/69 PASS by complete collected-test partition** at M0-CORE-005 completion on this Linux host. The execution harness timed out when all subprocess-heavy contracts were placed in one tool call; unit and every contract partition were executed separately with no failures.
 - Canonical loader acceptance verifier: **21/21 controlled artifacts loaded; 8/8 fail-closed negative checks PASS**.
 - Toolchain decision verifier: **13/13 checks PASS**.
 - `bootstrap --check-only`: **PASS** on CPython 3.13.5 / Linux x86_64.
@@ -136,5 +153,5 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. **M0-CORE-005 — architecture dependency test**.
-2. Continue the remaining M0 Core/Storage/Application/Platform backlog in SDIB dependency order.
+1. **M0-STO-001 — 1.6.0 clean DB bootstrap**, then Repository skeleton work per SDIB-1.0 §39.
+2. Build Application/FastAPI/PySide6 shell and close **M0-CORE-006 runtime baseline handshake** in the prescribed dependency order.

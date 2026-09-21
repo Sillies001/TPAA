@@ -1,0 +1,115 @@
+{
+  "schema": "TPAA_ARCHITECTURE_POLICY_V1",
+  "status": "FROZEN_FOR_M0_CORE_005",
+  "authority": "SDIB-1.0 §7.1 and Appendix E",
+  "transport_packages": [
+    "tpaa_api",
+    "tpaa_gui"
+  ],
+  "lower_layer_packages": [
+    "tpaa_generated",
+    "tpaa_registry",
+    "tpaa_canonical",
+    "tpaa_context",
+    "tpaa_ingest",
+    "tpaa_episode",
+    "tpaa_world",
+    "tpaa_metric",
+    "tpaa_observation",
+    "tpaa_longitudinal",
+    "tpaa_assessment",
+    "tpaa_storage",
+    "tpaa_application",
+    "tpaa_platform"
+  ],
+  "business_core_packages": [
+    "tpaa_registry",
+    "tpaa_canonical",
+    "tpaa_context",
+    "tpaa_episode",
+    "tpaa_world",
+    "tpaa_metric",
+    "tpaa_observation",
+    "tpaa_longitudinal",
+    "tpaa_assessment",
+    "tpaa_application"
+  ],
+  "forbidden_first_party_edges": {
+    "tpaa_generated": [
+      "tpaa_api",
+      "tpaa_application",
+      "tpaa_assessment",
+      "tpaa_canonical",
+      "tpaa_context",
+      "tpaa_episode",
+      "tpaa_gui",
+      "tpaa_ingest",
+      "tpaa_longitudinal",
+      "tpaa_metric",
+      "tpaa_observation",
+      "tpaa_platform",
+      "tpaa_registry",
+      "tpaa_storage",
+      "tpaa_world"
+    ],
+    "tpaa_episode": [
+      "tpaa_assessment",
+      "tpaa_metric"
+    ],
+    "tpaa_world": [
+      "tpaa_assessment",
+      "tpaa_metric"
+    ],
+    "tpaa_metric": [
+      "tpaa_application",
+      "tpaa_assessment",
+      "tpaa_longitudinal",
+      "tpaa_observation"
+    ],
+    "tpaa_longitudinal": [
+      "tpaa_assessment",
+      "tpaa_ingest"
+    ],
+    "tpaa_storage": [
+      "tpaa_assessment",
+      "tpaa_episode",
+      "tpaa_longitudinal",
+      "tpaa_metric",
+      "tpaa_observation",
+      "tpaa_world"
+    ],
+    "tpaa_api": [
+      "tpaa_metric",
+      "tpaa_storage"
+    ],
+    "tpaa_gui": [
+      "tpaa_assessment",
+      "tpaa_episode",
+      "tpaa_longitudinal",
+      "tpaa_metric",
+      "tpaa_observation",
+      "tpaa_storage",
+      "tpaa_world"
+    ],
+    "tpaa_platform": [
+      "tpaa_assessment",
+      "tpaa_episode",
+      "tpaa_metric",
+      "tpaa_world"
+    ]
+  },
+  "forbidden_external_prefixes": {
+    "tpaa_registry": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
+    "tpaa_canonical": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
+    "tpaa_context": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
+    "tpaa_metric": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlalchemy", "psycopg", "asyncpg"],
+    "tpaa_application": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
+    "tpaa_gui": ["sqlite3", "sqlalchemy", "psycopg", "asyncpg"]
+  },
+  "semantic_constraints_not_proven_by_import_scan": [
+    "observation_does_not_recompute_metric_or_world",
+    "metric_does_not_use_current_or_latest_shortcut",
+    "storage_contains_no_business_inference",
+    "platform_contains_no_business_rules_or_stage_semantics"
+  ]
+}
