@@ -1,0 +1,33 @@
+{
+  "schema": "TPAA_M0_TOOLCHAIN_V1",
+  "status": "FROZEN",
+  "decision_date": "2026-09-21",
+  "python": {
+    "implementation": "CPython",
+    "minor": "3.13",
+    "specifier": ">=3.13,<3.14",
+    "free_threaded": false
+  },
+  "dependency": {
+    "resolver": "uv",
+    "required_version": ">=0.10,<0.13",
+    "canonical_lock": "uv.lock"
+  },
+  "quality": {
+    "formatter": {"tool": "ruff", "version": "0.16.8", "command": "ruff format"},
+    "linter": {"tool": "ruff", "version": "0.16.8", "command": "ruff check"},
+    "type_checker": {"tool": "mypy", "version": "2.3.1", "command": "mypy"},
+    "test_runner": {"tool": "pytest", "version": "9.0.2", "command": "pytest"}
+  },
+  "platform_profiles": [
+    "WINDOWS_DESKTOP_X64",
+    "LINUX_DESKTOP_X64",
+    "WINDOWS_SERVICE_X64",
+    "LINUX_SERVICE_X64"
+  ],
+  "dataframe_policy": {
+    "preferred_engine": "polars",
+    "pandas_default_dependency": false,
+    "rule": "Use Polars by default for airborne-data columnar/batch/time-series metric analysis; introduce Pandas only with task-specific justification."
+  }
+}

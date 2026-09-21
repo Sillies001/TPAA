@@ -1,41 +1,89 @@
 # M0 Engineering Bootstrap Status
 
-## Completed in this repository increment
+## Completed
 
 ### M0-CORE-001 — COMPLETE
 
-**Workstream:** WS-CORE  
-**Authority:** `baseline/CB-1.4.0/BASELINE_LOCK.json` and the imported Canonical snapshot.  
-**Acceptance semantic:** `baseline verify` returns exact PASS for every controlled artifact hash.
+**Workstream:** WS-CORE
+**Acceptance:** `baseline verify` returns exact PASS for all controlled artifacts.
 
-Implemented controls:
+Controls already established:
 
 1. CB-1.4.0 Canonical snapshot imported byte-for-byte from the validated R3.3 source package.
 2. Repository verifier pins the approved `BASELINE_LOCK.json` SHA-256.
-3. Every lock-listed artifact is checked for exact filename, byte count, and SHA-256.
-4. Missing controlled files fail closed.
-5. Unexpected Canonical JSON files fail closed to prevent an ungoverned shadow authority entering the snapshot.
-6. Machine-readable execution evidence can be emitted for milestone review.
-7. Verification uses only the Python standard library so it can run before dependency/toolchain ADR closure.
+3. All 21 lock-listed artifacts are checked for exact filename, byte count and SHA-256.
+4. Missing, modified or unexpected Canonical JSON fails closed.
+5. Machine-readable evidence is generated for review.
 
-## Source-entry evidence verified before import
+### M0-DEV-001 — COMPLETE for backlog minimum acceptance
+
+**Workstream:** WS-DEVOPS
+**Acceptance:** `bootstrap/generate/test/run/package` command semantics are discoverable.
+
+Implemented:
+
+- Cross-platform standard-library dispatcher: `tools/dev/tpaa_dev.py`.
+- SDIB Appendix I command names are discoverable with explicit implementation state.
+- Implemented commands include bootstrap, baseline verification, quality-tool entry points and test-family entry points.
+- Commands controlled by future tasks are reserved and fail closed with the controlling task ID instead of returning false success.
+
+### M0-DEV-002 — COMPLETE for backlog minimum acceptance
+
+**Workstream:** WS-DEVOPS
+**Acceptance:** Windows/Linux use the same logical dependency lock.
+
+Implemented:
+
+- `pyproject.toml` is the reviewed dependency declaration.
+- `uv.lock` is the sole project dependency lock.
+- `uv lock --check --offline` verifies lock/project consistency.
+- Per-OS Python lockfiles are prohibited by ADR-M0-002.
+- Current lock contains no third-party runtime package because no completed task requires one yet.
+
+## Closed ADRs
+
+- **ADR-M0-001 — CLOSED:** CPython 3.13.x on all four governed Windows/Linux x64 profiles.
+- **ADR-M0-002 — CLOSED:** uv resolver, one universal `uv.lock`, frozen sync semantics.
+- **ADR-M0-003 — CLOSED:** Ruff 0.16.8 formatter/linter, mypy 2.3.1, pytest 9.0.2, local/CI routed through the developer dispatcher.
+
+The project also records **Polars-first** as the default flight-data/DataFrame policy; Pandas is not a default dependency.
+
+## Verification status for this increment
+
+- Baseline exact verification: **21/21 PASS**.
+- Contract tests: **13/13 PASS** after adding the toolchain verifier test.
+- Toolchain decision verifier: **13/13 checks PASS**.
+- `bootstrap --check-only`: **PASS** on CPython 3.13.5 / Linux x86_64.
+- `bootstrap` with frozen offline project sync: **PASS** on this host.
+- pytest 9.0.2 execution: **PASS** on this host.
+- Ruff 0.16.8 execution: **NOT CLAIMED** on this host; exact binary is not installed and the execution environment is network-isolated.
+- mypy 2.3.1 execution: **NOT CLAIMED** for the same reason.
+- Windows execution/certification: **NOT CLAIMED**; later `M0-PLAT-004` evidence is still required.
+
+## Partial governance state
+
+`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001 through ADR-M0-003 are formally closed; ADR-M0-004 through ADR-M0-010 remain open and must be resolved before M0 Exit.
+
+## Source-entry evidence retained
 
 - R3.3 source ZIP SHA-256 matches SDIB-1.0.
 - Package manifest: PASS.
-- `tools/validate_rebaseline.py`: 65/65 PASS.
-- `tools/independent_audit.py`: 24/24 PASS.
+- Core validator: **65/65 PASS**.
+- Independent audit: **24/24 PASS**.
 
-## Not claimed by this increment
+## Not claimed
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- Canonical artifact loader (`M0-CORE-002`).
-- Code generation (`M0-CORE-003/004`).
-- Toolchain/dependency ADR closure.
-- Windows/Linux certification; the verifier is written to be OS-neutral, but both CI profiles must still execute it later.
+- M0-CORE-002 Canonical artifact loader.
+- M0-CORE-003/004 code generation and generated-source governance.
+- Database, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- Windows/Linux certification or logical-equivalence qualification.
 
-## Required next sequence from SDIB-1.0
+## Next required sequence
 
-1. Establish `pyproject + dependency lock + developer command` skeleton.
-2. Close ADR-M0-001, ADR-M0-002, ADR-M0-003.
-3. Then implement `M0-CORE-002` Canonical artifact loader.
+Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
+
+1. **M0-CORE-002 — Canonical artifact loader**.
+2. **M0-CORE-003 — code generator framework**.
+3. **M0-CORE-004 — generated-source read-only/regenerate-diff governance**.
