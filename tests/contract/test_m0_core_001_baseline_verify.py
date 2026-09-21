@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,6 +14,7 @@ VERIFIER_PATH = REPO_ROOT / "tools" / "baseline" / "verify_baseline.py"
 SPEC = importlib.util.spec_from_file_location("verify_baseline", VERIFIER_PATH)
 assert SPEC is not None and SPEC.loader is not None
 VERIFY_BASELINE = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = VERIFY_BASELINE
 SPEC.loader.exec_module(VERIFY_BASELINE)
 
 
