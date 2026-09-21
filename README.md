@@ -8,6 +8,7 @@ TPAA V8.0 / ED-2.0 implementation monorepo bootstrapped from **SDIB-1.0**.
 - Completed tasks:
   - **M0-CORE-001** — import and lock CB-1.4.0 baseline snapshot
   - **M0-CORE-002** — fail-closed Canonical artifact loader
+  - **M0-CORE-003** — deterministic Canonical code generator framework
   - **M0-DEV-001** — unified developer command semantics
   - **M0-DEV-002** — one cross-platform project dependency lock
 - Closed toolchain decisions:
@@ -36,11 +37,13 @@ python tools/dev/tpaa_dev.py list
 python tools/dev/tpaa_dev.py bootstrap --check-only
 python tools/dev/tpaa_dev.py verify-baseline
 python tools/dev/tpaa_dev.py verify-canonical
+python tools/dev/tpaa_dev.py generate
+python tools/dev/tpaa_dev.py generate --check
 python tools/dev/tpaa_dev.py test-contract
 python tools/dev/tpaa_dev.py doctor
 ```
 
-The command dispatcher deliberately reserves future command names such as `generate`, `run-api`, `run-gui`, `package`, `manifest`, and `cold-start`, but those commands fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
+The command dispatcher implements `generate` for M0-CORE-003. Future command names such as `run-api`, `run-gui`, `package`, `manifest`, and `cold-start` remain reserved and fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
 
 ## Verify the frozen baseline
 
@@ -70,4 +73,4 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-The SDIB-1.0 startup sequence now includes the completed **M0-CORE-002 Canonical artifact loader**. The next implementation item is **M0-CORE-003 — code generator framework**, followed by **M0-CORE-004 — generated-source governance**.
+The SDIB-1.0 startup sequence now includes the completed **M0-CORE-003 code generator framework**. The next implementation item is **M0-CORE-004 — generated-source governance**.

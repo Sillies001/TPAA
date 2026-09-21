@@ -1,0 +1,118 @@
+{
+  "baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+  "core_baseline": "CB-1.4.0",
+  "generator_version": "0.1.0",
+  "generators": [
+    {
+      "generator_id": "baseline-metadata",
+      "metadata": {
+        "projection": "BASELINE_LOCK"
+      },
+      "outputs": [
+        {
+          "bytes": 207,
+          "path": "src/tpaa_generated/baseline.py",
+          "sha256": "37a6665349836a7f097570056f1933141446bf7b91c5c41ff098daf0853bd709"
+        }
+      ],
+      "sources": []
+    },
+    {
+      "generator_id": "dto-types",
+      "metadata": {
+        "dto_count": "7",
+        "field_count": "131"
+      },
+      "outputs": [
+        {
+          "bytes": 6090,
+          "path": "src/tpaa_generated/dto.py",
+          "sha256": "e3e09ff08d4684ed5e63e6ecf43f83ffd39120b91e7f79b1b949a10240e89db3"
+        }
+      ],
+      "sources": [
+        {
+          "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
+          "sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c",
+          "version": "UNVERSIONED_BY_AUTHORITY"
+        }
+      ]
+    },
+    {
+      "generator_id": "metric-registry",
+      "metadata": {
+        "metric_count": "116",
+        "projected_field_count": "16"
+      },
+      "outputs": [
+        {
+          "bytes": 90096,
+          "path": "src/tpaa_generated/metric_registry.py",
+          "sha256": "58b88e001b439ab5f3e3a23792b90221a7aca26463a6ff5dd490d96e93b680c3"
+        }
+      ],
+      "sources": [
+        {
+          "artifact_id": "P1_METRIC_CATALOG",
+          "sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+          "version": "1.14.0"
+        }
+      ]
+    },
+    {
+      "generator_id": "program-registry",
+      "metadata": {
+        "capability_phase_count": "6",
+        "milestone_count": "10",
+        "workstream_count": "18"
+      },
+      "outputs": [
+        {
+          "bytes": 12067,
+          "path": "src/tpaa_generated/program_registry.py",
+          "sha256": "75b144f21f25ec6bb25f9b850228515780bd2993b279fecb0b360c1371d99e17"
+        }
+      ],
+      "sources": [
+        {
+          "artifact_id": "CAPABILITY_PHASE_REGISTRY",
+          "sha256": "c2184ae93c08f5877372daa5e107ffa1df2b56a03c761ae568440cf72cfacb4e",
+          "version": "1.0.0"
+        },
+        {
+          "artifact_id": "DEVELOPMENT_MILESTONE_REGISTRY",
+          "sha256": "7e583a2503735a10ddd85b8ead67d5369cd34d423246c96254c4cb80eaaf1dfb",
+          "version": "1.0.0"
+        },
+        {
+          "artifact_id": "ENGINEERING_WORKSTREAM_REGISTRY",
+          "sha256": "adea6bba20fb6b9ec002e9e1d355259c594f292ef4721fb7272de0f387747e6d",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "generator_id": "stage-registry",
+      "metadata": {
+        "profile_count": "4",
+        "stage_identity_count": "25"
+      },
+      "outputs": [
+        {
+          "bytes": 5137,
+          "path": "src/tpaa_generated/stage_registry.py",
+          "sha256": "e8f028df5b3e7b43613fd9ec2d6610db90142bf46bc3c1b92fb1054eb76ea578"
+        }
+      ],
+      "sources": [
+        {
+          "artifact_id": "STAGE_REGISTRY",
+          "sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+          "version": "1.1.0"
+        }
+      ]
+    }
+  ],
+  "manifest_type": "TPAA_CODEGEN_MANIFEST",
+  "manifest_version": 1
+}

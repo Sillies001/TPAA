@@ -87,10 +87,10 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
     assert required <= names
 
 
-def test_reserved_capability_commands_fail_closed() -> None:
-    generate = _run("generate")
-    assert generate.returncode == 3
-    assert "M0-CORE-003" in generate.stderr
+def test_codegen_command_is_implemented_and_reserved_commands_still_fail_closed() -> None:
+    generate = _run("generate", "--check")
+    assert generate.returncode == 0, generate.stderr
+    assert "CODEGEN_CHECK_PASS" in generate.stdout
 
     package = _run("package")
     assert package.returncode == 3

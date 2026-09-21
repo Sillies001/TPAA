@@ -1,0 +1,94 @@
+"""Generated TPAA Stage registry. Do not edit by hand."""
+
+from enum import StrEnum
+from types import MappingProxyType
+from typing import Mapping
+
+class StageCode(StrEnum):
+    ASSESSMENT = 'ASSESSMENT'
+    COMPLETION = 'COMPLETION'
+    DECISION = 'DECISION'
+    DESIGNATION_TRACK = 'DESIGNATION_TRACK'
+    DETECTION = 'DETECTION'
+    EXECUTION = 'EXECUTION'
+    IDENTIFICATION = 'IDENTIFICATION'
+    KILL_ASSESSMENT = 'KILL_ASSESSMENT'
+    LAUNCH = 'LAUNCH'
+    MANEUVER = 'MANEUVER'
+    MERGE = 'MERGE'
+    MISSION_SETUP = 'MISSION_SETUP'
+    POSITION_ADVANTAGE = 'POSITION_ADVANTAGE'
+    POST_EVENT_TASK_TRANSITION = 'POST_EVENT_TASK_TRANSITION'
+    RANGE_SIM_ADJUDICATION = 'RANGE_SIM_ADJUDICATION'
+    RECOVERY = 'RECOVERY'
+    ROUTE_TASK_EXECUTION = 'ROUTE_TASK_EXECUTION'
+    SETUP_ENTRY = 'SETUP_ENTRY'
+    STABILIZATION_RECOVERY = 'STABILIZATION_RECOVERY'
+    TARGET_ASSOCIATION = 'TARGET_ASSOCIATION'
+    TARGET_INFORMATION_AVAILABLE = 'TARGET_INFORMATION_AVAILABLE'
+    TRACK = 'TRACK'
+    TRAINING_ATTACK_EVENT = 'TRAINING_ATTACK_EVENT'
+    WEAPON_EMPLOYMENT = 'WEAPON_EMPLOYMENT'
+    WEAPON_ENVELOPE = 'WEAPON_ENVELOPE'
+
+class StageProfileId(StrEnum):
+    BASIC_FLIGHT_V1 = 'BASIC_FLIGHT_V1'
+    BVR_KILL_CHAIN_V1 = 'BVR_KILL_CHAIN_V1'
+    STRIKE_MISSION_V1 = 'STRIKE_MISSION_V1'
+    WVR_ENGAGEMENT_V1 = 'WVR_ENGAGEMENT_V1'
+
+STAGE_PROFILES: tuple[Mapping[str, object], ...] = (
+    MappingProxyType({
+        'profile_id': 'BASIC_FLIGHT_V1',
+        'episode_type': 'BASIC_FLIGHT',
+        'ordered_stages': ('SETUP_ENTRY', 'EXECUTION', 'STABILIZATION_RECOVERY', 'COMPLETION'),
+        'semantics': MappingProxyType({
+            'SETUP_ENTRY': 'Subject/configuration/reference readiness and entry-condition interval.',
+            'EXECUTION': 'Primary maneuver/task execution interval.',
+            'STABILIZATION_RECOVERY': 'Post-execution stabilization or recovery interval.',
+            'COMPLETION': 'Completion-rule and terminal-state interval.',
+        }),
+    }),
+    MappingProxyType({
+        'profile_id': 'BVR_KILL_CHAIN_V1',
+        'episode_type': 'BVR_KILL_CHAIN',
+        'ordered_stages': ('DETECTION', 'TRACK', 'IDENTIFICATION', 'DECISION', 'WEAPON_EMPLOYMENT', 'ASSESSMENT'),
+        'semantics': MappingProxyType({
+            'DETECTION': 'Training-relevant information acquisition opportunity and detection interval.',
+            'TRACK': 'Track establishment/maintenance interval.',
+            'IDENTIFICATION': 'Reference association/classification/identification interval.',
+            'DECISION': 'Training-script task/coordination/response interval.',
+            'WEAPON_EMPLOYMENT': 'Observed training engagement action and support interval.',
+            'ASSESSMENT': 'Approved adjudication, recovery and post-event evidence interval.',
+        }),
+    }),
+    MappingProxyType({
+        'profile_id': 'STRIKE_MISSION_V1',
+        'episode_type': 'STRIKE_MISSION',
+        'ordered_stages': ('MISSION_SETUP', 'ROUTE_TASK_EXECUTION', 'TARGET_INFORMATION_AVAILABLE', 'TARGET_ASSOCIATION', 'DESIGNATION_TRACK', 'TRAINING_ATTACK_EVENT', 'RANGE_SIM_ADJUDICATION', 'POST_EVENT_TASK_TRANSITION', 'RECOVERY'),
+        'semantics': MappingProxyType({
+            'MISSION_SETUP': 'Mission/context/role/route/target/reference readiness interval.',
+            'ROUTE_TASK_EXECUTION': 'Scenario-defined route/profile/task execution interval; system does not synthesize an optimal attack route.',
+            'TARGET_INFORMATION_AVAILABLE': 'Target information becomes relevant/available under declared P/world capability.',
+            'TARGET_ASSOCIATION': 'Truth-to-perception/assignment association and task-target linkage interval.',
+            'DESIGNATION_TRACK': 'Observed designation/track continuity and target-ID stability interval.',
+            'TRAINING_ATTACK_EVENT': 'Observed training release/trigger/attempt action interval; not an official result.',
+            'RANGE_SIM_ADJUDICATION': 'Approved range/simulator adjudication association interval; absent J yields no official outcome claim.',
+            'POST_EVENT_TASK_TRANSITION': 'Observed post-event action, handoff or task-transition interval.',
+            'RECOVERY': 'Recovery/egress/completion interval under training context.',
+        }),
+    }),
+    MappingProxyType({
+        'profile_id': 'WVR_ENGAGEMENT_V1',
+        'episode_type': 'WVR_ENGAGEMENT',
+        'ordered_stages': ('MERGE', 'POSITION_ADVANTAGE', 'MANEUVER', 'WEAPON_ENVELOPE', 'LAUNCH', 'KILL_ASSESSMENT'),
+        'semantics': MappingProxyType({
+            'MERGE': 'Configured engagement entry and initial relative-state interval.',
+            'POSITION_ADVANTAGE': 'Training-defined relative geometry advantage-development interval.',
+            'MANEUVER': 'High-dynamic maneuver and energy/control interval.',
+            'WEAPON_ENVELOPE': 'Training-rule-defined engagement-opportunity interval; not a real-world weapon optimization product.',
+            'LAUNCH': 'Observed training launch/engagement action interval.',
+            'KILL_ASSESSMENT': 'External approved adjudication/result-association interval.',
+        }),
+    }),
+)

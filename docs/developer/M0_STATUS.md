@@ -33,6 +33,23 @@ Implemented:
 8. `CanonicalArtifactError` carries deterministic engineering diagnostics including artifact id plus expected/actual version and schema context.
 9. `python tools/dev/tpaa_dev.py verify-canonical` emits machine-readable acceptance evidence.
 
+
+### M0-CORE-003 — COMPLETE
+
+**Workstream:** WS-CORE
+**Acceptance:** DTO/enum/Stage/P-M-WS/Metric registry projections are repeatably generated from Canonical authority.
+
+Implemented:
+
+1. `src/tpaa_codegen/` provides deterministic generator models, naming, rendering, manifest and coordination.
+2. All Canonical domain generators consume authority through `CanonicalArtifactLoader`; direct Canonical JSON parsing is prohibited and contract-tested.
+3. Generated projections cover baseline metadata, P/M/WS registries and enums, Stage registry, P1 Metric registry, and cross-layer DTO transport types.
+4. Canonical identities are preserved as values; Python identifier projection is language-only and collision-fails-closed rather than inventing suffixes.
+5. `python tools/dev/tpaa_dev.py generate` writes deterministic UTF-8/LF output; `generate --check` verifies byte identity against checked-in generation.
+6. Generation manifest records generator version, Core Baseline, source artifact version/hash and output hash/size.
+7. Repeated generation is byte-identical and all generated Python modules import successfully.
+8. M0-CORE-004 still owns read-only enforcement and CI regenerate-diff governance; it is not claimed complete here.
+
 ### M0-DEV-001 — COMPLETE for backlog minimum acceptance
 
 **Workstream:** WS-DEVOPS
@@ -69,7 +86,7 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 ## Verification status for this increment
 
 - Baseline exact verification: **21/21 PASS**.
-- Repository tests: **25/25 PASS** (10 unit + 15 contract).
+- Repository tests: **43/43 PASS** at M0-CORE-003 completion on this Linux host.
 - Canonical loader acceptance verifier: **21/21 controlled artifacts loaded; 8/8 fail-closed negative checks PASS**.
 - Toolchain decision verifier: **13/13 checks PASS**.
 - `bootstrap --check-only`: **PASS** on CPython 3.13.5 / Linux x86_64.
@@ -94,7 +111,7 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- M0-CORE-003/004 code generation and generated-source governance.
+- M0-CORE-004 generated-source read-only/regenerate-diff governance.
 - Database, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
@@ -102,6 +119,5 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. **M0-CORE-003 — code generator framework**.
-2. **M0-CORE-004 — generated-source read-only/regenerate-diff governance**.
-3. Continue the remaining M0 Core/Storage/Application/Platform backlog in SDIB dependency order.
+1. **M0-CORE-004 — generated-source read-only/regenerate-diff governance**.
+2. Continue the remaining M0 Core/Storage/Application/Platform backlog in SDIB dependency order.
