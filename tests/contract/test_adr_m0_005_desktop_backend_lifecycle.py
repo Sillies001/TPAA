@@ -98,9 +98,14 @@ def test_shutdown_is_cooperative_first_with_bounded_force_fallback() -> None:
     assert shutdown["shutdown_http_endpoint_forbidden"] is True
 
 
-def test_adr_does_not_prematurely_activate_pyside6() -> None:
+def test_pyside6_activation_remains_owned_by_m0_gui_001() -> None:
     pyproject = PYPROJECT_PATH.read_text(encoding="utf-8").lower()
-    assert "pyside6" not in pyproject
+    policy = _policy()
+    owners = policy["implementation_owners"]
+    assert isinstance(owners, dict)
+    assert owners["pyside_shell"] == "M0-GUI-001"
+    assert '"pyside6==6.11.2"' in pyproject
+    assert "[[tool.uv.index]]" not in pyproject
 
 
 def test_developer_cli_exposes_desktop_lifecycle_policy_gate() -> None:

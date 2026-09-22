@@ -45,11 +45,14 @@ def test_pyside6_is_loaded_only_at_concrete_gui_edge() -> None:
     assert 'import_module("PySide6.QtWidgets")' in source
 
 
-def test_dependency_activation_is_owned_but_not_claimed_complete_in_checkpoint() -> None:
+def test_dependency_activation_is_governed_and_linux_gate_remains_open() -> None:
     pyproject = PYPROJECT.read_text(encoding="utf-8")
     plan = PLAN.read_text(encoding="utf-8")
-    assert "PySide6" not in pyproject
+    assert '"pyside6==6.11.2"' in pyproject.lower()
+    assert "[[tool.uv.index]]" not in pyproject
     assert "PySide6==6.11.2" in plan
+    assert "Windows" in plan and "PASS" in plan
+    assert "Linux" in plan and "outstanding" in plan
     assert "IN PROGRESS" in plan
 
 

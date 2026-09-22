@@ -269,13 +269,13 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
 ## M0-GUI-001 — IN PROGRESS
 
-**PySide6 application shell:** first Desktop shell slice implemented; platform/dependency acceptance remains open.
+**PySide6 application shell:** shell and governed dependency activation implemented; Linux platform acceptance remains open.
 
 1. `tpaa_gui` now owns a minimal `QApplication`/`QMainWindow` shell with lazy PySide6 loading and deterministic missing-dependency failure.
 2. Developer commands `run gui`, `run-gui`, and `gui-smoke --headless` are implemented for the shell.
 3. The shell deliberately contains no backend child process, token, port, readiness, HTTP, Storage, or Canonical logic; those remain M0-GUI-002 under ADR-M0-005.
-4. Frozen activation target is `PySide6==6.11.2`, but it is not yet present in `pyproject.toml`/`uv.lock` in this checkpoint.
-5. SDIB minimum acceptance requires Windows/Linux startup-exit smoke PASS, so M0-GUI-001 must not be marked COMPLETE until both platform executions exist.
+4. `PySide6==6.11.2` is now present in `pyproject.toml` and the single governed `uv.lock`; Windows import/version and headless startup-exit smoke are PASS.
+5. SDIB minimum acceptance requires Windows/Linux startup-exit smoke PASS; Linux execution remains outstanding, so M0-GUI-001 is still IN PROGRESS.
 
 ## Partial governance state
 

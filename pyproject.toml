@@ -7,6 +7,7 @@ license = "Proprietary"
 dependencies = [
     "fastapi[standard-no-fastapi-cloud-cli]==0.141.1",
     "psycopg[binary]==3.3.6",
+    "pyside6==6.11.2",
 ]
 
 [tool.uv]

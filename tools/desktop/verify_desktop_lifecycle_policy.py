@@ -154,10 +154,14 @@ def verify() -> dict[str, Any]:
         "stdlib secrets token generation and constant-time compare primitives PASS",
     )
 
+    pyproject_lower = pyproject.lower()
+    pyside_owner = policy.get("implementation_owners", {}).get("pyside_shell")
     record(
-        "pyside_dependency_not_prematurely_activated",
-        "pyside6" not in pyproject.lower(),
-        "ADR closure does not activate PySide6; M0-GUI-001 owns dependency activation",
+        "pyside_dependency_owned_by_m0_gui_001",
+        '"pyside6==6.11.2"' in pyproject_lower
+        and "[[tool.uv.index]]" not in pyproject_lower
+        and pyside_owner == "M0-GUI-001",
+        "M0-GUI-001 owns exact PySide6 6.11.2 activation; no project-level package-index override",
     )
 
     status = "PASS" if all(item["status"] == "PASS" for item in checks) else "FAIL"
