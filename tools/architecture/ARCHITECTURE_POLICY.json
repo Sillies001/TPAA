@@ -79,15 +79,32 @@
       "tpaa_world"
     ],
     "tpaa_api": [
-      "tpaa_metric",
-      "tpaa_storage"
-    ],
-    "tpaa_gui": [
       "tpaa_assessment",
+      "tpaa_canonical",
+      "tpaa_context",
       "tpaa_episode",
+      "tpaa_gui",
+      "tpaa_ingest",
       "tpaa_longitudinal",
       "tpaa_metric",
       "tpaa_observation",
+      "tpaa_platform",
+      "tpaa_registry",
+      "tpaa_storage",
+      "tpaa_world"
+    ],
+    "tpaa_gui": [
+      "tpaa_api",
+      "tpaa_assessment",
+      "tpaa_canonical",
+      "tpaa_context",
+      "tpaa_episode",
+      "tpaa_ingest",
+      "tpaa_longitudinal",
+      "tpaa_metric",
+      "tpaa_observation",
+      "tpaa_platform",
+      "tpaa_registry",
       "tpaa_storage",
       "tpaa_world"
     ],

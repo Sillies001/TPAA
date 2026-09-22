@@ -156,9 +156,25 @@ Completed implementation and acceptance:
 4. Explicit commit is required; uncommitted/exception exits roll back; read-only transactions use PostgreSQL `SET TRANSACTION READ ONLY`.
 5. The disposable real-server harness composes the existing M0-STO-001 bootstrap with the Psycopg Repository smoke and enforces an M0-STO-003-scoped database prefix before create/drop.
 6. Real PostgreSQL acceptance PASS: bootstrap verify, Repository conformance, transaction smoke, read transaction, explicit write commit, uncommitted-exit rollback and exception rollback; schema `1.6.0`, 77 Canonical tables, Core baseline `CB-1.4.0`.
-7. Application/FastAPI/PySide6, Alembic activation and M0-CORE-006 remain out of scope.
+7. Application/FastAPI/PySide6, Alembic activation and M0-CORE-006 were out of scope for M0-STO-003; M0-API-001 is completed separately below.
 
 Implementation record: `docs/implementation/M0-STO-003_POSTGRESQL_SERVICE_REPOSITORY_SKELETON.md`.
+
+### M0-API-001 — COMPLETE
+
+**Workstream:** WS-API
+**Acceptance:** Application Service skeleton; GUI/REST business access constrained to Application use cases.
+
+Completed implementation and acceptance:
+
+1. `tpaa_application` is now a real package with a typed `ApplicationService` facade and Application-owned result models.
+2. The first concrete use case, `GetStorageBaselineStatus`, reads bootstrap provenance only through the engine-neutral `RepositoryUnitOfWork` port; no concrete database adapter or driver leaks into Application.
+3. A real SQLite integration path proves M0-STO-001 bootstrap → Repository UoW → Application Service without direct transport/DB coupling.
+4. Architecture policy now encodes Appendix E strictly: `tpaa_api` and `tpaa_gui` may import first-party `tpaa_application` and `tpaa_generated` only.
+5. M0-CORE-006 READY/version mismatch semantics, FastAPI, PySide6 and ADR-M0-005 lifecycle/IPC remain deliberately outside this task.
+6. Final regression passed 138/138 by complete partition: unit 50/50, migration 26/26, contract 62/62; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/bootstrap/lock gates PASS.
+
+Implementation record: `docs/implementation/M0-API-001_APPLICATION_SERVICE_SKELETON.md`.
 
 ### ADR-M0-004 — CLOSED
 
@@ -216,12 +232,14 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- PostgreSQL Service repository skeleton, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- FastAPI, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
+Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Proceed to M0-STO-003 PostgreSQL Service repository skeleton and shared SQLite/PostgreSQL Repository conformance tests using CLOSED `ADR-M0-004`.
-2. Only after Storage/Repository boundaries stabilize, build Application/FastAPI/PySide6 shell and close **M0-CORE-006 runtime baseline handshake** in the prescribed dependency order.
+1. **M0-CORE-006** — implement the transport-neutral runtime baseline handshake/READY model over the completed Repository/Application boundaries.
+2. Then **M0-API-002** exposes health/readiness/version through FastAPI without reimplementing handshake rules.
+3. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
+4. Do not advance to §39 step 8 cross-platform CI as a substitute for unfinished step-7 dependencies.
