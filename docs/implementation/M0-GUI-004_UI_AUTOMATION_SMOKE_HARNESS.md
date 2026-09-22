@@ -1,6 +1,6 @@
 # M0-GUI-004 — UI automation smoke harness
 
-Status: **IN PROGRESS**
+Status: **COMPLETE**
 
 **Authority:** SDIB-1.0 §17 and §39 step 7  
 **Minimum acceptance:** Desktop launch, READY, and close are automatically verifiable.
@@ -27,7 +27,9 @@ The harness consumes GUI diagnostics and lifecycle state only. It does not evalu
 
 ## Evidence status
 
-Code-level validation is **219/219 PASS**: unit 93/93, migration 26/26, contract 100/100. Historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS. A real PySide6 execution of the unified `ui-automation-smoke` command is still required before this task may be marked COMPLETE in an environment where the governed 46-package lock can be synchronized. The current Chat sandbox reports the deterministic `PYSIDE6_DEPENDENCY_MISSING` blocker rather than claiming a UI run.
+M0-GUI-004 is **COMPLETE**. Governed Windows acceptance used CPython 3.13.5 and the unchanged 46-package lock via `uv sync --locked`; the unified `ui-automation-smoke` command executed the real PySide6 6.11.2 composed Desktop and reported PASS for `launch`, `backend_ready`, `diagnostics_visible`, `close`, and `backend_cleanup`. `uv lock --check` passed and `git status --short` remained empty after the run. The Qt headless font-directory and `propagateSizeHints()` messages were warnings only; the governed smoke exited successfully with status PASS.
+
+Final repository validation is **220/220 PASS**: unit 93/93, migration 26/26, contract 101/101. Historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS. SDIB §39 step 8 cross-platform CI is not claimed by this task.
 
 ## Explicit non-scope
 

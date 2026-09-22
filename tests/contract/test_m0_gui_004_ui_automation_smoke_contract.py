@@ -71,3 +71,16 @@ def test_m0_gui_004_does_not_add_dependency_or_claim_cross_platform_ci() -> None
     assert "pyautogui" not in pyproject.lower()
     assert "Cross-platform CI" in plan
     assert "M0-GUI-004" in STATUS.read_text(encoding="utf-8")
+
+
+def test_m0_gui_004_completion_status_and_windows_acceptance_are_recorded() -> None:
+    plan = PLAN.read_text(encoding="utf-8")
+    status = STATUS.read_text(encoding="utf-8")
+    assert "Status: **COMPLETE**" in plan
+    assert "M0-GUI-004 — COMPLETE" in status
+    for check in ("launch", "backend_ready", "diagnostics_visible", "close", "backend_cleanup"):
+        assert check in plan
+        assert check in status
+    assert "uv sync --locked" in plan
+    assert "uv lock --check" in plan
+    assert "cross-platform CI is not claimed" in plan
