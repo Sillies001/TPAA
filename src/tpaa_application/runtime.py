@@ -9,7 +9,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from tpaa_canonical.runtime_handshake import RuntimeBaselineHandshake, RuntimeBaselineIdentity
+from tpaa_canonical.runtime_handshake import (
+    RuntimeBaselineHandshake,
+    RuntimeBaselineIdentity,
+    load_trusted_runtime_baseline_handshake,
+)
 
 
 @dataclass(frozen=True)
@@ -70,3 +74,18 @@ class GetRuntimeBaselineStatus:
             expected=_project_identity(handshake.expected),
             observed=_project_identity(handshake.observed),
         )
+
+
+def build_trusted_runtime_status_use_case(*, product_build_version: str) -> GetRuntimeBaselineStatus:
+    """Wire the local trusted Core identity into the Application readiness use case.
+
+    This remains transport-neutral; Desktop/API adapters consume the returned use case
+    without importing Canonical directly. M0-DEV-003 may later supply the product build
+    version from a governed build manifest.
+    """
+
+    return GetRuntimeBaselineStatus(
+        lambda: load_trusted_runtime_baseline_handshake(
+            product_build_version=product_build_version
+        )
+    )

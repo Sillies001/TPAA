@@ -8,6 +8,7 @@ from .runtime import (
     GetRuntimeBaselineStatus,
     RuntimeBaselineIdentityView,
     RuntimeBaselineStatus,
+    build_trusted_runtime_status_use_case,
 )
 from .service import ApplicationService
 from .use_cases import GetStorageBaselineStatus
@@ -18,5 +19,6 @@ __all__ = [
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",
     "RuntimeBaselineStatus",
+    "build_trusted_runtime_status_use_case",
     "StorageBaselineStatus",
 ]

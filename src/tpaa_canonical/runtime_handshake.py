@@ -144,3 +144,17 @@ def load_trusted_runtime_baseline_identity(
         p1_metric_catalog_sha256=catalog.sha256,
         dto_authority_sha256=dto.sha256,
     )
+
+
+def load_trusted_runtime_baseline_handshake(
+    *,
+    product_build_version: str,
+    loader: CanonicalArtifactLoader | None = None,
+) -> RuntimeBaselineHandshake:
+    """Return the Core-owned exact-match handshake for a verified local runtime identity."""
+
+    trusted = load_trusted_runtime_baseline_identity(
+        product_build_version=product_build_version,
+        loader=loader,
+    )
+    return evaluate_runtime_baseline_handshake(expected=trusted, observed=trusted)

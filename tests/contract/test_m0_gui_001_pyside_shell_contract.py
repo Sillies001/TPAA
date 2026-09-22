@@ -66,7 +66,7 @@ def test_status_keeps_gui_002_backend_lifecycle_separate() -> None:
 
 def test_unified_developer_cli_exposes_gui_shell_and_smoke() -> None:
     dev = (ROOT / "tools" / "dev" / "tpaa_dev.py").read_text(encoding="utf-8")
-    assert 'CommandSpec("run-gui", "M0-GUI-001", "IMPLEMENTED"' in dev
+    assert 'CommandSpec("run-gui", "M0-GUI-002", "IMPLEMENTED"' in dev
     assert 'CommandSpec("gui-smoke", "M0-GUI-001", "IMPLEMENTED"' in dev
     assert 'if command == "run-gui":' in dev
     assert 'if command == "gui-smoke":' in dev

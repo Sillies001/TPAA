@@ -279,6 +279,21 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 6. Final repository regression passed **181/181** by complete partition: unit 72/72, migration 26/26, contract 83/83; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/offline-lock gates PASS.
 7. Backend child process/token/port/readiness lifecycle remains explicitly owned by M0-GUI-002.
 
+
+## M0-GUI-002 — IN PROGRESS
+
+**Local backend lifecycle handshake:** executable ADR-M0-005 child/token/READY/shutdown slice implemented; Windows real-process acceptance remains outstanding.
+
+1. GUI owns one isolated backend child and generates a fresh 32-byte URL-safe bearer token per lifecycle.
+2. Child binds `127.0.0.1:0`, reports non-secret `LISTENING` over stdout NDJSON, and never receives the token through argv/environment/files.
+3. Parent performs authenticated `/readiness` and `/version`; LISTENING alone never implies READY.
+4. Desktop HTTP requires exact bearer authentication, rejects Origin, and disables docs/OpenAPI/CORS.
+5. Backend crash or handshake mismatch becomes NOT_READY immediately.
+6. Normal exit sends stdin `SHUTDOWN`; terminate/kill are bounded fallback only.
+7. Linux/current-host real lifecycle smoke is PASS; Windows real-process lifecycle smoke is required before COMPLETE.
+
+Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
+
 ## Partial governance state
 
 `M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
@@ -294,13 +309,13 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- GUI backend lifecycle, GUI diagnostics/automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- M0-GUI-002 Windows real-process lifecycle acceptance, GUI diagnostics/automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Implement **M0-GUI-002 — Local backend lifecycle handshake** using the frozen child-process/stdin-stdout/ephemeral-port/bearer-token policy and the existing M0-CORE-006/M0-API-002 readiness authority.
+1. Complete **M0-GUI-002 — Local backend lifecycle handshake** with Windows real-process acceptance against the implemented frozen policy.
 2. Complete M0-GUI-003/004 diagnostics and UI automation in dependency order.
 3. Then proceed to §39 step 8 cross-platform CI.

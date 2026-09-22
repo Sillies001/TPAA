@@ -34,6 +34,7 @@ SQLITE_REPOSITORY = REPO_ROOT / "tools" / "storage" / "sqlite_repository.py"
 POSTGRES_REPOSITORY = REPO_ROOT / "tools" / "storage" / "postgres_repository.py"
 API_SMOKE = REPO_ROOT / "tools" / "api" / "smoke.py"
 GUI_SMOKE = REPO_ROOT / "tools" / "gui" / "smoke.py"
+DESKTOP_BACKEND_SMOKE = REPO_ROOT / "tools" / "desktop" / "lifecycle_smoke.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -67,6 +68,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("db-postgres-repository-acceptance", "M0-STO-003", "IMPLEMENTED", "Run PostgreSQL Service Repository/UoW acceptance against an existing ready database."),
     CommandSpec("api-smoke", "M0-API-002", "IMPLEMENTED", "Smoke health/readiness/version through the FastAPI transport adapter."),
     CommandSpec("gui-smoke", "M0-GUI-001", "IMPLEMENTED", "Smoke PySide6 application startup and controlled exit."),
+    CommandSpec("desktop-backend-smoke", "M0-GUI-002", "IMPLEMENTED", "Smoke owned local backend token/readiness/shutdown lifecycle."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -79,7 +81,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("test-e2e", "M0-TST-001", "IMPLEMENTED", "Run end-to-end tests."),
     CommandSpec("run", "M0-API-002/M0-GUI-001", "RESERVED", "Dispatch an API or GUI runtime profile."),
     CommandSpec("run-api", "M0-API-002", "RESERVED", "Start the API profile once implemented."),
-    CommandSpec("run-gui", "M0-GUI-001", "IMPLEMENTED", "Start the M0-GUI-001 Desktop application shell."),
+    CommandSpec("run-gui", "M0-GUI-002", "IMPLEMENTED", "Start the composed Desktop shell with its owned local backend."),
     CommandSpec("package", "M0-DEV-005", "RESERVED", "Build a platform development artifact once packaging is implemented."),
     CommandSpec("manifest", "M0-DEV-003", "RESERVED", "Generate build/package manifest and SBOM inputs."),
     CommandSpec("cold-start", "M0-DEV-006", "RESERVED", "Rebuild and execute all current milestone gates from clean state."),
@@ -361,6 +363,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("run-gui", help="Start the M0-GUI-001 Desktop shell")
     gui_smoke = sub.add_parser("gui-smoke", help="Run the M0-GUI-001 PySide6 startup/exit smoke")
     gui_smoke.add_argument("--headless", action="store_true")
+    sub.add_parser("desktop-backend-smoke", help="Run the M0-GUI-002 local backend lifecycle smoke")
     sub.add_parser("package", help="Reserved for M0-DEV-005")
     sub.add_parser("manifest", help="Reserved for M0-DEV-003")
     sub.add_parser("cold-start", help="Reserved for M0-DEV-006")
@@ -421,6 +424,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.headless:
             gui_args.append("--headless")
         return _run(gui_args)
+    if command == "desktop-backend-smoke":
+        return _run([sys.executable, str(DESKTOP_BACKEND_SMOKE)])
     if command == "db-bootstrap":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":

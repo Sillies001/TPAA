@@ -16,6 +16,7 @@ from .runtime_handshake import (
     RuntimeBaselineMismatch,
     RuntimeReadiness,
     evaluate_runtime_baseline_handshake,
+    load_trusted_runtime_baseline_handshake,
     load_trusted_runtime_baseline_identity,
 )
 
@@ -33,5 +34,6 @@ __all__ = [
     "RuntimeBaselineMismatch",
     "RuntimeReadiness",
     "evaluate_runtime_baseline_handshake",
+    "load_trusted_runtime_baseline_handshake",
     "load_trusted_runtime_baseline_identity",
 ]
