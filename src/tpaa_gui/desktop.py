@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from .local_backend import LocalBackendController
+from .local_backend import LocalBackendController, LocalBackendError
 from .shell import GuiShellConfig, run_gui
 
 
@@ -19,8 +19,19 @@ def run_desktop(
     """Run the GUI while owning exactly one authenticated local backend lifecycle."""
 
     controller = backend or LocalBackendController()
-    controller.start()
     try:
-        return run_gui(argv, config=config, auto_close_ms=auto_close_ms, show=show)
+        try:
+            controller.start()
+        except LocalBackendError:
+            # Fail closed but keep the Desktop shell alive so M0-GUI-003 can
+            # display the captured readiness/version diagnostics.
+            pass
+        return run_gui(
+            argv,
+            config=config,
+            auto_close_ms=auto_close_ms,
+            show=show,
+            diagnostics_provider=lambda: controller.diagnostics,
+        )
     finally:
         controller.shutdown()

@@ -297,6 +297,19 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
 Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
+## M0-GUI-003 — COMPLETE
+
+**Baseline/Diagnostics view:** the Desktop shell now renders the authoritative runtime readiness diagnostics without reimplementing READY semantics.
+
+1. The GUI renders readiness, backend lifecycle state, lifecycle failure code, mismatch codes, product build, Core baseline, P1 Metric Catalog version, and DB schema expected/observed values.
+2. Diagnostics are projected into a GUI-owned immutable snapshot that never contains the Desktop bearer token or lower-layer implementation objects.
+3. The local-backend controller captures authenticated `/readiness` and `/version` payloads before enforcing fail-closed startup; a baseline mismatch therefore remains NOT_READY but can still be displayed after the child is shut down.
+4. Backend crash changes the effective diagnostics readiness to NOT_READY and exposes `BACKEND_EXITED`; the view refreshes every 500 ms from the controller snapshot.
+5. Stable object names `tpaaDiagnosticsReadiness`, `tpaaDiagnosticsMismatches`, `tpaaDiagnosticsBuild`, `tpaaDiagnosticsCore`, `tpaaDiagnosticsCatalog`, and `tpaaDiagnosticsSchema` are frozen for the later M0-GUI-004 automation harness.
+6. GUI code does not import Canonical, Storage, FastAPI, database drivers, or the Core handshake evaluator and does not reproduce mismatch constants.
+7. M0-GUI-004 UI automation remains explicitly open.
+8. Final regression is **210/210 PASS**: unit 89/89, migration 26/26, contract 95/95; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS.
+
 ## Partial governance state
 
 `M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
@@ -312,12 +325,12 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- GUI diagnostics/automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- GUI automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Complete **M0-GUI-003/004** diagnostics and UI automation in dependency order.
+1. Complete **M0-GUI-004** UI automation.
 2. Then proceed to §39 step 8 cross-platform CI.

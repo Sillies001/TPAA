@@ -33,6 +33,23 @@ def test_handshake_mismatch_fails_closed(monkeypatch: pytest.MonkeyPatch) -> Non
     responses = iter(
         [
             (503, {"status": "NOT_READY", "ready": False, "mismatches": ["DB_SCHEMA_VERSION_MISMATCH"]}),
+            (
+                200,
+                {
+                    "expected": {
+                        "product_build_version": "0.0.0",
+                        "core_baseline": "CB-1.4.0",
+                        "p1_metric_catalog_version": "P1-METRIC-CATALOG-1.0",
+                        "db_schema_version": "1.6.0",
+                    },
+                    "observed": {
+                        "product_build_version": "0.0.0",
+                        "core_baseline": "CB-1.4.0",
+                        "p1_metric_catalog_version": "P1-METRIC-CATALOG-1.0",
+                        "db_schema_version": "1.5.0",
+                    },
+                },
+            ),
         ]
     )
     monkeypatch.setattr(controller, "_get_json", lambda _path: next(responses))

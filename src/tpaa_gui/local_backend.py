@@ -18,6 +18,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import IO, Any, Sequence
 
+from .diagnostics import EMPTY_DIAGNOSTICS, DiagnosticsSnapshot, snapshot_from_http
+
 CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
 STARTUP_TIMEOUT_SECONDS = 10.0
 GRACEFUL_SHUTDOWN_SECONDS = 5.0
@@ -123,6 +125,16 @@ class LocalBackendController:
         self._port: int | None = None
         self._state = LocalBackendState.STOPPED
         self._failure_code: str | None = None
+        self._baseline_diagnostics: DiagnosticsSnapshot = EMPTY_DIAGNOSTICS
+
+    @property
+    def diagnostics(self) -> DiagnosticsSnapshot:
+        status = self.status
+        return self._baseline_diagnostics.with_lifecycle(
+            backend_state=status.state.value,
+            backend_ready=status.ready,
+            failure_code=status.failure_code,
+        )
 
     @property
     def status(self) -> LocalBackendStatus:
@@ -146,6 +158,7 @@ class LocalBackendController:
             raise LocalBackendError("BACKEND_ALREADY_RUNNING")
         self._failure_code = None
         self._port = None
+        self._baseline_diagnostics = EMPTY_DIAGNOSTICS
         self._token = secrets.token_urlsafe(32)
         spawn_command, spawn_env = _prepare_child_spawn(self._child_command)
         self._process = subprocess.Popen(
@@ -291,9 +304,14 @@ class LocalBackendController:
 
     def _perform_http_handshake(self) -> None:
         readiness_status, readiness = self._get_json("/readiness")
+        version_status, version = self._get_json("/version")
+        self._baseline_diagnostics = snapshot_from_http(
+            readiness,
+            version,
+            backend_state=LocalBackendState.HTTP_HANDSHAKE.value,
+        )
         if readiness_status != 200 or readiness.get("ready") is not True or readiness.get("status") != "READY":
             raise LocalBackendError("READINESS_NOT_READY")
-        version_status, version = self._get_json("/version")
         if version_status != 200:
             raise LocalBackendError("VERSION_HANDSHAKE_FAILED")
         expected = version.get("expected")

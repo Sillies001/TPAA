@@ -1,8 +1,8 @@
-"""PySide6 application shell for M0-GUI-001.
+"""PySide6 Desktop shell and read-only runtime diagnostics view.
 
-This module deliberately owns only the Desktop process/UI shell.  Local backend
-process ownership, token transfer, readiness handshake and crash recovery belong
-to M0-GUI-002 and are intentionally absent here.
+M0-GUI-001 owns the process/window shell. M0-GUI-003 adds only rendering of
+sanitized diagnostics snapshots. READY semantics and backend lifecycle remain
+owned by lower authoritative layers and M0-GUI-002 respectively.
 """
 
 from __future__ import annotations
@@ -10,7 +10,9 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from importlib import import_module
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
+
+from .diagnostics import DiagnosticsSnapshot, diagnostics_lines
 
 
 class GuiShellError(RuntimeError):
@@ -43,7 +45,12 @@ def _load_qt() -> tuple[Any, Any]:
     return qt_core, qt_widgets
 
 
-def _create_window(qt_widgets: Any, config: GuiShellConfig) -> Any:
+def _create_window(
+    qt_core: Any,
+    qt_widgets: Any,
+    config: GuiShellConfig,
+    diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
+) -> Any:
     window = qt_widgets.QMainWindow()
     window.setObjectName("tpaaMainWindow")
     window.setWindowTitle(config.window_title)
@@ -60,6 +67,28 @@ def _create_window(qt_widgets: Any, config: GuiShellConfig) -> Any:
 
     layout.addWidget(title)
     layout.addWidget(status)
+
+    if diagnostics_provider is not None:
+        diagnostics_title = qt_widgets.QLabel("Runtime diagnostics", central)
+        diagnostics_title.setObjectName("tpaaDiagnosticsTitle")
+        layout.addWidget(diagnostics_title)
+        diagnostic_labels: dict[str, Any] = {}
+        for object_name, _label, text in diagnostics_lines(diagnostics_provider()):
+            widget = qt_widgets.QLabel(text, central)
+            widget.setObjectName(object_name)
+            layout.addWidget(widget)
+            diagnostic_labels[object_name] = widget
+
+        def refresh_diagnostics() -> None:
+            for object_name, _label, text in diagnostics_lines(diagnostics_provider()):
+                diagnostic_labels[object_name].setText(text)
+
+        refresh_timer = qt_core.QTimer(window)
+        refresh_timer.timeout.connect(refresh_diagnostics)
+        refresh_timer.start(500)
+        window._tpaa_diagnostics_timer = refresh_timer
+        window._tpaa_diagnostics_labels = diagnostic_labels
+
     layout.addStretch(1)
     window.setCentralWidget(central)
     return window
@@ -71,6 +100,7 @@ def run_gui(
     config: GuiShellConfig | None = None,
     auto_close_ms: int | None = None,
     show: bool = True,
+    diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
 ) -> int:
     """Start the PySide6 event loop and return its process exit code.
 
@@ -89,7 +119,7 @@ def run_gui(
     app = existing if existing is not None else qt_widgets.QApplication(qt_argv)
     app.setApplicationName(shell_config.application_name)
 
-    window = _create_window(qt_widgets, shell_config)
+    window = _create_window(qt_core, qt_widgets, shell_config, diagnostics_provider)
     if show:
         window.show()
 
