@@ -16,7 +16,7 @@ Expose the completed M0-CORE-006 runtime baseline handshake through a minimal Fa
 4. `GET /health` is liveness-only and returns HTTP 200 / `UP`; it deliberately makes no READY claim.
 5. `GET /readiness` returns HTTP 200 for authoritative `READY` and HTTP 503 for authoritative `NOT_READY`, preserving Core mismatch codes unchanged.
 6. `GET /version` exposes the expected and observed build/Core/Baseline-Lock/schema/P1-Catalog/DTO identity projected by Application for diagnostics.
-7. `api-smoke` executes real ASGI/TestClient requests for liveness, READY, NOT_READY and version diagnostics.
+7. `api-smoke` executes real ASGI/TestClient requests for liveness, READY, NOT_READY and version diagnostics and self-bootstraps `src/` on `sys.path` so direct execution from a clean checkout does not depend on ambient `PYTHONPATH`.
 
 ## Framework dependency decision for this task
 
@@ -34,7 +34,7 @@ The Chat execution host cannot resolve `pypi.org`, so dependency activation is d
 
 ## Current acceptance evidence
 
-- API/Application specialty slice: 11/11 PASS on the Chat host.
+- API/Application specialty slice: 12/12 PASS on the Chat host, including direct smoke execution without ambient `PYTHONPATH`.
 - `api-smoke`: PASS for health, READY, NOT_READY/503 and version endpoints.
 - Controller boundary contract: no direct Canonical/Storage/GUI/driver import and no READY comparison implementation.
 - Formal FastAPI 0.141.1 lock activation: PENDING external networked `uv add` and subsequent frozen-lock verification.

@@ -204,7 +204,7 @@ Current implementation state:
 1. `tpaa_application.runtime` projects the M0-CORE-006 handshake into transport-neutral Application models without reimplementing READY comparison rules.
 2. `tpaa_api.create_app()` exposes `/health`, `/readiness` and `/version`; API code imports `tpaa_application` rather than Canonical/Storage/GUI implementation packages.
 3. `/readiness` maps authoritative READY to HTTP 200 and NOT_READY to HTTP 503 while preserving deterministic Core mismatch codes.
-4. `api-smoke` performs real TestClient requests for liveness, ready/not-ready and version diagnostics; current specialty slice is 11/11 PASS on the Chat host.
+4. `api-smoke` performs real TestClient requests for liveness, ready/not-ready and version diagnostics, self-bootstraps the repository `src/` path for direct clean-checkout execution, and the current specialty slice is 12/12 PASS on the Chat host.
 5. Formal dependency activation target is `fastapi[standard-no-fastapi-cloud-cli]==0.141.1`. The Chat host cannot resolve PyPI, so `pyproject.toml`/`uv.lock` remain unchanged at this checkpoint and completion is not claimed.
 
 Implementation record: `docs/implementation/M0-API-002_FASTAPI_HEALTH_READINESS_VERSION.md`.

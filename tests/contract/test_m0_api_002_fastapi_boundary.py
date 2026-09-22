@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import ast
+import subprocess
+import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
 API_APP = ROOT / "src" / "tpaa_api" / "app.py"
 PYPROJECT = ROOT / "pyproject.toml"
+API_SMOKE = ROOT / "tools" / "api" / "smoke.py"
 
 
 def _imports(path: Path) -> set[str]:
@@ -41,3 +44,15 @@ def test_api_controller_does_not_own_ready_comparison_rules() -> None:
 def test_fastapi_dependency_activation_is_not_falsely_claimed_before_lock_update() -> None:
     pyproject = PYPROJECT.read_text(encoding="utf-8")
     assert 'fastapi' not in pyproject.lower()
+
+
+def test_api_smoke_is_directly_executable_from_clean_checkout() -> None:
+    result = subprocess.run(
+        [sys.executable, str(API_SMOKE)],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert '"status": "PASS"' in result.stdout
