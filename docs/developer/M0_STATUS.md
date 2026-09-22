@@ -194,6 +194,21 @@ Completed implementation and acceptance:
 
 Implementation record: `docs/implementation/M0-API-001_APPLICATION_SERVICE_SKELETON.md`.
 
+### M0-API-002 — IN PROGRESS
+
+**Workstream:** WS-API
+**Acceptance:** FastAPI local/service skeleton; health/readiness/version endpoints smoke PASS.
+
+Current implementation state:
+
+1. `tpaa_application.runtime` projects the M0-CORE-006 handshake into transport-neutral Application models without reimplementing READY comparison rules.
+2. `tpaa_api.create_app()` exposes `/health`, `/readiness` and `/version`; API code imports `tpaa_application` rather than Canonical/Storage/GUI implementation packages.
+3. `/readiness` maps authoritative READY to HTTP 200 and NOT_READY to HTTP 503 while preserving deterministic Core mismatch codes.
+4. `api-smoke` performs real TestClient requests for liveness, ready/not-ready and version diagnostics; current specialty slice is 11/11 PASS on the Chat host.
+5. Formal dependency activation target is `fastapi[standard-no-fastapi-cloud-cli]==0.141.1`. The Chat host cannot resolve PyPI, so `pyproject.toml`/`uv.lock` remain unchanged at this checkpoint and completion is not claimed.
+
+Implementation record: `docs/implementation/M0-API-002_FASTAPI_HEALTH_READINESS_VERSION.md`.
+
 ### ADR-M0-004 — CLOSED
 
 **Decision:** Repository DB access implementation.
@@ -250,13 +265,13 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- FastAPI, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- FastAPI dependency activation / M0-API-002 completion, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. **M0-API-002** — expose health/readiness/version through FastAPI by consuming the completed M0-CORE-006 handshake semantics; do not reimplement READY rules in controllers.
+1. Complete **M0-API-002** by activating the frozen FastAPI dependency in the single `uv.lock` and rerunning the governed smoke/regression gates.
 2. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
 3. Do not advance to §39 step 8 cross-platform CI as a substitute for unfinished step-7 dependencies.

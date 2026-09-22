@@ -48,11 +48,12 @@ def test_transport_packages_are_policy_limited_to_application_and_generated() ->
         assert allowed == {"tpaa_application", "tpaa_generated"}
 
 
-def test_application_service_does_not_claim_runtime_ready_handshake() -> None:
+def test_application_service_projects_but_does_not_reimplement_runtime_handshake() -> None:
     source = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((SRC / "tpaa_application").glob("*.py"))
-    ).lower()
-    assert "ready =" not in source
-    assert "readiness" not in source
-    assert "mismatch" not in source
+    )
+    assert "RuntimeBaselineHandshake" in source
+    assert "evaluate_runtime_baseline_handshake" not in source
+    assert "DB_SCHEMA_VERSION_MISMATCH" not in source
+    assert "CORE_BASELINE_MISMATCH" not in source

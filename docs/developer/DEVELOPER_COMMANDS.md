@@ -28,6 +28,8 @@ Quality commands use an already-installed exact tool version when available. Oth
 
 `run`/`run-api`/`run-gui`, `package`, `manifest`, and `cold-start` are intentionally discoverable now but exit with `NOT_IMPLEMENTED` until their controlling SDIB tasks are implemented. A placeholder command must never report success for a capability that does not yet exist.
 
+`api-smoke` is the M0-API-002 acceptance entry point for the FastAPI health/readiness/version adapter. It requires the governed FastAPI dependency to be installed; `run-api` remains reserved until the service runtime/composition entry point is formally activated.
+
 ## Bootstrap modes
 
 `bootstrap --check-only` verifies runtime, resolver/lock consistency and the frozen Canonical baseline without changing `.venv`.

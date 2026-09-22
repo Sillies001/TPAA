@@ -31,6 +31,7 @@ POSTGRES_STORAGE = REPO_ROOT / "tools" / "storage" / "postgres_db.py"
 REPOSITORY_POLICY_VERIFY = REPO_ROOT / "tools" / "storage" / "verify_repository_policy.py"
 SQLITE_REPOSITORY = REPO_ROOT / "tools" / "storage" / "sqlite_repository.py"
 POSTGRES_REPOSITORY = REPO_ROOT / "tools" / "storage" / "postgres_repository.py"
+API_SMOKE = REPO_ROOT / "tools" / "api" / "smoke.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -61,6 +62,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("db-postgres-verify", "M0-STO-001", "IMPLEMENTED", "Verify PostgreSQL schema/version/provenance through the external psql harness."),
     CommandSpec("db-postgres-acceptance", "M0-STO-001", "IMPLEMENTED", "Run destructive M0-STO-001 PostgreSQL acceptance in a dedicated disposable database."),
     CommandSpec("db-postgres-repository-acceptance", "M0-STO-003", "IMPLEMENTED", "Run PostgreSQL Service Repository/UoW acceptance against an existing ready database."),
+    CommandSpec("api-smoke", "M0-API-002", "IMPLEMENTED", "Smoke health/readiness/version through the FastAPI transport adapter."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -310,6 +312,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("regenerate-diff", help="Regenerate generated source and require zero Git diff")
     sub.add_parser("verify-architecture", help="Verify SDIB package/layer architecture dependencies")
     sub.add_parser("verify-repository-policy", help="Verify frozen ADR-M0-004 Repository DB access policy")
+    sub.add_parser("api-smoke", help="Run M0-API-002 health/readiness/version HTTP smoke")
     db_bootstrap = sub.add_parser("db-bootstrap", help="Bootstrap empty SQLite Desktop DB to schema 1.6.0")
     db_bootstrap.add_argument("database", type=Path)
     db_verify = sub.add_parser("db-verify", help="Verify SQLite Desktop DB schema/version/provenance")
@@ -402,6 +405,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(ARCHITECTURE_VERIFY)])
     if command == "verify-repository-policy":
         return _run([sys.executable, str(REPOSITORY_POLICY_VERIFY)])
+    if command == "api-smoke":
+        return _run([sys.executable, str(API_SMOKE)])
     if command == "db-bootstrap":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":
