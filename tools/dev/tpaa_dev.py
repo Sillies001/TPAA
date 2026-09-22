@@ -28,6 +28,7 @@ CODEGEN_REGENERATE_DIFF = REPO_ROOT / "tools" / "codegen" / "regenerate_diff.py"
 ARCHITECTURE_VERIFY = REPO_ROOT / "tools" / "architecture" / "verify_dependencies.py"
 STORAGE_BOOTSTRAP = REPO_ROOT / "tools" / "storage" / "bootstrap_db.py"
 POSTGRES_STORAGE = REPO_ROOT / "tools" / "storage" / "postgres_db.py"
+REPOSITORY_POLICY_VERIFY = REPO_ROOT / "tools" / "storage" / "verify_repository_policy.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -48,6 +49,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
     CommandSpec("verify-architecture", "M0-CORE-005", "IMPLEMENTED", "Verify SDIB package/layer dependency direction using the static architecture gate."),
+    CommandSpec("verify-repository-policy", "ADR-M0-004", "IMPLEMENTED", "Verify the frozen Repository DB access technology/UoW decision."),
     CommandSpec("verify-baseline", "M0-CORE-001", "IMPLEMENTED", "Verify BASELINE_LOCK and controlled Canonical artifact hashes."),
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
     CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from frozen schema 1.6.0 authority."),
@@ -303,6 +305,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-generated", help="Verify governed generated tree without rewriting")
     sub.add_parser("regenerate-diff", help="Regenerate generated source and require zero Git diff")
     sub.add_parser("verify-architecture", help="Verify SDIB package/layer architecture dependencies")
+    sub.add_parser("verify-repository-policy", help="Verify frozen ADR-M0-004 Repository DB access policy")
     db_bootstrap = sub.add_parser("db-bootstrap", help="Bootstrap empty SQLite Desktop DB to schema 1.6.0")
     db_bootstrap.add_argument("database", type=Path)
     db_verify = sub.add_parser("db-verify", help="Verify SQLite Desktop DB schema/version/provenance")
@@ -387,6 +390,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(CODEGEN_REGENERATE_DIFF)])
     if command == "verify-architecture":
         return _run([sys.executable, str(ARCHITECTURE_VERIFY)])
+    if command == "verify-repository-policy":
+        return _run([sys.executable, str(REPOSITORY_POLICY_VERIFY)])
     if command == "db-bootstrap":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":

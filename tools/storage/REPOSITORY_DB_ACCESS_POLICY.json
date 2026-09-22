@@ -1,0 +1,78 @@
+{
+  "schema": "TPAA_REPOSITORY_DB_ACCESS_POLICY_V1",
+  "status": "FROZEN",
+  "decision_id": "ADR-M0-004",
+  "decision_date": "2026-09-22",
+  "authority": [
+    "SDIB-1.0 §10.2",
+    "SDIB-1.0 Appendix E",
+    "ED-2.0 05E §2/§16"
+  ],
+  "repository_ports": {
+    "package": "tpaa_storage.ports",
+    "contract_style": "typing.Protocol/dataclass/value-object",
+    "driver_types_forbidden": true,
+    "dialect_branches_forbidden": true
+  },
+  "unit_of_work": {
+    "required": true,
+    "owner": "application_use_case",
+    "transaction_owner": "storage_adapter_unit_of_work",
+    "connection_scope": "one_connection_per_unit_of_work",
+    "repository_commit_forbidden": true,
+    "success_requires_explicit_commit": true,
+    "exception_rolls_back": true,
+    "uncommitted_exit_rolls_back": true,
+    "nested_transactions_m0": "OUT_OF_SCOPE"
+  },
+  "sqlite": {
+    "profile": "desktop",
+    "driver": "python_stdlib.sqlite3",
+    "api_mode": "synchronous_dbapi",
+    "journal_mode": "WAL",
+    "writer_model": "single_backend_writer",
+    "connection_thread_ownership": "adapter_owned",
+    "runtime_schema_authority": "M0-STO-001 bootstrap/verify",
+    "repository_sql_style": "explicit_parameterized_sql"
+  },
+  "postgresql": {
+    "profile": "service",
+    "driver": "psycopg",
+    "driver_generation": 3,
+    "decision_reference_version": "3.3.6",
+    "api_mode": "synchronous_dbapi",
+    "installation_profile": "psycopg[binary] for governed Windows/Linux x64 development and M0/M1 validation; production packaging may switch implementation only with platform evidence and without changing the Repository contract",
+    "connection_pooling_m0": "NOT_REQUIRED",
+    "runtime_schema_authority": "M0-STO-001 bootstrap/verify",
+    "repository_sql_style": "explicit_parameterized_sql",
+    "dependency_activation_task": "M0-STO-003"
+  },
+  "migration": {
+    "service_ci_mechanism": "Alembic",
+    "decision_reference_version": "1.20.0",
+    "authority_role": "execution/history mechanism only",
+    "schema_authority": "CORE_LOGICAL_MODEL.json plus governed migration artifacts",
+    "autogenerate_as_authority_forbidden": true,
+    "runtime_repository_auto_migrate_forbidden": true,
+    "activation_task": "M0-STO-005"
+  },
+  "rejected_runtime_abstractions": [
+    "SQLAlchemy ORM",
+    "SQLAlchemy Core as Repository runtime abstraction",
+    "asyncpg",
+    "driver-specific Repository ports"
+  ],
+  "deferred": [
+    "connection pool implementation and sizing",
+    "production psycopg binary-vs-local build packaging profile",
+    "read replica routing",
+    "nested/savepoint public Unit-of-Work semantics"
+  ],
+  "reopen_conditions": [
+    "selected PostgreSQL driver cannot satisfy CPython 3.13 or mandatory Windows/Linux x64 profiles",
+    "repository conformance demonstrates unresolvable SQLite/PostgreSQL semantic divergence",
+    "performance evidence requires an async Repository contract rather than an adapter-internal optimization",
+    "migration tooling would become a competing schema authority",
+    "security or support status makes a selected dependency unsuitable"
+  ]
+}

@@ -122,15 +122,34 @@ Completed implementation and acceptance:
 4. Repository-controlled external-`psql` bootstrap/verify/acceptance harness implements exact table/schema inventory, manifest provenance and PostgreSQL catalog fingerprint verification without selecting a Python Repository driver.
 5. Real PostgreSQL 16.15 acceptance PASS: clean bootstrap/verify, mid-bootstrap rollback, missing-table, manifest-tamper, DDL-tamper and unexpected-index fail-closed checks all PASS; verified schema `1.6.0`, 77 tables, Core Baseline `CB-1.4.0`, exact Canonical/baseline-lock hashes.
 6. Final repository regression collected 98 tests and passed 98/98 by complete file/partition; historical Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap gates PASS.
-7. `ADR-M0-004` remains OPEN by design; M0-STO-001 does not freeze Repository ORM/driver technology.
+7. M0-STO-001 itself did not freeze Repository technology; ADR-M0-004 was subsequently CLOSED before Repository skeleton implementation.
 
 Implementation record: `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md` v0.6.
+
+### ADR-M0-004 — CLOSED
+
+**Decision:** Repository DB access implementation.
+
+Frozen implementation boundary:
+
+1. Engine-neutral Repository/Unit-of-Work ports live under `tpaa_storage.ports`; concrete driver types and dialect flags may not cross the port boundary.
+2. Desktop adapter: synchronous CPython stdlib `sqlite3`, WAL, one Backend writer.
+3. Service adapter: synchronous Psycopg 3 DB-API; decision reference version `3.3.6`, dependency activation owned by M0-STO-003 through the single `uv.lock`.
+4. Runtime persistence uses explicit parameterized SQL; SQLAlchemy ORM/Core and asyncpg are rejected as Repository runtime abstractions.
+5. Unit of Work owns one connection/transaction; repositories never commit; successful work requires explicit use-case commit and all exceptional/uncommitted exits roll back.
+6. M0-STO-001 remains the schema/readiness authority; Repository runtime never silently bootstraps/migrates/repairs schema.
+7. ED-2.0 05E Alembic requirement is retained for migration execution/history only; M0-STO-005 owns activation and migration topology.
+8. `verify-repository-policy` provides a machine-readable ADR gate; architecture policy prevents rejected runtime abstractions in `tpaa_storage` and retains upper-layer DB-driver bans.
+
+Evidence study: `docs/implementation/ADR-M0-004_REPOSITORY_DB_ACCESS_STUDY.md`.
+Machine policy: `tools/storage/REPOSITORY_DB_ACCESS_POLICY.json`.
 
 ## Closed ADRs
 
 - **ADR-M0-001 — CLOSED:** CPython 3.13.x on all four governed Windows/Linux x64 profiles.
 - **ADR-M0-002 — CLOSED:** uv resolver, one universal `uv.lock`, frozen sync semantics.
 - **ADR-M0-003 — CLOSED:** Ruff 0.16.8 formatter/linter, mypy 2.3.1, pytest 9.0.2, local/CI routed through the developer dispatcher.
+- **ADR-M0-004 — CLOSED:** engine-neutral Repository/UoW ports; stdlib sqlite3 synchronous Desktop adapter; Psycopg 3 synchronous Service adapter; explicit parameterized SQL; SQLAlchemy ORM/Core rejected as runtime abstraction; Alembic limited to migration tooling.
 - **ADR-M0-007 — CLOSED:** generated source is committed and governed by vendor-neutral verify/regenerate-diff commands.
 
 The project also records **Polars-first** as the default flight-data/DataFrame policy; Pandas is not a default dependency.
@@ -150,7 +169,7 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 ## Partial governance state
 
-`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003 and ADR-M0-007 are formally closed; ADR-M0-004/005/006/008/009/010 remain open and must be resolved before M0 Exit.
+`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004 and ADR-M0-007 are formally closed; ADR-M0-005/006/008/009/010 remain open and must be resolved before M0 Exit.
 
 ## Source-entry evidence retained
 
@@ -170,5 +189,5 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. Proceed to Repository skeleton work per SDIB-1.0 §39, beginning with the required Repository technology decision (`ADR-M0-004`) before concrete adapter technology is frozen, then M0-STO-002/M0-STO-003 in sequence.
+1. Proceed to Repository skeleton work per SDIB-1.0 §39 using CLOSED `ADR-M0-004`: implement M0-STO-002 SQLite Desktop repository skeleton, then M0-STO-003 PostgreSQL Service repository skeleton and shared conformance tests.
 2. Only after Storage/Repository boundaries stabilize, build Application/FastAPI/PySide6 shell and close **M0-CORE-006 runtime baseline handshake** in the prescribed dependency order.
