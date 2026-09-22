@@ -30,6 +30,7 @@ STORAGE_BOOTSTRAP = REPO_ROOT / "tools" / "storage" / "bootstrap_db.py"
 POSTGRES_STORAGE = REPO_ROOT / "tools" / "storage" / "postgres_db.py"
 REPOSITORY_POLICY_VERIFY = REPO_ROOT / "tools" / "storage" / "verify_repository_policy.py"
 SQLITE_REPOSITORY = REPO_ROOT / "tools" / "storage" / "sqlite_repository.py"
+POSTGRES_REPOSITORY = REPO_ROOT / "tools" / "storage" / "postgres_repository.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -59,6 +60,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("db-postgres-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap PostgreSQL through the repository-controlled external psql harness."),
     CommandSpec("db-postgres-verify", "M0-STO-001", "IMPLEMENTED", "Verify PostgreSQL schema/version/provenance through the external psql harness."),
     CommandSpec("db-postgres-acceptance", "M0-STO-001", "IMPLEMENTED", "Run destructive M0-STO-001 PostgreSQL acceptance in a dedicated disposable database."),
+    CommandSpec("db-postgres-repository-acceptance", "M0-STO-003", "IMPLEMENTED", "Run PostgreSQL Service Repository/UoW acceptance against an existing ready database."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -331,6 +333,11 @@ def build_parser() -> argparse.ArgumentParser:
     add_postgres_client_args(pg_acceptance)
     pg_acceptance.add_argument("--admin-database", default="postgres")
     pg_acceptance.add_argument("--database", default="tpaa_m0_sto_001_acceptance")
+    pg_repo_acceptance = sub.add_parser("db-postgres-repository-acceptance", help="Run disposable M0-STO-003 PostgreSQL Repository acceptance")
+    add_postgres_client_args(pg_repo_acceptance)
+    pg_repo_acceptance.add_argument("--admin-database", default="postgres")
+    pg_repo_acceptance.add_argument("--database", default="tpaa_m0_sto_003_acceptance")
+    pg_repo_acceptance.add_argument("--conninfo-template", required=True)
 
     fmt = sub.add_parser("format", help="Run Ruff formatter")
     fmt.add_argument("--check", action="store_true")
@@ -401,6 +408,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "verify", str(args.database)])
     if command == "db-sqlite-repository-acceptance":
         return _run([sys.executable, str(SQLITE_REPOSITORY), "acceptance"])
+    if command == "db-postgres-repository-acceptance":
+        repo_args = [sys.executable, str(POSTGRES_REPOSITORY)]
+        if args.user:
+            repo_args.extend(["--user", args.user])
+        if args.host:
+            repo_args.extend(["--host", args.host])
+        if args.port is not None:
+            repo_args.extend(["--port", str(args.port)])
+        if args.psql:
+            repo_args.extend(["--psql", args.psql])
+        if args.docker_container:
+            repo_args.extend(["--docker-container", args.docker_container])
+        repo_args.extend([
+            "--admin-database", args.admin_database,
+            "--database", args.database,
+            "--conninfo-template", args.conninfo_template,
+        ])
+        return _run(repo_args)
     if command in {"db-postgres-bootstrap", "db-postgres-verify", "db-postgres-acceptance"}:
         pg_args = [sys.executable, str(POSTGRES_STORAGE)]
         if args.user:

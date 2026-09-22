@@ -143,6 +143,22 @@ Completed implementation and acceptance:
 
 Implementation record: `docs/implementation/M0-STO-002_SQLITE_DESKTOP_REPOSITORY_SKELETON.md`.
 
+### M0-STO-003 — IN PROGRESS
+
+**Workstream:** WS-STORAGE
+**Acceptance:** PostgreSQL Service repository skeleton; shared Repository contract conformance PASS.
+
+Current implementation checkpoint:
+
+1. `PostgreSQLServiceUnitOfWork` implements the ADR-M0-004 synchronous Service adapter behind the unchanged engine-neutral ports.
+2. Runtime readiness verifies M0-STO-001 manifest provenance, deterministic projection hash, exact table inventory and live PostgreSQL catalog hash before Repository use.
+3. Explicit commit is required; uncommitted/exception exits roll back; read-only transactions use PostgreSQL `SET TRANSACTION READ ONLY`.
+4. A disposable real-server acceptance harness composes the existing M0-STO-001 psql bootstrap with the Psycopg Repository smoke and drops the acceptance database afterward.
+5. `psycopg[binary]==3.3.6` activation through the single governed `uv.lock` remains a completion gate because the current Chat host cannot resolve PyPI. No inconsistent lock is committed.
+6. Application/FastAPI/PySide6 and M0-CORE-006 remain out of scope.
+
+Implementation record: `docs/implementation/M0-STO-003_POSTGRESQL_SERVICE_REPOSITORY_SKELETON.md`.
+
 ### ADR-M0-004 — CLOSED
 
 **Decision:** Repository DB access implementation.
