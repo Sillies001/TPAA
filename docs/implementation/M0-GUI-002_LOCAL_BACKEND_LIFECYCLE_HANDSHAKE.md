@@ -16,6 +16,7 @@ Implement ADR-M0-005 as executable Desktop lifecycle behavior without moving bus
 - `python -m tpaa_gui` now composes the existing PySide6 shell with the owned local-backend lifecycle.
 - Normal shutdown writes private `SHUTDOWN` over stdin and waits 5 seconds before bounded terminate (2 seconds) and final kill fallback.
 - `desktop-backend-smoke` performs a real child spawn, ephemeral-port handshake, bearer-negative probe and graceful cleanup.
+- Windows virtual-environment launch bypasses CPython's venv redirector: the controller directly spawns `sys._base_executable` with `__PYVENV_LAUNCHER__` pointing at the governed venv interpreter. This preserves venv package resolution while keeping `Popen.pid == LISTENING.pid`, so owned-child PID enforcement and terminate/kill fallback target the real backend Python process.
 
 ## Architecture boundary
 
@@ -32,9 +33,9 @@ Current host evidence:
 - cooperative shutdown and cleanup: **PASS**;
 - architecture import gate: **PASS**.
 
-Checkpoint regression: unit **81/81 PASS**, migration **26/26 PASS**, contract **89/89 PASS**, total **196/196 PASS**. Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates are PASS on the current host.
+Checkpoint regression: unit **83/83 PASS**, migration **26/26 PASS**, contract **90/90 PASS**, total **199/199 PASS**. Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates are PASS on the current host.
 
-Windows real-process lifecycle acceptance is still required before marking this task COMPLETE because ADR-M0-005 deliberately distinguishes Windows process termination semantics from POSIX. Until that external run is recorded, this task remains **IN PROGRESS**.
+The first Windows real-process acceptance run correctly failed closed with `LISTENING_PID_MISMATCH`: CPython's Windows venv launcher inserted a redirector process, so `Popen.pid` named the redirector while the backend reported the real interpreter PID. The checkpoint now bypasses that redirector using the same `sys._base_executable` + `__PYVENV_LAUNCHER__` pattern used by CPython's Windows process-launch support, without weakening the PID equality check. A Windows rerun of `desktop-backend-smoke` is still required before marking this task COMPLETE.
 
 ## Explicit non-scope
 

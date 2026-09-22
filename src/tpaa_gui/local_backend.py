@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import ntpath
+import os
 import queue
 import secrets
 import subprocess
@@ -20,6 +22,53 @@ CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
 STARTUP_TIMEOUT_SECONDS = 10.0
 GRACEFUL_SHUTDOWN_SECONDS = 5.0
 TERMINATE_WAIT_SECONDS = 2.0
+
+
+def _prepare_child_spawn(
+    command: Sequence[str],
+    *,
+    os_name: str | None = None,
+    executable: str | None = None,
+    base_executable: str | None = None,
+    environ: dict[str, str] | None = None,
+) -> tuple[list[str], dict[str, str] | None]:
+    """Return a spawn command that bypasses the Windows venv redirector.
+
+    CPython's Windows venv ``python.exe`` is a redirector process. Spawning it
+    directly would make ``Popen.pid`` refer to the redirector while the backend
+    reports the PID of the real interpreter. CPython's own Windows
+    multiprocessing launcher avoids that by spawning ``sys._base_executable``
+    directly and setting ``__PYVENV_LAUNCHER__`` to the venv interpreter path.
+    This keeps the virtual-environment semantics while preserving one real
+    owned process/PID for lifecycle enforcement.
+    """
+
+    resolved_os_name = os.name if os_name is None else os_name
+    resolved_executable = sys.executable if executable is None else executable
+    resolved_base = (
+        getattr(sys, "_base_executable", resolved_executable)
+        if base_executable is None
+        else base_executable
+    )
+    argv = list(command)
+
+    if resolved_os_name != "nt" or not argv or not resolved_base:
+        return argv, None
+
+    def same_windows_path(left: str, right: str) -> bool:
+        return ntpath.normcase(ntpath.abspath(left)) == ntpath.normcase(
+            ntpath.abspath(right)
+        )
+
+    if not same_windows_path(argv[0], resolved_executable) or same_windows_path(
+        resolved_executable, resolved_base
+    ):
+        return argv, None
+
+    argv[0] = resolved_base
+    child_env = dict(os.environ if environ is None else environ)
+    child_env["__PYVENV_LAUNCHER__"] = resolved_executable
+    return argv, child_env
 
 
 class LocalBackendState(StrEnum):
@@ -98,14 +147,16 @@ class LocalBackendController:
         self._failure_code = None
         self._port = None
         self._token = secrets.token_urlsafe(32)
+        spawn_command, spawn_env = _prepare_child_spawn(self._child_command)
         self._process = subprocess.Popen(
-            list(self._child_command),
+            spawn_command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,
             encoding="utf-8",
             bufsize=1,
+            env=spawn_env,
         )
         self._state = LocalBackendState.SPAWNED
         try:

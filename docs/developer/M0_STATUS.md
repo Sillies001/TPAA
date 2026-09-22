@@ -290,7 +290,7 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 4. Desktop HTTP requires exact bearer authentication, rejects Origin, and disables docs/OpenAPI/CORS.
 5. Backend crash or handshake mismatch becomes NOT_READY immediately.
 6. Normal exit sends stdin `SHUTDOWN`; terminate/kill are bounded fallback only.
-7. Linux/current-host real lifecycle smoke is PASS; Windows real-process lifecycle smoke is required before COMPLETE.
+7. Linux/current-host real lifecycle smoke is PASS. The first Windows run failed closed with `LISTENING_PID_MISMATCH` because the Windows venv executable is a redirector; the implementation now bypasses that redirector using `sys._base_executable` plus `__PYVENV_LAUNCHER__` while retaining exact PID ownership checks. Windows rerun is required before COMPLETE.
 
 Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 

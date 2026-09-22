@@ -5,7 +5,12 @@ import subprocess
 import pytest
 
 from tpaa_gui.desktop import run_desktop
-from tpaa_gui.local_backend import LocalBackendController, LocalBackendError, LocalBackendState
+from tpaa_gui.local_backend import (
+    LocalBackendController,
+    LocalBackendError,
+    LocalBackendState,
+    _prepare_child_spawn,
+)
 
 
 def test_real_child_enters_ready_then_gracefully_exits() -> None:
@@ -99,3 +104,32 @@ def test_run_desktop_shutdowns_backend_even_if_gui_raises(monkeypatch: pytest.Mo
     with pytest.raises(RuntimeError, match="boom"):
         run_desktop(backend=FakeBackend())  # type: ignore[arg-type]
     assert events == ["start", "shutdown"]
+
+
+def test_windows_venv_spawn_bypasses_redirector_but_preserves_venv_identity() -> None:
+    command, child_env = _prepare_child_spawn(
+        (r"C:\repo\.venv\Scripts\python.exe", "child.py"),
+        os_name="nt",
+        executable=r"C:\repo\.venv\Scripts\python.exe",
+        base_executable=r"C:\Python313\python.exe",
+        environ={"KEEP": "1"},
+    )
+
+    assert command == [r"C:\Python313\python.exe", "child.py"]
+    assert child_env == {
+        "KEEP": "1",
+        "__PYVENV_LAUNCHER__": r"C:\repo\.venv\Scripts\python.exe",
+    }
+
+
+def test_non_windows_spawn_keeps_interpreter_and_does_not_copy_environment() -> None:
+    command, child_env = _prepare_child_spawn(
+        ("/repo/.venv/bin/python", "child.py"),
+        os_name="posix",
+        executable="/repo/.venv/bin/python",
+        base_executable="/usr/bin/python3.13",
+        environ={"KEEP": "1"},
+    )
+
+    assert command == ["/repo/.venv/bin/python", "child.py"]
+    assert child_env is None

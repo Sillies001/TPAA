@@ -35,10 +35,19 @@ def test_token_is_stdin_only_and_child_command_cannot_contain_secret() -> None:
     source = GUI.read_text(encoding="utf-8")
     assert "secrets.token_urlsafe(32)" in source
     assert '"bearer_token": self._token' in source
-    assert "env=" not in source
+    assert 'child_env["__PYVENV_LAUNCHER__"] = resolved_executable' in source
+    assert 'child_env["bearer_token"]' not in source
+    assert 'child_env["token"]' not in source
     assert "Authorization" in source
     assert "query" not in source.lower()
 
+
+def test_windows_venv_redirector_is_bypassed_without_weakening_pid_ownership() -> None:
+    source = GUI.read_text(encoding="utf-8")
+    assert "sys._base_executable" in source or 'getattr(sys, "_base_executable"' in source
+    assert "__PYVENV_LAUNCHER__" in source
+    assert "LISTENING_PID_MISMATCH" in source
+    assert "pid != self._process.pid" in source
 
 def test_child_binds_loopback_ephemeral_and_emits_non_secret_listening() -> None:
     source = CHILD.read_text(encoding="utf-8")
