@@ -252,9 +252,23 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 - mypy 2.3.1 execution: **NOT CLAIMED** for the same reason.
 - Windows execution/certification: **NOT CLAIMED**; later `M0-PLAT-004` evidence is still required.
 
+## ADR-M0-005 — CLOSED
+
+**Desktop backend lifecycle / IPC:** frozen before PySide6 implementation.
+
+1. One GUI owns one isolated local backend child process; no in-process server and no silent attach to unowned backends.
+2. Backend binds only `127.0.0.1` on an OS-assigned ephemeral port; fixed ports and probe-close-rebind selection are forbidden.
+3. GUI generates a fresh 32-byte random bearer token per backend process and passes it only through the private stdin startup control record.
+4. Lifecycle control is stdio NDJSON; HTTP READY requires authenticated `/readiness` plus `/version` after the child reports `LISTENING`.
+5. Normal shutdown is cooperative over stdin; terminate/kill are bounded failure-recovery fallbacks only.
+6. Desktop HTTP disables docs/OpenAPI/CORS and requires bearer authentication on all routes.
+7. PySide6 is not activated by the ADR; M0-GUI-001 owns that governed dependency activation.
+
+Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
+
 ## Partial governance state
 
-`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004 and ADR-M0-007 are formally closed; ADR-M0-005/006/008/009/010 remain open and must be resolved before M0 Exit.
+`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
 
 ## Source-entry evidence retained
 
@@ -274,6 +288,6 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
-2. Complete the remaining §39 step-7 shell/lifecycle/version-handshake integration work in dependency order.
-3. Do not advance to §39 step 8 cross-platform CI as a substitute for unfinished step-7 dependencies.
+1. Implement **M0-GUI-001 — PySide6 application shell** using the now-frozen ADR-M0-005 lifecycle boundary; do not activate backend lifecycle shortcuts in the GUI process.
+2. Implement **M0-GUI-002 — Local backend lifecycle handshake** using the frozen child-process/stdin-stdout/ephemeral-port/bearer-token policy and the existing M0-CORE-006/M0-API-002 readiness authority.
+3. Complete M0-GUI-003/004 diagnostics and UI automation in dependency order, then proceed to §39 step 8 cross-platform CI.

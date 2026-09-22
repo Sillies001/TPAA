@@ -12,10 +12,14 @@ SDIB-1.0 requires ADR-M0-001 through ADR-M0-010 during M0. Decisions are not imp
 
 - [ADR-M0-004 — Repository DB access implementation](ADR-M0-004-repository-db-access-implementation.md) — **CLOSED**, synchronous explicit-SQL adapters: stdlib sqlite3 for Desktop, Psycopg 3 for Service, engine-neutral Repository/UoW ports, Alembic confined to migration tooling.
 
+## Closed before Desktop lifecycle implementation
+
+- [ADR-M0-005 — Desktop backend lifecycle / IPC](ADR-M0-005-desktop-backend-lifecycle-ipc.md) — **CLOSED**, GUI-owned isolated local backend child, loopback ephemeral listener, private stdio lifecycle control and per-process bearer token.
+
 ## Closed during M0-CORE-004
 
 - [ADR-M0-007 — Generated-source policy](ADR-M0-007-generated-source-policy.md) — **CLOSED**, checked-in generated source with vendor-neutral regenerate-diff enforcement.
 
 ## Still required before M0 Exit
 
-ADR-M0-005, ADR-M0-006, ADR-M0-008, ADR-M0-009 and ADR-M0-010 remain **OPEN / NOT YET DECIDED**. No implementation may silently turn one of those undecided topics into a de-facto standard.
+ADR-M0-006, ADR-M0-008, ADR-M0-009 and ADR-M0-010 remain **OPEN / NOT YET DECIDED**. No implementation may silently turn one of those undecided topics into a de-facto standard.

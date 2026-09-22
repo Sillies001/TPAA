@@ -1,0 +1,91 @@
+{
+  "schema": "TPAA_DESKTOP_BACKEND_LIFECYCLE_POLICY_V1",
+  "status": "FROZEN",
+  "decision_id": "ADR-M0-005",
+  "authority": [
+    "SDIB-1.0 §9",
+    "SDIB-1.0 §33",
+    "SDIB-1.0 §39 step 7"
+  ],
+  "ownership": {
+    "gui_owns_backend_process": true,
+    "process_model": "one_dedicated_child_process_per_gui_process",
+    "in_process_backend_forbidden": true,
+    "attach_to_unowned_backend_forbidden": true,
+    "service_profile_uses_this_policy": false
+  },
+  "listener": {
+    "host": "127.0.0.1",
+    "port_selection": "child_bind_os_ephemeral_port_zero",
+    "fixed_port_forbidden": true,
+    "localhost_hostname_forbidden": true,
+    "non_loopback_bind_forbidden": true,
+    "preflight_find_free_then_close_forbidden": true
+  },
+  "control_channel": {
+    "transport": "parent_child_stdio_ndjson",
+    "parent_to_child": "stdin",
+    "child_to_parent": "stdout",
+    "stdout_reserved_for_control_records": true,
+    "token_delivery": "first_start_control_record_over_stdin",
+    "token_in_argv_forbidden": true,
+    "token_in_environment_forbidden": true,
+    "token_in_file_forbidden": true,
+    "token_in_stdout_forbidden": true,
+    "token_in_logs_forbidden": true
+  },
+  "token": {
+    "algorithm": "python_secrets_token_urlsafe",
+    "random_bytes": 32,
+    "lifetime": "one_backend_process",
+    "persistence": "memory_only",
+    "http_transport": "Authorization: Bearer <token>",
+    "comparison": "constant_time",
+    "query_string_forbidden": true,
+    "cookie_forbidden": true,
+    "reuse_across_backend_processes_forbidden": true
+  },
+  "startup_handshake": {
+    "protocol": "TPAA_LOCAL_BACKEND_CONTROL_V1",
+    "listener_record": "LISTENING",
+    "listener_record_must_follow_successful_bind": true,
+    "listener_record_secret_fields_forbidden": true,
+    "http_confirmation": [
+      "GET /readiness",
+      "GET /version"
+    ],
+    "http_requires_bearer": true,
+    "ready_requires_http_200_readiness": true,
+    "mismatch_or_backend_exit_is_not_ready": true,
+    "startup_timeout_seconds": 10
+  },
+  "desktop_http_surface": {
+    "bearer_required_for_all_routes": true,
+    "interactive_docs_enabled": false,
+    "openapi_route_enabled": false,
+    "cors_enabled": false,
+    "origin_header_policy": "reject_unless_explicitly_allowlisted",
+    "native_pyside_client_sends_origin": false
+  },
+  "shutdown": {
+    "normal_mechanism": "SHUTDOWN control record over stdin",
+    "graceful_wait_seconds": 5,
+    "fallback_terminate": true,
+    "terminate_wait_seconds": 2,
+    "final_fallback_kill": true,
+    "backend_exit_makes_gui_not_ready_immediately": true,
+    "shutdown_http_endpoint_forbidden": true
+  },
+  "logging_boundary": {
+    "stdout_is_not_log_stream": true,
+    "stderr_is_not_part_of_control_protocol": true,
+    "structured_logging_selection_owned_by": "ADR-M0-008",
+    "secret_redaction_required": true
+  },
+  "implementation_owners": {
+    "pyside_shell": "M0-GUI-001",
+    "lifecycle_handshake": "M0-GUI-002",
+    "diagnostics_view": "M0-GUI-003",
+    "automation": "M0-GUI-004"
+  }
+}
