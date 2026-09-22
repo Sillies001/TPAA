@@ -310,6 +310,19 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 7. M0-GUI-004 UI automation remains explicitly open.
 8. Final regression is **210/210 PASS**: unit 89/89, migration 26/26, contract 95/95; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS.
 
+## M0-GUI-004 — IN PROGRESS
+
+**UI automation smoke harness:** the governed harness now automates the real composed Desktop launch → authoritative READY diagnostics → close → backend cleanup path using the existing PySide6 runtime and frozen object names.
+
+1. `python tools/dev/tpaa_dev.py ui-automation-smoke` is the unified developer command.
+2. The harness locates `tpaaMainWindow` and the M0-GUI-003 diagnostics labels through the real Qt object tree.
+3. READY is observed from `tpaaDiagnosticsReadiness`; the harness does not re-evaluate Core baseline identity.
+4. The real main window is closed automatically and the owned backend must end in EXITED with its port cleared.
+5. No new dependency is introduced; PySide6 6.11.2 from the existing 46-package lock is reused.
+6. Code-level regression is **219/219 PASS**: unit 93/93, migration 26/26, contract 100/100; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS.
+7. A real PySide6 execution of the unified automation smoke remains the completion gate before M0-GUI-004 may be marked COMPLETE; the current Chat sandbox reports deterministic `PYSIDE6_DEPENDENCY_MISSING`.
+8. SDIB §39 step 8 cross-platform CI remains explicitly outside this task.
+
 ## Partial governance state
 
 `M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
@@ -325,7 +338,7 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- GUI automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- UI automation completion, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence

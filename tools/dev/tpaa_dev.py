@@ -35,6 +35,7 @@ POSTGRES_REPOSITORY = REPO_ROOT / "tools" / "storage" / "postgres_repository.py"
 API_SMOKE = REPO_ROOT / "tools" / "api" / "smoke.py"
 GUI_SMOKE = REPO_ROOT / "tools" / "gui" / "smoke.py"
 DESKTOP_BACKEND_SMOKE = REPO_ROOT / "tools" / "desktop" / "lifecycle_smoke.py"
+UI_AUTOMATION_SMOKE = REPO_ROOT / "tools" / "gui" / "automation_smoke.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -69,6 +70,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("api-smoke", "M0-API-002", "IMPLEMENTED", "Smoke health/readiness/version through the FastAPI transport adapter."),
     CommandSpec("gui-smoke", "M0-GUI-001", "IMPLEMENTED", "Smoke PySide6 application startup and controlled exit."),
     CommandSpec("desktop-backend-smoke", "M0-GUI-002", "IMPLEMENTED", "Smoke owned local backend token/readiness/shutdown lifecycle."),
+    CommandSpec("ui-automation-smoke", "M0-GUI-004", "IMPLEMENTED", "Automate Desktop launch/READY diagnostics/close/backend cleanup."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -364,6 +366,9 @@ def build_parser() -> argparse.ArgumentParser:
     gui_smoke = sub.add_parser("gui-smoke", help="Run the M0-GUI-001 PySide6 startup/exit smoke")
     gui_smoke.add_argument("--headless", action="store_true")
     sub.add_parser("desktop-backend-smoke", help="Run the M0-GUI-002 local backend lifecycle smoke")
+    ui_automation = sub.add_parser("ui-automation-smoke", help="Run the M0-GUI-004 Desktop UI automation smoke")
+    ui_automation.add_argument("--show", action="store_true")
+    ui_automation.add_argument("--timeout", type=float, default=30.0)
     sub.add_parser("package", help="Reserved for M0-DEV-005")
     sub.add_parser("manifest", help="Reserved for M0-DEV-003")
     sub.add_parser("cold-start", help="Reserved for M0-DEV-006")
@@ -426,6 +431,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run(gui_args)
     if command == "desktop-backend-smoke":
         return _run([sys.executable, str(DESKTOP_BACKEND_SMOKE)])
+    if command == "ui-automation-smoke":
+        automation_args = [sys.executable, str(UI_AUTOMATION_SMOKE), "--timeout", str(args.timeout)]
+        if args.show:
+            automation_args.append("--show")
+        return _run(automation_args)
     if command == "db-bootstrap":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":
