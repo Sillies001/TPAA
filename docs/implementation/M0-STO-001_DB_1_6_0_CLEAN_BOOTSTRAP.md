@@ -2,13 +2,13 @@
 
 **Task:** M0-STO-001  
 **Workstream:** WS-STORAGE  
-**Status:** IN PROGRESS  
-**Plan version:** v0.5
+**Status:** COMPLETE
+**Plan version:** v0.6
 **Implementation baseline:** SDIB-1.0 + frozen CB-1.4.0 Canonical snapshot at repository HEAD
 
 ## 1. Objective
 
-Establish a deterministic, fail-closed clean-database bootstrap kernel for DB schema target `1.6.0` without inventing persistence semantics outside the frozen Canonical authority. The implemented slices bootstrap and verify the SQLite Desktop profile and deterministically project the same exact `CORE_LOGICAL_MODEL.json` authority to PostgreSQL DDL with FK dependency ordering. Repository-controlled PostgreSQL execution/readiness verification is now implemented through an external `psql` acceptance harness that deliberately does not select a Python Repository driver. Real-server execution of that committed harness remains required before M0-STO-001 can be declared COMPLETE.
+Establish a deterministic, fail-closed clean-database bootstrap kernel for DB schema target `1.6.0` without inventing persistence semantics outside the frozen Canonical authority. The implemented slices bootstrap and verify the SQLite Desktop profile and deterministically project the same exact `CORE_LOGICAL_MODEL.json` authority to PostgreSQL DDL with FK dependency ordering. Repository-controlled PostgreSQL execution/readiness verification is implemented through an external `psql` acceptance harness that deliberately does not select a Python Repository driver. The corrected committed harness has now passed the real PostgreSQL 16.15 acceptance run, closing the M0-STO-001 engine-execution requirement.
 
 ## 2. SDIB acceptance criteria
 
@@ -136,12 +136,14 @@ Implemented slices:
 - transaction rollback on injected DDL failure;
 - architecture dependency gate regression.
 
-Before COMPLETE:
+Completion evidence now established:
 
-- promote PostgreSQL real-server execution from feasibility evidence into the repository-controlled acceptance harness;
-- PostgreSQL schema/version/provenance verification equivalent to the SQLite readiness contract;
-- SQLite/PostgreSQL logical schema parity/conformance evidence;
-- full repository regression and clean-clone evidence.
+- repository-controlled PostgreSQL real-server acceptance harness executed successfully on PostgreSQL 16.15;
+- PostgreSQL schema/version/provenance verification matches the SQLite readiness contract at the governed authority boundary;
+- SQLite/PostgreSQL projections are derived from the same 77-table Canonical authority and PostgreSQL FK ordering is deterministic;
+- fail-closed corruption/rollback injections PASS;
+- complete repository test inventory is 98/98 PASS when executed by file/partition;
+- historical gates and clean-clone verification PASS, subject to the explicitly unclaimed Ruff/mypy/Windows-CI items outside this task completion claim.
 
 ## 13. Explicit non-scope
 
@@ -165,7 +167,7 @@ Repository skeleton may begin only after:
 
 ## 15. Completion criteria
 
-M0-STO-001 remains IN PROGRESS until all are true:
+M0-STO-001 is COMPLETE because all task completion criteria below are satisfied:
 
 - SQLite clean bootstrap to `1.6.0` PASS;
 - PostgreSQL clean bootstrap to `1.6.0` PASS on a real server;
@@ -219,7 +221,7 @@ Implementation feedback from that real execution is now reflected in code:
 2. PostgreSQL projection preserves native Canonical field SQL after the same authority-boundary cleanup of trailing human comments.
 3. FK target absence and dependency cycles are deterministic fail-closed errors.
 4. PostgreSQL DDL generation is now repository-controlled and deterministic, but PostgreSQL connection/Repository driver selection remains outside this slice and `ADR-M0-004` remains OPEN.
-5. Real-server execution still needs to be promoted into a repository-controlled acceptance harness with PostgreSQL schema/provenance verification before M0-STO-001 can be COMPLETE.
+5. Repository-controlled real-server acceptance and PostgreSQL schema/provenance verification were subsequently implemented and passed on PostgreSQL 16.15; see v0.4-v0.6 revisions.
 
 Repository regression after this slice on CPython 3.13.5 / Linux x86_64:
 
@@ -247,9 +249,9 @@ Implemented semantics:
 - Direct client mode uses `psql`; Docker mode uses `docker exec -i <container> psql`. Neither mode introduces or implies a Python Repository driver.
 - The catalog fingerprint includes non-system schemas/relations, column types/nullability/defaults, constraints, indexes, triggers, views, and sequences, so physical drift is not reduced to file/table existence.
 
-Repository-local tests after this revision cover generated SQL transaction/read-only semantics, provenance fields, rollback-failure detection, dirty-target rejection, and acceptance database safety. Real PostgreSQL execution of the committed acceptance command is still required on the user's existing PostgreSQL 16 container before this task can move to COMPLETE.
+Repository-local tests after this revision cover generated SQL transaction/read-only semantics, provenance fields, rollback-failure detection, dirty-target rejection, and acceptance database safety. The harness was subsequently executed on the user's PostgreSQL 16.15 Docker server; the first run exposed the catalog serialization issue corrected in v0.5, and the corrected run passed all acceptance checks recorded in v0.6.
 
-Current repository-local verification after the v0.4 implementation: migration 24/24 PASS, unit 33/33 PASS, contract 40/40 PASS by file/partition, Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap gates PASS. Ruff 0.16.8 and mypy 2.3.1 are not installed/cached on this offline host and remain NOT CLAIMED here.
+Current repository-local verification after the final completion update: complete collected inventory 98/98 PASS by file/partition, including migration 25/25 and unit 33/33; Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap gates PASS. Ruff 0.16.8 and mypy 2.3.1 are not installed/cached on this offline host and remain NOT CLAIMED here.
 
 ## 20. v0.5 revision — PostgreSQL catalog serialization compatibility fix
 
@@ -257,4 +259,22 @@ The first execution of the committed repository-controlled PostgreSQL acceptance
 
 This was an implementation defect in the verifier projection, not a Canonical schema, bootstrap, transaction, or Repository-technology decision. The catalog serializer now explicitly casts every internal `"char"` field used in concatenation to `text`: `pg_class.relkind`, `pg_attribute.attidentity`, `pg_attribute.attgenerated`, and `pg_constraint.contype`. A regression test asserts those casts so the failure cannot recur silently.
 
-M0-STO-001 remains **IN PROGRESS** until the corrected commit is re-run through the real PostgreSQL acceptance command and the full completion cycle is closed.
+The corrected commit was re-run through the real PostgreSQL 16.15 acceptance command and all acceptance checks passed. The final completion cycle is recorded in v0.6.
+
+
+## 21. v0.6 completion — real PostgreSQL acceptance and final closure
+
+The corrected repository-controlled acceptance harness was executed from clean clone commit `af5aa512963fa7caf7ac1a0d8868914f57c8fe2e` against the user-managed `postgres:16` Docker container reporting PostgreSQL 16.15. The command `db-postgres-acceptance` returned PASS for every destructive/fail-closed scenario in its disposable acceptance database:
+
+- `clean_bootstrap_verify`: PASS;
+- `mid_bootstrap_rollback`: PASS;
+- `missing_table_fail_closed`: PASS;
+- `manifest_tamper_fail_closed`: PASS;
+- `ddl_tamper_fail_closed`: PASS;
+- `unexpected_index_fail_closed`: PASS.
+
+The successful verification reported engine profile `postgresql-service`, schema version `1.6.0`, Core Baseline `CB-1.4.0`, Canonical SHA-256 `cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245`, baseline-lock SHA-256 `9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa`, 77 Canonical tables, physical-schema SHA-256 `b81611310f5519876e8331ef3a68c4993a4ae62ffa08d47dda9098eaf5e60411`, and PostgreSQL catalog-schema SHA-256 `c255519b726466d161492aa1b4a3e88c489b189cdde41b4f56bf315db1b5dcfd`.
+
+Final repository regression on CPython 3.13.5 / Linux x86_64 collected 98 tests and passed all 98 when executed by complete file/partition to avoid the subprocess-heavy aggregate timeout. This includes migration 25/25 and unit 33/33. Historical exact-baseline, Canonical-loader, codegen `--check`, generated-source governance, regenerate-diff, architecture dependency, and `bootstrap --check-only` gates all PASS. A final formal completion commit and clean-clone revalidation are part of the delivery evidence.
+
+Ruff 0.16.8, mypy 2.3.1, and Windows CI execution are not claimed by this Linux sandbox completion record; their absence does not alter the M0-STO-001 acceptance demonstrated above and they remain governed by the existing developer/platform workstreams. `ADR-M0-004` remains OPEN because this task deliberately did not select a Repository Python driver/ORM. M0 Exit and M0-CORE-006 are not claimed.

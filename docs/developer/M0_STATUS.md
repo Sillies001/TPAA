@@ -109,19 +109,22 @@ Implemented:
 - Per-OS Python lockfiles are prohibited by ADR-M0-002.
 - Current lock contains no third-party runtime package because no completed task requires one yet.
 
-### M0-STO-001 — IN PROGRESS
+### M0-STO-001 — COMPLETE
 
 **Workstream:** WS-STORAGE
 **Acceptance:** empty DB initializes to schema 1.6.0 and passes schema/hash verification.
 
-Current implementation phase:
+Completed implementation and acceptance:
 
-1. SDIB-1.0 and frozen Canonical DB authority mapping completed.
-2. Implementation Plan v0.4 recorded in `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md`.
-3. First vertical slice is the clean bootstrap kernel + schema/version/provenance verification + failure-injection tests.
-4. PostgreSQL deterministic projection and repository-controlled external-`psql` bootstrap/verify/acceptance harness are implemented; real-server execution of the committed harness remains the current completion blocker.
-5. Repository technology remains outside this slice; no Python PostgreSQL driver/ORM was added, and ADR-M0-004 is still required before Repository adapter technology is frozen.
-6. v0.4 repository-local verification: migration 24/24, unit 33/33, contract 40/40 by file/partition; historical baseline/canonical/codegen/architecture/bootstrap gates remain PASS. Real PostgreSQL execution of the committed acceptance command is still pending.
+1. Frozen SDIB-1.0 / Canonical authority mapping establishes DB target `1.6.0` from `BASELINE_LOCK.json` and `CORE_LOGICAL_MODEL.json`.
+2. SQLite Desktop clean bootstrap is deterministic, WAL-backed for file DBs, transactional, provenance-bound and fail-closed.
+3. PostgreSQL Service DDL is deterministically projected from the same 77-table Canonical authority using a 125-edge FK graph with zero missing targets/cycles and lexical tie-breaking.
+4. Repository-controlled external-`psql` bootstrap/verify/acceptance harness implements exact table/schema inventory, manifest provenance and PostgreSQL catalog fingerprint verification without selecting a Python Repository driver.
+5. Real PostgreSQL 16.15 acceptance PASS: clean bootstrap/verify, mid-bootstrap rollback, missing-table, manifest-tamper, DDL-tamper and unexpected-index fail-closed checks all PASS; verified schema `1.6.0`, 77 tables, Core Baseline `CB-1.4.0`, exact Canonical/baseline-lock hashes.
+6. Final repository regression collected 98 tests and passed 98/98 by complete file/partition; historical Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap gates PASS.
+7. `ADR-M0-004` remains OPEN by design; M0-STO-001 does not freeze Repository ORM/driver technology.
+
+Implementation record: `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md` v0.6.
 
 ## Closed ADRs
 
@@ -160,12 +163,12 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- Database, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- Repository skeleton, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. **M0-STO-001 — 1.6.0 clean DB bootstrap**, then Repository skeleton work per SDIB-1.0 §39.
-2. Build Application/FastAPI/PySide6 shell and close **M0-CORE-006 runtime baseline handshake** in the prescribed dependency order.
+1. Proceed to Repository skeleton work per SDIB-1.0 §39, beginning with the required Repository technology decision (`ADR-M0-004`) before concrete adapter technology is frozen, then M0-STO-002/M0-STO-003 in sequence.
+2. Only after Storage/Repository boundaries stabilize, build Application/FastAPI/PySide6 shell and close **M0-CORE-006 runtime baseline handshake** in the prescribed dependency order.
