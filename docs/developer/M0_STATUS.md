@@ -84,6 +84,24 @@ Implemented:
 8. `python tools/dev/tpaa_dev.py verify-architecture` is the single vendor-neutral local/later-CI entry point.
 9. Import scanning deliberately does not claim semantic checks that imports cannot prove; those limitations are machine-readable evidence.
 
+### M0-CORE-006 — COMPLETE
+
+**Workstream:** WS-CORE
+**Acceptance:** Core/Catalog/schema/build mismatch does not enter READY.
+
+Completed implementation and acceptance:
+
+1. `tpaa_canonical.runtime_handshake` defines the transport-neutral runtime baseline identity, READY/NOT_READY state, deterministic mismatch codes and exact fail-closed evaluator.
+2. The governed identity includes product build, Core Baseline, Baseline Lock hash, DB schema, Core logical-model authority id/hash, P1 Metric Catalog version/hash and cross-layer DTO authority hash.
+3. The trusted local identity is constructed only through `CanonicalArtifactLoader`, preserving the existing exact Baseline Lock and controlled-artifact hash trust boundary.
+4. Product build identity is an explicit input; M0-CORE-006 does not invent or pre-empt the M0-DEV-003 build manifest/source-revision authority.
+5. Exact Core, Catalog, schema or product-build mismatch returns `NOT_READY`; multiple mismatches are retained in deterministic diagnostic order.
+6. The handshake module has no FastAPI, GUI, Repository, database-driver or platform implementation dependency; M0-API-002 will expose it through the Application/API boundary without reimplementing comparison rules.
+7. Final regression passed 154/154 by complete partition: unit 63/63, migration 26/26, contract 65/65; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/bootstrap/lock gates PASS.
+
+Implementation record: `docs/implementation/M0-CORE-006_RUNTIME_BASELINE_HANDSHAKE.md`.
+
+
 ### M0-DEV-001 — COMPLETE for backlog minimum acceptance
 
 **Workstream:** WS-DEVOPS
@@ -239,7 +257,6 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. **M0-CORE-006** — implement the transport-neutral runtime baseline handshake/READY model over the completed Repository/Application boundaries.
-2. Then **M0-API-002** exposes health/readiness/version through FastAPI without reimplementing handshake rules.
-3. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
-4. Do not advance to §39 step 8 cross-platform CI as a substitute for unfinished step-7 dependencies.
+1. **M0-API-002** — expose health/readiness/version through FastAPI by consuming the completed M0-CORE-006 handshake semantics; do not reimplement READY rules in controllers.
+2. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
+3. Do not advance to §39 step 8 cross-platform CI as a substitute for unfinished step-7 dependencies.
