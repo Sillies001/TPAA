@@ -41,9 +41,17 @@ def test_api_controller_does_not_own_ready_comparison_rules() -> None:
     assert "CORE_BASELINE_MISMATCH" not in source
 
 
-def test_fastapi_dependency_activation_is_not_falsely_claimed_before_lock_update() -> None:
+def test_fastapi_dependency_is_exactly_activated_in_project_and_lock() -> None:
     pyproject = PYPROJECT.read_text(encoding="utf-8")
-    assert 'fastapi' not in pyproject.lower()
+    lock = (ROOT / "uv.lock").read_text(encoding="utf-8")
+
+    assert '"fastapi[standard-no-fastapi-cloud-cli]==0.141.1"' in pyproject
+    assert '[[tool.uv.index]]' not in pyproject
+    assert 'pypi.tuna.tsinghua.edu.cn' not in pyproject
+    assert 'name = "fastapi"' in lock
+    assert 'version = "0.141.1"' in lock
+    assert 'source = { registry = "https://pypi.org/simple" }' in lock
+    assert 'pypi.tuna.tsinghua.edu.cn' not in lock
 
 
 def test_api_smoke_is_directly_executable_from_clean_checkout() -> None:

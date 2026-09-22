@@ -194,18 +194,20 @@ Completed implementation and acceptance:
 
 Implementation record: `docs/implementation/M0-API-001_APPLICATION_SERVICE_SKELETON.md`.
 
-### M0-API-002 — IN PROGRESS
+### M0-API-002 — COMPLETE
 
 **Workstream:** WS-API
 **Acceptance:** FastAPI local/service skeleton; health/readiness/version endpoints smoke PASS.
 
-Current implementation state:
+Completed implementation and acceptance:
 
 1. `tpaa_application.runtime` projects the M0-CORE-006 handshake into transport-neutral Application models without reimplementing READY comparison rules.
 2. `tpaa_api.create_app()` exposes `/health`, `/readiness` and `/version`; API code imports `tpaa_application` rather than Canonical/Storage/GUI implementation packages.
 3. `/readiness` maps authoritative READY to HTTP 200 and NOT_READY to HTTP 503 while preserving deterministic Core mismatch codes.
-4. `api-smoke` performs real TestClient requests for liveness, ready/not-ready and version diagnostics, self-bootstraps the repository `src/` path for direct clean-checkout execution, and the current specialty slice is 12/12 PASS on the Chat host.
-5. Formal dependency activation target is `fastapi[standard-no-fastapi-cloud-cli]==0.141.1`. The Chat host cannot resolve PyPI, so `pyproject.toml`/`uv.lock` remain unchanged at this checkpoint and completion is not claimed.
+4. `api-smoke` performs real TestClient requests for liveness, ready/not-ready and version diagnostics and self-bootstraps the repository `src/` path for direct clean-checkout execution.
+5. `fastapi[standard-no-fastapi-cloud-cli]==0.141.1` is frozen in `pyproject.toml` and the single universal `uv.lock`; the lock uses official PyPI sources and contains no project-index mirror override.
+6. Governed Windows evidence: CPython 3.13.5 imports FastAPI 0.141.1; `api-smoke` health/readiness/version checks PASS; `uv lock --check` PASS.
+7. Final regression passed 163/163 by complete partition: unit 68/68, migration 26/26, contract 69/69; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/bootstrap/offline-lock gates PASS.
 
 Implementation record: `docs/implementation/M0-API-002_FASTAPI_HEALTH_READINESS_VERSION.md`.
 
@@ -265,13 +267,13 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- FastAPI dependency activation / M0-API-002 completion, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Complete **M0-API-002** by activating the frozen FastAPI dependency in the single `uv.lock` and rerunning the governed smoke/regression gates.
-2. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
+1. Resolve **ADR-M0-005** before wiring Desktop backend lifecycle/IPC, then implement the PySide6 shell/lifecycle tasks without direct Repository access.
+2. Complete the remaining §39 step-7 shell/lifecycle/version-handshake integration work in dependency order.
 3. Do not advance to §39 step 8 cross-platform CI as a substitute for unfinished step-7 dependencies.

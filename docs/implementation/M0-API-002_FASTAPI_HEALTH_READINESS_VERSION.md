@@ -1,6 +1,6 @@
 # M0-API-002 — FastAPI health/readiness/version exposure
 
-**Status:** IN PROGRESS  
+**Status:** COMPLETE
 **Workstream:** WS-API  
 **Authority:** SDIB-1.0 §17, §39 step 7, Appendix E and Appendix Q
 
@@ -30,24 +30,30 @@ Rationale:
 - the official `standard-no-fastapi-cloud-cli` extra supplies the local server/TestClient standard stack (including Uvicorn/HTTPX) without admitting the unrelated FastAPI Cloud deployment client.
 - ADR-M0-002 still requires the declaration and universal `uv.lock` to change together.
 
-The Chat execution host cannot resolve `pypi.org`, so dependency activation is deliberately **not committed yet**. The host has FastAPI 0.128.2/HTTPX 0.28.1 preinstalled, which is sufficient only for implementation smoke during this checkpoint and is not claimed as the governed project dependency.
+Dependency activation was completed in a clean Windows clone with CPython 3.13.5 and uv 0.12.17. `uv add "fastapi[standard-no-fastapi-cloud-cli]==0.141.1"` resolved the universal environment, `fastapi.__version__` reported `0.141.1`, and the resulting project/lock state was transferred byte-for-byte into the formal completion repository. The lock uses the official PyPI registry and contains no project-level mirror override.
 
-## Current acceptance evidence
+## Completion acceptance evidence
 
-- API/Application specialty slice: 12/12 PASS on the Chat host, including direct smoke execution without ambient `PYTHONPATH`.
-- `api-smoke`: PASS for health, READY, NOT_READY/503 and version endpoints.
+- Windows governed environment: FastAPI `0.141.1` import/version PASS on CPython 3.13.5.
+- Windows `api-smoke`: health PASS, readiness READY PASS, readiness NOT_READY/503 PASS, version PASS.
+- Windows `uv lock --check`: PASS after resolving 42 packages.
+- Dependency declaration is exact: `fastapi[standard-no-fastapi-cloud-cli]==0.141.1`.
+- Universal `uv.lock` uses official `https://pypi.org/simple` sources and contains no Tsinghua/project-index pollution.
+- API/Application specialty slice includes direct smoke execution without ambient `PYTHONPATH`.
 - Controller boundary contract: no direct Canonical/Storage/GUI/driver import and no READY comparison implementation.
-- Formal FastAPI 0.141.1 lock activation: PENDING external networked `uv add` and subsequent frozen-lock verification.
+- Final regression: unit 68/68, migration 26/26, contract 69/69 = 163/163 PASS.
+- Historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository/bootstrap/offline-lock gates PASS.
+- Final local regression and historical gates are recorded in `M0-API-002_COMPLETE_EVIDENCE.json`.
 
 ## Completion gate
 
-M0-API-002 may move to COMPLETE only after all of the following are true:
+All completion conditions are satisfied:
 
-1. `uv add "fastapi[standard-no-fastapi-cloud-cli]==0.141.1"` updates `pyproject.toml` and the single universal `uv.lock` without project-index pollution.
-2. `uv run python -c "import fastapi; print(fastapi.__version__)"` reports `0.141.1`.
-3. `uv run python tools/dev/tpaa_dev.py api-smoke` passes in the governed environment.
-4. Unit/contract regression and historical Baseline/Canonical/generated/architecture/Repository/bootstrap/lock gates pass.
-5. Documentation/status is switched from IN PROGRESS to COMPLETE and a clean-clone verification is recorded.
+1. `pyproject.toml` and the single universal `uv.lock` contain the exact FastAPI 0.141.1 activation without project-index pollution.
+2. Governed Windows import/version reports `0.141.1`.
+3. Governed Windows `api-smoke` passes for health, READY, NOT_READY/503 and version.
+4. Unit/migration/contract regression and historical Baseline/Canonical/generated/architecture/Repository/bootstrap/lock gates pass.
+5. COMPLETE status and clean-clone verification are recorded.
 
 ## Explicit non-scope
 

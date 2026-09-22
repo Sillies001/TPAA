@@ -5,6 +5,7 @@ description = "TPAA airborne-data assessment system engineering bootstrap"
 requires-python = ">=3.13,<3.14"
 license = "Proprietary"
 dependencies = [
+    "fastapi[standard-no-fastapi-cloud-cli]==0.141.1",
     "psycopg[binary]==3.3.6",
 ]
 
