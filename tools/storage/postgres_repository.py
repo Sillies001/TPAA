@@ -18,7 +18,7 @@ from postgres_db import (  # noqa: E402
     _database_exists,
     _identifier,
     _literal,
-    _recreate_acceptance_database,
+    _recreate_scoped_database,
     bootstrap_postgres,
 )
 from tpaa_storage.postgres_repository import (  # noqa: E402
@@ -40,7 +40,12 @@ def run_acceptance(
         raise ValueError("acceptance database name must start with 'tpaa_m0_sto_003_'")
     if "{database}" not in conninfo_template:
         raise ValueError("conninfo template must contain '{database}' placeholder")
-    _recreate_acceptance_database(psql_client, admin_database, database)
+    _recreate_scoped_database(
+        psql_client,
+        admin_database,
+        database,
+        required_prefix="tpaa_m0_sto_003_",
+    )
     try:
         bootstrap = bootstrap_postgres(psql_client, database)
         repository = postgres_repository_smoke(conninfo_template.format(database=database))

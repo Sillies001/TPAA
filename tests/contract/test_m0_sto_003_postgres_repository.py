@@ -8,6 +8,7 @@ PORTS = REPO_ROOT / "src" / "tpaa_storage" / "ports.py"
 ADAPTER = REPO_ROOT / "src" / "tpaa_storage" / "postgres_repository.py"
 PLAN = REPO_ROOT / "docs" / "implementation" / "M0-STO-003_POSTGRESQL_SERVICE_REPOSITORY_SKELETON.md"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
+HARNESS = REPO_ROOT / "tools" / "storage" / "postgres_repository.py"
 
 
 def test_shared_ports_remain_driver_neutral() -> None:
@@ -43,3 +44,10 @@ def test_plan_keeps_task_in_progress_until_dependency_and_real_server_gate() -> 
 def test_dependency_is_not_claimed_active_before_uv_lock_can_be_regenerated() -> None:
     project = PYPROJECT.read_text(encoding="utf-8")
     assert "psycopg" not in project.lower()
+
+
+def test_repository_acceptance_uses_m0_sto_003_scoped_database_guard() -> None:
+    source = HARNESS.read_text(encoding="utf-8")
+    assert "_recreate_scoped_database" in source
+    assert 'required_prefix="tpaa_m0_sto_003_"' in source
+    assert "_recreate_acceptance_database" not in source

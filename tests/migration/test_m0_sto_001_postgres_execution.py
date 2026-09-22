@@ -134,6 +134,19 @@ def test_acceptance_database_name_is_safely_scoped() -> None:
         postgres_tool._recreate_acceptance_database(client, "postgres", "production")
 
 
+def test_scoped_database_helper_accepts_explicit_task_prefix() -> None:
+    client = FakeClient(["0", ""])
+
+    postgres_tool._recreate_scoped_database(
+        client,
+        "postgres",
+        "tpaa_m0_sto_003_acceptance",
+        required_prefix="tpaa_m0_sto_003_",
+    )
+
+    assert client.calls[-1][1] == 'CREATE DATABASE "tpaa_m0_sto_003_acceptance";\n'
+
+
 def test_missing_external_client_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
     def missing(*args: object, **kwargs: object) -> object:
         raise FileNotFoundError("psql missing")

@@ -170,9 +170,15 @@ def _identifier(value: str) -> str:
     return '"' + value + '"'
 
 
-def _recreate_acceptance_database(client: SqlClient, admin_database: str, database: str) -> None:
-    if not database.startswith("tpaa_m0_sto_001_"):
-        raise ValueError("acceptance database name must start with 'tpaa_m0_sto_001_'")
+def _recreate_scoped_database(
+    client: SqlClient,
+    admin_database: str,
+    database: str,
+    *,
+    required_prefix: str,
+) -> None:
+    if not database.startswith(required_prefix):
+        raise ValueError(f"acceptance database name must start with {required_prefix!r}")
     name = _identifier(database)
     if _database_exists(client, admin_database, database):
         client.run(
@@ -182,6 +188,15 @@ def _recreate_acceptance_database(client: SqlClient, admin_database: str, databa
             f"DROP DATABASE {name};\n",
         )
     client.run(admin_database, f"CREATE DATABASE {name};\n")
+
+
+def _recreate_acceptance_database(client: SqlClient, admin_database: str, database: str) -> None:
+    _recreate_scoped_database(
+        client,
+        admin_database,
+        database,
+        required_prefix="tpaa_m0_sto_001_",
+    )
 
 
 def run_acceptance(
