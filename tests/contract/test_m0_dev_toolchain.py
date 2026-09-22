@@ -6,6 +6,8 @@ import sys
 import tomllib
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEV_CLI = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
@@ -128,3 +130,29 @@ def test_machine_readable_toolchain_verifier_passes() -> None:
     assert evidence["status"] == "PASS"
     assert evidence["tasks"] == ["M0-DEV-001", "M0-DEV-002"]
     assert evidence["adrs"] == ["ADR-M0-001", "ADR-M0-002", "ADR-M0-003"]
+
+
+def test_quality_tool_fallback_runs_inside_locked_project_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("tpaa_dev_toolchain", DEV_CLI)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.modules.pop(spec.name, None)
+
+    monkeypatch.setattr(module.shutil, "which", lambda name: "/usr/bin/uv" if name == "uv" else None)
+    command = module._quality_tool_command("mypy", "2.3.1", [])
+    assert command == [
+        "/usr/bin/uv",
+        "run",
+        "--locked",
+        "--with",
+        "mypy==2.3.1",
+        "mypy",
+    ]

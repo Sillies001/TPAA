@@ -22,7 +22,7 @@ Run `python tools/dev/tpaa_dev.py list` to discover every governed command and i
 - `test` plus the SDIB test-family commands — frozen pytest entry points.
 - `doctor` — machine-readable report of runtime/resolver/lock/quality-tool availability.
 
-Quality commands use an already-installed exact tool version when available. Otherwise they invoke `uv tool run --from <tool>==<frozen-version>`, so local and CI semantics do not silently float to `latest`.
+Quality commands use an already-installed exact tool version when available. Otherwise they invoke `uv run --locked --with <tool>==<frozen-version> <tool> ...`, so the exact quality tool is overlaid onto the locked project environment rather than running in an isolated tool environment or silently floating to `latest`.
 
 ## Reserved and fail-closed
 
@@ -50,3 +50,11 @@ Plain `bootstrap` additionally executes `uv sync --frozen --offline`; this guara
 SDIB-derived machine-readable policy. The same command is the required local/later-CI entry point;
 CI providers must not maintain a second dependency-rule implementation. See
 `docs/developer/ARCHITECTURE_DEPENDENCIES.md`.
+
+## Cross-platform CI
+
+`verify-ci` is the M0-PLAT-004/M0-PLAT-005 provider-orchestration verifier. It checks that the GitHub Actions workflow uses real Windows and Linux x64 runners, exact CPython/uv versions, immutable action commit pins, fail-closed required gates, and the unified dispatcher rather than duplicating application logic in YAML.
+
+`ci-check --expected-platform <windows|linux> --evidence <path>` is the platform-neutral required Gate aggregator for SDIB §39 step 8. It executes the currently implemented M0 baseline/codegen/architecture/storage/API/Desktop/test gates on either OS and emits machine-readable runner evidence. It deliberately excludes later packaging, SBOM, build-manifest, cold-start, M0 Exit, and the step-9 Golden/replay/logical-equivalence harness.
+
+The GitHub workflow first installs project dependencies with `uv sync --locked`, verifies `uv lock --check`, and then invokes these dispatcher commands. Ruff/mypy/pytest remain governed by ADR-M0-003 and `tools/dev/TOOLCHAIN.json`; the CI runner must obtain those exact tools rather than floating to latest versions.

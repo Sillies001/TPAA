@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""Run the current M0 cross-platform CI gate set and emit auditable evidence."""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import os
+import platform
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Sequence
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DISPATCHER = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
+
+
+def _platform_name() -> str:
+    if sys.platform.startswith("win"):
+        return "windows"
+    if sys.platform.startswith("linux"):
+        return "linux"
+    return sys.platform
+
+
+def _capture(args: Sequence[str]) -> str:
+    try:
+        completed = subprocess.run(
+            list(args),
+            cwd=REPO_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"UNAVAILABLE: {exc}"
+    return (completed.stdout or completed.stderr).strip()
+
+
+def _git_revision() -> str:
+    value = _capture(["git", "rev-parse", "HEAD"])
+    return value if len(value) == 40 else "UNKNOWN"
+
+
+def _run_gate(name: str, args: Sequence[str]) -> dict[str, object]:
+    print(f"CI_GATE_START {name}", flush=True)
+    started = time.monotonic()
+    try:
+        completed = subprocess.run(list(args), cwd=REPO_ROOT, check=False)
+        return_code = completed.returncode
+    except OSError as exc:
+        print(f"CI_GATE_EXECUTION_ERROR {name}: {exc}", file=sys.stderr, flush=True)
+        return_code = 127
+    duration = round(time.monotonic() - started, 3)
+    status = "PASS" if return_code == 0 else "FAIL"
+    print(f"CI_GATE_{status} {name} return_code={return_code} duration_seconds={duration}", flush=True)
+    return {
+        "name": name,
+        "command": list(args),
+        "status": status,
+        "return_code": return_code,
+        "duration_seconds": duration,
+    }
+
+
+def _dispatcher(*args: str) -> list[str]:
+    return [sys.executable, str(DISPATCHER), *args]
+
+
+def _sqlite_bootstrap_gate() -> dict[str, object]:
+    name = "sqlite-bootstrap-verify"
+    print(f"CI_GATE_START {name}", flush=True)
+    started = time.monotonic()
+    return_code = 0
+    commands: list[list[str]] = []
+    with tempfile.TemporaryDirectory(prefix="tpaa-ci-") as raw:
+        db = Path(raw) / "bootstrap.sqlite3"
+        for command in (
+            _dispatcher("db-bootstrap", str(db)),
+            _dispatcher("db-verify", str(db)),
+        ):
+            commands.append(command)
+            try:
+                completed = subprocess.run(command, cwd=REPO_ROOT, check=False)
+                return_code = completed.returncode
+            except OSError as exc:
+                print(f"CI_GATE_EXECUTION_ERROR {name}: {exc}", file=sys.stderr, flush=True)
+                return_code = 127
+            if return_code != 0:
+                break
+    duration = round(time.monotonic() - started, 3)
+    status = "PASS" if return_code == 0 else "FAIL"
+    print(f"CI_GATE_{status} {name} return_code={return_code} duration_seconds={duration}", flush=True)
+    return {
+        "name": name,
+        "command": commands,
+        "status": status,
+        "return_code": return_code,
+        "duration_seconds": duration,
+    }
+
+
+def _write_evidence(path: Path, payload: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def run(*, expected_platform: str | None, evidence: Path | None) -> int:
+    actual_platform = _platform_name()
+    started_at = dt.datetime.now(dt.UTC).isoformat()
+    gates: list[dict[str, object]] = []
+
+    preflight_failure: str | None = None
+    if actual_platform not in {"windows", "linux"}:
+        preflight_failure = f"UNSUPPORTED_PLATFORM:{actual_platform}"
+    elif expected_platform is not None and expected_platform != actual_platform:
+        preflight_failure = f"PLATFORM_MISMATCH:expected={expected_platform}:actual={actual_platform}"
+
+    if preflight_failure is None:
+        commands: tuple[tuple[str, list[str]], ...] = (
+            ("verify-ci", _dispatcher("verify-ci")),
+            ("verify-baseline", _dispatcher("verify-baseline")),
+            ("bootstrap-check-only", _dispatcher("bootstrap", "--check-only")),
+            ("verify-canonical", _dispatcher("verify-canonical")),
+            ("generate-check", _dispatcher("generate", "--check")),
+            ("verify-generated", _dispatcher("verify-generated")),
+            ("regenerate-diff", _dispatcher("regenerate-diff")),
+            ("verify-architecture", _dispatcher("verify-architecture")),
+            ("verify-repository-policy", _dispatcher("verify-repository-policy")),
+            ("verify-desktop-lifecycle-policy", _dispatcher("verify-desktop-lifecycle-policy")),
+            ("lint", _dispatcher("lint")),
+            ("typecheck", _dispatcher("typecheck")),
+            ("unit", _dispatcher("test-unit")),
+            ("contract", _dispatcher("test-contract")),
+            ("migration", _dispatcher("test-migration")),
+            ("sqlite-repository-acceptance", _dispatcher("db-sqlite-repository-acceptance")),
+            ("api-smoke", _dispatcher("api-smoke")),
+            ("gui-smoke-headless", _dispatcher("gui-smoke", "--headless")),
+            ("desktop-backend-smoke", _dispatcher("desktop-backend-smoke")),
+            ("ui-automation-smoke", _dispatcher("ui-automation-smoke")),
+            ("uv-lock-check-offline", [shutil.which("uv") or "uv", "lock", "--check", "--offline"]),
+            ("git-diff-check", ["git", "diff", "--check"]),
+            ("git-diff-exit-code", ["git", "diff", "--exit-code"]),
+        )
+        for name, command in commands[:16]:
+            gates.append(_run_gate(name, command))
+        gates.append(_sqlite_bootstrap_gate())
+        for name, command in commands[16:]:
+            gates.append(_run_gate(name, command))
+
+    failed = [gate for gate in gates if gate["status"] != "PASS"]
+    status = "FAIL" if preflight_failure or failed else "PASS"
+    payload: dict[str, object] = {
+        "schema": "TPAA_M0_CROSS_PLATFORM_CI_EVIDENCE_V1",
+        "tasks": ["M0-PLAT-004", "M0-PLAT-005"],
+        "status": status,
+        "preflight_failure": preflight_failure,
+        "source_revision": _git_revision(),
+        "platform": {
+            "logical": actual_platform,
+            "system": platform.system(),
+            "release": platform.release(),
+            "machine": platform.machine(),
+        },
+        "python": {
+            "executable": sys.executable,
+            "version": platform.python_version(),
+            "implementation": platform.python_implementation(),
+        },
+        "uv": _capture([shutil.which("uv") or "uv", "--version"]),
+        "runner": {
+            "github_actions": os.environ.get("GITHUB_ACTIONS") == "true",
+            "runner_os": os.environ.get("RUNNER_OS"),
+            "runner_name": os.environ.get("RUNNER_NAME"),
+            "runner_arch": os.environ.get("RUNNER_ARCH"),
+        },
+        "started_at_utc": started_at,
+        "finished_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "required_gates": gates,
+        "failed_gate_names": [str(gate["name"]) for gate in failed],
+        "scope": {
+            "included": "SDIB-1.0 §39 step 8 Windows/Linux CI over currently implemented M0 gates",
+            "excluded": [
+                "packaging",
+                "SBOM",
+                "build manifest",
+                "cold-start",
+                "M0 Exit Gate",
+                "step-9 Golden/replay/cross-platform logical-equivalence harness not yet implemented",
+                "real PostgreSQL server acceptance is retained from M0-STO-003 and is not redefined by this runner task",
+            ],
+        },
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    if evidence is not None:
+        _write_evidence(evidence, payload)
+        print(f"CI_EVIDENCE_WRITTEN {evidence}")
+    return 0 if status == "PASS" else 2
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--expected-platform", choices=("windows", "linux"))
+    parser.add_argument("--evidence", type=Path)
+    args = parser.parse_args(argv)
+    return run(expected_platform=args.expected_platform, evidence=args.evidence)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

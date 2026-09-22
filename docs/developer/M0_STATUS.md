@@ -324,6 +324,18 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 8. Final repository regression passed **220/220** by complete partition: unit 93/93, migration 26/26, contract 101/101; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS.
 9. SDIB §39 step 8 cross-platform CI remains explicitly outside this task.
 
+## M0-PLAT-004 / M0-PLAT-005 — IN-PROGRESS
+
+**Cross-platform CI:** SDIB §39 step 8 repository implementation is present, but external hosted-runner completion evidence is still pending.
+
+1. A GitHub Actions matrix now targets real `windows-2025` and `ubuntu-24.04` x64 jobs.
+2. Both jobs use CPython 3.13.5, uv 0.12.17, the single `uv.lock`, `uv sync --locked`, and the same `ci-check` dispatcher semantics.
+3. Provider actions are pinned to immutable commit SHAs; required gates have no `continue-on-error` or failure masking.
+4. The current M0-GUI-004 UI automation smoke is included on both platforms.
+5. `verify-ci` provides a vendor-orchestration contract verifier and `ci-check` emits per-platform machine-readable evidence.
+6. Packaging, SBOM, build manifest, cold-start, M0 Exit, and step-9 Golden/replay/logical-equivalence work remain out of scope.
+7. **Not yet COMPLETE:** real GitHub-hosted Windows/Linux jobs must both be GREEN for the checkpoint commit before `M0-PLAT-004` / `M0-PLAT-005` can be marked complete.
+
 ## Partial governance state
 
 `M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
@@ -339,12 +351,13 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- Packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- Packaging, SBOM, build manifest, cross-platform CI completion/certification, or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–7 are complete and step 8 is now active. Proceed in dependency order:
 
-1. Proceed to **§39 step 8 cross-platform CI**.
-2. Preserve all completed M0-GUI-004 automation gates in the CI matrix.
+1. Obtain real hosted-runner evidence for the current **§39 step 8 cross-platform CI** checkpoint.
+2. Require both `M0-PLAT-004` Windows and `M0-PLAT-005` Linux jobs to be GREEN before marking step 8 COMPLETE.
+3. Preserve all completed M0-GUI-004 automation gates in the CI matrix.

@@ -36,6 +36,8 @@ API_SMOKE = REPO_ROOT / "tools" / "api" / "smoke.py"
 GUI_SMOKE = REPO_ROOT / "tools" / "gui" / "smoke.py"
 DESKTOP_BACKEND_SMOKE = REPO_ROOT / "tools" / "desktop" / "lifecycle_smoke.py"
 UI_AUTOMATION_SMOKE = REPO_ROOT / "tools" / "gui" / "automation_smoke.py"
+CI_VERIFY = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
+CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -71,6 +73,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("gui-smoke", "M0-GUI-001", "IMPLEMENTED", "Smoke PySide6 application startup and controlled exit."),
     CommandSpec("desktop-backend-smoke", "M0-GUI-002", "IMPLEMENTED", "Smoke owned local backend token/readiness/shutdown lifecycle."),
     CommandSpec("ui-automation-smoke", "M0-GUI-004", "IMPLEMENTED", "Automate Desktop launch/READY diagnostics/close/backend cleanup."),
+    CommandSpec("verify-ci", "M0-PLAT-004/M0-PLAT-005", "IMPLEMENTED", "Verify the governed Windows/Linux CI orchestration contract."),
+    CommandSpec("ci-check", "M0-PLAT-004/M0-PLAT-005", "IMPLEMENTED", "Run the current required M0 gate set and emit platform CI evidence."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -142,7 +146,7 @@ def _quality_tool_command(tool: str, version: str, args: Sequence[str]) -> list[
     uv = _uv_executable()
     if uv is None:
         raise RuntimeError(f"{tool} {version} unavailable and uv is not on PATH")
-    return [uv, "tool", "run", "--from", f"{tool}=={version}", tool, *args]
+    return [uv, "run", "--locked", "--with", f"{tool}=={version}", tool, *args]
 
 
 def _quality_version(tool: str, version: str) -> tuple[str, str]:
@@ -369,6 +373,10 @@ def build_parser() -> argparse.ArgumentParser:
     ui_automation = sub.add_parser("ui-automation-smoke", help="Run the M0-GUI-004 Desktop UI automation smoke")
     ui_automation.add_argument("--show", action="store_true")
     ui_automation.add_argument("--timeout", type=float, default=30.0)
+    sub.add_parser("verify-ci", help="Verify the M0 Windows/Linux CI orchestration contract")
+    ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
+    ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
+    ci_check.add_argument("--evidence", type=Path)
     sub.add_parser("package", help="Reserved for M0-DEV-005")
     sub.add_parser("manifest", help="Reserved for M0-DEV-003")
     sub.add_parser("cold-start", help="Reserved for M0-DEV-006")
@@ -436,6 +444,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.show:
             automation_args.append("--show")
         return _run(automation_args)
+    if command == "verify-ci":
+        return _run([sys.executable, str(CI_VERIFY)])
+    if command == "ci-check":
+        ci_args = [sys.executable, str(CI_GATE)]
+        if args.expected_platform:
+            ci_args.extend(["--expected-platform", args.expected_platform])
+        if args.evidence is not None:
+            ci_args.extend(["--evidence", str(args.evidence)])
+        return _run(ci_args)
     if command == "db-bootstrap":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":
