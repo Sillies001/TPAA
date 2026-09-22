@@ -1,6 +1,6 @@
 # M0-GUI-002 — Local backend lifecycle handshake
 
-Status: **IN PROGRESS**
+Status: **COMPLETE**
 
 ## Objective
 
@@ -24,7 +24,7 @@ Implement ADR-M0-005 as executable Desktop lifecycle behavior without moving bus
 
 ## Acceptance status
 
-Current host evidence:
+Current-host/Linux evidence:
 
 - real local child spawn/listen/authenticated READY/version handshake: **PASS**;
 - unauthenticated Desktop HTTP rejected: **PASS**;
@@ -33,9 +33,20 @@ Current host evidence:
 - cooperative shutdown and cleanup: **PASS**;
 - architecture import gate: **PASS**.
 
-Checkpoint regression: unit **83/83 PASS**, migration **26/26 PASS**, contract **90/90 PASS**, total **199/199 PASS**. Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates are PASS on the current host.
+Windows real-process acceptance evidence:
 
-The first Windows real-process acceptance run correctly failed closed with `LISTENING_PID_MISMATCH`: CPython's Windows venv launcher inserted a redirector process, so `Popen.pid` named the redirector while the backend reported the real interpreter PID. The checkpoint now bypasses that redirector using the same `sys._base_executable` + `__PYVENV_LAUNCHER__` pattern used by CPython's Windows process-launch support, without weakening the PID equality check. A Windows rerun of `desktop-backend-smoke` is still required before marking this task COMPLETE.
+- CPython **3.13.5** consumed the governed **46-package** lock with `uv sync --locked`: **PASS**;
+- `owned_child_ready`: **PASS**;
+- `ephemeral_loopback_http`: **PASS**;
+- `bearer_required`: **PASS**;
+- `graceful_shutdown`: **PASS**;
+- `cleanup`: **PASS**;
+- `uv lock --check`: **PASS**;
+- `git status --short`: clean after acceptance.
+
+The first Windows real-process run correctly failed closed with `LISTENING_PID_MISMATCH`: CPython's Windows venv launcher inserted a redirector process, so `Popen.pid` named the redirector while the backend reported the real interpreter PID. The final implementation bypasses that redirector using `sys._base_executable` + `__PYVENV_LAUNCHER__` without weakening exact PID ownership. The Windows rerun then passed the complete lifecycle smoke above.
+
+Final regression: unit **83/83 PASS**, migration **26/26 PASS**, contract **90/90 PASS**, total **199/199 PASS**. Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates are PASS.
 
 ## Explicit non-scope
 

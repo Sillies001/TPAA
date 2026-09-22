@@ -280,9 +280,9 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 7. Backend child process/token/port/readiness lifecycle remains explicitly owned by M0-GUI-002.
 
 
-## M0-GUI-002 — IN PROGRESS
+## M0-GUI-002 — COMPLETE
 
-**Local backend lifecycle handshake:** executable ADR-M0-005 child/token/READY/shutdown slice implemented; Windows real-process acceptance remains outstanding.
+**Local backend lifecycle handshake:** ADR-M0-005 child/token/READY/shutdown lifecycle is implemented and accepted on the current Linux/POSIX host and on Windows real processes.
 
 1. GUI owns one isolated backend child and generates a fresh 32-byte URL-safe bearer token per lifecycle.
 2. Child binds `127.0.0.1:0`, reports non-secret `LISTENING` over stdout NDJSON, and never receives the token through argv/environment/files.
@@ -290,7 +290,10 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 4. Desktop HTTP requires exact bearer authentication, rejects Origin, and disables docs/OpenAPI/CORS.
 5. Backend crash or handshake mismatch becomes NOT_READY immediately.
 6. Normal exit sends stdin `SHUTDOWN`; terminate/kill are bounded fallback only.
-7. Linux/current-host real lifecycle smoke is PASS. The first Windows run failed closed with `LISTENING_PID_MISMATCH` because the Windows venv executable is a redirector; the implementation now bypasses that redirector using `sys._base_executable` plus `__PYVENV_LAUNCHER__` while retaining exact PID ownership checks. Windows rerun is required before COMPLETE.
+7. Linux/current-host real lifecycle smoke is PASS.
+8. Windows CPython 3.13.5 consumed the same governed 46-package lock via `uv sync --locked`; `owned_child_ready`, `ephemeral_loopback_http`, `bearer_required`, `graceful_shutdown`, and `cleanup` all PASS; `uv lock --check` PASS and the worktree remained clean.
+9. The Windows venv redirector issue is resolved by direct `sys._base_executable` spawn plus `__PYVENV_LAUNCHER__`, retaining exact `Popen.pid == LISTENING.pid` ownership checks.
+10. Final regression is **199/199 PASS**: unit 83/83, migration 26/26, contract 90/90; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS.
 
 Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
@@ -309,13 +312,12 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- M0-GUI-002 Windows real-process lifecycle acceptance, GUI diagnostics/automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- GUI diagnostics/automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Complete **M0-GUI-002 — Local backend lifecycle handshake** with Windows real-process acceptance against the implemented frozen policy.
-2. Complete M0-GUI-003/004 diagnostics and UI automation in dependency order.
-3. Then proceed to §39 step 8 cross-platform CI.
+1. Complete **M0-GUI-003/004** diagnostics and UI automation in dependency order.
+2. Then proceed to §39 step 8 cross-platform CI.

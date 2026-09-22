@@ -78,7 +78,10 @@ def test_shutdown_is_control_channel_first_then_bounded_terminate_kill() -> None
 
 
 def test_status_and_plan_keep_task_scope_explicit() -> None:
-    assert "M0-GUI-002" in STATUS.read_text(encoding="utf-8")
+    status = STATUS.read_text(encoding="utf-8")
     plan = PLAN.read_text(encoding="utf-8")
-    assert "M0-GUI-002" in plan
+    assert "## M0-GUI-002 — COMPLETE" in status
+    assert "Status: **COMPLETE**" in plan
+    assert "Windows CPython 3.13.5" in status
+    assert "owned_child_ready" in plan
     assert "M0-GUI-003" in plan
