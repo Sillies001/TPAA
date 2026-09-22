@@ -266,6 +266,17 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
+
+## M0-GUI-001 — IN PROGRESS
+
+**PySide6 application shell:** first Desktop shell slice implemented; platform/dependency acceptance remains open.
+
+1. `tpaa_gui` now owns a minimal `QApplication`/`QMainWindow` shell with lazy PySide6 loading and deterministic missing-dependency failure.
+2. Developer commands `run gui`, `run-gui`, and `gui-smoke --headless` are implemented for the shell.
+3. The shell deliberately contains no backend child process, token, port, readiness, HTTP, Storage, or Canonical logic; those remain M0-GUI-002 under ADR-M0-005.
+4. Frozen activation target is `PySide6==6.11.2`, but it is not yet present in `pyproject.toml`/`uv.lock` in this checkpoint.
+5. SDIB minimum acceptance requires Windows/Linux startup-exit smoke PASS, so M0-GUI-001 must not be marked COMPLETE until both platform executions exist.
+
 ## Partial governance state
 
 `M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
@@ -288,6 +299,6 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Implement **M0-GUI-001 — PySide6 application shell** using the now-frozen ADR-M0-005 lifecycle boundary; do not activate backend lifecycle shortcuts in the GUI process.
+1. Complete **M0-GUI-001 — PySide6 application shell** dependency activation and Windows/Linux startup-exit smoke; do not activate backend lifecycle shortcuts in the GUI process.
 2. Implement **M0-GUI-002 — Local backend lifecycle handshake** using the frozen child-process/stdin-stdout/ephemeral-port/bearer-token policy and the existing M0-CORE-006/M0-API-002 readiness authority.
 3. Complete M0-GUI-003/004 diagnostics and UI automation in dependency order, then proceed to §39 step 8 cross-platform CI.

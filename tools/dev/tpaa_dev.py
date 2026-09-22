@@ -33,6 +33,7 @@ DESKTOP_LIFECYCLE_POLICY_VERIFY = REPO_ROOT / "tools" / "desktop" / "verify_desk
 SQLITE_REPOSITORY = REPO_ROOT / "tools" / "storage" / "sqlite_repository.py"
 POSTGRES_REPOSITORY = REPO_ROOT / "tools" / "storage" / "postgres_repository.py"
 API_SMOKE = REPO_ROOT / "tools" / "api" / "smoke.py"
+GUI_SMOKE = REPO_ROOT / "tools" / "gui" / "smoke.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -65,6 +66,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("db-postgres-acceptance", "M0-STO-001", "IMPLEMENTED", "Run destructive M0-STO-001 PostgreSQL acceptance in a dedicated disposable database."),
     CommandSpec("db-postgres-repository-acceptance", "M0-STO-003", "IMPLEMENTED", "Run PostgreSQL Service Repository/UoW acceptance against an existing ready database."),
     CommandSpec("api-smoke", "M0-API-002", "IMPLEMENTED", "Smoke health/readiness/version through the FastAPI transport adapter."),
+    CommandSpec("gui-smoke", "M0-GUI-001", "IMPLEMENTED", "Smoke PySide6 application startup and controlled exit."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -77,7 +79,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("test-e2e", "M0-TST-001", "IMPLEMENTED", "Run end-to-end tests."),
     CommandSpec("run", "M0-API-002/M0-GUI-001", "RESERVED", "Dispatch an API or GUI runtime profile."),
     CommandSpec("run-api", "M0-API-002", "RESERVED", "Start the API profile once implemented."),
-    CommandSpec("run-gui", "M0-GUI-001", "RESERVED", "Start the Desktop GUI profile once implemented."),
+    CommandSpec("run-gui", "M0-GUI-001", "IMPLEMENTED", "Start the M0-GUI-001 Desktop application shell."),
     CommandSpec("package", "M0-DEV-005", "RESERVED", "Build a platform development artifact once packaging is implemented."),
     CommandSpec("manifest", "M0-DEV-003", "RESERVED", "Generate build/package manifest and SBOM inputs."),
     CommandSpec("cold-start", "M0-DEV-006", "RESERVED", "Rebuild and execute all current milestone gates from clean state."),
@@ -356,7 +358,9 @@ def build_parser() -> argparse.ArgumentParser:
     run = sub.add_parser("run", help="Dispatch runtime target")
     run.add_argument("target", choices=("api", "gui"))
     sub.add_parser("run-api", help="Reserved for M0-API-002")
-    sub.add_parser("run-gui", help="Reserved for M0-GUI-001")
+    sub.add_parser("run-gui", help="Start the M0-GUI-001 Desktop shell")
+    gui_smoke = sub.add_parser("gui-smoke", help="Run the M0-GUI-001 PySide6 startup/exit smoke")
+    gui_smoke.add_argument("--headless", action="store_true")
     sub.add_parser("package", help="Reserved for M0-DEV-005")
     sub.add_parser("manifest", help="Reserved for M0-DEV-003")
     sub.add_parser("cold-start", help="Reserved for M0-DEV-006")
@@ -412,6 +416,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(DESKTOP_LIFECYCLE_POLICY_VERIFY)])
     if command == "api-smoke":
         return _run([sys.executable, str(API_SMOKE)])
+    if command == "gui-smoke":
+        gui_args = [sys.executable, str(GUI_SMOKE)]
+        if args.headless:
+            gui_args.append("--headless")
+        return _run(gui_args)
     if command == "db-bootstrap":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":
@@ -455,14 +464,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             pg_args.extend([action, args.database])
         return _run(pg_args)
     if command == "run":
-        return _reserved("M0-API-002" if args.target == "api" else "M0-GUI-001", f"run {args.target}")
+        if args.target == "gui":
+            return _run([sys.executable, "-m", "tpaa_gui"])
+        return _reserved("M0-API-002", "run api")
     reserved = {
         "run-api": "M0-API-002",
-        "run-gui": "M0-GUI-001",
         "package": "M0-DEV-005",
         "manifest": "M0-DEV-003",
         "cold-start": "M0-DEV-006",
     }
+    if command == "run-gui":
+        return _run([sys.executable, "-m", "tpaa_gui"])
     if command in reserved:
         return _reserved(reserved[command], command)
     parser.error(f"unknown command: {command}")
