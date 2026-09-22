@@ -45,15 +45,17 @@ def test_pyside6_is_loaded_only_at_concrete_gui_edge() -> None:
     assert 'import_module("PySide6.QtWidgets")' in source
 
 
-def test_dependency_activation_is_governed_and_linux_gate_remains_open() -> None:
+def test_dependency_activation_and_dual_platform_acceptance_are_complete() -> None:
     pyproject = PYPROJECT.read_text(encoding="utf-8")
     plan = PLAN.read_text(encoding="utf-8")
     assert '"pyside6==6.11.2"' in pyproject.lower()
     assert "[[tool.uv.index]]" not in pyproject
     assert "PySide6==6.11.2" in plan
     assert "Windows" in plan and "PASS" in plan
-    assert "Linux" in plan and "outstanding" in plan
-    assert "IN PROGRESS" in plan
+    assert "Linux" in plan and "PASS" in plan
+    assert "COMPLETE" in plan
+    assert "uv sync --locked" in plan
+    assert "46-package" in plan
 
 
 def test_status_keeps_gui_002_backend_lifecycle_separate() -> None:

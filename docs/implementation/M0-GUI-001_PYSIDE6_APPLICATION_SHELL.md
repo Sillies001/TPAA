@@ -1,6 +1,6 @@
 # M0-GUI-001 — PySide6 application shell
 
-Status: **IN PROGRESS**
+Status: **COMPLETE**
 
 ## Objective
 
@@ -46,7 +46,20 @@ The SDIB minimum acceptance is Windows/Linux startup-exit smoke PASS. Current ev
 1. governed `PySide6==6.11.2` activation in the single `uv.lock`: **PASS**;
 2. Windows `import PySide6` reports `6.11.2`: **PASS**;
 3. Windows `gui-smoke --headless` startup/exit with exit code 0: **PASS**;
-4. Linux startup/exit smoke using the same lock: **outstanding**;
-5. final repository regression and historical governance gates: rerun after Linux evidence before COMPLETE.
+4. Linux Ubuntu 24.04 LTS / WSL2 x86_64, CPython 3.13.5, `uv 0.12.17`: `uv sync --locked` resolved the same 46-package lock and `import PySide6` reported `6.11.2`: **PASS**;
+5. Linux `gui-smoke --headless` startup/exit with exit code 0: **PASS**;
+6. Windows and Linux both consumed the same governed `uv.lock`; the Linux verification left `git status --short` empty: **PASS**;
+7. final repository regression and historical governance gates: **PASS** (recorded below).
 
-Until the Linux platform gate is evidenced, this task remains **IN PROGRESS**.
+## Completion regression
+
+Final completion regression from the formal completion cycle:
+
+- unit: **72/72 PASS**;
+- migration: **26/26 PASS**;
+- contract: **83/83 PASS**;
+- total: **181/181 PASS**.
+
+Historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/offline-lock gates: **PASS**.
+
+M0-GUI-001 completion does not claim M0-GUI-002 backend lifecycle, later GUI diagnostics/automation, or cross-platform CI certification.

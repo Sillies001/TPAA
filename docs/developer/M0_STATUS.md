@@ -267,15 +267,17 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
 
-## M0-GUI-001 — IN PROGRESS
+## M0-GUI-001 — COMPLETE
 
-**PySide6 application shell:** shell and governed dependency activation implemented; Linux platform acceptance remains open.
+**PySide6 application shell:** shell, governed dependency activation, and Windows/Linux startup-exit acceptance complete.
 
 1. `tpaa_gui` now owns a minimal `QApplication`/`QMainWindow` shell with lazy PySide6 loading and deterministic missing-dependency failure.
 2. Developer commands `run gui`, `run-gui`, and `gui-smoke --headless` are implemented for the shell.
 3. The shell deliberately contains no backend child process, token, port, readiness, HTTP, Storage, or Canonical logic; those remain M0-GUI-002 under ADR-M0-005.
-4. `PySide6==6.11.2` is now present in `pyproject.toml` and the single governed `uv.lock`; Windows import/version and headless startup-exit smoke are PASS.
-5. SDIB minimum acceptance requires Windows/Linux startup-exit smoke PASS; Linux execution remains outstanding, so M0-GUI-001 is still IN PROGRESS.
+4. `PySide6==6.11.2` is present in `pyproject.toml` and the single governed 46-package `uv.lock`; Windows CPython 3.13.5 import/version and headless startup-exit smoke are PASS.
+5. Linux Ubuntu 24.04 LTS / WSL2 x86_64 with CPython 3.13.5 and `uv 0.12.17` consumed the same lock via `uv sync --locked`; PySide6 6.11.2 import and headless startup-exit smoke are PASS, exit code 0, and the Git worktree remained clean.
+6. Final repository regression passed **181/181** by complete partition: unit 72/72, migration 26/26, contract 83/83; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/offline-lock gates PASS.
+7. Backend child process/token/port/readiness lifecycle remains explicitly owned by M0-GUI-002.
 
 ## Partial governance state
 
@@ -292,13 +294,13 @@ Machine gate: `python tools/dev/tpaa_dev.py verify-desktop-lifecycle-policy`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- GUI backend lifecycle, GUI diagnostics/automation, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, steps 1–6 are complete and step 7 is now active. Proceed in dependency order:
 
-1. Complete **M0-GUI-001 — PySide6 application shell** dependency activation and Windows/Linux startup-exit smoke; do not activate backend lifecycle shortcuts in the GUI process.
-2. Implement **M0-GUI-002 — Local backend lifecycle handshake** using the frozen child-process/stdin-stdout/ephemeral-port/bearer-token policy and the existing M0-CORE-006/M0-API-002 readiness authority.
-3. Complete M0-GUI-003/004 diagnostics and UI automation in dependency order, then proceed to §39 step 8 cross-platform CI.
+1. Implement **M0-GUI-002 — Local backend lifecycle handshake** using the frozen child-process/stdin-stdout/ephemeral-port/bearer-token policy and the existing M0-CORE-006/M0-API-002 readiness authority.
+2. Complete M0-GUI-003/004 diagnostics and UI automation in dependency order.
+3. Then proceed to §39 step 8 cross-platform CI.
