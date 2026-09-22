@@ -29,6 +29,7 @@ ARCHITECTURE_VERIFY = REPO_ROOT / "tools" / "architecture" / "verify_dependencie
 STORAGE_BOOTSTRAP = REPO_ROOT / "tools" / "storage" / "bootstrap_db.py"
 POSTGRES_STORAGE = REPO_ROOT / "tools" / "storage" / "postgres_db.py"
 REPOSITORY_POLICY_VERIFY = REPO_ROOT / "tools" / "storage" / "verify_repository_policy.py"
+SQLITE_REPOSITORY = REPO_ROOT / "tools" / "storage" / "sqlite_repository.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -54,6 +55,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
     CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from frozen schema 1.6.0 authority."),
     CommandSpec("db-verify", "M0-STO-001", "IMPLEMENTED", "Verify SQLite schema/version/provenance against frozen schema 1.6.0 authority."),
+    CommandSpec("db-sqlite-repository-acceptance", "M0-STO-002", "IMPLEMENTED", "Run disposable SQLite Desktop Repository/UoW/WAL/single-writer acceptance."),
     CommandSpec("db-postgres-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap PostgreSQL through the repository-controlled external psql harness."),
     CommandSpec("db-postgres-verify", "M0-STO-001", "IMPLEMENTED", "Verify PostgreSQL schema/version/provenance through the external psql harness."),
     CommandSpec("db-postgres-acceptance", "M0-STO-001", "IMPLEMENTED", "Run destructive M0-STO-001 PostgreSQL acceptance in a dedicated disposable database."),
@@ -310,6 +312,7 @@ def build_parser() -> argparse.ArgumentParser:
     db_bootstrap.add_argument("database", type=Path)
     db_verify = sub.add_parser("db-verify", help="Verify SQLite Desktop DB schema/version/provenance")
     db_verify.add_argument("database", type=Path)
+    sub.add_parser("db-sqlite-repository-acceptance", help="Run M0-STO-002 SQLite Repository acceptance on a disposable DB")
 
     def add_postgres_client_args(command: argparse.ArgumentParser) -> None:
         command.add_argument("--user", default="tpaa")
@@ -396,6 +399,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "bootstrap", str(args.database)])
     if command == "db-verify":
         return _run([sys.executable, str(STORAGE_BOOTSTRAP), "verify", str(args.database)])
+    if command == "db-sqlite-repository-acceptance":
+        return _run([sys.executable, str(SQLITE_REPOSITORY), "acceptance"])
     if command in {"db-postgres-bootstrap", "db-postgres-verify", "db-postgres-acceptance"}:
         pg_args = [sys.executable, str(POSTGRES_STORAGE)]
         if args.user:

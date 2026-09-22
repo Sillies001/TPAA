@@ -1,4 +1,4 @@
-"""TPAA storage bootstrap primitives."""
+"""TPAA storage bootstrap and Repository boundary primitives."""
 
 from .bootstrap import (
     EXPECTED_DB_SCHEMA_VERSION,
@@ -17,3 +17,21 @@ __all__ = [
     "postgres_create_statements",
     "verify_sqlite",
 ]
+
+from .ports import BaselineMetadataRepository, RepositoryBaselineMetadata, RepositoryUnitOfWork
+from .sqlite_repository import (
+    SQLiteBaselineMetadataRepository,
+    SQLiteDesktopUnitOfWork,
+    SQLiteRepositoryError,
+    sqlite_repository_smoke,
+)
+
+__all__.extend([
+    "BaselineMetadataRepository",
+    "RepositoryBaselineMetadata",
+    "RepositoryUnitOfWork",
+    "SQLiteBaselineMetadataRepository",
+    "SQLiteDesktopUnitOfWork",
+    "SQLiteRepositoryError",
+    "sqlite_repository_smoke",
+])

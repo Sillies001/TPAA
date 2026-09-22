@@ -126,6 +126,23 @@ Completed implementation and acceptance:
 
 Implementation record: `docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md` v0.6.
 
+### M0-STO-002 — COMPLETE
+
+**Workstream:** WS-STORAGE
+**Acceptance:** SQLite Desktop repository skeleton; WAL, single-writer and transaction smoke PASS.
+
+Completed implementation and acceptance:
+
+1. `tpaa_storage.ports` defines engine-neutral baseline-metadata Repository and explicit Unit-of-Work protocols with no concrete DB-driver types.
+2. `SQLiteDesktopUnitOfWork` opens only an existing M0-STO-001-verified DB, requires WAL, enables FK enforcement, uses read `BEGIN` / write `BEGIN IMMEDIATE`, and never bootstraps or migrates at runtime.
+3. Write UoWs require an exclusive process-local writer lease; SQLite `BEGIN IMMEDIATE` remains the database/cross-process serialization guard.
+4. Repository methods never commit; explicit UoW commit is required, while exception or uncommitted exit rolls back. Read UoWs enforce `PRAGMA query_only=ON`.
+5. The minimal concrete Repository exposes only existing bootstrap/baseline metadata; no Metric/Stage/Release/Application business Repository semantics were introduced.
+6. `db-sqlite-repository-acceptance` executes disposable real-adapter WAL/read/write/rollback/single-writer smoke using the same M0-STO-001 bootstrap implementation.
+7. Final regression collected 118 tests and passed 118/118 by complete partition: unit 42/42, migration 25/25, contract 51/51. Historical Baseline/Canonical/codegen/generated-governance/regenerate-diff/architecture/bootstrap and Repository-policy gates PASS.
+
+Implementation record: `docs/implementation/M0-STO-002_SQLITE_DESKTOP_REPOSITORY_SKELETON.md`.
+
 ### ADR-M0-004 — CLOSED
 
 **Decision:** Repository DB access implementation.
@@ -182,12 +199,12 @@ The project also records **Polars-first** as the default flight-data/DataFrame p
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- Repository skeleton, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
+- PostgreSQL Service repository skeleton, API, GUI, packaging, SBOM, build manifest, CI matrix or cold-start completion.
 - Windows/Linux certification or logical-equivalence qualification.
 
 ## Next required sequence
 
 Per SDIB-1.0 §39, startup steps 1–4 are complete. Proceed next to:
 
-1. Proceed to Repository skeleton work per SDIB-1.0 §39 using CLOSED `ADR-M0-004`: implement M0-STO-002 SQLite Desktop repository skeleton, then M0-STO-003 PostgreSQL Service repository skeleton and shared conformance tests.
+1. Proceed to M0-STO-003 PostgreSQL Service repository skeleton and shared SQLite/PostgreSQL Repository conformance tests using CLOSED `ADR-M0-004`.
 2. Only after Storage/Repository boundaries stabilize, build Application/FastAPI/PySide6 shell and close **M0-CORE-006 runtime baseline handshake** in the prescribed dependency order.
