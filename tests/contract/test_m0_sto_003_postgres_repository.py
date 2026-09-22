@@ -34,16 +34,19 @@ def test_postgres_adapter_is_explicit_sync_driver_edge_without_runtime_migration
     assert "postgres_bootstrap_script" not in source
 
 
-def test_plan_keeps_task_in_progress_until_dependency_and_real_server_gate() -> None:
+def test_plan_records_complete_dependency_and_real_server_gate() -> None:
     plan = PLAN.read_text(encoding="utf-8")
-    assert "**Status:** IN PROGRESS" in plan
+    assert "**Status:** COMPLETE" in plan
     assert "psycopg[binary]==3.3.6" in plan
     assert "Application/FastAPI/PySide6" in plan
 
 
-def test_dependency_is_not_claimed_active_before_uv_lock_can_be_regenerated() -> None:
+def test_dependency_is_exactly_activated_in_governed_project() -> None:
     project = PYPROJECT.read_text(encoding="utf-8")
-    assert "psycopg" not in project.lower()
+    assert '"psycopg[binary]==3.3.6"' in project
+    assert "sqlalchemy" not in project.lower()
+    assert "asyncpg" not in project.lower()
+    assert "alembic" not in project.lower()
 
 
 def test_repository_acceptance_uses_m0_sto_003_scoped_database_guard() -> None:

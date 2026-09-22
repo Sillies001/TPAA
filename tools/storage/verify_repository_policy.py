@@ -126,15 +126,13 @@ def verify() -> dict[str, Any]:
     spike_ok, spike_detail = _sqlite_transaction_spike()
     record("sqlite_transaction_spike", spike_ok, spike_detail)
 
-    # Dependency activation belongs to the implementing work packages. Closing
-    # the ADR must not create an unused runtime dependency or second lock.
     record(
-        "dependency_activation_deferred",
-        "psycopg" not in pyproject.lower()
+        "psycopg_dependency_activated",
+        '"psycopg[binary]==3.3.6"' in pyproject
         and "sqlalchemy" not in pyproject.lower()
         and "alembic" not in pyproject.lower()
         and "asyncpg" not in pyproject.lower(),
-        "selected dependencies are activated by M0-STO-003/M0-STO-005, not by ADR closure",
+        "M0-STO-003 activated exact Psycopg 3.3.6; rejected runtime abstractions remain absent",
     )
 
     status = "PASS" if all(check["status"] == "PASS" for check in checks) else "FAIL"
@@ -144,9 +142,9 @@ def verify() -> dict[str, Any]:
         "decision": "ADR-M0-004",
         "checks": checks,
         "execution_limitations": [
-            "The current Chat host is network-isolated, so Psycopg 3.3.6 installation/import is not claimed here.",
-            "M0-STO-003 must activate the exact selected driver through uv.lock and run Windows/Linux PostgreSQL conformance before that task can complete.",
-            "Real PostgreSQL 16.15 transaction/bootstrap fail-closed evidence is retained from completed M0-STO-001.",
+            "The Chat host remains network-isolated; dependency resolution/import evidence for Psycopg 3.3.6 was produced on the governed Windows CPython 3.13 environment.",
+            "Real PostgreSQL Service Repository acceptance for M0-STO-003 was executed against the governed PostgreSQL 16 container and recorded in the implementation record.",
+            "Cross-platform Windows/Linux CI is not claimed by this verifier.",
         ],
     }
 
