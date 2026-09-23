@@ -1,0 +1,52 @@
+{
+  "schema": "TPAA_M1_ENTRY_ACTIVATION_POLICY_V1",
+  "authority": "SDIB-1.0.1 §19.1",
+  "purpose": "Allow one final governance merge by separating static admission-candidate review from exact post-merge runtime activation evidence.",
+  "states": [
+    "M1_NOT_ADMITTED",
+    "M1_ADMISSION_CANDIDATE",
+    "M1_ADMISSION_CANDIDATE_VERIFIED",
+    "M1_ADMITTED"
+  ],
+  "rules": {
+    "static_candidate_requires": [
+      "explicitly assigned Primary WS owner",
+      "explicitly assigned Golden independent reviewer",
+      "explicitly assigned M1 Exit reviewer",
+      "explicit Golden independence attestation",
+      "conditions 1,2,3,4,5,7,8,9,10 PASS",
+      "condition 6 marked RUNTIME_VERIFY_REQUIRED",
+      "implementation_authorized=false"
+    ],
+    "pull_request_candidate_verification": [
+      "Windows M1 Entry manifest source_revision equals the PR synthetic merge revision",
+      "Linux M1 Entry manifest source_revision equals the same revision",
+      "all frozen authority hashes match",
+      "candidate activation output may be CANDIDATE_VERIFIED only",
+      "implementation_authorized=false"
+    ],
+    "merged_main_activation": [
+      "event is push to protected main",
+      "all existing required M0 jobs have succeeded before activation job runs",
+      "Windows/Linux M1 Entry manifests both equal the exact merged-main revision",
+      "static candidate and role assignments are valid",
+      "activation output decision=M1_ADMITTED",
+      "activation output implementation_authorized=true"
+    ],
+    "fail_closed": [
+      "missing role identity",
+      "missing independence attestation",
+      "manifest source-revision mismatch",
+      "authority-hash mismatch",
+      "platform-profile mismatch",
+      "static review inconsistency"
+    ]
+  },
+  "artifact": {
+    "name_pattern": "tpaa-m1-entry-activation-<source_revision>",
+    "path": "evidence/m1-entry/activation.json",
+    "retention_days": 30
+  },
+  "no_second_governance_merge_required": true,
+  "note": "The committed review remains the admission candidate; the exact merged-main activation artifact is the final machine evidence authorizing M1 implementation."
+}
