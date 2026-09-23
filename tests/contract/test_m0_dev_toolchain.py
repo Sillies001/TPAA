@@ -75,6 +75,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "verify-m0-delta-closure",
         "verify-m1-entry-preparation",
         "verify-m1-entry-gate-state",
+        "m1-entry-activation",
         "m1-entry-manifest",
         "generate",
         "verify-baseline",
