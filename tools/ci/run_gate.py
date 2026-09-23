@@ -21,11 +21,12 @@ DISPATCHER = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
 
 
 def _platform_name() -> str:
-    if sys.platform.startswith("win"):
+    system = platform.system().lower()
+    if system == "windows":
         return "windows"
-    if sys.platform.startswith("linux"):
+    if system == "linux":
         return "linux"
-    return sys.platform
+    return system or str(sys.platform)
 
 
 def _capture(args: Sequence[str]) -> str:

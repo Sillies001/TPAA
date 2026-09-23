@@ -205,7 +205,7 @@ def _sqlite_field_sql(table_name: str, raw_field: Mapping[str, Any]) -> str:
 
 
 def _table_dependencies(authority: _SchemaAuthority) -> dict[str, set[str]]:
-    dependencies = {table_name: set() for table_name in authority.tables}
+    dependencies: dict[str, set[str]] = {table_name: set() for table_name in authority.tables}
     for table_name, raw_table in authority.tables.items():
         raw_fields = raw_table["fields"]
         assert isinstance(raw_fields, list)

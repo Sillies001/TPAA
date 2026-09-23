@@ -154,10 +154,16 @@ def collect_imports(src_root: Path) -> tuple[list[ImportDependency], list[Archit
                     ImportDependency(relative, node.lineno, source_package, imported, "from")
                 )
             elif isinstance(node, ast.Call):
-                imported = _literal_dynamic_import(node)
-                if imported:
+                dynamic_imported = _literal_dynamic_import(node)
+                if dynamic_imported:
                     dependencies.append(
-                        ImportDependency(relative, node.lineno, source_package, imported, "dynamic-literal")
+                        ImportDependency(
+                            relative,
+                            node.lineno,
+                            source_package,
+                            dynamic_imported,
+                            "dynamic-literal",
+                        )
                     )
     return sorted(set(dependencies)), sorted(parse_violations), scanned_files
 

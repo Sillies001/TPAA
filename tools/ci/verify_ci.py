@@ -193,11 +193,24 @@ def verify() -> dict[str, object]:
         if pytest_pythonpath == [".", "src"]
         else _fail("pytest_repo_root_importable", f"expected=['.', 'src'] actual={pytest_pythonpath!r}")
     )
-    mypy_explicit_bases = pyproject.get("tool", {}).get("mypy", {}).get("explicit_package_bases")
+    mypy_config = pyproject.get("tool", {}).get("mypy", {})
+    mypy_explicit_bases = mypy_config.get("explicit_package_bases")
     checks.append(
         _pass("mypy_explicit_package_bases", "true")
         if mypy_explicit_bases is True
         else _fail("mypy_explicit_package_bases", f"expected=true actual={mypy_explicit_bases!r}")
+    )
+    mypy_path = mypy_config.get("mypy_path")
+    checks.append(
+        _pass("mypy_repository_path", repr(mypy_path))
+        if mypy_path == ["src", "."]
+        else _fail("mypy_repository_path", f"expected=['src', '.'] actual={mypy_path!r}")
+    )
+    mypy_files = mypy_config.get("files")
+    checks.append(
+        _pass("mypy_governed_scope", repr(mypy_files))
+        if mypy_files == ["tools", "src"]
+        else _fail("mypy_governed_scope", f"expected=['tools', 'src'] actual={mypy_files!r}")
     )
 
     status = "PASS" if all(check[1] == "PASS" for check in checks) else "FAIL"

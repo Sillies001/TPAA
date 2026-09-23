@@ -7,6 +7,7 @@ import json
 import sys
 from dataclasses import replace
 from pathlib import Path
+from typing import cast
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
@@ -16,7 +17,11 @@ if str(SRC_ROOT) not in sys.path:
 from fastapi.testclient import TestClient  # noqa: E402
 
 from tpaa_api import create_app  # noqa: E402
-from tpaa_application import ApplicationService, GetRuntimeBaselineStatus  # noqa: E402
+from tpaa_application import (  # noqa: E402
+    ApplicationService,
+    GetRuntimeBaselineStatus,
+    GetStorageBaselineStatus,
+)
 from tpaa_canonical.runtime_handshake import (  # noqa: E402
     RuntimeBaselineIdentity,
     evaluate_runtime_baseline_handshake,
@@ -49,7 +54,7 @@ def _client(*, ready: bool) -> TestClient:
         lambda: evaluate_runtime_baseline_handshake(expected=expected, observed=observed)
     )
     application = ApplicationService(
-        get_storage_baseline_status=_UnusedStorageUseCase(),  # type: ignore[arg-type]
+        get_storage_baseline_status=cast(GetStorageBaselineStatus, _UnusedStorageUseCase()),
         get_runtime_baseline_status=runtime,
     )
     return TestClient(create_app(application))
