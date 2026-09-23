@@ -67,6 +67,12 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.desktop_profile }} --output evidence/devops/${{ matrix.platform }}/desktop
           uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.service_profile }} --output evidence/devops/${{ matrix.platform }}/service
 
+      - name: Emit M1 Entry build-manifest candidate
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
+          --profile ${{ matrix.desktop_profile }}
+          --output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
+
       - name: Build M0 development packages
         run: |
           uv run --locked python tools/dev/tpaa_dev.py package --profile ${{ matrix.desktop_profile }} --output dist
@@ -92,6 +98,7 @@ jobs:
             evidence/tests/framework-${{ matrix.platform }}.json
             evidence/cross-platform/${{ matrix.platform }}.json
             evidence/devops/${{ matrix.platform }}
+            evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
             dist/
           if-no-files-found: error
           retention-days: 14
