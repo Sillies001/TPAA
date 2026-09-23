@@ -1,10 +1,10 @@
 # M0 Exit Review
 
-- **Status:** IN-PROGRESS
+- **Status:** PR ACCEPTANCE PASS / MAIN MERGE PENDING
 - **Authority:** SDIB-1.0 §16.3, §18, §39 step 11, Appendix F, Appendix K.
 - **Review baseline:** merged `main` revision `5768d53e6e2eb4cda59080ff4958d06e3984f499`.
 - **Step 10 evidence:** GitHub Actions Run #26 (`35836960857`) — Windows/Linux/logical-equivalence SUCCESS.
-- **Decision:** PENDING hosted Exit evidence.
+- **Decision:** GO on PR acceptance revision `863ff928bb072775e5b99599571827d07cb19832`; merged-main GO still pending.
 - **Important boundary:** M0 GO means engineering-substrate admission to M1 only. It is not P1 capability acceptance.
 
 ## 1. Scope
@@ -39,7 +39,14 @@ Step 11 adds two fail-closed jobs:
 2. **M0 Exit Review** — aggregates machine evidence for all 14 SDIB §18 Exit conditions and returns
    `GO` only if every condition is PASS for the same source revision.
 
-The review remains IN-PROGRESS until those hosted jobs are GREEN.
+GitHub Actions Run #29 (`35840449678`) completed SUCCESS for Windows, Linux, live PostgreSQL,
+logical equivalence and the M0 Exit Review aggregator. Artifact `10741590060`
+(`sha256:89d6b0e7a1bad27373b149a33bcdf9fc71c96e2c39cf2a4c67261f26f5325c09`) records
+`status=PASS`, `decision=GO`, all 14 §18 gates PASS, `mismatches=[]`, and
+`source_revision_consistent=true`.
+
+This is PR acceptance evidence. The review is not final on `main` until this PR is merged and the same
+Exit workflow produces GO for the merged revision.
 
 ## 4. Open Defects
 
@@ -87,8 +94,13 @@ field fail-closed checks run on both OS families.
 
 ## 10. Decision
 
-**PENDING.** The repository may receive an M0 GO only after the hosted Step 11 Exit jobs produce one
-machine-readable review artifact with all 14 SDIB §18 gates PASS for the same revision.
+**PR ACCEPTANCE: GO.** Run #29 machine evidence reports every one of the 14 SDIB §18 Exit conditions PASS
+for PR merge revision `863ff928bb072775e5b99599571827d07cb19832`.
 
-After a merged-main GO run, publish `M0_IMPLEMENTATION_BASELINE` tag/manifest. That tag is engineering
-baseline evidence only and must not be represented as a P1 capability release.
+This does **not** yet publish the M0 baseline. Final milestone closure requires:
+
+1. merge this Exit Review PR;
+2. obtain one fresh `main` run whose M0 Exit Review artifact again reports `decision=GO`;
+3. publish the `M0_IMPLEMENTATION_BASELINE` manifest/tag against that accepted merged-main revision.
+
+The tag is engineering baseline evidence only and must not be represented as a P1 capability release.

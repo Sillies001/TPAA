@@ -366,13 +366,22 @@ Run #26 with Windows, Linux and logical-equivalence SUCCESS.
 
 Implementation record: `docs/implementation/M0_STEP10_REMAINING_BACKLOG_COLD_START.md`.
 
-## SDIB §39 Step 11 — M0 EXIT REVIEW IN-PROGRESS
+## SDIB §39 Step 11 — PR ACCEPTANCE GO / MAIN MERGE PENDING
 
-The formal M0 Exit Review has started. Run #26 proves Step 10 but is not by itself the M0 GO decision.
+Run #29 proves the Exit Review PR acceptance boundary:
 
-The review adds a live PostgreSQL 16 Exit job plus a clean-clone PostgreSQL cold-start so §18.14
-reproduces the PostgreSQL bootstrap/Repository result rather than relying only on retained earlier task
-evidence. A machine aggregator must report all 14 §18 conditions PASS for the same source revision.
+- M0 Windows SUCCESS;
+- M0 Linux SUCCESS;
+- live PostgreSQL 16 Exit acceptance SUCCESS;
+- cross-platform logical equivalence SUCCESS;
+- M0 Exit Review aggregator SUCCESS.
+
+The review artifact reports `status=PASS`, `decision=GO`, all 14 SDIB §18 gates PASS,
+`source_revision_consistent=true`, and `mismatches=[]` for PR merge revision
+`863ff928bb072775e5b99599571827d07cb19832`.
+
+Final M0 closure is still pending merge plus one fresh merged-main GO run and publication of the
+`M0_IMPLEMENTATION_BASELINE` manifest/tag.
 
 Review record: `docs/reviews/M0_EXIT_REVIEW.md`.
 
@@ -394,7 +403,7 @@ Review record: `docs/reviews/M0_EXIT_REVIEW.md`.
 
 Per SDIB-1.0 §39, steps 1–10 are COMPLETE and step 11 is active.
 
-1. Obtain hosted Exit evidence for Windows/Linux, live PostgreSQL and the 14-Gate aggregator.
+1. Merge PR #6 after its final documentation checkpoint CI is GREEN.
 2. Require one merged-main Exit run with `decision=GO` and every §18 gate PASS.
 3. Publish `M0_IMPLEMENTATION_BASELINE` tag/manifest only after that merged-main GO.
 4. Begin M1 only after the M0 Exit baseline publication is complete.
