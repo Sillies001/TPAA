@@ -1,0 +1,45 @@
+name: TPAA Feature / Backlog Task
+description: Implement a governed SDIB/Canonical backlog item
+title: "[M?][WS-?] "
+labels: []
+body:
+  - type: input
+    id: milestone
+    attributes: {label: "Milestone / Task ID", placeholder: "M0-PLAT-001"}
+    validations: {required: true}
+  - type: input
+    id: workstream
+    attributes: {label: "Primary WS", placeholder: "WS-PLATFORM"}
+    validations: {required: true}
+  - type: input
+    id: capability
+    attributes: {label: "Related P (or NONE)", placeholder: "NONE"}
+    validations: {required: true}
+  - type: input
+    id: stage
+    attributes: {label: "Stage (or N/A)", placeholder: "N/A"}
+    validations: {required: true}
+  - type: textarea
+    id: authority
+    attributes: {label: "Authority refs"}
+    validations: {required: true}
+  - type: dropdown
+    id: change_class
+    attributes: {label: "Change class", options: ["C0 Implementation-only", "C1 SDIB implementation contract", "C2 Canonical non-semantic metadata", "C3 Semantic contract", "C4 Capability admission"]}
+    validations: {required: true}
+  - type: textarea
+    id: io
+    attributes: {label: "Inputs / outputs and failure boundary"}
+    validations: {required: true}
+  - type: textarea
+    id: tests
+    attributes: {label: "Acceptance tests / Golden fixture"}
+    validations: {required: true}
+  - type: textarea
+    id: security
+    attributes: {label: "Security / data impact"}
+    validations: {required: true}
+  - type: textarea
+    id: platform
+    attributes: {label: "Cross-platform impact"}
+    validations: {required: true}

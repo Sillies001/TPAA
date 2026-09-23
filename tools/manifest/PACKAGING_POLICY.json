@@ -1,0 +1,14 @@
+{
+  "schema": "TPAA_M0_PACKAGING_POLICY_V1",
+  "status": "FROZEN",
+  "adr": "ADR-M0-006",
+  "qualification": "DEVELOPMENT_NOT_M5_QUALIFIED",
+  "profiles": {
+    "WINDOWS_DESKTOP_X64": {"archive": "zip", "role": "DESKTOP"},
+    "WINDOWS_SERVICE_X64": {"archive": "zip", "role": "SERVICE"},
+    "LINUX_DESKTOP_X64": {"archive": "tar.gz", "role": "DESKTOP"},
+    "LINUX_SERVICE_X64": {"archive": "tar.gz", "role": "SERVICE"}
+  },
+  "common_inputs": ["source_revision", "pyproject.toml", "uv.lock", "baseline", "generated"],
+  "required_evidence": ["build-manifest.json", "sbom.cdx.json", "license-report.json", "native-dependencies.json", "package-manifest.json"]
+}

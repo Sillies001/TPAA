@@ -1,0 +1,1035 @@
+{
+  "components": {
+    "schemas": {
+      "CapabilityObservationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aircraft_configuration_snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "aircraft_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "aircraft_instance_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "aircraft_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "capability_dimension": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_level": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "comparison_key_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "context_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "context_tags": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "correlation_group_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coverage": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "eligibility_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "exclusion_reason_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metric_code": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "metric_semantic_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "metric_semantic_version": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "observation_end_session_time_us": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          },
+          "observation_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "observation_schema_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "observation_start_session_time_us": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          },
+          "observed_metric_instance_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "pilot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "release_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "structured_output_schema_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_entity_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "supersedes_observation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-tpaa-transport-type": "json-union"
+          },
+          "value_kind": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "aircraft_id",
+          "aircraft_instance_id",
+          "aircraft_model_id",
+          "capability_dimension",
+          "capability_level",
+          "capability_type",
+          "comparison_key_hash",
+          "confidence",
+          "context_id",
+          "context_tags",
+          "coverage",
+          "eligibility_status",
+          "episode_id",
+          "evidence_set_id",
+          "metric_code",
+          "metric_semantic_id",
+          "metric_semantic_version",
+          "observation_end_session_time_us",
+          "observation_id",
+          "observation_schema_version",
+          "observation_start_session_time_us",
+          "observed_metric_instance_id",
+          "release_id",
+          "session_id",
+          "subject_entity_id",
+          "unit",
+          "value_kind"
+        ],
+        "type": "object"
+      },
+      "ContextArtifactRefDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_kind": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "artifact_sha256": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "artifact_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "binding_role": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "context_artifact_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "logical_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "object_ref_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "schema_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "binding_role",
+          "context_artifact_id",
+          "artifact_kind",
+          "logical_key",
+          "artifact_version",
+          "object_ref_id",
+          "artifact_sha256",
+          "schema_version"
+        ],
+        "type": "object"
+      },
+      "EvaluationContextBundleDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ContextArtifactRefDTO"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "ContextArtifactRefDTO[]"
+          },
+          "assessment_profile": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object",
+                "x-tpaa-projection-type": "object?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cohort": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "object[]"
+          },
+          "context": {
+            "$ref": "#/components/schemas/EvaluationContextDTO",
+            "x-tpaa-projection-type": "EvaluationContextDTO"
+          },
+          "objectives": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "object[]"
+          },
+          "references": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "object[]"
+          },
+          "roles": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "object[]"
+          },
+          "rules": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "object[]"
+          },
+          "scenario": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object",
+                "x-tpaa-projection-type": "object?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "x-tpaa-projection-type": "object[]"
+          }
+        },
+        "required": [
+          "context",
+          "artifact_refs",
+          "objectives",
+          "roles",
+          "stages",
+          "references",
+          "rules",
+          "cohort"
+        ],
+        "type": "object"
+      },
+      "EvaluationContextDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "assessment_profile_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assessment_profile_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "context_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "context_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "longitudinal_profile_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metric_profile_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "reference_set_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision_no": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "role_model_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rule_set_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scenario_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_context_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "syllabus_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "syllabus_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valid_from_session_time_us": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                "type": "string",
+                "x-tpaa-transport-type": "decimal-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valid_to_session_time_us": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                "type": "string",
+                "x-tpaa-transport-type": "decimal-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "context_id",
+          "session_id",
+          "context_version",
+          "revision_no",
+          "rule_set_version",
+          "metric_profile_version",
+          "status"
+        ],
+        "type": "object"
+      },
+      "MetricCatalogEntryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "algorithm_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "catalog_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "constant_bindings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "default_aggregation": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "delivery_batch": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "delivery_milestone": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "family": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "input_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "metric_code": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "observation_lane": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "operator_bindings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "p1_longitudinal_trend_eligibility": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "profile_parameters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "publication_route": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "semantic_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "semantic_version": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "state_machine_bindings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "structured_output_schema_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "unit": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "upstream_dependencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "value_kind": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "metric_code",
+          "semantic_id",
+          "semantic_version",
+          "algorithm_id",
+          "algorithm_version",
+          "family",
+          "subject_type",
+          "observation_lane",
+          "publication_route",
+          "value_kind",
+          "unit",
+          "delivery_milestone",
+          "delivery_batch",
+          "p1_longitudinal_trend_eligibility",
+          "default_aggregation",
+          "operator_bindings",
+          "constant_bindings",
+          "upstream_dependencies",
+          "state_machine_bindings",
+          "profile_parameters",
+          "input_fields",
+          "catalog_version"
+        ],
+        "type": "object"
+      },
+      "MissionSystemObservationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aircraft_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "alignment_uncertainty_summary": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "comparison_key_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "context_tags": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "coverage": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "eligibility_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "episode_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "exclusion_reason_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mission_system_instance_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "observation_end_session_time_us": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          },
+          "observation_schema_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "observation_start_session_time_us": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          },
+          "observed_metric_instance_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "reference_quality_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "reference_truth_profile_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reference_uncertainty_summary": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "release_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "supersedes_system_observation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "system_observation_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          }
+        },
+        "required": [
+          "system_observation_id",
+          "release_id",
+          "session_id",
+          "aircraft_id",
+          "mission_system_instance_id",
+          "observed_metric_instance_id",
+          "reference_quality_status",
+          "reference_uncertainty_summary",
+          "alignment_uncertainty_summary",
+          "observation_start_session_time_us",
+          "observation_end_session_time_us",
+          "context_tags",
+          "evidence_set_id",
+          "coverage",
+          "confidence",
+          "eligibility_status",
+          "comparison_key_hash",
+          "observation_schema_version"
+        ],
+        "type": "object"
+      },
+      "TPAAChainDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "break_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chain_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "chain_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "chain_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "coverage": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "end_session_time_us": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          },
+          "episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "refs": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "release_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start_session_time_us": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          }
+        },
+        "required": [
+          "chain_id",
+          "release_id",
+          "episode_id",
+          "refs",
+          "start_session_time_us",
+          "end_session_time_us",
+          "chain_status",
+          "coverage",
+          "confidence",
+          "chain_version"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "TPAA M0 Canonical DTO Snapshot",
+    "version": "0.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {},
+  "x-tpaa-authority": {
+    "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
+    "artifact_version": "UNVERSIONED_BY_AUTHORITY",
+    "core_baseline": "CB-1.4.0",
+    "sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+  },
+  "x-tpaa-transport-rules": {
+    "session_time_us": "decimal-string for JS-visible API",
+    "structured_metric": "object, never JSON string",
+    "uuid": "canonical UUID string"
+  }
+}

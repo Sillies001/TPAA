@@ -54,10 +54,19 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
     required = (
         '_dispatcher("bootstrap", "--check-only")',
         '_dispatcher("test-unit")',
+        '_dispatcher("verify-governance")',
+        '_dispatcher("openapi-snapshot", "--check")',
+        '_dispatcher("migration-smoke")',
+        '_dispatcher("backup-restore-smoke")',
+        '_dispatcher("security-smoke")',
+        '_dispatcher("package-smoke")',
+        '"cold-start"',
         '_dispatcher("test-contract")',
         '_dispatcher("test-golden")',
         '_dispatcher("test-replay")',
         '_dispatcher("test-e2e")',
+        '_dispatcher("test-platform")',
+        '_dispatcher("platform-smoke")',
         '_dispatcher("api-smoke")',
         '_dispatcher("gui-smoke", "--headless")',
         '_dispatcher("ui-automation-smoke")',
@@ -71,14 +80,11 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
         assert token in text
 
 
-def test_ci_gate_does_not_dispatch_later_step_work() -> None:
+def test_ci_gate_dispatches_step10_package_and_cold_start_fail_closed() -> None:
     text = GATE_RUNNER.read_text(encoding="utf-8")
-    for token in (
-        '_dispatcher("package")',
-        '_dispatcher("manifest")',
-        '_dispatcher("cold-start")',
-    ):
-        assert token not in text
+    assert '_dispatcher("package-smoke")' in text
+    assert '"cold-start"' in text
+    assert "TPAA_COLD_START_INNER" in text
 
 
 def test_linux_runner_installs_required_qt_egl_runtime() -> None:
@@ -107,6 +113,14 @@ def test_step9_fixture_and_logical_equivalence_are_fail_closed_in_ci() -> None:
     assert "needs: m0-cross-platform" in text
     assert "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in text
     assert "python tools/dev/tpaa_dev.py compare-platform-logical" in text
-    assert "--windows downloaded/cross-platform/windows.json" in text
-    assert "--linux downloaded/cross-platform/linux.json" in text
+    assert "--windows downloaded/evidence/cross-platform/windows.json" in text
+    assert "--linux downloaded/evidence/cross-platform/linux.json" in text
     assert "--evidence evidence/cross-platform/logical-equivalence.json" in text
+
+
+def test_step10_workflow_archives_build_evidence_and_packages() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "python tools/dev/tpaa_dev.py manifest" in text
+    assert "python tools/dev/tpaa_dev.py package" in text
+    assert "evidence/devops/${{ matrix.platform }}" in text
+    assert "dist/" in text

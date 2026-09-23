@@ -20,8 +20,12 @@ jobs:
         include:
           - platform: linux
             runner: ubuntu-24.04
+            desktop_profile: LINUX_DESKTOP_X64
+            service_profile: LINUX_SERVICE_X64
           - platform: windows
             runner: windows-2025
+            desktop_profile: WINDOWS_DESKTOP_X64
+            service_profile: WINDOWS_SERVICE_X64
 
     steps:
       - name: Checkout
@@ -58,6 +62,16 @@ jobs:
           --expected-platform ${{ matrix.platform }}
           --evidence evidence/ci/${{ matrix.platform }}.json
 
+      - name: Emit M0 build evidence
+        run: |
+          uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.desktop_profile }} --output evidence/devops/${{ matrix.platform }}/desktop
+          uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.service_profile }} --output evidence/devops/${{ matrix.platform }}/service
+
+      - name: Build M0 development packages
+        run: |
+          uv run --locked python tools/dev/tpaa_dev.py package --profile ${{ matrix.desktop_profile }} --output dist
+          uv run --locked python tools/dev/tpaa_dev.py package --profile ${{ matrix.service_profile }} --output dist
+
       - name: Emit M0 fixture framework evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py fixture-check
@@ -68,7 +82,7 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py platform-logical-product
           --output evidence/cross-platform/${{ matrix.platform }}.json
 
-      - name: Upload CI and Step 9 evidence
+      - name: Upload M0 CI, Step 9 and Step 10 evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -77,6 +91,8 @@ jobs:
             evidence/ci/${{ matrix.platform }}.json
             evidence/tests/framework-${{ matrix.platform }}.json
             evidence/cross-platform/${{ matrix.platform }}.json
+            evidence/devops/${{ matrix.platform }}
+            dist/
           if-no-files-found: error
           retention-days: 14
 
@@ -105,8 +121,8 @@ jobs:
       - name: Compare Windows and Linux logical products
         run: >-
           python tools/dev/tpaa_dev.py compare-platform-logical
-          --windows downloaded/cross-platform/windows.json
-          --linux downloaded/cross-platform/linux.json
+          --windows downloaded/evidence/cross-platform/windows.json
+          --linux downloaded/evidence/cross-platform/linux.json
           --evidence evidence/cross-platform/logical-equivalence.json
 
       - name: Upload logical-equivalence evidence

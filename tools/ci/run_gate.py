@@ -135,6 +135,11 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("verify-architecture", _dispatcher("verify-architecture")),
             ("verify-repository-policy", _dispatcher("verify-repository-policy")),
             ("verify-desktop-lifecycle-policy", _dispatcher("verify-desktop-lifecycle-policy")),
+            ("verify-governance", _dispatcher("verify-governance")),
+            ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
+            ("migration-smoke", _dispatcher("migration-smoke")),
+            ("backup-restore-smoke", _dispatcher("backup-restore-smoke")),
+            ("security-smoke", _dispatcher("security-smoke")),
             ("lint", _dispatcher("lint")),
             ("typecheck", _dispatcher("typecheck")),
             ("unit", _dispatcher("test-unit")),
@@ -142,17 +147,35 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("golden-framework", _dispatcher("test-golden")),
             ("replay-framework", _dispatcher("test-replay")),
             ("e2e-framework", _dispatcher("test-e2e")),
+            ("platform-tests", _dispatcher("test-platform")),
+            ("platform-smoke", _dispatcher("platform-smoke")),
             ("migration", _dispatcher("test-migration")),
             ("sqlite-repository-acceptance", _dispatcher("db-sqlite-repository-acceptance")),
             ("api-smoke", _dispatcher("api-smoke")),
             ("gui-smoke-headless", _dispatcher("gui-smoke", "--headless")),
             ("desktop-backend-smoke", _dispatcher("desktop-backend-smoke")),
             ("ui-automation-smoke", _dispatcher("ui-automation-smoke")),
+            ("package-smoke", _dispatcher("package-smoke")),
             ("uv-lock-check-offline", [shutil.which("uv") or "uv", "lock", "--check", "--offline"]),
             ("git-diff-check", ["git", "diff", "--check"]),
             ("git-diff-exit-code", ["git", "diff", "--exit-code"]),
         )
-        for name, command in commands:
+        command_list = list(commands)
+        if os.environ.get("TPAA_COLD_START_INNER") != "1":
+            cold_evidence = f"evidence/devops/{actual_platform}/cold-start.json"
+            command_list.append(
+                (
+                    "cold-start",
+                    _dispatcher(
+                        "cold-start",
+                        "--expected-platform",
+                        actual_platform,
+                        "--evidence",
+                        cold_evidence,
+                    ),
+                )
+            )
+        for name, command in command_list:
             gates.append(_run_gate(name, command))
             if name == "sqlite-repository-acceptance":
                 gates.append(_sqlite_bootstrap_gate())
@@ -188,12 +211,8 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
         "required_gates": gates,
         "failed_gate_names": [str(gate["name"]) for gate in failed],
         "scope": {
-            "included": "SDIB-1.0 §39 step 8 Windows/Linux CI over currently implemented M0 gates",
+            "included": "SDIB-1.0 M0 Windows/Linux CI over implemented Step 8-10 gates including package/SBOM/cold-start",
             "excluded": [
-                "packaging",
-                "SBOM",
-                "build manifest",
-                "cold-start",
                 "M0 Exit Gate",
                 "M1 production Metric/Stage/Release Golden/replay bundles",
                 "real PostgreSQL server acceptance is retained from M0-STO-003 and is not redefined by this runner task",

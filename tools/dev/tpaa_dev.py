@@ -38,6 +38,16 @@ UI_AUTOMATION_SMOKE = REPO_ROOT / "tools" / "gui" / "automation_smoke.py"
 CI_VERIFY = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
+GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
+PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
+OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
+MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
+BACKUP_RESTORE_SMOKE = REPO_ROOT / "tools" / "storage" / "backup_restore_smoke.py"
+SECURITY_SMOKE = REPO_ROOT / "tools" / "security" / "smoke.py"
+MANIFEST_TOOL = REPO_ROOT / "tools" / "manifest" / "build_artifacts.py"
+PACKAGE_TOOL = REPO_ROOT / "tools" / "packaging" / "development_package.py"
+PACKAGE_SMOKE = REPO_ROOT / "tools" / "packaging" / "smoke.py"
+COLD_START = REPO_ROOT / "tools" / "ci" / "cold_start.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -75,6 +85,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("ui-automation-smoke", "M0-GUI-004", "IMPLEMENTED", "Automate Desktop launch/READY diagnostics/close/backend cleanup."),
     CommandSpec("verify-ci", "M0-PLAT-004/M0-PLAT-005", "IMPLEMENTED", "Verify the governed Windows/Linux CI orchestration contract."),
     CommandSpec("ci-check", "M0-PLAT-004/M0-PLAT-005", "IMPLEMENTED", "Run the current required M0 gate set and emit platform CI evidence."),
+    CommandSpec("verify-governance", "M0-GOV-001..004", "IMPLEMENTED", "Verify ADR, Issue/PR, Baseline Change and DoD governance contracts."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -85,15 +96,22 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("test-replay", "M0-TST-001", "IMPLEMENTED", "Run replay tests."),
     CommandSpec("test-migration", "M0-TST-001", "IMPLEMENTED", "Run migration tests."),
     CommandSpec("test-e2e", "M0-TST-001", "IMPLEMENTED", "Run end-to-end tests."),
+    CommandSpec("test-platform", "M0-PLAT-001..003", "IMPLEMENTED", "Run cross-platform adapter contract tests."),
+    CommandSpec("platform-smoke", "M0-PLAT-001..003", "IMPLEMENTED", "Run real path/spawn/lock/atomic adapter smoke."),
+    CommandSpec("openapi-snapshot", "M0-API-003", "IMPLEMENTED", "Generate/check Canonical DTO OpenAPI snapshot."),
+    CommandSpec("migration-smoke", "M0-STO-005", "IMPLEMENTED", "Run bootstrap/rollback/forward-recovery migration harness."),
+    CommandSpec("backup-restore-smoke", "M0-STO-007", "IMPLEMENTED", "Run development DB/object backup-restore smoke."),
+    CommandSpec("security-smoke", "M0-SEC-001..004", "IMPLEMENTED", "Run security/audit/data-guard/secret-separation smoke."),
     CommandSpec("fixture-check", "M0-TST-001/M0-TST-005/M0-TST-006", "IMPLEMENTED", "Run the frozen M0 fixture/Golden/replay framework smoke and emit evidence."),
     CommandSpec("platform-logical-product", "M0-TST-006", "IMPLEMENTED", "Emit the current platform logical product for cross-platform comparison."),
     CommandSpec("compare-platform-logical", "M0-TST-006", "IMPLEMENTED", "Compare Windows/Linux logical products using the shared fixture tolerance."),
     CommandSpec("run", "M0-API-002/M0-GUI-001", "RESERVED", "Dispatch an API or GUI runtime profile."),
     CommandSpec("run-api", "M0-API-002", "RESERVED", "Start the API profile once implemented."),
     CommandSpec("run-gui", "M0-GUI-002", "IMPLEMENTED", "Start the composed Desktop shell with its owned local backend."),
-    CommandSpec("package", "M0-DEV-005", "RESERVED", "Build a platform development artifact once packaging is implemented."),
-    CommandSpec("manifest", "M0-DEV-003", "RESERVED", "Generate build/package manifest and SBOM inputs."),
-    CommandSpec("cold-start", "M0-DEV-006", "RESERVED", "Rebuild and execute all current milestone gates from clean state."),
+    CommandSpec("package", "M0-DEV-005", "IMPLEMENTED", "Build a deterministic M0 development artifact for one governed profile."),
+    CommandSpec("package-smoke", "M0-DEV-005", "IMPLEMENTED", "Clean-extract/install/start/stop Desktop and Service development bundles."),
+    CommandSpec("manifest", "M0-DEV-003/M0-DEV-004", "IMPLEMENTED", "Generate build manifest, SBOM, license and native dependency evidence."),
+    CommandSpec("cold-start", "M0-DEV-006", "IMPLEMENTED", "Rebuild and execute current M0 gates from a clean local clone."),
     CommandSpec("doctor", "M0-DEV-001", "IMPLEMENTED", "Report runtime, resolver, lock and quality-tool availability."),
 )
 
@@ -363,8 +381,23 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("lint", help="Run Ruff linter")
     sub.add_parser("typecheck", help="Run mypy")
 
-    for name in ("test", "test-unit", "test-contract", "test-golden", "test-replay", "test-migration", "test-e2e"):
+    for name in (
+        "test",
+        "test-unit",
+        "test-contract",
+        "test-golden",
+        "test-replay",
+        "test-migration",
+        "test-e2e",
+        "test-platform",
+    ):
         sub.add_parser(name, help=f"Run {name} suite")
+    sub.add_parser("platform-smoke", help="Run M0 path/spawn/lock/atomic platform smoke")
+    openapi = sub.add_parser("openapi-snapshot", help="Generate/check M0 Canonical DTO OpenAPI snapshot")
+    openapi.add_argument("--check", action="store_true")
+    sub.add_parser("migration-smoke", help="Run M0-STO-005 migration/recovery harness")
+    sub.add_parser("backup-restore-smoke", help="Run M0-STO-007 development backup/restore smoke")
+    sub.add_parser("security-smoke", help="Run M0 security/audit/data-governance smoke")
 
     fixture_check = sub.add_parser("fixture-check", help="Run M0 fixture/Golden/replay framework smoke")
     fixture_check.add_argument("--bundle", type=Path)
@@ -394,12 +427,20 @@ def build_parser() -> argparse.ArgumentParser:
     ui_automation.add_argument("--show", action="store_true")
     ui_automation.add_argument("--timeout", type=float, default=30.0)
     sub.add_parser("verify-ci", help="Verify the M0 Windows/Linux CI orchestration contract")
+    sub.add_parser("verify-governance", help="Verify M0 governance repository contracts")
     ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
     ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
     ci_check.add_argument("--evidence", type=Path)
-    sub.add_parser("package", help="Reserved for M0-DEV-005")
-    sub.add_parser("manifest", help="Reserved for M0-DEV-003")
-    sub.add_parser("cold-start", help="Reserved for M0-DEV-006")
+    package = sub.add_parser("package", help="Build an M0 development package")
+    package.add_argument("--profile", required=True)
+    package.add_argument("--output", type=Path, required=True)
+    sub.add_parser("package-smoke", help="Clean install/start/stop current-OS Desktop and Service bundles")
+    manifest = sub.add_parser("manifest", help="Generate build/SBOM/license/native-dependency evidence")
+    manifest.add_argument("--profile", required=True)
+    manifest.add_argument("--output", type=Path, required=True)
+    cold_start = sub.add_parser("cold-start", help="Rebuild M0 from a clean clone and rerun gates")
+    cold_start.add_argument("--expected-platform", choices=("windows", "linux"))
+    cold_start.add_argument("--evidence", type=Path)
     return parser
 
 
@@ -432,6 +473,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "test-replay": "tests/replay",
         "test-migration": "tests/migration",
         "test-e2e": "tests/e2e",
+        "test-platform": "tests/platform",
     }
     if command in suite_paths:
         return cmd_test(suite_paths[command])
@@ -498,6 +540,52 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run(automation_args)
     if command == "verify-ci":
         return _run([sys.executable, str(CI_VERIFY)])
+    if command == "verify-governance":
+        return _run([sys.executable, str(GOVERNANCE_VERIFY)])
+    if command == "platform-smoke":
+        return _run([sys.executable, str(PLATFORM_SMOKE)])
+    if command == "openapi-snapshot":
+        openapi_args = [sys.executable, str(OPENAPI_SNAPSHOT)]
+        if args.check:
+            openapi_args.append("--check")
+        return _run(openapi_args)
+    if command == "migration-smoke":
+        return _run([sys.executable, str(MIGRATION_HARNESS)])
+    if command == "backup-restore-smoke":
+        return _run([sys.executable, str(BACKUP_RESTORE_SMOKE)])
+    if command == "security-smoke":
+        return _run([sys.executable, str(SECURITY_SMOKE)])
+    if command == "manifest":
+        return _run(
+            [
+                sys.executable,
+                str(MANIFEST_TOOL),
+                "--profile",
+                args.profile,
+                "--output",
+                str(args.output),
+            ]
+        )
+    if command == "package":
+        return _run(
+            [
+                sys.executable,
+                str(PACKAGE_TOOL),
+                "--profile",
+                args.profile,
+                "--output",
+                str(args.output),
+            ]
+        )
+    if command == "package-smoke":
+        return _run([sys.executable, str(PACKAGE_SMOKE)])
+    if command == "cold-start":
+        cold_args = [sys.executable, str(COLD_START)]
+        if args.expected_platform:
+            cold_args.extend(["--expected-platform", args.expected_platform])
+        if args.evidence is not None:
+            cold_args.extend(["--evidence", str(args.evidence)])
+        return _run(cold_args)
     if command == "ci-check":
         ci_args = [sys.executable, str(CI_GATE)]
         if args.expected_platform:
@@ -553,9 +641,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _reserved("M0-API-002", "run api")
     reserved = {
         "run-api": "M0-API-002",
-        "package": "M0-DEV-005",
-        "manifest": "M0-DEV-003",
-        "cold-start": "M0-DEV-006",
     }
     if command == "run-gui":
         return _run([sys.executable, "-m", "tpaa_gui"])

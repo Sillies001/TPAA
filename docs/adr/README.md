@@ -20,6 +20,11 @@ SDIB-1.0 requires ADR-M0-001 through ADR-M0-010 during M0. Decisions are not imp
 
 - [ADR-M0-007 — Generated-source policy](ADR-M0-007-generated-source-policy.md) — **CLOSED**, checked-in generated source with vendor-neutral regenerate-diff enforcement.
 
-## Still required before M0 Exit
+## Closed during SDIB §39 Step 10
 
-ADR-M0-006, ADR-M0-008, ADR-M0-009 and ADR-M0-010 remain **OPEN / NOT YET DECIDED**. No implementation may silently turn one of those undecided topics into a de-facto standard.
+- [ADR-M0-006 — Packaging](ADR-M0-006-packaging.md) — **CLOSED**, M0 development bundles are profile-specific deterministic source/runtime archives; formal installer qualification remains M5.
+- [ADR-M0-008 — Structured logging / telemetry](ADR-M0-008-structured-logging-telemetry.md) — **CLOSED**, TPAA-owned stdlib logging facade with NDJSON machine records and strict business/log-time separation.
+- [ADR-M0-009 — Local object / Parquet layout](ADR-M0-009-local-object-parquet-layout.md) — **CLOSED**, logical URI identity separated from configurable physical roots with Unicode/case safety.
+- [ADR-M0-010 — SBOM / license tooling](ADR-M0-010-sbom-license-tooling.md) — **CLOSED**, repository-controlled CycloneDX 1.6 SBOM plus explicit license/native dependency inventories.
+
+All ADR-M0-001 through ADR-M0-010 are now CLOSED. Reopen conditions remain defined by each ADR.

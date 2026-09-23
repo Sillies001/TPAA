@@ -1,11 +1,11 @@
 # M0-TST-001..006 — Test / Fixture Harness
 
-- **Status:** IN-PROGRESS — repository implementation is present; hosted Windows/Linux Golden/replay
-  framework smoke and cross-platform logical-equivalence evidence are required before Step 9 completion.
+- **Status:** COMPLETE — accepted on merged `main` revision `caf24b1c5c20d18e823012413fede6d0ca860f27`.
 - **Workstream:** WS-TEST
 - **Authority:** SDIB-1.0 §14, §15.1, §17 (`M0-TST-001`..`M0-TST-006`), §39 step 9,
   Appendix A, Appendix F, Appendix I, Appendix O, Appendix T.
 - **Starting revision:** `0c56f064aa033b3f7d467fb36dc0d9a8ce682e56` (Step 8 complete on `main`).
+- **Accepted main run:** GitHub Actions Run #18 (`35826990983`).
 
 ## M0 scope boundary
 
@@ -20,59 +20,47 @@ milestone tasks.
 ## Implemented harness
 
 1. `tests/unit`, `tests/contract`, `tests/golden`, `tests/replay`, `tests/migration`, and
-   `tests/e2e` are all executable through the same `tools/dev/tpaa_dev.py` dispatcher semantics.
-2. `fixtures/golden/M0_BASIC_TRANSPORT_V1` is a frozen framework-smoke bundle with fixture id/version,
-   exact input and expected hashes, Context/Stage/Profile refs, numeric tolerance, known invalid and
-   insufficient cases, and a replay provenance record.
-3. The fixture uses NUMERIC/TEXT/BOOLEAN/STRUCTURED values and a Session Time decimal string larger than
-   the JavaScript safe-integer range so transport behavior is exercised without inventing a production
-   Metric.
-4. `tools/testing/fixture_harness.py` validates paths, lifecycle, hashes, fixture version, typed values,
-   Session Time representation, expected logical products, replay frozen refs, evidence metadata, and
-   Windows/Linux logical equivalence.
-5. Missing input, corrupt/hash-drift input, unsupported fixture version, and insufficient payload produce
+   `tests/e2e` are executable through the same `tools/dev/tpaa_dev.py` dispatcher semantics.
+2. `fixtures/golden/M0_BASIC_TRANSPORT_V1` freezes fixture id/version, exact input/expected hashes,
+   Context/Stage/Profile refs, one numeric tolerance, invalid/insufficient cases, and replay provenance.
+3. The fixture exercises NUMERIC/TEXT/BOOLEAN/STRUCTURED values and a Session Time decimal string beyond
+   JavaScript safe-integer range without inventing a production Metric.
+4. Missing input, corrupt/hash-drift input, unsupported fixture version, and insufficient payload produce
    deterministic engineering failure classifications.
-6. Fixture evidence carries source revision, project/build version marker, Core Baseline, Baseline Lock
-   hash, DB schema, Metric/Stage/DTO authority hashes, dependency-lock hash, platform profile, fixture
-   id/version/hash, job identity, tolerance, replay source Release, start/end timestamps, and controlled
-   failure classification.
-7. The fixture lifecycle is `REVIEWED`, not `APPROVED_GOLDEN`. This is deliberate: the M0 harness
-   does not fabricate an independent Metric-mathematics approval. Promotion to `APPROVED_GOLDEN`
-   remains governed by Appendix O review discipline.
+5. Evidence records source revision, Core/Baseline/schema/Catalog/Stage/DTO authorities,
+   dependency-lock hash, platform profile, fixture identity/hash, tolerance and replay source.
+6. The lifecycle remains `REVIEWED` / `FRAMEWORK_SMOKE_ONLY`, not falsely
+   `APPROVED_GOLDEN`.
 
-## CI integration
+## Cross-platform frozen-input closure
 
-The existing Windows/Linux matrix remains the platform execution authority. Each platform now:
+Run #12 exposed that Windows/Linux checkout line-ending behavior could produce different raw
+`uv.lock` bytes while the first comparator revision did not yet compare that frozen input.
+M0-TST-006 was repaired rather than accepting the green jobs at face value:
 
-- runs `test-golden`, `test-replay`, and the M0 framework `test-e2e` inside `ci-check`;
-- emits `evidence/tests/framework-<platform>.json`;
-- emits `evidence/cross-platform/<platform>.json`;
-- archives those files with the existing per-platform CI evidence.
+- governed text checkout is LF-stable on both OS families;
+- the platform product carries Core/Baseline/schema/Catalog/Stage/DTO/dependency-lock frozen inputs;
+- the logical-equivalence comparator requires exact frozen-input parity before comparing products.
 
-A dependent `M0 logical equivalence` job downloads both immutable matrix artifacts and compares the
-Windows/Linux logical products. Stable identity, Session Time, kind/status-like discrete values and
-structured values are exact; NUMERIC values use the one tolerance frozen in the fixture manifest.
-There is no OS-specific threshold.
+Run #18 on merged `main` proves:
+
+- `M0 windows` = SUCCESS;
+- `M0 linux` = SUCCESS;
+- `M0 logical equivalence` = SUCCESS;
+- source revision = `caf24b1c5c20d18e823012413fede6d0ca860f27`;
+- dependency-lock SHA-256 = `302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e`;
+- fixture = `M0_BASIC_TRANSPORT_V1@1.0.0`;
+- `mismatches = []`;
+- `failure_classification = null`.
 
 ## Ticket coverage
 
 - **M0-TST-001:** executable unit/contract/golden/replay/migration/e2e directories and unified runners.
-- **M0-TST-002:** explicit Canonical contracts cover Core/DTO/Metric/Stage/P-M-WS authority loading,
-  supplementing the already governed loader/codegen contracts.
-- **M0-TST-003:** NUMERIC/TEXT/BOOLEAN/STRUCTURED JSON transport round-trip smoke.
-- **M0-TST-004:** Session Time remains a decimal string beyond `2^53-1`; no float conversion is allowed.
+- **M0-TST-002:** Canonical contracts cover Core/DTO/Metric/Stage/P-M-WS authority loading.
+- **M0-TST-003:** NUMERIC/TEXT/BOOLEAN/STRUCTURED transport round-trip smoke.
+- **M0-TST-004:** Session Time remains a decimal string beyond `2^53-1`.
 - **M0-TST-005:** deterministic missing/corrupt/version-mismatch and insufficient fixture failures.
-- **M0-TST-006:** machine-archivable fixture/platform/logical-equivalence evidence.
+- **M0-TST-006:** machine-archivable Windows/Linux fixture and frozen-input logical-equivalence evidence.
 
-## Completion discipline
-
-Step 9 remains **IN-PROGRESS** until a real GitHub Actions run on the Step 9 checkpoint proves:
-
-1. Windows Golden/replay/framework E2E GREEN;
-2. Linux Golden/replay/framework E2E GREEN;
-3. both platform evidence artifacts are generated for the same source revision and fixture hash;
-4. the dependent logical-equivalence comparison is GREEN with zero mismatches;
-5. existing Step 8 and earlier M0 gates remain GREEN.
-
-This task does not claim packaging, SBOM/build manifest, cold-start, remaining M0 backlog, M0 Exit,
-or any M1 capability.
+Step 9 is therefore **COMPLETE**. This completion still does not claim production Metric mathematics,
+production Release/Replay qualification, M0 Exit, or any M1 capability.

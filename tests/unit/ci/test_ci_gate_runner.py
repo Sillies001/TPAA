@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +31,7 @@ def test_dispatcher_command_uses_current_interpreter() -> None:
     assert command[-1] == "verify-baseline"
 
 
-def test_ci_scope_does_not_claim_later_release_work(
+def test_ci_scope_records_step10_work_without_claiming_m0_exit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     runner = _load_runner()
@@ -63,8 +64,14 @@ def test_ci_scope_does_not_claim_later_release_work(
     evidence = tmp_path / "ci.json"
 
     assert runner.run(expected_platform="linux", evidence=evidence) == 0
-    text = evidence.read_text(encoding="utf-8")
-    assert '"build manifest"' in text
-    assert '"SBOM"' in text
-    assert '"cold-start"' in text
-    assert '"M0 Exit Gate"' in text
+    payload = runner.json.loads(evidence.read_text(encoding="utf-8"))
+    included = payload["scope"]["included"]
+    excluded = payload["scope"]["excluded"]
+    gate_names = {gate["name"] for gate in payload["required_gates"]}
+    assert "package/SBOM/cold-start" in included
+    assert "package-smoke" in gate_names
+    assert "M0 Exit Gate" in excluded
+    if os.environ.get("TPAA_COLD_START_INNER") == "1":
+        assert "cold-start" not in gate_names
+    else:
+        assert "cold-start" in gate_names

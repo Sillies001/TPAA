@@ -14,6 +14,7 @@ from tpaa_application import ApplicationService
 from .app import _readiness_payload, _version_payload
 
 _bearer = HTTPBearer(auto_error=False)
+_DESKTOP_ALLOWED_PATHS = frozenset({"/health", "/readiness", "/version"})
 
 
 def create_desktop_app(*, application: ApplicationService, bearer_token: str) -> FastAPI:
@@ -46,9 +47,17 @@ def create_desktop_app(*, application: ApplicationService, bearer_token: str) ->
     )
 
     @app.middleware("http")
-    async def reject_origin(request: Request, call_next):  # type: ignore[no-untyped-def]
+    async def enforce_desktop_surface(request: Request, call_next):  # type: ignore[no-untyped-def]
+        if request.url.path not in _DESKTOP_ALLOWED_PATHS:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "PATH_NOT_ALLOWED"},
+            )
         if request.headers.get("origin") is not None:
-            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": "ORIGIN_FORBIDDEN"})
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"detail": "ORIGIN_FORBIDDEN"},
+            )
         return await call_next(request)
 
     @app.get("/health")
