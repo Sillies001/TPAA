@@ -1,0 +1,81 @@
+{
+  "schema": "TPAA_M0_IMPLEMENTATION_BASELINE_V1",
+  "baseline_id": "M0_IMPLEMENTATION_BASELINE",
+  "baseline_kind": "ENGINEERING_IMPLEMENTATION_BASELINE",
+  "status": "EXIT_GO_TAG_PENDING",
+  "authority": {
+    "sdib": "SDIB-1.0",
+    "exit_section": "§18",
+    "sequence": "§39 step 11"
+  },
+  "accepted_main_revision": "ee54e8500381e62a53e1f2352d485ed11892c9d6",
+  "exit_review": {
+    "workflow_run_id": 35849313925,
+    "workflow_run_number": 31,
+    "status": "PASS",
+    "decision": "GO",
+    "source_revision_consistent": true,
+    "exit_gate_count": 14,
+    "exit_gate_pass_count": 14,
+    "logical_equivalence_status": "PASS",
+    "logical_equivalence_mismatches": []
+  },
+  "frozen_inputs": {
+    "core_baseline": "CB-1.4.0",
+    "db_schema_version": "1.6.0",
+    "dependency_lock_sha256": "302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e",
+    "baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+    "dto_authority_sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+  },
+  "hosted_profiles": {
+    "windows": "windows-2025",
+    "linux": "ubuntu-24.04",
+    "python": "CPython 3.13.5",
+    "uv": "0.12.17",
+    "postgresql_exit": "PostgreSQL 16"
+  },
+  "artifacts": {
+    "windows_ci": {
+      "id": 10745101411,
+      "sha256": "e0eecc240499bb92517eaed4cf6cebaedf26ad64a8e2102a7aebba5deb28ce86"
+    },
+    "linux_ci": {
+      "id": 10744917537,
+      "sha256": "0ca13b69db6a2ee6f01def2bea19998205e1b77d32507e960f71df3a7cc83bd4"
+    },
+    "postgresql_exit": {
+      "id": 10745230650,
+      "sha256": "2127d7cc0a81657f72285f9762f3b16112004bc8826628e63a8754eb1cfd38d8"
+    },
+    "logical_equivalence": {
+      "id": 10744378110,
+      "sha256": "2397ff0678bfd14df07217cf90e32099c6173091ff7c0f028430a7a7fb11b5a5"
+    },
+    "exit_review": {
+      "id": 10744637893,
+      "sha256": "1047056f71ead3dbd997f6684d77932067d0314fd1281cd72af409783158472c"
+    }
+  },
+  "tag": {
+    "name": "M0_IMPLEMENTATION_BASELINE",
+    "target_revision": "ee54e8500381e62a53e1f2352d485ed11892c9d6",
+    "state": "PENDING_CREATION"
+  },
+  "scope": {
+    "admitted": [
+      "M0 engineering bootstrap substrate",
+      "Windows/Linux cross-platform implementation baseline",
+      "SQLite and live PostgreSQL bootstrap/repository acceptance",
+      "development package and clean-start evidence",
+      "M0 test/fixture framework and logical-equivalence gates"
+    ],
+    "not_admitted": [
+      "P1 capability",
+      "M1 Basic Flight vertical slice",
+      "production Metric/Stage/Release qualification",
+      "M5-qualified installers/releases"
+    ]
+  }
+}

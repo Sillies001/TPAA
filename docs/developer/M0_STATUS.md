@@ -366,24 +366,39 @@ Run #26 with Windows, Linux and logical-equivalence SUCCESS.
 
 Implementation record: `docs/implementation/M0_STEP10_REMAINING_BACKLOG_COLD_START.md`.
 
-## SDIB §39 Step 11 — PR ACCEPTANCE GO / MAIN MERGE PENDING
+## SDIB §39 Step 11 — COMPLETE / M0 EXIT GO
 
-Run #29 proves the Exit Review PR acceptance boundary:
+Merged `main` revision `ee54e8500381e62a53e1f2352d485ed11892c9d6` passed GitHub Actions
+Run #31 with all five final Exit jobs SUCCESS:
 
-- M0 Windows SUCCESS;
-- M0 Linux SUCCESS;
-- live PostgreSQL 16 Exit acceptance SUCCESS;
-- cross-platform logical equivalence SUCCESS;
-- M0 Exit Review aggregator SUCCESS.
+- M0 Windows;
+- M0 Linux;
+- live PostgreSQL 16 Exit acceptance;
+- cross-platform logical equivalence;
+- M0 Exit Review aggregator.
 
-The review artifact reports `status=PASS`, `decision=GO`, all 14 SDIB §18 gates PASS,
-`source_revision_consistent=true`, and `mismatches=[]` for PR merge revision
-`863ff928bb072775e5b99599571827d07cb19832`.
+The machine review artifact reports `status=PASS`, `decision=GO`, all **14/14** SDIB §18 gates PASS,
+`source_revision_consistent=true`, and `mismatches=[]`.
 
-Final M0 closure is still pending merge plus one fresh merged-main GO run and publication of the
-`M0_IMPLEMENTATION_BASELINE` manifest/tag.
+Therefore §39 step 11 is COMPLETE and the M0 Exit Gate is GO.
 
 Review record: `docs/reviews/M0_EXIT_REVIEW.md`.
+Publication manifest: `docs/baseline/M0_IMPLEMENTATION_BASELINE.json`.
+
+## M0 baseline publication
+
+The accepted engineering baseline tag is:
+
+`M0_IMPLEMENTATION_BASELINE`
+
+and must point exactly to:
+
+`ee54e8500381e62a53e1f2352d485ed11892c9d6`
+
+The manifest records the accepted revision, Run #31, all five artifact IDs/digests, frozen authority hashes,
+14/14 Exit result, and the explicit boundary that M0 GO is not P1 capability admission.
+
+M0 becomes publication-complete when this manifest is merged and the tag exists at the accepted revision.
 
 ## Source-entry evidence retained
 
@@ -394,16 +409,17 @@ Review record: `docs/reviews/M0_EXIT_REVIEW.md`.
 
 ## Not claimed
 
-- M0 overall completion or M0 Exit GO before Step 11 hosted review PASS on merged main.
 - P1 capability completion/admission.
 - M5-qualified packaging/release status.
-- Any M1 capability.
+- Production Metric/Stage/Release qualification.
+- Any M1 capability before M0 baseline publication is complete.
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, steps 1–10 are COMPLETE and step 11 is active.
+Per SDIB-1.0 §39, steps 1–11 are COMPLETE and M0 Exit is GO.
 
-1. Merge PR #6 after its final documentation checkpoint CI is GREEN.
-2. Require one merged-main Exit run with `decision=GO` and every §18 gate PASS.
-3. Publish `M0_IMPLEMENTATION_BASELINE` tag/manifest only after that merged-main GO.
-4. Begin M1 only after the M0 Exit baseline publication is complete.
+1. Merge the baseline-publication manifest/status PR after CI is GREEN.
+2. Create tag `M0_IMPLEMENTATION_BASELINE` at exact revision
+   `ee54e8500381e62a53e1f2352d485ed11892c9d6`.
+3. Verify the tag resolves to that exact revision.
+4. Only then begin M1 Basic Flight minimum vertical slice.
