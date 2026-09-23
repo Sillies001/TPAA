@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-SDIB-1.0 requires ADR-M0-001 through ADR-M0-010 during M0. Decisions are not implied by code; each ADR must carry status, owner role, decision, alternatives and evidence.
+SDIB-1.0.1 requires ADR-M0-001 through ADR-M0-010 during M0. Decisions are not implied by code; each ADR must carry status, owner role, decision, alternatives and evidence.
 
 ## Closed
 

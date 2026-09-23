@@ -1,25 +1,20 @@
 # TPAA Software Repository
 
-TPAA V8.0 / ED-2.0 implementation monorepo bootstrapped from **SDIB-1.0**.
+TPAA V8.0 / ED-2.0 implementation monorepo governed by **SDIB-1.0.1**. The already-published M0 engineering baseline remains a historical SDIB-1.0 acceptance result; SDIB-1.0.1 is a C1 implementation-organization patch and does not change CB-1.4.0 / R3.3 Canonical business authority.
 
 ## Current implementation state
 
-- Milestone: **M0 Engineering Bootstrap**
-- Completed tasks:
-  - **M0-CORE-001** — import and lock CB-1.4.0 baseline snapshot
-  - **M0-CORE-002** — fail-closed Canonical artifact loader
-  - **M0-CORE-003** — deterministic Canonical code generator framework
-  - **M0-CORE-004** — generated-source provenance and regenerate-diff governance
-  - **M0-CORE-005** — SDIB architecture dependency test
-  - **M0-DEV-001** — unified developer command semantics
-  - **M0-DEV-002** — one cross-platform project dependency lock
-- Closed toolchain decisions:
-  - **ADR-M0-001** — CPython 3.13.x runtime baseline
-  - **ADR-M0-002** — uv + single `uv.lock`
-  - **ADR-M0-003** — Ruff + mypy + pytest quality toolchain
-  - **ADR-M0-007** — checked-in generated source + vendor-neutral regenerate-diff
-- Capability claim: **none**. M0 does not admit P1 or any later Capability Phase.
-- DB schema target inherited from the baseline: **1.6.0**
+- Overall design input: **TPAA V8.0 / ED-2.0 Rebaseline R3.3**.
+- Machine business authority: **CB-1.4.0** with the frozen R3.3 Canonical snapshot under `baseline/CB-1.4.0/`.
+- Implementation baseline: **SDIB-1.0.1**.
+- Historical M0 Exit: **GO**, accepted merged-main revision `ee54e8500381e62a53e1f2352d485ed11892c9d6`.
+- Published engineering tag: `M0_IMPLEMENTATION_BASELINE`, verified to peel exactly to the accepted M0 revision above.
+- SDIB-1.0.1 adoption audit: the patch adds `M0-DEV-000 Formal Repository Bootstrap` and raises the normative M0 backlog to **48 work packages**.
+- Current delta status: strict **48/48 completion is not yet claimed** because the current GitHub `main` is not protected and the repository root does not yet contain `.editorconfig`, both required by `M0-DEV-000`.
+- Consequently, under SDIB-1.0.1 §19.1 the current transition state is **M1_NOT_ADMITTED** until the new M0 delta is closed (or a formal M0 Review grants an allowed non-blocking exception) and the M1 Entry Gate is re-reviewed.
+- Capability claim: **none beyond the historical M0 engineering substrate**. P1/M1 capability has not started or been admitted.
+
+See `docs/reviews/SDIB-1.0.1_ADOPTION_REVIEW.md` for the adoption/delta review.
 
 ## Machine authority rule
 
@@ -79,4 +74,5 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-The repository now includes completed **M0-CORE-003 code generation**, **M0-CORE-004 generated-source governance**, and **M0-CORE-005 architecture dependency testing**. Per SDIB-1.0 §39, the next main-sequence work is the **1.6.0 DB bootstrap / Repository skeleton** before the Application/API/GUI shell and runtime handshake.
+SDIB-1.0.1 §17.1/§17.2 are now the normative M0 construction order, and §19.1–§19.4 are the normative M1 transition/startup order. Do not begin M1 work until the SDIB-1.0.1 M0 delta review is closed and all §19.1 M1 Entry Gate conditions are evidenced PASS.
+

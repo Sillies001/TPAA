@@ -1,0 +1,52 @@
+TPAA SDIB-1.0.1 VALIDATION
+Date: 2026-09-22
+Document SHA-256: 506298fb86ae6fbc1dfedf68be7145369ef3b113616a8128b56bf149874175c7
+Result: 45/45 PASS
+
+01. [PASS] Version header SDIB-1.0.1
+02. [PASS] R3.3 retained
+03. [PASS] CB-1.4.0 retained
+04. [PASS] DB schema 1.6.0 retained
+05. [PASS] Planned SDIB-1.1 after M1 retained
+06. [PASS] M0 backlog exact 48 unique tasks — 48/48
+07. [PASS] M0-DEV-000 exists
+08. [PASS] M0 startup mapping exists
+09. [PASS] M0 six construction waves exist
+10. [PASS] M0 startup has 12 numbered rows
+11. [PASS] M1 backlog exact 56 unique tasks — 56/56
+12. [PASS] M1 Entry Gate exists
+13. [PASS] M1 startup checklist exists
+14. [PASS] M1 startup mapping exists
+15. [PASS] M1 critical path exists
+16. [PASS] M1 startup has 23 steps
+17. [PASS] M1-A wave exists
+18. [PASS] M1-B wave exists
+19. [PASS] M1-C wave exists
+20. [PASS] M1-D wave exists
+21. [PASS] M1-E wave exists
+22. [PASS] M1-F wave exists
+23. [PASS] M1-G wave exists
+24. [PASS] M1-H wave exists
+25. [PASS] Critical path contains M1-TST-001
+26. [PASS] Critical path contains M1-DATA-001
+27. [PASS] Critical path contains M1-WORLD-002
+28. [PASS] Critical path contains M1-TST-003
+29. [PASS] Critical path contains M1-MET-002
+30. [PASS] Critical path contains M1-OBS-002
+31. [PASS] Critical path contains M1-API-003
+32. [PASS] Critical path contains M1-GUI-006
+33. [PASS] Critical path contains M1-TST-008
+34. [PASS] No unknown full M0/M1 Task IDs
+35. [PASS] Old duplicate §39 removed
+36. [PASS] New §39 quick index exists
+37. [PASS] Retains 116 项 P1 指标
+38. [PASS] Retains 661 个输入绑定
+39. [PASS] Retains Windows/Linux
+40. [PASS] Retains P1-AIR-001
+41. [PASS] Retains P1-AIR-002
+42. [PASS] Retains P1-AIR-003
+43. [PASS] Retains P1-AIR-004
+44. [PASS] Retains P1-AIR-007
+45. [PASS] No accidental SDIB-1.1.1
+
+Scope note: this validation checks the SDIB patch structure and task traceability only. It does not claim M0/M1 implementation completion and does not alter R3.3/CB-1.4.0 machine authorities.
