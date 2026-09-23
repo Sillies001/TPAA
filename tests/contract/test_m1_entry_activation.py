@@ -1,6 +1,16 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+from pathlib import Path
+
 from tools.governance.m1_entry_activation import EXPECTED_FROZEN, evaluate
+from tools.manifest.m1_entry_manifest import build_manifest
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEV = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
+ROLES = REPO_ROOT / "docs" / "governance" / "M1_ROLE_ASSIGNMENTS.json"
 
 
 def _blocked_review() -> dict[str, object]:
@@ -146,3 +156,62 @@ def test_activation_fails_closed_on_cross_platform_source_revision_drift() -> No
     )
     assert result["status"] == "FAIL"
     assert result["implementation_authorized"] is False
+
+def test_auto_mode_tracks_current_role_state_without_early_admission(tmp_path: Path) -> None:
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    windows = tmp_path / "windows.json"
+    linux = tmp_path / "linux.json"
+    windows.write_text(
+        json.dumps(build_manifest("WINDOWS_DESKTOP_X64"), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    linux.write_text(
+        json.dumps(build_manifest("LINUX_DESKTOP_X64"), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "activation.json"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(DEV),
+            "m1-entry-activation",
+            "--mode",
+            "auto",
+            "--event-name",
+            "pull_request",
+            "--git-ref",
+            "refs/pull/entry/merge",
+            "--source-revision",
+            revision,
+            "--windows-manifest",
+            str(windows),
+            "--linux-manifest",
+            str(linux),
+            "--output",
+            str(output),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    assert result.returncode == 0, result.stderr
+    evidence = json.loads(output.read_text(encoding="utf-8"))
+    roles = json.loads(ROLES.read_text(encoding="utf-8"))
+    assert evidence["status"] == "PASS"
+    assert evidence["implementation_authorized"] is False
+    if roles["status"] == "UNASSIGNED":
+        assert evidence["mode"] == "blocked"
+        assert evidence["decision"] == "M1_NOT_ADMITTED"
+    else:
+        assert roles["status"] == "ASSIGNED"
+        assert evidence["mode"] == "candidate"
+        assert evidence["decision"] == "M1_ADMISSION_CANDIDATE_VERIFIED"
+
