@@ -44,6 +44,7 @@ M0_DELTA_CLOSURE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_m0_delta_
 M1_ENTRY_PREPARATION_MODULE = "tools.governance.verify_m1_entry_preparation"
 M1_ENTRY_GATE_STATE_MODULE = "tools.governance.verify_m1_entry_gate_state"
 M1_ENTRY_ACTIVATION_MODULE = "tools.governance.m1_entry_activation"
+M1_ENTRY_ASSIGN_ROLES_MODULE = "tools.governance.m1_entry_assign_roles"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -75,6 +76,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-m1-entry-preparation", "M1 Entry Gate §19.1(6/7/9/10)", "IMPLEMENTED", "Verify non-admitting M1 Entry preparation evidence."),
     CommandSpec("verify-m1-entry-gate-state", "M1 Entry Gate §19.1", "IMPLEMENTED", "Verify the current blocked/admitted M1 Entry review state."),
     CommandSpec("m1-entry-activation", "M1 Entry Gate §19.1", "IMPLEMENTED", "Verify a PR candidate or emit merged-main M1 admission activation evidence."),
+    CommandSpec("m1-entry-assign-roles", "M1 Entry Gate §19.1(8)", "IMPLEMENTED", "Render explicit human role assignments into a non-admitting M1 admission candidate."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -459,6 +461,16 @@ def build_parser() -> argparse.ArgumentParser:
     m1_activation.add_argument("--windows-manifest", type=Path, required=True)
     m1_activation.add_argument("--linux-manifest", type=Path, required=True)
     m1_activation.add_argument("--output", type=Path, required=True)
+    m1_roles = sub.add_parser(
+        "m1-entry-assign-roles",
+        help="Render explicit §19.1(8) role assignments into an admission candidate",
+    )
+    m1_roles.add_argument("--primary-ws-owner", required=True)
+    m1_roles.add_argument("--golden-independent-reviewer", required=True)
+    m1_roles.add_argument("--m1-exit-reviewer", required=True)
+    m1_roles.add_argument("--golden-independence-attestation", required=True)
+    m1_roles.add_argument("--roles-output", type=Path, required=True)
+    m1_roles.add_argument("--review-output", type=Path, required=True)
     ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
     ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
     ci_check.add_argument("--evidence", type=Path)
@@ -610,6 +622,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
                 "--output",
                 str(args.output),
+            ]
+        )
+    if command == "m1-entry-assign-roles":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_ENTRY_ASSIGN_ROLES_MODULE,
+                "--primary-ws-owner",
+                args.primary_ws_owner,
+                "--golden-independent-reviewer",
+                args.golden_independent_reviewer,
+                "--m1-exit-reviewer",
+                args.m1_exit_reviewer,
+                "--golden-independence-attestation",
+                args.golden_independence_attestation,
+                "--roles-output",
+                str(args.roles_output),
+                "--review-output",
+                str(args.review_output),
             ]
         )
     if command == "platform-smoke":
