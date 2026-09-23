@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 import tempfile
 from pathlib import Path
 from types import TracebackType
-from typing import BinaryIO
-
-if os.name == "nt":
-    import msvcrt
-else:
-    import fcntl
+from typing import Any, BinaryIO
 
 
 class LockUnavailable(RuntimeError):
@@ -37,9 +33,11 @@ class InterProcessFileLock:
         handle.seek(0)
         try:
             if os.name == "nt":
+                msvcrt: Any = importlib.import_module("msvcrt")
                 mode = msvcrt.LK_LOCK if blocking else msvcrt.LK_NBLCK
                 msvcrt.locking(handle.fileno(), mode, 1)
             else:
+                fcntl: Any = importlib.import_module("fcntl")
                 operation = fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB)
                 fcntl.flock(handle.fileno(), operation)
         except OSError as exc:
@@ -54,8 +52,10 @@ class InterProcessFileLock:
         try:
             handle.seek(0)
             if os.name == "nt":
+                msvcrt: Any = importlib.import_module("msvcrt")
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
             else:
+                fcntl: Any = importlib.import_module("fcntl")
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
         finally:
             handle.close()

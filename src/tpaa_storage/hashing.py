@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
+
 type JSONPrimitive = str | int | bool | None
 type CanonicalValue = JSONPrimitive | list[CanonicalValue] | dict[str, CanonicalValue]
 
