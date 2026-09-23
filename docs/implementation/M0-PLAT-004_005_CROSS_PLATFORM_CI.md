@@ -25,7 +25,8 @@ The current construction host is CPython 3.13.5 with uv 0.10.0 (within the froze
 
 - unit: **96/96 PASS**;
 - migration: **26/26 PASS**;
-- contract: **108/108 PASS** when the known subprocess-heavy contract set is run in controlled partitions; an aggregate invocation exceeded the chat execution timeout and was not used as a false failure;
+- contract: **110/110 PASS** when the known subprocess-heavy contract set is run in controlled partitions; an aggregate invocation exceeded the chat execution timeout and was not used as a false failure;
+- total regression: **232/232 PASS** (unit 96 + migration 26 + contract 110);
 - `verify-ci`: PASS;
 - baseline/canonical/generate-check/verify-generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap-check/SQLite bootstrap+verify/SQLite Repository/API smoke/Desktop-backend smoke/offline lock/diff-check: PASS;
 - local `gui-smoke --headless` and `ui-automation-smoke`: **not executable on this host** because PySide6 is absent; the hosted jobs install the frozen project lock before running them;
