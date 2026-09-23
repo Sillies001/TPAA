@@ -12,9 +12,9 @@ Role assignment contract: `docs/governance/M1_ROLE_ASSIGNMENTS.json`.
 
 Current merged-main engineering revision:
 
-`e651806dbfeec4955a5b19d68aef69d2e3abe145`
+`c3019718e6a088fdf01e5e4297ff5496746d0aa8`
 
-Run #43 completed SUCCESS on that exact revision with all five required jobs:
+Run #45 completed SUCCESS on that exact revision with all five required jobs:
 
 - M0 windows
 - M0 linux
@@ -26,7 +26,7 @@ The Exit Review reports `GO / PASS`, `source_revision_consistent=true`, and all 
 
 ## Exact M1 Entry manifests
 
-Run #43 emitted both Windows and Linux M1 Entry build manifests for the exact merged-main revision.
+Run #45 emitted both Windows and Linux M1 Entry build manifests for the exact merged-main revision.
 
 Both freeze the same:
 
@@ -45,7 +45,7 @@ Therefore §19.1 condition 6 is PASS.
 
 ## Conditions 7, 9 and 10
 
-Condition 7 is PASS because the synthetic-only / Golden strategy and machine policy are now merged on `main`, and `verify-m1-entry-preparation` passed on both Windows and Linux in Run #43.
+Condition 7 is PASS because the synthetic-only / Golden strategy and machine policy are now merged on `main`, and `verify-m1-entry-preparation` passed on both Windows and Linux in Run #45.
 
 Condition 9 is PASS because the architecture blocker review is merged, CI-verified, reports `NO_KNOWN_ARCHITECTURE_BLOCKER`, and authorizes no bypass of Context / Stage / World / Release / API / GUI.
 
@@ -90,4 +90,4 @@ Tracking issue: #67.
 
 No M1 feature implementation may begin while condition 8 remains blocked.
 
-Once the role assignment contract is explicitly filled and reviewed, the final Entry Gate review can be rerun. Only a 10/10 PASS review may change the decision to `M1_ADMITTED`.
+Once the role assignment contract is explicitly filled and reviewed, the final Entry Gate review can be rerun. The final role-assignment change will use the single-merge activation policy in `docs/governance/M1_ENTRY_ACTIVATION_POLICY.md`. A protected-main activation artifact bound to the exact merged revision is required before the decision becomes `M1_ADMITTED`.
