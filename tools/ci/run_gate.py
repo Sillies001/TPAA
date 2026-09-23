@@ -143,6 +143,8 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("golden-framework", _dispatcher("test-golden")),
             ("replay-framework", _dispatcher("test-replay")),
             ("e2e-framework", _dispatcher("test-e2e")),
+            ("platform-tests", _dispatcher("test-platform")),
+            ("platform-smoke", _dispatcher("platform-smoke")),
             ("migration", _dispatcher("test-migration")),
             ("sqlite-repository-acceptance", _dispatcher("db-sqlite-repository-acceptance")),
             ("api-smoke", _dispatcher("api-smoke")),

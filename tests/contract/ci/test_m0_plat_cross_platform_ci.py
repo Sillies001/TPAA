@@ -59,6 +59,8 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
         '_dispatcher("test-golden")',
         '_dispatcher("test-replay")',
         '_dispatcher("test-e2e")',
+        '_dispatcher("test-platform")',
+        '_dispatcher("platform-smoke")',
         '_dispatcher("api-smoke")',
         '_dispatcher("gui-smoke", "--headless")',
         '_dispatcher("ui-automation-smoke")',

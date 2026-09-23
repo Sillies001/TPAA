@@ -39,6 +39,7 @@ CI_VERIFY = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
 GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
+PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -87,6 +88,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("test-replay", "M0-TST-001", "IMPLEMENTED", "Run replay tests."),
     CommandSpec("test-migration", "M0-TST-001", "IMPLEMENTED", "Run migration tests."),
     CommandSpec("test-e2e", "M0-TST-001", "IMPLEMENTED", "Run end-to-end tests."),
+    CommandSpec("test-platform", "M0-PLAT-001..003", "IMPLEMENTED", "Run cross-platform adapter contract tests."),
+    CommandSpec("platform-smoke", "M0-PLAT-001..003", "IMPLEMENTED", "Run real path/spawn/lock/atomic adapter smoke."),
     CommandSpec("fixture-check", "M0-TST-001/M0-TST-005/M0-TST-006", "IMPLEMENTED", "Run the frozen M0 fixture/Golden/replay framework smoke and emit evidence."),
     CommandSpec("platform-logical-product", "M0-TST-006", "IMPLEMENTED", "Emit the current platform logical product for cross-platform comparison."),
     CommandSpec("compare-platform-logical", "M0-TST-006", "IMPLEMENTED", "Compare Windows/Linux logical products using the shared fixture tolerance."),
@@ -365,8 +368,18 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("lint", help="Run Ruff linter")
     sub.add_parser("typecheck", help="Run mypy")
 
-    for name in ("test", "test-unit", "test-contract", "test-golden", "test-replay", "test-migration", "test-e2e"):
+    for name in (
+        "test",
+        "test-unit",
+        "test-contract",
+        "test-golden",
+        "test-replay",
+        "test-migration",
+        "test-e2e",
+        "test-platform",
+    ):
         sub.add_parser(name, help=f"Run {name} suite")
+    sub.add_parser("platform-smoke", help="Run M0 path/spawn/lock/atomic platform smoke")
 
     fixture_check = sub.add_parser("fixture-check", help="Run M0 fixture/Golden/replay framework smoke")
     fixture_check.add_argument("--bundle", type=Path)
@@ -435,6 +448,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "test-replay": "tests/replay",
         "test-migration": "tests/migration",
         "test-e2e": "tests/e2e",
+        "test-platform": "tests/platform",
     }
     if command in suite_paths:
         return cmd_test(suite_paths[command])
@@ -503,6 +517,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(CI_VERIFY)])
     if command == "verify-governance":
         return _run([sys.executable, str(GOVERNANCE_VERIFY)])
+    if command == "platform-smoke":
+        return _run([sys.executable, str(PLATFORM_SMOKE)])
     if command == "ci-check":
         ci_args = [sys.executable, str(CI_GATE)]
         if args.expected_platform:

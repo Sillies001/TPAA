@@ -157,6 +157,8 @@ def verify() -> dict[str, object]:
         '_dispatcher("test-golden")',
         '_dispatcher("test-replay")',
         '_dispatcher("test-e2e")',
+        '_dispatcher("test-platform")',
+        '_dispatcher("platform-smoke")',
         '_dispatcher("test-migration")',
         '_dispatcher("db-sqlite-repository-acceptance")',
         '_dispatcher("api-smoke")',
