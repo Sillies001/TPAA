@@ -1,6 +1,6 @@
 # M0-PLAT-004 / M0-PLAT-005 — Cross-platform CI
 
-- **Status:** IN-PROGRESS — repository implementation and locally available verification complete; exact-tool/PySide6 hosted-runner evidence is still required before completion.
+- **Status:** COMPLETE — real GitHub-hosted Windows and Linux acceptance is GREEN on `main` revision `70f1112c313d666685867cfe00de46b81bd1a21f`.
 - **Workstream:** WS-PLATFORM
 - **Authority:** SDIB-1.0 §15, §17 (`M0-PLAT-004`, `M0-PLAT-005`), §39 step 8, Appendix F; ADR-M0-001/002/003; current completed M0 gate contracts.
 - **Starting commit:** `46f6e7db2245e4c3cf5f7c98f96b40c487743026`
@@ -32,7 +32,7 @@ The current construction host is CPython 3.13.5 with uv 0.10.0 (within the froze
 - local `gui-smoke --headless` and `ui-automation-smoke`: **not executable on this host** because PySide6 is absent; the hosted jobs install the frozen project lock before running them;
 - local Ruff 0.16.8 and mypy 2.3.1: **not executable on this host** because those exact tools are absent and network fetch is unavailable; the hosted jobs acquire the exact frozen versions through the governed dispatcher.
 
-No unavailable local gate is recorded as PASS. The checkpoint remains IN-PROGRESS until the real Windows and Linux jobs execute all required gates.
+No unavailable local gate was recorded as PASS. Local limitations were superseded by the real hosted acceptance recorded below.
 
 ## First hosted-runner attempt and remediation
 
@@ -44,7 +44,20 @@ The first real GitHub Actions run against checkpoint `065affd1bf465bd07a153034d1
 - hosted pytest could not import the repository-local `tools` namespace because only `src` was on the governed pytest path; the root path is now explicitly included together with `src`;
 - Linux PySide6 import failed on missing `libEGL.so.1`; the Linux matrix branch now installs the minimal Ubuntu `libegl1` runtime package before executing the unchanged offscreen/headless GUI gates. Windows GUI and UI-automation smoke already passed in that first hosted attempt.
 
-The CI verifier and contract tests now fail closed if the Linux EGL preparation or the pytest/mypy namespace configuration is removed. These repairs remain IN-PROGRESS until a new real hosted Windows/Linux run proves the exact Ruff/mypy/test/GUI gates on the amended commit.
+The CI verifier and contract tests now fail closed if the Linux EGL preparation or the pytest/mypy namespace configuration is removed. Subsequent hosted runs validated those repairs without weakening any required Gate.
+
+## Final hosted acceptance
+
+GitHub Actions Run #6 (`35814465946`) executed on the merged `main` revision `70f1112c313d666685867cfe00de46b81bd1a21f` and completed **SUCCESS** on both required matrix jobs:
+
+- `M0 windows`: **PASS** on `windows-2025`, CPython 3.13.5, uv 0.12.17;
+- `M0 linux`: **PASS** on `ubuntu-24.04`, CPython 3.13.5, uv 0.12.17;
+- both jobs completed `verify-ci`, baseline/bootstrap/Canonical/generated/architecture/Repository-policy/Desktop-lifecycle, Ruff lint, mypy typecheck, unit, contract, migration, SQLite repository/bootstrap, API smoke, GUI headless smoke, Desktop backend smoke, UI automation smoke, offline lock check and Git diff checks with zero failed gates;
+- Linux evidence artifact `10730478191`: digest `sha256:4926c93505fd1309ef37c949d11360988fcc78ccf1e9bd2117282914076c7975`;
+- Windows evidence artifact `10730209271`: digest `sha256:6d4a42b4d34242834fefef2d45e4de76b48ae0b340da03efa7eb0860bce00bfd`;
+- both machine-readable artifacts use schema `TPAA_M0_CROSS_PLATFORM_CI_EVIDENCE_V1`, record `status = PASS`, `failed_gate_names = []`, and pin `source_revision = 70f1112c313d666685867cfe00de46b81bd1a21f`.
+
+This satisfies the formal hosted-runner acceptance for `M0-PLAT-004` and `M0-PLAT-005`. It does not claim packaging, SBOM, build manifest, cold-start, M0 Exit, or §39 step 9 Golden/replay/logical-equivalence completion.
 
 ## PostgreSQL boundary
 
@@ -63,4 +76,4 @@ M0-STO-003 already owns and completed real PostgreSQL 16 repository acceptance. 
 
 ## Completion discipline
 
-The repository implementation is not `COMPLETE` until a real GitHub Actions run for the checkpoint commit provides GREEN evidence from both the Windows and Linux matrix jobs. Local Linux success, YAML parsing, or prior Windows workstation smoke results are not substitutes for hosted-runner evidence.
+Completion requires real hosted Windows/Linux GREEN evidence for the accepted source revision. Run #6 provides that evidence on merged `main` revision `70f1112c313d666685867cfe00de46b81bd1a21f`; therefore `M0-PLAT-004` and `M0-PLAT-005` are COMPLETE. This completion is limited to SDIB-1.0 §39 step 8 and does not imply M0 Exit or later-step completion.
