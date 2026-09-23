@@ -7,7 +7,7 @@ import socket
 import sys
 import threading
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
 if str(SRC_ROOT) not in sys.path:
@@ -18,6 +18,7 @@ import uvicorn  # noqa: E402
 from tpaa_api import create_desktop_app  # noqa: E402
 from tpaa_application import (  # noqa: E402
     ApplicationService,
+    GetStorageBaselineStatus,
     build_trusted_runtime_status_use_case,
 )
 
@@ -46,7 +47,7 @@ def _emit(record: dict[str, object]) -> None:
 
 def _application(product_build_version: str) -> ApplicationService:
     return ApplicationService(
-        get_storage_baseline_status=_UnusedStorageUseCase(),
+        get_storage_baseline_status=cast(GetStorageBaselineStatus, _UnusedStorageUseCase()),
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=product_build_version
         ),

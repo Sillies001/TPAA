@@ -103,7 +103,7 @@ def _run_checks() -> tuple[list[CheckResult], list[dict[str, object]]]:
             )
         )
 
-    records = [
+    records: list[dict[str, object]] = [
         {
             "artifact_id": artifact.artifact_id,
             "filename": artifact.filename,

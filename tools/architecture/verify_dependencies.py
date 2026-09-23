@@ -8,8 +8,12 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from dependency_policy import load_policy, scan_architecture
+if TYPE_CHECKING:
+    from tools.architecture.dependency_policy import load_policy, scan_architecture
+else:
+    from dependency_policy import load_policy, scan_architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
