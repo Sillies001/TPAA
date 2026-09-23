@@ -7,7 +7,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEV = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
-VERIFY = REPO_ROOT / "tools" / "governance" / "verify_m1_entry_preparation.py"
+VERIFY_MODULE = "tools.governance.verify_m1_entry_preparation"
 BACKLOG = REPO_ROOT / "docs" / "planning" / "M1_BACKLOG_IMPORT.json"
 FIXTURE_POLICY = REPO_ROOT / "tools" / "testing" / "M1_FIXTURE_POLICY.json"
 
@@ -28,7 +28,7 @@ def _profile() -> str:
 
 
 def test_m1_entry_preparation_verifier_passes_without_admitting_m1() -> None:
-    result = _run(str(VERIFY))
+    result = _run("-m", VERIFY_MODULE)
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
     assert evidence["schema"] == "TPAA_M1_ENTRY_PREPARATION_VERIFICATION_V1"
