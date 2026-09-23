@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 from dataclasses import asdict
 from pathlib import Path
 
@@ -17,7 +18,7 @@ class BackupRestoreError(RuntimeError):
 
 def _sqlite_backup(source: Path, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(source) as src, sqlite3.connect(destination) as dst:
+    with closing(sqlite3.connect(source)) as src, closing(sqlite3.connect(destination)) as dst:
         src.backup(dst)
 
 

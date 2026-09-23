@@ -9,10 +9,10 @@ and repository conformance against the current frozen authority.
 from __future__ import annotations
 
 import json
-import shutil
 import sqlite3
 import sys
 import tempfile
+from contextlib import closing
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -34,13 +34,13 @@ FIXTURE_MANIFEST = (
 
 
 def _backup_database(source: Path, destination: Path) -> None:
-    with sqlite3.connect(source) as src, sqlite3.connect(destination) as dst:
+    with closing(sqlite3.connect(source)) as src, closing(sqlite3.connect(destination)) as dst:
         src.backup(dst)
 
 
 def _restore_database(source: Path, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(source) as src, sqlite3.connect(destination) as dst:
+    with closing(sqlite3.connect(source)) as src, closing(sqlite3.connect(destination)) as dst:
         src.backup(dst)
 
 
@@ -57,7 +57,7 @@ def run() -> dict[str, object]:
 
         _backup_database(database, recovery)
 
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.execute("BEGIN")
             connection.execute(
                 f'UPDATE "{BOOTSTRAP_MANIFEST_TABLE}" SET schema_version=? WHERE singleton=1',
@@ -66,7 +66,7 @@ def run() -> dict[str, object]:
             connection.rollback()
         checks["rollback"] = verify_sqlite(database).schema_version == "1.6.0"
 
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.execute(
                 f'UPDATE "{BOOTSTRAP_MANIFEST_TABLE}" SET schema_version=? WHERE singleton=1',
                 ("drift-probe",),

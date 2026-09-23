@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import threading
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Callable
 
 from tpaa_storage.hashing import canonical_request_hash
 

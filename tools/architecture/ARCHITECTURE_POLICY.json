@@ -81,6 +81,7 @@
     ],
     "tpaa_api": [
       "tpaa_assessment",
+      "tpaa_audit",
       "tpaa_canonical",
       "tpaa_context",
       "tpaa_episode",
@@ -97,6 +98,7 @@
     "tpaa_gui": [
       "tpaa_api",
       "tpaa_assessment",
+      "tpaa_audit",
       "tpaa_canonical",
       "tpaa_context",
       "tpaa_episode",
