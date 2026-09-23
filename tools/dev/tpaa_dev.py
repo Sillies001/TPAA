@@ -47,6 +47,7 @@ MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
 BACKUP_RESTORE_SMOKE = REPO_ROOT / "tools" / "storage" / "backup_restore_smoke.py"
 SECURITY_SMOKE = REPO_ROOT / "tools" / "security" / "smoke.py"
 MANIFEST_TOOL = REPO_ROOT / "tools" / "manifest" / "build_artifacts.py"
+M1_ENTRY_MANIFEST_TOOL = REPO_ROOT / "tools" / "manifest" / "m1_entry_manifest.py"
 PACKAGE_TOOL = REPO_ROOT / "tools" / "packaging" / "development_package.py"
 PACKAGE_SMOKE = REPO_ROOT / "tools" / "packaging" / "smoke.py"
 COLD_START = REPO_ROOT / "tools" / "ci" / "cold_start.py"
@@ -115,6 +116,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("package", "M0-DEV-005", "IMPLEMENTED", "Build a deterministic M0 development artifact for one governed profile."),
     CommandSpec("package-smoke", "M0-DEV-005", "IMPLEMENTED", "Clean-extract/install/start/stop Desktop and Service development bundles."),
     CommandSpec("manifest", "M0-DEV-003/M0-DEV-004", "IMPLEMENTED", "Generate build manifest, SBOM, license and native dependency evidence."),
+    CommandSpec("m1-entry-manifest", "M1 Entry Gate §19.1(6)", "IMPLEMENTED", "Generate an exact M1 Entry build manifest without admitting M1."),
     CommandSpec("cold-start", "M0-DEV-006", "IMPLEMENTED", "Rebuild and execute current M0 gates from a clean local clone."),
     CommandSpec("doctor", "M0-DEV-001", "IMPLEMENTED", "Report runtime, resolver, lock and quality-tool availability."),
 )
@@ -444,6 +446,9 @@ def build_parser() -> argparse.ArgumentParser:
     manifest = sub.add_parser("manifest", help="Generate build/SBOM/license/native-dependency evidence")
     manifest.add_argument("--profile", required=True)
     manifest.add_argument("--output", type=Path, required=True)
+    m1_manifest = sub.add_parser("m1-entry-manifest", help="Generate M1 Entry build-manifest evidence")
+    m1_manifest.add_argument("--profile", required=True)
+    m1_manifest.add_argument("--output", type=Path, required=True)
     cold_start = sub.add_parser("cold-start", help="Rebuild M0 from a clean clone and rerun gates")
     cold_start.add_argument("--expected-platform", choices=("windows", "linux"))
     cold_start.add_argument("--evidence", type=Path)
@@ -570,6 +575,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             [
                 sys.executable,
                 str(MANIFEST_TOOL),
+                "--profile",
+                args.profile,
+                "--output",
+                str(args.output),
+            ]
+        )
+    if command == "m1-entry-manifest":
+        return _run(
+            [
+                sys.executable,
+                str(M1_ENTRY_MANIFEST_TOOL),
                 "--profile",
                 args.profile,
                 "--output",
