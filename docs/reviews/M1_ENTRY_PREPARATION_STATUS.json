@@ -1,0 +1,97 @@
+{
+  "schema": "TPAA_M1_ENTRY_PREPARATION_STATUS_V1",
+  "authority": "SDIB-1.0.1 §19.1",
+  "decision": "M1_NOT_ADMITTED",
+  "evidence_base_revision": "dd2e30827abb96e9880687ebd876696122f7b4db",
+  "merged_main_run": {
+    "run_id": 35882285253,
+    "run_number": 40,
+    "status": "PASS",
+    "source_revision": "dd2e30827abb96e9880687ebd876696122f7b4db",
+    "source_revision_consistent": true,
+    "exit_gate_pass_count": 14,
+    "exit_gate_count": 14,
+    "logical_equivalence_status": "PASS",
+    "logical_equivalence_mismatches": [],
+    "artifacts": {
+      "windows_ci": {
+        "id": 10762030055,
+        "sha256": "2122022a3afd0554f93f772811918f890a07e4794f95993294e1a3639fbceec2"
+      },
+      "linux_ci": {
+        "id": 10761307979,
+        "sha256": "974f7b5394a7cb44a86800725d3b752b97de95d48a1da4ef7517d4ac4cb47b5d"
+      },
+      "postgresql_exit": {
+        "id": 10761063544,
+        "sha256": "edb26f12782800015ff1cf6b96342e53c6391f57db3e9ad5b4769edbf99bfff2"
+      },
+      "logical_equivalence": {
+        "id": 10761570969,
+        "sha256": "177f61186dd8d0c2de3988cbdae8712a0583fc514af4af904073ac69195e8412"
+      },
+      "exit_review": {
+        "id": 10760794315,
+        "sha256": "9cd60317e486bca05e5c899ed7f630d52894a1bc8a7e6418e91cc3d69d3cbc00"
+      }
+    }
+  },
+  "conditions": [
+    {
+      "id": 1,
+      "status": "PASS",
+      "evidence": "Run #40 M0 Exit Review GO; 14/14 §18 gates PASS."
+    },
+    {
+      "id": 2,
+      "status": "PASS",
+      "evidence": "M0_IMPLEMENTATION_BASELINE independently verifies to ee54e8500381e62a53e1f2352d485ed11892c9d6; baseline manifest retained."
+    },
+    {
+      "id": 3,
+      "status": "PASS",
+      "evidence": "PR #10 merged; SDIB-1.0.1 M0 closure review records exactly 48/48 CLOSED; Run #40 accepted it on merged main."
+    },
+    {
+      "id": 4,
+      "status": "PASS",
+      "evidence": "Run #40 Exit gate 13 / verify-governance confirms ADR-M0-001..010 CLOSED."
+    },
+    {
+      "id": 5,
+      "status": "PASS",
+      "evidence": "Run #40 Windows/Linux CI GREEN; baseline/codegen/DB/API/Desktop gates repeatable."
+    },
+    {
+      "id": 6,
+      "status": "PREPARED_PENDING_MERGED_MAIN_ARTIFACT",
+      "evidence": "m1-entry-manifest generator and CI archive path are implemented on the entry-preparation branch; exact final source revision must be taken from the merged-main artifact after this PR."
+    },
+    {
+      "id": 7,
+      "status": "PREPARED_PENDING_CI_PUBLICATION",
+      "evidence": "Synthetic/Golden strategy and machine fixture policy are implemented; CI must accept the published branch/merged-main state."
+    },
+    {
+      "id": 8,
+      "status": "FAIL_UNASSIGNED",
+      "evidence": "M1 Primary WS owner, independent Golden reviewer, and M1 Exit reviewer are not explicitly assigned. Tracking issue #67."
+    },
+    {
+      "id": 9,
+      "status": "PREPARED_PENDING_CI_PUBLICATION",
+      "evidence": "Architecture blocker review records NO_KNOWN_ARCHITECTURE_BLOCKER from Run #40 and zero open blocker issues; CI publication remains pending."
+    },
+    {
+      "id": 10,
+      "status": "PASS",
+      "evidence": "Exactly 56 SDIB §23 Task IDs imported as GitHub issues #11-#66 with PLANNING_ONLY/M1_NOT_ADMITTED boundary; machine snapshot created."
+    }
+  ],
+  "tracking": {
+    "role_assignment_issue": "https://github.com/Sillies001/TPAA/issues/67",
+    "entry_review_issue": "https://github.com/Sillies001/TPAA/issues/68",
+    "backlog_issue_range": "#11-#66"
+  },
+  "implementation_boundary": "No M1 feature implementation is authorized until all ten conditions are PASS."
+}
