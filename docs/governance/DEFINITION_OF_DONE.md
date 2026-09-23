@@ -1,6 +1,6 @@
 # TPAA Definition of Done
 
-This repository policy implements SDIB-1.0 §32 and M0-GOV-004.
+This repository policy implements SDIB-1.0.1 §32 and M0-GOV-004.
 
 ## Pull Request DoD
 

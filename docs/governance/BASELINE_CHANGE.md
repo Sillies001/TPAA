@@ -1,6 +1,6 @@
 # Baseline Change Workflow
 
-This policy implements SDIB-1.0 §5, §30–§31, §39–§40 and M0-GOV-003.
+This policy implements SDIB-1.0.1 §5, §30–§31, §40 and M0-GOV-003.
 
 ## Classification first
 

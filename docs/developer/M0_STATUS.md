@@ -1,5 +1,36 @@
 # M0 Engineering Bootstrap Status
 
+
+## SDIB-1.0.1 adoption delta — M1_NOT_ADMITTED
+
+SDIB-1.0.1 is a C1 implementation-organization patch over the historical SDIB-1.0 M0
+acceptance. It does **not** change R3.3, CB-1.4.0, the Canonical machine authorities,
+the 116 P1 metrics, the 661 input bindings, Stage semantics, or DB schema 1.6.0.
+
+The previously accepted M0 Exit evidence remains historically valid:
+
+- accepted revision: `ee54e8500381e62a53e1f2352d485ed11892c9d6`;
+- M0 Exit: GO / 14 of 14 §18 gates PASS;
+- published tag: `M0_IMPLEMENTATION_BASELINE`, independently verified to peel to the
+  accepted revision.
+
+However SDIB-1.0.1 §17 adds `M0-DEV-000 Formal Repository Bootstrap`, making the
+normative M0 backlog 48 work packages. The current repository cannot yet claim strict
+48/48 closure because:
+
+1. GitHub reports the current `main` branch as `protected=false`;
+2. the repository root does not contain the required `.editorconfig`;
+3. no evidence has yet been accepted that the new `M0-DEV-000` minimum acceptance as
+   a whole (including the first bootstrap MR Windows/Linux minimum checks) is CLOSED.
+
+Therefore SDIB-1.0.1 §19.1 condition 3 is not currently PASS, and the transition state is
+`M1_NOT_ADMITTED`. No M1 implementation work may start until this delta is closed (or
+an allowed non-blocking exception is explicitly approved by an M0 Review) and all §19.1
+M1 Entry Gate conditions are re-reviewed.
+
+Adoption review: `docs/reviews/SDIB-1.0.1_ADOPTION_REVIEW.md`.
+
+
 ## Completed
 
 ### M0-CORE-001 — COMPLETE
@@ -416,10 +447,14 @@ M0 becomes publication-complete when this manifest is merged and the tag exists 
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, steps 1–11 are COMPLETE and M0 Exit is GO.
+Per SDIB-1.0.1 §17.1 and §19.1, the required sequence is now:
 
-1. Merge the baseline-publication manifest/status PR after CI is GREEN.
-2. Create tag `M0_IMPLEMENTATION_BASELINE` at exact revision
-   `ee54e8500381e62a53e1f2352d485ed11892c9d6`.
-3. Verify the tag resolves to that exact revision.
-4. Only then begin M1 Basic Flight minimum vertical slice.
+1. merge the SDIB-1.0.1 C1 baseline-adoption PR after its normal CI/quality gates pass;
+2. close the `M0-DEV-000` delta with machine/repository evidence (including protected
+   `main`, required repository bootstrap files, and the Windows/Linux minimum bootstrap
+   acceptance evidence);
+3. run a focused M0 delta review and record whether all 48 M0 work packages are CLOSED;
+4. execute the complete SDIB-1.0.1 §19.1 M1 Entry Gate review;
+5. only if every Entry Gate condition is PASS may M1-A / `BF_M1_NOMINAL_V1` work begin.
+
+The historical M0 tag must not be moved or recreated as part of this delta closure.

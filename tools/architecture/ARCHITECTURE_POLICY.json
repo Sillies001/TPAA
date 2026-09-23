@@ -1,7 +1,7 @@
 {
   "schema": "TPAA_ARCHITECTURE_POLICY_V1",
   "status": "FROZEN_FOR_M0_CORE_005",
-  "authority": "SDIB-1.0 §7.1 and Appendix E",
+  "authority": "SDIB-1.0.1 §7.1 and Appendix E",
   "transport_packages": [
     "tpaa_api",
     "tpaa_gui"
