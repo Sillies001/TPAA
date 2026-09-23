@@ -40,7 +40,8 @@ pretty = true
 show_error_codes = true
 warn_unreachable = true
 explicit_package_bases = true
-files = ["tools", "src", "tests"]
+mypy_path = ["src", "."]
+files = ["tools", "src"]
 exclude = ["^baseline/"]
 
 [tool.tpaa.dataframe]

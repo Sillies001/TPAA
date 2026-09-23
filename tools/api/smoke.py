@@ -49,7 +49,7 @@ def _client(*, ready: bool) -> TestClient:
         lambda: evaluate_runtime_baseline_handshake(expected=expected, observed=observed)
     )
     application = ApplicationService(
-        get_storage_baseline_status=_UnusedStorageUseCase(),  # type: ignore[arg-type]
+        get_storage_baseline_status=_UnusedStorageUseCase(),
         get_runtime_baseline_status=runtime,
     )
     return TestClient(create_app(application))

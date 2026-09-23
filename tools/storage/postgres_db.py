@@ -111,7 +111,7 @@ def _single_value(output: str) -> str:
     return values[0]
 
 
-def _empty_relation_count(client: PsqlClient, database: str) -> int:
+def _empty_relation_count(client: SqlClient, database: str) -> int:
     return int(_single_value(client.run(database, postgres_empty_check_script())))
 
 

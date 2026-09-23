@@ -46,7 +46,7 @@ def _emit(record: dict[str, object]) -> None:
 
 def _application(product_build_version: str) -> ApplicationService:
     return ApplicationService(
-        get_storage_baseline_status=_UnusedStorageUseCase(),  # type: ignore[arg-type]
+        get_storage_baseline_status=_UnusedStorageUseCase(),
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=product_build_version
         ),

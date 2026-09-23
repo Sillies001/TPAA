@@ -509,7 +509,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     if command in reserved:
         return _reserved(reserved[command], command)
     parser.error(f"unknown command: {command}")
-    return EXIT_FAILURE
 
 
 if __name__ == "__main__":

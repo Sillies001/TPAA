@@ -89,4 +89,8 @@ def test_linux_runner_installs_required_qt_egl_runtime() -> None:
 def test_pytest_and_mypy_resolve_repository_tool_packages() -> None:
     config = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert config["tool"]["pytest"]["ini_options"]["pythonpath"] == [".", "src"]
-    assert config["tool"]["mypy"]["explicit_package_bases"] is True
+    mypy = config["tool"]["mypy"]
+    assert mypy["explicit_package_bases"] is True
+    assert mypy["mypy_path"] == ["src", "."]
+    assert mypy["files"] == ["tools", "src"]
+    assert "tests" not in mypy["files"]

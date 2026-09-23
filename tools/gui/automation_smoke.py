@@ -70,7 +70,7 @@ def run_smoke(*, headless: bool = True, timeout_seconds: float = 30.0) -> dict[s
     app = QtWidgets.QApplication.instance()
     if app is None:
         app = QtWidgets.QApplication(["tpaa-ui-automation-smoke"])
-    app.setQuitOnLastWindowClosed(True)
+    QtWidgets.QApplication.setQuitOnLastWindowClosed(True)
 
     controller = LocalBackendController(product_build_version="0.0.0", startup_timeout_seconds=10)
     checks: dict[str, str] = {
