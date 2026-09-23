@@ -74,22 +74,13 @@ def evaluate(
     windows_manifest: dict[str, object],
     linux_manifest: dict[str, object],
 ) -> dict[str, object]:
-    if mode not in {"candidate", "activate"}:
+    if mode not in {"blocked", "candidate", "activate"}:
         raise ValueError(f"unsupported mode: {mode}")
     if len(source_revision) != 40:
         raise ValueError("source revision must be a 40-character Git commit SHA")
 
     conditions = _conditions(review)
-    fixed_pass_ids = (1, 2, 3, 4, 5, 7, 8, 9, 10)
-    static_ok = (
-        set(conditions) == set(range(1, 11))
-        and all(conditions.get(index, {}).get("status") == "PASS" for index in fixed_pass_ids)
-        and conditions.get(6, {}).get("status") == "RUNTIME_VERIFY_REQUIRED"
-        and review.get("decision") == "M1_ADMISSION_CANDIDATE"
-        and review.get("implementation_authorized") is False
-    )
-
-    roles_ok = (
+    assigned_roles_ok = (
         roles.get("schema") == "TPAA_M1_ROLE_ASSIGNMENTS_V1"
         and roles.get("status") == "ASSIGNED"
         and _assigned(roles.get("primary_ws_owner"))
@@ -97,6 +88,39 @@ def evaluate(
         and _assigned(roles.get("m1_exit_reviewer"))
         and _assigned(roles.get("golden_independence_attestation"))
     )
+    unassigned_roles_ok = (
+        roles.get("schema") == "TPAA_M1_ROLE_ASSIGNMENTS_V1"
+        and roles.get("status") == "UNASSIGNED"
+        and not _assigned(roles.get("primary_ws_owner"))
+        and not _assigned(roles.get("golden_independent_reviewer"))
+        and not _assigned(roles.get("m1_exit_reviewer"))
+        and not _assigned(roles.get("golden_independence_attestation"))
+    )
+
+    if mode == "blocked":
+        static_ok = (
+            set(conditions) == set(range(1, 11))
+            and all(
+                conditions.get(index, {}).get("status") == "PASS"
+                for index in (1, 2, 3, 4, 5, 6, 7, 9, 10)
+            )
+            and conditions.get(8, {}).get("status") == "BLOCKED_UNASSIGNED"
+            and review.get("decision") == "M1_NOT_ADMITTED"
+            and review.get("implementation_authorized") is False
+        )
+        roles_ok = unassigned_roles_ok
+    else:
+        static_ok = (
+            set(conditions) == set(range(1, 11))
+            and all(
+                conditions.get(index, {}).get("status") == "PASS"
+                for index in (1, 2, 3, 4, 5, 7, 8, 9, 10)
+            )
+            and conditions.get(6, {}).get("status") == "RUNTIME_VERIFY_REQUIRED"
+            and review.get("decision") == "M1_ADMISSION_CANDIDATE"
+            and review.get("implementation_authorized") is False
+        )
+        roles_ok = assigned_roles_ok
 
     windows_ok = _manifest_ok(
         windows_manifest,
@@ -121,10 +145,14 @@ def evaluate(
         decision = "M1_ADMITTED"
         implementation_authorized = True
         condition_6 = "PASS"
-    elif status == "PASS":
+    elif status == "PASS" and mode == "candidate":
         decision = "M1_ADMISSION_CANDIDATE_VERIFIED"
         implementation_authorized = False
         condition_6 = "CANDIDATE_PASS"
+    elif status == "PASS":
+        decision = "M1_NOT_ADMITTED"
+        implementation_authorized = False
+        condition_6 = "PASS"
     else:
         decision = "M1_NOT_ADMITTED"
         implementation_authorized = False
@@ -138,7 +166,7 @@ def evaluate(
         "decision": decision,
         "implementation_authorized": implementation_authorized,
         "condition_6_runtime": condition_6,
-        "conditions_passed_after_runtime_verification": 10 if status == "PASS" else 9,
+        "conditions_passed_after_runtime_verification": (9 if mode == "blocked" else 10) if status == "PASS" else 9,
         "checks": checks,
         "roles": {
             "primary_ws_owner": roles.get("primary_ws_owner"),
@@ -151,7 +179,9 @@ def evaluate(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=("candidate", "activate"), required=True)
+    parser.add_argument("--mode", choices=("auto", "blocked", "candidate", "activate"), required=True)
+    parser.add_argument("--event-name")
+    parser.add_argument("--git-ref")
     parser.add_argument("--source-revision", required=True)
     parser.add_argument("--windows-manifest", type=Path, required=True)
     parser.add_argument("--linux-manifest", type=Path, required=True)
@@ -160,11 +190,26 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
+    mode = args.mode
+    if mode == "auto":
+        roles = _load(args.roles)
+        roles_status = roles.get("status")
+        if roles_status == "UNASSIGNED":
+            mode = "blocked"
+        elif roles_status == "ASSIGNED" and args.event_name == "push" and args.git_ref == "refs/heads/main":
+            mode = "activate"
+        elif roles_status == "ASSIGNED":
+            mode = "candidate"
+        else:
+            mode = "blocked"
+    else:
+        roles = _load(args.roles)
+
     result = evaluate(
-        mode=args.mode,
+        mode=mode,
         source_revision=args.source_revision,
         review=_load(args.review),
-        roles=_load(args.roles),
+        roles=roles,
         windows_manifest=_load(args.windows_manifest),
         linux_manifest=_load(args.linux_manifest),
     )
