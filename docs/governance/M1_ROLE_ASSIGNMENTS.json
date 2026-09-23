@@ -1,16 +1,17 @@
 {
   "schema": "TPAA_M1_ROLE_ASSIGNMENTS_V1",
   "authority": "SDIB-1.0.1 §19.1(8)",
-  "status": "UNASSIGNED",
-  "primary_ws_owner": null,
-  "golden_independent_reviewer": null,
-  "m1_exit_reviewer": null,
-  "golden_independence_attestation": null,
+  "status": "ASSIGNED",
+  "primary_ws_owner": "@Sillies001",
+  "golden_independent_reviewer": "@Sillies001",
+  "m1_exit_reviewer": "@Sillies001",
+  "golden_independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance.",
   "assignment_rules": [
     "All three roles require explicit human identity assignment.",
     "Repository ownership alone does not constitute assignment.",
     "The Golden reviewer must be independent of the implementation/expected-result author for Golden acceptance.",
     "M1 remains M1_NOT_ADMITTED while any required role or independence attestation is missing."
   ],
-  "tracking_issue": "https://github.com/Sillies001/TPAA/issues/67"
+  "tracking_issue": "https://github.com/Sillies001/TPAA/issues/67",
+  "assignment_source": "EXPLICIT_HUMAN_ASSIGNMENT"
 }
