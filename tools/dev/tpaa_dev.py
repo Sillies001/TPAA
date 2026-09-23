@@ -40,6 +40,10 @@ CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
 GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
+OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
+MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
+BACKUP_RESTORE_SMOKE = REPO_ROOT / "tools" / "storage" / "backup_restore_smoke.py"
+SECURITY_SMOKE = REPO_ROOT / "tools" / "security" / "smoke.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -90,6 +94,10 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("test-e2e", "M0-TST-001", "IMPLEMENTED", "Run end-to-end tests."),
     CommandSpec("test-platform", "M0-PLAT-001..003", "IMPLEMENTED", "Run cross-platform adapter contract tests."),
     CommandSpec("platform-smoke", "M0-PLAT-001..003", "IMPLEMENTED", "Run real path/spawn/lock/atomic adapter smoke."),
+    CommandSpec("openapi-snapshot", "M0-API-003", "IMPLEMENTED", "Generate/check Canonical DTO OpenAPI snapshot."),
+    CommandSpec("migration-smoke", "M0-STO-005", "IMPLEMENTED", "Run bootstrap/rollback/forward-recovery migration harness."),
+    CommandSpec("backup-restore-smoke", "M0-STO-007", "IMPLEMENTED", "Run development DB/object backup-restore smoke."),
+    CommandSpec("security-smoke", "M0-SEC-001..004", "IMPLEMENTED", "Run security/audit/data-guard/secret-separation smoke."),
     CommandSpec("fixture-check", "M0-TST-001/M0-TST-005/M0-TST-006", "IMPLEMENTED", "Run the frozen M0 fixture/Golden/replay framework smoke and emit evidence."),
     CommandSpec("platform-logical-product", "M0-TST-006", "IMPLEMENTED", "Emit the current platform logical product for cross-platform comparison."),
     CommandSpec("compare-platform-logical", "M0-TST-006", "IMPLEMENTED", "Compare Windows/Linux logical products using the shared fixture tolerance."),
@@ -380,6 +388,11 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         sub.add_parser(name, help=f"Run {name} suite")
     sub.add_parser("platform-smoke", help="Run M0 path/spawn/lock/atomic platform smoke")
+    openapi = sub.add_parser("openapi-snapshot", help="Generate/check M0 Canonical DTO OpenAPI snapshot")
+    openapi.add_argument("--check", action="store_true")
+    sub.add_parser("migration-smoke", help="Run M0-STO-005 migration/recovery harness")
+    sub.add_parser("backup-restore-smoke", help="Run M0-STO-007 development backup/restore smoke")
+    sub.add_parser("security-smoke", help="Run M0 security/audit/data-governance smoke")
 
     fixture_check = sub.add_parser("fixture-check", help="Run M0 fixture/Golden/replay framework smoke")
     fixture_check.add_argument("--bundle", type=Path)
@@ -519,6 +532,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(GOVERNANCE_VERIFY)])
     if command == "platform-smoke":
         return _run([sys.executable, str(PLATFORM_SMOKE)])
+    if command == "openapi-snapshot":
+        openapi_args = [sys.executable, str(OPENAPI_SNAPSHOT)]
+        if args.check:
+            openapi_args.append("--check")
+        return _run(openapi_args)
+    if command == "migration-smoke":
+        return _run([sys.executable, str(MIGRATION_HARNESS)])
+    if command == "backup-restore-smoke":
+        return _run([sys.executable, str(BACKUP_RESTORE_SMOKE)])
+    if command == "security-smoke":
+        return _run([sys.executable, str(SECURITY_SMOKE)])
     if command == "ci-check":
         ci_args = [sys.executable, str(CI_GATE)]
         if args.expected_platform:

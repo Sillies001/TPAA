@@ -65,6 +65,27 @@ def run_smoke() -> dict[str, object]:
         health = ready_client.get("/health")
         readiness = ready_client.get("/readiness")
         version = ready_client.get("/version")
+        first_job = ready_client.post(
+            "/jobs",
+            headers={"Idempotency-Key": "api-smoke-key", "X-TPAA-Actor": "api-smoke"},
+            json={"command": "diagnostic", "payload": {"kind": "synthetic"}},
+        )
+        reused_job = ready_client.post(
+            "/jobs",
+            headers={"Idempotency-Key": "api-smoke-key", "X-TPAA-Actor": "api-smoke"},
+            json={"command": "diagnostic", "payload": {"kind": "synthetic"}},
+        )
+        conflict_job = ready_client.post(
+            "/jobs",
+            headers={"Idempotency-Key": "api-smoke-key", "X-TPAA-Actor": "api-smoke"},
+            json={"command": "diagnostic", "payload": {"kind": "different"}},
+        )
+        created_job_id = first_job.json().get("job_id")
+        queried_job = ready_client.get(f"/jobs/{created_job_id}")
+        cancelled_job = ready_client.post(
+            f"/jobs/{created_job_id}/cancel",
+            json={"reason": "smoke cleanup"},
+        )
     with _client(ready=False) as not_ready_client:
         blocked = not_ready_client.get("/readiness")
 
@@ -73,6 +94,11 @@ def run_smoke() -> dict[str, object]:
         "readiness_ready": "PASS" if readiness.status_code == 200 and readiness.json().get("ready") is True else "FAIL",
         "readiness_not_ready": "PASS" if blocked.status_code == 503 and blocked.json().get("ready") is False else "FAIL",
         "version": "PASS" if version.status_code == 200 and "expected" in version.json() and "observed" in version.json() else "FAIL",
+        "job_submit": "PASS" if first_job.status_code == 202 and first_job.json().get("reused") is False else "FAIL",
+        "job_reuse": "PASS" if reused_job.status_code == 200 and reused_job.json().get("job_id") == created_job_id and reused_job.json().get("reused") is True else "FAIL",
+        "job_conflict": "PASS" if conflict_job.status_code == 409 and conflict_job.json().get("error", {}).get("code") == "IDEMPOTENCY_KEY_CONFLICT" else "FAIL",
+        "job_query": "PASS" if queried_job.status_code == 200 and queried_job.json().get("job_id") == created_job_id else "FAIL",
+        "job_cancel": "PASS" if cancelled_job.status_code == 200 and cancelled_job.json().get("status") == "CANCELLED" else "FAIL",
     }
     if any(value != "PASS" for value in checks.values()):
         raise RuntimeError(f"M0-API-002 smoke failed: {checks}")

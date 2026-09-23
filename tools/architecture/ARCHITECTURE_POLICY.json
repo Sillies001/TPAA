@@ -8,6 +8,7 @@
   ],
   "lower_layer_packages": [
     "tpaa_generated",
+    "tpaa_audit",
     "tpaa_registry",
     "tpaa_canonical",
     "tpaa_context",
@@ -113,16 +114,102 @@
       "tpaa_episode",
       "tpaa_metric",
       "tpaa_world"
+    ],
+    "tpaa_audit": [
+      "tpaa_api",
+      "tpaa_application",
+      "tpaa_assessment",
+      "tpaa_canonical",
+      "tpaa_context",
+      "tpaa_episode",
+      "tpaa_gui",
+      "tpaa_ingest",
+      "tpaa_longitudinal",
+      "tpaa_metric",
+      "tpaa_observation",
+      "tpaa_platform",
+      "tpaa_registry",
+      "tpaa_storage",
+      "tpaa_world"
     ]
   },
   "forbidden_external_prefixes": {
-    "tpaa_registry": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
-    "tpaa_canonical": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
-    "tpaa_context": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
-    "tpaa_metric": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlalchemy", "psycopg", "asyncpg"],
-    "tpaa_application": ["fastapi", "starlette", "PySide6", "PyQt5", "PyQt6", "sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
-    "tpaa_gui": ["sqlite3", "sqlalchemy", "psycopg", "asyncpg"],
-    "tpaa_storage": ["sqlalchemy", "alembic", "asyncpg"]
+    "tpaa_registry": [
+      "fastapi",
+      "starlette",
+      "PySide6",
+      "PyQt5",
+      "PyQt6",
+      "sqlite3",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ],
+    "tpaa_canonical": [
+      "fastapi",
+      "starlette",
+      "PySide6",
+      "PyQt5",
+      "PyQt6",
+      "sqlite3",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ],
+    "tpaa_context": [
+      "fastapi",
+      "starlette",
+      "PySide6",
+      "PyQt5",
+      "PyQt6",
+      "sqlite3",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ],
+    "tpaa_metric": [
+      "fastapi",
+      "starlette",
+      "PySide6",
+      "PyQt5",
+      "PyQt6",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ],
+    "tpaa_application": [
+      "fastapi",
+      "starlette",
+      "PySide6",
+      "PyQt5",
+      "PyQt6",
+      "sqlite3",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ],
+    "tpaa_gui": [
+      "sqlite3",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ],
+    "tpaa_storage": [
+      "sqlalchemy",
+      "alembic",
+      "asyncpg"
+    ],
+    "tpaa_audit": [
+      "fastapi",
+      "starlette",
+      "PySide6",
+      "PyQt5",
+      "PyQt6",
+      "sqlite3",
+      "sqlalchemy",
+      "psycopg",
+      "asyncpg"
+    ]
   },
   "semantic_constraints_not_proven_by_import_scan": [
     "observation_does_not_recompute_metric_or_world",
@@ -131,6 +218,7 @@
     "platform_contains_no_business_rules_or_stage_semantics",
     "repository_ports_expose_no_driver_types",
     "repository_methods_do_not_commit_outside_unit_of_work",
-    "repository_runtime_does_not_auto_migrate_schema"
+    "repository_runtime_does_not_auto_migrate_schema",
+    "audit_and_logging_emit_no_secrets"
   ]
 }
