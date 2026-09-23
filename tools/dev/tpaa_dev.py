@@ -444,8 +444,17 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-m0-delta-closure", help="Verify SDIB-1.0.1 48-task M0 delta closure record")
     sub.add_parser("verify-m1-entry-preparation", help="Verify M1 Entry preparation evidence without admitting M1")
     sub.add_parser("verify-m1-entry-gate-state", help="Verify the current M1 Entry review decision/state")
-    m1_activation = sub.add_parser("m1-entry-activation", help="Verify/activate an M1 Entry admission candidate")
-    m1_activation.add_argument("--mode", choices=("candidate", "activate"), required=True)
+    m1_activation = sub.add_parser(
+        "m1-entry-activation",
+        help="Verify/activate an M1 Entry admission candidate",
+    )
+    m1_activation.add_argument(
+        "--mode",
+        choices=("auto", "blocked", "candidate", "activate"),
+        required=True,
+    )
+    m1_activation.add_argument("--event-name")
+    m1_activation.add_argument("--git-ref")
     m1_activation.add_argument("--source-revision", required=True)
     m1_activation.add_argument("--windows-manifest", type=Path, required=True)
     m1_activation.add_argument("--linux-manifest", type=Path, required=True)
@@ -589,6 +598,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.windows_manifest),
                 "--linux-manifest",
                 str(args.linux_manifest),
+                *(
+                    ["--event-name", args.event_name]
+                    if args.event_name is not None
+                    else []
+                ),
+                *(
+                    ["--git-ref", args.git_ref]
+                    if args.git_ref is not None
+                    else []
+                ),
                 "--output",
                 str(args.output),
             ]
