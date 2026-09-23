@@ -33,7 +33,7 @@ implementation_authorized = false
 
 Condition 8 requires explicit human assignments for the M1 Primary WS owner, independent Golden reviewer, M1 Exit reviewer, and Golden-independence attestation.
 
-To avoid a second governance-only merge after role assignment, the final Entry transition uses `M1_ENTRY_ACTIVATION_POLICY`: the final PR is verified as an admission candidate, then its protected-main CI emits an exact-source-revision activation artifact. Only a merged-main artifact with `decision=M1_ADMITTED` authorizes M1 implementation.
+To avoid a second governance-only merge after role assignment, the final Entry transition uses `M1_ENTRY_ACTIVATION_POLICY`: the final PR is verified as an admission candidate, then its the required `M0 Exit Review` job emits an exact-source-revision activation artifact. Only a merged-main artifact with `decision=M1_ADMITTED` authorizes M1 implementation.
 
 
 ## SDIB-1.0.1 M0 delta — 48/48 CLOSED; M1_NOT_ADMITTED
