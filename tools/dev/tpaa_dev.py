@@ -37,6 +37,7 @@ DESKTOP_BACKEND_SMOKE = REPO_ROOT / "tools" / "desktop" / "lifecycle_smoke.py"
 UI_AUTOMATION_SMOKE = REPO_ROOT / "tools" / "gui" / "automation_smoke.py"
 CI_VERIFY = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
+FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -84,6 +85,9 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("test-replay", "M0-TST-001", "IMPLEMENTED", "Run replay tests."),
     CommandSpec("test-migration", "M0-TST-001", "IMPLEMENTED", "Run migration tests."),
     CommandSpec("test-e2e", "M0-TST-001", "IMPLEMENTED", "Run end-to-end tests."),
+    CommandSpec("fixture-check", "M0-TST-001/M0-TST-005/M0-TST-006", "IMPLEMENTED", "Run the frozen M0 fixture/Golden/replay framework smoke and emit evidence."),
+    CommandSpec("platform-logical-product", "M0-TST-006", "IMPLEMENTED", "Emit the current platform logical product for cross-platform comparison."),
+    CommandSpec("compare-platform-logical", "M0-TST-006", "IMPLEMENTED", "Compare Windows/Linux logical products using the shared fixture tolerance."),
     CommandSpec("run", "M0-API-002/M0-GUI-001", "RESERVED", "Dispatch an API or GUI runtime profile."),
     CommandSpec("run-api", "M0-API-002", "RESERVED", "Start the API profile once implemented."),
     CommandSpec("run-gui", "M0-GUI-002", "IMPLEMENTED", "Start the composed Desktop shell with its owned local backend."),
@@ -362,6 +366,23 @@ def build_parser() -> argparse.ArgumentParser:
     for name in ("test", "test-unit", "test-contract", "test-golden", "test-replay", "test-migration", "test-e2e"):
         sub.add_parser(name, help=f"Run {name} suite")
 
+    fixture_check = sub.add_parser("fixture-check", help="Run M0 fixture/Golden/replay framework smoke")
+    fixture_check.add_argument("--bundle", type=Path)
+    fixture_check.add_argument("--evidence", type=Path)
+    platform_product = sub.add_parser(
+        "platform-logical-product",
+        help="Emit platform logical product for Windows/Linux equivalence",
+    )
+    platform_product.add_argument("--bundle", type=Path)
+    platform_product.add_argument("--output", type=Path, required=True)
+    platform_compare = sub.add_parser(
+        "compare-platform-logical",
+        help="Compare Windows/Linux logical products",
+    )
+    platform_compare.add_argument("--windows", type=Path, required=True)
+    platform_compare.add_argument("--linux", type=Path, required=True)
+    platform_compare.add_argument("--evidence", type=Path, required=True)
+
     run = sub.add_parser("run", help="Dispatch runtime target")
     run.add_argument("target", choices=("api", "gui"))
     sub.add_parser("run-api", help="Reserved for M0-API-002")
@@ -414,6 +435,38 @@ def main(argv: Sequence[str] | None = None) -> int:
     }
     if command in suite_paths:
         return cmd_test(suite_paths[command])
+    if command == "fixture-check":
+        fixture_args = [sys.executable, str(FIXTURE_HARNESS), "check"]
+        if args.bundle is not None:
+            fixture_args.extend(["--bundle", str(args.bundle)])
+        if args.evidence is not None:
+            fixture_args.extend(["--evidence", str(args.evidence)])
+        return _run(fixture_args)
+    if command == "platform-logical-product":
+        product_args = [
+            sys.executable,
+            str(FIXTURE_HARNESS),
+            "platform-product",
+            "--output",
+            str(args.output),
+        ]
+        if args.bundle is not None:
+            product_args.extend(["--bundle", str(args.bundle)])
+        return _run(product_args)
+    if command == "compare-platform-logical":
+        return _run(
+            [
+                sys.executable,
+                str(FIXTURE_HARNESS),
+                "compare-platform",
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
     if command == "generate":
         args_out = [sys.executable, str(CODEGEN_GENERATE)]
         if args.check:

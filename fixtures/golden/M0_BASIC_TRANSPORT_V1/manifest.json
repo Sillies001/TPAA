@@ -1,0 +1,50 @@
+{
+  "authority_refs": {
+    "context": "M0_TEST_CONTEXT_V1",
+    "profile": "M0_TEST_PROFILE_V1",
+    "stage": "M0_NO_STAGE_FRAMEWORK_SMOKE"
+  },
+  "current_refs": {
+    "path": "current/current-refs.json",
+    "role": "negative-control-not-replay-authority"
+  },
+  "expected": {
+    "path": "expected/logical-product.json",
+    "sha256": "b27ae61a1898f760f553f809fe3f74b61ca0b5cbd54e40f4934e813f3ca4b64c"
+  },
+  "fixture_id": "M0_BASIC_TRANSPORT_V1",
+  "fixture_version": "1.0.0",
+  "input": {
+    "path": "input/payload.json",
+    "sha256": "d9b236c4cfb89fa8503fbf8031460e3bc3bbb75cacfa1d9c0d3b80b66099d8c6"
+  },
+  "known_cases": [
+    {
+      "classification": "INVALID",
+      "id": "missing_input"
+    },
+    {
+      "classification": "INVALID",
+      "id": "corrupt_input"
+    },
+    {
+      "classification": "INVALID",
+      "id": "version_mismatch"
+    },
+    {
+      "classification": "INSUFFICIENT",
+      "id": "insufficient_payload"
+    }
+  ],
+  "lifecycle": "REVIEWED",
+  "numeric_tolerance": "0.000001",
+  "replay": {
+    "context_ref": "M0_TEST_CONTEXT_V1",
+    "frozen_expected_sha256": "b27ae61a1898f760f553f809fe3f74b61ca0b5cbd54e40f4934e813f3ca4b64c",
+    "frozen_input_sha256": "d9b236c4cfb89fa8503fbf8031460e3bc3bbb75cacfa1d9c0d3b80b66099d8c6",
+    "profile_ref": "M0_TEST_PROFILE_V1",
+    "release_id": "M0_TEST_RELEASE_V1",
+    "stage_ref": "M0_NO_STAGE_FRAMEWORK_SMOKE"
+  },
+  "schema": "TPAA_M0_FIXTURE_BUNDLE_V1"
+}

@@ -338,6 +338,25 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 8. Both machine-readable evidence files report `status = PASS`, `failed_gate_names = []`, and `source_revision = 70f1112c313d666685867cfe00de46b81bd1a21f`.
 9. Packaging, SBOM, build manifest, cold-start, M0 Exit, and step-9 Golden/replay/logical-equivalence remain out of scope and are not claimed by this completion.
 
+## M0-TST-001..006 — IN-PROGRESS
+
+**Test / fixture harness:** SDIB §39 step 9 implementation is now active.
+
+1. Golden/replay/e2e directories have real framework-smoke tests instead of placeholder-only content.
+2. `M0_BASIC_TRANSPORT_V1` freezes fixture identity/version/input+expected hashes, authority refs,
+   shared numeric tolerance, known invalid/insufficient cases, typed transport values and a large
+   decimal-string Session Time.
+3. The harness fails closed for missing/corrupt/version-mismatch fixtures and preserves replay frozen
+   refs even when the current refs differ.
+4. CI now runs Golden/replay framework smoke on both Windows and Linux, emits machine-readable test and
+   logical-product evidence, and requires a dependent Windows/Linux logical-equivalence comparator.
+5. The framework fixture is `REVIEWED`, not falsely labeled as an independently approved production
+   Metric Golden.
+6. **Not yet COMPLETE:** Step 9 requires fresh hosted Windows/Linux plus logical-equivalence GREEN evidence
+   on the Step 9 checkpoint before these tickets are closed.
+
+Implementation record: `docs/implementation/M0-TST-001_006_TEST_FIXTURE_HARNESS.md`.
+
 ## Partial governance state
 
 `M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
@@ -358,8 +377,9 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, steps 1–8 are complete. Proceed in dependency order:
+Per SDIB-1.0 §39, steps 1–8 are complete and step 9 is active. Proceed in dependency order:
 
-1. Start §39 step 9: build the complete test/fixture harness, including Golden/replay and the required cross-platform logical-equivalence evidence.
-2. Preserve the completed Windows/Linux CI matrix and all current fail-closed M0 gates while adding step-9 coverage.
-3. Do not claim cold-start, remaining M0 backlog completion, or M0 Exit until their later §39 steps are separately implemented and accepted.
+1. Obtain fresh hosted Windows/Linux Golden/replay/framework-E2E evidence for the Step 9 checkpoint.
+2. Require the dependent cross-platform logical-equivalence job to PASS with zero mismatches.
+3. Only after Step 9 acceptance proceed to §39 step 10 remaining M0 backlog and cold-start.
+4. Do not claim M0 Exit or begin M1 until their later §39 gates are separately accepted.

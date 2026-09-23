@@ -55,6 +55,9 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
         '_dispatcher("bootstrap", "--check-only")',
         '_dispatcher("test-unit")',
         '_dispatcher("test-contract")',
+        '_dispatcher("test-golden")',
+        '_dispatcher("test-replay")',
+        '_dispatcher("test-e2e")',
         '_dispatcher("api-smoke")',
         '_dispatcher("gui-smoke", "--headless")',
         '_dispatcher("ui-automation-smoke")',
@@ -74,8 +77,6 @@ def test_ci_gate_does_not_dispatch_later_step_work() -> None:
         '_dispatcher("package")',
         '_dispatcher("manifest")',
         '_dispatcher("cold-start")',
-        '_dispatcher("test-golden")',
-        '_dispatcher("test-replay")',
     ):
         assert token not in text
 
@@ -94,3 +95,18 @@ def test_pytest_and_mypy_resolve_repository_tool_packages() -> None:
     assert mypy["mypy_path"] == ["src", "."]
     assert mypy["files"] == ["tools", "src"]
     assert "tests" not in mypy["files"]
+
+
+def test_step9_fixture_and_logical_equivalence_are_fail_closed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "python tools/dev/tpaa_dev.py fixture-check" in text
+    assert "--evidence evidence/tests/framework-${{ matrix.platform }}.json" in text
+    assert "python tools/dev/tpaa_dev.py platform-logical-product" in text
+    assert "--output evidence/cross-platform/${{ matrix.platform }}.json" in text
+    assert "m0-logical-equivalence:" in text
+    assert "needs: m0-cross-platform" in text
+    assert "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in text
+    assert "python tools/dev/tpaa_dev.py compare-platform-logical" in text
+    assert "--windows downloaded/cross-platform/windows.json" in text
+    assert "--linux downloaded/cross-platform/linux.json" in text
+    assert "--evidence evidence/cross-platform/logical-equivalence.json" in text

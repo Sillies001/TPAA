@@ -58,11 +58,62 @@ jobs:
           --expected-platform ${{ matrix.platform }}
           --evidence evidence/ci/${{ matrix.platform }}.json
 
-      - name: Upload CI evidence
+      - name: Emit M0 fixture framework evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py fixture-check
+          --evidence evidence/tests/framework-${{ matrix.platform }}.json
+
+      - name: Emit platform logical product
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py platform-logical-product
+          --output evidence/cross-platform/${{ matrix.platform }}.json
+
+      - name: Upload CI and Step 9 evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: tpaa-ci-${{ matrix.platform }}-${{ github.sha }}
-          path: evidence/ci/${{ matrix.platform }}.json
+          path: |
+            evidence/ci/${{ matrix.platform }}.json
+            evidence/tests/framework-${{ matrix.platform }}.json
+            evidence/cross-platform/${{ matrix.platform }}.json
+          if-no-files-found: error
+          retention-days: 14
+
+  m0-logical-equivalence:
+    name: M0 logical equivalence
+    needs: m0-cross-platform
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download platform evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.sha }}
+          path: downloaded
+          merge-multiple: true
+
+      - name: Compare Windows and Linux logical products
+        run: >-
+          python tools/dev/tpaa_dev.py compare-platform-logical
+          --windows downloaded/cross-platform/windows.json
+          --linux downloaded/cross-platform/linux.json
+          --evidence evidence/cross-platform/logical-equivalence.json
+
+      - name: Upload logical-equivalence evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-logical-equivalence-${{ github.sha }}
+          path: evidence/cross-platform/logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
