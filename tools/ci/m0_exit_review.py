@@ -98,7 +98,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     )
     source_revision_ok = all(payload.get("source_revision") == expected for payload in source_payloads)
 
-    both = lambda name: _gate(windows, name) and _gate(linux, name)
+    def both(name: str) -> bool:
+        return _gate(windows, name) and _gate(linux, name)
 
     summaries = [
         args.artifact_root / "dist" / "tpaa-0.0.0-WINDOWS_DESKTOP_X64.zip.summary.json",
