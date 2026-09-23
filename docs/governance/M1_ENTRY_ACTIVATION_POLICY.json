@@ -27,7 +27,7 @@
     ],
     "merged_main_activation": [
       "event is push to protected main",
-      "all existing required M0 jobs have succeeded before activation job runs",
+      "activation executes inside the already-required M0 Exit Review status check after its upstream Windows/Linux, PostgreSQL and logical-equivalence dependencies succeed",
       "Windows/Linux M1 Entry manifests both equal the exact merged-main revision",
       "static candidate and role assignments are valid",
       "activation output decision=M1_ADMITTED",
@@ -48,5 +48,5 @@
     "retention_days": 30
   },
   "no_second_governance_merge_required": true,
-  "note": "The committed review remains the admission candidate; the exact merged-main activation artifact is the final machine evidence authorizing M1 implementation."
+  "note": "The committed review remains the admission candidate; the exact merged-main activation artifact is emitted inside the required M0 Exit Review check and is the final machine evidence authorizing M1 implementation."
 }
