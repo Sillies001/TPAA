@@ -4,7 +4,6 @@ import json
 from decimal import Decimal
 
 from tools.testing.fixture_harness import DEFAULT_BUNDLE, golden_check, load_spec
-
 from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 
 
