@@ -1,15 +1,15 @@
 # M0 Exit Review
 
-- **Status:** PR ACCEPTANCE PASS / MAIN MERGE PENDING
+- **Status:** MERGED-MAIN GO / BASELINE TAG PUBLICATION PENDING
 - **Authority:** SDIB-1.0 §16.3, §18, §39 step 11, Appendix F, Appendix K.
-- **Review baseline:** merged `main` revision `5768d53e6e2eb4cda59080ff4958d06e3984f499`.
-- **Step 10 evidence:** GitHub Actions Run #26 (`35836960857`) — Windows/Linux/logical-equivalence SUCCESS.
-- **Decision:** GO on PR acceptance revision `863ff928bb072775e5b99599571827d07cb19832`; merged-main GO still pending.
-- **Important boundary:** M0 GO means engineering-substrate admission to M1 only. It is not P1 capability acceptance.
+- **Accepted main revision:** `ee54e8500381e62a53e1f2352d485ed11892c9d6`.
+- **Final hosted evidence:** GitHub Actions Run #31 (`35849313925`).
+- **Decision:** **GO**.
+- **Important boundary:** M0 GO admits the engineering substrate to M1 work. It is not P1 capability acceptance.
 
 ## 1. Scope
 
-M0 objective is the sustainable engineering substrate: one source tree can clean-checkout on Windows/Linux,
+M0 proves the sustainable engineering substrate: one source tree can clean-checkout on Windows/Linux,
 verify the frozen baseline, install frozen dependencies, bootstrap storage, execute tests, start API/Desktop,
 produce traceable development artifacts and reproduce the result from a clean environment.
 
@@ -17,9 +17,9 @@ All M0 backlog IDs in SDIB §17 have implementation records and governed gates. 
 
 ## 2. Baseline
 
-Review baseline inputs are:
+Final accepted inputs:
 
-- source revision: `5768d53e6e2eb4cda59080ff4958d06e3984f499`;
+- source revision: `ee54e8500381e62a53e1f2352d485ed11892c9d6`;
 - Core Baseline: `CB-1.4.0`;
 - DB schema: `1.6.0`;
 - dependency lock SHA-256: `302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e`;
@@ -30,54 +30,54 @@ Review baseline inputs are:
 
 ## 3. Gate Results
 
-Run #26 proves the merged Step 10 Windows/Linux gate set and cross-platform logical equivalence.
+Run #31 completed SUCCESS for all five Exit jobs:
 
-Step 11 adds two fail-closed jobs:
+1. `M0 windows`;
+2. `M0 linux`;
+3. `M0 Exit PostgreSQL`;
+4. `M0 logical equivalence`;
+5. `M0 Exit Review`.
 
-1. **M0 Exit PostgreSQL** — live PostgreSQL 16 clean bootstrap, fail-closed schema/provenance checks,
-   Repository/UoW acceptance, and clean-clone cold-start that re-executes those PostgreSQL results.
-2. **M0 Exit Review** — aggregates machine evidence for all 14 SDIB §18 Exit conditions and returns
-   `GO` only if every condition is PASS for the same source revision.
+The final review artifact `10744637893`
+(`sha256:1047056f71ead3dbd997f6684d77932067d0314fd1281cd72af409783158472c`) records:
 
-GitHub Actions Run #29 (`35840449678`) completed SUCCESS for Windows, Linux, live PostgreSQL,
-logical equivalence and the M0 Exit Review aggregator. Artifact `10741590060`
-(`sha256:89d6b0e7a1bad27373b149a33bcdf9fc71c96e2c39cf2a4c67261f26f5325c09`) records
-`status=PASS`, `decision=GO`, all 14 §18 gates PASS, `mismatches=[]`, and
-`source_revision_consistent=true`.
-
-This is PR acceptance evidence. The review is not final on `main` until this PR is merged and the same
-Exit workflow produces GO for the merged revision.
+- `status=PASS`;
+- `decision=GO`;
+- all **14/14** SDIB §18 Exit gates PASS;
+- `source_revision_consistent=true`;
+- logical-equivalence `status=PASS`, `mismatches=[]`;
+- source revision exactly `ee54e8500381e62a53e1f2352d485ed11892c9d6`.
 
 ## 4. Open Defects
 
-At review start, the repository has no open GitHub issues and no other open PRs.
+At final Exit acceptance there are no open GitHub issues or open pull requests other than the baseline
+publication change itself. No known M0 implementation defect is classified as a blocker.
 
-No known implementation defect is currently classified as an M0 blocker. The PostgreSQL cold-start
-coverage gap described above is treated as an Exit-evidence blocker and is being closed in this review PR.
+The earlier PostgreSQL cold-start evidence gap is resolved by the live PostgreSQL Exit job and
+clean-clone PostgreSQL cold-start included in Run #31.
 
 ## 5. Deviations / ADRs
 
 ADR-M0-001 through ADR-M0-010 are CLOSED. The governance verifier checks status, owner role, decision and
-evidence references. No unresolved M0 ADR is permitted to enter M1.
+evidence references. No unresolved M0 ADR is carried into M1.
 
 Development packages remain intentionally pre-release and are marked `DEVELOPMENT_NOT_M5_QUALIFIED`.
 
 ## 6. Cross-platform
 
-Windows Server 2025 and Ubuntu 24.04 run the same governed M0 gate dispatcher, CPython 3.13.5, uv 0.12.17
-and the same `uv.lock`.
+Windows Server 2025 and Ubuntu 24.04 execute the same governed M0 gate dispatcher with CPython 3.13.5,
+uv 0.12.17 and the same `uv.lock`.
 
-Run #26 logical-equivalence evidence reports `mismatches=[]` using identical frozen inputs. Platform
-archive bytes, paths and host metadata are excluded from logical identity.
+Run #31 logical-equivalence evidence reports `mismatches=[]` using identical frozen inputs. Platform
+archive bytes, paths and host metadata remain outside logical identity.
 
 ## 7. Reproducibility
 
-Run #26 Windows and Linux cold-start evidence already proves clean clone + frozen dependency sync + M0 gates
-+ clean worktree.
+Windows and Linux cold-start evidence proves clean clone, frozen dependency sync, full governed M0 gates
+and clean worktree. The live PostgreSQL Exit cold-start additionally re-executes PostgreSQL clean bootstrap
+and Repository acceptance from the clean clone.
 
-Step 11 strengthens this by requiring one clean-clone run against a live PostgreSQL 16 service so §18.14
-also reproduces the PostgreSQL clean-bootstrap/Repository result instead of only retaining earlier task
-evidence.
+This satisfies SDIB §18.14 without relying only on retained earlier task evidence.
 
 ## 8. Data Governance
 
@@ -94,13 +94,12 @@ field fail-closed checks run on both OS families.
 
 ## 10. Decision
 
-**PR ACCEPTANCE: GO.** Run #29 machine evidence reports every one of the 14 SDIB §18 Exit conditions PASS
-for PR merge revision `863ff928bb072775e5b99599571827d07cb19832`.
+**GO.** Merged-main Run #31 proves every one of the 14 SDIB §18 Exit conditions on the accepted main
+revision.
 
-This does **not** yet publish the M0 baseline. Final milestone closure requires:
+Per SDIB §18, the engineering baseline is now ready for publication as
+`M0_IMPLEMENTATION_BASELINE`. The machine publication manifest is
+`docs/baseline/M0_IMPLEMENTATION_BASELINE.json`.
 
-1. merge this Exit Review PR;
-2. obtain one fresh `main` run whose M0 Exit Review artifact again reports `decision=GO`;
-3. publish the `M0_IMPLEMENTATION_BASELINE` manifest/tag against that accepted merged-main revision.
-
-The tag is engineering baseline evidence only and must not be represented as a P1 capability release.
+The tag must point exactly to `ee54e8500381e62a53e1f2352d485ed11892c9d6`. The tag is engineering
+baseline evidence only and must not be represented as a P1 capability release.
