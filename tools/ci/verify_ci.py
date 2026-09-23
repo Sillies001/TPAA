@@ -2,7 +2,7 @@
 """Verify the governed M0-PLAT-004/005 GitHub Actions CI contract.
 
 This verifier intentionally uses only the Python standard library.  It checks
-provider orchestration constraints derived from SDIB-1.0 without becoming a
+provider orchestration constraints derived from SDIB-1.0.1 without becoming a
 business-schema authority.
 """
 
@@ -162,6 +162,7 @@ def verify() -> dict[str, object]:
         '_dispatcher("verify-architecture")',
         '_dispatcher("verify-repository-policy")',
         '_dispatcher("verify-desktop-lifecycle-policy")',
+        '_dispatcher("verify-repository-bootstrap")',
         '_dispatcher("verify-governance")',
         '_dispatcher("openapi-snapshot", "--check")',
         '_dispatcher("migration-smoke")',
