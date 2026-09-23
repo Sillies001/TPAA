@@ -1,0 +1,127 @@
+{
+  "schema": "TPAA_M1_FIXTURE_POLICY_V1",
+  "status": "FROZEN_ENTRY_POLICY",
+  "admission": "M1_NOT_ADMITTED_BY_THIS_POLICY",
+  "authority": [
+    "SDIB-1.0.1 §19.1(7)",
+    "SDIB-1.0.1 §22",
+    "SDIB-1.0.1 Appendix O"
+  ],
+  "data_governance": {
+    "default_allowed_classifications": [
+      "SYNTHETIC"
+    ],
+    "operational_dependency": false,
+    "sensitive_dependency": false,
+    "unauthorized_operational_or_sensitive_data": "PROHIBITED",
+    "exception_rule": "Any future operational/sensitive-data use requires a separately approved controlled-data environment and explicit approval reference; M1 baseline fixtures remain synthetic."
+  },
+  "lifecycle": [
+    "DRAFT",
+    "REVIEWED",
+    "APPROVED_GOLDEN",
+    "RETIRED"
+  ],
+  "change_rules": [
+    "Input-byte changes require fixture version and input hash change.",
+    "Expected-result changes require an explicit rationale distinguishing Golden correction from upstream semantic change.",
+    "Metric/Stage semantic changes may not be hidden by expected-only updates; authority/version change is required first.",
+    "Harness-only fixes may not silently reapprove expected results.",
+    "Retired fixtures remain addressable for historical regression/replay."
+  ],
+  "expected_result_independence": {
+    "requirement": "Expected results must be independently reviewable and may not be copied from the first output of the implementation under test.",
+    "allowed_methods": [
+      "human_recalculation",
+      "independent_reference_script",
+      "independent_reference_implementation"
+    ],
+    "golden_reviewer_independence_required": true
+  },
+  "common_manifest_requirements": [
+    "fixture_id",
+    "fixture_version",
+    "input_sha256",
+    "expected_sha256",
+    "authority_refs",
+    "tolerance_profile",
+    "data_classification",
+    "review_state"
+  ],
+  "bundles": [
+    {
+      "id": "BF_M1_NOMINAL_V1",
+      "purpose": "主 Golden",
+      "must_cover": [
+        "四个 Basic Stage",
+        "连续有效数据",
+        "5项代表Metric",
+        "完整Release/API/GUI"
+      ]
+    },
+    {
+      "id": "BF_M1_GAP_V1",
+      "purpose": "缺口/coverage",
+      "must_cover": [
+        "内部 gap",
+        "min_coverage",
+        "max_gap",
+        "AIR-001/004 eligibility",
+        "Evidence"
+      ]
+    },
+    {
+      "id": "BF_M1_ANGLE_WRAP_V1",
+      "purpose": "角度/导数",
+      "must_cover": [
+        "heading 跨 ±π",
+        "unwrap",
+        "DERIVATIVE_LLS_V1",
+        "不产生假峰值"
+      ]
+    },
+    {
+      "id": "BF_M1_STRUCTURED_PARTIAL_V1",
+      "purpose": "结构化部分缺失",
+      "must_cover": [
+        "tas 有数据而 mach 缺失",
+        "mach 有数据而 tas 缺失",
+        "AIR-007 subrecord status"
+      ]
+    },
+    {
+      "id": "BF_M1_STAGE_BOUNDARY_V1",
+      "purpose": "Stage 边界",
+      "must_cover": [
+        "Metric window 不跨 Episode/Stage/validity boundary 产生错误结果"
+      ]
+    },
+    {
+      "id": "BF_M1_REPLAY_V1",
+      "purpose": "历史重放",
+      "must_cover": [
+        "发布后改变 current profile/fixture registry",
+        "旧 Release 按 frozen refs 重放"
+      ]
+    },
+    {
+      "id": "BF_M1_CROSS_PLATFORM_V1",
+      "purpose": "双平台",
+      "must_cover": [
+        "同一冻结 bundle",
+        "Windows/Linux logical-equivalence diff"
+      ]
+    },
+    {
+      "id": "BF_M1_FAILURE_V1",
+      "purpose": "失败闭合",
+      "must_cover": [
+        "corrupt manifest",
+        "version mismatch",
+        "missing artifact",
+        "DB write denial",
+        "fail-closed"
+      ]
+    }
+  ]
+}
