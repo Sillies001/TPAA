@@ -30,3 +30,6 @@ evidence/cross-platform/*
 evidence/devops/*
 !evidence/devops/.gitkeep
 dist/
+
+evidence/m0-exit/*
+!evidence/m0-exit/.gitkeep

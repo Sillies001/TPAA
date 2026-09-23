@@ -135,6 +135,15 @@ def verify() -> dict[str, object]:
         "python tools/dev/tpaa_dev.py package",
         "evidence/devops/${{ matrix.platform }}",
         "dist/",
+        "m0-exit-postgres:",
+        "image: postgres:16",
+        "python tools/dev/tpaa_dev.py db-postgres-acceptance",
+        "python tools/dev/tpaa_dev.py db-postgres-repository-acceptance",
+        "python tools/ci/cold_start.py",
+        "--postgres-conninfo-template",
+        "m0-exit-review:",
+        "python tools/ci/m0_exit_review.py",
+        "--output evidence/m0-exit/review.json",
         "if: ${{ always() }}",
     )
     for token in required_tokens:

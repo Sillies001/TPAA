@@ -354,37 +354,36 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 Implementation record: `docs/implementation/M0-TST-001_006_TEST_FIXTURE_HARNESS.md`.
 
-## SDIB §39 Step 10 — PR ACCEPTANCE PASS / MAIN MERGE PENDING
+## SDIB §39 Step 10 — COMPLETE
 
-PR #5 implements the remaining M0 backlog and cold-start. Current branch revision
-`7b04c0aa769f0cc7c83abffe696fcaded0c0f222` passed GitHub Actions Run #24 on hosted Windows/Linux.
+Merged `main` revision `5768d53e6e2eb4cda59080ff4958d06e3984f499` passed GitHub Actions
+Run #26 with Windows, Linux and logical-equivalence SUCCESS.
 
-Implemented/accepted on the PR branch:
-
-- **M0-STO-004..007:** logical object/Parquet abstraction, migration harness, distinct hash primitives,
-  backup/restore smoke.
-- **M0-API-003..005:** Canonical-driven OpenAPI snapshot, idempotent job-control skeleton and controlled
-  status/error mapping.
-- **M0-PLAT-001..003:** filesystem/path, spawn-worker and temp/lock/atomic-replace adapters.
-- **M0-SEC-001..004:** Desktop/path security minimum, structured audit, development data guard and
-  secret/config separation.
-- **M0-DEV-003..006:** build manifest, SBOM/license/native inventory, four-profile development packages,
-  and clean-clone cold-start.
-- **M0-GOV-001..004:** ADR-M0-001..010 CLOSED, governed Issue/PR templates, Baseline Change workflow
-  and Definition of Done.
-
-Run #24 reports:
-
-- `M0 windows` SUCCESS;
-- `M0 linux` SUCCESS;
-- `M0 logical equivalence` SUCCESS;
-- both platform CI evidence files have `failed_gate_names=[]`;
-- both cold-start evidence files have `status=PASS`, `clean_clone=true`,
-  `uv_sync_locked=true`, `m0_gates=PASS`, `worktree_clean=true`;
-- all four mandatory Desktop/Service profile development packages are generated and smoke-tested;
-- package qualification remains `DEVELOPMENT_NOT_M5_QUALIFIED`.
+- both CI evidence files: `status=PASS`, `failed_gate_names=[]`;
+- Windows/Linux cold-start: clean clone, frozen sync, M0 gates and clean worktree PASS;
+- all four Desktop/Service development profiles produced build/SBOM/license/native/package evidence;
+- logical equivalence: `mismatches=[]` with identical frozen dependency/baseline/DTO/Stage/Catalog inputs.
 
 Implementation record: `docs/implementation/M0_STEP10_REMAINING_BACKLOG_COLD_START.md`.
+
+## SDIB §39 Step 11 — PR ACCEPTANCE GO / MAIN MERGE PENDING
+
+Run #29 proves the Exit Review PR acceptance boundary:
+
+- M0 Windows SUCCESS;
+- M0 Linux SUCCESS;
+- live PostgreSQL 16 Exit acceptance SUCCESS;
+- cross-platform logical equivalence SUCCESS;
+- M0 Exit Review aggregator SUCCESS.
+
+The review artifact reports `status=PASS`, `decision=GO`, all 14 SDIB §18 gates PASS,
+`source_revision_consistent=true`, and `mismatches=[]` for PR merge revision
+`863ff928bb072775e5b99599571827d07cb19832`.
+
+Final M0 closure is still pending merge plus one fresh merged-main GO run and publication of the
+`M0_IMPLEMENTATION_BASELINE` manifest/tag.
+
+Review record: `docs/reviews/M0_EXIT_REVIEW.md`.
 
 ## Source-entry evidence retained
 
@@ -395,17 +394,16 @@ Implementation record: `docs/implementation/M0_STEP10_REMAINING_BACKLOG_COLD_STA
 
 ## Not claimed
 
-- M0 overall completion or M0 Exit Gate.
+- M0 overall completion or M0 Exit GO before Step 11 hosted review PASS on merged main.
 - P1 capability completion/admission.
 - M5-qualified packaging/release status.
-- Step 10 COMPLETE on `main` before PR #5 merge + post-merge hosted acceptance.
 - Any M1 capability.
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, steps 1–9 are COMPLETE. Step 10 implementation and PR-hosted acceptance are PASS.
+Per SDIB-1.0 §39, steps 1–10 are COMPLETE and step 11 is active.
 
-1. Merge PR #5 only after its final documentation checkpoint CI is GREEN.
-2. Verify one fresh `main` Windows/Linux/package/cold-start/logical-equivalence run.
-3. Mark §39 step 10 COMPLETE only from that merged-main evidence.
-4. Begin §39 step 11 M0 Exit Review; do not begin M1 until the complete M0 Exit Gate passes.
+1. Merge PR #6 after its final documentation checkpoint CI is GREEN.
+2. Require one merged-main Exit run with `decision=GO` and every §18 gate PASS.
+3. Publish `M0_IMPLEMENTATION_BASELINE` tag/manifest only after that merged-main GO.
+4. Begin M1 only after the M0 Exit baseline publication is complete.

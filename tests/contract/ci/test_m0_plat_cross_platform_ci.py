@@ -124,3 +124,17 @@ def test_step10_workflow_archives_build_evidence_and_packages() -> None:
     assert "python tools/dev/tpaa_dev.py package" in text
     assert "evidence/devops/${{ matrix.platform }}" in text
     assert "dist/" in text
+
+
+def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "m0-exit-postgres:" in text
+    assert "image: postgres:16" in text
+    assert "python tools/dev/tpaa_dev.py db-postgres-acceptance" in text
+    assert "python tools/dev/tpaa_dev.py db-postgres-repository-acceptance" in text
+    assert "python tools/ci/cold_start.py" in text
+    assert "--postgres-conninfo-template" in text
+    assert "m0-exit-review:" in text
+    assert "needs:" in text
+    assert "python tools/ci/m0_exit_review.py" in text
+    assert "--output evidence/m0-exit/review.json" in text
