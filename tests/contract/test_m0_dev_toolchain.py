@@ -73,6 +73,8 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "bootstrap",
         "verify-repository-bootstrap",
         "verify-m0-delta-closure",
+        "verify-m1-entry-preparation",
+        "m1-entry-manifest",
         "generate",
         "verify-baseline",
         "test-unit",

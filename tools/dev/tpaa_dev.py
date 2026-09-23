@@ -41,12 +41,14 @@ FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
 GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
 REPOSITORY_BOOTSTRAP_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_repository_bootstrap.py"
 M0_DELTA_CLOSURE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_m0_delta_closure.py"
+M1_ENTRY_PREPARATION_MODULE = "tools.governance.verify_m1_entry_preparation"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
 BACKUP_RESTORE_SMOKE = REPO_ROOT / "tools" / "storage" / "backup_restore_smoke.py"
 SECURITY_SMOKE = REPO_ROOT / "tools" / "security" / "smoke.py"
 MANIFEST_TOOL = REPO_ROOT / "tools" / "manifest" / "build_artifacts.py"
+M1_ENTRY_MANIFEST_MODULE = "tools.manifest.m1_entry_manifest"
 PACKAGE_TOOL = REPO_ROOT / "tools" / "packaging" / "development_package.py"
 PACKAGE_SMOKE = REPO_ROOT / "tools" / "packaging" / "smoke.py"
 COLD_START = REPO_ROOT / "tools" / "ci" / "cold_start.py"
@@ -68,6 +70,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("bootstrap", "M0-DEV-001", "IMPLEMENTED", "Validate runtime/lock/baseline and sync the frozen project environment."),
     CommandSpec("verify-repository-bootstrap", "M0-DEV-000", "IMPLEMENTED", "Verify the source-controlled Formal Repository Bootstrap contract."),
     CommandSpec("verify-m0-delta-closure", "M0 Milestone Review", "IMPLEMENTED", "Verify the SDIB-1.0.1 48-task M0 delta closure record."),
+    CommandSpec("verify-m1-entry-preparation", "M1 Entry Gate §19.1(6/7/9/10)", "IMPLEMENTED", "Verify non-admitting M1 Entry preparation evidence."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -115,6 +118,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("package", "M0-DEV-005", "IMPLEMENTED", "Build a deterministic M0 development artifact for one governed profile."),
     CommandSpec("package-smoke", "M0-DEV-005", "IMPLEMENTED", "Clean-extract/install/start/stop Desktop and Service development bundles."),
     CommandSpec("manifest", "M0-DEV-003/M0-DEV-004", "IMPLEMENTED", "Generate build manifest, SBOM, license and native dependency evidence."),
+    CommandSpec("m1-entry-manifest", "M1 Entry Gate §19.1(6)", "IMPLEMENTED", "Generate an exact M1 Entry build manifest without admitting M1."),
     CommandSpec("cold-start", "M0-DEV-006", "IMPLEMENTED", "Rebuild and execute current M0 gates from a clean local clone."),
     CommandSpec("doctor", "M0-DEV-001", "IMPLEMENTED", "Report runtime, resolver, lock and quality-tool availability."),
 )
@@ -434,6 +438,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-governance", help="Verify M0 governance repository contracts")
     sub.add_parser("verify-repository-bootstrap", help="Verify M0-DEV-000 repository bootstrap substrate")
     sub.add_parser("verify-m0-delta-closure", help="Verify SDIB-1.0.1 48-task M0 delta closure record")
+    sub.add_parser("verify-m1-entry-preparation", help="Verify M1 Entry preparation evidence without admitting M1")
     ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
     ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
     ci_check.add_argument("--evidence", type=Path)
@@ -444,6 +449,9 @@ def build_parser() -> argparse.ArgumentParser:
     manifest = sub.add_parser("manifest", help="Generate build/SBOM/license/native-dependency evidence")
     manifest.add_argument("--profile", required=True)
     manifest.add_argument("--output", type=Path, required=True)
+    m1_manifest = sub.add_parser("m1-entry-manifest", help="Generate M1 Entry build-manifest evidence")
+    m1_manifest.add_argument("--profile", required=True)
+    m1_manifest.add_argument("--output", type=Path, required=True)
     cold_start = sub.add_parser("cold-start", help="Rebuild M0 from a clean clone and rerun gates")
     cold_start.add_argument("--expected-platform", choices=("windows", "linux"))
     cold_start.add_argument("--evidence", type=Path)
@@ -552,6 +560,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(REPOSITORY_BOOTSTRAP_VERIFY)])
     if command == "verify-m0-delta-closure":
         return _run([sys.executable, str(M0_DELTA_CLOSURE_VERIFY)])
+    if command == "verify-m1-entry-preparation":
+        return _run([sys.executable, "-m", M1_ENTRY_PREPARATION_MODULE])
     if command == "platform-smoke":
         return _run([sys.executable, str(PLATFORM_SMOKE)])
     if command == "openapi-snapshot":
@@ -570,6 +580,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             [
                 sys.executable,
                 str(MANIFEST_TOOL),
+                "--profile",
+                args.profile,
+                "--output",
+                str(args.output),
+            ]
+        )
+    if command == "m1-entry-manifest":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_ENTRY_MANIFEST_MODULE,
                 "--profile",
                 args.profile,
                 "--output",

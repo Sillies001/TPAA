@@ -128,6 +128,15 @@ def test_step10_workflow_archives_build_evidence_and_packages() -> None:
     assert "dist/" in text
 
 
+def test_m1_entry_preparation_is_fail_closed_and_archived() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "python tools/dev/tpaa_dev.py verify-m1-entry-preparation" in text
+    assert "python tools/dev/tpaa_dev.py m1-entry-manifest" in text
+    assert "--profile ${{ matrix.desktop_profile }}" in text
+    assert "--output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json" in text
+    assert "evidence/m1-entry/${{ matrix.platform }}/build-manifest.json" in text
+
+
 def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "m0-exit-postgres:" in text
