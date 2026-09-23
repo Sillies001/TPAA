@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +71,7 @@ def test_ci_scope_records_step10_work_without_claiming_m0_exit(
     assert "package/SBOM/cold-start" in included
     assert "package-smoke" in gate_names
     assert "M0 Exit Gate" in excluded
-    # The nested cold-start gate is suppressed by TPAA_COLD_START_INNER only in the real inner run;
-    # this unit stub does not set that environment marker.
-    assert "cold-start" in gate_names
+    if os.environ.get("TPAA_COLD_START_INNER") == "1":
+        assert "cold-start" not in gate_names
+    else:
+        assert "cold-start" in gate_names
