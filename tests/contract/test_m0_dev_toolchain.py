@@ -72,6 +72,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
     required = {
         "bootstrap",
         "verify-repository-bootstrap",
+        "verify-m0-delta-closure",
         "generate",
         "verify-baseline",
         "test-unit",

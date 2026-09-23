@@ -1,34 +1,43 @@
 # M0 Engineering Bootstrap Status
 
 
-## SDIB-1.0.1 adoption delta — M1_NOT_ADMITTED
+## SDIB-1.0.1 M0 delta — 48/48 CLOSED; M1_NOT_ADMITTED
 
 SDIB-1.0.1 is a C1 implementation-organization patch over the historical SDIB-1.0 M0
 acceptance. It does **not** change R3.3, CB-1.4.0, the Canonical machine authorities,
 the 116 P1 metrics, the 661 input bindings, Stage semantics, or DB schema 1.6.0.
 
-The previously accepted M0 Exit evidence remains historically valid:
+The historical M0 engineering baseline remains unchanged:
 
 - accepted revision: `ee54e8500381e62a53e1f2352d485ed11892c9d6`;
 - M0 Exit: GO / 14 of 14 §18 gates PASS;
-- published tag: `M0_IMPLEMENTATION_BASELINE`, independently verified to peel to the
-  accepted revision.
+- published tag: `M0_IMPLEMENTATION_BASELINE`, independently verified to peel exactly
+  to the accepted revision.
 
-However SDIB-1.0.1 §17 adds `M0-DEV-000 Formal Repository Bootstrap`, making the
-normative M0 backlog 48 work packages. The current repository cannot yet claim strict
-48/48 closure because:
+The SDIB-1.0.1 repository-bootstrap delta is now closed on merged-main revision
+`e55e446e8830dc3ce2ed4c8854ed6095c6c2448f`:
 
-1. GitHub reports the current `main` branch as `protected=false`;
-2. the repository root does not contain the required `.editorconfig`;
-3. no evidence has yet been accepted that the new `M0-DEV-000` minimum acceptance as
-   a whole (including the first bootstrap MR Windows/Linux minimum checks) is CLOSED.
+- PR #9 supplied the required `.editorconfig` and fail-closed
+  `verify-repository-bootstrap` gate;
+- repository visibility is public;
+- `main.protected=true`;
+- all five governed GitHub Actions checks are required;
+- PR Run #36 passed Windows/Linux and Exit checks;
+- merged-main Run #37 passed all five jobs, 14/14 Exit gates, logical equivalence, and
+  the repository-bootstrap gate on both platforms.
 
-Therefore SDIB-1.0.1 §19.1 condition 3 is not currently PASS, and the transition state is
-`M1_NOT_ADMITTED`. No M1 implementation work may start until this delta is closed (or
-an allowed non-blocking exception is explicitly approved by an M0 Review) and all §19.1
-M1 Entry Gate conditions are re-reviewed.
+A focused SDIB-1.0.1 §17 review individually reconciled all 48 unique M0 work packages
+against their minimum acceptance. Result: **48 CLOSED / 0 OPEN / 0 EXCEPTIONS**.
 
-Adoption review: `docs/reviews/SDIB-1.0.1_ADOPTION_REVIEW.md`.
+Closure review:
+`docs/reviews/M0_SDIB-1.0.1_DELTA_CLOSURE_REVIEW.md`
+
+Machine record:
+`docs/reviews/M0_SDIB-1.0.1_DELTA_CLOSURE.json`
+
+This satisfies the evidence need for SDIB-1.0.1 §19.1 condition 3, but M1 is still
+`M1_NOT_ADMITTED` until the remaining §19.1 Entry Gate conditions are formally
+reviewed and all are PASS.
 
 
 ## Completed
@@ -443,18 +452,26 @@ M0 becomes publication-complete when this manifest is merged and the tag exists 
 - P1 capability completion/admission.
 - M5-qualified packaging/release status.
 - Production Metric/Stage/Release qualification.
-- Any M1 capability before M0 baseline publication is complete.
+- Any M1 implementation or capability before the complete SDIB-1.0.1 §19.1 Entry Gate
+  is PASS.
 
 ## Next required sequence
 
-Per SDIB-1.0.1 §17.1 and §19.1, the required sequence is now:
+Per SDIB-1.0.1 §19.1, the next required activity is the **complete M1 Entry Gate review**.
 
-1. merge the SDIB-1.0.1 C1 baseline-adoption PR after its normal CI/quality gates pass;
-2. close the `M0-DEV-000` delta with machine/repository evidence (including protected
-   `main`, required repository bootstrap files, and the Windows/Linux minimum bootstrap
-   acceptance evidence);
-3. run a focused M0 delta review and record whether all 48 M0 work packages are CLOSED;
-4. execute the complete SDIB-1.0.1 §19.1 M1 Entry Gate review;
-5. only if every Entry Gate condition is PASS may M1-A / `BF_M1_NOMINAL_V1` work begin.
+The M0 side now has explicit evidence for:
 
-The historical M0 tag must not be moved or recreated as part of this delta closure.
+1. §18 M0 Exit PASS;
+2. published/verifiable historical `M0_IMPLEMENTATION_BASELINE`;
+3. all 48 M0 work packages CLOSED;
+4. ADR-M0-001..010 CLOSED;
+5. Windows/Linux CI GREEN and repeatable.
+
+The Entry review must still independently evaluate conditions 6 through 10, including
+the M1 build-manifest freeze, Synthetic/Golden strategy, assigned review roles,
+architecture-blocker review, and project-management import of the M1 backlog.
+
+Only if all ten §19.1 conditions are PASS may M1-A / `BF_M1_NOMINAL_V1` implementation
+begin.
+
+The historical M0 tag must not be moved, recreated, or retargeted.
