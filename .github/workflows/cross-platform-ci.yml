@@ -67,6 +67,9 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.desktop_profile }} --output evidence/devops/${{ matrix.platform }}/desktop
           uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.service_profile }} --output evidence/devops/${{ matrix.platform }}/service
 
+      - name: Verify M1 Entry preparation contracts
+        run: uv run --locked python tools/dev/tpaa_dev.py verify-m1-entry-preparation
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
