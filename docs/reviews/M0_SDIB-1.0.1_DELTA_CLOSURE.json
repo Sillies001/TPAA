@@ -1,0 +1,320 @@
+{
+  "schema": "TPAA_M0_SDIB_1_0_1_DELTA_CLOSURE_REVIEW_V1",
+  "sdib": "SDIB-1.0.1",
+  "review_scope": "§17 48-work-package closure after SDIB-1.0.1 adoption and M0-DEV-000 reconciliation",
+  "decision": "GO",
+  "task_count": 48,
+  "closed_task_count": 48,
+  "evidence_revision": "e55e446e8830dc3ce2ed4c8854ed6095c6c2448f",
+  "historical_m0_baseline": {
+    "tag": "M0_IMPLEMENTATION_BASELINE",
+    "target_revision": "ee54e8500381e62a53e1f2352d485ed11892c9d6",
+    "tag_compare_status": "identical",
+    "original_exit_run": 31,
+    "original_exit_decision": "GO"
+  },
+  "sdib_1_0_1_merged_main_evidence": {
+    "run_id": 35874610225,
+    "run_number": 37,
+    "status": "PASS",
+    "source_revision": "e55e446e8830dc3ce2ed4c8854ed6095c6c2448f",
+    "source_revision_consistent": true,
+    "exit_gate_pass_count": 14,
+    "exit_gate_count": 14,
+    "logical_equivalence_status": "PASS",
+    "logical_equivalence_mismatches": [],
+    "artifacts": {
+      "windows_ci": {
+        "id": 10757202994,
+        "sha256": "0e7cb49b00c3092cf24bc0e4a37f3f6e8a7a8aceda991d59d337dd3fe1402654"
+      },
+      "linux_ci": {
+        "id": 10756367020,
+        "sha256": "1924d9ea374aee4d5a8aa69e9ead0d895fcfc5561ed312f000df2688fd9e5085"
+      },
+      "postgresql_exit": {
+        "id": 10756107192,
+        "sha256": "b892519e2c661500e616f3f207f5a281df43242a4f746e3b92c93929cc1ebe52"
+      },
+      "logical_equivalence": {
+        "id": 10757008384,
+        "sha256": "4e69d14ba595c78f1422317355b158fccdb50bd9732d00d185f79f088dd67f1d"
+      },
+      "exit_review": {
+        "id": 10757072040,
+        "sha256": "e05db176152d35acede9a2bc677733f7584c2df4c2a50629f04a4108b0aede2c"
+      }
+    }
+  },
+  "m0_dev_000_external_hosting_evidence": {
+    "repository_visibility": "public",
+    "main_protected": true,
+    "required_checks": [
+      "M0 windows",
+      "M0 linux",
+      "M0 Exit PostgreSQL",
+      "M0 logical equivalence",
+      "M0 Exit Review"
+    ],
+    "required_check_app_id": 15368,
+    "closure_pr": 9,
+    "closure_pr_run": 36,
+    "merged_main_run": 37
+  },
+  "frozen_inputs": {
+    "core_baseline": "CB-1.4.0",
+    "db_schema_version": "1.6.0",
+    "baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+    "dependency_lock_sha256": "302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+    "dto_authority_sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+  },
+  "tasks": [
+    {
+      "task_id": "M0-CORE-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 Windows/Linux verify-baseline PASS; exact baseline hash gate; docs/developer/M0_STATUS.md"
+    },
+    {
+      "task_id": "M0-CORE-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 Windows/Linux verify-canonical PASS; Canonical fail-closed contract; docs/developer/M0_STATUS.md"
+    },
+    {
+      "task_id": "M0-CORE-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 Windows/Linux generate-check PASS; docs/implementation/M0-CORE-003_CODE_GENERATOR_FRAMEWORK.md"
+    },
+    {
+      "task_id": "M0-CORE-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-generated + regenerate-diff PASS; docs/implementation/M0-CORE-004_GENERATED_SOURCE_GOVERNANCE.md"
+    },
+    {
+      "task_id": "M0-CORE-005",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-architecture PASS; docs/implementation/M0-CORE-005_ARCHITECTURE_DEPENDENCY_TEST.md"
+    },
+    {
+      "task_id": "M0-CORE-006",
+      "status": "CLOSED",
+      "evidence": "Run #37 contract + api-smoke PASS; docs/implementation/M0-CORE-006_RUNTIME_BASELINE_HANDSHAKE.md"
+    },
+    {
+      "task_id": "M0-STO-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 sqlite-bootstrap-verify PASS plus M0 Exit PostgreSQL clean-bootstrap PASS; docs/implementation/M0-STO-001_DB_1_6_0_CLEAN_BOOTSTRAP.md"
+    },
+    {
+      "task_id": "M0-STO-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 sqlite-repository-acceptance PASS; docs/implementation/M0-STO-002_SQLITE_DESKTOP_REPOSITORY_SKELETON.md"
+    },
+    {
+      "task_id": "M0-STO-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 M0 Exit PostgreSQL repository acceptance PASS; docs/implementation/M0-STO-003_POSTGRESQL_SERVICE_REPOSITORY_SKELETON.md"
+    },
+    {
+      "task_id": "M0-STO-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 unit PASS including tests/unit/storage/test_m0_sto_004_006_object_hash.py; Step 10 accepted backlog"
+    },
+    {
+      "task_id": "M0-STO-005",
+      "status": "CLOSED",
+      "evidence": "Run #37 migration-smoke + migration PASS; Step 10 accepted backlog"
+    },
+    {
+      "task_id": "M0-STO-006",
+      "status": "CLOSED",
+      "evidence": "Run #37 unit/contract PASS; Exit Review gate 9 PASS; tests/unit/storage/test_m0_sto_004_006_object_hash.py"
+    },
+    {
+      "task_id": "M0-STO-007",
+      "status": "CLOSED",
+      "evidence": "Run #37 backup-restore-smoke PASS; tests/unit/storage/test_m0_sto_007_backup_restore.py"
+    },
+    {
+      "task_id": "M0-API-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 contract + api-smoke PASS; docs/implementation/M0-API-001_APPLICATION_SERVICE_SKELETON.md"
+    },
+    {
+      "task_id": "M0-API-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 api-smoke PASS; docs/implementation/M0-API-002_FASTAPI_HEALTH_READINESS_VERSION.md"
+    },
+    {
+      "task_id": "M0-API-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 openapi-snapshot PASS; Step 10 accepted backlog"
+    },
+    {
+      "task_id": "M0-API-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 unit PASS including tests/unit/application/test_m0_api_004_005_job_idempotency.py; Step 10 accepted backlog"
+    },
+    {
+      "task_id": "M0-API-005",
+      "status": "CLOSED",
+      "evidence": "Run #37 unit PASS including controlled business/system status mapping test; Step 10 accepted backlog"
+    },
+    {
+      "task_id": "M0-GUI-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 gui-smoke-headless PASS on Windows/Linux; docs/implementation/M0-GUI-001_PYSIDE6_APPLICATION_SHELL.md"
+    },
+    {
+      "task_id": "M0-GUI-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 desktop-backend-smoke PASS; docs/implementation/M0-GUI-002_LOCAL_BACKEND_LIFECYCLE_HANDSHAKE.md"
+    },
+    {
+      "task_id": "M0-GUI-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 contract + ui-automation-smoke PASS; docs/implementation/M0-GUI-003_BASELINE_DIAGNOSTICS_VIEW.md"
+    },
+    {
+      "task_id": "M0-GUI-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 ui-automation-smoke PASS; docs/implementation/M0-GUI-004_UI_AUTOMATION_SMOKE_HARNESS.md"
+    },
+    {
+      "task_id": "M0-TST-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 unit/contract/golden/replay/migration/e2e commands PASS on both platforms; docs/implementation/M0-TST-001_006_TEST_FIXTURE_HARNESS.md"
+    },
+    {
+      "task_id": "M0-TST-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-canonical + contract PASS; Canonical registry contracts exercised"
+    },
+    {
+      "task_id": "M0-TST-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 fixture/golden/contract PASS; typed transport fixture M0_BASIC_TRANSPORT_V1"
+    },
+    {
+      "task_id": "M0-TST-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 fixture/logical-equivalence PASS; decimal-string Session Time retained in frozen fixture contract"
+    },
+    {
+      "task_id": "M0-TST-005",
+      "status": "CLOSED",
+      "evidence": "Run #37 golden/replay/e2e framework PASS; fail-closed fixture harness accepted"
+    },
+    {
+      "task_id": "M0-TST-006",
+      "status": "CLOSED",
+      "evidence": "Run #37 Windows/Linux machine CI evidence emitted; logical-equivalence artifact PASS with mismatches=[]"
+    },
+    {
+      "task_id": "M0-PLAT-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 platform-tests + platform-smoke PASS; tests/platform/test_m0_plat_001_003_platform_adapters.py"
+    },
+    {
+      "task_id": "M0-PLAT-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 platform-tests + platform-smoke PASS; real spawn payload round-trip accepted"
+    },
+    {
+      "task_id": "M0-PLAT-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 platform-tests + platform-smoke PASS; temp/lock/atomic-replace contracts accepted"
+    },
+    {
+      "task_id": "M0-PLAT-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 M0 windows SUCCESS; source revision e55e446e8830dc3ce2ed4c8854ed6095c6c2448f"
+    },
+    {
+      "task_id": "M0-PLAT-005",
+      "status": "CLOSED",
+      "evidence": "Run #37 M0 linux SUCCESS; source revision e55e446e8830dc3ce2ed4c8854ed6095c6c2448f"
+    },
+    {
+      "task_id": "M0-SEC-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 security-smoke + desktop lifecycle/API security contracts PASS; Step 10 accepted backlog"
+    },
+    {
+      "task_id": "M0-SEC-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 security-smoke + unit PASS; tests/unit/security/test_m0_sec_002_004_security_framework.py"
+    },
+    {
+      "task_id": "M0-SEC-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 security-smoke + unit PASS; development data guard blocks unapproved operational/sensitive data"
+    },
+    {
+      "task_id": "M0-SEC-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 security-smoke + manifest tests PASS; secret/config separation checks accepted"
+    },
+    {
+      "task_id": "M0-DEV-000",
+      "status": "CLOSED",
+      "evidence": "PR #9 merged; Run #36 PR Windows/Linux/Exit checks PASS; Run #37 merged-main verify-repository-bootstrap PASS on Windows/Linux; repository public; main protected=true; five required GitHub Actions checks enforced; README/.gitignore/.gitattributes/.editorconfig/CI present"
+    },
+    {
+      "task_id": "M0-DEV-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 bootstrap-check-only PASS and unified developer CLI contract PASS; docs/developer/M0_STATUS.md"
+    },
+    {
+      "task_id": "M0-DEV-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 uv-lock-check-offline PASS on Windows/Linux; logical-equivalence frozen dependency_lock_sha256 identical"
+    },
+    {
+      "task_id": "M0-DEV-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 build manifest artifacts generated for governed profiles; tests/unit/devops/test_m0_dev_003_004_manifest_sbom.py"
+    },
+    {
+      "task_id": "M0-DEV-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 SBOM/license/native inventories generated; tests/unit/devops/test_m0_dev_003_004_manifest_sbom.py"
+    },
+    {
+      "task_id": "M0-DEV-005",
+      "status": "CLOSED",
+      "evidence": "Run #37 package-smoke PASS; Windows/Linux Desktop/Service development packages emitted"
+    },
+    {
+      "task_id": "M0-DEV-006",
+      "status": "CLOSED",
+      "evidence": "Run #37 clean-clone cold-start PASS on Windows/Linux; worktree_clean=true, m0_gates=PASS"
+    },
+    {
+      "task_id": "M0-GOV-001",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-governance PASS; Exit Review gate 13 confirms ADR-M0-001..010 CLOSED"
+    },
+    {
+      "task_id": "M0-GOV-002",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-governance PASS; governed Issue/PR templates present"
+    },
+    {
+      "task_id": "M0-GOV-003",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-governance PASS; docs/governance/BASELINE_CHANGE.md present"
+    },
+    {
+      "task_id": "M0-GOV-004",
+      "status": "CLOSED",
+      "evidence": "Run #37 verify-governance PASS; docs/governance/DEFINITION_OF_DONE.md present"
+    }
+  ],
+  "transition": {
+    "m0_48_work_packages": "CLOSED",
+    "m1_entry": "NOT_EVALUATED_BY_THIS_REVIEW",
+    "m1_implementation": "NOT_STARTED"
+  }
+}
