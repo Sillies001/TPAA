@@ -121,8 +121,8 @@ jobs:
       - name: Compare Windows and Linux logical products
         run: >-
           python tools/dev/tpaa_dev.py compare-platform-logical
-          --windows downloaded/cross-platform/windows.json
-          --linux downloaded/cross-platform/linux.json
+          --windows downloaded/evidence/cross-platform/windows.json
+          --linux downloaded/evidence/cross-platform/linux.json
           --evidence evidence/cross-platform/logical-equivalence.json
 
       - name: Upload logical-equivalence evidence

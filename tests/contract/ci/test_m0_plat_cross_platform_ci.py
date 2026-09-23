@@ -113,8 +113,8 @@ def test_step9_fixture_and_logical_equivalence_are_fail_closed_in_ci() -> None:
     assert "needs: m0-cross-platform" in text
     assert "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in text
     assert "python tools/dev/tpaa_dev.py compare-platform-logical" in text
-    assert "--windows downloaded/cross-platform/windows.json" in text
-    assert "--linux downloaded/cross-platform/linux.json" in text
+    assert "--windows downloaded/evidence/cross-platform/windows.json" in text
+    assert "--linux downloaded/evidence/cross-platform/linux.json" in text
     assert "--evidence evidence/cross-platform/logical-equivalence.json" in text
 
 
