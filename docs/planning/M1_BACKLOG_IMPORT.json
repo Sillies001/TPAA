@@ -1,0 +1,683 @@
+{
+  "schema": "TPAA_M1_BACKLOG_IMPORT_V1",
+  "sdib": "SDIB-1.0.1",
+  "authority": "§23 M1 工作包 Backlog",
+  "admission_boundary": "PLANNING_ONLY_M1_NOT_ADMITTED",
+  "task_count": 56,
+  "imported_issue_count": 56,
+  "unique_task_count": 56,
+  "records": [
+    {
+      "task_id": "M1-DATA-001",
+      "ws": "WS-DATA",
+      "deliverable": "Synthetic Source Adapter",
+      "minimum_acceptance": "只接收受控 fixture bundle；source identity/hash 可追踪",
+      "issue": {
+        "number": 11,
+        "url": "https://github.com/Sillies001/TPAA/issues/11",
+        "title": "[M1][WS-DATA] M1-DATA-001 — Synthetic Source Adapter",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-DATA-002",
+      "ws": "WS-DATA",
+      "deliverable": "Source Registry/Artifact registration",
+      "minimum_acceptance": "原始 bundle 与 Context artifact 均有 immutable ref/hash",
+      "issue": {
+        "number": 12,
+        "url": "https://github.com/Sillies001/TPAA/issues/12",
+        "title": "[M1][WS-DATA] M1-DATA-002 — Source Registry/Artifact registration",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-DATA-003",
+      "ws": "WS-DATA",
+      "deliverable": "Session Time ingest path",
+      "minimum_acceptance": "源时间→Session Time 显式；不依赖 OS timezone/locale",
+      "issue": {
+        "number": 13,
+        "url": "https://github.com/Sillies001/TPAA/issues/13",
+        "title": "[M1][WS-DATA] M1-DATA-003 — Session Time ingest path",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-DATA-004",
+      "ws": "WS-DATA",
+      "deliverable": "Aircraft entity resolution",
+      "minimum_acceptance": "单架 aircraft stable identity 可重放",
+      "issue": {
+        "number": 14,
+        "url": "https://github.com/Sillies001/TPAA/issues/14",
+        "title": "[M1][WS-DATA] M1-DATA-004 — Aircraft entity resolution",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-DATA-005",
+      "ws": "WS-DATA",
+      "deliverable": "Canonical flight channels",
+      "minimum_acceptance": "body_p_rad_s/nz_g/heading_true_rad/tas_mps/mach/session_time/quality 进入 Canonical",
+      "issue": {
+        "number": 15,
+        "url": "https://github.com/Sillies001/TPAA/issues/15",
+        "title": "[M1][WS-DATA] M1-DATA-005 — Canonical flight channels",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-DATA-006",
+      "ws": "WS-DATA",
+      "deliverable": "Evaluation Context resolver",
+      "minimum_acceptance": "绑定 Basic profile、Stage profile、metric profile/artifact refs",
+      "issue": {
+        "number": 16,
+        "url": "https://github.com/Sillies001/TPAA/issues/16",
+        "title": "[M1][WS-DATA] M1-DATA-006 — Evaluation Context resolver",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-DATA-007",
+      "ws": "WS-DATA",
+      "deliverable": "Lineage/quality propagation",
+      "minimum_acceptance": "Canonical 字段可追溯 source；missing/invalid 不变成0",
+      "issue": {
+        "number": 17,
+        "url": "https://github.com/Sillies001/TPAA/issues/17",
+        "title": "[M1][WS-DATA] M1-DATA-007 — Lineage/quality propagation",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-001",
+      "ws": "WS-WORLD",
+      "deliverable": "Basic Episode detector",
+      "minimum_acceptance": "生成可重放 Episode identity/revision",
+      "issue": {
+        "number": 18,
+        "url": "https://github.com/Sillies001/TPAA/issues/18",
+        "title": "[M1][WS-WORLD] M1-WORLD-001 — Basic Episode detector",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-002",
+      "ws": "WS-WORLD",
+      "deliverable": "BASIC_FLIGHT_V1 Stage projector",
+      "minimum_acceptance": "四 Stage 顺序、[start,end)、precedence/boundary contract",
+      "issue": {
+        "number": 19,
+        "url": "https://github.com/Sillies001/TPAA/issues/19",
+        "title": "[M1][WS-WORLD] M1-WORLD-002 — BASIC_FLIGHT_V1 Stage projector",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-003",
+      "ws": "WS-WORLD",
+      "deliverable": "Stage quality/status",
+      "minimum_acceptance": "coverage/confidence/detector_version 进入产品",
+      "issue": {
+        "number": 20,
+        "url": "https://github.com/Sillies001/TPAA/issues/20",
+        "title": "[M1][WS-WORLD] M1-WORLD-003 — Stage quality/status",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-004",
+      "ws": "WS-WORLD",
+      "deliverable": "Minimal P1 World product",
+      "minimum_acceptance": "只构造代表Metric所需 aircraft observed world；无伪造 P/A/J",
+      "issue": {
+        "number": 21,
+        "url": "https://github.com/Sillies001/TPAA/issues/21",
+        "title": "[M1][WS-WORLD] M1-WORLD-004 — Minimal P1 World product",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-005",
+      "ws": "WS-WORLD",
+      "deliverable": "Revision/supersede smoke",
+      "minimum_acceptance": "Stage 修订新建 revision，不改历史 published Stage",
+      "issue": {
+        "number": 22,
+        "url": "https://github.com/Sillies001/TPAA/issues/22",
+        "title": "[M1][WS-WORLD] M1-WORLD-005 — Revision/supersede smoke",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-006",
+      "ws": "WS-WORLD",
+      "deliverable": "World logical hash",
+      "minimum_acceptance": "同输入跨平台逻辑 hash 稳定",
+      "issue": {
+        "number": 23,
+        "url": "https://github.com/Sillies001/TPAA/issues/23",
+        "title": "[M1][WS-WORLD] M1-WORLD-006 — World logical hash",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-WORLD-007",
+      "ws": "WS-WORLD",
+      "deliverable": "World evidence refs",
+      "minimum_acceptance": "Metric 可引用确定的 World/Stage/Canonical refs",
+      "issue": {
+        "number": 24,
+        "url": "https://github.com/Sillies001/TPAA/issues/24",
+        "title": "[M1][WS-WORLD] M1-WORLD-007 — World evidence refs",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-001",
+      "ws": "WS-METRIC",
+      "deliverable": "MetricContext builder",
+      "minimum_acceptance": "exact catalog/profile/input authority；不从 UI/DB 猜字段",
+      "issue": {
+        "number": 25,
+        "url": "https://github.com/Sillies001/TPAA/issues/25",
+        "title": "[M1][WS-METRIC] M1-MET-001 — MetricContext builder",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-002",
+      "ws": "WS-METRIC",
+      "deliverable": "P1-AIR-001",
+      "minimum_acceptance": "公式/validity/coverage/Evidence/Golden exact",
+      "issue": {
+        "number": 26,
+        "url": "https://github.com/Sillies001/TPAA/issues/26",
+        "title": "[M1][WS-METRIC] M1-MET-002 — P1-AIR-001",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-003",
+      "ws": "WS-METRIC",
+      "deliverable": "P1-AIR-002",
+      "minimum_acceptance": "主值与 diagnostic min evidence 分离",
+      "issue": {
+        "number": 27,
+        "url": "https://github.com/Sillies001/TPAA/issues/27",
+        "title": "[M1][WS-METRIC] M1-MET-003 — P1-AIR-002",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-004",
+      "ws": "WS-METRIC",
+      "deliverable": "P1-AIR-003",
+      "minimum_acceptance": "unwrap + DERIVATIVE_LLS_V1 + gap",
+      "issue": {
+        "number": 28,
+        "url": "https://github.com/Sillies001/TPAA/issues/28",
+        "title": "[M1][WS-METRIC] M1-MET-004 — P1-AIR-003",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-005",
+      "ws": "WS-METRIC",
+      "deliverable": "P1-AIR-004",
+      "minimum_acceptance": "ROLLING_MEDIAN + sustained dwell evidence",
+      "issue": {
+        "number": 29,
+        "url": "https://github.com/Sillies001/TPAA/issues/29",
+        "title": "[M1][WS-METRIC] M1-MET-005 — P1-AIR-004",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-006",
+      "ws": "WS-METRIC",
+      "deliverable": "P1-AIR-007",
+      "minimum_acceptance": "STRUCT_P1_AIR_007_V1 typed structured output",
+      "issue": {
+        "number": 30,
+        "url": "https://github.com/Sillies001/TPAA/issues/30",
+        "title": "[M1][WS-METRIC] M1-MET-006 — P1-AIR-007",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-007",
+      "ws": "WS-METRIC",
+      "deliverable": "Metric applicability/value-kind gate",
+      "minimum_acceptance": "AIR subject=Aircraft；typed result slot exact",
+      "issue": {
+        "number": 31,
+        "url": "https://github.com/Sillies001/TPAA/issues/31",
+        "title": "[M1][WS-METRIC] M1-MET-007 — Metric applicability/value-kind gate",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-MET-008",
+      "ws": "WS-METRIC",
+      "deliverable": "Metric compute staging",
+      "minimum_acceptance": "compute 不直接发布；失败不污染 current",
+      "issue": {
+        "number": 32,
+        "url": "https://github.com/Sillies001/TPAA/issues/32",
+        "title": "[M1][WS-METRIC] M1-MET-008 — Metric compute staging",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-OBS-001",
+      "ws": "WS-OBSERVATION",
+      "deliverable": "P1 Aircraft Observation builder",
+      "minimum_acceptance": "Metric publication_route→CAPABILITY_OBSERVATION",
+      "issue": {
+        "number": 33,
+        "url": "https://github.com/Sillies001/TPAA/issues/33",
+        "title": "[M1][WS-OBSERVATION] M1-OBS-001 — P1 Aircraft Observation builder",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-OBS-002",
+      "ws": "WS-OBSERVATION",
+      "deliverable": "SESSION Release builder",
+      "minimum_acceptance": "绑定 Session/Context/Catalog/Definition/World/Evidence",
+      "issue": {
+        "number": 34,
+        "url": "https://github.com/Sillies001/TPAA/issues/34",
+        "title": "[M1][WS-OBSERVATION] M1-OBS-002 — SESSION Release builder",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-OBS-003",
+      "ws": "WS-OBSERVATION",
+      "deliverable": "Publish CAS/idempotency",
+      "minimum_acceptance": "重复提交不产生重复 current Release",
+      "issue": {
+        "number": 35,
+        "url": "https://github.com/Sillies001/TPAA/issues/35",
+        "title": "[M1][WS-OBSERVATION] M1-OBS-003 — Publish CAS/idempotency",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-OBS-004",
+      "ws": "WS-OBSERVATION",
+      "deliverable": "Historical read",
+      "minimum_acceptance": "按 release-bound refs 读取，禁止 latest fallback",
+      "issue": {
+        "number": 36,
+        "url": "https://github.com/Sillies001/TPAA/issues/36",
+        "title": "[M1][WS-OBSERVATION] M1-OBS-004 — Historical read",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-OBS-005",
+      "ws": "WS-OBSERVATION",
+      "deliverable": "Replay command",
+      "minimum_acceptance": "同 provenance 复算并比较 logical products",
+      "issue": {
+        "number": 37,
+        "url": "https://github.com/Sillies001/TPAA/issues/37",
+        "title": "[M1][WS-OBSERVATION] M1-OBS-005 — Replay command",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-STO-001",
+      "ws": "WS-STORAGE",
+      "deliverable": "M1 persistence mappings",
+      "minimum_acceptance": "只按 Core model/Repository mapping 实现，不新增隐性表语义",
+      "issue": {
+        "number": 38,
+        "url": "https://github.com/Sillies001/TPAA/issues/38",
+        "title": "[M1][WS-STORAGE] M1-STO-001 — M1 persistence mappings",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-STO-002",
+      "ws": "WS-STORAGE",
+      "deliverable": "staging→sealed object flow",
+      "minimum_acceptance": "crash/cancel/orphan cleanup smoke",
+      "issue": {
+        "number": 39,
+        "url": "https://github.com/Sillies001/TPAA/issues/39",
+        "title": "[M1][WS-STORAGE] M1-STO-002 — staging→sealed object flow",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-STO-003",
+      "ws": "WS-STORAGE",
+      "deliverable": "SQLite/PostgreSQL parity",
+      "minimum_acceptance": "相同 fixture 发布相同 logical Release membership",
+      "issue": {
+        "number": 40,
+        "url": "https://github.com/Sillies001/TPAA/issues/40",
+        "title": "[M1][WS-STORAGE] M1-STO-003 — SQLite/PostgreSQL parity",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-API-001",
+      "ws": "WS-API",
+      "deliverable": "Import/compute/publish commands",
+      "minimum_acceptance": "均支持 Idempotency-Key/request hash",
+      "issue": {
+        "number": 41,
+        "url": "https://github.com/Sillies001/TPAA/issues/41",
+        "title": "[M1][WS-API] M1-API-001 — Import/compute/publish commands",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-API-002",
+      "ws": "WS-API",
+      "deliverable": "Session/Context/Episode/Stage queries",
+      "minimum_acceptance": "只返回 generated DTO/projection",
+      "issue": {
+        "number": 42,
+        "url": "https://github.com/Sillies001/TPAA/issues/42",
+        "title": "[M1][WS-API] M1-API-002 — Session/Context/Episode/Stage queries",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-API-003",
+      "ws": "WS-API",
+      "deliverable": "Metric list/detail/evidence query",
+      "minimum_acceptance": "使用 immutable Definition/Release，不读取 current formula",
+      "issue": {
+        "number": 43,
+        "url": "https://github.com/Sillies001/TPAA/issues/43",
+        "title": "[M1][WS-API] M1-API-003 — Metric list/detail/evidence query",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-API-004",
+      "ws": "WS-API",
+      "deliverable": "Release/historical read/replay query",
+      "minimum_acceptance": "明确 release identity/provenance/status",
+      "issue": {
+        "number": 44,
+        "url": "https://github.com/Sillies001/TPAA/issues/44",
+        "title": "[M1][WS-API] M1-API-004 — Release/historical read/replay query",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-API-005",
+      "ws": "WS-API",
+      "deliverable": "series/timeline range query",
+      "minimum_acceptance": "不把高频序列塞入单个大 JSON",
+      "issue": {
+        "number": 45,
+        "url": "https://github.com/Sillies001/TPAA/issues/45",
+        "title": "[M1][WS-API] M1-API-005 — series/timeline range query",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-001",
+      "ws": "WS-GUI",
+      "deliverable": "Session Browser",
+      "minimum_acceptance": "选择 synthetic Session/Release",
+      "issue": {
+        "number": 46,
+        "url": "https://github.com/Sillies001/TPAA/issues/46",
+        "title": "[M1][WS-GUI] M1-GUI-001 — Session Browser",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-002",
+      "ws": "WS-GUI",
+      "deliverable": "Context/Mission Header",
+      "minimum_acceptance": "显示 baseline/context/release identity 和 readiness",
+      "issue": {
+        "number": 47,
+        "url": "https://github.com/Sillies001/TPAA/issues/47",
+        "title": "[M1][WS-GUI] M1-GUI-002 — Context/Mission Header",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-003",
+      "ws": "WS-GUI",
+      "deliverable": "Master Timeline",
+      "minimum_acceptance": "统一控制 Stage/metric/evidence 游标",
+      "issue": {
+        "number": 48,
+        "url": "https://github.com/Sillies001/TPAA/issues/48",
+        "title": "[M1][WS-GUI] M1-GUI-003 — Master Timeline",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-004",
+      "ws": "WS-GUI",
+      "deliverable": "Basic Stage lane",
+      "minimum_acceptance": "四 Stage 可见且与时间轴对齐",
+      "issue": {
+        "number": 49,
+        "url": "https://github.com/Sillies001/TPAA/issues/49",
+        "title": "[M1][WS-GUI] M1-GUI-004 — Basic Stage lane",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-005",
+      "ws": "WS-GUI",
+      "deliverable": "Metric List",
+      "minimum_acceptance": "显示5项代表Metric状态/value kind/quality",
+      "issue": {
+        "number": 50,
+        "url": "https://github.com/Sillies001/TPAA/issues/50",
+        "title": "[M1][WS-GUI] M1-GUI-005 — Metric List",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-006",
+      "ws": "WS-GUI",
+      "deliverable": "Metric Detail + Evidence",
+      "minimum_acceptance": "公式不由UI定义；可下钻 input/world/stage/evidence refs",
+      "issue": {
+        "number": 51,
+        "url": "https://github.com/Sillies001/TPAA/issues/51",
+        "title": "[M1][WS-GUI] M1-GUI-006 — Metric Detail + Evidence",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-GUI-007",
+      "ws": "WS-GUI",
+      "deliverable": "Data Quality/Failure states",
+      "minimum_acceptance": "N_A/INSUFFICIENT/INVALID/系统错误视觉分离",
+      "issue": {
+        "number": 52,
+        "url": "https://github.com/Sillies001/TPAA/issues/52",
+        "title": "[M1][WS-GUI] M1-GUI-007 — Data Quality/Failure states",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-001",
+      "ws": "WS-TEST",
+      "deliverable": "8个 M1 fixture bundles",
+      "minimum_acceptance": "fixture manifest/hash/expected/tolerance 完整",
+      "issue": {
+        "number": 53,
+        "url": "https://github.com/Sillies001/TPAA/issues/53",
+        "title": "[M1][WS-TEST] M1-TST-001 — 8个 M1 fixture bundles",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-002",
+      "ws": "WS-TEST",
+      "deliverable": "5项 Metric unit+Golden",
+      "minimum_acceptance": "每项 nominal+edge+failure",
+      "issue": {
+        "number": 54,
+        "url": "https://github.com/Sillies001/TPAA/issues/54",
+        "title": "[M1][WS-TEST] M1-TST-002 — 5项 Metric unit+Golden",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-003",
+      "ws": "WS-TEST",
+      "deliverable": "Stage Golden",
+      "minimum_acceptance": "四 Stage boundary exact",
+      "issue": {
+        "number": 55,
+        "url": "https://github.com/Sillies001/TPAA/issues/55",
+        "title": "[M1][WS-TEST] M1-TST-003 — Stage Golden",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-004",
+      "ws": "WS-TEST",
+      "deliverable": "Release immutability test",
+      "minimum_acceptance": "published payload/definition/context 不可原地修改",
+      "issue": {
+        "number": 56,
+        "url": "https://github.com/Sillies001/TPAA/issues/56",
+        "title": "[M1][WS-TEST] M1-TST-004 — Release immutability test",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-005",
+      "ws": "WS-TEST",
+      "deliverable": "Idempotency race test",
+      "minimum_acceptance": "并发同请求只有一个逻辑发布",
+      "issue": {
+        "number": 57,
+        "url": "https://github.com/Sillies001/TPAA/issues/57",
+        "title": "[M1][WS-TEST] M1-TST-005 — Idempotency race test",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-006",
+      "ws": "WS-TEST",
+      "deliverable": "Historical replay test",
+      "minimum_acceptance": "current 改变不影响旧 Release 解释",
+      "issue": {
+        "number": 58,
+        "url": "https://github.com/Sillies001/TPAA/issues/58",
+        "title": "[M1][WS-TEST] M1-TST-006 — Historical replay test",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-007",
+      "ws": "WS-TEST",
+      "deliverable": "API contract snapshot",
+      "minimum_acceptance": "DTO/time/structured result exact",
+      "issue": {
+        "number": 59,
+        "url": "https://github.com/Sillies001/TPAA/issues/59",
+        "title": "[M1][WS-TEST] M1-TST-007 — API contract snapshot",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-008",
+      "ws": "WS-TEST",
+      "deliverable": "GUI E2E",
+      "minimum_acceptance": "import→compute→publish→timeline→metric detail→replay",
+      "issue": {
+        "number": 60,
+        "url": "https://github.com/Sillies001/TPAA/issues/60",
+        "title": "[M1][WS-TEST] M1-TST-008 — GUI E2E",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-009",
+      "ws": "WS-TEST",
+      "deliverable": "cross-platform logical equivalence",
+      "minimum_acceptance": "Windows/Linux exact/tolerance diff report",
+      "issue": {
+        "number": 61,
+        "url": "https://github.com/Sillies001/TPAA/issues/61",
+        "title": "[M1][WS-TEST] M1-TST-009 — cross-platform logical equivalence",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-TST-010",
+      "ws": "WS-TEST",
+      "deliverable": "cold-start M1",
+      "minimum_acceptance": "空 workspace + frozen bundle 重现 M1",
+      "issue": {
+        "number": 62,
+        "url": "https://github.com/Sillies001/TPAA/issues/62",
+        "title": "[M1][WS-TEST] M1-TST-010 — cold-start M1",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-PLAT-001",
+      "ws": "WS-PLATFORM",
+      "deliverable": "Windows Desktop M1 E2E",
+      "minimum_acceptance": "完整 vertical slice",
+      "issue": {
+        "number": 63,
+        "url": "https://github.com/Sillies001/TPAA/issues/63",
+        "title": "[M1][WS-PLATFORM] M1-PLAT-001 — Windows Desktop M1 E2E",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-PLAT-002",
+      "ws": "WS-PLATFORM",
+      "deliverable": "Linux Desktop M1 E2E",
+      "minimum_acceptance": "与 Windows 同一 fixture",
+      "issue": {
+        "number": 64,
+        "url": "https://github.com/Sillies001/TPAA/issues/64",
+        "title": "[M1][WS-PLATFORM] M1-PLAT-002 — Linux Desktop M1 E2E",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-PLAT-003",
+      "ws": "WS-PLATFORM",
+      "deliverable": "Windows/Linux Service smoke",
+      "minimum_acceptance": "同一 Application/Repository contract",
+      "issue": {
+        "number": 65,
+        "url": "https://github.com/Sillies001/TPAA/issues/65",
+        "title": "[M1][WS-PLATFORM] M1-PLAT-003 — Windows/Linux Service smoke",
+        "state": "open"
+      }
+    },
+    {
+      "task_id": "M1-PLAT-004",
+      "ws": "WS-PLATFORM",
+      "deliverable": "logical-equivalence report",
+      "minimum_acceptance": "排除 path/PID/native bytes，业务结果可比较",
+      "issue": {
+        "number": 66,
+        "url": "https://github.com/Sillies001/TPAA/issues/66",
+        "title": "[M1][WS-PLATFORM] M1-PLAT-004 — logical-equivalence report",
+        "state": "open"
+      }
+    }
+  ]
+}
