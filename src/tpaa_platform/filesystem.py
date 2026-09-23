@@ -38,7 +38,7 @@ def ensure_no_case_collisions(names: list[str] | tuple[str, ...]) -> None:
 
 
 def _logical_segments(relative: str) -> tuple[str, ...]:
-    if "\" in relative:
+    if "\\" in relative:
         raise PlatformPathError("logical paths use '/' separators only")
     logical = PurePosixPath(relative)
     if logical.is_absolute():

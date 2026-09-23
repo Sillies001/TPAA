@@ -5,10 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
-from typing import TypeAlias
-
-JSONPrimitive: TypeAlias = str | int | bool | None
-CanonicalValue: TypeAlias = JSONPrimitive | list["CanonicalValue"] | dict[str, "CanonicalValue"]
+type JSONPrimitive = str | int | bool | None
+type CanonicalValue = JSONPrimitive | list[CanonicalValue] | dict[str, CanonicalValue]
 
 
 class HashInputError(ValueError):

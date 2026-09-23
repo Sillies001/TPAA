@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from tpaa_platform.filesystem import PlatformFilesystem, PlatformPathError
 from tpaa_platform.filesync import InterProcessFileLock, atomic_replace_bytes
+from tpaa_platform.filesystem import PlatformFilesystem, PlatformPathError
 
 from .hashing import artifact_byte_hash
 
