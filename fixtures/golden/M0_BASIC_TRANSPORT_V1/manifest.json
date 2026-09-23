@@ -36,7 +36,7 @@
       "id": "insufficient_payload"
     }
   ],
-  "lifecycle": "APPROVED_GOLDEN",
+  "lifecycle": "REVIEWED",
   "numeric_tolerance": "0.000001",
   "replay": {
     "context_ref": "M0_TEST_CONTEXT_V1",

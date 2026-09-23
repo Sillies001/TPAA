@@ -22,3 +22,7 @@ evidence/generated/*
 !evidence/generated/.gitkeep
 evidence/ci/*
 !evidence/ci/.gitkeep
+evidence/tests/*
+!evidence/tests/.gitkeep
+evidence/cross-platform/*
+!evidence/cross-platform/.gitkeep

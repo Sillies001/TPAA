@@ -139,6 +139,9 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("typecheck", _dispatcher("typecheck")),
             ("unit", _dispatcher("test-unit")),
             ("contract", _dispatcher("test-contract")),
+            ("golden-framework", _dispatcher("test-golden")),
+            ("replay-framework", _dispatcher("test-replay")),
+            ("e2e-framework", _dispatcher("test-e2e")),
             ("migration", _dispatcher("test-migration")),
             ("sqlite-repository-acceptance", _dispatcher("db-sqlite-repository-acceptance")),
             ("api-smoke", _dispatcher("api-smoke")),
@@ -149,11 +152,10 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("git-diff-check", ["git", "diff", "--check"]),
             ("git-diff-exit-code", ["git", "diff", "--exit-code"]),
         )
-        for name, command in commands[:16]:
+        for name, command in commands:
             gates.append(_run_gate(name, command))
-        gates.append(_sqlite_bootstrap_gate())
-        for name, command in commands[16:]:
-            gates.append(_run_gate(name, command))
+            if name == "sqlite-repository-acceptance":
+                gates.append(_sqlite_bootstrap_gate())
 
     failed = [gate for gate in gates if gate["status"] != "PASS"]
     status = "FAIL" if preflight_failure or failed else "PASS"
@@ -193,7 +195,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
                 "build manifest",
                 "cold-start",
                 "M0 Exit Gate",
-                "step-9 Golden/replay/cross-platform logical-equivalence harness not yet implemented",
+                "M1 production Metric/Stage/Release Golden/replay bundles",
                 "real PostgreSQL server acceptance is retained from M0-STO-003 and is not redefined by this runner task",
             ],
         },

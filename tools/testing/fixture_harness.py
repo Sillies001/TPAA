@@ -174,8 +174,8 @@ def load_spec(bundle: Path = DEFAULT_BUNDLE) -> FixtureSpec:
             f"expected={EXPECTED_FIXTURE_VERSION} actual={fixture_version}",
         )
     lifecycle = _required_str(manifest, "lifecycle", code="FIXTURE_MANIFEST_INVALID")
-    if lifecycle != "APPROVED_GOLDEN":
-        raise FixtureError("FIXTURE_LIFECYCLE_NOT_APPROVED", lifecycle)
+    if lifecycle not in {"REVIEWED", "APPROVED_GOLDEN"}:
+        raise FixtureError("FIXTURE_LIFECYCLE_NOT_REVIEWED", lifecycle)
 
     input_ref = _as_object(
         manifest.get("input"),
@@ -614,6 +614,11 @@ def fixture_evidence(bundle: Path = DEFAULT_BUNDLE) -> tuple[int, dict[str, obje
         "finished_at_utc": finished,
         "failure_classification": None if error is None else error.code,
         "failure_detail": None if error is None else error.detail,
+        "fixture_lifecycle_qualification": (
+            "FRAMEWORK_SMOKE_ONLY"
+            if spec is None or spec.lifecycle != "APPROVED_GOLDEN"
+            else "APPROVED_GOLDEN"
+        ),
         "scope": {
             "included": "M0 Golden/replay/typed-transport/fixture lifecycle framework smoke",
             "excluded": [
