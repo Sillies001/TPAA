@@ -36,4 +36,25 @@ def test_m0_fixture_harness_evidence_and_platform_diff(tmp_path) -> None:
     assert compare_code == 0
     assert compare_evidence["status"] == "PASS"
     assert compare_evidence["mismatches"] == []
+    assert compare_evidence["frozen_inputs"]["dependency_lock_sha256"]
     assert output.is_file()
+
+
+def test_platform_diff_fails_when_dependency_lock_identity_differs(tmp_path) -> None:
+    base = platform_product(DEFAULT_BUNDLE)
+    windows = copy.deepcopy(base)
+    linux = copy.deepcopy(base)
+    windows["platform"] = {"logical": "windows", "system": "Windows", "machine": "AMD64"}
+    linux["platform"] = {"logical": "linux", "system": "Linux", "machine": "x86_64"}
+    linux["frozen_inputs"]["dependency_lock_sha256"] = "0" * 64
+
+    windows_path = tmp_path / "windows.json"
+    linux_path = tmp_path / "linux.json"
+    windows_path.write_text(json.dumps(windows), encoding="utf-8")
+    linux_path.write_text(json.dumps(linux), encoding="utf-8")
+
+    compare_code, compare_evidence = platform_equivalence_evidence(windows_path, linux_path)
+
+    assert compare_code == 2
+    assert compare_evidence["status"] == "FAIL"
+    assert "frozen_inputs.dependency_lock_sha256" in compare_evidence["mismatches"]

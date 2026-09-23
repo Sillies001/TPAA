@@ -556,6 +556,22 @@ def _baseline_metadata() -> tuple[str, str, str, str, str]:
     return core, db_schema, dto_hash, catalog_hash, stage_hash
 
 
+def _frozen_inputs(spec: FixtureSpec) -> dict[str, object]:
+    core, db_schema, dto_hash, catalog_hash, stage_hash = _baseline_metadata()
+    return {
+        "core_baseline": core,
+        "baseline_lock_sha256": _sha256_file(BASELINE_LOCK),
+        "db_schema_version": db_schema,
+        "p1_metric_catalog_sha256": catalog_hash,
+        "stage_authority_sha256": stage_hash,
+        "dto_authority_sha256": dto_hash,
+        "dependency_lock_sha256": _sha256_file(UV_LOCK),
+        "context_ref": spec.context_ref,
+        "stage_ref": spec.stage_ref,
+        "profile_ref": spec.profile_ref,
+    }
+
+
 def _request_hash(spec: FixtureSpec, command: str) -> str:
     payload = {
         "command": command,
@@ -663,6 +679,7 @@ def platform_product(bundle: Path = DEFAULT_BUNDLE) -> dict[str, object]:
     return {
         "schema": "TPAA_M0_PLATFORM_LOGICAL_PRODUCT_V1",
         "source_revision": _git_revision(),
+        "frozen_inputs": _frozen_inputs(spec),
         "platform": {
             "logical": platform_name,
             "system": platform.system(),
@@ -689,6 +706,31 @@ def compare_platform_payloads(
         mismatches.append("linux.schema")
     if windows.get("source_revision") != linux.get("source_revision"):
         mismatches.append("source_revision")
+
+    windows_frozen = _as_object(
+        windows.get("frozen_inputs"),
+        code="PLATFORM_PRODUCT_INVALID",
+        field="windows.frozen_inputs",
+    )
+    linux_frozen = _as_object(
+        linux.get("frozen_inputs"),
+        code="PLATFORM_PRODUCT_INVALID",
+        field="linux.frozen_inputs",
+    )
+    for key in (
+        "core_baseline",
+        "baseline_lock_sha256",
+        "db_schema_version",
+        "p1_metric_catalog_sha256",
+        "stage_authority_sha256",
+        "dto_authority_sha256",
+        "dependency_lock_sha256",
+        "context_ref",
+        "stage_ref",
+        "profile_ref",
+    ):
+        if windows_frozen.get(key) != linux_frozen.get(key):
+            mismatches.append(f"frozen_inputs.{key}")
 
     windows_platform = _as_object(
         windows.get("platform"),
@@ -781,11 +823,13 @@ def platform_equivalence_evidence(
         "status": status,
         "source_revision": windows.get("source_revision") or linux.get("source_revision"),
         "fixture": fixture_summary,
+        "frozen_inputs": windows.get("frozen_inputs") or linux.get("frozen_inputs"),
         "windows": windows.get("platform"),
         "linux": linux.get("platform"),
         "comparison_policy": {
             "exact": [
                 "source_revision",
+                "Core/Baseline/schema/Catalog/Stage/DTO/dependency-lock hashes and refs",
                 "fixture id/version/input hash/tolerance",
                 "logical product schema/identity/session time",
                 "value kind",
