@@ -46,9 +46,12 @@ def git_revision() -> str:
 def project_version() -> str:
     raw = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
     project = raw.get("project")
-    if not isinstance(project, dict) or not isinstance(project.get("version"), str):
+    if not isinstance(project, dict):
+        raise RuntimeError("project metadata unavailable")
+    version = project.get("version")
+    if not isinstance(version, str):
         raise RuntimeError("project version unavailable")
-    return project["version"]
+    return version
 
 
 def _locked_packages() -> list[dict[str, object]]:
