@@ -41,14 +41,14 @@ FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
 GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
 REPOSITORY_BOOTSTRAP_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_repository_bootstrap.py"
 M0_DELTA_CLOSURE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_m0_delta_closure.py"
-M1_ENTRY_PREPARATION_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_m1_entry_preparation.py"
+M1_ENTRY_PREPARATION_MODULE = "tools.governance.verify_m1_entry_preparation"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
 BACKUP_RESTORE_SMOKE = REPO_ROOT / "tools" / "storage" / "backup_restore_smoke.py"
 SECURITY_SMOKE = REPO_ROOT / "tools" / "security" / "smoke.py"
 MANIFEST_TOOL = REPO_ROOT / "tools" / "manifest" / "build_artifacts.py"
-M1_ENTRY_MANIFEST_TOOL = REPO_ROOT / "tools" / "manifest" / "m1_entry_manifest.py"
+M1_ENTRY_MANIFEST_MODULE = "tools.manifest.m1_entry_manifest"
 PACKAGE_TOOL = REPO_ROOT / "tools" / "packaging" / "development_package.py"
 PACKAGE_SMOKE = REPO_ROOT / "tools" / "packaging" / "smoke.py"
 COLD_START = REPO_ROOT / "tools" / "ci" / "cold_start.py"
@@ -561,7 +561,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if command == "verify-m0-delta-closure":
         return _run([sys.executable, str(M0_DELTA_CLOSURE_VERIFY)])
     if command == "verify-m1-entry-preparation":
-        return _run([sys.executable, str(M1_ENTRY_PREPARATION_VERIFY)])
+        return _run([sys.executable, "-m", M1_ENTRY_PREPARATION_MODULE])
     if command == "platform-smoke":
         return _run([sys.executable, str(PLATFORM_SMOKE)])
     if command == "openapi-snapshot":
@@ -590,7 +590,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run(
             [
                 sys.executable,
-                str(M1_ENTRY_MANIFEST_TOOL),
+                "-m",
+                M1_ENTRY_MANIFEST_MODULE,
                 "--profile",
                 args.profile,
                 "--output",
