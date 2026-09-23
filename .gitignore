@@ -26,3 +26,7 @@ evidence/tests/*
 !evidence/tests/.gitkeep
 evidence/cross-platform/*
 !evidence/cross-platform/.gitkeep
+
+evidence/devops/*
+!evidence/devops/.gitkeep
+dist/

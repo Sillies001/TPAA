@@ -88,14 +88,34 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
     assert required <= names
 
 
-def test_codegen_command_is_implemented_and_reserved_commands_still_fail_closed() -> None:
+def test_codegen_and_devops_commands_are_implemented_and_run_api_remains_reserved(
+    tmp_path: Path,
+) -> None:
     generate = _run("generate", "--check")
     assert generate.returncode == 0, generate.stderr
     assert "CODEGEN_CHECK_PASS" in generate.stdout
 
-    package = _run("package")
-    assert package.returncode == 3
-    assert "M0-DEV-005" in package.stderr
+    profile = "WINDOWS_DESKTOP_X64" if sys.platform == "win32" else "LINUX_DESKTOP_X64"
+    manifest = _run(
+        "manifest",
+        "--profile",
+        profile,
+        "--output",
+        str(tmp_path / "manifest"),
+    )
+    assert manifest.returncode == 0, manifest.stderr
+    assert (tmp_path / "manifest" / "build-manifest.json").is_file()
+    assert (tmp_path / "manifest" / "sbom.cdx.json").is_file()
+
+    package = _run(
+        "package",
+        "--profile",
+        profile,
+        "--output",
+        str(tmp_path / "dist"),
+    )
+    assert package.returncode == 0, package.stderr
+    assert any((tmp_path / "dist").glob("tpaa-0.0.0-*"))
 
     run_api = _run("run-api")
     assert run_api.returncode == 3

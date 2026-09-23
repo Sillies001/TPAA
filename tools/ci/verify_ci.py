@@ -131,6 +131,10 @@ def verify() -> dict[str, object]:
         "--windows downloaded/cross-platform/windows.json",
         "--linux downloaded/cross-platform/linux.json",
         "--evidence evidence/cross-platform/logical-equivalence.json",
+        "python tools/dev/tpaa_dev.py manifest",
+        "python tools/dev/tpaa_dev.py package",
+        "evidence/devops/${{ matrix.platform }}",
+        "dist/",
         "if: ${{ always() }}",
     )
     for token in required_tokens:
@@ -154,6 +158,8 @@ def verify() -> dict[str, object]:
         '_dispatcher("migration-smoke")',
         '_dispatcher("backup-restore-smoke")',
         '_dispatcher("security-smoke")',
+        '_dispatcher("package-smoke")',
+        '"cold-start"',
         '_dispatcher("lint")',
         '_dispatcher("typecheck")',
         '_dispatcher("test-unit")',
@@ -177,16 +183,10 @@ def verify() -> dict[str, object]:
         else _fail("governed_gate_set", f"missing gate tokens: {missing_gate_tokens!r}")
     )
 
-    forbidden_gate_tokens = (
-        '_dispatcher("package")',
-        '_dispatcher("manifest")',
-        '_dispatcher("cold-start")',
-    )
-    present_forbidden = [token for token in forbidden_gate_tokens if token in gate_text]
     checks.append(
-        _pass("later_steps_excluded", "packaging/manifest/cold-start not dispatched")
-        if not present_forbidden
-        else _fail("later_steps_excluded", f"premature gates: {present_forbidden!r}")
+        _pass("step10_devops_active", "package-smoke and cold-start are governed")
+        if '_dispatcher("package-smoke")' in gate_text and '"cold-start"' in gate_text
+        else _fail("step10_devops_active", "Step 10 package/cold-start gates missing")
     )
 
     quality = toolchain.get("quality")
