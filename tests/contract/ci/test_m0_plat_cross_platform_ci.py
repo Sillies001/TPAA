@@ -54,6 +54,7 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
     required = (
         '_dispatcher("bootstrap", "--check-only")',
         '_dispatcher("test-unit")',
+        '_dispatcher("verify-governance")',
         '_dispatcher("test-contract")',
         '_dispatcher("test-golden")',
         '_dispatcher("test-replay")',

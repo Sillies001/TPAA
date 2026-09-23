@@ -135,6 +135,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("verify-architecture", _dispatcher("verify-architecture")),
             ("verify-repository-policy", _dispatcher("verify-repository-policy")),
             ("verify-desktop-lifecycle-policy", _dispatcher("verify-desktop-lifecycle-policy")),
+            ("verify-governance", _dispatcher("verify-governance")),
             ("lint", _dispatcher("lint")),
             ("typecheck", _dispatcher("typecheck")),
             ("unit", _dispatcher("test-unit")),

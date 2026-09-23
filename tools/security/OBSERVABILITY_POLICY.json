@@ -1,0 +1,12 @@
+{
+  "schema": "TPAA_M0_OBSERVABILITY_POLICY_V1",
+  "status": "FROZEN",
+  "adr": "ADR-M0-008",
+  "logging_backend": "python-stdlib-logging",
+  "machine_format": "ndjson",
+  "system_time": "utc-iso8601",
+  "business_time_field": "session_time_us_decimal_string",
+  "correlation_fields": ["request_id", "job_id", "session_id", "release_id", "component", "product_version", "reason_code"],
+  "forbidden_secret_fields": ["authorization", "cookie", "password", "secret", "token", "private_key", "credential"],
+  "telemetry_backend": "internal-facade-no-mandatory-exporter"
+}

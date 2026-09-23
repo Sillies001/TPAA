@@ -38,6 +38,7 @@ UI_AUTOMATION_SMOKE = REPO_ROOT / "tools" / "gui" / "automation_smoke.py"
 CI_VERIFY = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
+GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
 
 EXIT_OK = 0
 EXIT_FAILURE = 2
@@ -75,6 +76,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("ui-automation-smoke", "M0-GUI-004", "IMPLEMENTED", "Automate Desktop launch/READY diagnostics/close/backend cleanup."),
     CommandSpec("verify-ci", "M0-PLAT-004/M0-PLAT-005", "IMPLEMENTED", "Verify the governed Windows/Linux CI orchestration contract."),
     CommandSpec("ci-check", "M0-PLAT-004/M0-PLAT-005", "IMPLEMENTED", "Run the current required M0 gate set and emit platform CI evidence."),
+    CommandSpec("verify-governance", "M0-GOV-001..004", "IMPLEMENTED", "Verify ADR, Issue/PR, Baseline Change and DoD governance contracts."),
     CommandSpec("format", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff formatter."),
     CommandSpec("lint", "ADR-M0-003", "IMPLEMENTED", "Run the frozen Ruff linter."),
     CommandSpec("typecheck", "ADR-M0-003", "IMPLEMENTED", "Run the frozen mypy type checker."),
@@ -394,6 +396,7 @@ def build_parser() -> argparse.ArgumentParser:
     ui_automation.add_argument("--show", action="store_true")
     ui_automation.add_argument("--timeout", type=float, default=30.0)
     sub.add_parser("verify-ci", help="Verify the M0 Windows/Linux CI orchestration contract")
+    sub.add_parser("verify-governance", help="Verify M0 governance repository contracts")
     ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
     ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
     ci_check.add_argument("--evidence", type=Path)
@@ -498,6 +501,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run(automation_args)
     if command == "verify-ci":
         return _run([sys.executable, str(CI_VERIFY)])
+    if command == "verify-governance":
+        return _run([sys.executable, str(GOVERNANCE_VERIFY)])
     if command == "ci-check":
         ci_args = [sys.executable, str(CI_GATE)]
         if args.expected_platform:

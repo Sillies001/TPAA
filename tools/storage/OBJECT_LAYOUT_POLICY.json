@@ -1,0 +1,12 @@
+{
+  "schema": "TPAA_M0_OBJECT_LAYOUT_POLICY_V1",
+  "status": "FROZEN",
+  "adr": "ADR-M0-009",
+  "logical_schemes": ["tpaa-object", "tpaa-parquet"],
+  "root_override_env": "TPAA_OBJECT_ROOT",
+  "default_root_contract": "platform-user-data-root/objects",
+  "unicode_normalization": "NFC",
+  "case_collision_comparison": "NFC+casefold",
+  "forbidden_segments": [".", ".."],
+  "logical_hash_excludes": ["absolute_path", "drive", "pid", "os_name", "package_bytes"]
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "TPAA_M0_SBOM_POLICY_V1",
+  "status": "FROZEN",
+  "adr": "ADR-M0-010",
+  "primary_format": "CycloneDX JSON",
+  "spec_version": "1.6",
+  "license_report_schema": "TPAA_M0_LICENSE_REPORT_V1",
+  "unknown_license": "UNKNOWN_REQUIRES_REVIEW",
+  "dependency_authority": "uv.lock",
+  "native_manifest_schema": "TPAA_M0_NATIVE_DEPENDENCIES_V1",
+  "legal_approval_claimed": false
+}

@@ -149,6 +149,7 @@ def verify() -> dict[str, object]:
         '_dispatcher("verify-architecture")',
         '_dispatcher("verify-repository-policy")',
         '_dispatcher("verify-desktop-lifecycle-policy")',
+        '_dispatcher("verify-governance")',
         '_dispatcher("lint")',
         '_dispatcher("typecheck")',
         '_dispatcher("test-unit")',

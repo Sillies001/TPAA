@@ -1,0 +1,29 @@
+name: Baseline Change Request
+description: Govern a C2/C3 Canonical or semantic authority change
+title: "[BASELINE-CHANGE][C?] "
+labels: []
+body:
+  - type: dropdown
+    id: change_class
+    attributes: {label: "Change class", options: ["C2 Canonical non-semantic metadata", "C3 Semantic contract"]}
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes: {label: "M / WS / P / Stage scope"}
+    validations: {required: true}
+  - type: textarea
+    id: authority
+    attributes: {label: "Affected authority artifacts and prior/new identity/version/hash"}
+    validations: {required: true}
+  - type: textarea
+    id: comparability
+    attributes: {label: "Semantic identity / comparability impact"}
+    validations: {required: true}
+  - type: textarea
+    id: closure
+    attributes: {label: "Validator / generated / Golden / replay / migration closure"}
+    validations: {required: true}
+  - type: textarea
+    id: security
+    attributes: {label: "Security / data / cross-platform impact"}
+    validations: {required: true}
