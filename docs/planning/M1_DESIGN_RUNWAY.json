@@ -1,0 +1,158 @@
+{
+  "schema": "TPAA_M1_ROLLING_DESIGN_RUNWAY_V1",
+  "authority": [
+    "SDIB-1.0.1 §19.2",
+    "SDIB-1.0.1 §19.3",
+    "SDIB-1.0.1 §19.4",
+    "SDIB-1.0.1 §20",
+    "SDIB-1.0.1 §21",
+    "SDIB-1.0.1 §22"
+  ],
+  "current_milestone": "M1",
+  "current_admission_state": "M1_ADMISSION_CANDIDATE",
+  "implementation_authorized": false,
+  "design_policy": {
+    "current_wave": "Detailed design must be implementation-ready before the wave starts.",
+    "next_wave": "Maintain approximately one construction wave of detailed-design lead while the current wave is implemented.",
+    "m2_before_m1_exit": "DESIGN_SEED_ONLY",
+    "m2_detail_refinement_gate": "M1_EXIT_GO",
+    "rationale": "SDIB §19.2 step 23 permits M2 backlog refinement only after the M1 Exit Review is GO; therefore pre-GO work may capture interfaces, risks, ADR candidates and evidence needs, but must not freeze full M2 backlog/detail semantics."
+  },
+  "waves": [
+    {
+      "wave": "M1-A",
+      "name": "Transition & Fixture Contract",
+      "implementation_anchor": [
+        "M1-TST-001"
+      ],
+      "detailed_design_now": [
+        "BF_M1_NOMINAL_V1 manifest/version/input/expected/tolerance contract",
+        "human-recalculable expected skeleton",
+        "fixture lifecycle and provenance layout"
+      ],
+      "design_ahead_for": "M1-B Data Spine"
+    },
+    {
+      "wave": "M1-B",
+      "name": "Data Spine",
+      "implementation_anchor": [
+        "M1-DATA-001..007"
+      ],
+      "detailed_design_now": [
+        "Synthetic Source Adapter and Source Registry boundary",
+        "Session Time / Aircraft Entity / Canonical channel contracts",
+        "Evaluation Context lineage/quality rules"
+      ],
+      "design_ahead_for": "M1-C Episode / Stage / World"
+    },
+    {
+      "wave": "M1-C",
+      "name": "Episode / Stage / World",
+      "implementation_anchor": [
+        "M1-WORLD-001..007",
+        "M1-TST-003"
+      ],
+      "detailed_design_now": [
+        "Basic Flight Episode boundary contract",
+        "BASIC_FLIGHT_V1 four-Stage projection and precedence",
+        "Stage Golden review basis",
+        "minimal P1 World product hash/evidence model"
+      ],
+      "design_ahead_for": "M1-D First Metric and M1-E First Published E2E"
+    },
+    {
+      "wave": "M1-D",
+      "name": "First Metric",
+      "implementation_anchor": [
+        "M1-MET-001",
+        "M1-MET-002",
+        "M1-MET-007",
+        "M1-MET-008",
+        "M1-TST-002 subset"
+      ],
+      "detailed_design_now": [
+        "MetricContext builder",
+        "Metric staging/result lifecycle",
+        "P1-AIR-001 validity-piece/coverage/max-gap/extremum reference path"
+      ],
+      "design_ahead_for": "M1-E First Published E2E"
+    },
+    {
+      "wave": "M1-E",
+      "name": "First Published E2E",
+      "implementation_anchor": [
+        "M1-OBS-001..003",
+        "M1-STO-001/002",
+        "M1-API-001..003",
+        "M1-GUI-001..006"
+      ],
+      "detailed_design_now": [
+        "Observation to immutable SESSION Release contract",
+        "publish CAS/idempotency behavior",
+        "minimum Session/Context/Episode/Stage/Metric/Release API",
+        "GUI dataflow for Session Browser, Timeline, Metric Detail and Evidence"
+      ],
+      "design_ahead_for": "M1-F Representative Metric Breadth"
+    },
+    {
+      "wave": "M1-F",
+      "name": "Representative Metric Breadth",
+      "implementation_anchor": [
+        "M1-MET-003..006",
+        "M1-GUI-007",
+        "M1-TST-001/002"
+      ],
+      "detailed_design_now": [
+        "AIR-002/AIR-003/AIR-004/AIR-007 reference calculations",
+        "ANGLE_WRAP/GAP/STRUCTURED_PARTIAL/STAGE_BOUNDARY expected design",
+        "structured value and supporting evidence presentation rules"
+      ],
+      "design_ahead_for": "M1-G Replay / Failure / Platform"
+    },
+    {
+      "wave": "M1-G",
+      "name": "Replay / Failure / Platform",
+      "implementation_anchor": [
+        "M1-OBS-004/005",
+        "M1-STO-003",
+        "M1-API-004/005",
+        "M1-TST-004..009",
+        "M1-PLAT-001..004"
+      ],
+      "detailed_design_now": [
+        "historical read/replay frozen-reference contract",
+        "release immutability and idempotency-race tests",
+        "SQLite/PostgreSQL parity",
+        "Windows/Linux logical equivalence and failure closure"
+      ],
+      "design_ahead_for": "M1-H Cold-start & Exit plus M2 design seeds"
+    },
+    {
+      "wave": "M1-H",
+      "name": "Cold-start & Exit",
+      "implementation_anchor": [
+        "M1-TST-010",
+        "all remaining M1 tasks"
+      ],
+      "detailed_design_now": [
+        "clean-workspace reconstruction",
+        "M1 Exit evidence aggregation",
+        "Exit Review closure checklist"
+      ],
+      "design_ahead_for": "M2 backlog refinement only after M1 Exit GO"
+    }
+  ],
+  "m2_design_seed_allowed": [
+    "record candidate interfaces that M2 sensor families will consume",
+    "record architecture risks and ADR questions exposed by M1",
+    "record evidence/test needs that would otherwise cause M1 rework",
+    "record dependency or schema pressure without changing Canonical authority"
+  ],
+  "m2_not_allowed_before_m1_exit_go": [
+    "claim M2 work package completion",
+    "freeze detailed M2 backlog as implementation authority",
+    "introduce RADAR/IRST/ESM/DL/FUS into the M1 vertical slice",
+    "change Canonical/Metric/Stage authority to satisfy speculative M2 design",
+    "start M2 feature implementation"
+  ]
+}
