@@ -257,7 +257,7 @@ jobs:
           --artifact-root downloaded/platform
           --windows-ci downloaded/platform/evidence/ci/windows.json
           --linux-ci downloaded/platform/evidence/ci/linux.json
-          --logical downloaded/logical/evidence/cross-platform/logical-equivalence.json
+          --logical downloaded/logical/logical-equivalence.json
           --windows-cold-start downloaded/platform/evidence/devops/windows/cold-start.json
           --linux-cold-start downloaded/platform/evidence/devops/linux/cold-start.json
           --postgres-bootstrap downloaded/postgres/postgres-bootstrap.json
