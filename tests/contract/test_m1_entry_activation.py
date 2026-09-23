@@ -3,6 +3,32 @@ from __future__ import annotations
 from tools.governance.m1_entry_activation import EXPECTED_FROZEN, evaluate
 
 
+def _blocked_review() -> dict[str, object]:
+    return {
+        "schema": "TPAA_M1_ENTRY_GATE_REVIEW_V1",
+        "decision": "M1_NOT_ADMITTED",
+        "implementation_authorized": False,
+        "conditions": [
+            {
+                "id": index,
+                "status": "BLOCKED_UNASSIGNED" if index == 8 else "PASS",
+            }
+            for index in range(1, 11)
+        ],
+    }
+
+
+def _unassigned_roles() -> dict[str, object]:
+    return {
+        "schema": "TPAA_M1_ROLE_ASSIGNMENTS_V1",
+        "status": "UNASSIGNED",
+        "primary_ws_owner": None,
+        "golden_independent_reviewer": None,
+        "m1_exit_reviewer": None,
+        "golden_independence_attestation": None,
+    }
+
+
 def _candidate_review() -> dict[str, object]:
     return {
         "schema": "TPAA_M1_ENTRY_GATE_REVIEW_V1",
@@ -40,6 +66,22 @@ def _manifest(source_revision: str, platform_profile: str) -> dict[str, object]:
         "platform_profile": platform_profile,
         **EXPECTED_FROZEN,
     }
+
+
+def test_blocked_mode_verifies_consistent_9_of_10_state() -> None:
+    revision = "9" * 40
+    result = evaluate(
+        mode="blocked",
+        source_revision=revision,
+        review=_blocked_review(),
+        roles=_unassigned_roles(),
+        windows_manifest=_manifest(revision, "WINDOWS_DESKTOP_X64"),
+        linux_manifest=_manifest(revision, "LINUX_DESKTOP_X64"),
+    )
+    assert result["status"] == "PASS"
+    assert result["decision"] == "M1_NOT_ADMITTED"
+    assert result["implementation_authorized"] is False
+    assert result["conditions_passed_after_runtime_verification"] == 9
 
 
 def test_candidate_mode_verifies_without_authorizing_implementation() -> None:
