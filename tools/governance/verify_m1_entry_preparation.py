@@ -9,7 +9,7 @@ It intentionally does not decide M1 admission and does not satisfy condition 8
 from __future__ import annotations
 
 import json
-import sys
+import platform
 from pathlib import Path
 
 from tools.manifest.m1_entry_manifest import build_manifest
@@ -62,11 +62,12 @@ def _check(code: str, ok: bool, detail: str) -> dict[str, str]:
 
 
 def _desktop_profile() -> str:
-    if sys.platform == "win32":
+    system = platform.system()
+    if system == "Windows":
         return "WINDOWS_DESKTOP_X64"
-    if sys.platform.startswith("linux"):
+    if system == "Linux":
         return "LINUX_DESKTOP_X64"
-    raise RuntimeError(f"unsupported M1 Entry verification platform: {sys.platform}")
+    raise RuntimeError(f"unsupported M1 Entry verification platform: {system}")
 
 
 def verify() -> dict[str, object]:
