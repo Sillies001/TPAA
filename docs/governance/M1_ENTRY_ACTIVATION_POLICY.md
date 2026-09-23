@@ -48,7 +48,7 @@ It may not authorize implementation.
 
 ## Merged-main activation
 
-After merge, the activation job runs only after the existing governed M0 jobs have succeeded.
+After merge, the activation step runs inside the already-required `M0 Exit Review` status check, after its governed Windows/Linux, PostgreSQL, and logical-equivalence dependencies have succeeded.
 
 It verifies that both platform manifests are bound to the exact merged-main `github.sha` and retain:
 
