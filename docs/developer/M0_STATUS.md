@@ -338,28 +338,53 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 8. Both machine-readable evidence files report `status = PASS`, `failed_gate_names = []`, and `source_revision = 70f1112c313d666685867cfe00de46b81bd1a21f`.
 9. Packaging, SBOM, build manifest, cold-start, M0 Exit, and step-9 Golden/replay/logical-equivalence remain out of scope and are not claimed by this completion.
 
-## M0-TST-001..006 — IN-PROGRESS
+## M0-TST-001..006 — COMPLETE
 
-**Test / fixture harness:** SDIB §39 step 9 implementation is now active.
+**Test / fixture harness:** SDIB §39 step 9 is accepted on merged main revision
+`caf24b1c5c20d18e823012413fede6d0ca860f27` by GitHub Actions Run #18.
 
-1. Golden/replay/e2e directories have real framework-smoke tests instead of placeholder-only content.
-2. `M0_BASIC_TRANSPORT_V1` freezes fixture identity/version/input+expected hashes, authority refs,
-   shared numeric tolerance, known invalid/insufficient cases, typed transport values and a large
-   decimal-string Session Time.
-3. The harness fails closed for missing/corrupt/version-mismatch fixtures and preserves replay frozen
-   refs even when the current refs differ.
-4. CI now runs Golden/replay framework smoke on both Windows and Linux, emits machine-readable test and
-   logical-product evidence, and requires a dependent Windows/Linux logical-equivalence comparator.
-5. The framework fixture is `REVIEWED`, not falsely labeled as an independently approved production
-   Metric Golden.
-6. **Not yet COMPLETE:** Step 9 requires fresh hosted Windows/Linux plus logical-equivalence GREEN evidence
-   on the Step 9 checkpoint before these tickets are closed.
+1. Golden/replay/framework-E2E run on Windows and Linux through the unified dispatcher.
+2. The frozen M0 fixture keeps typed transport and decimal-string Session Time semantics.
+3. Frozen-input parity now includes the exact dependency-lock hash plus Core/Baseline/schema/Catalog/
+   Stage/DTO refs and hashes.
+4. Run #18 logical-equivalence evidence reports `status=PASS`, `mismatches=[]`, and the same
+   `uv.lock` SHA-256 on Windows/Linux.
+5. The fixture remains `REVIEWED / FRAMEWORK_SMOKE_ONLY`; no production Metric Golden approval is
+   fabricated.
 
 Implementation record: `docs/implementation/M0-TST-001_006_TEST_FIXTURE_HARNESS.md`.
 
-## Partial governance state
+## SDIB §39 Step 10 — PR ACCEPTANCE PASS / MAIN MERGE PENDING
 
-`M0-GOV-001` is **PARTIAL**, not complete. ADR-M0-001, ADR-M0-002, ADR-M0-003, ADR-M0-004, ADR-M0-005 and ADR-M0-007 are formally closed; ADR-M0-006/008/009/010 remain open and must be resolved before M0 Exit.
+PR #5 implements the remaining M0 backlog and cold-start. Current branch revision
+`7b04c0aa769f0cc7c83abffe696fcaded0c0f222` passed GitHub Actions Run #24 on hosted Windows/Linux.
+
+Implemented/accepted on the PR branch:
+
+- **M0-STO-004..007:** logical object/Parquet abstraction, migration harness, distinct hash primitives,
+  backup/restore smoke.
+- **M0-API-003..005:** Canonical-driven OpenAPI snapshot, idempotent job-control skeleton and controlled
+  status/error mapping.
+- **M0-PLAT-001..003:** filesystem/path, spawn-worker and temp/lock/atomic-replace adapters.
+- **M0-SEC-001..004:** Desktop/path security minimum, structured audit, development data guard and
+  secret/config separation.
+- **M0-DEV-003..006:** build manifest, SBOM/license/native inventory, four-profile development packages,
+  and clean-clone cold-start.
+- **M0-GOV-001..004:** ADR-M0-001..010 CLOSED, governed Issue/PR templates, Baseline Change workflow
+  and Definition of Done.
+
+Run #24 reports:
+
+- `M0 windows` SUCCESS;
+- `M0 linux` SUCCESS;
+- `M0 logical equivalence` SUCCESS;
+- both platform CI evidence files have `failed_gate_names=[]`;
+- both cold-start evidence files have `status=PASS`, `clean_clone=true`,
+  `uv_sync_locked=true`, `m0_gates=PASS`, `worktree_clean=true`;
+- all four mandatory Desktop/Service profile development packages are generated and smoke-tested;
+- package qualification remains `DEVELOPMENT_NOT_M5_QUALIFIED`.
+
+Implementation record: `docs/implementation/M0_STEP10_REMAINING_BACKLOG_COLD_START.md`.
 
 ## Source-entry evidence retained
 
@@ -372,14 +397,15 @@ Implementation record: `docs/implementation/M0-TST-001_006_TEST_FIXTURE_HARNESS.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- Packaging, SBOM, build manifest, or cold-start completion.
-- Step-9 Golden/replay/cross-platform logical-equivalence qualification.
+- M5-qualified packaging/release status.
+- Step 10 COMPLETE on `main` before PR #5 merge + post-merge hosted acceptance.
+- Any M1 capability.
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, steps 1–8 are complete and step 9 is active. Proceed in dependency order:
+Per SDIB-1.0 §39, steps 1–9 are COMPLETE. Step 10 implementation and PR-hosted acceptance are PASS.
 
-1. Obtain fresh hosted Windows/Linux Golden/replay/framework-E2E evidence for the Step 9 checkpoint.
-2. Require the dependent cross-platform logical-equivalence job to PASS with zero mismatches.
-3. Only after Step 9 acceptance proceed to §39 step 10 remaining M0 backlog and cold-start.
-4. Do not claim M0 Exit or begin M1 until their later §39 gates are separately accepted.
+1. Merge PR #5 only after its final documentation checkpoint CI is GREEN.
+2. Verify one fresh `main` Windows/Linux/package/cold-start/logical-equivalence run.
+3. Mark §39 step 10 COMPLETE only from that merged-main evidence.
+4. Begin §39 step 11 M0 Exit Review; do not begin M1 until the complete M0 Exit Gate passes.
