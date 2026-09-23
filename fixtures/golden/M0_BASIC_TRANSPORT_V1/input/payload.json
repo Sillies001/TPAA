@@ -1,0 +1,33 @@
+{
+  "identity": {
+    "core_baseline": "CB-1.4.0",
+    "db_schema_version": "1.6.0"
+  },
+  "schema": "TPAA_M0_BASIC_OBJECT_INPUT_V1",
+  "session_time": "9007199254740993.125",
+  "values": [
+    {
+      "kind": "NUMERIC",
+      "value": "12.500000"
+    },
+    {
+      "kind": "TEXT",
+      "value": "READY"
+    },
+    {
+      "kind": "BOOLEAN",
+      "value": true
+    },
+    {
+      "kind": "STRUCTURED",
+      "value": {
+        "alpha": 1,
+        "beta": [
+          "x",
+          false,
+          null
+        ]
+      }
+    }
+  ]
+}
