@@ -1,5 +1,40 @@
 # M0 Engineering Bootstrap Status
 
+## Current M1 Entry transition state
+
+Merged-main revision `c3019718e6a088fdf01e5e4297ff5496746d0aa8` is accepted by Run #45:
+
+- M0 windows — SUCCESS;
+- M0 linux — SUCCESS;
+- M0 Exit PostgreSQL — SUCCESS;
+- M0 logical equivalence — SUCCESS;
+- M0 Exit Review — SUCCESS;
+- Exit Review — GO / PASS / source-revision-consistent;
+- Windows/Linux M1 Entry build manifests are bound to the exact merged-main revision.
+
+The SDIB-1.0.1 §19.1 Entry Gate therefore remains:
+
+```text
+1  PASS
+2  PASS
+3  PASS
+4  PASS
+5  PASS
+6  PASS
+7  PASS
+8  BLOCKED_UNASSIGNED
+9  PASS
+10 PASS
+
+PASS = 9 / 10
+decision = M1_NOT_ADMITTED
+implementation_authorized = false
+```
+
+Condition 8 requires explicit human assignments for the M1 Primary WS owner, independent Golden reviewer, M1 Exit reviewer, and Golden-independence attestation.
+
+To avoid a second governance-only merge after role assignment, the final Entry transition uses `M1_ENTRY_ACTIVATION_POLICY`: the final PR is verified as an admission candidate, then its protected-main CI emits an exact-source-revision activation artifact. Only a merged-main artifact with `decision=M1_ADMITTED` authorizes M1 implementation.
+
 
 ## SDIB-1.0.1 M0 delta — 48/48 CLOSED; M1_NOT_ADMITTED
 
