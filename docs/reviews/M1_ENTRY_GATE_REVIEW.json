@@ -1,12 +1,12 @@
 {
   "schema": "TPAA_M1_ENTRY_GATE_REVIEW_V1",
   "authority": "SDIB-1.0.1 §19.1",
-  "evidence_revision": "e651806dbfeec4955a5b19d68aef69d2e3abe145",
+  "evidence_revision": "c3019718e6a088fdf01e5e4297ff5496746d0aa8",
   "evidence_run": {
-    "run_id": 35889221484,
-    "run_number": 43,
+    "run_id": 35892300767,
+    "run_number": 45,
     "status": "PASS",
-    "source_revision": "e651806dbfeec4955a5b19d68aef69d2e3abe145",
+    "source_revision": "c3019718e6a088fdf01e5e4297ff5496746d0aa8",
     "source_revision_consistent": true,
     "jobs": {
       "windows": "SUCCESS",
@@ -19,31 +19,31 @@
     "logical_equivalence_mismatches": [],
     "artifacts": {
       "windows_ci": {
-        "id": 10763234708,
-        "sha256": "5d2ce5399e2e3f41fd381c367018d0d168521293e6879152a343b338e5398633"
+        "id": 10765412763,
+        "sha256": "c9dad09ede80e84ea0369bb4928b582a9871d31670f309d5358e98bf2ae029c9"
       },
       "linux_ci": {
-        "id": 10764202968,
-        "sha256": "3dde765fd869cbd7cb13670b7f0889b3cbdc3dcf2dd69f6ac3b26c7ace04622f"
+        "id": 10764638854,
+        "sha256": "5d065214e07a850cc08dc9d78838009181cefb2cf3a962dde818cd1cde63792c"
       },
       "postgresql_exit": {
-        "id": 10764371347,
-        "sha256": "e5caf80daadebd8ca0fea4adfbfd90087c828df084c9068c46483d0630d6ae6f"
+        "id": 10765606897,
+        "sha256": "274c2d78e982892b1c0a1b7e0137eaafae1cd255e5ad2fe06002260e9007a551"
       },
       "logical_equivalence": {
-        "id": 10763234764,
-        "sha256": "073939a1a66e832b283d852833b5925e80dc89c53dfe1f6a2127a9a1fa35a91c"
+        "id": 10765926486,
+        "sha256": "0517427f2ea0f52a0d6790dbba0cf82b3be76cfb05ff880e659ecfe8adb11ee5"
       },
       "exit_review": {
-        "id": 10763059979,
-        "sha256": "db251f5a97526444f34ed63628d6b6fdf66dc65fb97811b937dac196f2e9e8b9"
+        "id": 10765008925,
+        "sha256": "dac0e697106ba54dc8df33af300e60151720f6b497d5f8781a569c716832f421"
       }
     }
   },
   "m1_entry_manifests": {
     "windows": {
       "platform_profile": "WINDOWS_DESKTOP_X64",
-      "source_revision": "e651806dbfeec4955a5b19d68aef69d2e3abe145",
+      "source_revision": "c3019718e6a088fdf01e5e4297ff5496746d0aa8",
       "core_baseline": "CB-1.4.0",
       "db_schema_version": "1.6.0",
       "baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
@@ -56,7 +56,7 @@
     },
     "linux": {
       "platform_profile": "LINUX_DESKTOP_X64",
-      "source_revision": "e651806dbfeec4955a5b19d68aef69d2e3abe145",
+      "source_revision": "c3019718e6a088fdf01e5e4297ff5496746d0aa8",
       "core_baseline": "CB-1.4.0",
       "db_schema_version": "1.6.0",
       "baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
@@ -72,7 +72,7 @@
     {
       "id": 1,
       "status": "PASS",
-      "evidence": "Run #43 merged-main Exit Review GO; all 14 §18 gates PASS."
+      "evidence": "Run #45 merged-main Exit Review GO; all 14 §18 gates PASS."
     },
     {
       "id": 2,
@@ -87,22 +87,22 @@
     {
       "id": 4,
       "status": "PASS",
-      "evidence": "Run #43 verify-governance / Exit Review confirms ADR-M0-001..010 CLOSED."
+      "evidence": "Run #45 verify-governance / Exit Review confirms ADR-M0-001..010 CLOSED."
     },
     {
       "id": 5,
       "status": "PASS",
-      "evidence": "Run #43 Windows/Linux, DB bootstrap, API/Desktop smoke, codegen/baseline and cold-start gates PASS."
+      "evidence": "Run #45 Windows/Linux, DB bootstrap, API/Desktop smoke, codegen/baseline and cold-start gates PASS."
     },
     {
       "id": 6,
       "status": "PASS",
-      "evidence": "Run #43 Windows and Linux M1 Entry build manifests freeze exact main revision e651806..., CB-1.4.0, Baseline Lock, DB 1.6.0, P1 Metric Catalog, Stage/DTO authority and dependency lock."
+      "evidence": "Run #45 Windows and Linux M1 Entry build manifests freeze exact main revision c3019718..., CB-1.4.0, Baseline Lock, DB 1.6.0, P1 Metric Catalog, Stage/DTO authority and dependency lock."
     },
     {
       "id": 7,
       "status": "PASS",
-      "evidence": "Synthetic-only / Golden strategy and machine policy are merged on main and verify-m1-entry-preparation passed on both platforms in Run #43."
+      "evidence": "Synthetic-only / Golden strategy and machine policy are merged on main and verify-m1-entry-preparation passed on both platforms in Run #45."
     },
     {
       "id": 8,
@@ -112,7 +112,7 @@
     {
       "id": 9,
       "status": "PASS",
-      "evidence": "Architecture blocker review is merged, CI-verified, and records NO_KNOWN_ARCHITECTURE_BLOCKER with no layer bypass authorized."
+      "evidence": "Architecture blocker review remains merged and CI-verified in Run #45; NO_KNOWN_ARCHITECTURE_BLOCKER and no layer bypass authorized."
     },
     {
       "id": 10,
