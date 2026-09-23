@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 from decimal import Decimal
 
-from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 from tools.testing.fixture_harness import DEFAULT_BUNDLE, golden_check, load_spec
+
+from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 
 
 def test_m0_tst_002_canonical_contracts_cover_core_dto_metric_stage_and_registries() -> None:
