@@ -324,19 +324,19 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 8. Final repository regression passed **220/220** by complete partition: unit 93/93, migration 26/26, contract 101/101; historical Baseline/Canonical/codegen/generated/regenerate-diff/architecture/Repository-policy/Desktop-lifecycle-policy/bootstrap/API-smoke/Desktop-backend-smoke/offline-lock gates PASS.
 9. SDIB §39 step 8 cross-platform CI remains explicitly outside this task.
 
-## M0-PLAT-004 / M0-PLAT-005 — IN-PROGRESS
+## M0-PLAT-004 / M0-PLAT-005 — COMPLETE
 
-**Cross-platform CI:** SDIB §39 step 8 repository implementation is present, but external hosted-runner completion evidence is still pending.
+**Cross-platform CI:** SDIB §39 step 8 is accepted on real GitHub-hosted Windows and Linux runners for merged `main` revision `70f1112c313d666685867cfe00de46b81bd1a21f`.
 
-1. A GitHub Actions matrix now targets real `windows-2025` and `ubuntu-24.04` x64 jobs.
+1. A GitHub Actions matrix targets real `windows-2025` and `ubuntu-24.04` x64 jobs.
 2. Both jobs use CPython 3.13.5, uv 0.12.17, the single `uv.lock`, `uv sync --locked`, and the same `ci-check` dispatcher semantics.
 3. Provider actions are pinned to immutable commit SHAs; required gates have no `continue-on-error` or failure masking.
-4. The current M0-GUI-004 UI automation smoke is included on both platforms.
-5. `verify-ci` provides a vendor-orchestration contract verifier and `ci-check` emits per-platform machine-readable evidence.
-6. Packaging, SBOM, build manifest, cold-start, M0 Exit, and step-9 Golden/replay/logical-equivalence work remain out of scope.
-7. The first hosted run on checkpoint `065affd1bf465bd07a153034d192ba73472a6a0c` executed both real runners and failed closed: both exposed the same Ruff/mypy/repository-import defects, while Linux additionally exposed missing `libEGL.so.1`; Windows GUI and UI-automation smoke were already PASS.
-8. The remediation keeps the frozen static-quality gates, adds explicit repository-root namespace discovery for pytest/mypy, installs the minimal Linux EGL runtime before the unchanged headless Qt gates, and repairs the reported Ruff findings at source/generator level.
-9. **Not yet COMPLETE:** the amended checkpoint still requires a fresh real GitHub-hosted Windows/Linux run with both jobs GREEN before `M0-PLAT-004` / `M0-PLAT-005` can be marked complete.
+4. M0-GUI-004 UI automation runs on both platforms together with baseline/bootstrap/Canonical/generated/architecture/Repository-policy/Desktop-lifecycle, Ruff, mypy, unit, contract, migration, SQLite, API, lock and Git-diff gates.
+5. The first hosted attempt failed closed and exposed real Ruff/mypy/import and Linux EGL defects; the remediation kept the frozen quality policies and repaired those defects at source/configuration level.
+6. GitHub Actions Run #6 (`35814465946`) on `main` completed **SUCCESS** with `M0 windows` and `M0 linux` both GREEN.
+7. Linux artifact `10730478191` has digest `sha256:4926c93505fd1309ef37c949d11360988fcc78ccf1e9bd2117282914076c7975`; Windows artifact `10730209271` has digest `sha256:6d4a42b4d34242834fefef2d45e4de76b48ae0b340da03efa7eb0860bce00bfd`.
+8. Both machine-readable evidence files report `status = PASS`, `failed_gate_names = []`, and `source_revision = 70f1112c313d666685867cfe00de46b81bd1a21f`.
+9. Packaging, SBOM, build manifest, cold-start, M0 Exit, and step-9 Golden/replay/logical-equivalence remain out of scope and are not claimed by this completion.
 
 ## Partial governance state
 
@@ -353,13 +353,13 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 
 - M0 overall completion or M0 Exit Gate.
 - P1 capability completion/admission.
-- Packaging, SBOM, build manifest, cross-platform CI completion/certification, or cold-start completion.
-- Windows/Linux certification or logical-equivalence qualification.
+- Packaging, SBOM, build manifest, or cold-start completion.
+- Step-9 Golden/replay/cross-platform logical-equivalence qualification.
 
 ## Next required sequence
 
-Per SDIB-1.0 §39, steps 1–7 are complete and step 8 is now active. Proceed in dependency order:
+Per SDIB-1.0 §39, steps 1–8 are complete. Proceed in dependency order:
 
-1. Obtain real hosted-runner evidence for the current **§39 step 8 cross-platform CI** checkpoint.
-2. Require both `M0-PLAT-004` Windows and `M0-PLAT-005` Linux jobs to be GREEN before marking step 8 COMPLETE.
-3. Preserve all completed M0-GUI-004 automation gates in the CI matrix.
+1. Start §39 step 9: build the complete test/fixture harness, including Golden/replay and the required cross-platform logical-equivalence evidence.
+2. Preserve the completed Windows/Linux CI matrix and all current fail-closed M0 gates while adding step-9 coverage.
+3. Do not claim cold-start, remaining M0 backlog completion, or M0 Exit until their later §39 steps are separately implemented and accepted.
