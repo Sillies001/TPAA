@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import cast
 from dataclasses import replace
 from pathlib import Path
+from typing import cast
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
