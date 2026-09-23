@@ -278,38 +278,6 @@ jobs:
           --postgres-cold-start downloaded/postgres/postgres-cold-start.json
           --output evidence/m0-exit/review.json
 
-      - name: Upload M0 Exit Review evidence
-        if: ${{ always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: tpaa-m0-exit-review-${{ github.sha }}
-          path: evidence/m0-exit/review.json
-          if-no-files-found: error
-          retention-days: 30
-
-  m1-entry-activation:
-    name: M1 Entry Activation
-    needs:
-      - m0-exit-review
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set up CPython
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.13.5"
-          architecture: x64
-
-      - name: Download Windows/Linux M1 Entry manifests
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          pattern: tpaa-ci-*-${{ github.sha }}
-          path: downloaded/platform
-          merge-multiple: true
-
       - name: Verify or activate M1 Entry
         run: >-
           python tools/dev/tpaa_dev.py m1-entry-activation
@@ -320,6 +288,15 @@ jobs:
           --windows-manifest downloaded/platform/evidence/m1-entry/windows/build-manifest.json
           --linux-manifest downloaded/platform/evidence/m1-entry/linux/build-manifest.json
           --output evidence/m1-entry/activation.json
+
+      - name: Upload M0 Exit Review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m0-exit-review-${{ github.sha }}
+          path: evidence/m0-exit/review.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload M1 Entry activation evidence
         if: ${{ always() }}
