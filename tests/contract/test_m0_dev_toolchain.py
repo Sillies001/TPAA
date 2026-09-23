@@ -71,6 +71,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
     names = {record["name"] for record in records}
     required = {
         "bootstrap",
+        "verify-repository-bootstrap",
         "generate",
         "verify-baseline",
         "test-unit",

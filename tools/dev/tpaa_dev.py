@@ -39,6 +39,7 @@ CI_VERIFY = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 CI_GATE = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 FIXTURE_HARNESS = REPO_ROOT / "tools" / "testing" / "fixture_harness.py"
 GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
+REPOSITORY_BOOTSTRAP_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_repository_bootstrap.py"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -64,6 +65,7 @@ class CommandSpec:
 
 COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("bootstrap", "M0-DEV-001", "IMPLEMENTED", "Validate runtime/lock/baseline and sync the frozen project environment."),
+    CommandSpec("verify-repository-bootstrap", "M0-DEV-000", "IMPLEMENTED", "Verify the source-controlled Formal Repository Bootstrap contract."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -428,6 +430,7 @@ def build_parser() -> argparse.ArgumentParser:
     ui_automation.add_argument("--timeout", type=float, default=30.0)
     sub.add_parser("verify-ci", help="Verify the M0 Windows/Linux CI orchestration contract")
     sub.add_parser("verify-governance", help="Verify M0 governance repository contracts")
+    sub.add_parser("verify-repository-bootstrap", help="Verify M0-DEV-000 repository bootstrap substrate")
     ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
     ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
     ci_check.add_argument("--evidence", type=Path)
@@ -542,6 +545,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(CI_VERIFY)])
     if command == "verify-governance":
         return _run([sys.executable, str(GOVERNANCE_VERIFY)])
+    if command == "verify-repository-bootstrap":
+        return _run([sys.executable, str(REPOSITORY_BOOTSTRAP_VERIFY)])
     if command == "platform-smoke":
         return _run([sys.executable, str(PLATFORM_SMOKE)])
     if command == "openapi-snapshot":

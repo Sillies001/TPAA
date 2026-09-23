@@ -135,6 +135,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("verify-architecture", _dispatcher("verify-architecture")),
             ("verify-repository-policy", _dispatcher("verify-repository-policy")),
             ("verify-desktop-lifecycle-policy", _dispatcher("verify-desktop-lifecycle-policy")),
+            ("verify-repository-bootstrap", _dispatcher("verify-repository-bootstrap")),
             ("verify-governance", _dispatcher("verify-governance")),
             ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
             ("migration-smoke", _dispatcher("migration-smoke")),
@@ -211,7 +212,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
         "required_gates": gates,
         "failed_gate_names": [str(gate["name"]) for gate in failed],
         "scope": {
-            "included": "SDIB-1.0 M0 Windows/Linux CI over implemented Step 8-10 gates including package/SBOM/cold-start",
+            "included": "SDIB-1.0.1 M0 Windows/Linux CI over implemented M0 gates including repository-bootstrap/package/SBOM/cold-start",
             "excluded": [
                 "M0 Exit Gate",
                 "M1 production Metric/Stage/Release Golden/replay bundles",
