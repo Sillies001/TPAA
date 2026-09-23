@@ -20,12 +20,16 @@ HISTORICAL_M0_TARGET = "ee54e8500381e62a53e1f2352d485ed11892c9d6"
 
 def build_manifest(profile: str) -> dict[str, object]:
     base = build_evidence(profile)["build-manifest.json"]
-    canonical = base.get("canonical_artifact_hashes")
-    if not isinstance(canonical, dict):
+    canonical_obj = base.get("canonical_artifact_hashes")
+    if not isinstance(canonical_obj, dict):
         raise RuntimeError("canonical artifact hash map unavailable")
+    canonical_hashes: dict[str, str] = {}
+    for key, value in canonical_obj.items():
+        if isinstance(key, str) and isinstance(value, str):
+            canonical_hashes[key] = value
 
     def required_hash(name: str) -> str:
-        value = canonical.get(name)
+        value = canonical_hashes.get(name)
         if not isinstance(value, str) or len(value) != 64:
             raise RuntimeError(f"required authority hash unavailable: {name}")
         return value
