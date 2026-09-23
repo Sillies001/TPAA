@@ -12,7 +12,7 @@ Merged-main revision `c3019718e6a088fdf01e5e4297ff5496746d0aa8` is accepted by R
 - Exit Review — GO / PASS / source-revision-consistent;
 - Windows/Linux M1 Entry build manifests are bound to the exact merged-main revision.
 
-The SDIB-1.0.1 §19.1 Entry Gate therefore remains:
+The explicit §19.1(8) role assignments are now recorded on the finalization branch. The static Entry review is therefore an admission candidate:
 
 ```text
 1  PASS
@@ -20,20 +20,25 @@ The SDIB-1.0.1 §19.1 Entry Gate therefore remains:
 3  PASS
 4  PASS
 5  PASS
-6  PASS
+6  RUNTIME_VERIFY_REQUIRED
 7  PASS
-8  BLOCKED_UNASSIGNED
+8  PASS
 9  PASS
 10 PASS
 
-PASS = 9 / 10
-decision = M1_NOT_ADMITTED
+static PASS = 9 / 10
+decision = M1_ADMISSION_CANDIDATE
 implementation_authorized = false
 ```
 
-Condition 8 requires explicit human assignments for the M1 Primary WS owner, independent Golden reviewer, M1 Exit reviewer, and Golden-independence attestation.
+Assigned identities:
 
-To avoid a second governance-only merge after role assignment, the final Entry transition uses `M1_ENTRY_ACTIVATION_POLICY`: the final PR is verified as an admission candidate, then its the required `M0 Exit Review` job emits an exact-source-revision activation artifact. Only a merged-main artifact with `decision=M1_ADMITTED` authorizes M1 implementation.
+- M1 Primary WS owner: `@Sillies001`;
+- Golden independent reviewer: `@Sillies001`;
+- M1 Exit reviewer: `@Sillies001`;
+- Golden independence attestation: `@Sillies001 is independent of the implementation and expected-result author for Golden acceptance.`
+
+Condition 6 is deliberately re-opened for runtime verification because the role-assignment change creates a new source revision. The same finalization PR must first verify the PR synthetic merge revision, then a single protected-main merge must let the required `M0 Exit Review` job emit the exact-source-revision activation artifact. Only an artifact with `decision=M1_ADMITTED` and `implementation_authorized=true` authorizes M1 implementation.
 
 
 ## SDIB-1.0.1 M0 delta — 48/48 CLOSED; M1_NOT_ADMITTED
