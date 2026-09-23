@@ -171,8 +171,9 @@ def verify() -> dict[str, object]:
     checks.append(_check("run37_summary", run_ok, "Run #37 merged-main evidence"))
 
     artifacts = run.get("artifacts") if isinstance(run, dict) else None
-    artifact_ok = isinstance(artifacts, dict) and len(artifacts) == 5
-    if artifact_ok:
+    artifact_ok = False
+    if isinstance(artifacts, dict):
+        artifact_ok = len(artifacts) == 5
         for item in artifacts.values():
             artifact_ok = (
                 artifact_ok
