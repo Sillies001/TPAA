@@ -42,6 +42,7 @@ GOVERNANCE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_governance.py"
 REPOSITORY_BOOTSTRAP_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_repository_bootstrap.py"
 M0_DELTA_CLOSURE_VERIFY = REPO_ROOT / "tools" / "governance" / "verify_m0_delta_closure.py"
 M1_ENTRY_PREPARATION_MODULE = "tools.governance.verify_m1_entry_preparation"
+M1_ENTRY_GATE_STATE_MODULE = "tools.governance.verify_m1_entry_gate_state"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -71,6 +72,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-repository-bootstrap", "M0-DEV-000", "IMPLEMENTED", "Verify the source-controlled Formal Repository Bootstrap contract."),
     CommandSpec("verify-m0-delta-closure", "M0 Milestone Review", "IMPLEMENTED", "Verify the SDIB-1.0.1 48-task M0 delta closure record."),
     CommandSpec("verify-m1-entry-preparation", "M1 Entry Gate §19.1(6/7/9/10)", "IMPLEMENTED", "Verify non-admitting M1 Entry preparation evidence."),
+    CommandSpec("verify-m1-entry-gate-state", "M1 Entry Gate §19.1", "IMPLEMENTED", "Verify the current blocked/admitted M1 Entry review state."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -439,6 +441,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-repository-bootstrap", help="Verify M0-DEV-000 repository bootstrap substrate")
     sub.add_parser("verify-m0-delta-closure", help="Verify SDIB-1.0.1 48-task M0 delta closure record")
     sub.add_parser("verify-m1-entry-preparation", help="Verify M1 Entry preparation evidence without admitting M1")
+    sub.add_parser("verify-m1-entry-gate-state", help="Verify the current M1 Entry review decision/state")
     ci_check = sub.add_parser("ci-check", help="Run the governed M0 cross-platform CI gate set")
     ci_check.add_argument("--expected-platform", choices=("windows", "linux"))
     ci_check.add_argument("--evidence", type=Path)
@@ -562,6 +565,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, str(M0_DELTA_CLOSURE_VERIFY)])
     if command == "verify-m1-entry-preparation":
         return _run([sys.executable, "-m", M1_ENTRY_PREPARATION_MODULE])
+    if command == "verify-m1-entry-gate-state":
+        return _run([sys.executable, "-m", M1_ENTRY_GATE_STATE_MODULE])
     if command == "platform-smoke":
         return _run([sys.executable, str(PLATFORM_SMOKE)])
     if command == "openapi-snapshot":
