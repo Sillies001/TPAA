@@ -142,6 +142,23 @@ def test_m1_entry_gate_state_is_verified_in_ci() -> None:
     assert "python tools/dev/tpaa_dev.py verify-m1-entry-gate-state" in text
 
 
+def test_m1_entry_activation_is_exact_source_revision_and_fail_closed() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "m1-entry-activation:" in text
+    assert "name: M1 Entry Activation" in text
+    assert "needs:" in text
+    assert "- m0-exit-review" in text
+    assert "python tools/dev/tpaa_dev.py m1-entry-activation" in text
+    assert "--mode auto" in text
+    assert "--event-name ${{ github.event_name }}" in text
+    assert "--git-ref ${{ github.ref }}" in text
+    assert "--source-revision ${{ github.sha }}" in text
+    assert "--windows-manifest downloaded/platform/evidence/m1-entry/windows/build-manifest.json" in text
+    assert "--linux-manifest downloaded/platform/evidence/m1-entry/linux/build-manifest.json" in text
+    assert "--output evidence/m1-entry/activation.json" in text
+    assert "tpaa-m1-entry-activation-${{ github.sha }}" in text
+
+
 def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "m0-exit-postgres:" in text
