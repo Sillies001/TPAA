@@ -4,9 +4,10 @@
 # source artifact_id=P1_METRIC_CATALOG version=1.14.0 sha256=24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d
 """Generated TPAA P1 Metric identity/metadata registry. Do not edit by hand."""
 
+from collections.abc import Mapping
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Mapping
+
 
 class P1MetricCode(StrEnum):
     P1_AIR_001 = 'P1-AIR-001'

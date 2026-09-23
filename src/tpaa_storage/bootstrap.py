@@ -11,9 +11,10 @@ import hashlib
 import heapq
 import re
 import sqlite3
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 

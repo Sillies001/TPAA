@@ -6,8 +6,8 @@ view for REST/GUI adapters. READY semantics remain owned by ``tpaa_canonical``.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from tpaa_canonical.runtime_handshake import (
     RuntimeBaselineHandshake,

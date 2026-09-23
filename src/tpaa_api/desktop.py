@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import hmac
+from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from tpaa_application import ApplicationService
 
@@ -27,7 +28,7 @@ def create_desktop_app(*, application: ApplicationService, bearer_token: str) ->
         raise ValueError("bearer_token must be non-empty")
 
     def require_bearer(
-        credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+        credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
     ) -> None:
         supplied = "" if credentials is None else credentials.credentials
         if credentials is None or credentials.scheme.lower() != "bearer" or not hmac.compare_digest(

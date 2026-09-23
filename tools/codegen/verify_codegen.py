@@ -19,7 +19,6 @@ if str(SRC_ROOT) not in sys.path:
 from tpaa_canonical import CanonicalArtifactLoader  # noqa: E402
 from tpaa_codegen import GenerationCoordinator, default_generators  # noqa: E402
 
-
 GENERATORS = list(default_generators())
 
 def _sha256(data: bytes) -> str:

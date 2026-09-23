@@ -9,14 +9,15 @@ import queue
 import secrets
 import subprocess
 import sys
-from pathlib import Path
 import threading
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import IO, Any, Sequence
+from pathlib import Path
+from typing import IO, Any
 
 from .diagnostics import EMPTY_DIAGNOSTICS, DiagnosticsSnapshot, snapshot_from_http
 
@@ -323,7 +324,7 @@ class LocalBackendController:
         if expected != observed:
             raise LocalBackendError("VERSION_IDENTITY_MISMATCH")
 
-    def __enter__(self) -> "LocalBackendController":
+    def __enter__(self) -> LocalBackendController:
         self.start()
         return self
 

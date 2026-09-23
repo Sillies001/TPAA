@@ -6,9 +6,10 @@
 # source artifact_id=ENGINEERING_WORKSTREAM_REGISTRY version=1.0.0 sha256=adea6bba20fb6b9ec002e9e1d355259c594f292ef4721fb7272de0f387747e6d
 """Generated TPAA P/M/WS program registries. Do not edit by hand."""
 
+from collections.abc import Mapping
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Mapping
+
 
 class CapabilityPhase(StrEnum):
     P1 = 'P1'

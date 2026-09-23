@@ -17,11 +17,11 @@ from tpaa_storage.postgres_repository import (
 
 @dataclass
 class FakeCursor:
-    connection: "FakeConnection"
+    connection: FakeConnection
     rows: list[tuple[object, ...]] | None = None
     rowcount: int = -1
 
-    def __enter__(self) -> "FakeCursor":
+    def __enter__(self) -> FakeCursor:
         return self
 
     def __exit__(self, *_: object) -> None:

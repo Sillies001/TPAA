@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
 import pytest
 
 from tools.storage import postgres_db as postgres_tool
-
 from tpaa_storage.bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     POSTGRES_ENGINE_PROFILE,
     postgres_bootstrap_script,
     postgres_verify_script,
 )
+
 
 class FakeClient:
     def __init__(self, outputs: list[Any]) -> None:

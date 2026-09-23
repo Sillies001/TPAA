@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -77,3 +78,15 @@ def test_ci_gate_does_not_dispatch_later_step_work() -> None:
         '_dispatcher("test-replay")',
     ):
         assert token not in text
+
+
+def test_linux_runner_installs_required_qt_egl_runtime() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "if: ${{ matrix.platform == 'linux' }}" in text
+    assert "sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1" in text
+
+
+def test_pytest_and_mypy_resolve_repository_tool_packages() -> None:
+    config = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert config["tool"]["pytest"]["ini_options"]["pythonpath"] == [".", "src"]
+    assert config["tool"]["mypy"]["explicit_package_bases"] is True

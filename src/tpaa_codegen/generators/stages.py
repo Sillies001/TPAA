@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import PurePosixPath
-from typing import Any
 
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
@@ -85,9 +84,10 @@ class StageRegistryGenerator:
         lines = [
             '"""Generated TPAA Stage registry. Do not edit by hand."""',
             "",
+            "from collections.abc import Mapping",
             "from enum import StrEnum",
             "from types import MappingProxyType",
-            "from typing import Mapping",
+            "",
             "",
             "class StageCode(StrEnum):",
         ]

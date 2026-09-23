@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import PurePosixPath
-from typing import Any, Mapping
+from typing import Any
 
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifact, CanonicalArtifactLoader
 
@@ -127,9 +128,10 @@ class ProgramRegistryGenerator:
         lines: list[str] = [
             '"""Generated TPAA P/M/WS program registries. Do not edit by hand."""',
             "",
+            "from collections.abc import Mapping",
             "from enum import StrEnum",
             "from types import MappingProxyType",
-            "from typing import Mapping",
+            "",
             "",
         ]
         lines.extend(_render_enum("CapabilityPhase", phases, "p_code", artifact_id=p.artifact_id))

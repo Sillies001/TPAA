@@ -6,10 +6,10 @@
 
 from __future__ import annotations
 
-from typing import NotRequired, Required, TypeAlias, TypedDict
+from typing import NotRequired, Required, TypedDict
 
-JSONScalar: TypeAlias = str | int | float | bool | None
-JSONValue: TypeAlias = JSONScalar | list['JSONValue'] | dict[str, 'JSONValue']
+type JSONScalar = str | int | float | bool | None
+type JSONValue = JSONScalar | list[JSONValue] | dict[str, JSONValue]
 
 class CapabilityObservationDTO(TypedDict, total=False):
     aircraft_configuration_snapshot_id: NotRequired[str | None]

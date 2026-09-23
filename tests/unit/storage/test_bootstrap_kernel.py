@@ -5,7 +5,7 @@ import sqlite3
 import pytest
 
 from tpaa_storage import bootstrap as bootstrap_module
-from tpaa_storage.bootstrap import BootstrapError, EXPECTED_DB_SCHEMA_VERSION
+from tpaa_storage.bootstrap import EXPECTED_DB_SCHEMA_VERSION, BootstrapError
 
 
 def test_authority_is_exact_schema_1_6_0_and_all_tables_agree() -> None:

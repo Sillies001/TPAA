@@ -11,10 +11,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 EXPECTED_CORE_BASELINE = "CB-1.4.0"
 EXPECTED_BASELINE_LOCK_SHA256 = (

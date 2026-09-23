@@ -6,9 +6,9 @@ import pytest
 
 from tpaa_storage.bootstrap import (
     BootstrapError,
-    _SchemaAuthority,
     _postgres_create_statements,
     _postgres_table_order,
+    _SchemaAuthority,
     _table_dependencies,
     postgres_create_statements,
 )

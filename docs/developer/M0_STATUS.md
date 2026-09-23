@@ -334,7 +334,9 @@ Developer gate: `python tools/dev/tpaa_dev.py desktop-backend-smoke`.
 4. The current M0-GUI-004 UI automation smoke is included on both platforms.
 5. `verify-ci` provides a vendor-orchestration contract verifier and `ci-check` emits per-platform machine-readable evidence.
 6. Packaging, SBOM, build manifest, cold-start, M0 Exit, and step-9 Golden/replay/logical-equivalence work remain out of scope.
-7. **Not yet COMPLETE:** real GitHub-hosted Windows/Linux jobs must both be GREEN for the checkpoint commit before `M0-PLAT-004` / `M0-PLAT-005` can be marked complete.
+7. The first hosted run on checkpoint `065affd1bf465bd07a153034d192ba73472a6a0c` executed both real runners and failed closed: both exposed the same Ruff/mypy/repository-import defects, while Linux additionally exposed missing `libEGL.so.1`; Windows GUI and UI-automation smoke were already PASS.
+8. The remediation keeps the frozen static-quality gates, adds explicit repository-root namespace discovery for pytest/mypy, installs the minimal Linux EGL runtime before the unchanged headless Qt gates, and repairs the reported Ruff findings at source/generator level.
+9. **Not yet COMPLETE:** the amended checkpoint still requires a fresh real GitHub-hosted Windows/Linux run with both jobs GREEN before `M0-PLAT-004` / `M0-PLAT-005` can be marked complete.
 
 ## Partial governance state
 

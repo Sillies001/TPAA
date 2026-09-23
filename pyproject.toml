@@ -17,7 +17,7 @@ required-version = ">=0.10,<0.13"
 minversion = "9.0"
 addopts = ["-ra", "--strict-config", "--strict-markers"]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [".", "src"]
 xfail_strict = true
 
 [tool.ruff]
@@ -39,6 +39,7 @@ strict = true
 pretty = true
 show_error_codes = true
 warn_unreachable = true
+explicit_package_bases = true
 files = ["tools", "src", "tests"]
 exclude = ["^baseline/"]
 

@@ -10,10 +10,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
-from pathlib import Path
 from collections.abc import Callable, Sequence
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
@@ -21,12 +21,12 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from tpaa_canonical import (  # noqa: E402
-    ArtifactExpectation,
-    CanonicalArtifactError,
-    CanonicalArtifactLoader,
     EXPECTED_BASELINE_LOCK_SHA256,
     EXPECTED_CONTROLLED_ARTIFACT_COUNT,
     EXPECTED_CORE_BASELINE,
+    ArtifactExpectation,
+    CanonicalArtifactError,
+    CanonicalArtifactLoader,
 )
 
 TASK_ID = "M0-CORE-002"
@@ -42,7 +42,7 @@ class CheckResult:
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
 def _git_revision() -> str:

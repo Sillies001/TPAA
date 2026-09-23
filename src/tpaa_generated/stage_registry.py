@@ -4,9 +4,10 @@
 # source artifact_id=STAGE_REGISTRY version=1.1.0 sha256=52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691
 """Generated TPAA Stage registry. Do not edit by hand."""
 
+from collections.abc import Mapping
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Mapping
+
 
 class StageCode(StrEnum):
     ASSESSMENT = 'ASSESSMENT'

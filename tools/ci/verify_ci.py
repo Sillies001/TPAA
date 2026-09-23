@@ -10,12 +10,13 @@ from __future__ import annotations
 
 import json
 import re
-import sys
+import tomllib
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
 TOOLCHAIN = REPO_ROOT / "tools" / "dev" / "TOOLCHAIN.json"
+PYPROJECT = REPO_ROOT / "pyproject.toml"
 GATE_RUNNER = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 
 EXPECTED_PYTHON = "3.13.5"
@@ -49,6 +50,7 @@ def verify() -> dict[str, object]:
     text = WORKFLOW.read_text(encoding="utf-8")
     gate_text = GATE_RUNNER.read_text(encoding="utf-8") if GATE_RUNNER.is_file() else ""
     toolchain = json.loads(TOOLCHAIN.read_text(encoding="utf-8"))
+    pyproject = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
 
     checks.append(_pass("workflow_exists", WORKFLOW.relative_to(REPO_ROOT).as_posix()))
     checks.append(
@@ -111,6 +113,8 @@ def verify() -> dict[str, object]:
     )
 
     required_tokens = (
+        "if: ${{ matrix.platform == 'linux' }}",
+        "sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1",
         "uv sync --locked --python 3.13.5",
         "uv lock --check",
         "python tools/dev/tpaa_dev.py verify-ci",
@@ -181,6 +185,19 @@ def verify() -> dict[str, object]:
         _pass("quality_authority", "workflow delegates exact Ruff/mypy versions to TOOLCHAIN.json")
         if quality_ok
         else _fail("quality_authority", "unexpected frozen quality-tool contract")
+    )
+
+    pytest_pythonpath = pyproject.get("tool", {}).get("pytest", {}).get("ini_options", {}).get("pythonpath")
+    checks.append(
+        _pass("pytest_repo_root_importable", repr(pytest_pythonpath))
+        if pytest_pythonpath == [".", "src"]
+        else _fail("pytest_repo_root_importable", f"expected=['.', 'src'] actual={pytest_pythonpath!r}")
+    )
+    mypy_explicit_bases = pyproject.get("tool", {}).get("mypy", {}).get("explicit_package_bases")
+    checks.append(
+        _pass("mypy_explicit_package_bases", "true")
+        if mypy_explicit_bases is True
+        else _fail("mypy_explicit_package_bases", f"expected=true actual={mypy_explicit_bases!r}")
     )
 
     status = "PASS" if all(check[1] == "PASS" for check in checks) else "FAIL"

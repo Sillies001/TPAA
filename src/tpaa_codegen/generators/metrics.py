@@ -105,9 +105,10 @@ class MetricRegistryGenerator:
         lines = [
             '"""Generated TPAA P1 Metric identity/metadata registry. Do not edit by hand."""',
             "",
+            "from collections.abc import Mapping",
             "from enum import StrEnum",
             "from types import MappingProxyType",
-            "from typing import Mapping",
+            "",
             "",
             "class P1MetricCode(StrEnum):",
         ]

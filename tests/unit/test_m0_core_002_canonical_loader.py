@@ -6,12 +6,12 @@ from pathlib import Path
 import pytest
 
 from tpaa_canonical import (
-    ArtifactExpectation,
-    CanonicalArtifactError,
-    CanonicalArtifactLoader,
     EXPECTED_CONTROLLED_ARTIFACT_COUNT,
     EXPECTED_CORE_BASELINE,
     UNVERSIONED_BY_AUTHORITY,
+    ArtifactExpectation,
+    CanonicalArtifactError,
+    CanonicalArtifactLoader,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]

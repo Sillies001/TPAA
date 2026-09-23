@@ -5,18 +5,21 @@ from __future__ import annotations
 import json
 import socket
 import sys
-from pathlib import Path
 import threading
+from pathlib import Path
 from typing import Any
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-import uvicorn
+import uvicorn  # noqa: E402
 
-from tpaa_api import create_desktop_app
-from tpaa_application import ApplicationService, build_trusted_runtime_status_use_case
+from tpaa_api import create_desktop_app  # noqa: E402
+from tpaa_application import (  # noqa: E402
+    ApplicationService,
+    build_trusted_runtime_status_use_case,
+)
 
 CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
 

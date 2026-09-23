@@ -8,7 +8,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VERIFIER_PATH = REPO_ROOT / "tools" / "baseline" / "verify_baseline.py"
 SPEC = importlib.util.spec_from_file_location("verify_baseline", VERIFIER_PATH)

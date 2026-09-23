@@ -1,16 +1,16 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import Iterable
 
 from tpaa_canonical import CanonicalArtifactLoader
 
 from .errors import CodegenError, CodegenErrorContext, CodegenReason
 from .manifest import build_manifest
 from .models import GeneratedFile, GenerationResult
-from .provenance import decorate_python_source
 from .protocol import Generator
+from .provenance import decorate_python_source
 from .rendering import render_json
 
 GENERATOR_VERSION = "0.2.0"

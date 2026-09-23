@@ -17,7 +17,6 @@ from tpaa_codegen import GenerationCoordinator, default_generators  # noqa: E402
 from tpaa_codegen.governance import verify_generated_tree  # noqa: E402
 
 
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate deterministic TPAA source projections")
     parser.add_argument(

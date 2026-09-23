@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from types import MappingProxyType
-from typing import Mapping
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,7 +43,7 @@ class GenerationResult:
         sources: tuple[SourceArtifactRef, ...],
         files: tuple[GeneratedFile, ...],
         metadata: Mapping[str, str] | None = None,
-    ) -> "GenerationResult":
+    ) -> GenerationResult:
         return cls(
             generator_id=generator_id,
             sources=sources,

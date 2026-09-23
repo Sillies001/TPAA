@@ -39,6 +39,10 @@ jobs:
           version: "0.12.17"
           enable-cache: false
 
+      - name: Install Linux Qt runtime dependency
+        if: ${{ matrix.platform == 'linux' }}
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1
+
       - name: Synchronize frozen project dependencies
         run: uv sync --locked --python 3.13.5
 

@@ -6,8 +6,9 @@ It never recomputes READY semantics and never carries the Desktop bearer token.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
-from typing import Any, Mapping
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -37,7 +38,7 @@ class DiagnosticsSnapshot:
         backend_state: str,
         backend_ready: bool,
         failure_code: str | None,
-    ) -> "DiagnosticsSnapshot":
+    ) -> DiagnosticsSnapshot:
         """Overlay current child lifecycle without re-evaluating baseline identity."""
 
         effective_readiness = "READY" if backend_ready and self.readiness == "READY" else "NOT_READY"

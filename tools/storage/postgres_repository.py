@@ -21,6 +21,7 @@ from postgres_db import (  # noqa: E402
     _recreate_scoped_database,
     bootstrap_postgres,
 )
+
 from tpaa_storage.postgres_repository import (  # noqa: E402
     PostgreSQLRepositoryError,
     postgres_repository_smoke,

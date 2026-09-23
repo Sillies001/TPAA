@@ -33,6 +33,18 @@ The current construction host is CPython 3.13.5 with uv 0.10.0 (within the froze
 
 No unavailable local gate is recorded as PASS. The checkpoint remains IN-PROGRESS until the real Windows and Linux jobs execute all required gates.
 
+## First hosted-runner attempt and remediation
+
+The first real GitHub Actions run against checkpoint `065affd1bf465bd07a153034d192ba73472a6a0c` correctly failed closed and produced actionable Windows/Linux evidence instead of being treated as completion:
+
+- both runners reached and passed the CI orchestration, baseline, bootstrap, Canonical, generated-source, architecture, Repository-policy, and Desktop-lifecycle preflight gates;
+- Ruff 0.16.8 exposed 75 pre-existing static-quality findings that could not have been observed on the package-isolated construction host; the repair normalizes those findings without weakening the frozen Ruff policy, including generator templates so generated output remains governed;
+- mypy 2.3.1 stopped at duplicate namespace-module discovery for `tools/api/smoke.py` and `tools/gui/smoke.py`; `explicit_package_bases = true` now gives the repository namespace an unambiguous module root without excluding either file;
+- hosted pytest could not import the repository-local `tools` namespace because only `src` was on the governed pytest path; the root path is now explicitly included together with `src`;
+- Linux PySide6 import failed on missing `libEGL.so.1`; the Linux matrix branch now installs the minimal Ubuntu `libegl1` runtime package before executing the unchanged offscreen/headless GUI gates. Windows GUI and UI-automation smoke already passed in that first hosted attempt.
+
+The CI verifier and contract tests now fail closed if the Linux EGL preparation or the pytest/mypy namespace configuration is removed. These repairs remain IN-PROGRESS until a new real hosted Windows/Linux run proves the exact Ruff/mypy/test/GUI gates on the amended commit.
+
 ## PostgreSQL boundary
 
 M0-STO-003 already owns and completed real PostgreSQL 16 repository acceptance. SDIB §39 step 8 and the existing M0-PLAT task minimum do not explicitly require redefining that acceptance as a per-OS live PostgreSQL service Gate. This CI stage therefore preserves the completed PostgreSQL contract/migration coverage but does not invent a new Windows/Linux PostgreSQL-version policy. If a later authority requires live PostgreSQL in every runner, that change must be made explicitly rather than silently using different runner-provided majors.

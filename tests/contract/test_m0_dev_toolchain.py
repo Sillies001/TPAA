@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEV_CLI = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
 TOOLCHAIN = REPO_ROOT / "tools" / "dev" / "TOOLCHAIN.json"

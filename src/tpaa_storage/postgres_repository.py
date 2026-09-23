@@ -7,9 +7,10 @@ migrates, repairs, or redefines the Canonical schema.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import asdict
 from importlib import import_module
-from typing import Any, Callable
+from typing import Any
 
 from .bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,

@@ -2,7 +2,12 @@
 
 from .desktop import run_desktop
 from .diagnostics import DiagnosticsIdentity, DiagnosticsSnapshot, diagnostics_lines
-from .local_backend import LocalBackendController, LocalBackendError, LocalBackendState, LocalBackendStatus
+from .local_backend import (
+    LocalBackendController,
+    LocalBackendError,
+    LocalBackendState,
+    LocalBackendStatus,
+)
 from .shell import PYSIDE6_DEPENDENCY_MISSING, GuiShellConfig, GuiShellError, run_gui
 
 __all__ = [

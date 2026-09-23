@@ -8,9 +8,10 @@ owned by lower authoritative layers and M0-GUI-002 respectively.
 from __future__ import annotations
 
 import sys
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from importlib import import_module
-from typing import Any, Callable, Sequence
+from typing import Any
 
 from .diagnostics import DiagnosticsSnapshot, diagnostics_lines
 

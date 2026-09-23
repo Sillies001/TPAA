@@ -4,8 +4,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from tpaa_gui import GuiShellConfig
-from tpaa_gui import shell
+from tpaa_gui import GuiShellConfig, shell
 
 
 class _SignalTimer:

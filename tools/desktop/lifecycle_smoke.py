@@ -14,7 +14,7 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from tpaa_gui import LocalBackendController, LocalBackendState
+from tpaa_gui import LocalBackendController, LocalBackendState  # noqa: E402
 
 
 def _unauthenticated_status(port: int) -> int:

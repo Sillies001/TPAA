@@ -4,7 +4,6 @@ from pathlib import Path
 
 from tools.architecture.dependency_policy import load_policy, scan_architecture
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 POLICY = load_policy(REPO_ROOT / "tools" / "architecture" / "ARCHITECTURE_POLICY.json")
 
