@@ -96,8 +96,8 @@
     },
     {
       "id": 6,
-      "status": "PASS",
-      "evidence": "Run #45 Windows and Linux M1 Entry build manifests freeze exact main revision c3019718..., CB-1.4.0, Baseline Lock, DB 1.6.0, P1 Metric Catalog, Stage/DTO authority and dependency lock."
+      "status": "RUNTIME_VERIFY_REQUIRED",
+      "evidence": "Role-assignment change creates a new source revision. Windows/Linux M1 Entry manifests must match the exact PR synthetic merge revision and then the final merged-main revision through M1_ENTRY_ACTIVATION_POLICY."
     },
     {
       "id": 7,
@@ -106,8 +106,8 @@
     },
     {
       "id": 8,
-      "status": "BLOCKED_UNASSIGNED",
-      "evidence": "Required human identities and Golden independence attestation are not explicitly assigned; see M1_ROLE_ASSIGNMENTS.json and issue #67."
+      "status": "PASS",
+      "evidence": "Explicit human role assignments and Golden independence attestation are frozen in docs/governance/M1_ROLE_ASSIGNMENTS.json."
     },
     {
       "id": 9,
@@ -122,10 +122,10 @@
   ],
   "pass_count": 9,
   "condition_count": 10,
-  "decision": "M1_NOT_ADMITTED",
+  "decision": "M1_ADMISSION_CANDIDATE",
   "blocking_conditions": [
-    8
+    "MERGED_MAIN_RUNTIME_EVIDENCE"
   ],
   "implementation_authorized": false,
-  "next_action": "Explicitly assign the three §19.1(8) human roles and Golden independence attestation, then rerun the final Entry Gate review."
+  "next_action": "Verify the admission candidate on the PR synthetic merge revision, merge once, then require the protected-main M0 Exit Review activation artifact to state M1_ADMITTED before implementation begins."
 }
