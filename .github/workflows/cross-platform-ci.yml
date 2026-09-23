@@ -133,3 +133,143 @@ jobs:
           path: evidence/cross-platform/logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
+
+
+  m0-exit-postgres:
+    name: M0 Exit PostgreSQL
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tpaa
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tpaa -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.17"
+          enable-cache: false
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y postgresql-client
+
+      - name: Synchronize frozen project dependencies
+        run: uv sync --locked --python 3.13.5
+
+      - name: Verify dependency lock
+        run: uv lock --check
+
+      - name: Run PostgreSQL clean-bootstrap Exit acceptance
+        run: |
+          mkdir -p evidence/m0-exit
+          uv run --locked python tools/dev/tpaa_dev.py db-postgres-acceptance \
+            --user tpaa --host 127.0.0.1 --port 5432 \
+            --admin-database postgres --database tpaa_m0_sto_001_exit_acceptance \
+            > evidence/m0-exit/postgres-bootstrap.json
+
+      - name: Run PostgreSQL Repository Exit acceptance
+        run: |
+          uv run --locked python tools/dev/tpaa_dev.py db-postgres-repository-acceptance \
+            --user tpaa --host 127.0.0.1 --port 5432 \
+            --admin-database postgres --database tpaa_m0_sto_003_exit_acceptance \
+            --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}" \
+            > evidence/m0-exit/postgres-repository.json
+
+      - name: Cold-start full M0 with live PostgreSQL
+        run: >-
+          uv run --locked python tools/ci/cold_start.py
+          --expected-platform linux
+          --postgres-user tpaa
+          --postgres-host 127.0.0.1
+          --postgres-port 5432
+          --postgres-admin-database postgres
+          --postgres-conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --evidence evidence/m0-exit/postgres-cold-start.json
+
+      - name: Upload PostgreSQL Exit evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m0-exit-postgres-${{ github.sha }}
+          path: evidence/m0-exit/
+          if-no-files-found: error
+          retention-days: 14
+
+  m0-exit-review:
+    name: M0 Exit Review
+    needs:
+      - m0-cross-platform
+      - m0-logical-equivalence
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download Windows/Linux evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.sha }}
+          path: downloaded/platform
+          merge-multiple: true
+
+      - name: Download logical-equivalence evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-logical-equivalence-${{ github.sha }}
+          path: downloaded/logical
+
+      - name: Download PostgreSQL Exit evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m0-exit-postgres-${{ github.sha }}
+          path: downloaded/postgres
+
+      - name: Aggregate all 14 M0 Exit Gates
+        run: >-
+          python tools/ci/m0_exit_review.py
+          --expected-revision ${{ github.sha }}
+          --artifact-root downloaded/platform
+          --windows-ci downloaded/platform/evidence/ci/windows.json
+          --linux-ci downloaded/platform/evidence/ci/linux.json
+          --logical downloaded/logical/evidence/cross-platform/logical-equivalence.json
+          --windows-cold-start downloaded/platform/evidence/devops/windows/cold-start.json
+          --linux-cold-start downloaded/platform/evidence/devops/linux/cold-start.json
+          --postgres-bootstrap downloaded/postgres/postgres-bootstrap.json
+          --postgres-repository downloaded/postgres/postgres-repository.json
+          --postgres-cold-start downloaded/postgres/postgres-cold-start.json
+          --output evidence/m0-exit/review.json
+
+      - name: Upload M0 Exit Review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m0-exit-review-${{ github.sha }}
+          path: evidence/m0-exit/review.json
+          if-no-files-found: error
+          retention-days: 30
