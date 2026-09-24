@@ -134,6 +134,7 @@ def verify() -> dict[str, object]:
         "python tools/dev/tpaa_dev.py manifest",
         "python tools/dev/tpaa_dev.py verify-m1-entry-preparation",
         "python tools/dev/tpaa_dev.py verify-m1-entry-gate-state",
+        "python tools/dev/tpaa_dev.py verify-m1-detailed-design",
         "python tools/dev/tpaa_dev.py m1-entry-manifest",
         "--output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json",
         "- name: Verify or activate M1 Entry",
