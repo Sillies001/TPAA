@@ -6,9 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
-
-from tpaa_ingest import GOVERNED_FIXTURE_IDS, load_synthetic_fixture_bundle
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "m1"
@@ -28,6 +27,11 @@ def _git_revision() -> str:
 
 
 def verify() -> dict[str, object]:
+    src_root = str(REPO_ROOT / "src")
+    if src_root not in sys.path:
+        sys.path.insert(0, src_root)
+    from tpaa_ingest import GOVERNED_FIXTURE_IDS, load_synthetic_fixture_bundle
+
     bundles: list[dict[str, object]] = []
     source_refs: set[str] = set()
     for fixture_id in sorted(GOVERNED_FIXTURE_IDS):

@@ -12,7 +12,6 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import TypeAlias
 
 EXPECTED_MANIFEST_SCHEMA = "TPAA_M1_FIXTURE_BUNDLE_V1"
 EXPECTED_MANIFEST_VERSION = "1.0.0"
@@ -62,7 +61,7 @@ EXPECTED_PHYSICAL_TO_CANONICAL_MAPPING = MappingProxyType(
 )
 REQUIRED_PHYSICAL_MAPPING = frozenset(EXPECTED_PHYSICAL_TO_CANONICAL_MAPPING)
 
-SourceScalar: TypeAlias = str | int | float | bool | None
+type SourceScalar = str | int | float | bool | None
 
 
 class SyntheticSourceAdapterError(RuntimeError):
