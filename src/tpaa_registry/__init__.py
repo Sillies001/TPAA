@@ -9,7 +9,6 @@ from .source_registration import (
     register_all_synthetic_fixtures,
     register_synthetic_fixture,
 )
-
 from .time_alignment import (
     CanonicalTimeTransformProjection,
     SessionTimeError,
