@@ -1,0 +1,59 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_FAILURE_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "a8d4954ab812ac7990b0e00737b6005929a25b62ec2c3960e32f34d8e97208dd",
+  "expected_sha256": "87e6e4f9528feb49255a0557bc8da50eef03ae950ac87ba63b277fab185da609",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Fail-closed mutations",
+  "must_cover": [
+    "corrupt manifest",
+    "version mismatch",
+    "missing artifact",
+    "DB write denial",
+    "fail closed"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "712091c8149a96f9f99956d6ec8b1b4a2bbd58970e15b004cb0b0db258a5c99e"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "207729712de8eb6da47651a1908a38f232366c86148ea6790ab0d5c3caf1c2e6"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "87e6e4f9528feb49255a0557bc8da50eef03ae950ac87ba63b277fab185da609"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  }
+}
