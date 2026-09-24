@@ -2,7 +2,7 @@
   "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
   "fixture_id": "BF_M1_ANGLE_WRAP_V1",
   "fixture_version": "1.0.0",
-  "input_sha256": "d7d6ccd9b1691d894b5583210c1e47968d6839b08a6b4a51ac47535b873c4808",
+  "input_sha256": "3a08975680a2ae19f92dbcc1f3ff40672d105cdaf57192e8dded3e2d4f7b434f",
   "expected_sha256": "bbb28d700ab4c1dc94b3a2912a73c4bb2895dc84c9f60545fdc75bad28ff4f2e",
   "authority_refs": {
     "core_baseline": "CB-1.4.0",
