@@ -2,18 +2,20 @@ from __future__ import annotations
 
 import json
 
-from tools.testing.m1_fixture_contract import FIXTURE_ROOT, load_spec, validate_all
+from tools.testing.m1_fixture_harness import FIXTURE_ROOT, load_spec, validate_all
 
 
 def test_m1_tst_001_all_eight_fixture_bundles_validate() -> None:
     evidence = validate_all()
 
-    assert evidence["schema"] == "TPAA_M1_FIXTURE_CONTRACT_EVIDENCE_V1"
+    assert evidence["schema"] == "TPAA_M1_TST_001_FIXTURE_EVIDENCE_V1"
     assert evidence["task_id"] == "M1-TST-001"
     assert evidence["status"] == "PASS"
-    assert evidence["fixture_count"] == 8
+    assert evidence["bundle_count"] == 8
+    assert evidence["reviewed_bundle_count"] == 8
+    assert evidence["business_logic_executed"] is False
 
-    bundles = evidence["fixtures"]
+    bundles = evidence["bundles"]
     assert isinstance(bundles, list)
     assert {item["fixture_id"] for item in bundles} == {
         "BF_M1_NOMINAL_V1",
@@ -61,7 +63,12 @@ def test_bf_m1_nominal_v1_stage_contract_is_exact() -> None:
         "STABILIZATION_RECOVERY",
         "COMPLETION",
     ]
-    intervals = [\n        (item["start_session_time_us"], item["end_session_time_us"])\n        for item in stages\n    ]\n    assert intervals == [\n        ("1000000", "3000000"),
+    intervals = [
+        (item["start_session_time_us"], item["end_session_time_us"])
+        for item in stages
+    ]
+    assert intervals == [
+        ("1000000", "3000000"),
         ("3000000", "5000000"),
         ("5000000", "7000000"),
         ("7000000", "9000000"),
