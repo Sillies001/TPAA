@@ -2,7 +2,7 @@
   "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
   "fixture_id": "BF_M1_FAILURE_V1",
   "fixture_version": "1.0.0",
-  "input_sha256": "6e1aa5dc9d6480aba4de01198981851454cf2df75a6d34fecd7afabb56284ae3",
+  "input_sha256": "74b669e993e85d72513cf9ae985fcffb24bfc6e9fbe93fcf9fb4b19f14c01c19",
   "expected_sha256": "87e6e4f9528feb49255a0557bc8da50eef03ae950ac87ba63b277fab185da609",
   "authority_refs": {
     "core_baseline": "CB-1.4.0",
