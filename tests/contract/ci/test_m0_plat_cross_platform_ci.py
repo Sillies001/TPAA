@@ -266,3 +266,19 @@ def test_m1_data_005_canonical_flight_channel_evidence_is_governed_in_ci() -> No
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-canonical-flight-channels-check")' in gate
+
+
+def test_m1_data_006_evaluation_context_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-DATA-006 Evaluation Context evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-evaluation-context-check" in text
+    assert (
+        "--evidence evidence/m1-data-006/${{ matrix.platform }}/evaluation-context.json"
+        in text
+    )
+    assert (
+        "evidence/m1-data-006/${{ matrix.platform }}/evaluation-context.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-evaluation-context-check")' in gate
