@@ -53,6 +53,7 @@ def test_nominal_bundle_exposes_stable_source_identity_and_mapping() -> None:
         "513ba5592d156ef668cd271af6cb97e2f90a6c814822920736f5ae921fa00b8d"
     )
     assert bundle.data_classification == "SYNTHETIC"
+    assert bundle.mapping_version == "M1_BASIC_FLIGHT_SOURCE_MAP_V1"
     assert bundle.physical_to_canonical_mapping["p"] == "body_p_rad_s"
     assert bundle.physical_to_canonical_mapping["quality"] == "quality_mask"
 
@@ -130,3 +131,72 @@ def test_unknown_fixture_identity_fails_closed(tmp_path: Path) -> None:
         load_synthetic_fixture_bundle(bundle)
 
     assert caught.value.code == "M1_SOURCE_ADAPTER_FIXTURE_NOT_GOVERNED"
+
+
+def test_mapping_metadata_drift_fails_closed(tmp_path: Path) -> None:
+    bundle = _copy_bundle(tmp_path)
+    source_path = bundle / "source" / "flight.json"
+    source = json.loads(source_path.read_text(encoding="utf-8"))
+    source["mapping"]["p"] = "roll_rate_guess"
+    _write_json(source_path, source)
+
+    manifest_path = bundle / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    import hashlib
+
+    source_sha = hashlib.sha256(source_path.read_bytes()).hexdigest()
+    manifest["files"]["source"]["sha256"] = source_sha
+    context_sha = manifest["files"]["context"]["sha256"]
+    basis = (
+        f"source/flight.json={source_sha}\n"
+        f"context/evaluation-context.json={context_sha}\n"
+    ).encode("ascii")
+    manifest["input_sha256"] = hashlib.sha256(basis).hexdigest()
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(SyntheticSourceAdapterError) as caught:
+        load_synthetic_fixture_bundle(bundle)
+
+    assert caught.value.code == "M1_SOURCE_ADAPTER_MAPPING_MISMATCH"
+
+
+def test_context_classification_fails_closed_even_when_hashes_are_refreshed(
+    tmp_path: Path,
+) -> None:
+    import hashlib
+
+    bundle = _copy_bundle(tmp_path)
+    context_path = bundle / "context" / "evaluation-context.json"
+    context = json.loads(context_path.read_text(encoding="utf-8"))
+    context["classification"] = "OPERATIONAL"
+    _write_json(context_path, context)
+
+    manifest_path = bundle / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    context_sha = hashlib.sha256(context_path.read_bytes()).hexdigest()
+    manifest["files"]["context"]["sha256"] = context_sha
+    source_sha = manifest["files"]["source"]["sha256"]
+    basis = (
+        f"source/flight.json={source_sha}\n"
+        f"context/evaluation-context.json={context_sha}\n"
+    ).encode("ascii")
+    manifest["input_sha256"] = hashlib.sha256(basis).hexdigest()
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(SyntheticSourceAdapterError) as caught:
+        load_synthetic_fixture_bundle(bundle)
+
+    assert caught.value.code == "M1_SOURCE_ADAPTER_CLASSIFICATION_FORBIDDEN"
+
+
+def test_authority_hash_drift_fails_before_source_is_exposed(tmp_path: Path) -> None:
+    bundle = _copy_bundle(tmp_path)
+    manifest_path = bundle / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["authority_refs"]["stage_registry_sha256"] = "0" * 64
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(SyntheticSourceAdapterError) as caught:
+        load_synthetic_fixture_bundle(bundle)
+
+    assert caught.value.code == "M1_SOURCE_ADAPTER_AUTHORITY_MISMATCH"
