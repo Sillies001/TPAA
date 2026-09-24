@@ -13,7 +13,7 @@ from tpaa_registry import (
     register_synthetic_fixture,
 )
 
-FIXTURE_ROOT = Path(__file__).resolve().parents[3] / "fixtures" / "m1"
+FIXTURE_ROOT = Path(__file__).resolve().parents[2] / "fixtures" / "m1"
 
 
 def test_nominal_registration_is_deterministic_and_immutable() -> None:
