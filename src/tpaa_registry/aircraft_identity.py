@@ -104,7 +104,7 @@ def resolve_aircraft_identity(bundle_path: Path) -> AircraftIdentityResolution:
     registration = register_synthetic_fixture(bundle_path)
     aircraft_id = parse_governed_aircraft_id(bundle.aircraft.aircraft_id)
 
-    replay_basis = {
+    replay_basis: dict[str, object] = {
         "fixture_id": bundle.identity.fixture_id,
         "fixture_version": bundle.identity.fixture_version,
         "input_sha256": bundle.identity.input_sha256,
