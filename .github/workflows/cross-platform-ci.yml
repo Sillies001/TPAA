@@ -96,6 +96,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-session-time-check
           --evidence evidence/m1-data-003/${{ matrix.platform }}/session-time.json
 
+      - name: Emit M1-DATA-004 aircraft-identity evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-aircraft-identity-check
+          --evidence evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -132,6 +137,7 @@ jobs:
             evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
+            evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
             dist/
           if-no-files-found: error
           retention-days: 14

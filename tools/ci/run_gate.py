@@ -141,6 +141,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("m1-source-adapter", _dispatcher("m1-source-adapter-check")),
             ("m1-source-registry", _dispatcher("m1-source-registry-check")),
             ("m1-session-time", _dispatcher("m1-session-time-check")),
+            ("m1-aircraft-identity", _dispatcher("m1-aircraft-identity-check")),
             ("verify-governance", _dispatcher("verify-governance")),
             ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
             ("migration-smoke", _dispatcher("migration-smoke")),
@@ -190,7 +191,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
     status = "FAIL" if preflight_failure or failed else "PASS"
     payload: dict[str, object] = {
         "schema": "TPAA_M0_CROSS_PLATFORM_CI_EVIDENCE_V1",
-        "tasks": ["M0-PLAT-004", "M0-PLAT-005", "M1-TST-001", "M1-DATA-001", "M1-DATA-002", "M1-DATA-003"],
+        "tasks": ["M0-PLAT-004", "M0-PLAT-005", "M1-TST-001", "M1-DATA-001", "M1-DATA-002", "M1-DATA-003", "M1-DATA-004"],
         "status": status,
         "preflight_failure": preflight_failure,
         "source_revision": _git_revision(),
@@ -217,10 +218,10 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
         "required_gates": gates,
         "failed_gate_names": [str(gate["name"]) for gate in failed],
         "scope": {
-            "included": "SDIB-1.0.1 Windows/Linux CI over implemented M0 gates plus M1-TST-001 fixture validation, M1-DATA-001 source-adapter validation, M1-DATA-002 immutable registry validation, and M1-DATA-003 explicit Session Time validation, package/SBOM/cold-start",
+            "included": "SDIB-1.0.1 Windows/Linux CI over implemented M0 gates plus M1-TST-001 fixture validation, M1-DATA-001 source-adapter validation, M1-DATA-002 immutable registry validation, M1-DATA-003 explicit Session Time validation, and M1-DATA-004 replay-stable aircraft identity validation, package/SBOM/cold-start",
             "excluded": [
                 "M0 Exit Gate",
-                "M1 Data Spine execution beyond M1-DATA-003; World/Metric/Release production execution",
+                "M1 Data Spine execution beyond M1-DATA-004; World/Metric/Release production execution",
                 "real PostgreSQL server acceptance is retained from M0-STO-003 and is not redefined by this runner task",
             ],
         },

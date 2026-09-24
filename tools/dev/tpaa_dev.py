@@ -50,6 +50,7 @@ M1_FIXTURE_HARNESS_MODULE = "tools.testing.m1_fixture_harness"
 M1_SOURCE_ADAPTER_CHECK_MODULE = "tools.testing.m1_source_adapter_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
+M1_AIRCRAFT_IDENTITY_CHECK_MODULE = "tools.testing.m1_aircraft_identity_check"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -87,6 +88,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-source-adapter-check", "M1-DATA-001", "IMPLEMENTED", "Verify the synthetic source adapter over all governed M1 bundles."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
+    CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -472,6 +474,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verify M1-DATA-003 explicit Session Time transforms",
     )
     m1_time.add_argument("--evidence", type=Path)
+    m1_aircraft = sub.add_parser(
+        "m1-aircraft-identity-check",
+        help="Verify M1-DATA-004 replay-stable governed aircraft identity",
+    )
+    m1_aircraft.add_argument("--evidence", type=Path)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -639,6 +646,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.evidence is not None:
             time_args.extend(["--evidence", str(args.evidence)])
         return _run(time_args)
+    if command == "m1-aircraft-identity-check":
+        aircraft_args = [sys.executable, "-m", M1_AIRCRAFT_IDENTITY_CHECK_MODULE]
+        if args.evidence is not None:
+            aircraft_args.extend(["--evidence", str(args.evidence)])
+        return _run(aircraft_args)
     if command == "m1-fixture-check":
         fixture_args = [sys.executable, "-m", M1_FIXTURE_HARNESS_MODULE]
         if args.bundle is not None:
