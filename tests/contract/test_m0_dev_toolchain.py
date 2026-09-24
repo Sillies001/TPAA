@@ -78,6 +78,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m1-entry-activation",
         "m1-entry-assign-roles",
         "verify-m1-detailed-design",
+        "m1-fixture-check",
         "m1-entry-manifest",
         "generate",
         "verify-baseline",
