@@ -1,0 +1,58 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_NOMINAL_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "355b34309e98e483fa2586c65b328c6ce3c2c8d865ae6216972609ad946f3932",
+  "expected_sha256": "ccf88bc7eb04f7e227b90ac420a2c3c7b0cb7c4aa0569e90437c63ee257428db",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Primary Golden",
+  "must_cover": [
+    "four Basic Stages",
+    "continuous valid data",
+    "five representative metrics",
+    "release/api/gui downstream-ready"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "513ba5592d156ef668cd271af6cb97e2f90a6c814822920736f5ae921fa00b8d"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "ae280377ab2561259c277762cc6860e4e85b4e02478239050e9838f1b8c6bf7f"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "ccf88bc7eb04f7e227b90ac420a2c3c7b0cb7c4aa0569e90437c63ee257428db"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  }
+}
