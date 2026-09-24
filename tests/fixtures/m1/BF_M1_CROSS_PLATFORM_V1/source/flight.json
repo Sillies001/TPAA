@@ -1,0 +1,121 @@
+{
+  "schema": "TPAA_M1_SYNTHETIC_SOURCE_V1",
+  "fixture_id": "BF_M1_CROSS_PLATFORM_V1",
+  "session": {
+    "session_id": "11111111-1111-4111-8111-111111111111",
+    "session_code": "BF_M1_CROSS_PLATFORM_V1",
+    "session_type": "SIM",
+    "source_time_basis": "SOURCE_US",
+    "end_source_time_us": "8000000"
+  },
+  "aircraft": {
+    "source_aircraft_key": "SYNTH-ACFT-01",
+    "aircraft_id": "22222222-2222-4222-8222-222222222222"
+  },
+  "mapping": {
+    "source_time_us": "session_time_us via context.source_time_transform",
+    "p": "body_p_rad_s",
+    "nz": "nz_g",
+    "heading": "heading_true_rad",
+    "tas": "tas_mps",
+    "mach": "mach",
+    "quality": "quality_mask"
+  },
+  "rows": [
+    {
+      "source_time_us": "0",
+      "p": 0,
+      "nz": 1,
+      "heading": 0,
+      "tas": 96,
+      "mach": 0.25,
+      "quality": 0
+    },
+    {
+      "source_time_us": "1000000",
+      "p": 0.125,
+      "nz": 1.25,
+      "heading": 0.0625,
+      "tas": 100,
+      "mach": 0.265625,
+      "quality": 0
+    },
+    {
+      "source_time_us": "2000000",
+      "p": 0.25,
+      "nz": 1.5,
+      "heading": 0.125,
+      "tas": 104,
+      "mach": 0.28125,
+      "quality": 0
+    },
+    {
+      "source_time_us": "3000000",
+      "p": 0.375,
+      "nz": 1.75,
+      "heading": 0.1875,
+      "tas": 108,
+      "mach": 0.296875,
+      "quality": 0
+    },
+    {
+      "source_time_us": "4000000",
+      "p": 0.5,
+      "nz": 2,
+      "heading": 0.25,
+      "tas": 112,
+      "mach": 0.3125,
+      "quality": 0
+    },
+    {
+      "source_time_us": "5000000",
+      "p": 0.625,
+      "nz": 2.25,
+      "heading": 0.3125,
+      "tas": 116,
+      "mach": 0.328125,
+      "quality": 0
+    },
+    {
+      "source_time_us": "6000000",
+      "p": 0.75,
+      "nz": 2.5,
+      "heading": 0.375,
+      "tas": 120,
+      "mach": 0.34375,
+      "quality": 0
+    },
+    {
+      "source_time_us": "7000000",
+      "p": 0.875,
+      "nz": 2.75,
+      "heading": 0.4375,
+      "tas": 124,
+      "mach": 0.359375,
+      "quality": 0
+    }
+  ],
+  "official_stage_markers": [
+    {
+      "source_time_us": "0",
+      "stage": "SETUP_ENTRY"
+    },
+    {
+      "source_time_us": "2000000",
+      "stage": "EXECUTION"
+    },
+    {
+      "source_time_us": "4000000",
+      "stage": "STABILIZATION_RECOVERY"
+    },
+    {
+      "source_time_us": "6000000",
+      "stage": "COMPLETION"
+    },
+    {
+      "source_time_us": "8000000",
+      "stage": "END"
+    }
+  ],
+  "data_classification": "SYNTHETIC"
+}
