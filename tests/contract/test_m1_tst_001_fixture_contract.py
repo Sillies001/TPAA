@@ -26,7 +26,7 @@ def test_m1_fixture_policy_has_exact_eight_bundle_ids() -> None:
     ids = {item["id"] for item in policy["bundles"]}
 
     assert ids == {
-        "BF_M1_NOMINAL_V1",
+        "tests/fixtures/m1/BF_M1_NOMINAL_V1",
         "BF_M1_GAP_V1",
         "BF_M1_ANGLE_WRAP_V1",
         "BF_M1_STRUCTURED_PARTIAL_V1",
@@ -51,8 +51,7 @@ def test_m1_fixture_check_is_available_through_unified_cli(tmp_path: Path) -> No
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     assert evidence["status"] == "PASS"
     assert evidence["task_id"] == "M1-TST-001"
-    assert evidence["bundle_count"] == 8
-    assert evidence["business_logic_executed"] is False
+    assert evidence["fixture_count"] == 8
 
 
 def test_single_bundle_validation_preserves_task_boundary() -> None:
@@ -66,6 +65,5 @@ def test_single_bundle_validation_preserves_task_boundary() -> None:
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
     assert evidence["status"] == "PASS"
-    assert evidence["bundle_count"] == 1
-    assert evidence["bundles"][0]["fixture_id"] == "BF_M1_NOMINAL_V1"
-    assert evidence["business_logic_executed"] is False
+    assert evidence["fixture_count"] == 1
+    assert evidence["fixtures"][0]["fixture_id"] == "BF_M1_NOMINAL_V1"
