@@ -111,6 +111,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-evaluation-context-check
           --evidence evidence/m1-data-006/${{ matrix.platform }}/evaluation-context.json
 
+      - name: Emit M1-DATA-007 lineage-quality evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-lineage-quality-check
+          --evidence evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -150,6 +155,7 @@ jobs:
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
             evidence/m1-data-005/${{ matrix.platform }}/canonical-flight-channels.json
             evidence/m1-data-006/${{ matrix.platform }}/evaluation-context.json
+            evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json
             dist/
           if-no-files-found: error
           retention-days: 14

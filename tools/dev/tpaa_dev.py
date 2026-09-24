@@ -55,6 +55,7 @@ M1_CANONICAL_FLIGHT_CHANNELS_CHECK_MODULE = (
     "tools.testing.m1_canonical_flight_channels_check"
 )
 M1_EVALUATION_CONTEXT_CHECK_MODULE = "tools.testing.m1_evaluation_context_check"
+M1_LINEAGE_QUALITY_CHECK_MODULE = "tools.testing.m1_lineage_quality_check"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -95,6 +96,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
     CommandSpec("m1-canonical-flight-channels-check", "M1-DATA-005", "IMPLEMENTED", "Verify exact physical-to-Canonical aircraft flight channel projection over all M1 bundles."),
     CommandSpec("m1-evaluation-context-check", "M1-DATA-006", "IMPLEMENTED", "Verify immutable Basic/Stage/Metric Evaluation Context binding over all M1 bundles."),
+    CommandSpec("m1-lineage-quality-check", "M1-DATA-007", "IMPLEMENTED", "Verify field-level source lineage and exact quality/missing propagation over all M1 bundles."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -495,6 +497,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verify M1-DATA-006 immutable Evaluation Context resolution",
     )
     m1_context.add_argument("--evidence", type=Path)
+    m1_lineage = sub.add_parser(
+        "m1-lineage-quality-check",
+        help="Verify M1-DATA-007 Canonical field lineage/quality propagation",
+    )
+    m1_lineage.add_argument("--evidence", type=Path)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -681,6 +688,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.evidence is not None:
             context_args.extend(["--evidence", str(args.evidence)])
         return _run(context_args)
+    if command == "m1-lineage-quality-check":
+        lineage_args = [sys.executable, "-m", M1_LINEAGE_QUALITY_CHECK_MODULE]
+        if args.evidence is not None:
+            lineage_args.extend(["--evidence", str(args.evidence)])
+        return _run(lineage_args)
     if command == "m1-fixture-check":
         fixture_args = [sys.executable, "-m", M1_FIXTURE_HARNESS_MODULE]
         if args.bundle is not None:

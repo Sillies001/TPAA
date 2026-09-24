@@ -282,3 +282,19 @@ def test_m1_data_006_evaluation_context_evidence_is_governed_in_ci() -> None:
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-evaluation-context-check")' in gate
+
+
+def test_m1_data_007_lineage_quality_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-DATA-007 lineage-quality evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-lineage-quality-check" in text
+    assert (
+        "--evidence evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json"
+        in text
+    )
+    assert (
+        "evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-lineage-quality-check")' in gate
