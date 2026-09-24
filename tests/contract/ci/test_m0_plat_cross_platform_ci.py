@@ -216,3 +216,19 @@ def test_m1_data_002_source_registry_evidence_is_governed_in_ci() -> None:
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-source-registry-check")' in gate
+
+
+def test_m1_data_003_session_time_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-DATA-003 Session Time evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-session-time-check" in text
+    assert (
+        "--evidence evidence/m1-data-003/${{ matrix.platform }}/session-time.json"
+        in text
+    )
+    assert (
+        "evidence/m1-data-003/${{ matrix.platform }}/session-time.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-session-time-check")' in gate

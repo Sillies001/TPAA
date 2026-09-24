@@ -81,6 +81,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m1-fixture-check",
         "m1-source-adapter-check",
         "m1-source-registry-check",
+        "m1-session-time-check",
         "m1-entry-manifest",
         "generate",
         "verify-baseline",
