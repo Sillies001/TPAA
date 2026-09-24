@@ -142,6 +142,12 @@ def test_m1_entry_gate_state_is_verified_in_ci() -> None:
     assert "python tools/dev/tpaa_dev.py verify-m1-entry-gate-state" in text
 
 
+def test_m1_detailed_design_is_verified_on_both_platforms() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Verify M1 detailed-design runway" in text
+    assert "python tools/dev/tpaa_dev.py verify-m1-detailed-design" in text
+
+
 def test_m1_entry_activation_is_inside_required_exit_review_check() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "m0-exit-review:" in text
