@@ -45,6 +45,7 @@ M1_ENTRY_PREPARATION_MODULE = "tools.governance.verify_m1_entry_preparation"
 M1_ENTRY_GATE_STATE_MODULE = "tools.governance.verify_m1_entry_gate_state"
 M1_ENTRY_ACTIVATION_MODULE = "tools.governance.m1_entry_activation"
 M1_ENTRY_ASSIGN_ROLES_MODULE = "tools.governance.m1_entry_assign_roles"
+M1_DETAILED_DESIGN_VERIFY_MODULE = "tools.governance.verify_m1_detailed_design"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -77,6 +78,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-m1-entry-gate-state", "M1 Entry Gate §19.1", "IMPLEMENTED", "Verify the current blocked/admitted M1 Entry review state."),
     CommandSpec("m1-entry-activation", "M1 Entry Gate §19.1", "IMPLEMENTED", "Verify a PR candidate or emit merged-main M1 admission activation evidence."),
     CommandSpec("m1-entry-assign-roles", "M1 Entry Gate §19.1(8)", "IMPLEMENTED", "Render explicit human role assignments into a non-admitting M1 admission candidate."),
+    CommandSpec("verify-m1-detailed-design", "M1-A/B/C Design", "IMPLEMENTED", "Verify pre-admission M1 fixture/data-spine/stage design against frozen authorities."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -446,6 +448,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-m0-delta-closure", help="Verify SDIB-1.0.1 48-task M0 delta closure record")
     sub.add_parser("verify-m1-entry-preparation", help="Verify M1 Entry preparation evidence without admitting M1")
     sub.add_parser("verify-m1-entry-gate-state", help="Verify the current M1 Entry review decision/state")
+    sub.add_parser("verify-m1-detailed-design", help="Verify M1-A/B/C detailed design against frozen authorities")
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -596,6 +599,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, "-m", M1_ENTRY_PREPARATION_MODULE])
     if command == "verify-m1-entry-gate-state":
         return _run([sys.executable, "-m", M1_ENTRY_GATE_STATE_MODULE])
+    if command == "verify-m1-detailed-design":
+        return _run([sys.executable, "-m", M1_DETAILED_DESIGN_VERIFY_MODULE])
     if command == "m1-entry-activation":
         return _run(
             [
