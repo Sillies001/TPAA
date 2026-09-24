@@ -190,3 +190,13 @@ def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
     assert "needs:" in text
     assert "python tools/ci/m0_exit_review.py" in text
     assert "--output evidence/m0-exit/review.json" in text
+
+
+def test_m1_data_001_source_adapter_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-DATA-001 source-adapter evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-source-adapter-check" in text
+    assert "--evidence evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json" in text
+    assert "evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json" in text
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-source-adapter-check")' in gate
