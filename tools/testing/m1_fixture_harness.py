@@ -19,6 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "m1"
 POLICY_PATH = REPO_ROOT / "tools" / "testing" / "M1_FIXTURE_POLICY.json"
+ROLE_ASSIGNMENTS = REPO_ROOT / "docs" / "governance" / "M1_ROLE_ASSIGNMENTS.json"
 STAGE_REGISTRY = (
     REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical" / "STAGE_REGISTRY.json"
 )
@@ -87,6 +88,7 @@ class BundleSpec:
     tolerance_relative: Decimal
     expected_method: str
     expected_reviewer: str
+    expected_independence_attestation: str
 
 
 def _load_json(path: Path, *, missing_code: str, corrupt_code: str) -> dict[str, object]:
@@ -309,6 +311,16 @@ def load_spec(bundle: Path) -> BundleSpec:
     context_path, context_sha = file_ref("context")
     expected_path, expected_file_sha = file_ref("expected")
 
+    input_hash_basis = manifest.get("input_hash_basis")
+    if input_hash_basis != [
+        "source/flight.json",
+        "context/evaluation-context.json",
+    ]:
+        raise M1FixtureError(
+            "M1_FIXTURE_INPUT_HASH_BASIS_MISMATCH",
+            repr(input_hash_basis),
+        )
+
     authority = _object(
         manifest.get("authority_refs"),
         code="M1_FIXTURE_MANIFEST_INVALID",
@@ -380,6 +392,32 @@ def load_spec(bundle: Path) -> BundleSpec:
         code="M1_FIXTURE_MANIFEST_INVALID",
         field="expected_generation.reviewer",
     )
+    attestation = _string(
+        generation.get("independence_attestation"),
+        code="M1_FIXTURE_MANIFEST_INVALID",
+        field="expected_generation.independence_attestation",
+    )
+
+    roles = _load_json(
+        ROLE_ASSIGNMENTS,
+        missing_code="M1_ROLE_ASSIGNMENTS_MISSING",
+        corrupt_code="M1_ROLE_ASSIGNMENTS_CORRUPT",
+    )
+    if roles.get("status") != "ASSIGNED":
+        raise M1FixtureError(
+            "M1_FIXTURE_GOLDEN_ROLE_UNASSIGNED",
+            repr(roles.get("status")),
+        )
+    if reviewer != roles.get("golden_independent_reviewer"):
+        raise M1FixtureError(
+            "M1_FIXTURE_GOLDEN_REVIEWER_MISMATCH",
+            f"fixture={reviewer!r} assigned={roles.get('golden_independent_reviewer')!r}",
+        )
+    if attestation != roles.get("golden_independence_attestation"):
+        raise M1FixtureError(
+            "M1_FIXTURE_GOLDEN_ATTESTATION_MISMATCH",
+            "fixture attestation differs from M1 role assignment contract",
+        )
 
     return BundleSpec(
         fixture_id=fixture_id,
@@ -409,6 +447,7 @@ def load_spec(bundle: Path) -> BundleSpec:
         tolerance_relative=_decimal(tolerance.get("relative"), field="relative"),
         expected_method=method,
         expected_reviewer=reviewer,
+        expected_independence_attestation=attestation,
     )
 
 
@@ -528,6 +567,14 @@ def _validate_payloads(spec: BundleSpec) -> None:
         raise M1FixtureError(
             "M1_FIXTURE_EXPECTED_METADATA_MISMATCH",
             "reviewer differs between manifest and expected payload",
+        )
+    if (
+        generation.get("independence_attestation")
+        != spec.expected_independence_attestation
+    ):
+        raise M1FixtureError(
+            "M1_FIXTURE_EXPECTED_METADATA_MISMATCH",
+            "independence attestation differs between manifest and expected payload",
         )
 
     expected_stages = expected.get("stages")
