@@ -69,11 +69,13 @@ def verify() -> dict[str, object]:
 
     unique_ids = {record["episode_id"] for record in records}
     unique_hashes = {record["logical_hash"] for record in records}
+    same_governed_identity_across_fixtures = (
+        len(unique_ids) == 1 and len(unique_hashes) == 1
+    )
     status = (
         "PASS"
         if len(records) == 8
-        and len(unique_ids) == 8
-        and len(unique_hashes) == 8
+        and same_governed_identity_across_fixtures
         and replay_stable
         and expected_intervals_exact
         else "FAIL"
@@ -89,6 +91,9 @@ def verify() -> dict[str, object]:
         "projection_count": len(records),
         "unique_episode_id_count": len(unique_ids),
         "unique_logical_hash_count": len(unique_hashes),
+        "same_governed_identity_across_fixtures": (
+            same_governed_identity_across_fixtures
+        ),
         "replay_stable": replay_stable,
         "expected_intervals_exact": expected_intervals_exact,
         "revision_no": 1,

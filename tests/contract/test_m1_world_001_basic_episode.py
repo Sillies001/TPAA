@@ -25,6 +25,9 @@ def test_m1_world_001_acceptance_command_emits_machine_evidence(tmp_path: Path) 
     assert payload["task_id"] == "M1-WORLD-001"
     assert payload["status"] == "PASS"
     assert payload["projection_count"] == 8
+    assert payload["unique_episode_id_count"] == 1
+    assert payload["unique_logical_hash_count"] == 1
+    assert payload["same_governed_identity_across_fixtures"] is True
     assert payload["replay_stable"] is True
     assert payload["expected_intervals_exact"] is True
     assert payload["database_persistence_executed"] is False

@@ -9,8 +9,14 @@ fixture using half-open Session Time boundaries.
 
 Episode identity is deterministic over the exact M1-C design inputs:
 session_id, context_id, primary_aircraft_id, episode_type, start/end Session
-Time, and detector version M1_BASIC_FLIGHT_EPISODE_V1. The initial projection is
-revision 1 with no superseded Episode. No database row is written by this task.
+Time, and detector version M1_BASIC_FLIGHT_EPISODE_V1. The fixture case label is
+evidence metadata and is deliberately not an Episode business-identity input.
+
+All eight governed M1 fixture cases currently share the same governed
+session/context/aircraft/interval/detector identity inputs. They therefore must
+resolve to the same Episode identity and logical hash while retaining distinct
+fixture evidence records. The initial projection is revision 1 with no
+superseded Episode. No database row is written by this task.
 
 The governed command is:
 
