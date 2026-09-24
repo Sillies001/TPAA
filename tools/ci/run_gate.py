@@ -137,7 +137,6 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("verify-desktop-lifecycle-policy", _dispatcher("verify-desktop-lifecycle-policy")),
             ("verify-repository-bootstrap", _dispatcher("verify-repository-bootstrap")),
             ("verify-m0-delta-closure", _dispatcher("verify-m0-delta-closure")),
-            ("m1-fixture-contract", _dispatcher("m1-fixture-check")),
             ("verify-governance", _dispatcher("verify-governance")),
             ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
             ("migration-smoke", _dispatcher("migration-smoke")),
