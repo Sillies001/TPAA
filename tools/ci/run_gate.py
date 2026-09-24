@@ -141,7 +141,6 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("m1-source-adapter", _dispatcher("m1-source-adapter-check")),
             ("m1-source-registry", _dispatcher("m1-source-registry-check")),
             ("m1-session-time", _dispatcher("m1-session-time-check")),
-            ("m1-session-time", _dispatcher("m1-session-time-check")),
             ("verify-governance", _dispatcher("verify-governance")),
             ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
             ("migration-smoke", _dispatcher("migration-smoke")),
