@@ -11,10 +11,10 @@ from .source_registration import (
 )
 from .time_alignment import (
     CanonicalTimeTransformProjection,
-    SessionTimeError,
-    SessionTimeProjection,
     SessionTimedSourceMarker,
     SessionTimedSourceRow,
+    SessionTimeError,
+    SessionTimeProjection,
     apply_session_time_us,
     build_all_session_time_projections,
     build_session_time_projection,
