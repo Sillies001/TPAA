@@ -262,7 +262,10 @@ def verify() -> dict[str, object]:
             if metric_code not in REPRESENTATIVE_METRICS:
                 continue
             representative_seen.add(str(metric_code))
-            if item.get("binding_kind") == "CANONICAL_FIELD" and item.get("authority_id") == "CANONICAL_AIRCRAFT_STATE_V1":
+            if (
+                item.get("binding_kind") == "CANONICAL_FIELD"
+                and item.get("authority_id") == "CANONICAL_AIRCRAFT_STATE_V1"
+            ):
                 authority_field = item.get("authority_field")
                 if isinstance(authority_field, str):
                     authority_fields.add(authority_field)
@@ -305,7 +308,11 @@ def verify() -> dict[str, object]:
         _check(
             "logical_model_contracts",
             not missing_table_fields,
-            "; ".join(missing_table_fields) if missing_table_fields else "all required table fields present",
+            (
+                "; ".join(missing_table_fields)
+                if missing_table_fields
+                else "all required table fields present"
+            ),
         )
     )
 
@@ -331,7 +338,8 @@ def verify() -> dict[str, object]:
     checks.append(
         _check(
             "stage_interval",
-            stage_governance.get("time_interval") == "half-open [start_session_time_us,end_session_time_us)",
+            stage_governance.get("time_interval")
+            == "half-open [start_session_time_us,end_session_time_us)",
             str(stage_governance.get("time_interval")),
         )
     )
