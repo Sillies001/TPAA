@@ -83,6 +83,21 @@ def verify() -> dict[str, object]:
     alias_roles = {record["source_alias_role"] for record in records}
     identity_fields = {record["identity_field"] for record in records}
     methods = {record["resolution_method"] for record in records}
+    source_alias_used_as_business_identity = any(
+        record["aircraft_id"] == record["source_aircraft_key"] for record in records
+    )
+    downstream_execution_detected = any(
+        bool(record[field])
+        for record in records
+        for field in (
+            "master_aircraft_persistence_executed",
+            "aircraft_instance_projection_executed",
+            "canonical_flight_channel_projection_executed",
+            "evaluation_context_binding_executed",
+            "stage_projection_executed",
+            "metric_logic_executed",
+        )
+    )
 
     status = (
         "PASS"
@@ -94,6 +109,8 @@ def verify() -> dict[str, object]:
         and alias_roles == {"LINEAGE_ONLY"}
         and identity_fields == {"aircraft_id"}
         and methods == {"GOVERNED_FIXTURE_AIRCRAFT_ID"}
+        and not source_alias_used_as_business_identity
+        and not downstream_execution_detected
         else "FAIL"
     )
     return {
@@ -108,8 +125,8 @@ def verify() -> dict[str, object]:
         "replay_stable": replay_stable,
         "identity_field": "aircraft_id",
         "source_alias_role": "LINEAGE_ONLY",
-        "source_alias_used_as_business_identity": False,
-        "business_identity_generated_from_alias": False,
+        "source_alias_used_as_business_identity": source_alias_used_as_business_identity,
+        "business_identity_generated_from_alias": source_alias_used_as_business_identity,
         "resolution_method": "GOVERNED_FIXTURE_AIRCRAFT_ID",
         "master_aircraft_persistence_executed": False,
         "aircraft_instance_projection_executed": False,
