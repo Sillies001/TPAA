@@ -2,8 +2,8 @@
   "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
   "fixture_id": "BF_M1_ANGLE_WRAP_V1",
   "fixture_version": "1.0.0",
-  "input_sha256": "4001cebe317686730d7616ee8fd29521b3f07eb65b9d2a94726aba16525dbac5",
-  "expected_sha256": "bbb28d700ab4c1dc94b3a2912a73c4bb2895dc84c9f60545fdc75bad28ff4f2e",
+  "input_sha256": "78f08822a95b3c43cda0c6c20dcc91a5daddfa888821a6ca7658ef5082b6948b",
+  "expected_sha256": "3ee3044c70e350aeb57307eb1eab865d4a2609adb47a353430ac599eaf183931",
   "authority_refs": {
     "core_baseline": "CB-1.4.0",
     "stage_profile": "BASIC_FLIGHT_V1",
@@ -44,11 +44,11 @@
     },
     "context": {
       "path": "context/evaluation-context.json",
-      "sha256": "d975c8611a9f7782da174fcbcc6b406eb9fd10f6edcdd1454ec89716fa503886"
+      "sha256": "3112f00263a59a87b86ed40d29a8c5db23075bc7cec0b7b9ed0b1c43adae4a81"
     },
     "expected": {
       "path": "expected/expected.json",
-      "sha256": "bbb28d700ab4c1dc94b3a2912a73c4bb2895dc84c9f60545fdc75bad28ff4f2e"
+      "sha256": "3ee3044c70e350aeb57307eb1eab865d4a2609adb47a353430ac599eaf183931"
     }
   },
   "expected_generation": {
