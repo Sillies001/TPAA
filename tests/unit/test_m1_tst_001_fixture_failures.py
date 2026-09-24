@@ -5,7 +5,7 @@ import shutil
 
 import pytest
 
-from tools.testing.m1_fixture_harness import (
+from tools.testing.m1_fixture_contract import (
     FIXTURE_ROOT,
     M1FixtureError,
     load_spec,
@@ -71,7 +71,7 @@ def test_changed_source_bytes_fail_hash_validation(tmp_path) -> None:
     with pytest.raises(M1FixtureError) as caught:
         validate_bundle(bundle)
 
-    assert caught.value.code == "M1_FIXTURE_SOURCE_HASH_MISMATCH"
+    assert caught.value.code == "M1_FIXTURE_HASH_MISMATCH"
 
 
 def test_operational_classification_is_rejected(tmp_path) -> None:
@@ -84,7 +84,7 @@ def test_operational_classification_is_rejected(tmp_path) -> None:
     with pytest.raises(M1FixtureError) as caught:
         load_spec(bundle)
 
-    assert caught.value.code == "M1_FIXTURE_DATA_CLASSIFICATION_FORBIDDEN"
+    assert caught.value.code == "M1_FIXTURE_DATA_CLASS_FORBIDDEN"
 
 
 def test_unreviewed_fixture_is_not_accepted_for_m1_tst_001(tmp_path) -> None:
@@ -97,4 +97,4 @@ def test_unreviewed_fixture_is_not_accepted_for_m1_tst_001(tmp_path) -> None:
     with pytest.raises(M1FixtureError) as caught:
         load_spec(bundle)
 
-    assert caught.value.code == "M1_FIXTURE_NOT_REVIEWABLE"
+    assert caught.value.code == "M1_FIXTURE_NOT_REVIEWED"
