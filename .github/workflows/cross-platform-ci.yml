@@ -86,6 +86,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-source-adapter-check
           --evidence evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json
 
+      - name: Emit M1-DATA-002 source-registry evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
+          --evidence evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -120,6 +125,7 @@ jobs:
             evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
             evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json
             evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json
+            evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             dist/
           if-no-files-found: error
           retention-days: 14
