@@ -2,7 +2,7 @@
   "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
   "fixture_id": "BF_M1_CROSS_PLATFORM_V1",
   "fixture_version": "1.0.0",
-  "input_sha256": "04009e5ff567079261c94f243db4273e87ac8ddbf4bbf99d99d3c2cd6fd30cf7",
+  "input_sha256": "c2a1050a6638260e104748b87a54616cee11be03d54ad660b81d4d839a749fc9",
   "expected_sha256": "239ef43a23019485904f26e22da14f3ac60a3e9c8e55e7c25b0f8eb644876ca8",
   "authority_refs": {
     "core_baseline": "CB-1.4.0",
