@@ -1,0 +1,239 @@
+{
+  "schema": "TPAA_M1_A_C_DETAILED_DESIGN_BASELINE_V1",
+  "document_role": "IMPLEMENTATION_DESIGN_NOT_SEMANTIC_AUTHORITY",
+  "entry_state_at_design_freeze": "M1_ADMISSION_CANDIDATE",
+  "admission_decision_source": "M1 Entry activation artifact; this design file never admits M1",
+  "authorities": [
+    "SDIB-1.0.1 §19.2",
+    "SDIB-1.0.1 §19.3",
+    "SDIB-1.0.1 §19.4",
+    "SDIB-1.0.1 §21",
+    "SDIB-1.0.1 §22",
+    "SDIB-1.0.1 §23",
+    "CB-1.4.0 CORE_RULES.json",
+    "CB-1.4.0 CORE_LOGICAL_MODEL.json",
+    "CB-1.4.0 CROSS_LAYER_DTO_CONTRACTS.json",
+    "CB-1.4.0 STAGE_REGISTRY.json",
+    "CB-1.4.0 METRIC_INPUT_AUTHORITY_MATRIX.json"
+  ],
+  "guardrails": {
+    "canonical_semantics_may_be_redefined": false,
+    "pre_admission_feature_code_authorized": false,
+    "m1_vertical_slice_sensor_families_excluded": [
+      "RADAR",
+      "IRST",
+      "ESM",
+      "DL",
+      "FUS"
+    ],
+    "missing_is_zero": false,
+    "os_specific_business_semantics": false,
+    "gui_direct_db_access": false
+  },
+  "wave_a_fixture_contract": {
+    "parent_task_ids": [
+      "M1-TST-001"
+    ],
+    "first_bundle": "BF_M1_NOMINAL_V1",
+    "bundle_ids": [
+      "BF_M1_NOMINAL_V1",
+      "BF_M1_GAP_V1",
+      "BF_M1_ANGLE_WRAP_V1",
+      "BF_M1_STRUCTURED_PARTIAL_V1",
+      "BF_M1_STAGE_BOUNDARY_V1",
+      "BF_M1_REPLAY_V1",
+      "BF_M1_CROSS_PLATFORM_V1",
+      "BF_M1_FAILURE_V1"
+    ],
+    "implementation_layout": {
+      "root_pattern": "tests/fixtures/m1/<fixture_id>/",
+      "required_entries": [
+        "manifest.json",
+        "source/",
+        "context/",
+        "expected/"
+      ]
+    },
+    "manifest_required_fields": [
+      "fixture_id",
+      "fixture_version",
+      "input_sha256",
+      "expected_sha256",
+      "authority_refs",
+      "tolerance_profile",
+      "data_classification",
+      "review_state"
+    ],
+    "lifecycle": [
+      "DRAFT",
+      "REVIEWED",
+      "APPROVED_GOLDEN",
+      "RETIRED"
+    ],
+    "nominal_expected_skeleton": [
+      "stable training-session identity inputs",
+      "single stable aircraft identity",
+      "explicit source-time to Session Time mapping basis",
+      "canonical AIR channels required by the five representative metrics",
+      "reviewable Basic Flight Episode boundary basis",
+      "reviewable BASIC_FLIGHT_V1 official Stage marker basis",
+      "expected placeholders must be independently calculated before APPROVED_GOLDEN"
+    ],
+    "acceptance_before_implementation": [
+      "fixture manifest schema is reviewable and deterministic",
+      "input and expected hashes are versioned",
+      "Golden expected results are not copied from first implementation output",
+      "data classification is SYNTHETIC"
+    ]
+  },
+  "wave_b_data_spine": {
+    "parent_task_ids": [
+      "M1-DATA-001",
+      "M1-DATA-002",
+      "M1-DATA-003",
+      "M1-DATA-004",
+      "M1-DATA-005",
+      "M1-DATA-006",
+      "M1-DATA-007"
+    ],
+    "package_ownership": {
+      "src/tpaa_ingest": "fixture-only Synthetic Source Adapter and normalization boundary",
+      "src/tpaa_registry": "Source/Data Artifact registration orchestration",
+      "src/tpaa_context": "Evaluation Context resolution and immutable binding consumption",
+      "src/tpaa_storage": "persistence ports/repositories only; no M1 domain semantics"
+    },
+    "persistence_authority_refs": [
+      "registry.training_session",
+      "registry.data_source",
+      "registry.source_stream",
+      "registry.source_artifact",
+      "registry.dataset_manifest",
+      "registry.context_artifact",
+      "context.evaluation_context",
+      "context.context_artifact_binding"
+    ],
+    "source_adapter": {
+      "accepts_only_controlled_fixture_bundles": true,
+      "requires_input_hash_match": true,
+      "physical_column_mapping": "versioned fixture/source mapping only",
+      "source_identity_replay_stable": true,
+      "no_operational_or_sensitive_default": true
+    },
+    "session_time": {
+      "rule_id": "CR-003",
+      "transform_contract": "explicit source-clock TimeTransform to authoritative session_time_us",
+      "os_timezone_dependency": false,
+      "locale_dependency": false,
+      "transport_rule": "JS-visible int64 Session Time remains decimal-string across API DTO boundaries"
+    },
+    "aircraft_identity": {
+      "stable_identity_field": "aircraft_id",
+      "replay_requires_same_identity": true,
+      "source_local_alias_never_becomes_business_identity": true
+    },
+    "canonical_aircraft_state": {
+      "authority_id": "CANONICAL_AIRCRAFT_STATE_V1",
+      "required_fields": [
+        "body_p_rad_s",
+        "nz_g",
+        "heading_true_rad",
+        "tas_mps",
+        "mach",
+        "session_time_us",
+        "quality_mask"
+      ],
+      "exact_semantic_name_mapping": true,
+      "invalid_or_missing_to_zero": false
+    },
+    "evaluation_context": {
+      "dto_contract": "EvaluationContextDTO",
+      "artifact_ref_contract": "ContextArtifactRefDTO",
+      "immutable_history_rule_id": "CR-006",
+      "required_runtime_bindings": [
+        "RULE_SET",
+        "METRIC_PROFILE"
+      ],
+      "stage_profile_selection": {
+        "profile_id": "BASIC_FLIGHT_V1",
+        "authority": "STAGE_REGISTRY 1.1.0 / generated StageProfileId",
+        "new_context_binding_role_invented": false,
+        "note": "Do not add a STAGE_PROFILE persistence enum outside Canonical authority; bind/select the authoritative profile through governed M1 context provenance until Canonical authority explicitly defines another binding field."
+      }
+    },
+    "lineage_quality": {
+      "every_canonical_value_traceable_to_source_artifact": true,
+      "source_artifact_sha256_required": true,
+      "dataset_logical_content_hash_required_for_managed_canonical_products": true,
+      "missing_rule_id": "CR-005",
+      "half_open_rule_id": "CR-004",
+      "quality_propagates_without_fabricating_validity": true
+    }
+  },
+  "wave_c_episode_stage_world_design_ahead": {
+    "parent_task_ids": [
+      "M1-WORLD-001",
+      "M1-WORLD-002",
+      "M1-WORLD-003",
+      "M1-WORLD-004",
+      "M1-WORLD-005",
+      "M1-WORLD-006",
+      "M1-WORLD-007",
+      "M1-TST-003"
+    ],
+    "episode": {
+      "table_authority": "episode.training_episode",
+      "episode_type": "BASIC_FLIGHT",
+      "stable_replay_identity": true,
+      "revision_by_supersession": true,
+      "half_open_interval": true
+    },
+    "stage": {
+      "table_authority": "episode.episode_stage",
+      "profile_id": "BASIC_FLIGHT_V1",
+      "ordered_stages": [
+        "SETUP_ENTRY",
+        "EXECUTION",
+        "STABILIZATION_RECOVERY",
+        "COMPLETION"
+      ],
+      "interval": "[start_session_time_us,end_session_time_us)",
+      "precedence": [
+        "CONTEXT_OFFICIAL_MARKER",
+        "NORMALIZED_AUTHORITY_EVENT",
+        "CONTEXT_RULE_WORLD_DERIVATION",
+        "MODEL_INFERENCE",
+        "MANUAL_REVIEW"
+      ],
+      "revision_by_supersedes_stage_id": true,
+      "required_quality_fields": [
+        "stage_status",
+        "coverage",
+        "confidence",
+        "detector_version"
+      ],
+      "stage_golden_required_before_metric_vertical_slice_claim": true
+    },
+    "world": {
+      "package_target": "src/tpaa_world",
+      "m1_scope": "minimal observed-aircraft world required by representative AIR metrics",
+      "may_fabricate_perception_or_adjudication": false,
+      "world_capability_gate_rule_id": "CR-018",
+      "logical_hash_cross_platform_stable": true,
+      "evidence_refs_required": true
+    }
+  },
+  "implementation_order": [
+    "M1-TST-001 fixture contract",
+    "M1-DATA-001..007 Data Spine",
+    "M1-WORLD-001..004,006,007 plus M1-TST-003 Stage Golden",
+    "only then M1-MET-001/M1-MET-002 AIR-001 integration"
+  ],
+  "design_completion_definition": [
+    "authority references validate against frozen CB-1.4.0 artifacts",
+    "fixture and Data Spine boundaries are unambiguous enough to implement without inventing semantic fields",
+    "Stage order/precedence/revision contract exactly matches STAGE_REGISTRY",
+    "representative Metric inputs map only to Canonical authority fields",
+    "no M2 sensor family enters the M1 vertical slice",
+    "design does not authorize pre-admission feature code"
+  ]
+}

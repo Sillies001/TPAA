@@ -23,38 +23,42 @@ def _run(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_m1_entry_gate_state_verifier_accepts_blocked_review_without_admission() -> None:
+def test_m1_entry_gate_state_verifier_accepts_assigned_candidate_without_admission() -> None:
     result = _run("-m", VERIFY_MODULE)
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
     assert evidence["schema"] == "TPAA_M1_ENTRY_GATE_STATE_VERIFICATION_V1"
     assert evidence["status"] == "PASS"
-    assert evidence["decision"] == "M1_NOT_ADMITTED"
+    assert evidence["decision"] == "M1_ADMISSION_CANDIDATE"
     assert evidence["implementation_authorized"] is False
-    assert evidence["condition_8"] == "BLOCKED_UNASSIGNED"
+    assert evidence["condition_8"] == "PASS"
     assert all(item["status"] == "PASS" for item in evidence["checks"])
 
 
-def test_m1_entry_gate_review_is_exactly_9_of_10_with_only_condition_8_blocked() -> None:
+def test_m1_entry_gate_review_is_assigned_candidate_with_runtime_condition_6() -> None:
     review = json.loads(REVIEW.read_text(encoding="utf-8"))
     conditions = {item["id"]: item["status"] for item in review["conditions"]}
     assert set(conditions) == set(range(1, 11))
-    assert all(conditions[index] == "PASS" for index in (1,2,3,4,5,6,7,9,10))
-    assert conditions[8] == "BLOCKED_UNASSIGNED"
+    assert all(conditions[index] == "PASS" for index in (1,2,3,4,5,7,8,9,10))
+    assert conditions[6] == "RUNTIME_VERIFY_REQUIRED"
     assert review["pass_count"] == 9
     assert review["condition_count"] == 10
-    assert review["blocking_conditions"] == [8]
-    assert review["decision"] == "M1_NOT_ADMITTED"
+    assert review["blocking_conditions"] == ["MERGED_MAIN_RUNTIME_EVIDENCE"]
+    assert review["decision"] == "M1_ADMISSION_CANDIDATE"
     assert review["implementation_authorized"] is False
 
 
-def test_role_assignment_contract_remains_explicitly_unassigned() -> None:
+def test_role_assignment_contract_is_explicitly_assigned() -> None:
     roles = json.loads(ROLES.read_text(encoding="utf-8"))
-    assert roles["status"] == "UNASSIGNED"
-    assert roles["primary_ws_owner"] is None
-    assert roles["golden_independent_reviewer"] is None
-    assert roles["m1_exit_reviewer"] is None
-    assert roles["golden_independence_attestation"] is None
+    assert roles["status"] == "ASSIGNED"
+    assert roles["primary_ws_owner"] == "@Sillies001"
+    assert roles["golden_independent_reviewer"] == "@Sillies001"
+    assert roles["m1_exit_reviewer"] == "@Sillies001"
+    assert roles["golden_independence_attestation"] == (
+        "@Sillies001 is independent of the implementation and expected-result "
+        "author for Golden acceptance."
+    )
+    assert roles["assignment_source"] == "EXPLICIT_HUMAN_ASSIGNMENT"
 
 
 def test_m1_entry_gate_state_is_available_through_unified_cli() -> None:
@@ -62,4 +66,5 @@ def test_m1_entry_gate_state_is_available_through_unified_cli() -> None:
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
     assert evidence["status"] == "PASS"
-    assert evidence["decision"] == "M1_NOT_ADMITTED"
+    assert evidence["decision"] == "M1_ADMISSION_CANDIDATE"
+    assert evidence["implementation_authorized"] is False

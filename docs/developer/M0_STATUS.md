@@ -1,5 +1,45 @@
 # M0 Engineering Bootstrap Status
 
+## Current M1 Entry transition state
+
+Merged-main revision `c3019718e6a088fdf01e5e4297ff5496746d0aa8` is accepted by Run #45:
+
+- M0 windows — SUCCESS;
+- M0 linux — SUCCESS;
+- M0 Exit PostgreSQL — SUCCESS;
+- M0 logical equivalence — SUCCESS;
+- M0 Exit Review — SUCCESS;
+- Exit Review — GO / PASS / source-revision-consistent;
+- Windows/Linux M1 Entry build manifests are bound to the exact merged-main revision.
+
+The explicit §19.1(8) role assignments are now recorded on the finalization branch. The static Entry review is therefore an admission candidate:
+
+```text
+1  PASS
+2  PASS
+3  PASS
+4  PASS
+5  PASS
+6  RUNTIME_VERIFY_REQUIRED
+7  PASS
+8  PASS
+9  PASS
+10 PASS
+
+static PASS = 9 / 10
+decision = M1_ADMISSION_CANDIDATE
+implementation_authorized = false
+```
+
+Assigned identities:
+
+- M1 Primary WS owner: `@Sillies001`;
+- Golden independent reviewer: `@Sillies001`;
+- M1 Exit reviewer: `@Sillies001`;
+- Golden independence attestation: `@Sillies001 is independent of the implementation and expected-result author for Golden acceptance.`
+
+Condition 6 is deliberately re-opened for runtime verification because the role-assignment change creates a new source revision. The same finalization PR must first verify the PR synthetic merge revision, then a single protected-main merge must let the required `M0 Exit Review` job emit the exact-source-revision activation artifact. Only an artifact with `decision=M1_ADMITTED` and `implementation_authorized=true` authorizes M1 implementation.
+
 
 ## SDIB-1.0.1 M0 delta — 48/48 CLOSED; M1_NOT_ADMITTED
 

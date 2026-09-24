@@ -1,4 +1,4 @@
-# SDIB-1.0.1 M1 Entry Gate Review — Blocked State
+# SDIB-1.0.1 M1 Entry Gate Review — Admission Candidate
 
 ## Authority
 
@@ -12,9 +12,9 @@ Role assignment contract: `docs/governance/M1_ROLE_ASSIGNMENTS.json`.
 
 Current merged-main engineering revision:
 
-`e651806dbfeec4955a5b19d68aef69d2e3abe145`
+`c3019718e6a088fdf01e5e4297ff5496746d0aa8`
 
-Run #43 completed SUCCESS on that exact revision with all five required jobs:
+Run #45 completed SUCCESS on that exact revision with all five required jobs:
 
 - M0 windows
 - M0 linux
@@ -26,7 +26,7 @@ The Exit Review reports `GO / PASS`, `source_revision_consistent=true`, and all 
 
 ## Exact M1 Entry manifests
 
-Run #43 emitted both Windows and Linux M1 Entry build manifests for the exact merged-main revision.
+Run #45 emitted both Windows and Linux M1 Entry build manifests for the exact merged-main revision.
 
 Both freeze the same:
 
@@ -41,11 +41,11 @@ Both freeze the same:
 
 The only intended platform-specific difference is `platform_profile`.
 
-Therefore §19.1 condition 6 is PASS.
+Condition 6 was PASS on Run #45, but the explicit role-assignment change creates a new candidate revision. It is therefore marked `RUNTIME_VERIFY_REQUIRED` until the PR synthetic merge revision and final merged-main revision are both verified by the activation policy.
 
 ## Conditions 7, 9 and 10
 
-Condition 7 is PASS because the synthetic-only / Golden strategy and machine policy are now merged on `main`, and `verify-m1-entry-preparation` passed on both Windows and Linux in Run #43.
+Condition 7 is PASS because the synthetic-only / Golden strategy and machine policy are now merged on `main`, and `verify-m1-entry-preparation` passed on both Windows and Linux in Run #45.
 
 Condition 9 is PASS because the architecture blocker review is merged, CI-verified, reports `NO_KNOWN_ARCHITECTURE_BLOCKER`, and authorizes no bypass of Context / Stage / World / Release / API / GUI.
 
@@ -61,33 +61,29 @@ The current condition matrix is:
 3.  M0 48 work packages CLOSED                   PASS
 4.  ADR-M0-001..010 CLOSED                       PASS
 5.  Windows/Linux CI GREEN                       PASS
-6.  Exact M1 Entry build manifest                PASS
+6.  Exact M1 Entry build manifest                RUNTIME_VERIFY_REQUIRED
 7.  Synthetic/Golden strategy                    PASS
-8.  Required human role assignments              BLOCKED_UNASSIGNED
+8.  Required human role assignments              PASS
 9.  Architecture blocker review                  PASS
 10. M1 backlog import                            PASS
 
-PASS = 9 / 10
-Decision = M1_NOT_ADMITTED
+Static PASS = 9 / 10
+Decision = M1_ADMISSION_CANDIDATE
 ```
 
-## Blocking condition 8
+## Condition 8 assignments
 
-The following explicit human assignments are still required:
+Explicit assignments are now frozen as:
 
-- M1 Primary WS owner
-- Golden independent reviewer
-- M1 Exit reviewer
-- Golden reviewer independence attestation
+- M1 Primary WS owner: `@Sillies001`
+- Golden independent reviewer: `@Sillies001`
+- M1 Exit reviewer: `@Sillies001`
+- Golden independence attestation: `@Sillies001 is independent of the implementation and expected-result author for Golden acceptance.`
 
-No identity is inferred from repository ownership or previous commits.
-
-Tracking issue: #67.
+The assignment source is explicit human input; it is not inferred from repository ownership.
 
 ## Implementation boundary
 
 `implementation_authorized = false`
 
-No M1 feature implementation may begin while condition 8 remains blocked.
-
-Once the role assignment contract is explicitly filled and reviewed, the final Entry Gate review can be rerun. Only a 10/10 PASS review may change the decision to `M1_ADMITTED`.
+The review is now an admission candidate, not an admission decision. No M1 feature implementation may begin until the PR candidate is verified and the final protected-main `M0 Exit Review` emits an exact-source-revision activation artifact with `decision=M1_ADMITTED` and `implementation_authorized=true`.

@@ -141,13 +141,25 @@ def verify() -> dict[str, object]:
 
     if all_roles_assigned:
         role_state_ok = roles.get("status") == "ASSIGNED" and condition8.get("status") == "PASS"
-        decision_ok = (
-            decision == "M1_ADMITTED"
-            and blockers == []
-            and all(by_id.get(idx, {}).get("status") == "PASS" for idx in range(1, 11))
-            and review.get("pass_count") == 10
-            and review.get("implementation_authorized") is True
-        )
+        if decision == "M1_ADMISSION_CANDIDATE":
+            decision_ok = (
+                blockers == ["MERGED_MAIN_RUNTIME_EVIDENCE"]
+                and by_id.get(6, {}).get("status") == "RUNTIME_VERIFY_REQUIRED"
+                and all(
+                    by_id.get(idx, {}).get("status") == "PASS"
+                    for idx in (1, 2, 3, 4, 5, 7, 8, 9, 10)
+                )
+                and review.get("pass_count") == 9
+                and review.get("implementation_authorized") is False
+            )
+        else:
+            decision_ok = (
+                decision == "M1_ADMITTED"
+                and blockers == []
+                and all(by_id.get(idx, {}).get("status") == "PASS" for idx in range(1, 11))
+                and review.get("pass_count") == 10
+                and review.get("implementation_authorized") is True
+            )
     else:
         role_state_ok = (
             roles.get("status") == "UNASSIGNED"
