@@ -98,3 +98,29 @@ def test_unreviewed_fixture_is_not_accepted_for_m1_tst_001(tmp_path) -> None:
         load_spec(bundle)
 
     assert caught.value.code == "M1_FIXTURE_NOT_REVIEWABLE"
+
+def test_input_hash_basis_mismatch_fails_closed(tmp_path) -> None:
+    bundle = _copy_bundle(tmp_path)
+    path = bundle / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["input_hash_basis"] = ["source/flight.json"]
+    _write_json(path, manifest)
+
+    with pytest.raises(M1FixtureError) as caught:
+        load_spec(bundle)
+
+    assert caught.value.code == "M1_FIXTURE_INPUT_HASH_BASIS_MISMATCH"
+
+
+def test_golden_reviewer_must_match_assigned_role(tmp_path) -> None:
+    bundle = _copy_bundle(tmp_path)
+    path = bundle / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["expected_generation"]["reviewer"] = "@not-the-assigned-reviewer"
+    _write_json(path, manifest)
+
+    with pytest.raises(M1FixtureError) as caught:
+        load_spec(bundle)
+
+    assert caught.value.code == "M1_FIXTURE_GOLDEN_REVIEWER_MISMATCH"
+
