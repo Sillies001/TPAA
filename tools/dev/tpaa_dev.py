@@ -46,7 +46,6 @@ M1_ENTRY_GATE_STATE_MODULE = "tools.governance.verify_m1_entry_gate_state"
 M1_ENTRY_ACTIVATION_MODULE = "tools.governance.m1_entry_activation"
 M1_ENTRY_ASSIGN_ROLES_MODULE = "tools.governance.m1_entry_assign_roles"
 M1_DETAILED_DESIGN_VERIFY_MODULE = "tools.governance.verify_m1_detailed_design"
-M1_FIXTURE_CONTRACT_MODULE = "tools.testing.m1_fixture_contract"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -80,7 +79,6 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-entry-activation", "M1 Entry Gate §19.1", "IMPLEMENTED", "Verify a PR candidate or emit merged-main M1 admission activation evidence."),
     CommandSpec("m1-entry-assign-roles", "M1 Entry Gate §19.1(8)", "IMPLEMENTED", "Render explicit human role assignments into a non-admitting M1 admission candidate."),
     CommandSpec("verify-m1-detailed-design", "M1-A/B/C Design", "IMPLEMENTED", "Verify pre-admission M1 fixture/data-spine/stage design against frozen authorities."),
-    CommandSpec("m1-fixture-check", "M1-TST-001", "IMPLEMENTED", "Verify all governed M1 fixture manifests, hashes, Golden provenance and synthetic-data boundaries."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -451,9 +449,6 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-m1-entry-preparation", help="Verify M1 Entry preparation evidence without admitting M1")
     sub.add_parser("verify-m1-entry-gate-state", help="Verify the current M1 Entry review decision/state")
     sub.add_parser("verify-m1-detailed-design", help="Verify M1-A/B/C detailed design against frozen authorities")
-    m1_fixture = sub.add_parser("m1-fixture-check", help="Verify M1-TST-001 fixture contracts")
-    m1_fixture.add_argument("--bundle", type=Path)
-    m1_fixture.add_argument("--evidence", type=Path)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -606,13 +601,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run([sys.executable, "-m", M1_ENTRY_GATE_STATE_MODULE])
     if command == "verify-m1-detailed-design":
         return _run([sys.executable, "-m", M1_DETAILED_DESIGN_VERIFY_MODULE])
-    if command == "m1-fixture-check":
-        fixture_args = [sys.executable, "-m", M1_FIXTURE_CONTRACT_MODULE]
-        if args.bundle is not None:
-            fixture_args.extend(["--bundle", str(args.bundle)])
-        if args.evidence is not None:
-            fixture_args.extend(["--evidence", str(args.evidence)])
-        return _run(fixture_args)
     if command == "m1-entry-activation":
         return _run(
             [
