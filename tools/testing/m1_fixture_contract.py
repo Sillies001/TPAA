@@ -20,7 +20,7 @@ FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "m1"
 POLICY = REPO_ROOT / "tools" / "testing" / "M1_FIXTURE_POLICY.json"
 BASELINE_LOCK = REPO_ROOT / "baseline" / "CB-1.4.0" / "BASELINE_LOCK.json"
 
-MANIFEST_SCHEMA = "TPAA_M1_FIXTURE_MANIFEST_V1"
+MANIFEST_SCHEMA = "TPAA_M1_FIXTURE_BUNDLE_V1"
 FIXTURE_VERSION = "1.0.0"
 SOURCE_SCHEMA = "TPAA_M1_SYNTHETIC_SOURCE_V1"
 CONTEXT_SCHEMA = "TPAA_M1_SYNTHETIC_CONTEXT_V1"
@@ -61,6 +61,7 @@ class M1FixtureSpec:
     source_path: Path
     context_path: Path
     expected_path: Path
+    input_sha256: str
     source_sha256: str
     context_sha256: str
     expected_sha256: str
@@ -213,9 +214,14 @@ def load_spec(bundle: Path) -> M1FixtureSpec:
         "expected_sha256",
         code="M1_FIXTURE_MANIFEST_INVALID",
     )
-    if input_sha != refs["source"][1]:
+    if manifest.get("input_hash_algorithm") != "SHA256_PATH_SHA256_V1":
         raise M1FixtureError(
-            "M1_FIXTURE_INPUT_HASH_DECLARATION_MISMATCH",
+            "M1_FIXTURE_INPUT_HASH_ALGORITHM_MISMATCH",
+            fixture_id,
+        )
+    if manifest.get("expected_hash_algorithm") != "SHA256_FILE_BYTES_V1":
+        raise M1FixtureError(
+            "M1_FIXTURE_EXPECTED_HASH_ALGORITHM_MISMATCH",
             fixture_id,
         )
     if expected_sha != refs["expected"][1]:
@@ -229,10 +235,16 @@ def load_spec(bundle: Path) -> M1FixtureSpec:
         "tolerance_profile",
         code="M1_FIXTURE_MANIFEST_INVALID",
     )
-    if tolerance.get("discrete") != "EXACT":
+    if tolerance.get("id") != "M1_AIR_NUMERIC_DEFAULT_V1":
         raise M1FixtureError("M1_FIXTURE_TOLERANCE_INVALID", fixture_id)
-    numeric_abs = tolerance.get("numeric_abs")
-    if not isinstance(numeric_abs, str) or not numeric_abs:
+    absolute = tolerance.get("absolute")
+    relative = tolerance.get("relative")
+    if (
+        not isinstance(absolute, str)
+        or not absolute
+        or not isinstance(relative, str)
+        or not relative
+    ):
         raise M1FixtureError("M1_FIXTURE_TOLERANCE_INVALID", fixture_id)
 
     authority = _object(
@@ -263,6 +275,7 @@ def load_spec(bundle: Path) -> M1FixtureSpec:
         source_path=refs["source"][0],
         context_path=refs["context"][0],
         expected_path=refs["expected"][0],
+        input_sha256=input_sha,
         source_sha256=refs["source"][1],
         context_sha256=refs["context"][1],
         expected_sha256=refs["expected"][1],
@@ -288,6 +301,18 @@ def validate_bundle(bundle: Path) -> dict[str, object]:
                 f"{spec.fixture_id}:{role}:"
                 f"expected={expected[role]} actual={actual[role]}",
             )
+
+    input_basis = (
+        f"source/flight.json={actual['source']}\n"
+        f"context/evaluation-context.json={actual['context']}\n"
+    ).encode("utf-8")
+    actual_input_sha = hashlib.sha256(input_basis).hexdigest()
+    if actual_input_sha != spec.input_sha256:
+        raise M1FixtureError(
+            "M1_FIXTURE_INPUT_HASH_MISMATCH",
+            f"{spec.fixture_id}:expected={spec.input_sha256} "
+            f"actual={actual_input_sha}",
+        )
 
     source = _load(
         spec.source_path,
