@@ -2,8 +2,8 @@
   "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
   "fixture_id": "BF_M1_NOMINAL_V1",
   "fixture_version": "1.0.0",
-  "input_sha256": "692a02151bfc200032a63e7d8b326d9b27f8a91e2272640b327d736a1a8811bc",
-  "expected_sha256": "ccf88bc7eb04f7e227b90ac420a2c3c7b0cb7c4aa0569e90437c63ee257428db",
+  "input_sha256": "ca649b252e37639206e420930933c76637bd249f27e3bb8a925747274886c91c",
+  "expected_sha256": "514c5746ae261a8551a72f53289e5ed7c24ae10c06845474d9585ec1de4f96c7",
   "authority_refs": {
     "core_baseline": "CB-1.4.0",
     "stage_profile": "BASIC_FLIGHT_V1",
@@ -44,11 +44,11 @@
     },
     "context": {
       "path": "context/evaluation-context.json",
-      "sha256": "ae280377ab2561259c277762cc6860e4e85b4e02478239050e9838f1b8c6bf7f"
+      "sha256": "a8e7036cf86a3ab63ee8447013d8e01ddf61de682009ee771d3f68017aad8096"
     },
     "expected": {
       "path": "expected/expected.json",
-      "sha256": "ccf88bc7eb04f7e227b90ac420a2c3c7b0cb7c4aa0569e90437c63ee257428db"
+      "sha256": "514c5746ae261a8551a72f53289e5ed7c24ae10c06845474d9585ec1de4f96c7"
     }
   },
   "expected_generation": {
