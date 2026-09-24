@@ -180,6 +180,7 @@ def verify() -> dict[str, object]:
         '_dispatcher("verify-desktop-lifecycle-policy")',
         '_dispatcher("verify-repository-bootstrap")',
         '_dispatcher("verify-m0-delta-closure")',
+        '_dispatcher("m1-fixture-check")',
         '_dispatcher("verify-governance")',
         '_dispatcher("openapi-snapshot", "--check")',
         '_dispatcher("migration-smoke")',
