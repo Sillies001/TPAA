@@ -1,0 +1,58 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_ANGLE_WRAP_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "d4bcfc5c1947a033b02f00daa7950db67af2b0845e937bc0f193e53eac281946",
+  "expected_sha256": "bbb28d700ab4c1dc94b3a2912a73c4bb2895dc84c9f60545fdc75bad28ff4f2e",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Angle unwrap / derivative",
+  "must_cover": [
+    "heading crosses +/-pi",
+    "unwrap",
+    "DERIVATIVE_LLS_V1",
+    "no false spike"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "19b79e02a69a8aa34d9e9021d10e0f30fdd2f096efabbd09919ba07280b6d244"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "d975c8611a9f7782da174fcbcc6b406eb9fd10f6edcdd1454ec89716fa503886"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "bbb28d700ab4c1dc94b3a2912a73c4bb2895dc84c9f60545fdc75bad28ff4f2e"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  }
+}
