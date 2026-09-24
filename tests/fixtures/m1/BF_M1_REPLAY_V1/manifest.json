@@ -1,0 +1,56 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_REPLAY_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "975bf3b38126691e0dc941ba21b3d42ce46c8d61a9aa78d43f3461a01b359618",
+  "expected_sha256": "250e5f6bd5b36fa7117d6905089a8038cf6384bd7bb7a079b51c9ff66fd9cbd9",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Historical replay frozen refs",
+  "must_cover": [
+    "current refs differ after publish",
+    "old release resolves frozen refs"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "b796a3fadb53c82a9807d5ed738a4c47f8e9a152a6f8da04f2c5b7fa26713a61"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "9cb4098fbd8cbc0f5a5ee046ce576a4bb78e15489c8bf82a365ef8439ad36d59"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "250e5f6bd5b36fa7117d6905089a8038cf6384bd7bb7a079b51c9ff66fd9cbd9"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  }
+}
