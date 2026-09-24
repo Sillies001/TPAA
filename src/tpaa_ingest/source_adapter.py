@@ -20,6 +20,21 @@ EXPECTED_SOURCE_SCHEMA = "TPAA_M1_SYNTHETIC_SOURCE_V1"
 EXPECTED_CLASSIFICATION = "SYNTHETIC"
 EXPECTED_INPUT_HASH_ALGORITHM = "SHA256_PATH_SHA256_V1"
 EXPECTED_CORE_BASELINE = "CB-1.4.0"
+EXPECTED_CONTEXT_SCHEMA = "TPAA_M1_SYNTHETIC_CONTEXT_V1"
+EXPECTED_STAGE_PROFILE = "BASIC_FLIGHT_V1"
+EXPECTED_MAPPING_VERSION = "M1_BASIC_FLIGHT_SOURCE_MAP_V1"
+EXPECTED_STAGE_REGISTRY_SHA256 = (
+    "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691"
+)
+EXPECTED_P1_METRIC_CATALOG_SHA256 = (
+    "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d"
+)
+EXPECTED_DTO_CONTRACTS_SHA256 = (
+    "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+)
+EXPECTED_METRIC_CODES = frozenset(
+    {"P1-AIR-001", "P1-AIR-002", "P1-AIR-003", "P1-AIR-004", "P1-AIR-007"}
+)
 
 GOVERNED_FIXTURE_IDS = frozenset(
     {
@@ -34,17 +49,18 @@ GOVERNED_FIXTURE_IDS = frozenset(
     }
 )
 
-REQUIRED_PHYSICAL_MAPPING = frozenset(
+EXPECTED_PHYSICAL_TO_CANONICAL_MAPPING = MappingProxyType(
     {
-        "source_time_us",
-        "p",
-        "nz",
-        "heading",
-        "tas",
-        "mach",
-        "quality",
+        "source_time_us": "session_time_us via context.source_time_transform",
+        "p": "body_p_rad_s",
+        "nz": "nz_g",
+        "heading": "heading_true_rad",
+        "tas": "tas_mps",
+        "mach": "mach",
+        "quality": "quality_mask",
     }
 )
+REQUIRED_PHYSICAL_MAPPING = frozenset(EXPECTED_PHYSICAL_TO_CANONICAL_MAPPING)
 
 SourceScalar: TypeAlias = str | int | float | bool | None
 
@@ -112,6 +128,7 @@ class SyntheticSourceBundle:
     identity: SourceArtifactIdentity
     session: SyntheticSessionSource
     aircraft: SyntheticAircraftSource
+    mapping_version: str
     physical_to_canonical_mapping: MappingProxyType[str, str]
     rows: tuple[SyntheticSourceRow, ...]
     source_markers: tuple[SyntheticSourceMarker, ...]
@@ -290,10 +307,26 @@ def load_synthetic_fixture_bundle(bundle: Path) -> SyntheticSourceBundle:
         )
 
     authority = _object(manifest.get("authority_refs"), field="authority_refs")
-    if authority.get("core_baseline") != EXPECTED_CORE_BASELINE:
+    expected_authority = {
+        "core_baseline": EXPECTED_CORE_BASELINE,
+        "stage_profile": EXPECTED_STAGE_PROFILE,
+        "stage_registry_sha256": EXPECTED_STAGE_REGISTRY_SHA256,
+        "p1_metric_catalog_sha256": EXPECTED_P1_METRIC_CATALOG_SHA256,
+        "dto_contracts_sha256": EXPECTED_DTO_CONTRACTS_SHA256,
+    }
+    for key, expected in expected_authority.items():
+        if authority.get(key) != expected:
+            raise SyntheticSourceAdapterError(
+                "M1_SOURCE_ADAPTER_AUTHORITY_MISMATCH",
+                f"{key}={authority.get(key)!r}",
+            )
+    metric_codes = authority.get("metric_codes")
+    if not isinstance(metric_codes, list) or {
+        value for value in metric_codes if isinstance(value, str)
+    } != EXPECTED_METRIC_CODES:
         raise SyntheticSourceAdapterError(
             "M1_SOURCE_ADAPTER_AUTHORITY_MISMATCH",
-            repr(authority.get("core_baseline")),
+            f"metric_codes={metric_codes!r}",
         )
 
     files = _object(manifest.get("files"), field="files")
@@ -339,6 +372,27 @@ def load_synthetic_fixture_bundle(bundle: Path) -> SyntheticSourceBundle:
             f"expected={input_expected} actual={input_actual}",
         )
 
+    context = _load_json(
+        context_path,
+        missing="M1_SOURCE_ADAPTER_CONTEXT_MISSING",
+        corrupt="M1_SOURCE_ADAPTER_CONTEXT_CORRUPT",
+    )
+    if context.get("schema") != EXPECTED_CONTEXT_SCHEMA:
+        raise SyntheticSourceAdapterError(
+            "M1_SOURCE_ADAPTER_CONTEXT_SCHEMA_MISMATCH",
+            repr(context.get("schema")),
+        )
+    if context.get("fixture_id") != fixture_id:
+        raise SyntheticSourceAdapterError(
+            "M1_SOURCE_ADAPTER_CONTEXT_ID_MISMATCH",
+            repr(context.get("fixture_id")),
+        )
+    if context.get("classification") != EXPECTED_CLASSIFICATION:
+        raise SyntheticSourceAdapterError(
+            "M1_SOURCE_ADAPTER_CLASSIFICATION_FORBIDDEN",
+            repr(context.get("classification")),
+        )
+
     source = _load_json(
         source_path,
         missing="M1_SOURCE_ADAPTER_SOURCE_MISSING",
@@ -363,20 +417,12 @@ def load_synthetic_fixture_bundle(bundle: Path) -> SyntheticSourceBundle:
     session_raw = _object(source.get("session"), field="session")
     aircraft_raw = _object(source.get("aircraft"), field="aircraft")
     mapping_raw = _object(source.get("mapping"), field="mapping")
-    if set(mapping_raw) != REQUIRED_PHYSICAL_MAPPING:
+    if mapping_raw != dict(EXPECTED_PHYSICAL_TO_CANONICAL_MAPPING):
         raise SyntheticSourceAdapterError(
             "M1_SOURCE_ADAPTER_MAPPING_MISMATCH",
-            repr(sorted(mapping_raw)),
+            repr(mapping_raw),
         )
-    mapping: dict[str, str] = {}
-    for key in sorted(mapping_raw):
-        value = mapping_raw[key]
-        if not isinstance(value, str) or not value:
-            raise SyntheticSourceAdapterError(
-                "M1_SOURCE_ADAPTER_MAPPING_MISMATCH",
-                f"{key} must map to non-empty string",
-            )
-        mapping[key] = value
+    mapping = dict(EXPECTED_PHYSICAL_TO_CANONICAL_MAPPING)
 
     rows_raw = source.get("rows")
     if not isinstance(rows_raw, list) or not rows_raw:
@@ -444,6 +490,7 @@ def load_synthetic_fixture_bundle(bundle: Path) -> SyntheticSourceBundle:
                 code="M1_SOURCE_ADAPTER_SOURCE_INVALID",
             ),
         ),
+        mapping_version=EXPECTED_MAPPING_VERSION,
         physical_to_canonical_mapping=MappingProxyType(mapping),
         rows=rows,
         source_markers=markers,
