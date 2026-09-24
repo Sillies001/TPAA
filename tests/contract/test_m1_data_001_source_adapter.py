@@ -51,6 +51,7 @@ def test_source_adapter_acceptance_command_emits_machine_evidence(tmp_path: Path
     assert evidence["status"] == "PASS"
     assert evidence["bundle_count"] == 8
     assert evidence["unique_source_ref_count"] == 8
+    assert evidence["mapping_version"] == "M1_BASIC_FLIGHT_SOURCE_MAP_V1"
     assert evidence["source_clock_preserved"] is True
     assert evidence["session_time_transform_executed"] is False
     assert evidence["canonical_projection_executed"] is False
