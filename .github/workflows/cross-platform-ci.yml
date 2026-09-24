@@ -126,6 +126,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-basic-stage-check
           --evidence evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
 
+      - name: Emit M1-WORLD-003 Stage quality/status evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-stage-quality-check
+          --evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -168,6 +173,7 @@ jobs:
             evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json
             evidence/m1-world-001/${{ matrix.platform }}/basic-episode.json
             evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
+            evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
             dist/
           if-no-files-found: error
           retention-days: 14

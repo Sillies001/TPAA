@@ -87,6 +87,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m1-evaluation-context-check",
         "m1-lineage-quality-check",
         "m1-basic-stage-check",
+        "m1-stage-quality-check",
         "m1-entry-manifest",
         "generate",
         "verify-baseline",
