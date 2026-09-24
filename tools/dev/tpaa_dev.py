@@ -50,7 +50,6 @@ M1_FIXTURE_HARNESS_MODULE = "tools.testing.m1_fixture_harness"
 M1_SOURCE_ADAPTER_CHECK_MODULE = "tools.testing.m1_source_adapter_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
-M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -87,7 +86,6 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-fixture-check", "M1-TST-001", "IMPLEMENTED", "Validate all governed M1 synthetic fixture bundles and hashes."),
     CommandSpec("m1-source-adapter-check", "M1-DATA-001", "IMPLEMENTED", "Verify the synthetic source adapter over all governed M1 bundles."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
-    CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit source-clock to authoritative Session Time projection."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
@@ -469,11 +467,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
     )
     m1_registry.add_argument("--evidence", type=Path)
-    m1_session_time = sub.add_parser(
-        "m1-session-time-check",
-        help="Verify M1-DATA-003 explicit Session Time projection",
-    )
-    m1_session_time.add_argument("--evidence", type=Path)
     m1_time = sub.add_parser(
         "m1-session-time-check",
         help="Verify M1-DATA-003 explicit Session Time transforms",
@@ -641,11 +634,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.evidence is not None:
             registry_args.extend(["--evidence", str(args.evidence)])
         return _run(registry_args)
-    if command == "m1-session-time-check":
-        session_time_args = [sys.executable, "-m", M1_SESSION_TIME_CHECK_MODULE]
-        if args.evidence is not None:
-            session_time_args.extend(["--evidence", str(args.evidence)])
-        return _run(session_time_args)
     if command == "m1-session-time-check":
         time_args = [sys.executable, "-m", M1_SESSION_TIME_CHECK_MODULE]
         if args.evidence is not None:
