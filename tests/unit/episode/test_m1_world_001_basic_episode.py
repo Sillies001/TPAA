@@ -4,11 +4,12 @@ from tpaa_episode import detect_basic_episode
 
 ROOT = Path(__file__).resolve().parents[3]
 NOMINAL = ROOT / "tests" / "fixtures" / "m1" / "BF_M1_NOMINAL_V1"
+AUTHORITY_ROOT = ROOT / "baseline" / "CB-1.4.0" / "canonical"
 
 
 def test_basic_episode_identity_and_interval_are_replay_stable() -> None:
-    first = detect_basic_episode(NOMINAL)
-    second = detect_basic_episode(NOMINAL)
+    first = detect_basic_episode(NOMINAL, authority_root=AUTHORITY_ROOT)
+    second = detect_basic_episode(NOMINAL, authority_root=AUTHORITY_ROOT)
 
     assert first == second
     assert first.episode_type == "BASIC_FLIGHT"

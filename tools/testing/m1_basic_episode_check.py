@@ -5,12 +5,12 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
-
-from tpaa_episode import detect_basic_episode
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "m1"
+AUTHORITY_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
 
 
 def _git_revision() -> str:
@@ -26,12 +26,24 @@ def _git_revision() -> str:
 
 
 def verify() -> dict[str, object]:
+    src_root = str(REPO_ROOT / "src")
+    if src_root not in sys.path:
+        sys.path.insert(0, src_root)
+
+    from tpaa_episode import detect_basic_episode
+
     records: list[dict[str, object]] = []
     replay_stable = True
     expected_intervals_exact = True
     for bundle in sorted(path for path in FIXTURE_ROOT.iterdir() if path.is_dir()):
-        episode = detect_basic_episode(bundle)
-        replay = detect_basic_episode(bundle)
+        episode = detect_basic_episode(
+            bundle,
+            authority_root=AUTHORITY_ROOT,
+        )
+        replay = detect_basic_episode(
+            bundle,
+            authority_root=AUTHORITY_ROOT,
+        )
         replay_stable = replay_stable and replay == episode
         expected = json.loads((bundle / "expected" / "expected.json").read_text(encoding="utf-8"))
         expected_episode = expected["episode"]

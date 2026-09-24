@@ -57,12 +57,19 @@ def _canonical_bytes(payload: object) -> bytes:
     ).encode("ascii")
 
 
-def detect_basic_episode(bundle_path: Path) -> BasicFlightEpisode:
+def detect_basic_episode(
+    bundle_path: Path,
+    *,
+    authority_root: Path,
+) -> BasicFlightEpisode:
     """Create the single controlled Basic Flight Episode for one governed fixture."""
 
     bundle = load_synthetic_fixture_bundle(bundle_path)
     timed = build_session_time_projection(bundle_path)
-    context = resolve_evaluation_context(bundle_path)
+    context = resolve_evaluation_context(
+        bundle_path,
+        authority_root=authority_root,
+    )
     aircraft = resolve_aircraft_identity(bundle_path)
 
     if timed.session_id != bundle.session.session_id or context.session_id != timed.session_id:
