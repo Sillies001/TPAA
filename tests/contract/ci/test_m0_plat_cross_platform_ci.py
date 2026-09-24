@@ -200,3 +200,19 @@ def test_m1_data_001_source_adapter_evidence_is_governed_in_ci() -> None:
     assert "evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json" in text
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-source-adapter-check")' in gate
+
+
+def test_m1_data_002_source_registry_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-DATA-002 source-registry evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-source-registry-check" in text
+    assert (
+        "--evidence evidence/m1-data-002/${{ matrix.platform }}/source-registry.json"
+        in text
+    )
+    assert (
+        "evidence/m1-data-002/${{ matrix.platform }}/source-registry.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-source-registry-check")' in gate
