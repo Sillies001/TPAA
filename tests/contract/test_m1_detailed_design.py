@@ -9,6 +9,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEV = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
 VERIFY_MODULE = "tools.governance.verify_m1_detailed_design"
 DESIGN = REPO_ROOT / "docs" / "design" / "M1" / "M1_A_C_DETAILED_DESIGN.json"
+M1_C_DESIGN = (
+    REPO_ROOT
+    / "docs"
+    / "design"
+    / "M1"
+    / "M1_C_EPISODE_STAGE_WORLD_IMPLEMENTATION_DESIGN.json"
+)
 
 
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -92,3 +99,26 @@ def test_m1_detailed_design_verifier_is_available_through_unified_cli() -> None:
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
     assert evidence["status"] == "PASS"
+
+
+def test_m1_c_design_ahead_is_explicit_and_keeps_implementation_blocked() -> None:
+    design = json.loads(M1_C_DESIGN.read_text(encoding="utf-8"))
+
+    assert design["schema"] == "TPAA_M1_C_EPISODE_STAGE_WORLD_IMPLEMENTATION_DESIGN_V1"
+    assert design["wave"] == "M1-C"
+    assert design["design_ahead_from_wave"] == "M1-B"
+    assert design["implementation_state"] == "DESIGN_ONLY"
+    assert set(design["implementation_prerequisites"]) == {
+        "M1-DATA-001",
+        "M1-DATA-002",
+        "M1-DATA-003",
+        "M1-DATA-004",
+        "M1-DATA-005",
+        "M1-DATA-006",
+        "M1-DATA-007",
+    }
+    stage = design["stage_contract"]
+    assert stage["fixture_marker_contract"]["terminator_marker"] == "END"
+    assert stage["fixture_marker_contract"]["terminator_is_stage"] is False
+    assert design["world_contract"]["truth_may_substitute_for_missing_perception"] is False
+    assert design["world_contract"]["missing_adjudication_may_be_inferred"] is False

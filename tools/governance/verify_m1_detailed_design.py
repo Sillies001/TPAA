@@ -13,12 +13,20 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DESIGN = REPO_ROOT / "docs" / "design" / "M1" / "M1_A_C_DETAILED_DESIGN.json"
+M1_C_DESIGN = (
+    REPO_ROOT
+    / "docs"
+    / "design"
+    / "M1"
+    / "M1_C_EPISODE_STAGE_WORLD_IMPLEMENTATION_DESIGN.json"
+)
 FIXTURE_POLICY = REPO_ROOT / "tools" / "testing" / "M1_FIXTURE_POLICY.json"
 CANONICAL_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
 CORE_RULES = CANONICAL_ROOT / "CORE_RULES.json"
 CORE_MODEL = CANONICAL_ROOT / "CORE_LOGICAL_MODEL.json"
 STAGES = CANONICAL_ROOT / "STAGE_REGISTRY.json"
 METRIC_INPUTS = CANONICAL_ROOT / "METRIC_INPUT_AUTHORITY_MATRIX.json"
+WORLD_CAPABILITIES = CANONICAL_ROOT / "WORLD_CAPABILITY_REGISTRY.json"
 
 EXPECTED_FIXTURES = {
     "BF_M1_NOMINAL_V1",
@@ -163,11 +171,13 @@ def _mapping(value: object) -> dict[str, object]:
 
 def verify() -> dict[str, object]:
     design = _load(DESIGN)
+    m1_c_design = _load(M1_C_DESIGN)
     fixture_policy = _load(FIXTURE_POLICY)
     core_rules = _load(CORE_RULES)
     core_model = _load(CORE_MODEL)
     stages = _load(STAGES)
     metric_inputs = _load(METRIC_INPUTS)
+    world_capabilities = _load(WORLD_CAPABILITIES)
 
     checks: list[dict[str, str]] = []
     checks.append(
@@ -362,6 +372,179 @@ def verify() -> dict[str, object]:
             "package_targets_exist",
             packages_ok,
             ",".join(sorted(packages)),
+        )
+    )
+
+    m1_c_prerequisites = _string_set(m1_c_design.get("implementation_prerequisites"))
+    checks.append(
+        _check(
+            "m1_c_design_schema",
+            m1_c_design.get("schema")
+            == "TPAA_M1_C_EPISODE_STAGE_WORLD_IMPLEMENTATION_DESIGN_V1",
+            str(m1_c_design.get("schema")),
+        )
+    )
+    checks.append(
+        _check(
+            "m1_c_design_role",
+            m1_c_design.get("document_role")
+            == "IMPLEMENTATION_DESIGN_NOT_SEMANTIC_AUTHORITY"
+            and m1_c_design.get("implementation_state") == "DESIGN_ONLY",
+            str(m1_c_design.get("implementation_state")),
+        )
+    )
+    checks.append(
+        _check(
+            "m1_c_data_spine_prerequisites",
+            m1_c_prerequisites
+            == {
+                "M1-DATA-001",
+                "M1-DATA-002",
+                "M1-DATA-003",
+                "M1-DATA-004",
+                "M1-DATA-005",
+                "M1-DATA-006",
+                "M1-DATA-007",
+            },
+            ",".join(sorted(m1_c_prerequisites)),
+        )
+    )
+
+    episode_contract = _mapping(m1_c_design.get("episode_contract"))
+    episode_table = _mapping(tables.get("episode.training_episode"))
+    episode_fields = episode_table.get("fields")
+    actual_episode_fields: set[str] = set()
+    if isinstance(episode_fields, list):
+        for field in episode_fields:
+            if isinstance(field, dict) and isinstance(field.get("name"), str):
+                actual_episode_fields.add(field["name"])
+    required_episode_fields = {
+        "episode_id",
+        "session_id",
+        "episode_type",
+        "context_id",
+        "start_session_time_us",
+        "end_session_time_us",
+        "subject_scope",
+        "primary_aircraft_id",
+        "episode_status",
+        "detector_version",
+        "coverage",
+        "confidence",
+        "data_sufficiency_status",
+        "supersedes_episode_id",
+    }
+    checks.append(
+        _check(
+            "m1_c_episode_contract",
+            episode_contract.get("table_authority") == "episode.training_episode"
+            and episode_contract.get("episode_type") == "BASIC_FLIGHT"
+            and episode_contract.get("subject_scope") == "AIRCRAFT"
+            and episode_contract.get("interval")
+            == "[start_session_time_us,end_session_time_us)"
+            and required_episode_fields <= actual_episode_fields,
+            str(episode_contract.get("detector_version")),
+        )
+    )
+
+    m1_c_stage = _mapping(m1_c_design.get("stage_contract"))
+    fixture_marker_contract = _mapping(m1_c_stage.get("fixture_marker_contract"))
+    checks.append(
+        _check(
+            "m1_c_stage_contract",
+            m1_c_stage.get("profile_id") == "BASIC_FLIGHT_V1"
+            and m1_c_stage.get("ordered_stages") == list(EXPECTED_STAGE_ORDER)
+            and m1_c_stage.get("precedence") == list(EXPECTED_PRECEDENCE)
+            and m1_c_stage.get("detection_method_mapping")
+            == stage_governance.get("detection_method_mapping")
+            and fixture_marker_contract.get("published_stage_markers")
+            == list(EXPECTED_STAGE_ORDER)
+            and fixture_marker_contract.get("terminator_marker") == "END"
+            and fixture_marker_contract.get("terminator_is_stage") is False,
+            str(m1_c_stage.get("profile_id")),
+        )
+    )
+
+    world_contract = _mapping(m1_c_design.get("world_contract"))
+    capabilities = _mapping(world_capabilities.get("capabilities"))
+    basic_core = _mapping(capabilities.get("BASIC_CORE"))
+    world_table = _mapping(tables.get("world.world_product_manifest"))
+    world_fields = world_table.get("fields")
+    actual_world_fields: set[str] = set()
+    world_kind_sql = ""
+    if isinstance(world_fields, list):
+        for field in world_fields:
+            if not isinstance(field, dict):
+                continue
+            name = field.get("name")
+            if isinstance(name, str):
+                actual_world_fields.add(name)
+            sql = field.get("sql")
+            if name == "world_kind" and isinstance(sql, str):
+                world_kind_sql = sql
+    allowed_world_kinds = _string_set(world_contract.get("allowed_world_kind_authority"))
+    required_world_fields = {
+        "world_product_id",
+        "release_id",
+        "session_id",
+        "episode_id",
+        "stage_id",
+        "world_kind",
+        "aircraft_id",
+        "dataset_id",
+        "start_session_time_us",
+        "end_session_time_us",
+        "status",
+        "coverage",
+        "confidence",
+        "world_version",
+        "policy_version",
+        "logical_content_hash",
+        "request_hash",
+        "supersedes_id",
+    }
+    checks.append(
+        _check(
+            "m1_c_world_contract",
+            world_contract.get("manifest_authority") == "world.world_product_manifest"
+            and world_contract.get("capability_code") == "BASIC_CORE"
+            and world_contract.get("required_capability_letters") == basic_core.get("required")
+            and world_contract.get("optional_capability_letters") == basic_core.get("optional")
+            and required_world_fields <= actual_world_fields
+            and allowed_world_kinds
+            == {"CONTEXT", "TRUTH", "PERCEPTION", "ACTION", "ADJUDICATION", "MACHINE"}
+            and all(kind in world_kind_sql for kind in allowed_world_kinds)
+            and world_contract.get("truth_may_substitute_for_missing_perception") is False
+            and world_contract.get("missing_adjudication_may_be_inferred") is False,
+            str(world_contract.get("capability_code")),
+        )
+    )
+
+    stage_golden = _mapping(m1_c_design.get("stage_golden"))
+    checks.append(
+        _check(
+            "m1_c_stage_golden_gate",
+            stage_golden.get("task_id") == "M1-TST-003"
+            and stage_golden.get("required_before_metric_vertical_slice") is True
+            and stage_golden.get("primary_fixture") == "BF_M1_NOMINAL_V1"
+            and stage_golden.get("boundary_fixture") == "BF_M1_STAGE_BOUNDARY_V1"
+            and stage_golden.get("expected_result_independence_required") is True
+            and stage_golden.get("metric_code_must_not_resegment_stage") is True,
+            str(stage_golden.get("task_id")),
+        )
+    )
+
+    m1_c_guardrails = _mapping(m1_c_design.get("guardrails"))
+    checks.append(
+        _check(
+            "m1_c_guardrails",
+            m1_c_guardrails.get("canonical_semantics_may_be_redefined") is False
+            and m1_c_guardrails.get("stage_semantics_may_be_redefined") is False
+            and m1_c_guardrails.get("m2_sensor_family_implementation_allowed") is False
+            and m1_c_guardrails.get("metric_business_logic_implemented_by_this_design") is False
+            and m1_c_guardrails.get("database_migration_required_by_this_design") is False
+            and m1_c_guardrails.get("os_specific_business_semantics") is False,
+            str(m1_c_guardrails),
         )
     )
 

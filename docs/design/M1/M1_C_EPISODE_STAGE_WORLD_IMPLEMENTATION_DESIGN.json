@@ -1,0 +1,197 @@
+{
+  "schema": "TPAA_M1_C_EPISODE_STAGE_WORLD_IMPLEMENTATION_DESIGN_V1",
+  "document_role": "IMPLEMENTATION_DESIGN_NOT_SEMANTIC_AUTHORITY",
+  "wave": "M1-C",
+  "design_ahead_from_wave": "M1-B",
+  "implementation_state": "DESIGN_ONLY",
+  "implementation_prerequisites": [
+    "M1-DATA-001",
+    "M1-DATA-002",
+    "M1-DATA-003",
+    "M1-DATA-004",
+    "M1-DATA-005",
+    "M1-DATA-006",
+    "M1-DATA-007"
+  ],
+  "implementation_anchors": [
+    "M1-WORLD-001",
+    "M1-WORLD-002",
+    "M1-WORLD-003",
+    "M1-WORLD-004",
+    "M1-WORLD-005",
+    "M1-WORLD-006",
+    "M1-WORLD-007",
+    "M1-TST-003"
+  ],
+  "authorities": [
+    "SDIB-1.0.1 §19.2",
+    "SDIB-1.0.1 §19.3",
+    "SDIB-1.0.1 §19.4",
+    "SDIB-1.0.1 §21",
+    "SDIB-1.0.1 §22",
+    "SDIB-1.0.1 §23",
+    "CB-1.4.0 CORE_RULES.json",
+    "CB-1.4.0 CORE_LOGICAL_MODEL.json",
+    "CB-1.4.0 STAGE_REGISTRY.json",
+    "CB-1.4.0 WORLD_CAPABILITY_REGISTRY.json"
+  ],
+  "episode_contract": {
+    "table_authority": "episode.training_episode",
+    "episode_type": "BASIC_FLIGHT",
+    "subject_scope": "AIRCRAFT",
+    "primary_subject_field": "primary_aircraft_id",
+    "interval": "[start_session_time_us,end_session_time_us)",
+    "required_identity_inputs": [
+      "session_id",
+      "context_id",
+      "primary_aircraft_id",
+      "episode_type",
+      "start_session_time_us",
+      "end_session_time_us",
+      "detector_version"
+    ],
+    "detector_version": "M1_BASIC_FLIGHT_EPISODE_V1",
+    "context_reference_required": true,
+    "revision_rule": "corrections create a new row linked by supersedes_episode_id",
+    "published_history_mutable": false,
+    "required_quality_fields": [
+      "episode_status",
+      "coverage",
+      "confidence",
+      "data_sufficiency_status"
+    ]
+  },
+  "stage_contract": {
+    "table_authority": "episode.episode_stage",
+    "profile_id": "BASIC_FLIGHT_V1",
+    "ordered_stages": [
+      "SETUP_ENTRY",
+      "EXECUTION",
+      "STABILIZATION_RECOVERY",
+      "COMPLETION"
+    ],
+    "interval": "[start_session_time_us,end_session_time_us)",
+    "precedence": [
+      "CONTEXT_OFFICIAL_MARKER",
+      "NORMALIZED_AUTHORITY_EVENT",
+      "CONTEXT_RULE_WORLD_DERIVATION",
+      "MODEL_INFERENCE",
+      "MANUAL_REVIEW"
+    ],
+    "detection_method_mapping": {
+      "CONTEXT_OFFICIAL_MARKER": "CONTEXT",
+      "NORMALIZED_AUTHORITY_EVENT": "MARKER",
+      "CONTEXT_RULE_WORLD_DERIVATION": "RULE",
+      "MODEL_INFERENCE": "RULE",
+      "MANUAL_REVIEW": "MANUAL"
+    },
+    "first_slice_fixture_evidence": "official_stage_markers mapped through authoritative Session Time",
+    "fixture_marker_contract": {
+      "published_stage_markers": [
+        "SETUP_ENTRY",
+        "EXECUTION",
+        "STABILIZATION_RECOVERY",
+        "COMPLETION"
+      ],
+      "terminator_marker": "END",
+      "terminator_is_stage": false,
+      "interval_construction": "stage_i=[marker_i,marker_i+1)",
+      "fail_closed_on": [
+        "missing END marker",
+        "duplicate or out-of-order governed Stage marker",
+        "marker outside Episode interval",
+        "Stage interval crossing Episode revision boundary",
+        "unrecognized Stage code"
+      ]
+    },
+    "revision_rule": "corrections create a new row linked by supersedes_stage_id",
+    "published_history_mutable": false,
+    "required_quality_fields": [
+      "stage_status",
+      "coverage",
+      "confidence",
+      "detector_version"
+    ]
+  },
+  "world_contract": {
+    "manifest_authority": "world.world_product_manifest",
+    "capability_registry": "WORLD_CAPABILITY_REGISTRY 1.0.0",
+    "capability_code": "BASIC_CORE",
+    "required_capability_letters": [
+      "C",
+      "W",
+      "A",
+      "M"
+    ],
+    "optional_capability_letters": [
+      "P",
+      "J"
+    ],
+    "allowed_world_kind_authority": [
+      "CONTEXT",
+      "TRUTH",
+      "PERCEPTION",
+      "ACTION",
+      "ADJUDICATION",
+      "MACHINE"
+    ],
+    "selection_rule": "publish only existing world_kind values backed by governed evidence; no synthetic P/J or new world kind",
+    "minimum_subject_binding": [
+      "session_id",
+      "episode_id",
+      "aircraft_id",
+      "start_session_time_us",
+      "end_session_time_us"
+    ],
+    "identity_hash_inputs": [
+      "release_id",
+      "session_id",
+      "episode_id",
+      "stage_id",
+      "world_kind",
+      "aircraft_id",
+      "dataset_id",
+      "start_session_time_us",
+      "end_session_time_us",
+      "world_version",
+      "policy_version",
+      "logical_content_hash",
+      "request_hash"
+    ],
+    "logical_hash_cross_platform_stable": true,
+    "immutable_evidence_refs_required": true,
+    "truth_may_substitute_for_missing_perception": false,
+    "missing_adjudication_may_be_inferred": false
+  },
+  "stage_golden": {
+    "task_id": "M1-TST-003",
+    "required_before_metric_vertical_slice": true,
+    "primary_fixture": "BF_M1_NOMINAL_V1",
+    "boundary_fixture": "BF_M1_STAGE_BOUNDARY_V1",
+    "exact_discrete_outputs": [
+      "episode_id",
+      "stage_id",
+      "stage_type",
+      "stage_order",
+      "start_session_time_us",
+      "end_session_time_us",
+      "detection_method",
+      "stage_status",
+      "detector_version"
+    ],
+    "governed_numeric_outputs": [
+      "coverage",
+      "confidence"
+    ],
+    "expected_result_independence_required": true,
+    "metric_code_must_not_resegment_stage": true
+  },
+  "guardrails": {
+    "canonical_semantics_may_be_redefined": false,
+    "stage_semantics_may_be_redefined": false,
+    "m2_sensor_family_implementation_allowed": false,
+    "metric_business_logic_implemented_by_this_design": false,
+    "database_migration_required_by_this_design": false,
+    "os_specific_business_semantics": false
+  }
+}
