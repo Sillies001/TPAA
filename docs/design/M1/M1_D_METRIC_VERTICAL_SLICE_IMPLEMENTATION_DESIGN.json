@@ -1,0 +1,61 @@
+{
+  "schema": "TPAA_M1_D_METRIC_VERTICAL_SLICE_IMPLEMENTATION_DESIGN_V1",
+  "document_role": "IMPLEMENTATION_DESIGN_NOT_SEMANTIC_AUTHORITY",
+  "wave": "M1-D",
+  "design_ahead_from_wave": "M1-C",
+  "implementation_state": "DESIGN_ONLY",
+  "implementation_prerequisites": [
+    "M1-WORLD-001",
+    "M1-WORLD-002",
+    "M1-WORLD-003",
+    "M1-WORLD-004",
+    "M1-WORLD-005",
+    "M1-WORLD-006",
+    "M1-WORLD-007",
+    "M1-TST-003"
+  ],
+  "implementation_anchors": [
+    "M1-MET-001",
+    "M1-MET-002",
+    "M1-MET-003",
+    "M1-MET-004",
+    "M1-MET-005",
+    "M1-MET-006",
+    "M1-MET-007",
+    "M1-MET-008"
+  ],
+  "metric_context": {
+    "authority_source": "frozen metric catalog/profile plus explicit immutable input refs",
+    "ui_is_authority": false,
+    "latest_fallback_allowed": false,
+    "required_ref_classes": [
+      "EVALUATION_CONTEXT",
+      "CANONICAL",
+      "EPISODE",
+      "STAGE",
+      "WORLD",
+      "EVIDENCE"
+    ]
+  },
+  "first_vertical_slice": [
+    "P1-AIR-001",
+    "P1-AIR-002",
+    "P1-AIR-003",
+    "P1-AIR-004",
+    "P1-AIR-007"
+  ],
+  "constraints": {
+    "metric_may_resegment_episode_or_stage": false,
+    "missing_input_may_be_zero_filled": false,
+    "compute_directly_publishes": false,
+    "failed_compute_changes_current": false,
+    "stage_golden_required_before_metric": true,
+    "cross_platform_logical_identity_required": true
+  },
+  "algorithm_guardrails": {
+    "P1-AIR-003": "unwrap + DERIVATIVE_LLS_V1 + governed gap behavior",
+    "P1-AIR-004": "ROLLING_MEDIAN + sustained dwell evidence",
+    "P1-AIR-007": "STRUCT_P1_AIR_007_V1 typed structured output"
+  },
+  "next_wave_not_advanced": "M1-E Observation/Release"
+}
