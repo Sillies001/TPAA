@@ -1,0 +1,63 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_NOMINAL_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "ca649b252e37639206e420930933c76637bd249f27e3bb8a925747274886c91c",
+  "expected_sha256": "514c5746ae261a8551a72f53289e5ed7c24ae10c06845474d9585ec1de4f96c7",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1",
+    "stage_registry_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "dto_contracts_sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Primary Golden",
+  "must_cover": [
+    "four Basic Stages",
+    "continuous valid data",
+    "five representative metrics",
+    "release/api/gui downstream-ready"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "513ba5592d156ef668cd271af6cb97e2f90a6c814822920736f5ae921fa00b8d"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "a8e7036cf86a3ab63ee8447013d8e01ddf61de682009ee771d3f68017aad8096"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "514c5746ae261a8551a72f53289e5ed7c24ae10c06845474d9585ec1de4f96c7"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  },
+  "input_hash_algorithm": "SHA256_PATH_SHA256_V1",
+  "expected_hash_algorithm": "SHA256_FILE_BYTES_V1"
+}

@@ -76,6 +76,11 @@ jobs:
       - name: Verify M1 detailed-design runway
         run: uv run --locked python tools/dev/tpaa_dev.py verify-m1-detailed-design
 
+      - name: Emit M1-TST-001 fixture evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-fixture-check
+          --evidence evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -108,6 +113,7 @@ jobs:
             evidence/cross-platform/${{ matrix.platform }}.json
             evidence/devops/${{ matrix.platform }}
             evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
+            evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json
             dist/
           if-no-files-found: error
           retention-days: 14

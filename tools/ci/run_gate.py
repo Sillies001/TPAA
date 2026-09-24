@@ -137,6 +137,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("verify-desktop-lifecycle-policy", _dispatcher("verify-desktop-lifecycle-policy")),
             ("verify-repository-bootstrap", _dispatcher("verify-repository-bootstrap")),
             ("verify-m0-delta-closure", _dispatcher("verify-m0-delta-closure")),
+            ("m1-fixture-contract", _dispatcher("m1-fixture-check")),
             ("verify-governance", _dispatcher("verify-governance")),
             ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
             ("migration-smoke", _dispatcher("migration-smoke")),
@@ -186,7 +187,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
     status = "FAIL" if preflight_failure or failed else "PASS"
     payload: dict[str, object] = {
         "schema": "TPAA_M0_CROSS_PLATFORM_CI_EVIDENCE_V1",
-        "tasks": ["M0-PLAT-004", "M0-PLAT-005"],
+        "tasks": ["M0-PLAT-004", "M0-PLAT-005", "M1-TST-001"],
         "status": status,
         "preflight_failure": preflight_failure,
         "source_revision": _git_revision(),
@@ -213,10 +214,10 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
         "required_gates": gates,
         "failed_gate_names": [str(gate["name"]) for gate in failed],
         "scope": {
-            "included": "SDIB-1.0.1 M0 Windows/Linux CI over implemented M0 gates including repository-bootstrap/package/SBOM/cold-start",
+            "included": "SDIB-1.0.1 Windows/Linux CI over implemented M0 gates plus M1-TST-001 fixture-contract validation, package/SBOM/cold-start",
             "excluded": [
                 "M0 Exit Gate",
-                "M1 production Metric/Stage/Release Golden/replay bundles",
+                "M1 Data/World/Metric/Release production execution beyond the M1-TST-001 fixture contract",
                 "real PostgreSQL server acceptance is retained from M0-STO-003 and is not redefined by this runner task",
             ],
         },

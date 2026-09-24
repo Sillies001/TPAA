@@ -1,0 +1,62 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_STRUCTURED_PARTIAL_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "b6ee20dd4346f1a7c801e7b7d43e1d939d133b666e031f7a46c8ea88c7946caf",
+  "expected_sha256": "9935a8b397a54d342fe62236829457b68c162b62f28f95df832bfb75e21072da",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1",
+    "stage_registry_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "dto_contracts_sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Structured partial channels",
+  "must_cover": [
+    "TAS present while Mach missing",
+    "Mach present while TAS missing",
+    "AIR-007 subrecord status"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "0004f0bbad79f08e03cc4ee25a3ce81cde23fb0d7881b40d56092dd4138d530e"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "89c3a7a2d464d928d53cd4ba42a776af9ef618767b0e4ee4fd33d8d2ed8c7d57"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "9935a8b397a54d342fe62236829457b68c162b62f28f95df832bfb75e21072da"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  },
+  "input_hash_algorithm": "SHA256_PATH_SHA256_V1",
+  "expected_hash_algorithm": "SHA256_FILE_BYTES_V1"
+}

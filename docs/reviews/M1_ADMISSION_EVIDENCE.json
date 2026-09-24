@@ -1,0 +1,47 @@
+{
+  "schema": "TPAA_M1_ADMISSION_EVIDENCE_V1",
+  "authority": "SDIB-1.0.1 §19.1",
+  "decision": "M1_ADMITTED",
+  "implementation_authorized": true,
+  "source_revision": "7bfb5967f5de50895961a1ef504101897b91c458",
+  "run": {
+    "run_id": 35941454209,
+    "run_number": 70,
+    "status": "PASS",
+    "head_sha": "7bfb5967f5de50895961a1ef504101897b91c458",
+    "activation_artifact": {
+      "id": 10785660905,
+      "sha256": "1cf964a0ac5496c6aaa55c896d02759b0b272d7ef42872c4511b36ff7bfa4de8"
+    },
+    "exit_review_artifact": {
+      "id": 10784783852,
+      "sha256": "ac518561837567893378c0ee9634ed64fcb23e5f4dbf69476dc08f9d14605e65"
+    },
+    "logical_equivalence_artifact": {
+      "id": 10785835080,
+      "sha256": "703314d36092d9aa17329edad9ef6b99af99f2e6a60d695418eb67372dd1b2ee"
+    },
+    "windows_artifact": {
+      "id": 10785331939,
+      "sha256": "0dd8880401e735e4ef0bbf62968324bbb0eb2b9bca28cca0e104a3c1aca1f74c"
+    },
+    "linux_artifact": {
+      "id": 10784967757,
+      "sha256": "b7de4568ea576de06f5aac70a71a5e9db4f1f27238e06f50c03e86c807bb2582"
+    },
+    "postgresql_artifact": {
+      "id": 10784827070,
+      "sha256": "29e9a8e979acbfc1dfac8a051ec19029b08bfed297220aeaed918c4dd1126966"
+    }
+  },
+  "activation": {
+    "schema": "TPAA_M1_ENTRY_ACTIVATION_V1",
+    "status": "PASS",
+    "mode": "activate",
+    "condition_6_runtime": "PASS",
+    "conditions_passed_after_runtime_verification": 10,
+    "decision": "M1_ADMITTED",
+    "implementation_authorized": true
+  },
+  "implementation_boundary": "M1 feature implementation is authorized from this exact admitted main revision forward; downstream task acceptance remains task-specific and fail-closed."
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_STAGE_BOUNDARY_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "06ce8c8cb50fe94043ccd727fcbdaa4cd0f8e181e109f7f453ec80c1e2216258",
+  "expected_sha256": "fdd4aff5913dd428a5c312bff3faa367c0ecfb6a15759c5469dcc6d2ea6ec6d6",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1",
+    "stage_registry_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "dto_contracts_sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Stage boundary isolation",
+  "must_cover": [
+    "metric window does not cross Episode/Stage/validity boundary"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "dbb735b7f653bd14e1656e901816e42264a75af1f328af672399b79def5e7da1"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "f52d6fdd573af9f8434950fdf0ed352904415115d6cd44e7572b06fcea21d151"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "fdd4aff5913dd428a5c312bff3faa367c0ecfb6a15759c5469dcc6d2ea6ec6d6"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  },
+  "input_hash_algorithm": "SHA256_PATH_SHA256_V1",
+  "expected_hash_algorithm": "SHA256_FILE_BYTES_V1"
+}
