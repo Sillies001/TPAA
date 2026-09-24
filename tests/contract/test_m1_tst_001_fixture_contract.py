@@ -26,7 +26,7 @@ def test_m1_fixture_policy_has_exact_eight_bundle_ids() -> None:
     ids = {item["id"] for item in policy["bundles"]}
 
     assert ids == {
-        "tests/fixtures/m1/BF_M1_NOMINAL_V1",
+        "BF_M1_NOMINAL_V1",
         "BF_M1_GAP_V1",
         "BF_M1_ANGLE_WRAP_V1",
         "BF_M1_STRUCTURED_PARTIAL_V1",
@@ -59,7 +59,7 @@ def test_single_bundle_validation_preserves_task_boundary() -> None:
         str(DEV),
         "m1-fixture-check",
         "--bundle",
-        "BF_M1_NOMINAL_V1",
+        "tests/fixtures/m1/BF_M1_NOMINAL_V1",
     )
 
     assert result.returncode == 0, result.stderr
