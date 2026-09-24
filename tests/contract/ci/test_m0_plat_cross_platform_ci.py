@@ -298,3 +298,19 @@ def test_m1_data_007_lineage_quality_evidence_is_governed_in_ci() -> None:
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-lineage-quality-check")' in gate
+
+
+def test_m1_world_002_basic_stage_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-WORLD-002 BASIC_FLIGHT_V1 Stage evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-basic-stage-check" in text
+    assert (
+        "--evidence evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json"
+        in text
+    )
+    assert (
+        "evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-basic-stage-check")' in gate

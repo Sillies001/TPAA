@@ -57,6 +57,7 @@ M1_CANONICAL_FLIGHT_CHANNELS_CHECK_MODULE = (
 M1_EVALUATION_CONTEXT_CHECK_MODULE = "tools.testing.m1_evaluation_context_check"
 M1_LINEAGE_QUALITY_CHECK_MODULE = "tools.testing.m1_lineage_quality_check"
 M1_BASIC_EPISODE_CHECK_MODULE = "tools.testing.m1_basic_episode_check"
+M1_BASIC_STAGE_CHECK_MODULE = "tools.testing.m1_basic_stage_check"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -99,6 +100,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-evaluation-context-check", "M1-DATA-006", "IMPLEMENTED", "Verify immutable Basic/Stage/Metric Evaluation Context binding over all M1 bundles."),
     CommandSpec("m1-lineage-quality-check", "M1-DATA-007", "IMPLEMENTED", "Verify field-level source lineage and exact quality/missing propagation over all M1 bundles."),
     CommandSpec("m1-basic-episode-check", "M1-WORLD-001", "IMPLEMENTED", "Verify replay-stable Basic Flight Episode identity/revision over all M1 bundles."),
+    CommandSpec("m1-basic-stage-check", "M1-WORLD-002", "IMPLEMENTED", "Verify exact BASIC_FLIGHT_V1 Stage order and half-open boundary projection over all M1 bundles."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -509,6 +511,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verify M1-WORLD-001 replay-stable Basic Flight Episode detection",
     )
     m1_episode.add_argument("--evidence", type=Path)
+    m1_stage = sub.add_parser(
+        "m1-basic-stage-check",
+        help="Verify M1-WORLD-002 governed BASIC_FLIGHT_V1 Stage projection",
+    )
+    m1_stage.add_argument("--evidence", type=Path)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -705,6 +712,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.evidence is not None:
             episode_args.extend(["--evidence", str(args.evidence)])
         return _run(episode_args)
+    if command == "m1-basic-stage-check":
+        stage_args = [sys.executable, "-m", M1_BASIC_STAGE_CHECK_MODULE]
+        if args.evidence is not None:
+            stage_args.extend(["--evidence", str(args.evidence)])
+        return _run(stage_args)
     if command == "m1-fixture-check":
         fixture_args = [sys.executable, "-m", M1_FIXTURE_HARNESS_MODULE]
         if args.bundle is not None:
