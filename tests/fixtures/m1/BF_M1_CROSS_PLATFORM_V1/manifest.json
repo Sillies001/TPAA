@@ -1,0 +1,56 @@
+{
+  "schema": "TPAA_M1_FIXTURE_BUNDLE_V1",
+  "fixture_id": "BF_M1_CROSS_PLATFORM_V1",
+  "fixture_version": "1.0.0",
+  "input_sha256": "30ad2099a0c17ee4b5299ef17dba34406e8175c2ac9bd30582613f4827ca71d0",
+  "expected_sha256": "239ef43a23019485904f26e22da14f3ac60a3e9c8e55e7c25b0f8eb644876ca8",
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "stage_profile": "BASIC_FLIGHT_V1",
+    "metric_codes": [
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-007"
+    ],
+    "fixture_policy": "TPAA_M1_FIXTURE_POLICY_V1"
+  },
+  "tolerance_profile": {
+    "id": "M1_AIR_NUMERIC_DEFAULT_V1",
+    "absolute": "0.000001",
+    "relative": "0.000001"
+  },
+  "data_classification": "SYNTHETIC",
+  "review_state": "REVIEWED",
+  "purpose": "Windows/Linux logical equivalence",
+  "must_cover": [
+    "same frozen bundle",
+    "Windows/Linux logical-equivalence"
+  ],
+  "input_hash_basis": [
+    "source/flight.json",
+    "context/evaluation-context.json"
+  ],
+  "files": {
+    "source": {
+      "path": "source/flight.json",
+      "sha256": "28edcbc632e940f9455805a8fa4f65c226665c005d1d6ce40fb3afc0bf883266"
+    },
+    "context": {
+      "path": "context/evaluation-context.json",
+      "sha256": "0b131a061e78b998ea8651a3ad97c9a68264ec1e7d3ebe55f87f47ec7cde1de2"
+    },
+    "expected": {
+      "path": "expected/expected.json",
+      "sha256": "239ef43a23019485904f26e22da14f3ac60a3e9c8e55e7c25b0f8eb644876ca8"
+    }
+  },
+  "expected_generation": {
+    "method": "human_recalculation",
+    "generated_from_implementation_under_test": false,
+    "independently_reviewable": true,
+    "reviewer": "@Sillies001",
+    "independence_attestation": "@Sillies001 is independent of the implementation and expected-result author for Golden acceptance."
+  }
+}
