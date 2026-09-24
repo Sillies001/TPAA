@@ -233,6 +233,8 @@ def test_m1_data_003_session_time_evidence_is_governed_in_ci() -> None:
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-session-time-check")' in gate
 
+
+
 def test_m1_data_004_aircraft_identity_evidence_is_governed_in_ci() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "- name: Emit M1-DATA-004 aircraft-identity evidence" in text
@@ -247,3 +249,20 @@ def test_m1_data_004_aircraft_identity_evidence_is_governed_in_ci() -> None:
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-aircraft-identity-check")' in gate
+
+
+
+def test_m1_data_005_canonical_flight_channel_evidence_is_governed_in_ci() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1-DATA-005 Canonical-flight-channel evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-canonical-flight-channels-check" in text
+    assert (
+        "--evidence evidence/m1-data-005/${{ matrix.platform }}/canonical-flight-channels.json"
+        in text
+    )
+    assert (
+        "evidence/m1-data-005/${{ matrix.platform }}/canonical-flight-channels.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-canonical-flight-channels-check")' in gate
