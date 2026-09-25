@@ -7,6 +7,7 @@ from tools.testing.m1_batch_2_support import (
     build_batch_2_fixture_products,
     seed_sqlite_core_prerequisites,
 )
+from tpaa_application.m1_publication import to_core_publication_bundle
 from tpaa_storage.bootstrap import bootstrap_sqlite
 from tpaa_storage.sqlite_repository import SQLiteDesktopUnitOfWork
 
@@ -31,7 +32,7 @@ def test_sqlite_core_publication_maps_only_authoritative_tables(tmp_path: Path) 
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
         receipt = uow.publication.publish(
-            products.release,
+            to_core_publication_bundle(products.release),
             idempotency_key="sqlite-batch-2",
             expected_version_token=0,
         )
@@ -48,7 +49,7 @@ def test_sqlite_core_publication_maps_only_authoritative_tables(tmp_path: Path) 
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
         retry = uow.publication.publish(
-            products.release,
+            to_core_publication_bundle(products.release),
             idempotency_key="sqlite-batch-2",
             expected_version_token=0,
         )
