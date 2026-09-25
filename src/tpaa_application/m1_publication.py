@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import threading
+from collections.abc import Callable
 from pathlib import Path
 
 from tpaa_context import resolve_evaluation_context
@@ -83,6 +85,11 @@ class M1PublicationService:
         self._fixture_root = fixture_root
         self._authority_root = authority_root
         self._repository = repository
+        self._command_lock = threading.Lock()
+        self._command_results: dict[
+            tuple[str, str],
+            tuple[str, dict[str, object]],
+        ] = {}
 
     def _bundle_path(self, fixture_id: str) -> Path:
         if not fixture_id or "/" in fixture_id or "\\" in fixture_id or ".." in fixture_id:
@@ -91,6 +98,126 @@ class M1PublicationService:
         if not path.is_dir():
             raise M1ApplicationError("M1_FIXTURE_NOT_FOUND", fixture_id)
         return path
+
+
+    def _idempotent_command(
+        self,
+        *,
+        command: str,
+        idempotency_key: str,
+        payload: dict[str, object],
+        execute: Callable[[], dict[str, object]],
+    ) -> dict[str, object]:
+        if not idempotency_key.strip():
+            raise M1ApplicationError("IDEMPOTENCY_KEY_REQUIRED", "")
+        request_hash = canonical_request_hash(payload)
+        key = (command, idempotency_key)
+        with self._command_lock:
+            prior = self._command_results.get(key)
+            if prior is not None:
+                prior_hash, prior_result = prior
+                if prior_hash != request_hash:
+                    raise M1ApplicationError("IDEMPOTENCY_KEY_CONFLICT", idempotency_key)
+                return {**prior_result, "request_hash": request_hash, "reused": True}
+
+            result = execute()
+            stored = {**result, "request_hash": request_hash, "reused": False}
+            self._command_results[key] = (request_hash, stored)
+            return dict(stored)
+
+    def import_session(
+        self,
+        *,
+        fixture_id: str,
+        idempotency_key: str,
+    ) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "command": "M1_IMPORT_SESSION",
+            "fixture_id": fixture_id,
+        }
+
+        def execute() -> dict[str, object]:
+            bundle = load_synthetic_fixture_bundle(self._bundle_path(fixture_id))
+            return {
+                "command": "M1_IMPORT_SESSION",
+                "fixture_id": bundle.identity.fixture_id,
+                "fixture_version": bundle.identity.fixture_version,
+                "session_id": bundle.session.session_id,
+                "aircraft_id": bundle.aircraft.aircraft_id,
+                "source_ref": bundle.identity.stable_source_ref,
+                "input_sha256": bundle.identity.input_sha256,
+                "source_sha256": bundle.identity.source_sha256,
+                "context_sha256": bundle.identity.context_sha256,
+                "source_row_count": len(bundle.rows),
+                "status": "VALIDATED",
+            }
+
+        return self._idempotent_command(
+            command="M1_IMPORT_SESSION",
+            idempotency_key=idempotency_key,
+            payload=payload,
+            execute=execute,
+        )
+
+    def compute_session(
+        self,
+        *,
+        fixture_id: str,
+        idempotency_key: str,
+    ) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "command": "M1_COMPUTE_SESSION",
+            "fixture_id": fixture_id,
+        }
+
+        def execute() -> dict[str, object]:
+            bundle_path = self._bundle_path(fixture_id)
+            bundle = load_synthetic_fixture_bundle(bundle_path)
+            request_hash = canonical_request_hash(payload)
+            candidate_release_id = allocate_session_release_id(
+                session_id=bundle.session.session_id,
+                request_hash=request_hash,
+            )
+            world = project_minimal_p1_world(
+                bundle_path,
+                authority_root=self._authority_root,
+                release_id=candidate_release_id,
+            )
+            context = build_metric_context(
+                bundle_path,
+                authority_root=self._authority_root,
+                world=world,
+            )
+            batch = compute_representative_metrics(context, world)
+            return {
+                "command": "M1_COMPUTE_SESSION",
+                "fixture_id": fixture_id,
+                "candidate_release_id": candidate_release_id,
+                "session_id": world.session_id,
+                "context_id": context.context_id,
+                "metric_context_id": context.metric_context_id,
+                "world_product_id": world.world_product_id,
+                "world_logical_hash": world.logical_content_hash,
+                "metric_batch_hash": batch.logical_hash,
+                "metric_results": [
+                    {
+                        "metric_code": item.metric_code,
+                        "status": item.status,
+                        "logical_hash": item.logical_hash,
+                    }
+                    for item in batch.results
+                ],
+                "database_persistence_executed": batch.database_persistence_executed,
+                "publication_executed": batch.publication_executed,
+                "status": batch.staging_status,
+            }
+
+        return self._idempotent_command(
+            command="M1_COMPUTE_SESSION",
+            idempotency_key=idempotency_key,
+            payload=payload,
+            execute=execute,
+        )
 
     def publish_session(
         self,
