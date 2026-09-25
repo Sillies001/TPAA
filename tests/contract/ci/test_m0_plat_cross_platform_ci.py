@@ -46,7 +46,7 @@ def test_workflow_calls_one_governed_ci_gate_command() -> None:
 
 def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    assert text.count(f"ref: {SOURCE_REVISION}") == 4
+    assert text.count(f"ref: {SOURCE_REVISION}") == 5
     assert "${{ github.sha }}" not in text
     assert f"pattern: tpaa-ci-*-{SOURCE_REVISION}" in text
     assert f"--expected-revision {SOURCE_REVISION}" in text
@@ -366,3 +366,84 @@ def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() 
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-batch-1-core-check")' in gate
+
+
+def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1 Batch 2 service smoke evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-service-smoke" in text
+    assert "--expected-platform ${{ matrix.platform }}" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
+    assert (
+        "--evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json"
+        in text
+    )
+    assert "evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json" in text
+    assert "- name: Compare Windows and Linux M1 Batch 2 service products" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-service-compare" in text
+    assert (
+        "--windows downloaded/evidence/m1-batch-2/windows/service-smoke.json"
+        in text
+    )
+    assert (
+        "--linux downloaded/evidence/m1-batch-2/linux/service-smoke.json"
+        in text
+    )
+    assert (
+        "--evidence evidence/cross-platform/m1-batch-2-service-logical-equivalence.json"
+        in text
+    )
+    assert "evidence/cross-platform/m1-batch-2-service-logical-equivalence.json" in text
+
+
+def test_m1_batch_2_storage_parity_is_real_postgres_hosted_evidence() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1 Batch 2 SQLite PostgreSQL parity evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-storage-parity" in text
+    assert "--database tpaa_m1_batch_2_parity" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
+    assert "--evidence evidence/m1-batch-2/postgres/storage-parity.json" in text
+    assert "- name: Upload M1 Batch 2 PostgreSQL parity evidence" in text
+    assert f"tpaa-m1-batch-2-postgres-{SOURCE_REVISION}" in text
+    assert "evidence/m1-batch-2/postgres/storage-parity.json" in text
+
+
+def test_m1_batch_2_backend_acceptance_is_emitted_on_both_platforms() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit consolidated M1 Batch 2 backend evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-backend-check" in text
+    assert "--platform ${{ matrix.platform }}" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
+    assert "--evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json" in text
+    assert "evidence/m1-batch-2/${{ matrix.platform }}/backend.json" in text
+
+
+def test_m1_batch_2_review_aggregates_exact_revision_evidence() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "m1-batch-2-review:" in text
+    assert "name: M1 Batch 2 Review" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-review" in text
+    assert f"--expected-revision {SOURCE_REVISION}" in text
+    assert (
+        "--windows-backend downloaded/platform/evidence/m1-batch-2/windows/backend.json"
+        in text
+    )
+    assert (
+        "--linux-backend downloaded/platform/evidence/m1-batch-2/linux/backend.json"
+        in text
+    )
+    assert (
+        "--windows-service downloaded/platform/evidence/m1-batch-2/windows/service-smoke.json"
+        in text
+    )
+    assert (
+        "--linux-service downloaded/platform/evidence/m1-batch-2/linux/service-smoke.json"
+        in text
+    )
+    assert (
+        "--service-logical downloaded/logical/m1-batch-2-service-logical-equivalence.json"
+        in text
+    )
+    assert "--storage-parity downloaded/postgres/storage-parity.json" in text
+    assert "--output evidence/m1-batch-2/review.json" in text
+    assert f"tpaa-m1-batch-2-review-{SOURCE_REVISION}" in text

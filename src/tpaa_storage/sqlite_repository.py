@@ -18,6 +18,7 @@ from .bootstrap import (
     BootstrapError,
     verify_sqlite,
 )
+from .core_publication_ledger import SQLiteCorePublicationLedger
 from .ports import RepositoryBaselineMetadata
 
 
@@ -110,6 +111,7 @@ class SQLiteDesktopUnitOfWork:
         self._writer_lease: threading.Lock | None = None
         self._finalized = False
         self.metadata: SQLiteBaselineMetadataRepository
+        self.publication: SQLiteCorePublicationLedger
 
     @property
     def write(self) -> bool:
@@ -148,6 +150,7 @@ class SQLiteDesktopUnitOfWork:
             self._connection = connection
             self._finalized = False
             self.metadata = SQLiteBaselineMetadataRepository(connection)
+            self.publication = SQLiteCorePublicationLedger(connection)
             return self
         except Exception:
             if connection is not None:

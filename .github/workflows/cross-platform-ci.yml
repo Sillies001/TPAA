@@ -138,6 +138,20 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-batch-1-core-check
           --evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
 
+      - name: Emit M1 Batch 2 service smoke evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-service-smoke
+          --expected-platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
+
+      - name: Emit consolidated M1 Batch 2 backend evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-backend-check
+          --platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -182,6 +196,8 @@ jobs:
             evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
             evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
             evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
+            evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
+            evidence/m1-batch-2/${{ matrix.platform }}/backend.json
             dist/
           if-no-files-found: error
           retention-days: 14
@@ -224,6 +240,13 @@ jobs:
           --linux downloaded/evidence/m1-batch-1/linux/core-product.json
           --evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json
 
+      - name: Compare Windows and Linux M1 Batch 2 service products
+        run: >-
+          python tools/dev/tpaa_dev.py m1-batch-2-service-compare
+          --windows downloaded/evidence/m1-batch-2/windows/service-smoke.json
+          --linux downloaded/evidence/m1-batch-2/linux/service-smoke.json
+          --evidence evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
+
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -232,6 +255,7 @@ jobs:
           path: |
             evidence/cross-platform/logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
+            evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
 
@@ -296,6 +320,18 @@ jobs:
             --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}" \
             > evidence/m0-exit/postgres-repository.json
 
+      - name: Emit M1 Batch 2 SQLite PostgreSQL parity evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-storage-parity
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_m1_batch_2_parity
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-2/postgres/storage-parity.json
+
       - name: Cold-start full M0 with live PostgreSQL
         run: >-
           uv run --locked python tools/ci/cold_start.py
@@ -315,6 +351,75 @@ jobs:
           path: evidence/m0-exit/
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload M1 Batch 2 PostgreSQL parity evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m1-batch-2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m1-batch-2/postgres/storage-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
+  m1-batch-2-review:
+    name: M1 Batch 2 Review
+    needs:
+      - m0-cross-platform
+      - m0-logical-equivalence
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download Windows Linux Batch 2 evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/platform
+          merge-multiple: true
+
+      - name: Download Batch 2 service logical equivalence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/logical
+
+      - name: Download Batch 2 PostgreSQL parity
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m1-batch-2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/postgres
+
+      - name: Aggregate all 18 Batch 2 acceptance rows
+        run: >-
+          python tools/dev/tpaa_dev.py m1-batch-2-review
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --windows-backend downloaded/platform/evidence/m1-batch-2/windows/backend.json
+          --linux-backend downloaded/platform/evidence/m1-batch-2/linux/backend.json
+          --windows-service downloaded/platform/evidence/m1-batch-2/windows/service-smoke.json
+          --linux-service downloaded/platform/evidence/m1-batch-2/linux/service-smoke.json
+          --service-logical downloaded/logical/m1-batch-2-service-logical-equivalence.json
+          --storage-parity downloaded/postgres/storage-parity.json
+          --output evidence/m1-batch-2/review.json
+
+      - name: Upload M1 Batch 2 Review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m1-batch-2-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m1-batch-2/review.json
+          if-no-files-found: error
+          retention-days: 30
 
   m0-exit-review:
     name: M0 Exit Review

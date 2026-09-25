@@ -61,6 +61,11 @@ M1_BASIC_STAGE_CHECK_MODULE = "tools.testing.m1_basic_stage_check"
 M1_STAGE_QUALITY_CHECK_MODULE = "tools.testing.m1_stage_quality_check"
 M1_BATCH_1_CORE_CHECK_MODULE = "tools.testing.m1_batch_1_core_check"
 M1_BATCH_1_COMPARE_MODULE = "tools.testing.m1_batch_1_compare"
+M1_BATCH_2_SERVICE_SMOKE_MODULE = "tools.testing.m1_batch_2_service_smoke"
+M1_BATCH_2_SERVICE_COMPARE_MODULE = "tools.testing.m1_batch_2_service_compare"
+M1_BATCH_2_STORAGE_PARITY_MODULE = "tools.testing.m1_batch_2_storage_parity"
+M1_BATCH_2_BACKEND_CHECK_MODULE = "tools.testing.m1_batch_2_backend_check"
+M1_BATCH_2_REVIEW_MODULE = "tools.testing.m1_batch_2_review"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -107,6 +112,11 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-stage-quality-check", "M1-WORLD-003", "IMPLEMENTED", "Verify governed Stage status, coverage, confidence, and detector version over all M1 bundles."),
     CommandSpec("m1-batch-1-core-check", "M1-WORLD-004..007/M1-MET-001..008/M1-TST-002..003", "IMPLEMENTED", "Verify consolidated M1 Batch 1 World, representative Metric, staging, and Golden acceptance."),
     CommandSpec("m1-batch-1-compare", "M1-WORLD-006/M1-TST-002", "IMPLEMENTED", "Compare Windows/Linux Batch 1 logical evidence exactly."),
+    CommandSpec("m1-batch-2-service-smoke", "M1-PLAT-003", "IMPLEMENTED", "Run the M1 Batch 2 Application/Repository service contract and emit logical evidence."),
+    CommandSpec("m1-batch-2-service-compare", "M1-PLAT-003", "IMPLEMENTED", "Compare Windows/Linux Batch 2 service logical evidence exactly."),
+    CommandSpec("m1-batch-2-storage-parity", "M1-STO-001/M1-STO-003", "IMPLEMENTED", "Publish the same Batch 2 Release to real SQLite/PostgreSQL Core schemas and compare logical membership exactly."),
+    CommandSpec("m1-batch-2-backend-check", "M1 Batch 2 backend acceptance", "IMPLEMENTED", "Emit executable acceptance for OBS/STO-002/API/TST backend rows."),
+    CommandSpec("m1-batch-2-review", "M1 Batch 2 Issue #87", "IMPLEMENTED", "Aggregate exact-revision Windows/Linux/backend/service/storage evidence into the 18-row Batch 2 acceptance matrix."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -539,6 +549,63 @@ def build_parser() -> argparse.ArgumentParser:
     m1_batch_1_compare.add_argument("--windows", type=Path, required=True)
     m1_batch_1_compare.add_argument("--linux", type=Path, required=True)
     m1_batch_1_compare.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_service = sub.add_parser(
+        "m1-batch-2-service-smoke",
+        help="Run M1 Batch 2 cross-platform service smoke",
+    )
+    m1_batch_2_service.add_argument(
+        "--expected-platform",
+        choices=("windows", "linux"),
+        required=True,
+    )
+    m1_batch_2_service.add_argument("--source-revision", required=True)
+    m1_batch_2_service.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_service_compare = sub.add_parser(
+        "m1-batch-2-service-compare",
+        help="Compare Windows/Linux M1 Batch 2 service evidence",
+    )
+    m1_batch_2_service_compare.add_argument("--windows", type=Path, required=True)
+    m1_batch_2_service_compare.add_argument("--linux", type=Path, required=True)
+    m1_batch_2_service_compare.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_storage = sub.add_parser(
+        "m1-batch-2-storage-parity",
+        help="Verify real SQLite/PostgreSQL M1 Batch 2 publication parity",
+    )
+    m1_batch_2_storage.add_argument("--user", default="tpaa")
+    m1_batch_2_storage.add_argument("--host")
+    m1_batch_2_storage.add_argument("--port", type=int)
+    m1_batch_2_storage.add_argument("--psql", default="psql")
+    m1_batch_2_storage.add_argument("--admin-database", default="postgres")
+    m1_batch_2_storage.add_argument(
+        "--database",
+        default="tpaa_m1_batch_2_parity",
+    )
+    m1_batch_2_storage.add_argument("--conninfo-template", required=True)
+    m1_batch_2_storage.add_argument("--source-revision", required=True)
+    m1_batch_2_storage.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_backend = sub.add_parser(
+        "m1-batch-2-backend-check",
+        help="Verify consolidated M1 Batch 2 backend acceptance",
+    )
+    m1_batch_2_backend.add_argument(
+        "--platform",
+        choices=("windows", "linux"),
+        required=True,
+    )
+    m1_batch_2_backend.add_argument("--source-revision", required=True)
+    m1_batch_2_backend.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_review = sub.add_parser(
+        "m1-batch-2-review",
+        help="Aggregate exact-revision M1 Batch 2 acceptance evidence",
+    )
+    m1_batch_2_review.add_argument("--expected-revision", required=True)
+    m1_batch_2_review.add_argument("--windows-backend", type=Path, required=True)
+    m1_batch_2_review.add_argument("--linux-backend", type=Path, required=True)
+    m1_batch_2_review.add_argument("--windows-service", type=Path, required=True)
+    m1_batch_2_review.add_argument("--linux-service", type=Path, required=True)
+    m1_batch_2_review.add_argument("--service-logical", type=Path, required=True)
+    m1_batch_2_review.add_argument("--storage-parity", type=Path, required=True)
+    m1_batch_2_review.add_argument("--output", type=Path, required=True)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -762,6 +829,97 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.linux),
                 "--evidence",
                 str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-2-service-smoke":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_SERVICE_SMOKE_MODULE,
+                "--expected-platform",
+                args.expected_platform,
+                "--source-revision",
+                args.source_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-2-service-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_SERVICE_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-2-storage-parity":
+        parity_args = [
+            sys.executable,
+            "-m",
+            M1_BATCH_2_STORAGE_PARITY_MODULE,
+            "--user",
+            args.user,
+            "--admin-database",
+            args.admin_database,
+            "--database",
+            args.database,
+            "--conninfo-template",
+            args.conninfo_template,
+            "--source-revision",
+            args.source_revision,
+            "--evidence",
+            str(args.evidence),
+        ]
+        if args.host:
+            parity_args.extend(["--host", args.host])
+        if args.port is not None:
+            parity_args.extend(["--port", str(args.port)])
+        if args.psql:
+            parity_args.extend(["--psql", args.psql])
+        return _run(parity_args)
+    if command == "m1-batch-2-backend-check":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_BACKEND_CHECK_MODULE,
+                "--platform",
+                args.platform,
+                "--source-revision",
+                args.source_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-2-review":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_REVIEW_MODULE,
+                "--expected-revision",
+                args.expected_revision,
+                "--windows-backend",
+                str(args.windows_backend),
+                "--linux-backend",
+                str(args.linux_backend),
+                "--windows-service",
+                str(args.windows_service),
+                "--linux-service",
+                str(args.linux_service),
+                "--service-logical",
+                str(args.service_logical),
+                "--storage-parity",
+                str(args.storage_parity),
+                "--output",
+                str(args.output),
             ]
         )
     if command == "m1-fixture-check":

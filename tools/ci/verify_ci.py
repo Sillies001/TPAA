@@ -116,10 +116,10 @@ def verify() -> dict[str, object]:
 
     checks.append(
         _pass("checkout_exact_candidate_revision", SOURCE_REVISION)
-        if text.count(f"ref: {SOURCE_REVISION}") == 4
+        if text.count(f"ref: {SOURCE_REVISION}") == 5
         else _fail(
             "checkout_exact_candidate_revision",
-            f"expected 4 exact-source checkouts using {SOURCE_REVISION}",
+            f"expected 5 exact-source checkouts using {SOURCE_REVISION}",
         )
     )
     checks.append(
@@ -178,6 +178,12 @@ def verify() -> dict[str, object]:
         "--evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json",
         "python tools/dev/tpaa_dev.py m1-batch-1-core-check",
         "--evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json",
+        "python tools/dev/tpaa_dev.py m1-batch-2-service-smoke",
+        "--expected-platform ${{ matrix.platform }}",
+        "--evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json",
+        "python tools/dev/tpaa_dev.py m1-batch-2-backend-check",
+        "--platform ${{ matrix.platform }}",
+        "--evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json",
         "--evidence evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json",
         "python tools/dev/tpaa_dev.py m1-entry-manifest",
         "--output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json",
@@ -206,17 +212,36 @@ def verify() -> dict[str, object]:
         "evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json",
         "evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json",
         "evidence/m1-batch-1/${{ matrix.platform }}/core-product.json",
+        "evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json",
         "python tools/dev/tpaa_dev.py m1-batch-1-compare",
         "--windows downloaded/evidence/m1-batch-1/windows/core-product.json",
         "--linux downloaded/evidence/m1-batch-1/linux/core-product.json",
         "--evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json",
+        "python tools/dev/tpaa_dev.py m1-batch-2-service-compare",
+        "--windows downloaded/evidence/m1-batch-2/windows/service-smoke.json",
+        "--linux downloaded/evidence/m1-batch-2/linux/service-smoke.json",
+        "--evidence evidence/cross-platform/m1-batch-2-service-logical-equivalence.json",
         "dist/",
         "m0-exit-postgres:",
         "image: postgres:16",
         "python tools/dev/tpaa_dev.py db-postgres-acceptance",
         "python tools/dev/tpaa_dev.py db-postgres-repository-acceptance",
+        "python tools/dev/tpaa_dev.py m1-batch-2-storage-parity",
+        "--database tpaa_m1_batch_2_parity",
+        "--evidence evidence/m1-batch-2/postgres/storage-parity.json",
+        f"--source-revision {SOURCE_REVISION}",
+        f"tpaa-m1-batch-2-postgres-{SOURCE_REVISION}",
         "python tools/ci/cold_start.py",
         "--postgres-conninfo-template",
+        "m1-batch-2-review:",
+        "name: M1 Batch 2 Review",
+        "python tools/dev/tpaa_dev.py m1-batch-2-review",
+        "--windows-backend downloaded/platform/evidence/m1-batch-2/windows/backend.json",
+        "--linux-backend downloaded/platform/evidence/m1-batch-2/linux/backend.json",
+        "--service-logical downloaded/logical/m1-batch-2-service-logical-equivalence.json",
+        "--storage-parity downloaded/postgres/storage-parity.json",
+        "--output evidence/m1-batch-2/review.json",
+        f"tpaa-m1-batch-2-review-{SOURCE_REVISION}",
         "m0-exit-review:",
         "python tools/ci/m0_exit_review.py",
         "--output evidence/m0-exit/review.json",
