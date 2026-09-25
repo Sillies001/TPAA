@@ -35,13 +35,13 @@ SDIB-1.1 采用四条实施主线：
 3. **Golden Before Scale**：每个算法/状态机/Release 能力都必须有可复算的 fixture 与预期结果，再进入批量实现。
 4. **Windows/Linux From First Commit**：跨平台不是 M5 才开始“移植”；M0 起即进入 PR Gate，M5 才完成正式资格化。
 
-本文件把 M0/M1 写到可直接拆解 Issue/PR/测试证据的粒度。M2～M9 只冻结目标、依赖和进入条件，避免在没有真实代码反馈前做过度详细的远期任务计划。
+本文件保留 M0/M1 可直接追溯 Issue/PR/测试证据的任务级历史合同，并把 M2 写到可直接建立粗粒度 Batch 的任务级粒度。M3～M9 仍只冻结目标、依赖和进入条件，避免在没有真实代码反馈前做过度详细的远期任务计划。
 
 ## 1. 目的、适用范围与非目标
 
 ### 1.1 目的
 
-SDIB-1.1 回答 ED-2.0 之后开发团队必须立即面对的问题：代码仓怎么建、模块如何依赖、Canonical 如何进入代码、数据库如何 bootstrap、Release/Replay 如何先于大规模指标实现、Windows/Linux CI 怎么从第一天运行、M0/M1 做到什么程度才算完成，以及 M2～M9 在什么条件下才允许进入。
+SDIB-1.1 回答 ED-2.0 之后开发团队必须立即面对的问题：代码仓怎么建、模块如何依赖、Canonical 如何进入代码、数据库如何 bootstrap、Release/Replay 如何先于大规模指标实现、Windows/Linux CI 怎么持续运行、M0/M1 如何形成已验证历史基线、M2 如何在 M1 Exit GO 后扩展到 P1 Basic Flight Complete，以及 M3～M9 在什么条件下才允许进入。
 
 ### 1.2 当前详细实施范围
 
