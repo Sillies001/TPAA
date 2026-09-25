@@ -53,6 +53,16 @@ class ApplicabilityContract:
 
 
 @dataclass(frozen=True)
+class InputAuthorityBinding:
+    input_field: str
+    optional: bool
+    binding_kind: str
+    authority_id: str
+    authority_field: str
+    normalization_rule: str
+
+
+@dataclass(frozen=True)
 class M2MetricDefinition:
     catalog_index: int
     metric_code: str
@@ -79,6 +89,7 @@ class M2MetricDefinition:
     metric_dependencies: tuple[str, ...]
     external_dependencies: tuple[str, ...]
     state_machine_bindings: tuple[str, ...]
+    input_authority_bindings: tuple[InputAuthorityBinding, ...]
     applicability: ApplicabilityContract
     definition_hash: str
 
@@ -88,6 +99,8 @@ class M2MetricExecutionPlan:
     catalog_id: str
     catalog_version: str
     catalog_sha256: str
+    input_authority_matrix_sha256: str
+    world_capability_registry_sha256: str
     db_schema_version: str
     delivery_milestone: str
     delivery_batch: str
@@ -462,6 +475,91 @@ def _applicability(
     return result
 
 
+def _input_authority_by_metric(
+    authority_root: Path,
+    *,
+    catalog_version: str,
+    selected_codes: set[str],
+) -> tuple[dict[str, tuple[InputAuthorityBinding, ...]], str]:
+    path = authority_root / "METRIC_INPUT_AUTHORITY_MATRIX.json"
+    matrix, raw_bytes = _load_object(path)
+    if _text(matrix, "catalog_version", field="input_authority_matrix") != catalog_version:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_INPUT_AUTHORITY_CATALOG_VERSION_DRIFT",
+            catalog_version,
+        )
+    contracts = _object(
+        matrix.get("authority_contracts"),
+        field="input_authority_matrix.authority_contracts",
+    )
+    bindings = _objects(matrix.get("bindings"), field="input_authority_matrix.bindings")
+    grouped: dict[str, list[InputAuthorityBinding]] = {code: [] for code in selected_codes}
+    seen: set[tuple[str, str]] = set()
+    for index, raw in enumerate(bindings):
+        code = _text(raw, "metric_code", field=f"bindings[{index}]")
+        if code not in selected_codes:
+            continue
+        input_field = _text(raw, "input_field", field=f"bindings[{index}]")
+        key = (code, input_field)
+        if key in seen:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_DUPLICATE",
+                f"{code}:{input_field}",
+            )
+        seen.add(key)
+        authority_id = _text(raw, "authority_id", field=f"bindings[{index}]")
+        if authority_id not in contracts:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_MISSING",
+                f"{code}:{input_field}:{authority_id}",
+            )
+        optional = raw.get("optional")
+        if not isinstance(optional, bool):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_INVALID",
+                f"{code}:{input_field}:optional",
+            )
+        grouped[code].append(
+            InputAuthorityBinding(
+                input_field=input_field,
+                optional=optional,
+                binding_kind=_text(raw, "binding_kind", field=f"bindings[{index}]"),
+                authority_id=authority_id,
+                authority_field=_text(raw, "authority_field", field=f"bindings[{index}]"),
+                normalization_rule=_text(
+                    raw,
+                    "normalization_rule",
+                    field=f"bindings[{index}]",
+                ),
+            )
+        )
+    return (
+        {code: tuple(items) for code, items in grouped.items()},
+        hashlib.sha256(raw_bytes).hexdigest(),
+    )
+
+
+def _world_capability_registry_hash(authority_root: Path) -> str:
+    path = authority_root / "WORLD_CAPABILITY_REGISTRY.json"
+    registry, raw_bytes = _load_object(path)
+    if _text(registry, "registry_id", field="world_capability_registry") != "WORLD_CAPABILITY_REGISTRY":
+        raise CatalogMetricEngineError(
+            "M2_METRIC_WORLD_CAPABILITY_REGISTRY_INVALID",
+            "registry_id",
+        )
+    _object(registry.get("worlds"), field="world_capability_registry.worlds")
+    _object(registry.get("capabilities"), field="world_capability_registry.capabilities")
+    missing_rules = registry.get("missing_rules")
+    if not isinstance(missing_rules, list) or not all(
+        isinstance(item, str) and item for item in missing_rules
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_WORLD_CAPABILITY_REGISTRY_INVALID",
+            "missing_rules",
+        )
+    return hashlib.sha256(raw_bytes).hexdigest()
+
+
 def _generated_metadata_by_code() -> dict[str, Mapping[str, object]]:
     result: dict[str, Mapping[str, object]] = {}
     for raw in P1_METRICS:
@@ -598,6 +696,12 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
     )
     generated_by_code = _generated_metadata_by_code()
     selected_codes = set(catalog_codes)
+    input_authority_by_metric, input_authority_matrix_sha256 = _input_authority_by_metric(
+        authority_root,
+        catalog_version=catalog_version,
+        selected_codes=selected_codes,
+    )
+    world_capability_registry_sha256 = _world_capability_registry_hash(authority_root)
     definitions: list[M2MetricDefinition] = []
 
     for index, raw in selected_with_index:
@@ -616,6 +720,22 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         state_machines = _string_list(raw, "state_machine_bindings", field=code)
         profile_parameters = _string_list(raw, "profile_parameters", field=code)
         input_fields = _string_list(raw, "input_fields", field=code)
+        authority_bindings = input_authority_by_metric.get(code, ())
+        binding_fields = tuple(binding.input_field for binding in authority_bindings)
+        if len(binding_fields) != len(set(binding_fields)) or set(binding_fields) != set(input_fields):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_COVERAGE_DRIFT",
+                code,
+            )
+        if any(
+            binding.binding_kind == "UPSTREAM_CONTRACT"
+            and binding.authority_id not in upstream
+            for binding in authority_bindings
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_UPSTREAM_DRIFT",
+                code,
+            )
 
         for operator_id in operators:
             if operator_id not in operator_registry:
@@ -696,6 +816,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             metric_dependencies=metric_dependencies,
             external_dependencies=external_dependencies,
             state_machine_bindings=state_machines,
+            input_authority_bindings=authority_bindings,
             applicability=_applicability(raw, family_contracts),
             definition_hash=_sha256_object(raw),
         )
@@ -710,6 +831,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "catalog_id": "P1_METRIC_CATALOG",
             "catalog_version": catalog_version,
             "catalog_sha256": hashlib.sha256(catalog_bytes).hexdigest(),
+            "input_authority_matrix_sha256": input_authority_matrix_sha256,
+            "world_capability_registry_sha256": world_capability_registry_sha256,
             "db_schema_version": db_schema_version,
             "delivery_milestone": M2_DELIVERY_MILESTONE,
             "delivery_batch": M2_DELIVERY_BATCH,
@@ -726,6 +849,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         catalog_id="P1_METRIC_CATALOG",
         catalog_version=catalog_version,
         catalog_sha256=hashlib.sha256(catalog_bytes).hexdigest(),
+        input_authority_matrix_sha256=input_authority_matrix_sha256,
+        world_capability_registry_sha256=world_capability_registry_sha256,
         db_schema_version=db_schema_version,
         delivery_milestone=M2_DELIVERY_MILESTONE,
         delivery_batch=M2_DELIVERY_BATCH,
