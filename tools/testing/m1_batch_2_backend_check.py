@@ -10,12 +10,25 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import FrozenInstanceError
 from pathlib import Path
+from typing import Never
 from uuid import NAMESPACE_URL, uuid5
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
+
+from fastapi.testclient import TestClient  # noqa: E402
+from tpaa_api import create_m1_app  # noqa: E402
+from tpaa_application import (  # noqa: E402
+    ApplicationService,
+    M1PublicationService,
+    M1PublishSessionCommand,
+    M1PublishSessionResult,
+)
+from tpaa_application.m1_repository import (  # noqa: E402
+    InMemorySessionPublicationRepository,
+)
 
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "m1"
 AUTHORITY_ROOT = ROOT / "baseline" / "CB-1.4.0" / "canonical"
@@ -47,9 +60,7 @@ def _platform_matches(expected: str) -> bool:
     return sys.platform.startswith("linux")
 
 
-def _command(token: int, capability_type: str):
-    from tpaa_application import M1PublishSessionCommand
-
+def _command(token: int, capability_type: str) -> M1PublishSessionCommand:
     return M1PublishSessionCommand(
         fixture_id="BF_M1_NOMINAL_V1",
         aircraft_model_id=str(uuid5(NAMESPACE_URL, "m1-batch-2-backend-model")),
@@ -61,10 +72,7 @@ def _command(token: int, capability_type: str):
     )
 
 
-def _service():
-    from tpaa_application import M1PublicationService
-    from tpaa_application.m1_repository import InMemorySessionPublicationRepository
-
+def _service() -> tuple[M1PublicationService, InMemorySessionPublicationRepository]:
     repository = InMemorySessionPublicationRepository()
     service = M1PublicationService(
         fixture_root=FIXTURE_ROOT,
@@ -74,16 +82,15 @@ def _service():
     return service, repository
 
 
-def _api_client():
-    from fastapi.testclient import TestClient
-
-    from tpaa_api import create_m1_app
-    from tpaa_application import ApplicationService
-
+def _api_client() -> tuple[
+    TestClient,
+    M1PublicationService,
+    InMemorySessionPublicationRepository,
+]:
     service, repository = _service()
 
     class _UnusedStorageBaseline:
-        def execute(self):
+        def execute(self) -> Never:
             raise AssertionError("Batch 2 backend evidence must not use M0 storage baseline")
 
     application = ApplicationService(
@@ -149,7 +156,7 @@ def _race_ok() -> bool:
     service, repository = _service()
     command = _command(0, "TEST_RACE_CAPABILITY")
 
-    def publish(_index: int):
+    def publish(_index: int) -> M1PublishSessionResult:
         return service.publish_session(
             command,
             idempotency_key="m1-batch-2-backend-race",
@@ -177,7 +184,6 @@ def _race_ok() -> bool:
 
 def run(*, platform: str, source_revision: str, evidence: Path) -> int:
     from tpaa_application.m1_publication import to_core_publication_bundle
-    from tpaa_observation import SessionRelease
 
     failures: list[str] = []
     acceptance: dict[str, bool] = {task_id: False for task_id in TASK_IDS}
@@ -277,13 +283,15 @@ def run(*, platform: str, source_revision: str, evidence: Path) -> int:
         )
 
         immutable_ok = True
+        manifest_field = "manifest_hash"
+        algorithm_field = "algorithm_version"
         try:
-            setattr(stored, "manifest_hash", "0" * 64)
+            setattr(stored, manifest_field, "0" * 64)
             immutable_ok = False
         except FrozenInstanceError:
             pass
         try:
-            setattr(stored.definitions[0], "algorithm_version", "tampered")
+            setattr(stored.definitions[0], algorithm_field, "tampered")
             immutable_ok = False
         except FrozenInstanceError:
             pass
