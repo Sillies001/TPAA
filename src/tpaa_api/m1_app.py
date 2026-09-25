@@ -125,6 +125,56 @@ def create_m1_app(application: ApplicationService):
             actor=actor,
         )
 
+    @app.post("/m1/commands/import-session")
+    def import_session(
+        body: dict[str, object],
+        idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+    ) -> JSONResponse:
+        if idempotency_key is None or not idempotency_key.strip():
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "detail": "Idempotency-Key is required",
+                    },
+                },
+            )
+        try:
+            result = application.import_m1_session(
+                fixture_id=_required_text(body, "fixture_id"),
+                idempotency_key=idempotency_key,
+            )
+        except M1ApplicationError as exc:
+            return _m1_error(exc)
+        return JSONResponse(status_code=200, content=result)
+
+    @app.post("/m1/commands/compute-session")
+    def compute_session(
+        body: dict[str, object],
+        idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+    ) -> JSONResponse:
+        if idempotency_key is None or not idempotency_key.strip():
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "detail": "Idempotency-Key is required",
+                    },
+                },
+            )
+        try:
+            result = application.compute_m1_session(
+                fixture_id=_required_text(body, "fixture_id"),
+                idempotency_key=idempotency_key,
+            )
+        except M1ApplicationError as exc:
+            return _m1_error(exc)
+        return JSONResponse(status_code=200, content=result)
+
     @app.post("/m1/commands/publish-session")
     def publish_session(
         body: dict[str, object],
