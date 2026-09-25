@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 from uuid import UUID, uuid5
 
-from tpaa_observation import SessionRelease
+from .publication_bundle import CorePublicationBundle
 
 COMPUTE_JOB_NAMESPACE = UUID("a682e684-0645-4bc2-b886-e62a20f0e08b")
 CONTEXT_REF_NAMESPACE = UUID("b3306367-f022-4567-a9e9-55feb71b2f25")
@@ -170,7 +170,7 @@ class CorePublicationLedger:
             raise CorePublicationLedgerError(code, f"table={table_name} rows={len(rows)}")
         return rows[0]
 
-    def _require_prerequisites(self, release: SessionRelease) -> None:
+    def _require_prerequisites(self, release: CorePublicationBundle) -> None:
         d = self._db
         session = self._one(
             "registry.training_session",
@@ -197,9 +197,21 @@ class CorePublicationLedger:
 
         if not release.observations:
             raise CorePublicationLedgerError("OBSERVATION_SET_EMPTY", release.release_id)
-        identity = release.observations[0].identity
+        identity = release.observations[0]
+        expected_identity = (
+            identity.aircraft_id,
+            identity.aircraft_model_id,
+            identity.aircraft_instance_id,
+            identity.subject_entity_id,
+        )
         for observation in release.observations:
-            if observation.identity != identity:
+            actual_identity = (
+                observation.aircraft_id,
+                observation.aircraft_model_id,
+                observation.aircraft_instance_id,
+                observation.subject_entity_id,
+            )
+            if actual_identity != expected_identity:
                 raise CorePublicationLedgerError(
                     "OBSERVATION_IDENTITY_DRIFT",
                     observation.observation_id,
@@ -330,8 +342,8 @@ class CorePublicationLedger:
                 definition.metric_definition_id,
                 definition.catalog_version,
                 definition.catalog_hash,
-                definition.semantic_id,
-                definition.semantic_version,
+                definition.metric_semantic_id,
+                definition.metric_semantic_version,
                 definition.subject_type,
                 definition.observation_lane,
                 definition.publication_route,
@@ -345,7 +357,7 @@ class CorePublicationLedger:
 
     def _idempotent_receipt(
         self,
-        release: SessionRelease,
+        release: CorePublicationBundle,
         *,
         idempotency_key: str,
     ) -> CorePublishReceipt | None:
@@ -392,7 +404,7 @@ class CorePublicationLedger:
 
     def publish(
         self,
-        release: SessionRelease,
+        release: CorePublicationBundle,
         *,
         idempotency_key: str,
         expected_version_token: int,
@@ -541,33 +553,8 @@ class CorePublicationLedger:
             ),
         )
 
-        instance_by_evidence = {
-            item.evidence_set_id: item for item in release.metric_instances
-        }
-        if len(instance_by_evidence) != len(release.metric_instances):
-            raise CorePublicationLedgerError(
-                "EVIDENCE_SET_NOT_ONE_TO_ONE",
-                release.release_id,
-            )
         evidence_table = d.table("metric.evidence_set")
         for evidence in release.evidence_sets:
-            instance = instance_by_evidence[evidence.evidence_set_id]
-            series_locator = {
-                "logical_hash": evidence.logical_hash,
-                "refs": [
-                    {
-                        "ref_class": ref.ref_class,
-                        "ref_id": ref.ref_id,
-                        "logical_hash": ref.logical_hash,
-                    }
-                    for ref in evidence.refs
-                ],
-                "details": [list(item) for item in evidence.details],
-            }
-            algorithm_versions = {
-                "metric_code": instance.metric_code,
-                "compute_version": instance.compute_version,
-            }
             d.execute(
                 f"""INSERT INTO {evidence_table} (
                         evidence_set_id, release_id, session_id, episode_id,
@@ -581,27 +568,13 @@ class CorePublicationLedger:
                     evidence.episode_id,
                     evidence.start_session_time_us,
                     evidence.end_session_time_us,
-                    d.json(series_locator),
-                    d.json(algorithm_versions),
+                    d.json(evidence.series_locator),
+                    d.json(evidence.algorithm_versions),
                 ),
             )
 
-        observation_by_instance = {
-            item.metric_instance_id: item for item in release.observations
-        }
-        if len(observation_by_instance) != len(release.observations):
-            raise CorePublicationLedgerError(
-                "OBSERVATION_NOT_ONE_TO_ONE",
-                release.release_id,
-            )
         metric_table = d.table("metric.metric_instance")
         for instance in release.metric_instances:
-            observation = observation_by_instance[instance.metric_instance_id]
-            value_structured = (
-                None
-                if instance.value_structured_json is None
-                else d.json(json.loads(instance.value_structured_json))
-            )
             metric_scope = "STAGE" if instance.stage_id is not None else "EPISODE"
             d.execute(
                 f"""INSERT INTO {metric_table} (
@@ -630,21 +603,16 @@ class CorePublicationLedger:
                     instance.value_numeric,
                     None,
                     None,
-                    value_structured,
+                    None if instance.value_structured is None else d.json(instance.value_structured),
                     instance.unit,
                     instance.status,
                     d.text_array(instance.reason_codes),
-                    observation.coverage,
-                    observation.confidence,
+                    instance.coverage,
+                    instance.confidence,
                     d.json({}),
                     instance.evidence_set_id,
                     instance.context_id,
-                    d.json(
-                        {
-                            "world_product_id": instance.world_product_id,
-                            "logical_hash": instance.world_logical_hash,
-                        }
-                    ),
+                    d.json(instance.world_product_versions),
                     instance.compute_version,
                     instance.input_hash,
                 ),
@@ -652,11 +620,6 @@ class CorePublicationLedger:
 
         observation_table = d.table("metric.capability_observation")
         for observation in release.observations:
-            structured = (
-                None
-                if observation.value_structured_json is None
-                else d.json(json.loads(observation.value_structured_json))
-            )
             d.execute(
                 f"""INSERT INTO {observation_table} (
                         observation_id, release_id, session_id, episode_id, stage_id,
@@ -683,22 +646,26 @@ class CorePublicationLedger:
                     release.session_id,
                     observation.episode_id,
                     observation.stage_id,
-                    observation.identity.aircraft_id,
-                    observation.identity.aircraft_instance_id,
-                    observation.identity.subject_entity_id,
-                    observation.identity.aircraft_model_id,
+                    observation.aircraft_id,
+                    observation.aircraft_instance_id,
+                    observation.subject_entity_id,
+                    observation.aircraft_model_id,
                     None,
                     None,
                     None,
                     observation.context_id,
-                    observation.identity.capability_dimension,
-                    observation.identity.capability_type,
+                    observation.capability_dimension,
+                    observation.capability_type,
                     "CAP_L1_OBSERVED",
-                    observation.metric_instance_id,
-                    observation.value_numeric,
+                    observation.observed_metric_instance_id,
+                    observation.observed_value_numeric,
                     None,
                     None,
-                    structured,
+                    (
+                        None
+                        if observation.observed_value_structured is None
+                        else d.json(observation.observed_value_structured)
+                    ),
                     observation.unit,
                     observation.observation_start_session_time_us,
                     observation.observation_end_session_time_us,
