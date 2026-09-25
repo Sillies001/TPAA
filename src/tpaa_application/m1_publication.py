@@ -16,6 +16,7 @@ from tpaa_metric import build_metric_context, compute_representative_metrics
 from tpaa_observation import (
     AircraftPublicationIdentity,
     PublicationError,
+    SessionRelease,
     allocate_session_release_id,
     build_session_release,
     compare_replay,
