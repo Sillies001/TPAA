@@ -159,6 +159,15 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
 
+      - name: Emit integrated M1 Batch 4 platform qualification
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-4-platform-check
+          --batch1 evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
+          --batch2-service evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
+          --batch3-desktop evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-4/${{ matrix.platform }}/platform.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -206,6 +215,7 @@ jobs:
             evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
             evidence/m1-batch-2/${{ matrix.platform }}/backend.json
             evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
+            evidence/m1-batch-4/${{ matrix.platform }}/platform.json
             dist/
           if-no-files-found: error
           retention-days: 14
@@ -246,6 +256,7 @@ jobs:
           python tools/dev/tpaa_dev.py m1-batch-1-compare
           --windows downloaded/evidence/m1-batch-1/windows/core-product.json
           --linux downloaded/evidence/m1-batch-1/linux/core-product.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json
 
       - name: Compare Windows and Linux M1 Batch 2 service products
@@ -263,6 +274,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
 
+      - name: Compare Windows and Linux integrated M1 products
+        run: >-
+          python tools/dev/tpaa_dev.py m1-batch-4-compare
+          --windows downloaded/evidence/m1-batch-4/windows/platform.json
+          --linux downloaded/evidence/m1-batch-4/linux/platform.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m1-batch-4-logical-equivalence.json
+
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -273,6 +292,7 @@ jobs:
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
+            evidence/cross-platform/m1-batch-4-logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
 
@@ -488,6 +508,76 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+
+  m1-exit-review:
+    name: M1 Exit Review
+    needs:
+      - m0-cross-platform
+      - m0-logical-equivalence
+      - m1-batch-2-review
+      - m1-batch-3-review
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download integrated platform evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/platform
+          merge-multiple: true
+
+      - name: Download logical-equivalence evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/logical
+
+      - name: Download Batch 2 review evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m1-batch-2-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/batch2
+
+      - name: Download Batch 3 review evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m1-batch-3-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/batch3
+
+      - name: Aggregate all 56 M1 Task IDs and Exit checklist
+        run: >-
+          python tools/dev/tpaa_dev.py m1-exit-review
+          --artifact-root downloaded/platform
+          --batch1-logical downloaded/logical/m1-batch-1-logical-equivalence.json
+          --batch2-review downloaded/batch2/review.json
+          --batch3-review downloaded/batch3/review.json
+          --batch4-windows downloaded/platform/evidence/m1-batch-4/windows/platform.json
+          --batch4-linux downloaded/platform/evidence/m1-batch-4/linux/platform.json
+          --batch4-logical downloaded/logical/m1-batch-4-logical-equivalence.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --event-name ${{ github.event_name }}
+          --git-ref ${{ github.ref }}
+          --output evidence/m1-exit/review.json
+
+      - name: Upload M1 Exit Review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m1-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m1-exit/review.json
+          if-no-files-found: error
+          retention-days: 30
 
   m0-exit-review:
     name: M0 Exit Review
