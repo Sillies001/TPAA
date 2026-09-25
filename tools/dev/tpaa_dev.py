@@ -782,8 +782,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.windows),
                 "--linux",
                 str(args.linux),
-                "--expected-revision",
-                args.expected_revision,
                 "--evidence",
                 str(args.evidence),
             ]
@@ -900,6 +898,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.windows),
                 "--linux",
                 str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
                 "--evidence",
                 str(args.evidence),
             ]
