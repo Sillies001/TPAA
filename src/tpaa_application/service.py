@@ -78,6 +78,32 @@ class ApplicationService:
             raise RuntimeError("M1 publication service is not configured")
         return self._m1_publication
 
+    def import_m1_session(
+        self,
+        *,
+        fixture_id: str,
+        idempotency_key: str,
+    ) -> dict[str, object]:
+        """Validate one governed source fixture through the M1 import command."""
+
+        return self._m1().import_session(
+            fixture_id=fixture_id,
+            idempotency_key=idempotency_key,
+        )
+
+    def compute_m1_session(
+        self,
+        *,
+        fixture_id: str,
+        idempotency_key: str,
+    ) -> dict[str, object]:
+        """Compute one staged M1 World/Metric product without publication."""
+
+        return self._m1().compute_session(
+            fixture_id=fixture_id,
+            idempotency_key=idempotency_key,
+        )
+
     def publish_m1_session(
         self,
         command: M1PublishSessionCommand,
