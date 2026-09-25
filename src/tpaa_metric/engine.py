@@ -293,17 +293,49 @@ def _result(
     )
 
 
+def _row_channel_valid(row: CanonicalFlightRow, field: str) -> bool:
+    value = getattr(row, field)
+    return row.quality_mask == 0 and value is not None and math.isfinite(value)
+
+
 def _finite_channel(
     rows: tuple[CanonicalFlightRow, ...],
     field: str,
 ) -> tuple[TimedValue, ...]:
-    values: list[TimedValue] = []
-    for row in rows:
-        quality_mask = row.quality_mask
-        value = getattr(row, field)
-        if quality_mask == 0 and value is not None and math.isfinite(value):
-            values.append(TimedValue(row.session_time_us, float(value)))
-    return tuple(values)
+    return tuple(
+        TimedValue(row.session_time_us, float(getattr(row, field)))
+        for row in rows
+        if _row_channel_valid(row, field)
+    )
+
+
+def _covered_duration_ratio(
+    rows: tuple[CanonicalFlightRow, ...],
+    *,
+    field: str,
+    window_start_us: int,
+    window_end_us: int,
+) -> float:
+    """Measure valid sample support over a half-open eligible Session-Time window."""
+
+    duration = window_end_us - window_start_us
+    if duration <= 0:
+        raise MetricComputationError(
+            "M1_METRIC_WINDOW_INVALID",
+            f"[{window_start_us},{window_end_us})",
+        )
+    covered = 0
+    for index, row in enumerate(rows):
+        support_start = max(window_start_us, row.session_time_us)
+        support_end = (
+            rows[index + 1].session_time_us if index + 1 < len(rows) else window_end_us
+        )
+        support_end = min(window_end_us, support_end)
+        if support_end <= support_start:
+            continue
+        if _row_channel_valid(row, field):
+            covered += support_end - support_start
+    return covered / duration
 
 
 def _insufficient(
@@ -329,12 +361,19 @@ def _air_001(
     world: AircraftObservedWorld,
     rows: tuple[CanonicalFlightRow, ...],
     stage_id: str | None,
+    window_start_us: int,
+    window_end_us: int,
 ) -> MetricResult:
     authority = context.authority("P1-AIR-001")
     if _has_excessive_gap(rows, context.max_gap_us):
         return _insufficient(context, authority, world, stage_id, "MAX_GAP_EXCEEDED")
     values = _finite_channel(rows, "body_p_rad_s")
-    coverage = len(values) / len(rows) if rows else 0.0
+    coverage = _covered_duration_ratio(
+        rows,
+        field="body_p_rad_s",
+        window_start_us=window_start_us,
+        window_end_us=window_end_us,
+    )
     if not values or coverage < context.min_coverage:
         return _insufficient(context, authority, world, stage_id, "MIN_COVERAGE_NOT_MET")
     return _result(
@@ -513,7 +552,14 @@ def compute_representative_metrics(
     window_start_us, window_end_us = _window_bounds(world, stage_id)
     rates = _heading_rates(context, rows)
     results = (
-        _air_001(context, world, rows, stage_id),
+        _air_001(
+            context,
+            world,
+            rows,
+            stage_id,
+            window_start_us,
+            window_end_us,
+        ),
         _air_002(context, world, rows, stage_id),
         _air_003(context, world, rows, stage_id, rates),
         _air_004(
