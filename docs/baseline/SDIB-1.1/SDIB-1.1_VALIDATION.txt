@@ -1,0 +1,35 @@
+TPAA SDIB-1.1 STRUCTURAL VALIDATION
+Date: 2026-09-25
+Document SHA-256: ba6cfd3765c53fec7ea322b2ec964ee78f09392d1e6a1e32d9754584b71132fe
+M2 Task Baseline SHA-256: 733b4180ad6941ca1361e1a5857c802e698ad69351b07cf9c591c80045a63d4b
+Result: 24/24 STRUCTURAL PASS
+Hosted adoption CI: PENDING PR / protected-main validation
+
+01. [PASS] Version header SDIB-1.1
+02. [PASS] Parent baseline SDIB-1.0.1 retained as historical source
+03. [PASS] R3.3 retained
+04. [PASS] CB-1.4.0 retained
+05. [PASS] DB schema 1.6.0 retained
+06. [PASS] M1 protected-main Exit GO is the M2 refinement prerequisite
+07. [PASS] M2 Entry Gate exists
+08. [PASS] M2 task backlog exact 27 unique tasks
+09. [PASS] M2 Primary WS set exact: DATA/WORLD/METRIC/OBSERVATION/GUI/TEST
+10. [PASS] Four coarse M2 execution batches defined
+11. [PASS] Four batches cover 27/27 tasks exactly once
+12. [PASS] Frozen Catalog M2 delivery set exact 32 metrics
+13. [PASS] Delivery metadata exact: M2 / P1_FOUNDATION_32
+14. [PASS] QA foundation count exact 8
+15. [PASS] AIR formal M2 delivery count exact 3
+16. [PASS] SNS foundation count exact 21
+17. [PASS] SNS family applicability remains SYSTEM_TYPE_EXACT / RADAR only
+18. [PASS] M1 AIR early implementation is not counted as automatic M2 completion
+19. [PASS] Publication route / observation lane authority remains Catalog-owned
+20. [PASS] No second Metric Engine permitted
+21. [PASS] Windows/Linux and SQLite/PostgreSQL M2 Exit evidence required
+22. [PASS] Cold-start and exact protected-main M2 Exit GO required
+23. [PASS] M3 remains gated; no M3 Task IDs introduced
+24. [PASS] Markdown task table is mirrored by M2_TASK_BASELINE.json and contract-tested
+
+Scope note: this validation covers the SDIB-1.1 implementation-contract refinement only.
+It does not claim any M2 implementation Task is complete. PR Hosted CI and post-merge
+protected-main validation are still required before M2 execution batches may start.
