@@ -114,17 +114,35 @@ class M1PublicationService:
             request_hash=request_hash,
         )
 
-        current = self._repository.current(bundle.session.session_id)
-        parent_release_id = None if current is None else current.release.release_id
-        expected_parent_token = 0 if current is None else current.version_token
-        if expected_parent_token != command.expected_version_token:
-            raise M1ApplicationError(
-                "PUBLISH_CAS_CONFLICT",
-                (
-                    f"expected={command.expected_version_token} "
-                    f"actual={expected_parent_token}"
-                ),
+        try:
+            reused = self._repository.idempotency_lookup(
+                idempotency_key=idempotency_key,
+                request_hash=request_hash,
             )
+        except PublishIdempotencyConflict as exc:
+            raise M1ApplicationError("IDEMPOTENCY_KEY_CONFLICT", str(exc)) from exc
+        if reused is not None:
+            return M1PublishSessionResult(
+                release_id=reused.release.release_id,
+                session_id=reused.release.session_id,
+                request_hash=reused.release.request_hash,
+                manifest_hash=reused.release.manifest_hash,
+                status=reused.status,
+                version_token=reused.version_token,
+                reused=True,
+            )
+
+        if command.expected_version_token == 0:
+            parent_release_id = None
+        else:
+            current = self._repository.current(bundle.session.session_id)
+            if current is None or current.version_token != command.expected_version_token:
+                actual = 0 if current is None else current.version_token
+                raise M1ApplicationError(
+                    "PUBLISH_CAS_CONFLICT",
+                    f"expected={command.expected_version_token} actual={actual}",
+                )
+            parent_release_id = current.release.release_id
 
         world = project_minimal_p1_world(
             bundle_path,
