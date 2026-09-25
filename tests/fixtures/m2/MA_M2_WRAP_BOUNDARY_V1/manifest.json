@@ -32,7 +32,7 @@
   "files": {
     "source": {
       "path": "source/measurement-alignment.json",
-      "sha256": "e6f17bd0be6fe75f27585523261dbaf80314da591c462a310ccca09ba247d4a0"
+      "sha256": "1ade2d73acb0159ae2949a4b1b53502124820e2a11028e87056d7a4716ec2198"
     }
   },
   "fixture_id": "MA_M2_WRAP_BOUNDARY_V1",
