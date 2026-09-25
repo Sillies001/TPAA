@@ -52,7 +52,7 @@ def _acceptance(payload: dict[str, object]) -> dict[str, bool]:
     return cast(dict[str, bool], raw)
 
 
-def _revision(payload: dict[str, object], expected: str, label: str) -> bool:
+def _revision(payload: dict[str, object], expected: str) -> bool:
     return payload.get("source_revision") == expected
 
 
@@ -78,12 +78,12 @@ def run(
     storage = _load(storage_parity, STORAGE_SCHEMA)
 
     revisions = {
-        "windows_backend": _revision(wb, expected_revision, "windows_backend"),
-        "linux_backend": _revision(lb, expected_revision, "linux_backend"),
-        "windows_service": _revision(ws, expected_revision, "windows_service"),
-        "linux_service": _revision(ls, expected_revision, "linux_service"),
-        "service_logical": _revision(logical, expected_revision, "service_logical"),
-        "storage_parity": _revision(storage, expected_revision, "storage_parity"),
+        "windows_backend": _revision(wb, expected_revision),
+        "linux_backend": _revision(lb, expected_revision),
+        "windows_service": _revision(ws, expected_revision),
+        "linux_service": _revision(ls, expected_revision),
+        "service_logical": _revision(logical, expected_revision),
+        "storage_parity": _revision(storage, expected_revision),
     }
 
     wb_acceptance = _acceptance(wb)
