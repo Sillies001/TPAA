@@ -101,33 +101,49 @@ def rolling_medians(
     values: Sequence[TimedValue],
     *,
     duration_s: float,
+    min_coverage: float,
     max_gap_us: int,
+    window_start_us: int,
+    window_end_us: int,
 ) -> tuple[tuple[TimedValue, int, int], ...]:
-    """Apply a deterministic time-based trailing ROLLING_MEDIAN_V1 window."""
+    """Apply governed centered ROLLING_MEDIAN_V1 inside each validity piece."""
 
     duration_us = int(duration_s * 1_000_000.0)
+    if duration_us <= 0:
+        raise ValueError("M1_METRIC_ROLLING_DURATION_INVALID")
+    if not 0.0 < min_coverage <= 1.0:
+        raise ValueError("M1_METRIC_ROLLING_COVERAGE_INVALID")
+    if window_end_us <= window_start_us:
+        raise ValueError("M1_METRIC_ROLLING_WINDOW_INVALID")
+
+    half_window_us = duration_us // 2
     outputs: list[tuple[TimedValue, int, int]] = []
     for piece in split_validity_pieces(values, max_gap_us=max_gap_us):
-        for end_item in piece:
-            start_limit = end_item.session_time_us - duration_us
+        for center in piece:
+            requested_start = center.session_time_us - half_window_us
+            requested_end = requested_start + duration_us
+            clipped_start = max(window_start_us, requested_start)
+            clipped_end = min(window_end_us, requested_end)
+            if clipped_end <= clipped_start:
+                continue
+            coverage = (clipped_end - clipped_start) / duration_us
+            if coverage < min_coverage:
+                continue
             window = tuple(
                 item
                 for item in piece
-                if start_limit <= item.session_time_us <= end_item.session_time_us
+                if clipped_start <= item.session_time_us < clipped_end
             )
-            if len(window) < 2:
-                continue
-            if window[-1].session_time_us - window[0].session_time_us < duration_us:
+            if not window:
                 continue
             outputs.append(
                 (
-                    TimedValue(end_item.session_time_us, median([item.value for item in window])),
-                    window[0].session_time_us,
-                    window[-1].session_time_us,
+                    TimedValue(center.session_time_us, median([item.value for item in window])),
+                    clipped_start,
+                    clipped_end,
                 )
             )
     return tuple(outputs)
-
 
 def quantile_hf7(values: Sequence[float], probability: float) -> float:
     """Return Hyndman-Fan type 7 sample quantile."""
