@@ -1,0 +1,29 @@
+{
+  "authority_refs": {
+    "allowed_system_types": [
+      "RADAR"
+    ],
+    "applicability_mode": "SYSTEM_TYPE_EXACT",
+    "core_baseline": "CB-1.4.0",
+    "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+    "core_table": "master.mission_system_instance",
+    "metric_family": "P1-SNS-*",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "subject_type": "MISSION_SYSTEM_INSTANCE"
+  },
+  "data_classification": "SYNTHETIC",
+  "files": {
+    "source": {
+      "path": "source/mission-system.json",
+      "sha256": "0da9ba58e95274a03ee39009a0755f4d8396070238f53d433e1c1b5c0da3ab24"
+    }
+  },
+  "fixture_id": "MSI_M2_RADAR_V1",
+  "fixture_version": "1.0.0",
+  "input_hash_algorithm": "SHA256_FILE_V1",
+  "input_hash_basis": [
+    "source/mission-system.json"
+  ],
+  "input_sha256": "0da9ba58e95274a03ee39009a0755f4d8396070238f53d433e1c1b5c0da3ab24",
+  "schema": "TPAA_M2_MISSION_SYSTEM_FIXTURE_V1"
+}
