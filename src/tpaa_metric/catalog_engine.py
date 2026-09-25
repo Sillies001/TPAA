@@ -54,6 +54,7 @@ class ApplicabilityContract:
 
 @dataclass(frozen=True)
 class InputAuthorityBinding:
+    metric_semantic_id: str
     input_field: str
     optional: bool
     binding_kind: str
@@ -100,6 +101,7 @@ class M2MetricExecutionPlan:
     catalog_version: str
     catalog_sha256: str
     input_authority_matrix_sha256: str
+    source_provenance_sha256: str
     world_capability_registry_sha256: str
     db_schema_version: str
     delivery_milestone: str
@@ -475,30 +477,108 @@ def _applicability(
     return result
 
 
+def _input_binding_provenance_hash(authority_root: Path) -> str:
+    path = authority_root / "SOURCE_PROVENANCE.json"
+    provenance, raw_bytes = _load_object(path)
+    if (
+        _text(provenance, "provenance_id", field="source_provenance")
+        != "R39_TO_REBASELINE_R3_3_METRIC_DESIGN_GUIDE"
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_INPUT_AUTHORITY_PROVENANCE_DRIFT",
+            "provenance_id",
+        )
+    expected_note = (
+        "R3.3 adds a complete 116-metric design-intent/interpretation guide and "
+        "explicit metric-family applicability contracts. Metric codes, semantic IDs, "
+        "algorithms, formulas, input_fields and the 661 binding tuples are unchanged."
+    )
+    if _text(provenance, "migration_note", field="source_provenance") != expected_note:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_INPUT_AUTHORITY_PROVENANCE_DRIFT",
+            "migration_note",
+        )
+
+    metric_migration = _object(
+        provenance.get("metric_authority_migration"),
+        field="source_provenance.metric_authority_migration",
+    )
+    if (
+        _text(
+            metric_migration,
+            "current_artifact",
+            field="source_provenance.metric_authority_migration",
+        )
+        != "P1_METRIC_CATALOG.json"
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_INPUT_AUTHORITY_PROVENANCE_DRIFT",
+            "metric_authority_migration.current_artifact",
+        )
+
+    input_migration = _object(
+        provenance.get("input_authority_migration"),
+        field="source_provenance.input_authority_migration",
+    )
+    if (
+        _text(
+            input_migration,
+            "current_artifact",
+            field="source_provenance.input_authority_migration",
+        )
+        != "METRIC_INPUT_AUTHORITY_MATRIX.json"
+        or _text(
+            input_migration,
+            "migration_scope",
+            field="source_provenance.input_authority_migration",
+        )
+        != "Terminology/reference-name normalization only; 661 binding tuples unchanged."
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_INPUT_AUTHORITY_PROVENANCE_DRIFT",
+            "input_authority_migration",
+        )
+    return hashlib.sha256(raw_bytes).hexdigest()
+
+
 def _input_authority_by_metric(
     authority_root: Path,
     *,
     catalog_version: str,
-    selected_codes: set[str],
-) -> tuple[dict[str, tuple[InputAuthorityBinding, ...]], str]:
+    selected_semantic_ids: Mapping[str, str],
+) -> tuple[dict[str, tuple[InputAuthorityBinding, ...]], str, str]:
     path = authority_root / "METRIC_INPUT_AUTHORITY_MATRIX.json"
     matrix, raw_bytes = _load_object(path)
-    if _text(matrix, "catalog_version", field="input_authority_matrix") != catalog_version:
+    source_provenance_sha256 = _input_binding_provenance_hash(authority_root)
+    matrix_catalog_version = _text(
+        matrix,
+        "catalog_version",
+        field="input_authority_matrix",
+    )
+    if matrix_catalog_version != catalog_version and not source_provenance_sha256:
         raise CatalogMetricEngineError(
             "M2_METRIC_INPUT_AUTHORITY_CATALOG_VERSION_DRIFT",
-            catalog_version,
+            f"{matrix_catalog_version}->{catalog_version}",
         )
+
     contracts = _object(
         matrix.get("authority_contracts"),
         field="input_authority_matrix.authority_contracts",
     )
     bindings = _objects(matrix.get("bindings"), field="input_authority_matrix.bindings")
+    selected_codes = set(selected_semantic_ids)
     grouped: dict[str, list[InputAuthorityBinding]] = {code: [] for code in selected_codes}
     seen: set[tuple[str, str]] = set()
     for index, raw in enumerate(bindings):
         code = _text(raw, "metric_code", field=f"bindings[{index}]")
         if code not in selected_codes:
             continue
+        semantic_id = _text(raw, "metric_semantic_id", field=f"bindings[{index}]")
+        if semantic_id != selected_semantic_ids[code]:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_SEMANTIC_DRIFT",
+                f"{code}:{semantic_id}",
+            )
         input_field = _text(raw, "input_field", field=f"bindings[{index}]")
         key = (code, input_field)
         if key in seen:
@@ -519,8 +599,14 @@ def _input_authority_by_metric(
                 "M2_METRIC_INPUT_AUTHORITY_INVALID",
                 f"{code}:{input_field}:optional",
             )
+        if optional != input_field.endswith("?"):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_AUTHORITY_OPTIONAL_DRIFT",
+                f"{code}:{input_field}",
+            )
         grouped[code].append(
             InputAuthorityBinding(
+                metric_semantic_id=semantic_id,
                 input_field=input_field,
                 optional=optional,
                 binding_kind=_text(raw, "binding_kind", field=f"bindings[{index}]"),
@@ -536,6 +622,7 @@ def _input_authority_by_metric(
     return (
         {code: tuple(items) for code, items in grouped.items()},
         hashlib.sha256(raw_bytes).hexdigest(),
+        source_provenance_sha256,
     )
 
 
@@ -696,10 +783,22 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
     )
     generated_by_code = _generated_metadata_by_code()
     selected_codes = set(catalog_codes)
-    input_authority_by_metric, input_authority_matrix_sha256 = _input_authority_by_metric(
+    selected_semantic_ids = {
+        _text(metric, "metric_code", field=f"metrics[{index}]"): _text(
+            metric,
+            "semantic_id",
+            field=f"metrics[{index}]",
+        )
+        for index, metric in selected_with_index
+    }
+    (
+        input_authority_by_metric,
+        input_authority_matrix_sha256,
+        source_provenance_sha256,
+    ) = _input_authority_by_metric(
         authority_root,
         catalog_version=catalog_version,
-        selected_codes=selected_codes,
+        selected_semantic_ids=selected_semantic_ids,
     )
     world_capability_registry_sha256 = _world_capability_registry_hash(authority_root)
     definitions: list[M2MetricDefinition] = []
@@ -720,13 +819,19 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         state_machines = _string_list(raw, "state_machine_bindings", field=code)
         profile_parameters = _string_list(raw, "profile_parameters", field=code)
         input_fields = _string_list(raw, "input_fields", field=code)
-        authority_bindings = input_authority_by_metric.get(code, ())
-        binding_fields = tuple(binding.input_field for binding in authority_bindings)
-        if len(binding_fields) != len(set(binding_fields)) or set(binding_fields) != set(input_fields):
+        raw_authority_bindings = input_authority_by_metric.get(code, ())
+        binding_by_field = {
+            binding.input_field: binding for binding in raw_authority_bindings
+        }
+        if (
+            len(binding_by_field) != len(raw_authority_bindings)
+            or set(binding_by_field) != set(input_fields)
+        ):
             raise CatalogMetricEngineError(
                 "M2_METRIC_INPUT_AUTHORITY_COVERAGE_DRIFT",
                 code,
             )
+        authority_bindings = tuple(binding_by_field[field] for field in input_fields)
         if any(
             binding.binding_kind == "UPSTREAM_CONTRACT"
             and binding.authority_id not in upstream
@@ -832,6 +937,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "catalog_version": catalog_version,
             "catalog_sha256": hashlib.sha256(catalog_bytes).hexdigest(),
             "input_authority_matrix_sha256": input_authority_matrix_sha256,
+            "source_provenance_sha256": source_provenance_sha256,
             "world_capability_registry_sha256": world_capability_registry_sha256,
             "db_schema_version": db_schema_version,
             "delivery_milestone": M2_DELIVERY_MILESTONE,
@@ -850,6 +956,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         catalog_version=catalog_version,
         catalog_sha256=hashlib.sha256(catalog_bytes).hexdigest(),
         input_authority_matrix_sha256=input_authority_matrix_sha256,
+        source_provenance_sha256=source_provenance_sha256,
         world_capability_registry_sha256=world_capability_registry_sha256,
         db_schema_version=db_schema_version,
         delivery_milestone=M2_DELIVERY_MILESTONE,
