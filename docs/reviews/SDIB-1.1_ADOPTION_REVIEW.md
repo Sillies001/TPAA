@@ -9,7 +9,7 @@
 - **Source design package:** TPAA V8.0 / ED-2.0 Rebaseline R3.3.
 - **Core baseline:** CB-1.4.0.
 - **DB schema:** 1.6.0.
-- **SDIB-1.1 document SHA-256:** `569cc4f677b866f318e3d3e3b24a20d004c02c5d3b1b90326281d1cef2769121`.
+- **SDIB-1.1 document SHA-256:** `ba6cfd3765c53fec7ea322b2ec964ee78f09392d1e6a1e32d9754584b71132fe`.
 - **M2 task manifest SHA-256:** `733b4180ad6941ca1361e1a5857c802e698ad69351b07cf9c591c80045a63d4b`.
 
 ## M1 Exit authority for refinement
