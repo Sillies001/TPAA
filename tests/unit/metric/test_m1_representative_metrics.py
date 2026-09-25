@@ -101,6 +101,37 @@ def test_nominal_five_metric_results_match_independent_expected_values() -> None
     assert batch.database_persistence_executed is False
 
 
+def test_air_001_coverage_is_session_time_duration_not_sample_fraction() -> None:
+    world, context, _ = _compute("BF_M1_NOMINAL_V1")
+    times = (
+        1_000_000,
+        4_000_000,
+        5_000_000,
+        6_000_000,
+        6_500_000,
+        7_000_000,
+        7_500_000,
+        8_000_000,
+    )
+    rows = tuple(
+        replace(
+            row,
+            session_time_us=session_time_us,
+            quality_mask=1 if index == 0 else 0,
+        )
+        for index, (row, session_time_us) in enumerate(zip(world.canonical_rows, times, strict=True))
+    )
+    altered_world = replace(world, canonical_rows=rows)
+    altered_context = replace(context, min_coverage=0.8, max_gap_us=10_000_000)
+
+    batch = compute_representative_metrics(altered_context, altered_world)
+    result = _by_code(batch)["P1-AIR-001"]
+
+    assert result.status == "INSUFFICIENT_DATA"
+    assert result.reason_codes == ("MIN_COVERAGE_NOT_MET",)
+    assert result.value_numeric is None
+
+
 def test_heading_unwrap_prevents_false_2pi_spike() -> None:
     _, _, batch = _compute("BF_M1_ANGLE_WRAP_V1")
     result = _by_code(batch)["P1-AIR-003"]
