@@ -394,3 +394,15 @@ def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> 
         in text
     )
     assert "evidence/cross-platform/m1-batch-2-service-logical-equivalence.json" in text
+
+
+def test_m1_batch_2_storage_parity_is_real_postgres_hosted_evidence() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1 Batch 2 SQLite PostgreSQL parity evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-storage-parity" in text
+    assert "--database tpaa_m1_batch_2_parity" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
+    assert "--evidence evidence/m1-batch-2/postgres/storage-parity.json" in text
+    assert "- name: Upload M1 Batch 2 PostgreSQL parity evidence" in text
+    assert f"tpaa-m1-batch-2-postgres-{SOURCE_REVISION}" in text
+    assert "evidence/m1-batch-2/postgres/storage-parity.json" in text
