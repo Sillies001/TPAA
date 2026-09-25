@@ -624,7 +624,7 @@ def load_m2_measurement_alignment(bundle: Path) -> M2MeasurementAlignmentProject
     status = "READY" if not reason_codes else "INSUFFICIENT"
 
     logical_hash = _logical_hash(
-        fixture_id=cast(str, fixture_id),
+        fixture_id=fixture_id,
         session_id=session_id,
         mission_system_instance_id=mission_system_instance_id,
         target_pair_id=target_pair_id,
@@ -638,7 +638,7 @@ def load_m2_measurement_alignment(bundle: Path) -> M2MeasurementAlignmentProject
         reason_codes=reason_codes,
     )
     return M2MeasurementAlignmentProjection(
-        fixture_id=cast(str, fixture_id),
+        fixture_id=fixture_id,
         fixture_version=EXPECTED_FIXTURE_VERSION,
         session_id=session_id,
         mission_system_instance_id=mission_system_instance_id,
