@@ -5,7 +5,6 @@ import json
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SDIB_DIR = ROOT / "docs" / "baseline" / "SDIB-1.1"
 SDIB = SDIB_DIR / "TPAA_软件开发实施基线_SDIB-1.1.md"
