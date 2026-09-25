@@ -312,6 +312,12 @@ def verify() -> dict[str, object]:
 def compare_evidence(windows: Path, linux: Path, *, expected_revision: str) -> dict[str, object]:
     left = _load_json(windows)
     right = _load_json(linux)
+    left_product = _object(left.get("logical_product"), field="windows.logical_product")
+    left_members = left_product.get("members")
+    host_path_absent = isinstance(left_members, list) and all(
+        isinstance(member, dict) and "host_path" not in member and "path" not in member
+        for member in left_members
+    )
     checks = {
         "windows_status_pass": left.get("status") == "PASS",
         "linux_status_pass": right.get("status") == "PASS",
@@ -322,14 +328,7 @@ def compare_evidence(windows: Path, linux: Path, *, expected_revision: str) -> d
         "family_logical_hash_equal": left.get("fixture_family_logical_hash")
         == right.get("fixture_family_logical_hash"),
         "logical_product_equal": left.get("logical_product") == right.get("logical_product"),
-        "host_path_absent": all(
-            "host_path" not in member and "path" not in member
-            for member in cast(
-                dict[str, object],
-                left.get("logical_product", {}),
-            ).get("members", [])
-            if isinstance(member, dict)
-        ),
+        "host_path_absent": host_path_absent,
     }
     failed = sorted(key for key, value in checks.items() if not value)
     return {
