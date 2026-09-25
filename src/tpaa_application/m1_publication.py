@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -19,6 +20,13 @@ from tpaa_observation import (
     compare_replay,
 )
 from tpaa_storage.hashing import canonical_request_hash
+from tpaa_storage.publication_bundle import (
+    CoreEvidenceRecord,
+    CoreMetricDefinitionRef,
+    CoreMetricInstanceRecord,
+    CoreObservationRecord,
+    CorePublicationBundle,
+)
 from tpaa_application.m1_repository import (
     PublishCASConflict,
     PublishIdempotencyConflict,
@@ -70,6 +78,135 @@ class M1PublishSessionResult:
     status: str
     version_token: int
     reused: bool
+
+
+def to_core_publication_bundle(release: SessionRelease) -> CorePublicationBundle:
+    """Project a decided immutable Release into driver-neutral Core row records."""
+
+    metric_by_evidence = {
+        item.evidence_set_id: item for item in release.metric_instances
+    }
+    observation_by_metric = {
+        item.metric_instance_id: item for item in release.observations
+    }
+    evidence_sets = tuple(
+        CoreEvidenceRecord(
+            evidence_set_id=evidence.evidence_set_id,
+            episode_id=evidence.episode_id,
+            start_session_time_us=evidence.start_session_time_us,
+            end_session_time_us=evidence.end_session_time_us,
+            series_locator={
+                "logical_hash": evidence.logical_hash,
+                "refs": [
+                    {
+                        "ref_class": ref.ref_class,
+                        "ref_id": ref.ref_id,
+                        "logical_hash": ref.logical_hash,
+                    }
+                    for ref in evidence.refs
+                ],
+                "details": [list(item) for item in evidence.details],
+            },
+            algorithm_versions={
+                "metric_code": metric_by_evidence[evidence.evidence_set_id].metric_code,
+                "compute_version": metric_by_evidence[evidence.evidence_set_id].compute_version,
+            },
+        )
+        for evidence in release.evidence_sets
+    )
+    metric_instances = tuple(
+        CoreMetricInstanceRecord(
+            metric_instance_id=item.metric_instance_id,
+            metric_definition_id=item.metric_definition_id,
+            metric_code=item.metric_code,
+            episode_id=item.episode_id,
+            stage_id=item.stage_id,
+            subject_entity_id=item.subject_entity_id,
+            value_numeric=item.value_numeric,
+            value_structured=(
+                None
+                if item.value_structured_json is None
+                else json.loads(item.value_structured_json)
+            ),
+            unit=item.unit,
+            status=item.status,
+            reason_codes=item.reason_codes,
+            coverage=observation_by_metric[item.metric_instance_id].coverage,
+            confidence=observation_by_metric[item.metric_instance_id].confidence,
+            evidence_set_id=item.evidence_set_id,
+            context_id=item.context_id,
+            world_product_versions={
+                "world_product_id": item.world_product_id,
+                "logical_hash": item.world_logical_hash,
+            },
+            compute_version=item.compute_version,
+            input_hash=item.input_hash,
+        )
+        for item in release.metric_instances
+    )
+    observations = tuple(
+        CoreObservationRecord(
+            observation_id=item.observation_id,
+            episode_id=item.episode_id,
+            stage_id=item.stage_id,
+            aircraft_id=item.identity.aircraft_id,
+            aircraft_instance_id=item.identity.aircraft_instance_id,
+            subject_entity_id=item.identity.subject_entity_id,
+            aircraft_model_id=item.identity.aircraft_model_id,
+            context_id=item.context_id,
+            capability_dimension=item.identity.capability_dimension,
+            capability_type=item.identity.capability_type,
+            observed_metric_instance_id=item.metric_instance_id,
+            observed_value_numeric=item.value_numeric,
+            observed_value_structured=(
+                None
+                if item.value_structured_json is None
+                else json.loads(item.value_structured_json)
+            ),
+            unit=item.unit,
+            observation_start_session_time_us=item.observation_start_session_time_us,
+            observation_end_session_time_us=item.observation_end_session_time_us,
+            evidence_set_id=item.evidence_set_id,
+            coverage=item.coverage,
+            confidence=item.confidence,
+            eligibility_status=item.eligibility_status,
+            exclusion_reason_code=item.exclusion_reason_code,
+            comparison_key_hash=item.comparison_key_hash,
+            observation_schema_version=item.observation_schema_version,
+        )
+        for item in release.observations
+    )
+    return CorePublicationBundle(
+        release_id=release.release_id,
+        release_no=release.release_no,
+        parent_release_id=release.parent_release_id,
+        request_hash=release.request_hash,
+        session_id=release.session_id,
+        context_id=release.context_id,
+        context_version=release.context_version,
+        context_binding_hash=release.context_binding_hash,
+        catalog_version=release.catalog_version,
+        catalog_hash=release.catalog_hash,
+        manifest_hash=release.manifest_hash,
+        definitions=tuple(
+            CoreMetricDefinitionRef(
+                metric_definition_id=item.metric_definition_id,
+                metric_code=item.metric_code,
+                catalog_version=item.catalog_version,
+                catalog_hash=item.catalog_hash,
+                metric_semantic_id=item.semantic_id,
+                metric_semantic_version=item.semantic_version,
+                subject_type=item.subject_type,
+                observation_lane=item.observation_lane,
+                publication_route=item.publication_route,
+                definition_hash=item.definition_hash,
+            )
+            for item in release.definitions
+        ),
+        evidence_sets=evidence_sets,
+        metric_instances=metric_instances,
+        observations=observations,
+    )
 
 
 class M1PublicationService:
