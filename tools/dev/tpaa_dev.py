@@ -48,6 +48,17 @@ M1_ENTRY_ASSIGN_ROLES_MODULE = "tools.governance.m1_entry_assign_roles"
 M1_DETAILED_DESIGN_VERIFY_MODULE = "tools.governance.verify_m1_detailed_design"
 M1_FIXTURE_HARNESS_MODULE = "tools.testing.m1_fixture_harness"
 M1_SOURCE_ADAPTER_CHECK_MODULE = "tools.testing.m1_source_adapter_check"
+M2_FIXTURE_FAMILY_CHECK_MODULE = "tools.testing.m2_fixture_family_check"
+M2_MEASUREMENT_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_measurement_alignment_check"
+M2_MISSION_SYSTEM_CHECK_MODULE = "tools.testing.m2_mission_system_check"
+M2_REFERENCE_TRUTH_CHECK_MODULE = "tools.testing.m2_reference_truth_check"
+M2_REFERENCE_TIME_WORLD_CHECK_MODULE = "tools.testing.m2_reference_time_world_check"
+M2_REFERENCE_TIME_WORLD_COMPARE_MODULE = "tools.testing.m2_reference_time_world_compare"
+M2_RADAR_SENSOR_WORLD_CHECK_MODULE = "tools.testing.m2_radar_sensor_world_check"
+M2_RADAR_SENSOR_WORLD_COMPARE_MODULE = "tools.testing.m2_radar_sensor_world_compare"
+M2_STAGE_WORLD_LINEAGE_CHECK_MODULE = "tools.testing.m2_stage_world_lineage_check"
+M2_STAGE_WORLD_LINEAGE_COMPARE_MODULE = "tools.testing.m2_stage_world_lineage_compare"
+M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
 M1_AIRCRAFT_IDENTITY_CHECK_MODULE = "tools.testing.m1_aircraft_identity_check"
@@ -107,6 +118,18 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-m1-detailed-design", "M1-A/B/C Design", "IMPLEMENTED", "Verify pre-admission M1 fixture/data-spine/stage design against frozen authorities."),
     CommandSpec("m1-fixture-check", "M1-TST-001", "IMPLEMENTED", "Validate all governed M1 synthetic fixture bundles and hashes."),
     CommandSpec("m1-source-adapter-check", "M1-DATA-001", "IMPLEMENTED", "Verify the synthetic source adapter over all governed M1 bundles."),
+    CommandSpec("m2-reference-truth-check", "M2-DATA-001", "IMPLEMENTED", "Verify governed M2 reference-relative truth/time/frame provenance."),
+    CommandSpec("m2-mission-system-check", "M2-DATA-003", "IMPLEMENTED", "Verify governed RADAR mission-system identity and fail-closed SNS applicability."),
+    CommandSpec("m2-measurement-alignment-check", "M2-DATA-004", "IMPLEMENTED", "Verify governed measurement/reference pairing, quality, gap and uncertainty provenance."),
+    CommandSpec("m2-fixture-family-check", "M2-DATA-005", "IMPLEMENTED", "Verify the governed M2 nominal/boundary/gap/insufficient/invalid/applicability fixture family."),
+    CommandSpec("m2-fixture-family-compare", "M2-DATA-005", "IMPLEMENTED", "Compare Windows/Linux M2 fixture-family logical evidence exactly."),
+    CommandSpec("m2-time-alignment-check", "M2-DATA-002", "IMPLEMENTED", "Verify governed M2 sensor/INS time-alignment input provenance and fail-closed negatives."),
+    CommandSpec("m2-reference-time-world-check", "M2-WORLD-001", "IMPLEMENTED", "Verify Core-compatible replay-stable M2 reference/time World products."),
+    CommandSpec("m2-reference-time-world-compare", "M2-WORLD-001", "IMPLEMENTED", "Compare Windows/Linux M2 reference/time World logical evidence exactly."),
+    CommandSpec("m2-radar-sensor-world-check", "M2-WORLD-002", "IMPLEMENTED", "Verify Core-compatible RADAR sensor MACHINE World input and subject identity."),
+    CommandSpec("m2-radar-sensor-world-compare", "M2-WORLD-002", "IMPLEMENTED", "Compare Windows/Linux M2 RADAR sensor World logical evidence exactly."),
+    CommandSpec("m2-stage-world-lineage-check", "M2-WORLD-003", "IMPLEMENTED", "Verify replay-stable M2 Basic Flight Stage/World lineage, quality and status."),
+    CommandSpec("m2-stage-world-lineage-compare", "M2-WORLD-003", "IMPLEMENTED", "Compare Windows/Linux M2 Stage/World lineage logical evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -504,6 +527,78 @@ def build_parser() -> argparse.ArgumentParser:
     m1_fixture.add_argument("--evidence", type=Path)
     m1_source = sub.add_parser("m1-source-adapter-check", help="Verify M1-DATA-001 synthetic source adapter")
     m1_source.add_argument("--evidence", type=Path)
+    m2_reference = sub.add_parser(
+        "m2-reference-truth-check",
+        help="Verify M2-DATA-001 reference-relative truth projection",
+    )
+    m2_reference.add_argument("--evidence", type=Path)
+    m2_time = sub.add_parser(
+        "m2-time-alignment-check",
+        help="Verify M2-DATA-002 sensor/INS time-alignment input projection",
+    )
+    m2_time.add_argument("--evidence", type=Path)
+    m2_mission = sub.add_parser(
+        "m2-mission-system-check",
+        help="Verify M2-DATA-003 RADAR mission-system identity/applicability",
+    )
+    m2_mission.add_argument("--evidence", type=Path)
+    m2_measurement = sub.add_parser(
+        "m2-measurement-alignment-check",
+        help="Verify M2-DATA-004 measurement/reference quality projection",
+    )
+    m2_measurement.add_argument("--evidence", type=Path)
+    m2_family = sub.add_parser(
+        "m2-fixture-family-check",
+        help="Verify M2-DATA-005 frozen fixture family",
+    )
+    m2_family.add_argument("--evidence", type=Path)
+    m2_family_compare = sub.add_parser(
+        "m2-fixture-family-compare",
+        help="Compare Windows/Linux M2-DATA-005 fixture evidence",
+    )
+    m2_family_compare.add_argument("--windows", type=Path, required=True)
+    m2_family_compare.add_argument("--linux", type=Path, required=True)
+    m2_family_compare.add_argument("--expected-revision", required=True)
+    m2_family_compare.add_argument("--evidence", type=Path, required=True)
+    m2_reference_time_world = sub.add_parser(
+        "m2-reference-time-world-check",
+        help="Verify M2-WORLD-001 reference/time World products",
+    )
+    m2_reference_time_world.add_argument("--evidence", type=Path)
+    m2_reference_time_world_compare = sub.add_parser(
+        "m2-reference-time-world-compare",
+        help="Compare Windows/Linux M2-WORLD-001 logical evidence",
+    )
+    m2_reference_time_world_compare.add_argument("--windows", type=Path, required=True)
+    m2_reference_time_world_compare.add_argument("--linux", type=Path, required=True)
+    m2_reference_time_world_compare.add_argument("--expected-revision", required=True)
+    m2_reference_time_world_compare.add_argument("--evidence", type=Path, required=True)
+    m2_radar_sensor_world = sub.add_parser(
+        "m2-radar-sensor-world-check",
+        help="Verify M2-WORLD-002 RADAR sensor World product",
+    )
+    m2_radar_sensor_world.add_argument("--evidence", type=Path)
+    m2_radar_sensor_world_compare = sub.add_parser(
+        "m2-radar-sensor-world-compare",
+        help="Compare Windows/Linux M2-WORLD-002 logical evidence",
+    )
+    m2_radar_sensor_world_compare.add_argument("--windows", type=Path, required=True)
+    m2_radar_sensor_world_compare.add_argument("--linux", type=Path, required=True)
+    m2_radar_sensor_world_compare.add_argument("--expected-revision", required=True)
+    m2_radar_sensor_world_compare.add_argument("--evidence", type=Path, required=True)
+    m2_stage_world_lineage = sub.add_parser(
+        "m2-stage-world-lineage-check",
+        help="Verify M2-WORLD-003 Stage/World lineage and status",
+    )
+    m2_stage_world_lineage.add_argument("--evidence", type=Path)
+    m2_stage_world_lineage_compare = sub.add_parser(
+        "m2-stage-world-lineage-compare",
+        help="Compare Windows/Linux M2-WORLD-003 logical evidence",
+    )
+    m2_stage_world_lineage_compare.add_argument("--windows", type=Path, required=True)
+    m2_stage_world_lineage_compare.add_argument("--linux", type=Path, required=True)
+    m2_stage_world_lineage_compare.add_argument("--expected-revision", required=True)
+    m2_stage_world_lineage_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -834,6 +929,111 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.evidence is not None:
             source_args.extend(["--evidence", str(args.evidence)])
         return _run(source_args)
+    if command == "m2-reference-truth-check":
+        reference_args = [sys.executable, "-m", M2_REFERENCE_TRUTH_CHECK_MODULE]
+        if args.evidence is not None:
+            reference_args.extend(["--evidence", str(args.evidence)])
+        return _run(reference_args)
+    if command == "m2-time-alignment-check":
+        time_alignment_args = [sys.executable, "-m", M2_TIME_ALIGNMENT_CHECK_MODULE]
+        if args.evidence is not None:
+            time_alignment_args.extend(["--evidence", str(args.evidence)])
+        return _run(time_alignment_args)
+    if command == "m2-mission-system-check":
+        mission_system_args = [sys.executable, "-m", M2_MISSION_SYSTEM_CHECK_MODULE]
+        if args.evidence is not None:
+            mission_system_args.extend(["--evidence", str(args.evidence)])
+        return _run(mission_system_args)
+    if command == "m2-measurement-alignment-check":
+        measurement_args = [sys.executable, "-m", M2_MEASUREMENT_ALIGNMENT_CHECK_MODULE]
+        if args.evidence is not None:
+            measurement_args.extend(["--evidence", str(args.evidence)])
+        return _run(measurement_args)
+    if command == "m2-fixture-family-check":
+        family_args = [sys.executable, "-m", M2_FIXTURE_FAMILY_CHECK_MODULE, "check"]
+        if args.evidence is not None:
+            family_args.extend(["--evidence", str(args.evidence)])
+        return _run(family_args)
+    if command == "m2-fixture-family-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_FIXTURE_FAMILY_CHECK_MODULE,
+                "compare",
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-reference-time-world-check":
+        world_args = [sys.executable, "-m", M2_REFERENCE_TIME_WORLD_CHECK_MODULE]
+        if args.evidence is not None:
+            world_args.extend(["--evidence", str(args.evidence)])
+        return _run(world_args)
+    if command == "m2-reference-time-world-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_REFERENCE_TIME_WORLD_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-radar-sensor-world-check":
+        radar_args = [sys.executable, "-m", M2_RADAR_SENSOR_WORLD_CHECK_MODULE]
+        if args.evidence is not None:
+            radar_args.extend(["--evidence", str(args.evidence)])
+        return _run(radar_args)
+    if command == "m2-radar-sensor-world-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_RADAR_SENSOR_WORLD_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-stage-world-lineage-check":
+        lineage_args = [sys.executable, "-m", M2_STAGE_WORLD_LINEAGE_CHECK_MODULE]
+        if args.evidence is not None:
+            lineage_args.extend(["--evidence", str(args.evidence)])
+        return _run(lineage_args)
+    if command == "m2-stage-world-lineage-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_STAGE_WORLD_LINEAGE_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
     if command == "m1-source-registry-check":
         registry_args = [sys.executable, "-m", M1_SOURCE_REGISTRY_CHECK_MODULE]
         if args.evidence is not None:

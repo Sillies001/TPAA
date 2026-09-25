@@ -1,5 +1,37 @@
 """TPAA ingest-layer public contracts."""
 
+from tpaa_ingest.m2_measurement_alignment import (
+    M2MeasurementAlignmentError,
+    M2MeasurementAlignmentProjection,
+    MeasurementAlignmentRow,
+    ReferenceMatchQualityProfile,
+    load_m2_measurement_alignment,
+)
+from tpaa_ingest.m2_mission_system import (
+    M2MissionSystemError,
+    M2MissionSystemProjection,
+    MissionSystemIdentity,
+    MissionSystemInstance,
+    load_m2_mission_system,
+)
+from tpaa_ingest.m2_reference_truth import (
+    M2ReferenceTruthError,
+    M2ReferenceTruthProjection,
+    ReferenceFrameProvenance,
+    ReferenceIdentity,
+    ReferenceTruthRow,
+    load_m2_reference_truth,
+)
+from tpaa_ingest.m2_time_alignment import (
+    ClockAlignmentSample,
+    ClockSegment,
+    InterpolationInput,
+    LatencyInput,
+    M2TimeAlignmentError,
+    M2TimeAlignmentProjection,
+    NavTimeUncertaintyInput,
+    load_m2_time_alignment,
+)
 from tpaa_ingest.source_adapter import (
     GOVERNED_FIXTURE_IDS,
     SourceArtifactIdentity,
@@ -13,7 +45,27 @@ from tpaa_ingest.source_adapter import (
 )
 
 __all__ = [
+    "ClockAlignmentSample",
+    "ClockSegment",
     "GOVERNED_FIXTURE_IDS",
+    "InterpolationInput",
+    "LatencyInput",
+    "M2MeasurementAlignmentError",
+    "M2MeasurementAlignmentProjection",
+    "M2MissionSystemError",
+    "M2MissionSystemProjection",
+    "M2ReferenceTruthError",
+    "M2ReferenceTruthProjection",
+    "M2TimeAlignmentError",
+    "M2TimeAlignmentProjection",
+    "MeasurementAlignmentRow",
+    "MissionSystemIdentity",
+    "MissionSystemInstance",
+    "NavTimeUncertaintyInput",
+    "ReferenceFrameProvenance",
+    "ReferenceMatchQualityProfile",
+    "ReferenceIdentity",
+    "ReferenceTruthRow",
     "SourceArtifactIdentity",
     "SyntheticAircraftSource",
     "SyntheticSessionSource",
@@ -21,5 +73,9 @@ __all__ = [
     "SyntheticSourceBundle",
     "SyntheticSourceMarker",
     "SyntheticSourceRow",
+    "load_m2_measurement_alignment",
+    "load_m2_mission_system",
+    "load_m2_reference_truth",
+    "load_m2_time_alignment",
     "load_synthetic_fixture_bundle",
 ]

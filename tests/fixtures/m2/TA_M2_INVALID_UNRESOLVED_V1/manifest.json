@@ -1,0 +1,33 @@
+{
+  "authority_refs": {
+    "canonical_reference_navigation": "CANONICAL_REFERENCE_NAVIGATION_V1",
+    "core_baseline": "CB-1.4.0",
+    "evaluation_profile": "EVALUATION_PROFILE_V1",
+    "metric_codes": [
+      "P1-QA-003",
+      "P1-QA-004",
+      "P1-QA-005",
+      "P1-QA-007",
+      "P1-QA-008"
+    ],
+    "metric_input_authority_matrix_sha256": "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc",
+    "nav_uncertainty_contract": "CONTRACT_NAV_UNCERTAINTY_REPRESENTATION_V1",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "time_transform_contract": "CONTRACT_TIME_TRANSFORM_V1"
+  },
+  "data_classification": "SYNTHETIC",
+  "files": {
+    "source": {
+      "path": "source/time-alignment.json",
+      "sha256": "fa581e580e68c084d08fe366636676df8ce31ff5d6da12855216be354d30047d"
+    }
+  },
+  "fixture_id": "TA_M2_INVALID_UNRESOLVED_V1",
+  "fixture_version": "1.0.0",
+  "input_hash_algorithm": "SHA256_FILE_V1",
+  "input_hash_basis": [
+    "source/time-alignment.json"
+  ],
+  "input_sha256": "fa581e580e68c084d08fe366636676df8ce31ff5d6da12855216be354d30047d",
+  "schema": "TPAA_M2_TIME_ALIGNMENT_FIXTURE_V1"
+}

@@ -1,0 +1,21 @@
+{
+  "data_classification": "SYNTHETIC",
+  "fixture_id": "MSI_M2_IRST_NEGATIVE_V1",
+  "identity_provenance": {
+    "identity_ref": "mission-system-identity:irst-a:v1",
+    "source_entity_key": "IRST-A-01"
+  },
+  "mission_system_instance": {
+    "aircraft_id": "11111111-1111-4111-8111-111111111111",
+    "alignment_profile_version": "ALIGN-1",
+    "configuration_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "hardware_version": "HW-1",
+    "installation_id": "INST-IRST-A",
+    "mission_system_instance_id": "77777777-7777-4777-8777-777777777702",
+    "software_version": "SW-1.0",
+    "status": "ACTIVE",
+    "system_code": "IRST-A",
+    "system_type": "IRST"
+  },
+  "schema": "TPAA_M2_MISSION_SYSTEM_SOURCE_V1"
+}

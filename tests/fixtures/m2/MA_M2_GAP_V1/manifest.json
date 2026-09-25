@@ -1,0 +1,46 @@
+{
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "metric_codes": [
+      "P1-QA-006",
+      "P1-SNS-005",
+      "P1-SNS-006",
+      "P1-SNS-007",
+      "P1-SNS-008",
+      "P1-SNS-009",
+      "P1-SNS-010",
+      "P1-SNS-011",
+      "P1-SNS-012",
+      "P1-SNS-013",
+      "P1-SNS-014",
+      "P1-SNS-015",
+      "P1-SNS-016",
+      "P1-SNS-017",
+      "P1-SNS-018",
+      "P1-SNS-019",
+      "P1-SNS-020",
+      "P1-SNS-021"
+    ],
+    "metric_input_authority_matrix_sha256": "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc",
+    "mission_system_measurement_authority": "CANONICAL_MISSION_SYSTEM_MEASUREMENT_V1",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "reference_match_quality_contract": "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1",
+    "reference_navigation_authority": "CANONICAL_REFERENCE_NAVIGATION_V1",
+    "reference_relative_state_contract": "CONTRACT_REFERENCE_RELATIVE_STATE_V1"
+  },
+  "data_classification": "SYNTHETIC",
+  "files": {
+    "source": {
+      "path": "source/measurement-alignment.json",
+      "sha256": "b66e8b8322b798391182dc337ab9088286421f6aff65dc8dc4773b01aec3e325"
+    }
+  },
+  "fixture_id": "MA_M2_GAP_V1",
+  "fixture_version": "1.0.0",
+  "input_hash_algorithm": "SHA256_PATH_SHA256_V1",
+  "input_hash_basis": [
+    "source/measurement-alignment.json"
+  ],
+  "input_sha256": "77bc5b34485687e7bca83f174fb90728f12c1f8a3bd1352bb6f852560542e452",
+  "schema": "TPAA_M2_MEASUREMENT_ALIGNMENT_FIXTURE_V1"
+}
