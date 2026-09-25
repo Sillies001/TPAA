@@ -8,8 +8,9 @@ import hashlib
 import json
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, cast
+from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = REPO_ROOT / "tests" / "fixtures" / "m2"
