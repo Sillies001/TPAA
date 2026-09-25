@@ -1,0 +1,310 @@
+{
+  "data_classification": "SYNTHETIC",
+  "fixture_id": "RT_M2_NOMINAL_V1",
+  "frame_provenance": {
+    "own_attitude_frame_ref": "reference-frame:own-attitude:v1",
+    "position_frame": "ECEF",
+    "sensor_boresight_frame_ref": null,
+    "velocity_frame": "ECEF"
+  },
+  "identity_provenance": {
+    "own": {
+      "aircraft_id": "22222222-2222-4222-8222-222222222222",
+      "identity_ref": "reference-identity:own:v1",
+      "source_entity_key": "OWN-REF-01"
+    },
+    "target": {
+      "aircraft_id": "33333333-3333-4333-8333-333333333333",
+      "identity_ref": "reference-identity:target:v1",
+      "source_entity_key": "TARGET-REF-01"
+    }
+  },
+  "records": [
+    {
+      "own": {
+        "attitude_quat": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "position_ecef_m": [
+          6378137,
+          0,
+          0
+        ],
+        "velocity_ecef_mps": [
+          0,
+          200,
+          0
+        ]
+      },
+      "relative_state_jacobian": [
+        [
+          1,
+          0,
+          0,
+          -1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          -1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          -1
+        ]
+      ],
+      "sensor_boresight_quat": null,
+      "source_time_us": 0,
+      "target": {
+        "position_ecef_m": [
+          6378137,
+          1000,
+          100
+        ],
+        "velocity_ecef_mps": [
+          0,
+          180,
+          0
+        ]
+      },
+      "uncertainty_refs": {
+        "own_attitude_uncertainty_ref": "navu:own-attitude:v1",
+        "own_position_uncertainty_ref": "navu:own-position:v1",
+        "target_attitude_uncertainty_ref": "navu:target-attitude:v1",
+        "target_position_uncertainty_ref": "navu:target-position:v1",
+        "time_alignment_uncertainty_ref": "navu:time-alignment:v1"
+      }
+    },
+    {
+      "own": {
+        "attitude_quat": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "position_ecef_m": [
+          6378137,
+          200,
+          0
+        ],
+        "velocity_ecef_mps": [
+          0,
+          200,
+          0
+        ]
+      },
+      "relative_state_jacobian": [
+        [
+          1,
+          0,
+          0,
+          -1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          -1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          -1
+        ]
+      ],
+      "sensor_boresight_quat": null,
+      "source_time_us": 1000000,
+      "target": {
+        "position_ecef_m": [
+          6378137,
+          1180,
+          100
+        ],
+        "velocity_ecef_mps": [
+          0,
+          180,
+          0
+        ]
+      },
+      "uncertainty_refs": {
+        "own_attitude_uncertainty_ref": "navu:own-attitude:v1",
+        "own_position_uncertainty_ref": "navu:own-position:v1",
+        "target_attitude_uncertainty_ref": "navu:target-attitude:v1",
+        "target_position_uncertainty_ref": "navu:target-position:v1",
+        "time_alignment_uncertainty_ref": "navu:time-alignment:v1"
+      }
+    },
+    {
+      "own": {
+        "attitude_quat": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "position_ecef_m": [
+          6378137,
+          400,
+          0
+        ],
+        "velocity_ecef_mps": [
+          0,
+          200,
+          0
+        ]
+      },
+      "relative_state_jacobian": [
+        [
+          1,
+          0,
+          0,
+          -1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          -1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          -1
+        ]
+      ],
+      "sensor_boresight_quat": null,
+      "source_time_us": 2000000,
+      "target": {
+        "position_ecef_m": [
+          6378137,
+          1360,
+          100
+        ],
+        "velocity_ecef_mps": [
+          0,
+          180,
+          0
+        ]
+      },
+      "uncertainty_refs": {
+        "own_attitude_uncertainty_ref": "navu:own-attitude:v1",
+        "own_position_uncertainty_ref": "navu:own-position:v1",
+        "target_attitude_uncertainty_ref": "navu:target-attitude:v1",
+        "target_position_uncertainty_ref": "navu:target-position:v1",
+        "time_alignment_uncertainty_ref": "navu:time-alignment:v1"
+      }
+    }
+  ],
+  "schema": "TPAA_M2_REFERENCE_TRUTH_SOURCE_V1",
+  "session": {
+    "session_id": "11111111-1111-4111-8111-111111111111",
+    "source_time_basis": "REFERENCE_SOURCE_US"
+  },
+  "time_transform": {
+    "anchor_segment_time_ns": 0,
+    "anchor_session_time_us": 1000000,
+    "confidence": 1,
+    "method": "M2_REFERENCE_TRUTH_SYNTHETIC",
+    "model": "ANCHORED_RATIONAL",
+    "rate_den": 1000,
+    "rate_num": 1,
+    "residual_p95_us": 0,
+    "residual_rms_us": 0,
+    "source_clock_segment_id": "44444444-4444-4444-8444-444444444444",
+    "time_transform_id": "55555555-5555-4555-8555-555555555555",
+    "valid_segment_end_ns": 2000000000,
+    "valid_segment_start_ns": 0,
+    "version": "1.0.0"
+  },
+  "uncertainty_records": {
+    "navu:own-attitude:v1": {
+      "frame_ref": "reference-frame:own-attitude:v1",
+      "representation": "SIGMA_1D",
+      "unit": "rad",
+      "value": 0.001
+    },
+    "navu:own-position:v1": {
+      "frame_ref": "ECEF",
+      "representation": "COVARIANCE",
+      "unit": "m^2",
+      "value": [
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          9
+        ]
+      ]
+    },
+    "navu:target-attitude:v1": {
+      "frame_ref": "reference-frame:target-attitude:v1",
+      "representation": "SIGMA_1D",
+      "unit": "rad",
+      "value": 0.0015
+    },
+    "navu:target-position:v1": {
+      "frame_ref": "ECEF",
+      "representation": "COVARIANCE",
+      "unit": "m^2",
+      "value": [
+        [
+          9,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          0
+        ],
+        [
+          0,
+          0,
+          16
+        ]
+      ]
+    },
+    "navu:time-alignment:v1": {
+      "frame_ref": "SESSION_TIME",
+      "representation": "TWO_SIDED_HARD_BOUND",
+      "unit": "us",
+      "value": 50
+    }
+  }
+}
