@@ -102,6 +102,15 @@ def _optional_finite(
     return result
 
 
+def _operator_finite(value: object, *, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"M2_QA_OPERATOR_OUTPUT_INVALID:{field}")
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError(f"M2_QA_OPERATOR_OUTPUT_NONFINITE:{field}")
+    return result
+
+
 def _metric_guard(
     request: M2MetricPluginRequest,
     *,
@@ -216,15 +225,15 @@ def _qa003(request: M2MetricPluginRequest) -> Mapping[str, object]:
         instances.append(
             _instance(
                 value_kind="NUMERIC",
-                value_numeric=float(mean(tuple(offsets))),
+                value_numeric=_operator_finite(mean(tuple(offsets)), field="P1-QA-003.MEAN_V1"),
                 diagnostics={
                     "segment_id": segment_id,
                     "time_transform_id": transform_id,
                     "sample_count": len(offsets),
                     "sample_session_time_min_us": min(sample_times),
                     "sample_session_time_max_us": max(sample_times),
-                    "rmse_us": float(rms(tuple(offsets))),
-                    "p95_us": float(quantile(tuple(offsets), 0.95)),
+                    "rmse_us": _operator_finite(rms(tuple(offsets)), field="P1-QA-003.RMS_V1"),
+                    "p95_us": _operator_finite(quantile(tuple(offsets), 0.95), field="P1-QA-003.QUANTILE_HF7_V1"),
                 },
             )
         )
@@ -258,10 +267,10 @@ def _qa004(request: M2MetricPluginRequest) -> Mapping[str, object]:
     else:
         instance = _instance(
             value_kind="NUMERIC",
-            value_numeric=float(median(tuple(latencies))),
+            value_numeric=_operator_finite(median(tuple(latencies)), field="P1-QA-004.MEDIAN_V1"),
             diagnostics={
                 "sample_count": len(latencies),
-                "p95_us": float(quantile(tuple(latencies), 0.95)),
+                "p95_us": _operator_finite(quantile(tuple(latencies), 0.95), field="P1-QA-004.QUANTILE_HF7_V1"),
             },
         )
     return {"metric_code": request.definition.metric_code, "instances": [instance]}
@@ -297,11 +306,11 @@ def _qa005(request: M2MetricPluginRequest) -> Mapping[str, object]:
     else:
         instance = _instance(
             value_kind="NUMERIC",
-            value_numeric=float(median(tuple(ages))),
+            value_numeric=_operator_finite(median(tuple(ages)), field="P1-QA-005.MEDIAN_V1"),
             diagnostics={
                 "eligible_count": len(ages),
                 "rejected_max_gap_count": rejected,
-                "p95_us": float(quantile(tuple(ages), 0.95)),
+                "p95_us": _operator_finite(quantile(tuple(ages), 0.95), field="P1-QA-005.QUANTILE_HF7_V1"),
                 "max_us": max(ages),
             },
         )
