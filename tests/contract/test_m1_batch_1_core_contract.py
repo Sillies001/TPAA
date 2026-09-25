@@ -73,6 +73,9 @@ def test_batch_1_compare_command_proves_exact_logical_equivalence(tmp_path: Path
     windows = tmp_path / "windows.json"
     linux = tmp_path / "linux.json"
     comparison = tmp_path / "comparison.json"
+    expected_revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
 
     for evidence in (windows, linux):
         result = subprocess.run(
@@ -94,6 +97,8 @@ def test_batch_1_compare_command_proves_exact_logical_equivalence(tmp_path: Path
             str(windows),
             "--linux",
             str(linux),
+            "--expected-revision",
+            expected_revision,
             "--evidence",
             str(comparison),
         ],
@@ -111,6 +116,8 @@ def test_batch_1_compare_command_proves_exact_logical_equivalence(tmp_path: Path
         "exact_logical_equality": True,
         "metric_batch_hashes_equal": True,
         "schema": "TPAA_M1_BATCH_1_LOGICAL_EQUIVALENCE_V1",
+        "source_revision": expected_revision,
+        "source_revisions_exact": True,
         "status": "PASS",
         "world_hashes_equal": True,
     }
