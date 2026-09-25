@@ -1,0 +1,404 @@
+{
+  "schema": "TPAA_SDIB_M2_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.1",
+  "milestone": "M2",
+  "milestone_name": "P1 Basic Flight Complete",
+  "task_count": 27,
+  "required_workstreams": [
+    "WS-DATA",
+    "WS-WORLD",
+    "WS-METRIC",
+    "WS-OBSERVATION",
+    "WS-GUI",
+    "WS-TEST"
+  ],
+  "catalog_delivery": {
+    "delivery_milestone": "M2",
+    "delivery_batch": "P1_FOUNDATION_32",
+    "count": 32,
+    "metric_codes": [
+      "P1-QA-001",
+      "P1-QA-002",
+      "P1-QA-006",
+      "P1-QA-003",
+      "P1-QA-004",
+      "P1-QA-005",
+      "P1-QA-007",
+      "P1-QA-008",
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-SNS-001",
+      "P1-SNS-002",
+      "P1-SNS-003",
+      "P1-SNS-004",
+      "P1-SNS-005",
+      "P1-SNS-006",
+      "P1-SNS-007",
+      "P1-SNS-008",
+      "P1-SNS-009",
+      "P1-SNS-010",
+      "P1-SNS-011",
+      "P1-SNS-012",
+      "P1-SNS-013",
+      "P1-SNS-014",
+      "P1-SNS-015",
+      "P1-SNS-016",
+      "P1-SNS-017",
+      "P1-SNS-018",
+      "P1-SNS-019",
+      "P1-SNS-020",
+      "P1-SNS-021"
+    ]
+  },
+  "authority_boundaries": {
+    "canonical_business_authority": "CB-1.4.0 machine-readable Canonical artifacts",
+    "db_schema_version": "1.6.0",
+    "no_second_metric_engine": true,
+    "sns_applicability": "RADAR only per frozen family applicability contract",
+    "m3_not_admitted": true
+  },
+  "batches": [
+    {
+      "batch_id": "M2-BATCH-1",
+      "name": "Data + World foundations",
+      "task_ids": [
+        "M2-DATA-001",
+        "M2-DATA-002",
+        "M2-DATA-003",
+        "M2-DATA-004",
+        "M2-DATA-005",
+        "M2-WORLD-001",
+        "M2-WORLD-002",
+        "M2-WORLD-003"
+      ]
+    },
+    {
+      "batch_id": "M2-BATCH-2",
+      "name": "General Metric Engine + P1_FOUNDATION_32",
+      "task_ids": [
+        "M2-MET-001",
+        "M2-MET-002",
+        "M2-MET-003",
+        "M2-MET-004",
+        "M2-MET-005",
+        "M2-MET-006",
+        "M2-MET-007"
+      ]
+    },
+    {
+      "batch_id": "M2-BATCH-3",
+      "name": "Publication + GUI product closure",
+      "task_ids": [
+        "M2-OBS-001",
+        "M2-OBS-002",
+        "M2-OBS-003",
+        "M2-GUI-001",
+        "M2-GUI-002",
+        "M2-GUI-003"
+      ]
+    },
+    {
+      "batch_id": "M2-BATCH-4",
+      "name": "Golden / parity / cold-start / Exit",
+      "task_ids": [
+        "M2-TST-001",
+        "M2-TST-002",
+        "M2-TST-003",
+        "M2-TST-004",
+        "M2-TST-005",
+        "M2-TST-006"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M2-DATA-001",
+      "workstream": "WS-DATA",
+      "deliverable": "Reference-relative truth input closure",
+      "dependencies": [
+        "M1",
+        "CB-1.4.0 input authority"
+      ],
+      "minimum_acceptance": "P1-QA-001/002 pairwise truth/time/frame inputs replay with complete identity/time/frame provenance"
+    },
+    {
+      "task_id": "M2-DATA-002",
+      "workstream": "WS-DATA",
+      "deliverable": "Sensor/INS time-alignment input closure",
+      "dependencies": [
+        "M1-DATA-003",
+        "CB-1.4.0 input authority"
+      ],
+      "minimum_acceptance": "P1-QA-003/004/005/007/008 time, latency, interpolation-age and uncertainty inputs have exact lineage plus negative fixtures"
+    },
+    {
+      "task_id": "M2-DATA-003",
+      "workstream": "WS-DATA",
+      "deliverable": "RADAR mission-system instance ingest and identity",
+      "dependencies": [
+        "M1 source registry",
+        "M1 entity resolution"
+      ],
+      "minimum_acceptance": "SNS inputs bind to explicit MISSION_SYSTEM_INSTANCE; RADAR applicability executes; non-RADAR path fails closed"
+    },
+    {
+      "task_id": "M2-DATA-004",
+      "workstream": "WS-DATA",
+      "deliverable": "Reference to measurement alignment and quality",
+      "dependencies": [
+        "M2-DATA-001",
+        "M2-DATA-002",
+        "M2-DATA-003"
+      ],
+      "minimum_acceptance": "P1-QA-006 and SNS accuracy pairing, quality, coverage/max-gap and uncertainty provenance are auditable"
+    },
+    {
+      "task_id": "M2-DATA-005",
+      "workstream": "WS-DATA",
+      "deliverable": "M2 frozen fixture family",
+      "dependencies": [
+        "M2-DATA-001",
+        "M2-DATA-002",
+        "M2-DATA-003",
+        "M2-DATA-004"
+      ],
+      "minimum_acceptance": "Nominal, wrap/boundary, gap, insufficient, invalid and wrong-sensor applicability fixtures have manifest/hash and same-source Windows/Linux constraints"
+    },
+    {
+      "task_id": "M2-WORLD-001",
+      "workstream": "WS-WORLD",
+      "deliverable": "M2 reference/time World inputs",
+      "dependencies": [
+        "M2-DATA-001",
+        "M2-DATA-002",
+        "M2-DATA-005"
+      ],
+      "minimum_acceptance": "Produce QA-required World products only from frozen input authority with replay-stable logical hashes and no shadow schema"
+    },
+    {
+      "task_id": "M2-WORLD-002",
+      "workstream": "WS-WORLD",
+      "deliverable": "M2 RADAR sensor World inputs",
+      "dependencies": [
+        "M2-DATA-003",
+        "M2-DATA-004",
+        "M2-DATA-005"
+      ],
+      "minimum_acceptance": "Produce SNS-required World products from frozen input authority while preserving RADAR applicability and subject identity"
+    },
+    {
+      "task_id": "M2-WORLD-003",
+      "workstream": "WS-WORLD",
+      "deliverable": "M2 Basic Flight Stage/World lineage and status",
+      "dependencies": [
+        "M2-WORLD-001",
+        "M2-WORLD-002",
+        "M1 Stage authority"
+      ],
+      "minimum_acceptance": "Validity, coverage, confidence and lineage replay for M2 products without rewriting frozen Stage authority"
+    },
+    {
+      "task_id": "M2-MET-001",
+      "workstream": "WS-METRIC",
+      "deliverable": "Catalog-driven general Metric Engine",
+      "dependencies": [
+        "M1 Metric engine",
+        "M2-WORLD-001",
+        "M2-WORLD-002",
+        "M2-WORLD-003"
+      ],
+      "minimum_acceptance": "Execute M2 Catalog through registry/operator/plugin mechanisms with no second per-family engine and deterministic ordering/hash"
+    },
+    {
+      "task_id": "M2-MET-002",
+      "workstream": "WS-METRIC",
+      "deliverable": "QA foundation 8 metrics",
+      "dependencies": [
+        "M2-MET-001",
+        "M2 QA data/world inputs"
+      ],
+      "minimum_acceptance": "P1-QA-001..008 exact Catalog semantics, value kinds, structured schemas and Golden/negative cases PASS"
+    },
+    {
+      "task_id": "M2-MET-003",
+      "workstream": "WS-METRIC",
+      "deliverable": "AIR M2 formal delivery",
+      "dependencies": [
+        "M2-MET-001",
+        "M1 AIR implementation"
+      ],
+      "minimum_acceptance": "P1-AIR-001/002/003 re-qualify under M2 formal delivery for Catalog/Golden/Evidence/Release acceptance"
+    },
+    {
+      "task_id": "M2-MET-004",
+      "workstream": "WS-METRIC",
+      "deliverable": "SNS detection 4 metrics",
+      "dependencies": [
+        "M2-MET-001",
+        "M2-WORLD-002",
+        "M2-WORLD-003"
+      ],
+      "minimum_acceptance": "P1-SNS-001..004 exact Catalog semantics and RADAR applicability PASS; non-applicable systems emit no fake observation"
+    },
+    {
+      "task_id": "M2-MET-005",
+      "workstream": "WS-METRIC",
+      "deliverable": "SNS accuracy 17 metrics",
+      "dependencies": [
+        "M2-MET-001",
+        "M2-DATA-004",
+        "M2-WORLD-002",
+        "M2-WORLD-003"
+      ],
+      "minimum_acceptance": "P1-SNS-005..021 exact Catalog semantics, units, operators and Golden PASS"
+    },
+    {
+      "task_id": "M2-MET-006",
+      "workstream": "WS-METRIC",
+      "deliverable": "Runtime applicability/value-kind/schema gates",
+      "dependencies": [
+        "M2-MET-002",
+        "M2-MET-003",
+        "M2-MET-004",
+        "M2-MET-005"
+      ],
+      "minimum_acceptance": "Subject/family applicability, NUMERIC/STRUCTURED slots, structured schemas and N_A/INSUFFICIENT/INVALID branches are exact"
+    },
+    {
+      "task_id": "M2-MET-007",
+      "workstream": "WS-METRIC",
+      "deliverable": "32-metric deterministic batch and replay contract",
+      "dependencies": [
+        "M2-MET-002",
+        "M2-MET-003",
+        "M2-MET-004",
+        "M2-MET-005",
+        "M2-MET-006"
+      ],
+      "minimum_acceptance": "Exact 32-code membership, dependency ordering, batch hash and per-metric Definition/Evidence hashes repeat and match cross-platform"
+    },
+    {
+      "task_id": "M2-OBS-001",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Exact publication lane/route for 32",
+      "dependencies": [
+        "M2-MET-007"
+      ],
+      "minimum_acceptance": "Every metric follows frozen publication_route and observation_lane into capability/system-performance/evidence-only products with no route drift"
+    },
+    {
+      "task_id": "M2-OBS-002",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Immutable M2 Release snapshots",
+      "dependencies": [
+        "M2-OBS-001"
+      ],
+      "minimum_acceptance": "Definition/Evidence/Context/World/identity/provenance are release-bound; historical reads do not consult latest Catalog/Profile"
+    },
+    {
+      "task_id": "M2-OBS-003",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Idempotent publication and replay for foundation batch",
+      "dependencies": [
+        "M2-OBS-002"
+      ],
+      "minimum_acceptance": "Concurrent/retry requests yield one logical publication and replay uses release provenance without silent latest fallback"
+    },
+    {
+      "task_id": "M2-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "Basic Flight foundation navigation",
+      "dependencies": [
+        "M2-OBS-001",
+        "M2-OBS-002",
+        "M2-OBS-003"
+      ],
+      "minimum_acceptance": "Session→Timeline/Stage→family/Metric→Evidence covers 32 foundation metrics and GUI does not access DB directly"
+    },
+    {
+      "task_id": "M2-GUI-002",
+      "workstream": "WS-GUI",
+      "deliverable": "Observation-lane aware presentation",
+      "dependencies": [
+        "M2-GUI-001"
+      ],
+      "minimum_acceptance": "Capability, system-performance and quality-evidence-only semantics are visibly separated; ViewModel does not recompute business metrics"
+    },
+    {
+      "task_id": "M2-GUI-003",
+      "workstream": "WS-GUI",
+      "deliverable": "Applicability/quality/error-state UX",
+      "dependencies": [
+        "M2-GUI-001",
+        "M2-GUI-002",
+        "M2-MET-006"
+      ],
+      "minimum_acceptance": "N_A/INSUFFICIENT/INVALID/system-error/wrong-sensor applicability are distinct with traceable Evidence drill-down"
+    },
+    {
+      "task_id": "M2-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "Exact M2 Catalog coverage contract",
+      "dependencies": [
+        "P1_METRIC_CATALOG.json"
+      ],
+      "minimum_acceptance": "32/32 exact codes, milestone/batch exact, no M3 remainder counted, RADAR applicability contract asserted statically and at runtime"
+    },
+    {
+      "task_id": "M2-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "QA/AIR Golden and negative suite",
+      "dependencies": [
+        "M2-MET-002",
+        "M2-MET-003",
+        "M2-DATA-005"
+      ],
+      "minimum_acceptance": "Windows/Linux use the same fixture set; QA 8 + AIR 3 numeric/structured/invalid/insufficient Golden PASS"
+    },
+    {
+      "task_id": "M2-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "SNS Golden and applicability suite",
+      "dependencies": [
+        "M2-MET-004",
+        "M2-MET-005",
+        "M2-MET-006",
+        "M2-DATA-005"
+      ],
+      "minimum_acceptance": "SNS 21 Golden PASS plus RADAR positive and IRST/EO negative applicability PASS"
+    },
+    {
+      "task_id": "M2-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "Release/history/replay/idempotency suite",
+      "dependencies": [
+        "M2-OBS-001",
+        "M2-OBS-002",
+        "M2-OBS-003"
+      ],
+      "minimum_acceptance": "32-metric immutable Release, historical stability, replay exact/tolerance and concurrent idempotency PASS"
+    },
+    {
+      "task_id": "M2-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "Cross-platform/storage qualification",
+      "dependencies": [
+        "M2-TST-001",
+        "M2-TST-002",
+        "M2-TST-003",
+        "M2-TST-004"
+      ],
+      "minimum_acceptance": "Windows/Linux logical equivalence and SQLite/PostgreSQL logical Release membership parity PASS on exact candidate SHA"
+    },
+    {
+      "task_id": "M2-TST-006",
+      "workstream": "WS-TEST",
+      "deliverable": "Cold-start and M2 Exit review",
+      "dependencies": [
+        "ALL_M2_TASKS"
+      ],
+      "minimum_acceptance": "Clean source+baseline bundle reconstructs; 27/27 task evidence exact; failed_acceptance=[]; protected-main M2 Exit GO"
+    }
+  ]
+}
