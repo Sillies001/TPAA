@@ -19,7 +19,14 @@ from typing import cast
 from tpaa_ingest.m2_mission_system import load_m2_mission_system
 from tpaa_ingest.m2_reference_truth import load_m2_reference_truth
 
-EXPECTED_FIXTURE_IDS = frozenset(\n    {\n        "MA_M2_NOMINAL_V1",\n        "MA_M2_GAP_V1",\n        "MA_M2_WRAP_BOUNDARY_V1",\n        "MA_M2_INSUFFICIENT_V1",\n    }\n)
+EXPECTED_FIXTURE_IDS = frozenset(
+    {
+        "MA_M2_NOMINAL_V1",
+        "MA_M2_GAP_V1",
+        "MA_M2_WRAP_BOUNDARY_V1",
+        "MA_M2_INSUFFICIENT_V1",
+    }
+)
 EXPECTED_FIXTURE_VERSION = "1.0.0"
 EXPECTED_MANIFEST_SCHEMA = "TPAA_M2_MEASUREMENT_ALIGNMENT_FIXTURE_V1"
 EXPECTED_SOURCE_SCHEMA = "TPAA_M2_MEASUREMENT_ALIGNMENT_SOURCE_V1"
