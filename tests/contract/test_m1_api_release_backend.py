@@ -132,3 +132,45 @@ def test_publish_requires_idempotency_key() -> None:
     response = _client().post("/m1/commands/publish-session", json=_body())
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "IDEMPOTENCY_KEY_REQUIRED"
+
+
+
+def test_import_and_compute_commands_are_idempotent_and_request_hashed() -> None:
+    client = _client()
+    for route, key, command in (
+        ("/m1/commands/import-session", "api-import", "M1_IMPORT_SESSION"),
+        ("/m1/commands/compute-session", "api-compute", "M1_COMPUTE_SESSION"),
+    ):
+        body = {"fixture_id": "BF_M1_NOMINAL_V1"}
+        first = client.post(route, json=body, headers={"Idempotency-Key": key})
+        assert first.status_code == 202
+        first_payload = first.json()
+        assert first_payload["command"] == command
+        assert first_payload["reused"] is False
+        assert len(first_payload["request_hash"]) == 64
+
+        retry = client.post(route, json=body, headers={"Idempotency-Key": key})
+        assert retry.status_code == 200
+        assert retry.json()["reused"] is True
+        assert retry.json()["job_id"] == first_payload["job_id"]
+        assert retry.json()["request_hash"] == first_payload["request_hash"]
+
+        conflict = client.post(
+            route,
+            json={"fixture_id": "BF_M1_REPLAY_V1"},
+            headers={"Idempotency-Key": key},
+        )
+        assert conflict.status_code == 409
+        assert conflict.json()["error"]["code"] == "IDEMPOTENCY_KEY_CONFLICT"
+
+
+def test_all_m1_commands_require_idempotency_key() -> None:
+    client = _client()
+    for route in (
+        "/m1/commands/import-session",
+        "/m1/commands/compute-session",
+        "/m1/commands/publish-session",
+    ):
+        response = client.post(route, json=_body())
+        assert response.status_code == 400
+        assert response.json()["error"]["code"] == "IDEMPOTENCY_KEY_REQUIRED"
