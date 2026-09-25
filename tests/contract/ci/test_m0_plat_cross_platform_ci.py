@@ -46,7 +46,7 @@ def test_workflow_calls_one_governed_ci_gate_command() -> None:
 
 def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    assert text.count(f"ref: {SOURCE_REVISION}") == 4
+    assert text.count(f"ref: {SOURCE_REVISION}") == 5
     assert "${{ github.sha }}" not in text
     assert f"pattern: tpaa-ci-*-{SOURCE_REVISION}" in text
     assert f"--expected-revision {SOURCE_REVISION}" in text
