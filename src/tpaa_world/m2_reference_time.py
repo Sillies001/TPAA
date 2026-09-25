@@ -381,19 +381,19 @@ def _time_bounds(projection: M2TimeAlignmentProjection) -> tuple[int, int]:
                     row.aligned_session_time_us,
                 )
             )
-    for row in projection.latency_records:
+    for latency in projection.latency_records:
         times.extend(
             (
-                row.sensor_measurement_effective_time_us,
-                row.referenced_ownship_state_effective_time_us,
+                latency.sensor_measurement_effective_time_us,
+                latency.referenced_ownship_state_effective_time_us,
             )
         )
-    for row in projection.interpolation_records:
+    for interpolation in projection.interpolation_records:
         times.extend(
             (
-                row.left_truth_time_us,
-                row.measurement_time_us,
-                row.right_truth_time_us,
+                interpolation.left_truth_time_us,
+                interpolation.measurement_time_us,
+                interpolation.right_truth_time_us,
             )
         )
     if not times:

@@ -14,7 +14,7 @@
       "category": "NOMINAL",
       "expected_status": "PASS",
       "fixture_id": "TA_M2_NOMINAL_V1",
-      "input_sha256": "05a715054d9b8508182eef9117e56679778c39456314ec6e622952d192f8c507",
+      "input_sha256": "707bf3219901196f63369fd534780597555cf407ffa53d44eebf133fed9af3d2",
       "loader": "TIME_ALIGNMENT"
     },
     {
