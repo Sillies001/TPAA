@@ -92,7 +92,7 @@ class ApplicationService:
         return self._m1().release_summary(release_id)
 
     def m1_observations(self, release_id: str) -> list[dict[str, object]]:
-        return list(self._m1().observations(release_id))
+        return [dict(item) for item in self._m1().observations(release_id)]
 
     def m1_metrics(self, release_id: str) -> list[dict[str, object]]:
         return self._m1().metric_list(release_id)
