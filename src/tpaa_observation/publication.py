@@ -158,7 +158,7 @@ class ImmutableMetricInstance:
 
     def value(self) -> object | None:
         if self.value_structured_json is not None:
-            return json.loads(self.value_structured_json)
+            return cast(object, json.loads(self.value_structured_json))
         return self.value_numeric
 
 
