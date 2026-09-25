@@ -56,6 +56,8 @@ M2_REFERENCE_TIME_WORLD_CHECK_MODULE = "tools.testing.m2_reference_time_world_ch
 M2_REFERENCE_TIME_WORLD_COMPARE_MODULE = "tools.testing.m2_reference_time_world_compare"
 M2_RADAR_SENSOR_WORLD_CHECK_MODULE = "tools.testing.m2_radar_sensor_world_check"
 M2_RADAR_SENSOR_WORLD_COMPARE_MODULE = "tools.testing.m2_radar_sensor_world_compare"
+M2_STAGE_WORLD_LINEAGE_CHECK_MODULE = "tools.testing.m2_stage_world_lineage_check"
+M2_STAGE_WORLD_LINEAGE_COMPARE_MODULE = "tools.testing.m2_stage_world_lineage_compare"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -126,6 +128,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-reference-time-world-compare", "M2-WORLD-001", "IMPLEMENTED", "Compare Windows/Linux M2 reference/time World logical evidence exactly."),
     CommandSpec("m2-radar-sensor-world-check", "M2-WORLD-002", "IMPLEMENTED", "Verify Core-compatible RADAR sensor MACHINE World input and subject identity."),
     CommandSpec("m2-radar-sensor-world-compare", "M2-WORLD-002", "IMPLEMENTED", "Compare Windows/Linux M2 RADAR sensor World logical evidence exactly."),
+    CommandSpec("m2-stage-world-lineage-check", "M2-WORLD-003", "IMPLEMENTED", "Verify replay-stable M2 Basic Flight Stage/World lineage, quality and status."),
+    CommandSpec("m2-stage-world-lineage-compare", "M2-WORLD-003", "IMPLEMENTED", "Compare Windows/Linux M2 Stage/World lineage logical evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -582,6 +586,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_radar_sensor_world_compare.add_argument("--linux", type=Path, required=True)
     m2_radar_sensor_world_compare.add_argument("--expected-revision", required=True)
     m2_radar_sensor_world_compare.add_argument("--evidence", type=Path, required=True)
+    m2_stage_world_lineage = sub.add_parser(
+        "m2-stage-world-lineage-check",
+        help="Verify M2-WORLD-003 Stage/World lineage and status",
+    )
+    m2_stage_world_lineage.add_argument("--evidence", type=Path)
+    m2_stage_world_lineage_compare = sub.add_parser(
+        "m2-stage-world-lineage-compare",
+        help="Compare Windows/Linux M2-WORLD-003 logical evidence",
+    )
+    m2_stage_world_lineage_compare.add_argument("--windows", type=Path, required=True)
+    m2_stage_world_lineage_compare.add_argument("--linux", type=Path, required=True)
+    m2_stage_world_lineage_compare.add_argument("--expected-revision", required=True)
+    m2_stage_world_lineage_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -986,6 +1003,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_RADAR_SENSOR_WORLD_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-stage-world-lineage-check":
+        lineage_args = [sys.executable, "-m", M2_STAGE_WORLD_LINEAGE_CHECK_MODULE]
+        if args.evidence is not None:
+            lineage_args.extend(["--evidence", str(args.evidence)])
+        return _run(lineage_args)
+    if command == "m2-stage-world-lineage-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_STAGE_WORLD_LINEAGE_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
