@@ -19,7 +19,7 @@ from tpaa_observation import (
     compare_replay,
 )
 from tpaa_storage.hashing import canonical_request_hash
-from tpaa_storage.publication import (
+from tpaa_application.m1_repository import (
     PublishCASConflict,
     PublishIdempotencyConflict,
     PublishedSessionRelease,
