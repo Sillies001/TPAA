@@ -1,0 +1,736 @@
+"""Catalog-driven general Metric Engine for the frozen M2 foundation batch.
+
+The engine owns ordering, authority binding, operator resolution and algorithm-plugin
+dispatch. Business algorithms are supplied as algorithm-id plugins; families are not
+separate engines or dispatch namespaces.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from collections import Counter
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from types import MappingProxyType
+from typing import Protocol, cast
+
+from tpaa_generated.metric_registry import P1_METRICS
+from tpaa_metric.operators import M2_OPERATOR_IMPLEMENTATIONS
+
+M2_DELIVERY_MILESTONE = "M2"
+M2_DELIVERY_BATCH = "P1_FOUNDATION_32"
+M2_FOUNDATION_COUNT = 32
+M2_EXPECTED_FAMILY_COUNTS = MappingProxyType(
+    {
+        "REFERENCE_TRUTH": 3,
+        "TIME_ALIGNMENT": 5,
+        "AIRCRAFT_FLIGHT": 3,
+        "SENSOR_DETECTION": 4,
+        "SENSOR_ACCURACY": 17,
+    }
+)
+M2_DISPATCH_KEY = "algorithm_id"
+
+
+class CatalogMetricEngineError(RuntimeError):
+    """Deterministic fail-closed Catalog Metric Engine error."""
+
+    def __init__(self, code: str, detail: str) -> None:
+        super().__init__(f"{code}: {detail}")
+        self.code = code
+        self.detail = detail
+
+
+@dataclass(frozen=True)
+class ApplicabilityContract:
+    key: str
+    subject_type: str
+    applicability_mode: str
+    allowed_system_types: tuple[str, ...]
+    required_product_semantics: str | None
+
+
+@dataclass(frozen=True)
+class M2MetricDefinition:
+    catalog_index: int
+    metric_code: str
+    name: str
+    semantic_id: str
+    semantic_version: int
+    family: str
+    subject_type: str
+    unit: str
+    value_kind: str
+    algorithm_id: str
+    algorithm_version: str
+    observation_lane: str
+    publication_route: str
+    structured_output_schema_id: str | None
+    input_fields: tuple[str, ...]
+    formula: str
+    validity_conditions: str
+    na_conditions: str
+    profile_parameters: tuple[str, ...]
+    operator_bindings: tuple[str, ...]
+    constant_bindings: tuple[str, ...]
+    upstream_dependencies: tuple[str, ...]
+    metric_dependencies: tuple[str, ...]
+    external_dependencies: tuple[str, ...]
+    state_machine_bindings: tuple[str, ...]
+    applicability: ApplicabilityContract
+    definition_hash: str
+
+
+@dataclass(frozen=True)
+class M2MetricExecutionPlan:
+    catalog_id: str
+    catalog_version: str
+    catalog_sha256: str
+    db_schema_version: str
+    delivery_milestone: str
+    delivery_batch: str
+    catalog_metric_codes: tuple[str, ...]
+    definitions: tuple[M2MetricDefinition, ...]
+    required_operator_ids: tuple[str, ...]
+    logical_hash: str
+
+    @property
+    def metric_codes(self) -> tuple[str, ...]:
+        return tuple(item.metric_code for item in self.definitions)
+
+    def definition(self, metric_code: str) -> M2MetricDefinition:
+        for definition in self.definitions:
+            if definition.metric_code == metric_code:
+                return definition
+        raise CatalogMetricEngineError("M2_METRIC_DEFINITION_MISSING", metric_code)
+
+
+@dataclass(frozen=True)
+class M2MetricPluginRequest:
+    definition: M2MetricDefinition
+    input_payload: Mapping[str, object]
+    upstream_result_hashes: tuple[tuple[str, str], ...]
+    operators: Mapping[str, Callable[..., object]]
+
+
+class M2MetricPlugin(Protocol):
+    def __call__(self, request: M2MetricPluginRequest) -> Mapping[str, object]:
+        """Execute one Catalog algorithm and return a JSON-compatible logical result."""
+
+
+@dataclass(frozen=True)
+class M2MetricExecutionRecord:
+    metric_code: str
+    algorithm_id: str
+    plugin_id: str
+    operator_bindings: tuple[str, ...]
+    upstream_result_hashes: tuple[tuple[str, str], ...]
+    plugin_output_hash: str
+    logical_hash: str
+
+
+@dataclass(frozen=True)
+class M2MetricExecutionBatch:
+    plan_hash: str
+    dispatch_key: str
+    records: tuple[M2MetricExecutionRecord, ...]
+    logical_hash: str
+
+    @property
+    def metric_codes(self) -> tuple[str, ...]:
+        return tuple(item.metric_code for item in self.records)
+
+
+class MetricPluginRegistry:
+    """Algorithm-id plugin registry shared by every Metric family."""
+
+    def __init__(self) -> None:
+        self._plugins: dict[str, tuple[str, M2MetricPlugin]] = {}
+
+    def register(
+        self,
+        algorithm_id: str,
+        *,
+        plugin_id: str,
+        plugin: M2MetricPlugin,
+    ) -> None:
+        if not algorithm_id or not plugin_id:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_PLUGIN_ID_INVALID",
+                repr((algorithm_id, plugin_id)),
+            )
+        if algorithm_id in self._plugins:
+            raise CatalogMetricEngineError("M2_METRIC_PLUGIN_DUPLICATE", algorithm_id)
+        self._plugins[algorithm_id] = (plugin_id, plugin)
+
+    def resolve(self, algorithm_id: str) -> tuple[str, M2MetricPlugin]:
+        try:
+            return self._plugins[algorithm_id]
+        except KeyError as exc:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_PLUGIN_MISSING",
+                algorithm_id,
+            ) from exc
+
+    @property
+    def plugin_ids(self) -> Mapping[str, str]:
+        return MappingProxyType(
+            {algorithm_id: value[0] for algorithm_id, value in self._plugins.items()}
+        )
+
+
+class CatalogMetricEngine:
+    """One Catalog-driven execution engine with algorithm-id plugin dispatch."""
+
+    dispatch_key = M2_DISPATCH_KEY
+
+    def __init__(
+        self,
+        plan: M2MetricExecutionPlan,
+        plugins: MetricPluginRegistry,
+    ) -> None:
+        self.plan = plan
+        self.plugins = plugins
+
+    def _execution_definitions(
+        self,
+        metric_codes: Sequence[str] | None,
+    ) -> tuple[M2MetricDefinition, ...]:
+        if metric_codes is None:
+            return self.plan.definitions
+
+        requested = set(metric_codes)
+        if len(requested) != len(metric_codes):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_REQUEST_DUPLICATE",
+                repr(tuple(metric_codes)),
+            )
+        unknown = requested - set(self.plan.metric_codes)
+        if unknown:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_REQUEST_UNKNOWN",
+                repr(sorted(unknown)),
+            )
+
+        closure = set(requested)
+        changed = True
+        while changed:
+            changed = False
+            for definition in self.plan.definitions:
+                if definition.metric_code not in closure:
+                    continue
+                for dependency in definition.metric_dependencies:
+                    if dependency not in closure:
+                        closure.add(dependency)
+                        changed = True
+        return tuple(
+            definition
+            for definition in self.plan.definitions
+            if definition.metric_code in closure
+        )
+
+    def execute(
+        self,
+        inputs: Mapping[str, Mapping[str, object]],
+        *,
+        metric_codes: Sequence[str] | None = None,
+    ) -> M2MetricExecutionBatch:
+        definitions = self._execution_definitions(metric_codes)
+        records: list[M2MetricExecutionRecord] = []
+        result_hashes: dict[str, str] = {}
+
+        for definition in definitions:
+            input_payload = inputs.get(definition.metric_code)
+            if input_payload is None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_INPUT_PAYLOAD_MISSING",
+                    definition.metric_code,
+                )
+            plugin_id, plugin = self.plugins.resolve(definition.algorithm_id)
+            upstream_hashes = tuple(
+                (dependency, result_hashes[dependency])
+                for dependency in definition.metric_dependencies
+            )
+            operators = MappingProxyType(
+                {
+                    operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
+                    for operator_id in definition.operator_bindings
+                }
+            )
+            request = M2MetricPluginRequest(
+                definition=definition,
+                input_payload=input_payload,
+                upstream_result_hashes=upstream_hashes,
+                operators=operators,
+            )
+            try:
+                output = dict(plugin(request))
+                output_hash = _sha256_object(output)
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_PLUGIN_OUTPUT_INVALID",
+                    f"{definition.metric_code}: {exc}",
+                ) from exc
+
+            logical_hash = _sha256_object(
+                {
+                    "metric_code": definition.metric_code,
+                    "definition_hash": definition.definition_hash,
+                    "algorithm_id": definition.algorithm_id,
+                    "plugin_id": plugin_id,
+                    "operator_bindings": definition.operator_bindings,
+                    "upstream_result_hashes": upstream_hashes,
+                    "plugin_output_hash": output_hash,
+                }
+            )
+            record = M2MetricExecutionRecord(
+                metric_code=definition.metric_code,
+                algorithm_id=definition.algorithm_id,
+                plugin_id=plugin_id,
+                operator_bindings=definition.operator_bindings,
+                upstream_result_hashes=upstream_hashes,
+                plugin_output_hash=output_hash,
+                logical_hash=logical_hash,
+            )
+            records.append(record)
+            result_hashes[definition.metric_code] = logical_hash
+
+        batch_hash = _sha256_object(
+            {
+                "plan_hash": self.plan.logical_hash,
+                "dispatch_key": self.dispatch_key,
+                "record_hashes": [record.logical_hash for record in records],
+            }
+        )
+        return M2MetricExecutionBatch(
+            plan_hash=self.plan.logical_hash,
+            dispatch_key=self.dispatch_key,
+            records=tuple(records),
+            logical_hash=batch_hash,
+        )
+
+
+def _canonical_bytes(value: object) -> bytes:
+    try:
+        return json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CANONICALIZATION_FAILED",
+            str(exc),
+        ) from exc
+
+
+def _sha256_object(value: object) -> str:
+    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+
+
+def _load_object(path: Path) -> tuple[dict[str, object], bytes]:
+    try:
+        raw_bytes = path.read_bytes()
+        raw: object = json.loads(raw_bytes)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_INVALID",
+            path.as_posix(),
+        ) from exc
+    if not isinstance(raw, dict) or not all(isinstance(key, str) for key in raw):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_INVALID",
+            "root must be string-keyed object",
+        )
+    return cast(dict[str, object], raw), raw_bytes
+
+
+def _object(value: object, *, field: str) -> dict[str, object]:
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_SHAPE_INVALID",
+            f"{field} must be string-keyed object",
+        )
+    return cast(dict[str, object], value)
+
+
+def _objects(value: object, *, field: str) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_SHAPE_INVALID",
+            f"{field} must be list",
+        )
+    result: list[dict[str, object]] = []
+    for index, item in enumerate(value):
+        result.append(_object(item, field=f"{field}[{index}]"))
+    return result
+
+
+def _text(mapping: Mapping[str, object], name: str, *, field: str) -> str:
+    value = mapping.get(name)
+    if not isinstance(value, str) or not value:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_FIELD_INVALID",
+            f"{field}.{name}",
+        )
+    return value
+
+
+def _integer(mapping: Mapping[str, object], name: str, *, field: str) -> int:
+    value = mapping.get(name)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_FIELD_INVALID",
+            f"{field}.{name}",
+        )
+    return value
+
+
+def _string_list(mapping: Mapping[str, object], name: str, *, field: str) -> tuple[str, ...]:
+    value = mapping.get(name)
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_FIELD_INVALID",
+            f"{field}.{name}",
+        )
+    return tuple(cast(list[str], value))
+
+
+def _optional_text(mapping: Mapping[str, object], name: str, *, field: str) -> str | None:
+    value = mapping.get(name)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_CATALOG_FIELD_INVALID",
+            f"{field}.{name}",
+        )
+    return value
+
+
+def _applicability_key(metric_code: str) -> str:
+    parts = metric_code.split("-")
+    if len(parts) != 3 or parts[0] != "P1":
+        raise CatalogMetricEngineError("M2_METRIC_CODE_INVALID", metric_code)
+    return f"{parts[0]}-{parts[1]}-*"
+
+
+def _applicability(
+    definition: Mapping[str, object],
+    family_contracts: Mapping[str, object],
+) -> ApplicabilityContract:
+    metric_code = _text(definition, "metric_code", field="metric")
+    key = _applicability_key(metric_code)
+    contract = _object(family_contracts.get(key), field=f"family_applicability_contracts.{key}")
+    allowed_raw = contract.get("allowed_system_types", [])
+    if not isinstance(allowed_raw, list) or not all(
+        isinstance(item, str) for item in allowed_raw
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_APPLICABILITY_INVALID",
+            f"{key}.allowed_system_types",
+        )
+    result = ApplicabilityContract(
+        key=key,
+        subject_type=_text(contract, "subject_type", field=key),
+        applicability_mode=_text(contract, "applicability_mode", field=key),
+        allowed_system_types=tuple(cast(list[str], allowed_raw)),
+        required_product_semantics=_optional_text(
+            contract,
+            "required_product_semantics",
+            field=key,
+        ),
+    )
+    subject_type = _text(definition, "subject_type", field=metric_code)
+    if result.subject_type != "MIXED" and result.subject_type != subject_type:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_APPLICABILITY_SUBJECT_DRIFT",
+            metric_code,
+        )
+    if key == "P1-SNS-*" and (
+        result.applicability_mode != "SYSTEM_TYPE_EXACT"
+        or result.allowed_system_types != ("RADAR",)
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_SNS_APPLICABILITY_DRIFT",
+            repr(result),
+        )
+    return result
+
+
+def _generated_metadata_by_code() -> dict[str, Mapping[str, object]]:
+    result: dict[str, Mapping[str, object]] = {}
+    for raw in P1_METRICS:
+        code = raw.get("metric_code")
+        if not isinstance(code, str) or not code:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_GENERATED_REGISTRY_INVALID",
+                repr(code),
+            )
+        result[code] = raw
+    return result
+
+
+def _validate_generated_projection(
+    raw: Mapping[str, object],
+    generated: Mapping[str, object],
+) -> None:
+    code = _text(raw, "metric_code", field="metric")
+    keys = (
+        "metric_code",
+        "semantic_id",
+        "semantic_version",
+        "family",
+        "subject_type",
+        "unit",
+        "value_kind",
+        "algorithm_id",
+        "algorithm_version",
+        "delivery_milestone",
+        "delivery_batch",
+        "observation_lane",
+        "publication_route",
+        "structured_output_schema_id",
+    )
+    for key in keys:
+        if raw.get(key) != generated.get(key):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_GENERATED_REGISTRY_DRIFT",
+                f"{code}.{key}",
+            )
+
+
+def _topological_order(
+    definitions: Sequence[M2MetricDefinition],
+) -> tuple[M2MetricDefinition, ...]:
+    by_code = {definition.metric_code: definition for definition in definitions}
+    remaining = set(by_code)
+    completed: set[str] = set()
+    ordered: list[M2MetricDefinition] = []
+
+    while remaining:
+        ready = sorted(
+            (
+                by_code[code]
+                for code in remaining
+                if set(by_code[code].metric_dependencies).issubset(completed)
+            ),
+            key=lambda definition: definition.catalog_index,
+        )
+        if not ready:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_DEPENDENCY_CYCLE",
+                repr(sorted(remaining)),
+            )
+        for definition in ready:
+            ordered.append(definition)
+            completed.add(definition.metric_code)
+            remaining.remove(definition.metric_code)
+    return tuple(ordered)
+
+
+def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPlan:
+    """Compile the exact frozen M2 Catalog batch into one deterministic plan."""
+
+    catalog_path = authority_root / "P1_METRIC_CATALOG.json"
+    catalog, catalog_bytes = _load_object(catalog_path)
+    catalog_version = _text(catalog, "catalog_version", field="catalog")
+    db_schema_version = _text(catalog, "db_schema_version", field="catalog")
+    if db_schema_version != "1.6.0":
+        raise CatalogMetricEngineError(
+            "M2_METRIC_DB_SCHEMA_VERSION_DRIFT",
+            db_schema_version,
+        )
+
+    metrics = _objects(catalog.get("metrics"), field="metrics")
+    selected_with_index = [
+        (index, metric)
+        for index, metric in enumerate(metrics)
+        if metric.get("delivery_milestone") == M2_DELIVERY_MILESTONE
+        and metric.get("delivery_batch") == M2_DELIVERY_BATCH
+    ]
+    if len(selected_with_index) != M2_FOUNDATION_COUNT:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_FOUNDATION_COUNT_DRIFT",
+            str(len(selected_with_index)),
+        )
+    catalog_codes = tuple(
+        _text(metric, "metric_code", field=f"metrics[{index}]")
+        for index, metric in selected_with_index
+    )
+    if len(set(catalog_codes)) != M2_FOUNDATION_COUNT:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_FOUNDATION_CODE_DUPLICATE",
+            repr(catalog_codes),
+        )
+
+    family_counts = Counter(
+        _text(metric, "family", field=f"metrics[{index}]")
+        for index, metric in selected_with_index
+    )
+    if dict(family_counts) != dict(M2_EXPECTED_FAMILY_COUNTS):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_FAMILY_COUNT_DRIFT",
+            repr(dict(family_counts)),
+        )
+
+    operator_registry = _object(catalog.get("operator_registry"), field="operator_registry")
+    constant_registry = _object(catalog.get("constant_registry"), field="constant_registry")
+    state_machine_registry = _object(
+        catalog.get("state_machine_registry"),
+        field="state_machine_registry",
+    )
+    upstream_registry = _object(
+        catalog.get("upstream_contract_registry"),
+        field="upstream_contract_registry",
+    )
+    schema_registry = _object(
+        catalog.get("structured_output_schema_registry"),
+        field="structured_output_schema_registry",
+    )
+    family_contracts = _object(
+        catalog.get("family_applicability_contracts"),
+        field="family_applicability_contracts",
+    )
+    generated_by_code = _generated_metadata_by_code()
+    selected_codes = set(catalog_codes)
+    definitions: list[M2MetricDefinition] = []
+
+    for index, raw in selected_with_index:
+        code = _text(raw, "metric_code", field=f"metrics[{index}]")
+        generated = generated_by_code.get(code)
+        if generated is None:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_GENERATED_DEFINITION_MISSING",
+                code,
+            )
+        _validate_generated_projection(raw, generated)
+
+        operators = _string_list(raw, "operator_bindings", field=code)
+        constants = _string_list(raw, "constant_bindings", field=code)
+        upstream = _string_list(raw, "upstream_dependencies", field=code)
+        state_machines = _string_list(raw, "state_machine_bindings", field=code)
+        profile_parameters = _string_list(raw, "profile_parameters", field=code)
+        input_fields = _string_list(raw, "input_fields", field=code)
+
+        for operator_id in operators:
+            if operator_id not in operator_registry:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_OPERATOR_AUTHORITY_MISSING",
+                    f"{code}:{operator_id}",
+                )
+            if operator_id not in M2_OPERATOR_IMPLEMENTATIONS:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_OPERATOR_IMPLEMENTATION_MISSING",
+                    f"{code}:{operator_id}",
+                )
+        for constant_id in constants:
+            if constant_id not in constant_registry:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_CONSTANT_AUTHORITY_MISSING",
+                    f"{code}:{constant_id}",
+                )
+        for state_machine_id in state_machines:
+            if state_machine_id not in state_machine_registry:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_STATE_MACHINE_AUTHORITY_MISSING",
+                    f"{code}:{state_machine_id}",
+                )
+
+        metric_dependencies = tuple(item for item in upstream if item in selected_codes)
+        external_dependencies = tuple(item for item in upstream if item not in selected_codes)
+        for dependency in external_dependencies:
+            if dependency.startswith("P1-") or dependency not in upstream_registry:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_UPSTREAM_AUTHORITY_MISSING",
+                    f"{code}:{dependency}",
+                )
+
+        value_kind = _text(raw, "value_kind", field=code)
+        schema_id = _optional_text(raw, "structured_output_schema_id", field=code)
+        if value_kind == "STRUCTURED":
+            if schema_id is None or schema_id not in schema_registry:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_STRUCTURED_SCHEMA_MISSING",
+                    code,
+                )
+        elif value_kind == "NUMERIC":
+            if schema_id is not None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_NUMERIC_SCHEMA_UNEXPECTED",
+                    code,
+                )
+        else:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_VALUE_KIND_UNSUPPORTED",
+                f"{code}:{value_kind}",
+            )
+
+        definition = M2MetricDefinition(
+            catalog_index=index,
+            metric_code=code,
+            name=_text(raw, "name", field=code),
+            semantic_id=_text(raw, "semantic_id", field=code),
+            semantic_version=_integer(raw, "semantic_version", field=code),
+            family=_text(raw, "family", field=code),
+            subject_type=_text(raw, "subject_type", field=code),
+            unit=_text(raw, "unit", field=code),
+            value_kind=value_kind,
+            algorithm_id=_text(raw, "algorithm_id", field=code),
+            algorithm_version=_text(raw, "algorithm_version", field=code),
+            observation_lane=_text(raw, "observation_lane", field=code),
+            publication_route=_text(raw, "publication_route", field=code),
+            structured_output_schema_id=schema_id,
+            input_fields=input_fields,
+            formula=_text(raw, "formula", field=code),
+            validity_conditions=_text(raw, "validity_conditions", field=code),
+            na_conditions=_text(raw, "na_conditions", field=code),
+            profile_parameters=profile_parameters,
+            operator_bindings=operators,
+            constant_bindings=constants,
+            upstream_dependencies=upstream,
+            metric_dependencies=metric_dependencies,
+            external_dependencies=external_dependencies,
+            state_machine_bindings=state_machines,
+            applicability=_applicability(raw, family_contracts),
+            definition_hash=_sha256_object(raw),
+        )
+        definitions.append(definition)
+
+    ordered = _topological_order(definitions)
+    required_operator_ids = tuple(
+        sorted({operator for definition in ordered for operator in definition.operator_bindings})
+    )
+    logical_hash = _sha256_object(
+        {
+            "catalog_id": "P1_METRIC_CATALOG",
+            "catalog_version": catalog_version,
+            "catalog_sha256": hashlib.sha256(catalog_bytes).hexdigest(),
+            "db_schema_version": db_schema_version,
+            "delivery_milestone": M2_DELIVERY_MILESTONE,
+            "delivery_batch": M2_DELIVERY_BATCH,
+            "catalog_metric_codes": catalog_codes,
+            "execution_metric_codes": [definition.metric_code for definition in ordered],
+            "definition_hashes": [
+                (definition.metric_code, definition.definition_hash) for definition in ordered
+            ],
+            "required_operator_ids": required_operator_ids,
+            "dispatch_key": M2_DISPATCH_KEY,
+        }
+    )
+    return M2MetricExecutionPlan(
+        catalog_id="P1_METRIC_CATALOG",
+        catalog_version=catalog_version,
+        catalog_sha256=hashlib.sha256(catalog_bytes).hexdigest(),
+        db_schema_version=db_schema_version,
+        delivery_milestone=M2_DELIVERY_MILESTONE,
+        delivery_batch=M2_DELIVERY_BATCH,
+        catalog_metric_codes=catalog_codes,
+        definitions=ordered,
+        required_operator_ids=required_operator_ids,
+        logical_hash=logical_hash,
+    )
