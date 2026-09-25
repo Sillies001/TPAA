@@ -265,14 +265,15 @@ def run(*, expected_platform: str, source_revision: str, evidence: Path) -> int:
     )
     status = "PASS" if not failures and not failed_acceptance else "FAIL"
 
-    def definition_hash(code: str) -> object | None:
+    def definition_hash(code: str) -> str | None:
         detail = details.get(code)
         if detail is None:
             return None
         definition = detail.get("definition")
         if not isinstance(definition, dict):
             return None
-        return definition.get("definition_hash")
+        value = definition.get("definition_hash")
+        return value if isinstance(value, str) else None
 
     logical_product: dict[str, object] = {
         "fixture_id": fixture_id,
