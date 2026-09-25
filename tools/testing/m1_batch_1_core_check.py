@@ -6,6 +6,7 @@ import argparse
 import json
 import math
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import cast
 from uuid import UUID, uuid5
@@ -137,6 +138,7 @@ def run(evidence: Path | None) -> int:
     all_value_slots_exact = True
     all_staging_atomic = True
     stage_revision_ok = False
+    duration_coverage_ok = False
     nominal_ok = False
     angle_wrap_ok = False
     gap_ok = False
@@ -214,6 +216,43 @@ def run(evidence: Path | None) -> int:
 
             if fixture_id == "BF_M1_NOMINAL_V1":
                 nominal_ok = _nominal_golden_ok(metrics)
+                coverage_times = (
+                    1_000_000,
+                    4_000_000,
+                    5_000_000,
+                    6_000_000,
+                    6_500_000,
+                    7_000_000,
+                    7_500_000,
+                    8_000_000,
+                )
+                coverage_rows = tuple(
+                    replace(
+                        row,
+                        session_time_us=session_time_us,
+                        quality_mask=1 if index == 0 else 0,
+                    )
+                    for index, (row, session_time_us) in enumerate(
+                        zip(world.canonical_rows, coverage_times, strict=True)
+                    )
+                )
+                coverage_world = replace(world, canonical_rows=coverage_rows)
+                coverage_context = replace(
+                    context,
+                    min_coverage=0.8,
+                    max_gap_us=10_000_000,
+                )
+                coverage_result = _metric_map(
+                    compute_representative_metrics(
+                        coverage_context,
+                        coverage_world,
+                    ).results
+                )["P1-AIR-001"]
+                duration_coverage_ok = (
+                    coverage_result.status == "INSUFFICIENT_DATA"
+                    and coverage_result.reason_codes == ("MIN_COVERAGE_NOT_MET",)
+                    and coverage_result.value_numeric is None
+                )
                 original = world.stages[0]
                 revised = supersede_stage(original, correction_key="batch-1-revision-smoke")
                 stage_revision_ok = (
@@ -263,7 +302,9 @@ def run(evidence: Path | None) -> int:
         "world_logical_hash_replay_stable": len(worlds) == len(GOVERNED_FIXTURE_IDS),
         "world_and_metric_evidence_refs_exact": all_world_refs,
         "metric_context_exact_no_latest_or_ui_db_guess": all_context_exact,
-        "p1_air_001_nominal_gap_and_stage_boundary": nominal_ok and gap_ok and stage_boundary_ok,
+        "p1_air_001_nominal_gap_and_stage_boundary": (
+            nominal_ok and gap_ok and stage_boundary_ok and duration_coverage_ok
+        ),
         "p1_air_002_primary_and_diagnostic_separated": nominal_ok,
         "p1_air_003_unwrap_derivative_lls": nominal_ok and angle_wrap_ok,
         "p1_air_004_rolling_median_dwell_and_gap": (
