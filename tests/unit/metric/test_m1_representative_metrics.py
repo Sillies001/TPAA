@@ -132,6 +132,19 @@ def test_air_001_coverage_is_session_time_duration_not_sample_fraction() -> None
     assert result.value_numeric is None
 
 
+def test_air_002_excludes_invalid_peak_and_keeps_diagnostic_in_evidence() -> None:
+    world, context, _ = _compute("BF_M1_NOMINAL_V1")
+    rows = list(world.canonical_rows)
+    rows[6] = replace(rows[6], nz_g=99.0, quality_mask=1)
+    altered_world = replace(world, canonical_rows=tuple(rows))
+
+    result = _by_code(compute_representative_metrics(context, altered_world))["P1-AIR-002"]
+
+    assert result.status == "VALID"
+    assert result.value_numeric == pytest.approx(2.5)
+    assert dict(result.evidence.details)["diagnostic_min_nz_g"] == "1.0"
+
+
 def test_heading_unwrap_prevents_false_2pi_spike() -> None:
     _, _, batch = _compute("BF_M1_ANGLE_WRAP_V1")
     result = _by_code(batch)["P1-AIR-003"]
@@ -211,6 +224,58 @@ def test_half_open_stage_membership_controls_metric_window() -> None:
 
     assert _by_code(setup)["P1-AIR-001"].value_numeric == pytest.approx(0.5)
     assert _by_code(execution)["P1-AIR-001"].value_numeric == pytest.approx(9.0)
+
+
+def test_short_stage_fails_closed_for_derivative_and_sustained_metrics() -> None:
+    bundle = FIXTURES / "BF_M1_STAGE_BOUNDARY_V1"
+    world = project_minimal_p1_world(
+        bundle,
+        authority_root=AUTHORITY_ROOT,
+        release_id=RELEASE_ID,
+    )
+    context = build_metric_context(bundle, authority_root=AUTHORITY_ROOT, world=world)
+    batch = compute_representative_metrics(context, world, stage_id=world.stages[0].stage_id)
+    metrics = _by_code(batch)
+
+    assert metrics["P1-AIR-003"].status == "INSUFFICIENT_DATA"
+    assert metrics["P1-AIR-003"].reason_codes == ("DERIVATIVE_UNAVAILABLE",)
+    assert metrics["P1-AIR-004"].status == "INSUFFICIENT_DATA"
+    assert metrics["P1-AIR-004"].reason_codes == ("SUSTAIN_DURATION_NOT_MET",)
+
+
+def test_air_007_zero_channel_and_both_missing_statuses_are_exact() -> None:
+    world, context, _ = _compute("BF_M1_NOMINAL_V1")
+    tas_only_world = replace(
+        world,
+        canonical_rows=tuple(replace(row, mach=None) for row in world.canonical_rows),
+    )
+    tas_only = _by_code(compute_representative_metrics(context, tas_only_world))["P1-AIR-007"]
+    envelope = tas_only.value_structured
+
+    assert tas_only.status == "VALID"
+    assert envelope is not None
+    assert envelope.tas.status == "VALID"
+    assert envelope.tas.n == 8
+    assert envelope.mach.status == "INSUFFICIENT_DATA"
+    assert envelope.mach.n == 0
+    assert envelope.mach.minimum is None
+    assert envelope.mach.maximum is None
+    assert envelope.mach.p05 is None
+    assert envelope.mach.p50 is None
+    assert envelope.mach.p95 is None
+
+    neither_world = replace(
+        world,
+        canonical_rows=tuple(
+            replace(row, tas_mps=None, mach=None) for row in world.canonical_rows
+        ),
+    )
+    neither = _by_code(compute_representative_metrics(context, neither_world))["P1-AIR-007"]
+
+    assert neither.status == "N_A"
+    assert neither.reason_codes == ("TAS_AND_MACH_UNAVAILABLE",)
+    assert neither.value_numeric is None
+    assert neither.value_structured is None
 
 
 def test_compute_is_replay_stable_and_stages_atomically_without_publish() -> None:
