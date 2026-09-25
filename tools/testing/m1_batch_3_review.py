@@ -57,6 +57,14 @@ def run(
         for task in TASK_IDS
     }
     revision_checks = {
+        "windows_schema_exact": win.get("schema") == "TPAA_M1_BATCH_3_DESKTOP_E2E_V1",
+        "linux_schema_exact": lin.get("schema") == "TPAA_M1_BATCH_3_DESKTOP_E2E_V1",
+        "logical_schema_exact": (
+            eq.get("schema") == "TPAA_M1_BATCH_3_DESKTOP_LOGICAL_EQUIVALENCE_V1"
+        ),
+        "windows_tracking_issue_exact": win.get("tracking_issue") == 89,
+        "linux_tracking_issue_exact": lin.get("tracking_issue") == 89,
+        "logical_tracking_issue_exact": eq.get("tracking_issue") == 89,
         "windows_revision_exact": win.get("source_revision") == expected_revision,
         "linux_revision_exact": lin.get("source_revision") == expected_revision,
         "logical_revision_exact": eq.get("source_revision") == expected_revision,

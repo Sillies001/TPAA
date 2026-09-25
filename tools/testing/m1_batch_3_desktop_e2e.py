@@ -213,7 +213,38 @@ def run(
             and _text(evidence_cursor) == f"Evidence cursor: {cursor_value}"
             and stages.currentRow() >= 0
         )
-        acceptance["M1-GUI-004"] = stages.count() == 4
+        stage_rows = [stages.item(i).text() for i in range(stages.count())]
+        expected_stage_types = (
+            "SETUP_ENTRY",
+            "EXECUTION",
+            "STABILIZATION_RECOVERY",
+            "COMPLETION",
+        )
+        parsed_stage_bounds: list[tuple[int, int]] = []
+        stage_projection_exact = stages.count() == 4
+        for index, expected_type in enumerate(expected_stage_types):
+            if not stage_projection_exact:
+                break
+            row_text = stage_rows[index]
+            if not row_text.startswith(f"{expected_type} ["):
+                stage_projection_exact = False
+                break
+            try:
+                bounds_text = row_text.split("[", 1)[1].split(")", 1)[0]
+                start_text, end_text = bounds_text.split(",", 1)
+                parsed_stage_bounds.append((int(start_text), int(end_text)))
+            except (IndexError, ValueError):
+                stage_projection_exact = False
+                break
+        if stage_projection_exact and len(parsed_stage_bounds) == 4:
+            stage_projection_exact = (
+                all(start < end for start, end in parsed_stage_bounds)
+                and all(
+                    parsed_stage_bounds[index][1] == parsed_stage_bounds[index + 1][0]
+                    for index in range(3)
+                )
+            )
+        acceptance["M1-GUI-004"] = stage_projection_exact
 
         metric_codes: list[str] = []
         metric_rows_complete = metrics.rowCount() == 5
@@ -241,6 +272,20 @@ def run(
         except json.JSONDecodeError:
             detail_json = {}
             evidence_json = {}
+        evidence_refs = evidence_json.get("refs") if isinstance(evidence_json, dict) else None
+        ref_classes = {
+            ref.get("ref_class")
+            for ref in evidence_refs
+            if isinstance(ref, dict) and isinstance(ref.get("ref_class"), str)
+        } if isinstance(evidence_refs, list) else set()
+        required_ref_classes = {
+            "EVALUATION_CONTEXT",
+            "CANONICAL",
+            "EPISODE",
+            "STAGE",
+            "WORLD",
+            "EVIDENCE",
+        }
         acceptance["M1-GUI-006"] = (
             isinstance(detail_json, dict)
             and isinstance(evidence_json, dict)
@@ -248,11 +293,9 @@ def run(
             and evidence_json.get("release_id") == release_id
             and isinstance(detail_json.get("definition"), dict)
             and "definition_hash" in detail_json.get("definition", {})
-            and (
-                isinstance(evidence_json.get("refs"), list)
-                or isinstance(evidence_json.get("details"), list)
-                or "logical_hash" in evidence_json
-            )
+            and isinstance(evidence_json.get("logical_hash"), str)
+            and bool(evidence_json.get("logical_hash"))
+            and required_ref_classes.issubset(ref_classes)
         )
 
         badge_names = (
@@ -285,7 +328,8 @@ def run(
             fixture_id=fixture.currentText(),
             release_id=release_id,
             metric_codes=metric_codes,
-            stage_rows=[stages.item(i).text() for i in range(stages.count())],
+            stage_rows=stage_rows,
+            evidence_ref_classes=sorted(ref_classes),
             cursor=cursor_value,
             workflow_status=workflow_text,
             replay_status=replay_text,
@@ -326,6 +370,7 @@ def run(
         "release_id": captured.get("release_id"),
         "metric_codes": captured.get("metric_codes"),
         "stage_rows": captured.get("stage_rows"),
+        "evidence_ref_classes": captured.get("evidence_ref_classes"),
         "cursor": captured.get("cursor"),
         "workflow_status": captured.get("workflow_status"),
         "replay_status": captured.get("replay_status"),

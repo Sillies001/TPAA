@@ -22,6 +22,10 @@ def run(*, windows: Path, linux: Path, expected_revision: str, evidence: Path) -
     win = _load(windows)
     lin = _load(linux)
     acceptance = {
+        "windows_schema_exact": win.get("schema") == "TPAA_M1_BATCH_3_DESKTOP_E2E_V1",
+        "linux_schema_exact": lin.get("schema") == "TPAA_M1_BATCH_3_DESKTOP_E2E_V1",
+        "windows_tracking_issue_exact": win.get("tracking_issue") == 89,
+        "linux_tracking_issue_exact": lin.get("tracking_issue") == 89,
         "windows_status_pass": win.get("status") == "PASS",
         "linux_status_pass": lin.get("status") == "PASS",
         "windows_revision_exact": win.get("source_revision") == expected_revision,
