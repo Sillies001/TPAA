@@ -116,10 +116,10 @@ def verify() -> dict[str, object]:
 
     checks.append(
         _pass("checkout_exact_candidate_revision", SOURCE_REVISION)
-        if text.count(f"ref: {SOURCE_REVISION}") == 5
+        if text.count(f"ref: {SOURCE_REVISION}") == 6
         else _fail(
             "checkout_exact_candidate_revision",
-            f"expected 5 exact-source checkouts using {SOURCE_REVISION}",
+            f"expected 6 exact-source checkouts using {SOURCE_REVISION}",
         )
     )
     checks.append(
@@ -184,6 +184,8 @@ def verify() -> dict[str, object]:
         "python tools/dev/tpaa_dev.py m1-batch-2-backend-check",
         "--platform ${{ matrix.platform }}",
         "--evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json",
+        "python tools/dev/tpaa_dev.py m1-batch-3-desktop-e2e",
+        "--evidence evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json",
         "--evidence evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json",
         "python tools/dev/tpaa_dev.py m1-entry-manifest",
         "--output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json",
@@ -221,6 +223,10 @@ def verify() -> dict[str, object]:
         "--windows downloaded/evidence/m1-batch-2/windows/service-smoke.json",
         "--linux downloaded/evidence/m1-batch-2/linux/service-smoke.json",
         "--evidence evidence/cross-platform/m1-batch-2-service-logical-equivalence.json",
+        "python tools/dev/tpaa_dev.py m1-batch-3-desktop-compare",
+        "--windows downloaded/evidence/m1-batch-3/windows/desktop-e2e.json",
+        "--linux downloaded/evidence/m1-batch-3/linux/desktop-e2e.json",
+        "--evidence evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json",
         "dist/",
         "m0-exit-postgres:",
         "image: postgres:16",
@@ -242,6 +248,14 @@ def verify() -> dict[str, object]:
         "--storage-parity downloaded/postgres/storage-parity.json",
         "--output evidence/m1-batch-2/review.json",
         f"tpaa-m1-batch-2-review-{SOURCE_REVISION}",
+        "m1-batch-3-review:",
+        "name: M1 Batch 3 Review",
+        "python tools/dev/tpaa_dev.py m1-batch-3-review",
+        "--windows downloaded/platform/evidence/m1-batch-3/windows/desktop-e2e.json",
+        "--linux downloaded/platform/evidence/m1-batch-3/linux/desktop-e2e.json",
+        "--logical downloaded/logical/m1-batch-3-desktop-logical-equivalence.json",
+        "--output evidence/m1-batch-3/review.json",
+        f"tpaa-m1-batch-3-review-{SOURCE_REVISION}",
         "m0-exit-review:",
         "python tools/ci/m0_exit_review.py",
         "--output evidence/m0-exit/review.json",
