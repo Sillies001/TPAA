@@ -126,6 +126,9 @@ class ApplicationService:
     def m1_metric(self, release_id: str, metric_code: str) -> dict[str, object]:
         return self._m1().metric_detail(release_id, metric_code)
 
+    def m1_metric_evidence(self, release_id: str, metric_code: str) -> dict[str, object]:
+        return self._m1().metric_evidence(release_id, metric_code)
+
     def m1_context(self, release_id: str) -> dict[str, object]:
         return dict(self._m1().context_projection(release_id))
 
