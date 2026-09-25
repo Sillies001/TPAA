@@ -72,6 +72,7 @@ def run(
     checks = {
         "batch1_schema_exact": b1.get("schema") == "TPAA_M1_BATCH_1_CORE_EVIDENCE_V1",
         "batch1_status_pass": b1.get("status") == "PASS",
+        "batch1_revision_exact": b1.get("source_revision") == expected_revision,
         "batch1_failed_acceptance_empty": b1.get("failed_acceptance") == [],
         "batch2_schema_exact": b2.get("schema") == "TPAA_M1_BATCH_2_SERVICE_SMOKE_V1",
         "batch2_status_pass": b2.get("status") == "PASS",
