@@ -145,6 +145,13 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
 
+      - name: Emit consolidated M1 Batch 2 backend evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-backend-check
+          --platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -190,6 +197,7 @@ jobs:
             evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
             evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
             evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
+            evidence/m1-batch-2/${{ matrix.platform }}/backend.json
             dist/
           if-no-files-found: error
           retention-days: 14
