@@ -366,3 +366,31 @@ def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() 
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-batch-1-core-check")' in gate
+
+
+def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1 Batch 2 service smoke evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-service-smoke" in text
+    assert "--expected-platform ${{ matrix.platform }}" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
+    assert (
+        "--evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json"
+        in text
+    )
+    assert "evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json" in text
+    assert "- name: Compare Windows and Linux M1 Batch 2 service products" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-service-compare" in text
+    assert (
+        "--windows downloaded/evidence/m1-batch-2/windows/service-smoke.json"
+        in text
+    )
+    assert (
+        "--linux downloaded/evidence/m1-batch-2/linux/service-smoke.json"
+        in text
+    )
+    assert (
+        "--evidence evidence/cross-platform/m1-batch-2-service-logical-equivalence.json"
+        in text
+    )
+    assert "evidence/cross-platform/m1-batch-2-service-logical-equivalence.json" in text
