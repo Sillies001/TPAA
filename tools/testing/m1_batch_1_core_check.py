@@ -8,19 +8,8 @@ import math
 import sys
 from dataclasses import replace
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 from uuid import UUID, uuid5
-
-from tpaa_episode import project_basic_flight_stage_quality, supersede_stage
-from tpaa_ingest import GOVERNED_FIXTURE_IDS
-from tpaa_metric import (
-    MetricResult,
-    MetricStagingArea,
-    build_metric_context,
-    compute_representative_metrics,
-)
-from tpaa_metric.operators import TimedValue, rolling_medians
-from tpaa_world import project_minimal_p1_world
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "m1"
@@ -45,6 +34,12 @@ TASK_IDS = (
 )
 
 
+def _ensure_project_src() -> None:
+    src_root = str(ROOT / "src")
+    if src_root not in sys.path:
+        sys.path.insert(0, src_root)
+
+
 def _load_object(path: Path) -> dict[str, object]:
     raw: object = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or not all(isinstance(key, str) for key in raw):
@@ -52,7 +47,7 @@ def _load_object(path: Path) -> dict[str, object]:
     return cast(dict[str, object], raw)
 
 
-def _metric_map(results: tuple[MetricResult, ...]) -> dict[str, MetricResult]:
+def _metric_map(results: tuple[Any, ...]) -> dict[str, Any]:
     return {result.metric_code: result for result in results}
 
 
@@ -61,6 +56,9 @@ def _close(actual: float | None, expected: float) -> bool:
 
 
 def _stage_golden_ok(bundle: Path) -> bool:
+    _ensure_project_src()
+    from tpaa_episode import project_basic_flight_stage_quality
+
     expected = _load_object(bundle / "expected" / "expected.json")
     raw_stages = expected.get("stages")
     if not isinstance(raw_stages, list):
@@ -80,7 +78,7 @@ def _stage_golden_ok(bundle: Path) -> bool:
     )
 
 
-def _nominal_golden_ok(metrics: dict[str, MetricResult]) -> bool:
+def _nominal_golden_ok(metrics: dict[str, Any]) -> bool:
     envelope = metrics["P1-AIR-007"].value_structured
     sustained_details = dict(metrics["P1-AIR-004"].evidence.details)
     return (
@@ -104,6 +102,9 @@ def _nominal_golden_ok(metrics: dict[str, MetricResult]) -> bool:
 
 
 def _centered_rolling_median_ok() -> bool:
+    _ensure_project_src()
+    from tpaa_metric.operators import TimedValue, rolling_medians
+
     values = (
         TimedValue(0, 0.0),
         TimedValue(1_000_000, 0.0),
@@ -128,6 +129,12 @@ def _centered_rolling_median_ok() -> bool:
 
 
 def run(evidence: Path | None) -> int:
+    _ensure_project_src()
+    from tpaa_episode import supersede_stage
+    from tpaa_ingest import GOVERNED_FIXTURE_IDS
+    from tpaa_metric import MetricStagingArea, build_metric_context, compute_representative_metrics
+    from tpaa_world import project_minimal_p1_world
+
     failures: list[str] = []
     worlds: dict[str, str] = {}
     batches: dict[str, str] = {}
