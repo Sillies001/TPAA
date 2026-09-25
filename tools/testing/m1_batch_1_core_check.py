@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import subprocess
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -418,6 +419,7 @@ def run(evidence: Path | None) -> int:
         "schema": "TPAA_M1_BATCH_1_CORE_EVIDENCE_V1",
         "batch_id": BATCH_ID,
         "tracking_issue": 86,
+        "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         "task_ids": list(TASK_IDS),
         "status": status,
         "fixture_count": len(worlds),
