@@ -605,6 +605,40 @@ class M1PublicationService:
             },
         }
 
+    def metric_evidence(self, release_id: str, metric_code: str) -> dict[str, object]:
+        release = self._release(release_id).release
+        instance = next(
+            (item for item in release.metric_instances if item.metric_code == metric_code),
+            None,
+        )
+        definition = next(
+            (item for item in release.definitions if item.metric_code == metric_code),
+            None,
+        )
+        if instance is None or definition is None:
+            raise M1ApplicationError("METRIC_NOT_FOUND", metric_code)
+        evidence = next(
+            item for item in release.evidence_sets if item.evidence_set_id == instance.evidence_set_id
+        )
+        return {
+            "release_id": release.release_id,
+            "metric_instance_id": instance.metric_instance_id,
+            "metric_code": instance.metric_code,
+            "metric_definition_id": definition.metric_definition_id,
+            "definition_hash": definition.definition_hash,
+            "evidence_set_id": evidence.evidence_set_id,
+            "logical_hash": evidence.logical_hash,
+            "refs": [
+                {
+                    "ref_class": ref.ref_class,
+                    "ref_id": ref.ref_id,
+                    "logical_hash": ref.logical_hash,
+                }
+                for ref in evidence.refs
+            ],
+            "details": [list(item) for item in evidence.details],
+        }
+
     def context_projection(self, release_id: str) -> EvaluationContextDTO:
         release = self._release(release_id).release
         resolved = resolve_evaluation_context(
