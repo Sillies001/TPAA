@@ -53,6 +53,81 @@ def create_m1_app(application: ApplicationService):
 
     app = create_app(application)
 
+    def _submit_control_command(
+        *,
+        command: str,
+        body: dict[str, object],
+        idempotency_key: str | None,
+        actor: str,
+    ) -> JSONResponse:
+        if idempotency_key is None or not idempotency_key.strip():
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "detail": "Idempotency-Key is required",
+                    },
+                },
+            )
+        try:
+            submission = application.submit_job(
+                idempotency_key=idempotency_key,
+                command=command,
+                payload=body,
+                actor=actor,
+            )
+        except Exception as exc:
+            from tpaa_application import IdempotencyConflict
+
+            if isinstance(exc, IdempotencyConflict):
+                return JSONResponse(
+                    status_code=409,
+                    content={
+                        "outcome": "SYSTEM_ERROR",
+                        "error": {"code": "IDEMPOTENCY_KEY_CONFLICT", "detail": str(exc)},
+                    },
+                )
+            raise
+        record = submission.record
+        return JSONResponse(
+            status_code=200 if submission.reused else 202,
+            content={
+                "job_id": record.job_id,
+                "request_hash": record.request_hash,
+                "command": record.command,
+                "status": record.status.value,
+                "reused": submission.reused,
+            },
+        )
+
+    @app.post("/m1/commands/import-session")
+    def import_session(
+        body: dict[str, object],
+        idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+        actor: Annotated[str, Header(alias="X-TPAA-Actor")] = "development",
+    ) -> JSONResponse:
+        return _submit_control_command(
+            command="M1_IMPORT_SESSION",
+            body=body,
+            idempotency_key=idempotency_key,
+            actor=actor,
+        )
+
+    @app.post("/m1/commands/compute-session")
+    def compute_session(
+        body: dict[str, object],
+        idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+        actor: Annotated[str, Header(alias="X-TPAA-Actor")] = "development",
+    ) -> JSONResponse:
+        return _submit_control_command(
+            command="M1_COMPUTE_SESSION",
+            body=body,
+            idempotency_key=idempotency_key,
+            actor=actor,
+        )
+
     @app.post("/m1/commands/publish-session")
     def publish_session(
         body: dict[str, object],
