@@ -182,7 +182,14 @@ def verify() -> dict[str, object]:
             == set(definition.input_fields)
             for definition in plan.definitions
         ),
+        "input_authority_semantics_exact": all(
+            binding.metric_semantic_id == definition.semantic_id
+            and binding.optional == binding.input_field.endswith("?")
+            for definition in plan.definitions
+            for binding in definition.input_authority_bindings
+        ),
         "input_authority_hash_bound": len(plan.input_authority_matrix_sha256) == 64,
+        "source_provenance_hash_bound": len(plan.source_provenance_sha256) == 64,
         "world_capability_registry_hash_bound": (
             len(plan.world_capability_registry_sha256) == 64
         ),
@@ -203,6 +210,7 @@ def verify() -> dict[str, object]:
         "catalog_version": plan.catalog_version,
         "catalog_sha256": plan.catalog_sha256,
         "input_authority_matrix_sha256": plan.input_authority_matrix_sha256,
+        "source_provenance_sha256": plan.source_provenance_sha256,
         "world_capability_registry_sha256": plan.world_capability_registry_sha256,
         "db_schema_version": plan.db_schema_version,
         "delivery_milestone": plan.delivery_milestone,
@@ -218,6 +226,7 @@ def verify() -> dict[str, object]:
                 definition.metric_code,
                 [
                     [
+                        binding.metric_semantic_id,
                         binding.input_field,
                         binding.binding_kind,
                         binding.authority_id,
