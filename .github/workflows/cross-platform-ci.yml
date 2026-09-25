@@ -138,6 +138,13 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-batch-1-core-check
           --evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
 
+      - name: Emit M1 Batch 2 service smoke evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-service-smoke
+          --expected-platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -182,6 +189,7 @@ jobs:
             evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
             evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
             evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
+            evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
             dist/
           if-no-files-found: error
           retention-days: 14
@@ -224,6 +232,13 @@ jobs:
           --linux downloaded/evidence/m1-batch-1/linux/core-product.json
           --evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json
 
+      - name: Compare Windows and Linux M1 Batch 2 service products
+        run: >-
+          python tools/dev/tpaa_dev.py m1-batch-2-service-compare
+          --windows downloaded/evidence/m1-batch-2/windows/service-smoke.json
+          --linux downloaded/evidence/m1-batch-2/linux/service-smoke.json
+          --evidence evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
+
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -232,6 +247,7 @@ jobs:
           path: |
             evidence/cross-platform/logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
+            evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
 
