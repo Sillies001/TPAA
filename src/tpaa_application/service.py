@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Protocol
+
 from .job_control import JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
     M1PublicationService,
@@ -10,7 +12,14 @@ from .m1_publication import (
 )
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
-from .use_cases import GetStorageBaselineStatus
+
+
+class StorageBaselineStatusUseCase(Protocol):
+    """Structural Application dependency for persisted baseline status."""
+
+    def execute(self) -> StorageBaselineStatus:
+        """Return engine-neutral persisted baseline metadata."""
+        ...
 
 
 class ApplicationService:
@@ -19,7 +28,7 @@ class ApplicationService:
     def __init__(
         self,
         *,
-        get_storage_baseline_status: GetStorageBaselineStatus,
+        get_storage_baseline_status: StorageBaselineStatusUseCase,
         get_runtime_baseline_status: GetRuntimeBaselineStatus | None = None,
         job_control: M0JobControl | None = None,
         m1_publication: M1PublicationService | None = None,
@@ -133,7 +142,7 @@ class ApplicationService:
         return dict(self._m1().context_projection(release_id))
 
     def m1_session_episode_stages(self, release_id: str) -> dict[str, object]:
-        return self._m1().session_episode_stage_projection(release_id)
+        return dict(self._m1().session_episode_stage_projection(release_id))
 
     def replay_m1_release(self, release_id: str) -> dict[str, object]:
         return self._m1().replay(release_id)
