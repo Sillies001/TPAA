@@ -8,7 +8,6 @@ from tpaa_ingest.m2_reference_truth import (
     ReferenceTruthRow,
     load_m2_reference_truth,
 )
-
 from tpaa_ingest.source_adapter import (
     GOVERNED_FIXTURE_IDS,
     SourceArtifactIdentity,
