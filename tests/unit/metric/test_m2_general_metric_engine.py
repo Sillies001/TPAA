@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import math
+import shutil
 from collections import Counter
 from pathlib import Path
 
@@ -24,6 +26,20 @@ from tpaa_metric.operators import (
 
 ROOT = Path(__file__).resolve().parents[3]
 AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+M2_AUTHORITY_FILES = (
+    "P1_METRIC_CATALOG.json",
+    "METRIC_INPUT_AUTHORITY_MATRIX.json",
+    "SOURCE_PROVENANCE.json",
+    "WORLD_CAPABILITY_REGISTRY.json",
+)
+
+
+def _copy_authority(tmp_path: Path) -> Path:
+    copied = tmp_path / "canonical"
+    copied.mkdir()
+    for name in M2_AUTHORITY_FILES:
+        shutil.copy2(AUTHORITY / name, copied / name)
+    return copied
 
 
 def _probe(request: M2MetricPluginRequest) -> dict[str, object]:
@@ -90,6 +106,55 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
     )
     assert len(plan.logical_hash) == 64
     assert len(plan.catalog_sha256) == 64
+    assert len(plan.input_authority_matrix_sha256) == 64
+    assert len(plan.source_provenance_sha256) == 64
+    assert len(plan.world_capability_registry_sha256) == 64
+    assert all(
+        binding.metric_semantic_id == definition.semantic_id
+        and binding.optional == binding.input_field.endswith("?")
+        for definition in plan.definitions
+        for binding in definition.input_authority_bindings
+    )
+
+
+def test_m2_input_authority_version_bridge_requires_frozen_provenance(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "SOURCE_PROVENANCE.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["input_authority_migration"]["migration_scope"] = "TEST_ONLY_DRIFT"
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_INPUT_AUTHORITY_PROVENANCE_DRIFT"
+
+
+def test_m2_input_authority_optional_marker_drift_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "METRIC_INPUT_AUTHORITY_MATRIX.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    binding = next(
+        item
+        for item in payload["bindings"]
+        if item["metric_code"] == "P1-QA-001"
+        and item["input_field"] == "sensor_boresight_quat?"
+    )
+    binding["optional"] = False
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_INPUT_AUTHORITY_OPTIONAL_DRIFT"
 
 
 def test_m2_plan_is_dependency_ordered_and_sns_stays_radar_only() -> None:
