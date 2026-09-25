@@ -80,12 +80,12 @@ def verify() -> dict[str, object]:
             == world.time_alignment.session_id
         ),
         "reference_upstream_projection_preserved": (
-            world.reference_manifest.source_authority_signature
-            and world.reference_truth.logical_hash
+            bool(world.reference_manifest.source_authority_signature)
+            and len(world.reference_truth.logical_hash) == 64
         ),
         "time_upstream_projection_preserved": (
-            world.time_manifest.source_authority_signature
-            and world.time_alignment.logical_hash
+            bool(world.time_manifest.source_authority_signature)
+            and len(world.time_alignment.logical_hash) == 64
         ),
         "replay_stable": world == replayed,
         "logical_content_release_independent": (
