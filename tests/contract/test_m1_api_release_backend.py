@@ -1,0 +1,134 @@
+from __future__ import annotations
+
+from pathlib import Path
+from uuid import NAMESPACE_URL, uuid5
+
+from fastapi.testclient import TestClient
+
+from tpaa_api import create_m1_app
+from tpaa_application import ApplicationService, M1PublicationService
+from tpaa_storage.publication import InMemorySessionPublicationRepository
+
+ROOT = Path(__file__).resolve().parents[2]
+FIXTURES = ROOT / "tests" / "fixtures" / "m1"
+AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+
+
+class _UnusedStorageBaseline:
+    def execute(self):
+        raise AssertionError("M1 API contract must not call M0 storage baseline")
+
+
+def _client() -> TestClient:
+    m1 = M1PublicationService(
+        fixture_root=FIXTURES,
+        authority_root=AUTHORITY,
+        repository=InMemorySessionPublicationRepository(),
+    )
+    application = ApplicationService(
+        get_storage_baseline_status=_UnusedStorageBaseline(),
+        m1_publication=m1,
+    )
+    return TestClient(create_m1_app(application))
+
+
+def _body(token: int = 0) -> dict[str, object]:
+    return {
+        "fixture_id": "BF_M1_NOMINAL_V1",
+        "aircraft_model_id": str(uuid5(NAMESPACE_URL, "m1-api-model")),
+        "aircraft_instance_id": str(uuid5(NAMESPACE_URL, "m1-api-instance")),
+        "subject_entity_id": str(uuid5(NAMESPACE_URL, "m1-api-entity")),
+        "capability_dimension": "TEST_EXPLICIT_CAPABILITY_DIMENSION",
+        "capability_type": "TEST_EXPLICIT_CAPABILITY_TYPE",
+        "expected_version_token": token,
+    }
+
+
+def test_publish_and_release_bound_read_snapshot() -> None:
+    client = _client()
+    first = client.post(
+        "/m1/commands/publish-session",
+        json=_body(),
+        headers={"Idempotency-Key": "api-publish"},
+    )
+    assert first.status_code == 201
+    published = first.json()
+    assert published["status"] == "PUBLISHED"
+    assert published["reused"] is False
+    assert len(published["request_hash"]) == 64
+    release_id = published["release_id"]
+
+    retry = client.post(
+        "/m1/commands/publish-session",
+        json=_body(),
+        headers={"Idempotency-Key": "api-publish"},
+    )
+    assert retry.status_code == 200
+    assert retry.json()["reused"] is True
+    assert retry.json()["release_id"] == release_id
+
+    release = client.get(f"/m1/releases/{release_id}")
+    assert release.status_code == 200
+    assert release.json()["release_id"] == release_id
+    assert release.json()["status"] == "PUBLISHED"
+
+    context = client.get(f"/m1/releases/{release_id}/context")
+    assert context.status_code == 200
+    assert context.json()["context_id"] == release.json()["context_id"]
+
+    topology = client.get(f"/m1/releases/{release_id}/topology")
+    assert topology.status_code == 200
+    topo = topology.json()
+    assert isinstance(topo["session"]["start_session_time_us"], str)
+    assert isinstance(topo["session"]["end_session_time_us"], str)
+    assert all(isinstance(item["start_session_time_us"], str) for item in topo["stages"])
+
+    metrics = client.get(f"/m1/releases/{release_id}/metrics")
+    assert metrics.status_code == 200
+    assert [item["metric_code"] for item in metrics.json()["items"]] == [
+        "P1-AIR-001",
+        "P1-AIR-002",
+        "P1-AIR-003",
+        "P1-AIR-004",
+        "P1-AIR-007",
+    ]
+
+    structured = client.get(f"/m1/releases/{release_id}/metrics/P1-AIR-007")
+    assert structured.status_code == 200
+    structured_payload = structured.json()
+    assert structured_payload["value_kind"] == "STRUCTURED"
+    assert isinstance(structured_payload["value"], dict)
+    assert structured_payload["definition"]["publication_route"] == "CAPABILITY_OBSERVATION"
+
+    observations = client.get(f"/m1/releases/{release_id}/observations")
+    assert observations.status_code == 200
+    observation_items = observations.json()["items"]
+    assert len(observation_items) == 5
+    assert all(
+        isinstance(item["observation_start_session_time_us"], str)
+        for item in observation_items
+    )
+
+    replay = client.post(f"/m1/releases/{release_id}/replay")
+    assert replay.status_code == 200
+    assert replay.json()["status"] == "PASS"
+    assert replay.json()["current_latest_fallback_used"] is False
+
+    start = topo["session"]["start_session_time_us"]
+    end = topo["session"]["end_session_time_us"]
+    series = client.get(
+        f"/m1/releases/{release_id}/series",
+        params={
+            "start_session_time_us": start,
+            "end_session_time_us": end,
+            "limit": 2,
+        },
+    )
+    assert series.status_code == 200
+    assert series.json()["returned"] <= 2
+
+
+def test_publish_requires_idempotency_key() -> None:
+    response = _client().post("/m1/commands/publish-session", json=_body())
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "IDEMPOTENCY_KEY_REQUIRED"
