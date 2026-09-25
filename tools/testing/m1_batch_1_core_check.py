@@ -139,6 +139,9 @@ def run(evidence: Path | None) -> int:
     all_staging_atomic = True
     stage_revision_ok = False
     duration_coverage_ok = False
+    air_002_invalid_peak_ok = False
+    air_007_missing_channels_ok = False
+    short_window_fail_closed_ok = False
     nominal_ok = False
     angle_wrap_ok = False
     gap_ok = False
@@ -253,6 +256,61 @@ def run(evidence: Path | None) -> int:
                     and coverage_result.reason_codes == ("MIN_COVERAGE_NOT_MET",)
                     and coverage_result.value_numeric is None
                 )
+
+                invalid_nz_rows = list(world.canonical_rows)
+                invalid_nz_rows[6] = replace(
+                    invalid_nz_rows[6],
+                    nz_g=99.0,
+                    quality_mask=1,
+                )
+                invalid_nz_world = replace(world, canonical_rows=tuple(invalid_nz_rows))
+                invalid_nz_result = _metric_map(
+                    compute_representative_metrics(context, invalid_nz_world).results
+                )["P1-AIR-002"]
+                air_002_invalid_peak_ok = (
+                    invalid_nz_result.status == "VALID"
+                    and _close(invalid_nz_result.value_numeric, 2.5)
+                    and dict(invalid_nz_result.evidence.details).get("diagnostic_min_nz_g")
+                    == "1.0"
+                )
+
+                tas_only_world = replace(
+                    world,
+                    canonical_rows=tuple(
+                        replace(row, mach=None) for row in world.canonical_rows
+                    ),
+                )
+                tas_only_result = _metric_map(
+                    compute_representative_metrics(context, tas_only_world).results
+                )["P1-AIR-007"]
+                tas_only_envelope = tas_only_result.value_structured
+                neither_world = replace(
+                    world,
+                    canonical_rows=tuple(
+                        replace(row, tas_mps=None, mach=None) for row in world.canonical_rows
+                    ),
+                )
+                neither_result = _metric_map(
+                    compute_representative_metrics(context, neither_world).results
+                )["P1-AIR-007"]
+                air_007_missing_channels_ok = (
+                    tas_only_result.status == "VALID"
+                    and tas_only_envelope is not None
+                    and tas_only_envelope.tas.status == "VALID"
+                    and tas_only_envelope.tas.n == 8
+                    and tas_only_envelope.mach.status == "INSUFFICIENT_DATA"
+                    and tas_only_envelope.mach.n == 0
+                    and tas_only_envelope.mach.minimum is None
+                    and tas_only_envelope.mach.maximum is None
+                    and tas_only_envelope.mach.p05 is None
+                    and tas_only_envelope.mach.p50 is None
+                    and tas_only_envelope.mach.p95 is None
+                    and neither_result.status == "N_A"
+                    and neither_result.reason_codes == ("TAS_AND_MACH_UNAVAILABLE",)
+                    and neither_result.value_numeric is None
+                    and neither_result.value_structured is None
+                )
+
                 original = world.stages[0]
                 revised = supersede_stage(original, correction_key="batch-1-revision-smoke")
                 stage_revision_ok = (
@@ -290,9 +348,19 @@ def run(evidence: Path | None) -> int:
                     world,
                     stage_id=world.stages[1].stage_id,
                 )
+                setup_metrics = _metric_map(setup.results)
+                execution_metrics = _metric_map(execution.results)
                 stage_boundary_ok = _close(
-                    _metric_map(setup.results)["P1-AIR-001"].value_numeric, 0.5
-                ) and _close(_metric_map(execution.results)["P1-AIR-001"].value_numeric, 9.0)
+                    setup_metrics["P1-AIR-001"].value_numeric, 0.5
+                ) and _close(execution_metrics["P1-AIR-001"].value_numeric, 9.0)
+                short_window_fail_closed_ok = (
+                    setup_metrics["P1-AIR-003"].status == "INSUFFICIENT_DATA"
+                    and setup_metrics["P1-AIR-003"].reason_codes
+                    == ("DERIVATIVE_UNAVAILABLE",)
+                    and setup_metrics["P1-AIR-004"].status == "INSUFFICIENT_DATA"
+                    and setup_metrics["P1-AIR-004"].reason_codes
+                    == ("SUSTAIN_DURATION_NOT_MET",)
+                )
         except Exception as exc:  # noqa: BLE001 - evidence must capture all fixture failures
             failures.append(f"{fixture_id}:{type(exc).__name__}:{exc}")
 
@@ -305,16 +373,33 @@ def run(evidence: Path | None) -> int:
         "p1_air_001_nominal_gap_and_stage_boundary": (
             nominal_ok and gap_ok and stage_boundary_ok and duration_coverage_ok
         ),
-        "p1_air_002_primary_and_diagnostic_separated": nominal_ok,
-        "p1_air_003_unwrap_derivative_lls": nominal_ok and angle_wrap_ok,
-        "p1_air_004_rolling_median_dwell_and_gap": (
-            nominal_ok and gap_ok and _centered_rolling_median_ok()
+        "p1_air_002_primary_and_diagnostic_separated": (
+            nominal_ok and air_002_invalid_peak_ok
         ),
-        "p1_air_007_typed_structured_partial": nominal_ok and structured_partial_ok,
+        "p1_air_003_unwrap_derivative_lls": (
+            nominal_ok and angle_wrap_ok and short_window_fail_closed_ok
+        ),
+        "p1_air_004_rolling_median_dwell_and_gap": (
+            nominal_ok
+            and gap_ok
+            and short_window_fail_closed_ok
+            and _centered_rolling_median_ok()
+        ),
+        "p1_air_007_typed_structured_partial": (
+            nominal_ok and structured_partial_ok and air_007_missing_channels_ok
+        ),
         "applicability_and_value_slots_exact": all_value_slots_exact,
         "metric_compute_staging_atomic_and_unpublished": all_staging_atomic,
         "five_metric_nominal_edge_failure_golden": (
-            nominal_ok and angle_wrap_ok and gap_ok and structured_partial_ok and stage_boundary_ok
+            nominal_ok
+            and duration_coverage_ok
+            and air_002_invalid_peak_ok
+            and angle_wrap_ok
+            and gap_ok
+            and short_window_fail_closed_ok
+            and structured_partial_ok
+            and air_007_missing_channels_ok
+            and stage_boundary_ok
         ),
         "four_stage_boundaries_golden_exact": all_stage_golden,
     }
