@@ -416,3 +416,34 @@ def test_m1_batch_2_backend_acceptance_is_emitted_on_both_platforms() -> None:
     assert f"--source-revision {SOURCE_REVISION}" in text
     assert "--evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json" in text
     assert "evidence/m1-batch-2/${{ matrix.platform }}/backend.json" in text
+
+
+def test_m1_batch_2_review_aggregates_exact_revision_evidence() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "m1-batch-2-review:" in text
+    assert "name: M1 Batch 2 Review" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-2-review" in text
+    assert f"--expected-revision {SOURCE_REVISION}" in text
+    assert (
+        "--windows-backend downloaded/platform/evidence/m1-batch-2/windows/backend.json"
+        in text
+    )
+    assert (
+        "--linux-backend downloaded/platform/evidence/m1-batch-2/linux/backend.json"
+        in text
+    )
+    assert (
+        "--windows-service downloaded/platform/evidence/m1-batch-2/windows/service-smoke.json"
+        in text
+    )
+    assert (
+        "--linux-service downloaded/platform/evidence/m1-batch-2/linux/service-smoke.json"
+        in text
+    )
+    assert (
+        "--service-logical downloaded/logical/m1-batch-2-service-logical-equivalence.json"
+        in text
+    )
+    assert "--storage-parity downloaded/postgres/storage-parity.json" in text
+    assert "--output evidence/m1-batch-2/review.json" in text
+    assert f"tpaa-m1-batch-2-review-{SOURCE_REVISION}" in text
