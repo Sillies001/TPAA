@@ -145,6 +145,7 @@ def rolling_medians(
             )
     return tuple(outputs)
 
+
 def quantile_hf7(values: Sequence[float], probability: float) -> float:
     """Return Hyndman-Fan type 7 sample quantile."""
 
