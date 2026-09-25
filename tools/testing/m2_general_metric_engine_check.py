@@ -176,6 +176,16 @@ def verify() -> dict[str, object]:
                 for item in sns
             )
         ),
+        "input_authority_bound_exact": all(
+            tuple(binding.input_field for binding in definition.input_authority_bindings)
+            and set(binding.input_field for binding in definition.input_authority_bindings)
+            == set(definition.input_fields)
+            for definition in plan.definitions
+        ),
+        "input_authority_hash_bound": len(plan.input_authority_matrix_sha256) == 64,
+        "world_capability_registry_hash_bound": (
+            len(plan.world_capability_registry_sha256) == 64
+        ),
         "definition_hashes_complete": all(
             len(definition.definition_hash) == 64 for definition in plan.definitions
         ),
@@ -192,6 +202,8 @@ def verify() -> dict[str, object]:
         "catalog_id": plan.catalog_id,
         "catalog_version": plan.catalog_version,
         "catalog_sha256": plan.catalog_sha256,
+        "input_authority_matrix_sha256": plan.input_authority_matrix_sha256,
+        "world_capability_registry_sha256": plan.world_capability_registry_sha256,
         "db_schema_version": plan.db_schema_version,
         "delivery_milestone": plan.delivery_milestone,
         "delivery_batch": plan.delivery_batch,
@@ -199,6 +211,22 @@ def verify() -> dict[str, object]:
         "execution_metric_codes": list(plan.metric_codes),
         "definition_hashes": [
             [definition.metric_code, definition.definition_hash]
+            for definition in plan.definitions
+        ],
+        "input_authority_bindings": [
+            [
+                definition.metric_code,
+                [
+                    [
+                        binding.input_field,
+                        binding.binding_kind,
+                        binding.authority_id,
+                        binding.authority_field,
+                        binding.optional,
+                    ]
+                    for binding in definition.input_authority_bindings
+                ],
+            ]
             for definition in plan.definitions
         ],
         "dependency_edges": [
