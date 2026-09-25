@@ -18,6 +18,7 @@ from tpaa_metric import (
     build_metric_context,
     compute_representative_metrics,
 )
+from tpaa_metric.operators import TimedValue, rolling_medians
 from tpaa_world import project_minimal_p1_world
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -80,11 +81,15 @@ def _stage_golden_ok(bundle: Path) -> bool:
 
 def _nominal_golden_ok(metrics: dict[str, MetricResult]) -> bool:
     envelope = metrics["P1-AIR-007"].value_structured
+    sustained_details = dict(metrics["P1-AIR-004"].evidence.details)
     return (
         _close(metrics["P1-AIR-001"].value_numeric, 0.6)
         and _close(metrics["P1-AIR-002"].value_numeric, 2.5)
         and _close(metrics["P1-AIR-003"].value_numeric, 0.1)
         and _close(metrics["P1-AIR-004"].value_numeric, 0.1)
+        and sustained_details.get("operator") == "ROLLING_MEDIAN_V1"
+        and sustained_details.get("supporting_dwell_start_session_time_us") == "1000000"
+        and sustained_details.get("supporting_dwell_end_session_time_us") == "9000000"
         and envelope is not None
         and envelope.tas.n == 8
         and _close(envelope.tas.p05, 101.75)
@@ -94,6 +99,30 @@ def _nominal_golden_ok(metrics: dict[str, MetricResult]) -> bool:
         and _close(envelope.mach.p05, 0.3035)
         and _close(envelope.mach.p50, 0.335)
         and _close(envelope.mach.p95, 0.3665)
+    )
+
+
+def _centered_rolling_median_ok() -> bool:
+    values = (
+        TimedValue(0, 0.0),
+        TimedValue(1_000_000, 0.0),
+        TimedValue(2_000_000, 0.0),
+        TimedValue(3_000_000, 100.0),
+        TimedValue(4_000_000, 100.0),
+    )
+    outputs = rolling_medians(
+        values,
+        duration_s=3.0,
+        min_coverage=1.0,
+        max_gap_us=1_500_000,
+        window_start_us=0,
+        window_end_us=5_000_000,
+    )
+    return (
+        [(item.session_time_us, item.value) for item, _, _ in outputs]
+        == [(2_000_000, 0.0), (3_000_000, 100.0)]
+        and [(start, end) for _, start, end in outputs]
+        == [(500_000, 3_500_000), (1_500_000, 4_500_000)]
     )
 
 
@@ -237,7 +266,9 @@ def run(evidence: Path | None) -> int:
         "p1_air_001_nominal_gap_and_stage_boundary": nominal_ok and gap_ok and stage_boundary_ok,
         "p1_air_002_primary_and_diagnostic_separated": nominal_ok,
         "p1_air_003_unwrap_derivative_lls": nominal_ok and angle_wrap_ok,
-        "p1_air_004_rolling_median_dwell_and_gap": nominal_ok and gap_ok,
+        "p1_air_004_rolling_median_dwell_and_gap": (
+            nominal_ok and gap_ok and _centered_rolling_median_ok()
+        ),
         "p1_air_007_typed_structured_partial": nominal_ok and structured_partial_ok,
         "applicability_and_value_slots_exact": all_value_slots_exact,
         "metric_compute_staging_atomic_and_unpublished": all_staging_atomic,
