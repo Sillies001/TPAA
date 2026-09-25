@@ -65,6 +65,14 @@ class PublishResult:
 class SessionPublicationRepository(Protocol):
     """Repository contract consumed by Application publication use cases."""
 
+    def idempotency_lookup(
+        self,
+        *,
+        idempotency_key: str,
+        request_hash: str,
+    ) -> PublishedSessionRelease | None:
+        """Resolve an already-published identical request before CAS."""
+
     def publish(
         self,
         release: SessionRelease,
@@ -93,6 +101,23 @@ class InMemorySessionPublicationRepository:
         self._current: dict[str, str] = {}
         self._tokens: dict[str, int] = {}
         self._idempotency: dict[str, tuple[str, str, str]] = {}
+
+    def idempotency_lookup(
+        self,
+        *,
+        idempotency_key: str,
+        request_hash: str,
+    ) -> PublishedSessionRelease | None:
+        if not idempotency_key.strip():
+            raise ValueError("idempotency_key must be non-empty")
+        with self._lock:
+            prior = self._idempotency.get(idempotency_key)
+            if prior is None:
+                return None
+            prior_request_hash, _, release_id = prior
+            if prior_request_hash != request_hash:
+                raise PublishIdempotencyConflict(idempotency_key)
+            return self._releases[release_id]
 
     def publish(
         self,
