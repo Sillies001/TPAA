@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Never
 from uuid import NAMESPACE_URL, uuid5
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,7 +39,7 @@ def run(*, expected_platform: str, source_revision: str, evidence: Path) -> int:
     from tpaa_application.m1_repository import InMemorySessionPublicationRepository
 
     class _UnusedStorageBaseline:
-        def execute(self):
+        def execute(self) -> Never:
             raise AssertionError("M1 Batch 2 service smoke must not use M0 storage baseline")
 
     repository = InMemorySessionPublicationRepository()
@@ -176,6 +177,8 @@ def run(*, expected_platform: str, source_revision: str, evidence: Path) -> int:
     )
     replay_payload = replay.json() if replay is not None and replay.status_code == 200 else {}
 
+    series_rows = series_payload.get("rows")
+
     acceptance = {
         "platform_matches_expected": _platform_matches(expected_platform),
         "import_command_idempotent": (
@@ -252,8 +255,8 @@ def run(*, expected_platform: str, source_revision: str, evidence: Path) -> int:
         "bounded_series_query": (
             series_payload.get("release_id") == release_id
             and series_payload.get("limit") == 3
-            and isinstance(series_payload.get("rows"), list)
-            and len(series_payload.get("rows", [])) <= 3
+            and isinstance(series_rows, list)
+            and len(series_rows) <= 3
         ),
     }
 
@@ -261,6 +264,15 @@ def run(*, expected_platform: str, source_revision: str, evidence: Path) -> int:
         name for name, passed in acceptance.items() if not passed
     )
     status = "PASS" if not failures and not failed_acceptance else "FAIL"
+
+    def definition_hash(code: str) -> object | None:
+        detail = details.get(code)
+        if detail is None:
+            return None
+        definition = detail.get("definition")
+        if not isinstance(definition, dict):
+            return None
+        return definition.get("definition_hash")
 
     logical_product: dict[str, object] = {
         "fixture_id": fixture_id,
@@ -275,7 +287,7 @@ def run(*, expected_platform: str, source_revision: str, evidence: Path) -> int:
         "world_logical_hash": release_payload.get("world_logical_hash"),
         "metric_codes": metric_codes,
         "definition_hashes": {
-            code: details[code]["definition"]["definition_hash"]
+            code: definition_hash(code)
             for code in metric_codes
             if code in details
         },
