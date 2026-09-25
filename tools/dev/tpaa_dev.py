@@ -64,6 +64,7 @@ M1_BATCH_1_COMPARE_MODULE = "tools.testing.m1_batch_1_compare"
 M1_BATCH_2_SERVICE_SMOKE_MODULE = "tools.testing.m1_batch_2_service_smoke"
 M1_BATCH_2_SERVICE_COMPARE_MODULE = "tools.testing.m1_batch_2_service_compare"
 M1_BATCH_2_STORAGE_PARITY_MODULE = "tools.testing.m1_batch_2_storage_parity"
+M1_BATCH_2_BACKEND_CHECK_MODULE = "tools.testing.m1_batch_2_backend_check"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -113,6 +114,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-batch-2-service-smoke", "M1-PLAT-003", "IMPLEMENTED", "Run the M1 Batch 2 Application/Repository service contract and emit logical evidence."),
     CommandSpec("m1-batch-2-service-compare", "M1-PLAT-003", "IMPLEMENTED", "Compare Windows/Linux Batch 2 service logical evidence exactly."),
     CommandSpec("m1-batch-2-storage-parity", "M1-STO-001/M1-STO-003", "IMPLEMENTED", "Publish the same Batch 2 Release to real SQLite/PostgreSQL Core schemas and compare logical membership exactly."),
+    CommandSpec("m1-batch-2-backend-check", "M1 Batch 2 backend acceptance", "IMPLEMENTED", "Emit executable acceptance for OBS/STO-002/API/TST backend rows."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -579,6 +581,17 @@ def build_parser() -> argparse.ArgumentParser:
     m1_batch_2_storage.add_argument("--conninfo-template", required=True)
     m1_batch_2_storage.add_argument("--source-revision", required=True)
     m1_batch_2_storage.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_backend = sub.add_parser(
+        "m1-batch-2-backend-check",
+        help="Verify consolidated M1 Batch 2 backend acceptance",
+    )
+    m1_batch_2_backend.add_argument(
+        "--platform",
+        choices=("windows", "linux"),
+        required=True,
+    )
+    m1_batch_2_backend.add_argument("--source-revision", required=True)
+    m1_batch_2_backend.add_argument("--evidence", type=Path, required=True)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -857,6 +870,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.psql:
             parity_args.extend(["--psql", args.psql])
         return _run(parity_args)
+    if command == "m1-batch-2-backend-check":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_BACKEND_CHECK_MODULE,
+                "--platform",
+                args.platform,
+                "--source-revision",
+                args.source_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
     if command == "m1-fixture-check":
         fixture_args = [sys.executable, "-m", M1_FIXTURE_HARNESS_MODULE]
         if args.bundle is not None:
