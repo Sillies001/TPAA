@@ -148,7 +148,7 @@ def run(
     )
     protected_main = event_name == "push" and git_ref == "refs/heads/main"
     decision = "GO" if all_pass and protected_main else "PENDING_PROTECTED_MAIN" if all_pass else "NO_GO"
-    unresolved_risks = []
+    unresolved_risks: list[dict[str, object]] = []
     if failed_tasks:
         unresolved_risks.append({"kind": "task_acceptance", "items": failed_tasks})
     if failed_revision_checks:
