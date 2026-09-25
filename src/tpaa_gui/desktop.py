@@ -32,6 +32,7 @@ def run_desktop(
             auto_close_ms=auto_close_ms,
             show=show,
             diagnostics_provider=lambda: controller.diagnostics,
+            m1_transport=controller,
         )
     finally:
         controller.shutdown()

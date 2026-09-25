@@ -272,6 +272,59 @@ class LocalBackendController:
             raise LocalBackendError("LISTENING_PID_MISMATCH")
         self._port = port
 
+    def m1_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        """Issue one authenticated M1 request while keeping the bearer private."""
+
+        status = self.status
+        if not status.ready or status.state is not LocalBackendState.READY:
+            raise LocalBackendError("BACKEND_NOT_READY")
+        normalized_method = method.upper()
+        if normalized_method not in {"GET", "POST"}:
+            raise LocalBackendError("M1_HTTP_METHOD_FORBIDDEN")
+        if not path.startswith("/m1/"):
+            raise LocalBackendError("M1_HTTP_PATH_FORBIDDEN")
+        supplied_headers = dict(headers or {})
+        if any(key.lower() in {"authorization", "origin"} for key in supplied_headers):
+            raise LocalBackendError("M1_HTTP_HEADER_FORBIDDEN")
+        if self._port is None or self._token is None:
+            raise LocalBackendError("HANDSHAKE_NOT_CONFIGURED")
+
+        request_headers = {
+            "Authorization": f"Bearer {self._token}",
+            **supplied_headers,
+        }
+        data: bytes | None = None
+        if body is not None:
+            data = json.dumps(body, separators=(",", ":")).encode("utf-8")
+            request_headers["Content-Type"] = "application/json"
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self._port}{path}",
+            headers=request_headers,
+            data=data,
+            method=normalized_method,
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self._startup_timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+                if not isinstance(payload, dict):
+                    raise LocalBackendError("INVALID_HTTP_PAYLOAD")
+                return response.status, payload
+        except urllib.error.HTTPError as exc:
+            try:
+                payload = json.loads(exc.read().decode("utf-8"))
+            except Exception:
+                payload = {}
+            return exc.code, payload if isinstance(payload, dict) else {}
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
+            raise LocalBackendError("M1_HTTP_REQUEST_FAILED") from exc
+
     def _get_json(self, path: str) -> tuple[int, dict[str, Any]]:
         if self._port is None or self._token is None:
             raise LocalBackendError("HANDSHAKE_NOT_CONFIGURED")

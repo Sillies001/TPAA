@@ -46,7 +46,7 @@ def test_workflow_calls_one_governed_ci_gate_command() -> None:
 
 def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    assert text.count(f"ref: {SOURCE_REVISION}") == 5
+    assert text.count(f"ref: {SOURCE_REVISION}") == 6
     assert "${{ github.sha }}" not in text
     assert f"pattern: tpaa-ci-*-{SOURCE_REVISION}" in text
     assert f"--expected-revision {SOURCE_REVISION}" in text
@@ -447,3 +447,25 @@ def test_m1_batch_2_review_aggregates_exact_revision_evidence() -> None:
     assert "--storage-parity downloaded/postgres/storage-parity.json" in text
     assert "--output evidence/m1-batch-2/review.json" in text
     assert f"tpaa-m1-batch-2-review-{SOURCE_REVISION}" in text
+
+
+def test_m1_batch_3_desktop_e2e_is_cross_platform_compared_and_reviewed() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M1 Batch 3 Desktop E2E evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-3-desktop-e2e" in text
+    assert "--expected-platform ${{ matrix.platform }}" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
+    assert "--evidence evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json" in text
+    assert "- name: Compare Windows and Linux M1 Batch 3 Desktop products" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-3-desktop-compare" in text
+    assert "--windows downloaded/evidence/m1-batch-3/windows/desktop-e2e.json" in text
+    assert "--linux downloaded/evidence/m1-batch-3/linux/desktop-e2e.json" in text
+    assert "--evidence evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json" in text
+    assert "m1-batch-3-review:" in text
+    assert "name: M1 Batch 3 Review" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-3-review" in text
+    assert "--windows downloaded/platform/evidence/m1-batch-3/windows/desktop-e2e.json" in text
+    assert "--linux downloaded/platform/evidence/m1-batch-3/linux/desktop-e2e.json" in text
+    assert "--logical downloaded/logical/m1-batch-3-desktop-logical-equivalence.json" in text
+    assert "--output evidence/m1-batch-3/review.json" in text
+    assert f"tpaa-m1-batch-3-review-{SOURCE_REVISION}" in text

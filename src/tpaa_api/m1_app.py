@@ -48,10 +48,8 @@ def _required_token(body: dict[str, object]) -> int:
     return value
 
 
-def create_m1_app(application: ApplicationService) -> FastAPI:
-    """Extend the stable M0 transport with release-bound M1 backend endpoints."""
-
-    app = create_app(application)
+def register_m1_routes(app: FastAPI, application: ApplicationService) -> FastAPI:
+    """Register release-bound M1 routes on an already-governed transport."""
 
     @app.post("/m1/commands/import-session")
     def import_session(
@@ -243,3 +241,9 @@ def create_m1_app(application: ApplicationService) -> FastAPI:
             return _m1_error(exc)
 
     return app
+
+
+def create_m1_app(application: ApplicationService) -> FastAPI:
+    """Extend the stable M0 service transport with M1 backend endpoints."""
+
+    return register_m1_routes(create_app(application), application)

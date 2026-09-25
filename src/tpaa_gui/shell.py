@@ -14,6 +14,7 @@ from importlib import import_module
 from typing import Any
 
 from .diagnostics import DiagnosticsSnapshot, diagnostics_lines
+from .m1_workspace import M1DesktopTransport, create_m1_workspace
 
 
 class GuiShellError(RuntimeError):
@@ -51,6 +52,7 @@ def _create_window(
     qt_widgets: Any,
     config: GuiShellConfig,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
+    m1_transport: M1DesktopTransport | None = None,
 ) -> Any:
     window = qt_widgets.QMainWindow()
     window.setObjectName("tpaaMainWindow")
@@ -90,6 +92,17 @@ def _create_window(
         window._tpaa_diagnostics_timer = refresh_timer
         window._tpaa_diagnostics_labels = diagnostic_labels
 
+    if m1_transport is not None and diagnostics_provider is not None:
+        workspace = create_m1_workspace(
+            qt_core,
+            qt_widgets,
+            central,
+            transport=m1_transport,
+            diagnostics_provider=diagnostics_provider,
+        )
+        layout.addWidget(workspace)
+        window._tpaa_m1_workspace = workspace
+
     layout.addStretch(1)
     window.setCentralWidget(central)
     return window
@@ -102,6 +115,7 @@ def run_gui(
     auto_close_ms: int | None = None,
     show: bool = True,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
+    m1_transport: M1DesktopTransport | None = None,
 ) -> int:
     """Start the PySide6 event loop and return its process exit code.
 
@@ -120,7 +134,13 @@ def run_gui(
     app = existing if existing is not None else qt_widgets.QApplication(qt_argv)
     app.setApplicationName(shell_config.application_name)
 
-    window = _create_window(qt_core, qt_widgets, shell_config, diagnostics_provider)
+    window = _create_window(
+        qt_core,
+        qt_widgets,
+        shell_config,
+        diagnostics_provider,
+        m1_transport,
+    )
     if show:
         window.show()
 
