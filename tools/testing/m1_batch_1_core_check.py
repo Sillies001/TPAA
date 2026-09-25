@@ -87,8 +87,10 @@ def _nominal_golden_ok(metrics: dict[str, Any]) -> bool:
         and _close(metrics["P1-AIR-003"].value_numeric, 0.1)
         and _close(metrics["P1-AIR-004"].value_numeric, 0.1)
         and sustained_details.get("operator") == "ROLLING_MEDIAN_V1"
-        and sustained_details.get("supporting_dwell_start_session_time_us") == "1000000"
-        and sustained_details.get("supporting_dwell_end_session_time_us") == "9000000"
+        and sustained_details.get("eligible_window_start_session_time_us") == "1000000"
+        and sustained_details.get("eligible_window_end_session_time_us") == "9000000"
+        and sustained_details.get("supporting_dwell_start_session_time_us") == "2500000"
+        and sustained_details.get("supporting_dwell_end_session_time_us") == "5500000"
         and envelope is not None
         and envelope.tas.n == 8
         and _close(envelope.tas.p05, 101.75)
