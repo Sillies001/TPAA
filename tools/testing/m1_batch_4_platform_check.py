@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -20,15 +19,26 @@ def _load(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _tree_hash(root: Path) -> str:
-    digest = hashlib.sha256()
-    for path in sorted(p for p in root.rglob("*") if p.is_file() and "__pycache__" not in p.parts):
-        rel = path.relative_to(root).as_posix()
-        digest.update(rel.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
+def _git_tree_identity(repo_root: Path, relative: str) -> str:
+    result = subprocess.run(
+        ["git", "ls-tree", "-r", "HEAD", "--", relative],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def _git_blob_identity(repo_root: Path, relative: str) -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", f"HEAD:{relative}"],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else ""
 
 
 def _git_clean(repo_root: Path) -> bool:
@@ -55,18 +65,13 @@ def run(
     b2 = _load(batch2_service)
     b3 = _load(batch3_desktop)
 
-    frozen_roots = {
-        "canonical": repo_root / "baseline" / "CB-1.4.0" / "canonical",
-        "fixtures": repo_root / "tests" / "fixtures" / "m1",
-    }
     frozen_hashes = {
-        name: _tree_hash(path) if path.is_dir() else ""
-        for name, path in frozen_roots.items()
+        "canonical": _git_tree_identity(repo_root, "baseline/CB-1.4.0/canonical"),
+        "fixtures": _git_tree_identity(repo_root, "tests/fixtures/m1"),
     }
     lock_hashes = {
-        name: hashlib.sha256((repo_root / name).read_bytes()).hexdigest()
+        name: _git_blob_identity(repo_root, name)
         for name in ("pyproject.toml", "uv.lock")
-        if (repo_root / name).is_file()
     }
 
     checks = {
@@ -95,10 +100,10 @@ def run(
         "batch2": b2.get("logical_product"),
         "batch3": b3.get("logical_product"),
         "frozen_bundle": {
-            "canonical_tree_sha256": frozen_hashes["canonical"],
-            "fixture_tree_sha256": frozen_hashes["fixtures"],
-            "pyproject_sha256": lock_hashes.get("pyproject.toml"),
-            "uv_lock_sha256": lock_hashes.get("uv.lock"),
+            "canonical_git_tree_listing": frozen_hashes["canonical"],
+            "fixture_git_tree_listing": frozen_hashes["fixtures"],
+            "pyproject_git_blob": lock_hashes.get("pyproject.toml"),
+            "uv_lock_git_blob": lock_hashes.get("uv.lock"),
         },
     }
     failed = sorted(name for name, passed in checks.items() if not passed)
