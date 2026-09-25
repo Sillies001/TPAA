@@ -1,0 +1,30 @@
+{
+  "authority_refs": {
+    "canonical_authority": "CANONICAL_REFERENCE_NAVIGATION_V1",
+    "core_baseline": "CB-1.4.0",
+    "metric_codes": [
+      "P1-QA-001",
+      "P1-QA-002"
+    ],
+    "metric_input_authority_matrix_sha256": "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "time_transform_contract": "CONTRACT_TIME_TRANSFORM_V1",
+    "uncertainty_contract": "CONTRACT_NAV_UNCERTAINTY_REPRESENTATION_V1"
+  },
+  "data_classification": "SYNTHETIC",
+  "files": {
+    "source": {
+      "path": "source/reference-truth.json",
+      "sha256": "b4e1daef5f859d1dcb556617906c769b696adee84969217558c61e4304f30c67"
+    }
+  },
+  "fixture_id": "RT_M2_NOMINAL_V1",
+  "fixture_version": "1.0.0",
+  "input_hash_algorithm": "SHA256_PATH_SHA256_V1",
+  "input_hash_basis": [
+    "source/reference-truth.json"
+  ],
+  "input_sha256": "cd1b45fb6fb6569d3250a446639c7058436e9e32ca722a64c31f735a17cbe8d4",
+  "schema": "TPAA_M2_REFERENCE_TRUTH_FIXTURE_V1",
+  "time_transform_hash": "8c386f22938c03c0d58ca9f62ec0a4276d3ad80c77c089bdf820770db4f286fd"
+}
