@@ -2,13 +2,13 @@
 
 from .desktop import run_desktop
 from .diagnostics import DiagnosticsIdentity, DiagnosticsSnapshot, diagnostics_lines
-from .m1_workspace import M1DesktopTransport, M1WorkspaceError, create_m1_workspace
 from .local_backend import (
     LocalBackendController,
     LocalBackendError,
     LocalBackendState,
     LocalBackendStatus,
 )
+from .m1_workspace import M1DesktopTransport, M1WorkspaceError, create_m1_workspace
 from .shell import PYSIDE6_DEPENDENCY_MISSING, GuiShellConfig, GuiShellError, run_gui
 
 __all__ = [
