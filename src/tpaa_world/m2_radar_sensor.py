@@ -19,6 +19,7 @@ from uuid import UUID, uuid5
 from tpaa_ingest import (
     M2MeasurementAlignmentProjection,
     M2MissionSystemProjection,
+    MeasurementAlignmentRow,
     load_m2_measurement_alignment,
     load_m2_mission_system,
 )
@@ -288,8 +289,8 @@ def _validate_authority(
     )
 
 
-def _row_payload(row: object) -> dict[str, object]:
-    measurement = cast("object", row)
+def _row_payload(row: MeasurementAlignmentRow) -> dict[str, object]:
+    measurement = row
     return {
         "measurement_id": measurement.measurement_id,
         "reference_state_id": measurement.reference_state_id,
