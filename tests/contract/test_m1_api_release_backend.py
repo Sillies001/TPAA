@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from tpaa_api import create_m1_app
 from tpaa_application import ApplicationService, M1PublicationService
-from tpaa_storage.publication import InMemorySessionPublicationRepository
+from tpaa_application.m1_repository import InMemorySessionPublicationRepository
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests" / "fixtures" / "m1"
