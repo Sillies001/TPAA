@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, cast
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
@@ -19,7 +20,11 @@ from tpaa_api import create_desktop_app  # noqa: E402
 from tpaa_application import (  # noqa: E402
     ApplicationService,
     GetStorageBaselineStatus,
+    M1PublicationService,
     build_trusted_runtime_status_use_case,
+)
+from tpaa_application.m1_repository import (  # noqa: E402
+    InMemorySessionPublicationRepository,
 )
 
 CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
@@ -46,11 +51,17 @@ def _emit(record: dict[str, object]) -> None:
 
 
 def _application(product_build_version: str) -> ApplicationService:
+    publication = M1PublicationService(
+        fixture_root=REPO_ROOT / "tests" / "fixtures" / "m1",
+        authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
+        repository=InMemorySessionPublicationRepository(),
+    )
     return ApplicationService(
         get_storage_baseline_status=cast(GetStorageBaselineStatus, _UnusedStorageUseCase()),
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=product_build_version
         ),
+        m1_publication=publication,
     )
 
 
