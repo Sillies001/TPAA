@@ -477,11 +477,11 @@ def _air_004(
         numeric=best[0].value,
         details=(
             ("operator", "ROLLING_MEDIAN_V1"),
-            ("supporting_dwell_start_session_time_us", str(window_start_us)),
-            ("supporting_dwell_end_session_time_us", str(window_end_us)),
+            ("eligible_window_start_session_time_us", str(window_start_us)),
+            ("eligible_window_end_session_time_us", str(window_end_us)),
+            ("supporting_dwell_start_session_time_us", str(best[1])),
+            ("supporting_dwell_end_session_time_us", str(best[2])),
             ("selected_center_session_time_us", str(best[0].session_time_us)),
-            ("selected_centered_window_start_session_time_us", str(best[1])),
-            ("selected_centered_window_end_session_time_us", str(best[2])),
         ),
     )
 
