@@ -1,0 +1,93 @@
+{
+  "data_classification": "SYNTHETIC",
+  "family_id": "M2_P1_FOUNDATION_DATA_WORLD_FIXTURES",
+  "family_version": "1.0.0",
+  "members": [
+    {
+      "category": "NOMINAL",
+      "expected_status": "PASS",
+      "fixture_id": "RT_M2_NOMINAL_V1",
+      "input_sha256": "cd1b45fb6fb6569d3250a446639c7058436e9e32ca722a64c31f735a17cbe8d4",
+      "loader": "REFERENCE_TRUTH"
+    },
+    {
+      "category": "NOMINAL",
+      "expected_status": "PASS",
+      "fixture_id": "TA_M2_NOMINAL_V1",
+      "input_sha256": "05a715054d9b8508182eef9117e56679778c39456314ec6e622952d192f8c507",
+      "loader": "TIME_ALIGNMENT"
+    },
+    {
+      "category": "NOMINAL",
+      "expected_status": "PASS",
+      "fixture_id": "MSI_M2_RADAR_V1",
+      "input_sha256": "0da9ba58e95274a03ee39009a0755f4d8396070238f53d433e1c1b5c0da3ab24",
+      "loader": "MISSION_SYSTEM"
+    },
+    {
+      "category": "NOMINAL",
+      "expected_status": "READY",
+      "fixture_id": "MA_M2_NOMINAL_V1",
+      "input_sha256": "901d2c26c15ea22200f45984eb3a5ba3fea038313fad232153e9444accdf8983",
+      "loader": "MEASUREMENT_ALIGNMENT"
+    },
+    {
+      "category": "WRAP_BOUNDARY",
+      "expected_status": "READY",
+      "fixture_id": "MA_M2_WRAP_BOUNDARY_V1",
+      "input_sha256": "b34906716f54f480dfe6bd9aed66b404895b7f802a1c978af4567167f2b4151c",
+      "loader": "MEASUREMENT_ALIGNMENT"
+    },
+    {
+      "category": "GAP",
+      "expected_reason_codes": [
+        "MAX_GAP_EXCEEDED",
+        "MIN_COVERAGE_NOT_MET"
+      ],
+      "expected_status": "INSUFFICIENT",
+      "fixture_id": "MA_M2_GAP_V1",
+      "input_sha256": "77bc5b34485687e7bca83f174fb90728f12c1f8a3bd1352bb6f852560542e452",
+      "loader": "MEASUREMENT_ALIGNMENT"
+    },
+    {
+      "category": "INSUFFICIENT",
+      "expected_reason_codes": [
+        "MIN_COVERAGE_NOT_MET"
+      ],
+      "expected_status": "INSUFFICIENT",
+      "fixture_id": "MA_M2_INSUFFICIENT_V1",
+      "input_sha256": "e02b09ab0db46733c66d9031493d2a69777b0ee5c4face1fc0e64d98115c682c",
+      "loader": "MEASUREMENT_ALIGNMENT"
+    },
+    {
+      "category": "INVALID",
+      "expected_error_code": "M2_TIME_ALIGNMENT_TIME_TRANSFORM_UNRESOLVED",
+      "fixture_id": "TA_M2_INVALID_UNRESOLVED_V1",
+      "input_sha256": "fa581e580e68c084d08fe366636676df8ce31ff5d6da12855216be354d30047d",
+      "loader": "TIME_ALIGNMENT"
+    },
+    {
+      "category": "WRONG_SENSOR_APPLICABILITY",
+      "expected_error_code": "M2_MISSION_SYSTEM_NOT_APPLICABLE",
+      "fixture_id": "MSI_M2_IRST_NEGATIVE_V1",
+      "input_sha256": "13c68dcb8cd2df9e0ff82af20a34c5ae440fbdb3055bd597ff47ef76560bba99",
+      "loader": "MISSION_SYSTEM"
+    }
+  ],
+  "platform_policy": {
+    "host_path_in_logical_product": false,
+    "source_bytes": "REPOSITORY_CONTROLLED_IDENTICAL_BYTES",
+    "windows_linux_constraint": "SAME_MANIFEST_AND_INPUT_SHA256"
+  },
+  "required_categories": [
+    "NOMINAL",
+    "WRAP_BOUNDARY",
+    "GAP",
+    "INSUFFICIENT",
+    "INVALID",
+    "WRONG_SENSOR_APPLICABILITY"
+  ],
+  "schema": "TPAA_M2_FIXTURE_FAMILY_V1",
+  "task_id": "M2-DATA-005",
+  "tracking_issue": 96
+}
