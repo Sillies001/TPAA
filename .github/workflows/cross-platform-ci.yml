@@ -133,6 +133,11 @@ jobs:
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
           --evidence evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
 
+      - name: Emit M2-MET-002 incremental QA foundation evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-qa-foundation-incremental-check
+          --evidence evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -256,6 +261,7 @@ jobs:
             evidence/m2-world-002/${{ matrix.platform }}/radar-sensor-world.json
             evidence/m2-world-003/${{ matrix.platform }}/stage-world-lineage.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
+            evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -345,6 +351,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-met-001-logical-equivalence.json
 
+      - name: Compare Windows and Linux incremental M2-MET-002 QA evidence
+        run: >-
+          python tools/dev/tpaa_dev.py m2-qa-foundation-incremental-compare
+          --windows downloaded/evidence/m2-met-002/windows/qa-incremental.json
+          --linux downloaded/evidence/m2-met-002/linux/qa-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -388,6 +402,7 @@ jobs:
             evidence/cross-platform/m2-world-002-logical-equivalence.json
             evidence/cross-platform/m2-world-003-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
+            evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
