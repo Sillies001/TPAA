@@ -103,6 +103,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-mission-system-check
           --evidence evidence/m2-data-003/${{ matrix.platform }}/mission-system.json
 
+      - name: Emit M2-DATA-004 measurement-alignment evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-measurement-alignment-check
+          --evidence evidence/m2-data-004/${{ matrix.platform }}/measurement-alignment.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -220,6 +225,7 @@ jobs:
             evidence/m2-data-001/${{ matrix.platform }}/reference-truth.json
             evidence/m2-data-002/${{ matrix.platform }}/time-alignment.json
             evidence/m2-data-003/${{ matrix.platform }}/mission-system.json
+            evidence/m2-data-004/${{ matrix.platform }}/measurement-alignment.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
