@@ -463,6 +463,17 @@ class M1PublicationService:
             authority_root=self._authority_root,
         )
         batch = compute_representative_metrics(context, world)
+        context_snapshot: EvaluationContextDTO = {
+            "context_id": resolved_context.context_id,
+            "session_id": resolved_context.session_id,
+            "context_version": resolved_context.context_version,
+            "revision_no": resolved_context.revision_no,
+            "rule_set_version": resolved_context.rule_set_version,
+            "metric_profile_version": resolved_context.metric_profile_version,
+            "status": resolved_context.status,
+        }
+        if resolved_context.supersedes_context_id is not None:
+            context_snapshot["supersedes_context_id"] = resolved_context.supersedes_context_id
         identity = AircraftPublicationIdentity(
             aircraft_id=world.aircraft_id,
             aircraft_model_id=command.aircraft_model_id,
@@ -479,6 +490,7 @@ class M1PublicationService:
                 parent_release_id=parent_release_id,
                 context=context,
                 context_version=resolved_context.context_version,
+                context_projection=context_snapshot,
                 world=world,
                 batch=batch,
                 identity=identity,
@@ -670,27 +682,7 @@ class M1PublicationService:
 
     def context_projection(self, release_id: str) -> EvaluationContextDTO:
         release = self._release(release_id).release
-        resolved = resolve_evaluation_context(
-            self._bundle_path(release.fixture_id),
-            authority_root=self._authority_root,
-        )
-        if (
-            resolved.context_id != release.context_id
-            or resolved.context_version != release.context_version
-        ):
-            raise M1ApplicationError("HISTORICAL_CONTEXT_DRIFT", release.release_id)
-        result: EvaluationContextDTO = {
-            "context_id": resolved.context_id,
-            "session_id": resolved.session_id,
-            "context_version": resolved.context_version,
-            "revision_no": resolved.revision_no,
-            "rule_set_version": resolved.rule_set_version,
-            "metric_profile_version": resolved.metric_profile_version,
-            "status": resolved.status,
-        }
-        if resolved.supersedes_context_id is not None:
-            result["supersedes_context_id"] = resolved.supersedes_context_id
-        return result
+        return release.context_dto()
 
     def session_episode_stage_projection(
         self,
