@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from tpaa_application import (
     ApplicationService,
+    IdempotencyConflict,
     M1ApplicationError,
     M1PublishSessionCommand,
 )
@@ -78,18 +79,14 @@ def create_m1_app(application: ApplicationService):
                 payload=body,
                 actor=actor,
             )
-        except Exception as exc:
-            from tpaa_application import IdempotencyConflict
-
-            if isinstance(exc, IdempotencyConflict):
-                return JSONResponse(
-                    status_code=409,
-                    content={
-                        "outcome": "SYSTEM_ERROR",
-                        "error": {"code": "IDEMPOTENCY_KEY_CONFLICT", "detail": str(exc)},
-                    },
-                )
-            raise
+        except IdempotencyConflict as exc:
+            return JSONResponse(
+                status_code=409,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {"code": "IDEMPOTENCY_KEY_CONFLICT", "detail": str(exc)},
+                },
+            )
         record = submission.record
         return JSONResponse(
             status_code=200 if submission.reused else 202,
