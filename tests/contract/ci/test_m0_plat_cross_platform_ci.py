@@ -368,6 +368,30 @@ def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() 
     assert '_dispatcher("m1-batch-1-core-check")' in gate
 
 
+def test_m2_met_003_air_formal_delivery_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M2-MET-003 AIR formal-delivery evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-air-formal-delivery-check" in text
+    assert (
+        "--evidence evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json"
+        in text
+    )
+    assert "- name: Compare Windows and Linux M2-MET-003 AIR formal delivery" in text
+    assert "python tools/dev/tpaa_dev.py m2-air-formal-delivery-compare" in text
+    assert (
+        "--windows downloaded/evidence/m2-met-003/windows/air-formal-delivery.json"
+        in text
+    )
+    assert (
+        "--linux downloaded/evidence/m2-met-003/linux/air-formal-delivery.json"
+        in text
+    )
+    assert (
+        "--evidence evidence/cross-platform/m2-met-003-logical-equivalence.json"
+        in text
+    )
+
+
 def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "- name: Emit M1 Batch 2 service smoke evidence" in text

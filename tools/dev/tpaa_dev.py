@@ -62,6 +62,8 @@ M2_GENERAL_METRIC_ENGINE_CHECK_MODULE = "tools.testing.m2_general_metric_engine_
 M2_GENERAL_METRIC_ENGINE_COMPARE_MODULE = "tools.testing.m2_general_metric_engine_compare"
 M2_QA_FOUNDATION_INCREMENTAL_CHECK_MODULE = "tools.testing.m2_qa_foundation_incremental_check"
 M2_QA_FOUNDATION_INCREMENTAL_COMPARE_MODULE = "tools.testing.m2_qa_foundation_incremental_compare"
+M2_AIR_FORMAL_DELIVERY_CHECK_MODULE = "tools.testing.m2_air_formal_delivery_check"
+M2_AIR_FORMAL_DELIVERY_COMPARE_MODULE = "tools.testing.m2_air_formal_delivery_compare"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -138,6 +140,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-general-metric-engine-compare", "M2-MET-001", "IMPLEMENTED", "Compare Windows/Linux M2-MET-001 logical evidence exactly."),
     CommandSpec("m2-qa-foundation-incremental-check", "M2-MET-002", "IMPLEMENTED", "Verify the authority-safe QA foundation subset without claiming task completion."),
     CommandSpec("m2-qa-foundation-incremental-compare", "M2-MET-002", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-002 QA evidence exactly."),
+    CommandSpec("m2-air-formal-delivery-check", "M2-MET-003", "IMPLEMENTED", "Requalify the exact M2 AIR metric set through Catalog, Golden, Evidence, and immutable Release."),
+    CommandSpec("m2-air-formal-delivery-compare", "M2-MET-003", "IMPLEMENTED", "Compare Windows/Linux M2-MET-003 AIR formal-delivery evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -633,6 +637,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_qa_incremental_compare.add_argument("--linux", type=Path, required=True)
     m2_qa_incremental_compare.add_argument("--expected-revision", required=True)
     m2_qa_incremental_compare.add_argument("--evidence", type=Path, required=True)
+    m2_air_delivery = sub.add_parser(
+        "m2-air-formal-delivery-check",
+        help="Verify exact M2-MET-003 AIR formal delivery",
+    )
+    m2_air_delivery.add_argument("--evidence", type=Path)
+    m2_air_delivery_compare = sub.add_parser(
+        "m2-air-formal-delivery-compare",
+        help="Compare Windows/Linux M2-MET-003 AIR formal-delivery evidence",
+    )
+    m2_air_delivery_compare.add_argument("--windows", type=Path, required=True)
+    m2_air_delivery_compare.add_argument("--linux", type=Path, required=True)
+    m2_air_delivery_compare.add_argument("--expected-revision", required=True)
+    m2_air_delivery_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1100,6 +1117,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_QA_FOUNDATION_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-air-formal-delivery-check":
+        air_args = [sys.executable, "-m", M2_AIR_FORMAL_DELIVERY_CHECK_MODULE]
+        if args.evidence is not None:
+            air_args.extend(["--evidence", str(args.evidence)])
+        return _run(air_args)
+    if command == "m2-air-formal-delivery-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_AIR_FORMAL_DELIVERY_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
