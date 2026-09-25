@@ -174,3 +174,51 @@ def test_all_m1_commands_require_idempotency_key() -> None:
         response = client.post(route, json=_body())
         assert response.status_code == 400
         assert response.json()["error"]["code"] == "IDEMPOTENCY_KEY_REQUIRED"
+
+
+def test_import_and_compute_commands_are_idempotent_and_hash_bound() -> None:
+    client = _client()
+
+    imported = client.post(
+        "/m1/commands/import-session",
+        json={"fixture_id": "BF_M1_NOMINAL_V1"},
+        headers={"Idempotency-Key": "api-import"},
+    )
+    assert imported.status_code == 200
+    import_payload = imported.json()
+    assert len(import_payload["request_hash"]) == 64
+    assert import_payload["status"] == "VALIDATED"
+    assert import_payload["reused"] is False
+
+    import_retry = client.post(
+        "/m1/commands/import-session",
+        json={"fixture_id": "BF_M1_NOMINAL_V1"},
+        headers={"Idempotency-Key": "api-import"},
+    )
+    assert import_retry.status_code == 200
+    assert import_retry.json()["request_hash"] == import_payload["request_hash"]
+    assert import_retry.json()["reused"] is True
+
+    computed = client.post(
+        "/m1/commands/compute-session",
+        json={"fixture_id": "BF_M1_NOMINAL_V1"},
+        headers={"Idempotency-Key": "api-compute"},
+    )
+    assert computed.status_code == 200
+    compute_payload = computed.json()
+    assert len(compute_payload["request_hash"]) == 64
+    assert len(compute_payload["world_logical_hash"]) == 64
+    assert len(compute_payload["metric_batch_hash"]) == 64
+    assert len(compute_payload["metric_results"]) == 5
+    assert compute_payload["database_persistence_executed"] is False
+    assert compute_payload["publication_executed"] is False
+    assert compute_payload["reused"] is False
+
+    compute_retry = client.post(
+        "/m1/commands/compute-session",
+        json={"fixture_id": "BF_M1_NOMINAL_V1"},
+        headers={"Idempotency-Key": "api-compute"},
+    )
+    assert compute_retry.status_code == 200
+    assert compute_retry.json()["metric_batch_hash"] == compute_payload["metric_batch_hash"]
+    assert compute_retry.json()["reused"] is True
