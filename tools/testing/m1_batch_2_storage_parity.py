@@ -54,6 +54,11 @@ def _hash(value: object) -> str:
     return hashlib.sha256(_canonical_json(value).encode("ascii")).hexdigest()
 
 
+def _has_exact_list_size(payload: dict[str, object], key: str, size: int) -> bool:
+    value = payload.get(key)
+    return isinstance(value, list) and len(value) == size
+
+
 def _publish_sqlite(products: Any) -> tuple[dict[str, object], dict[str, object]]:
     with tempfile.TemporaryDirectory(prefix="tpaa-m1-batch2-sqlite-") as tmp:
         database = Path(tmp) / "tpaa.sqlite3"
@@ -237,16 +242,16 @@ def run(
         "logical_release_membership_equal": membership_equal,
         "logical_membership_hash_equal": sqlite_hash == postgres_hash,
         "five_metric_instances_equal": (
-            len(sqlite_membership["metric_instances"]) == 5
-            and len(postgres_membership["metric_instances"]) == 5
+            _has_exact_list_size(sqlite_membership, "metric_instances", 5)
+            and _has_exact_list_size(postgres_membership, "metric_instances", 5)
         ),
         "five_evidence_sets_equal": (
-            len(sqlite_membership["evidence_sets"]) == 5
-            and len(postgres_membership["evidence_sets"]) == 5
+            _has_exact_list_size(sqlite_membership, "evidence_sets", 5)
+            and _has_exact_list_size(postgres_membership, "evidence_sets", 5)
         ),
         "five_observations_equal": (
-            len(sqlite_membership["observations"]) == 5
-            and len(postgres_membership["observations"]) == 5
+            _has_exact_list_size(sqlite_membership, "observations", 5)
+            and _has_exact_list_size(postgres_membership, "observations", 5)
         ),
     }
     failed_acceptance = sorted(
