@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import Header, Query
+from fastapi import FastAPI, Header, Query
 from fastapi.responses import JSONResponse
 
 from tpaa_application import (
@@ -48,7 +48,7 @@ def _required_token(body: dict[str, object]) -> int:
     return value
 
 
-def create_m1_app(application: ApplicationService):
+def create_m1_app(application: ApplicationService) -> FastAPI:
     """Extend the stable M0 transport with release-bound M1 backend endpoints."""
 
     app = create_app(application)
