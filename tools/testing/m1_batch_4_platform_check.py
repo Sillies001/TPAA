@@ -21,7 +21,7 @@ def _load(path: Path) -> dict[str, Any]:
 
 def _git_tree_identity(repo_root: Path, relative: str) -> str:
     result = subprocess.run(
-        ["git", "ls-tree", "-r", "HEAD", "--", relative],
+        ["git", "rev-parse", f"HEAD:{relative}"],
         cwd=repo_root,
         check=False,
         capture_output=True,
@@ -100,8 +100,8 @@ def run(
         "batch2": b2.get("logical_product"),
         "batch3": b3.get("logical_product"),
         "frozen_bundle": {
-            "canonical_git_tree_listing": frozen_hashes["canonical"],
-            "fixture_git_tree_listing": frozen_hashes["fixtures"],
+            "canonical_git_tree": frozen_hashes["canonical"],
+            "fixture_git_tree": frozen_hashes["fixtures"],
             "pyproject_git_blob": lock_hashes.get("pyproject.toml"),
             "uv_lock_git_blob": lock_hashes.get("uv.lock"),
         },
