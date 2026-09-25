@@ -69,6 +69,9 @@ M1_BATCH_2_REVIEW_MODULE = "tools.testing.m1_batch_2_review"
 M1_BATCH_3_DESKTOP_E2E_MODULE = "tools.testing.m1_batch_3_desktop_e2e"
 M1_BATCH_3_DESKTOP_COMPARE_MODULE = "tools.testing.m1_batch_3_desktop_compare"
 M1_BATCH_3_REVIEW_MODULE = "tools.testing.m1_batch_3_review"
+M1_BATCH_4_PLATFORM_CHECK_MODULE = "tools.testing.m1_batch_4_platform_check"
+M1_BATCH_4_COMPARE_MODULE = "tools.testing.m1_batch_4_compare"
+M1_EXIT_REVIEW_MODULE = "tools.testing.m1_exit_review"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -123,6 +126,9 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-batch-3-desktop-e2e", "M1-GUI-001..007/M1-TST-008/M1-PLAT-001..002", "IMPLEMENTED", "Run the real M1 Desktop journey and emit exact-revision platform evidence."),
     CommandSpec("m1-batch-3-desktop-compare", "M1-PLAT-001/M1-PLAT-002", "IMPLEMENTED", "Compare Windows/Linux M1 Desktop logical products exactly."),
     CommandSpec("m1-batch-3-review", "M1 Batch 3 Issue #89", "IMPLEMENTED", "Aggregate exact-revision Windows/Linux Desktop evidence into the ten-row Batch 3 acceptance matrix."),
+    CommandSpec("m1-batch-4-platform-check", "M1-TST-010", "IMPLEMENTED", "Qualify integrated M1 on one platform from a clean locked workspace and emit a noise-free logical product."),
+    CommandSpec("m1-batch-4-compare", "M1-TST-009/M1-PLAT-004", "IMPLEMENTED", "Compare Windows/Linux integrated M1 logical products while excluding platform noise."),
+    CommandSpec("m1-exit-review", "M1 Batch 4 Issue #88", "IMPLEMENTED", "Aggregate all 56 M1 Task IDs and emit GO only for exact protected-main push evidence."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -554,6 +560,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     m1_batch_1_compare.add_argument("--windows", type=Path, required=True)
     m1_batch_1_compare.add_argument("--linux", type=Path, required=True)
+    m1_batch_1_compare.add_argument("--expected-revision", required=True)
     m1_batch_1_compare.add_argument("--evidence", type=Path, required=True)
     m1_batch_2_service = sub.add_parser(
         "m1-batch-2-service-smoke",
@@ -637,6 +644,39 @@ def build_parser() -> argparse.ArgumentParser:
     m1_batch_3_review.add_argument("--logical", type=Path, required=True)
     m1_batch_3_review.add_argument("--expected-revision", required=True)
     m1_batch_3_review.add_argument("--output", type=Path, required=True)
+    m1_batch_4_platform = sub.add_parser(
+        "m1-batch-4-platform-check",
+        help="Qualify integrated M1 on one clean platform workspace",
+    )
+    m1_batch_4_platform.add_argument("--batch1", type=Path, required=True)
+    m1_batch_4_platform.add_argument("--batch2-service", type=Path, required=True)
+    m1_batch_4_platform.add_argument("--batch3-desktop", type=Path, required=True)
+    m1_batch_4_platform.add_argument("--expected-revision", required=True)
+    m1_batch_4_platform.add_argument("--repo-root", type=Path, default=REPO_ROOT)
+    m1_batch_4_platform.add_argument("--evidence", type=Path, required=True)
+    m1_batch_4_compare = sub.add_parser(
+        "m1-batch-4-compare",
+        help="Compare integrated Windows/Linux M1 logical products",
+    )
+    m1_batch_4_compare.add_argument("--windows", type=Path, required=True)
+    m1_batch_4_compare.add_argument("--linux", type=Path, required=True)
+    m1_batch_4_compare.add_argument("--expected-revision", required=True)
+    m1_batch_4_compare.add_argument("--evidence", type=Path, required=True)
+    m1_exit_review = sub.add_parser(
+        "m1-exit-review",
+        help="Aggregate all M1 task evidence and gate M1 Exit GO on protected main",
+    )
+    m1_exit_review.add_argument("--artifact-root", type=Path, required=True)
+    m1_exit_review.add_argument("--batch1-logical", type=Path, required=True)
+    m1_exit_review.add_argument("--batch2-review", type=Path, required=True)
+    m1_exit_review.add_argument("--batch3-review", type=Path, required=True)
+    m1_exit_review.add_argument("--batch4-windows", type=Path, required=True)
+    m1_exit_review.add_argument("--batch4-linux", type=Path, required=True)
+    m1_exit_review.add_argument("--batch4-logical", type=Path, required=True)
+    m1_exit_review.add_argument("--expected-revision", required=True)
+    m1_exit_review.add_argument("--event-name", required=True)
+    m1_exit_review.add_argument("--git-ref", required=True)
+    m1_exit_review.add_argument("--output", type=Path, required=True)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -742,6 +782,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.windows),
                 "--linux",
                 str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
                 "--evidence",
                 str(args.evidence),
             ]
@@ -999,6 +1041,72 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.logical),
                 "--expected-revision",
                 args.expected_revision,
+                "--output",
+                str(args.output),
+            ]
+        )
+    if command == "m1-batch-4-platform-check":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_4_PLATFORM_CHECK_MODULE,
+                "--batch1",
+                str(args.batch1),
+                "--batch2-service",
+                str(args.batch2_service),
+                "--batch3-desktop",
+                str(args.batch3_desktop),
+                "--expected-revision",
+                args.expected_revision,
+                "--repo-root",
+                str(args.repo_root),
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-4-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_4_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-exit-review":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_EXIT_REVIEW_MODULE,
+                "--artifact-root",
+                str(args.artifact_root),
+                "--batch1-logical",
+                str(args.batch1_logical),
+                "--batch2-review",
+                str(args.batch2_review),
+                "--batch3-review",
+                str(args.batch3_review),
+                "--batch4-windows",
+                str(args.batch4_windows),
+                "--batch4-linux",
+                str(args.batch4_linux),
+                "--batch4-logical",
+                str(args.batch4_logical),
+                "--expected-revision",
+                args.expected_revision,
+                "--event-name",
+                args.event_name,
+                "--git-ref",
+                args.git_ref,
                 "--output",
                 str(args.output),
             ]
