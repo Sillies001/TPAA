@@ -392,6 +392,18 @@ def test_m2_met_003_air_formal_delivery_is_cross_platform_compared() -> None:
     )
 
 
+def test_m2_met_004_sns_detection_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M2-MET-004 SNS detection evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-sns-detection-check" in text
+    assert "evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json" in text
+    assert "- name: Compare Windows and Linux M2-MET-004 SNS detection" in text
+    assert "python tools/dev/tpaa_dev.py m2-sns-detection-compare" in text
+    assert "downloaded/evidence/m2-met-004/windows/sns-detection.json" in text
+    assert "downloaded/evidence/m2-met-004/linux/sns-detection.json" in text
+    assert "evidence/cross-platform/m2-met-004-logical-equivalence.json" in text
+
+
 def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "- name: Emit M1 Batch 2 service smoke evidence" in text

@@ -28,6 +28,12 @@ from .engine import (
     TasMachEnvelope,
     compute_representative_metrics,
 )
+from .sns_detection import (
+    M2_SNS_DETECTION_PLUGINS,
+    SNS_DETECTION_CODES,
+    build_m2_sns_detection_inputs,
+    register_m2_sns_detection_plugins,
+)
 
 __all__ = [
     "AIR_M1_IMPLEMENTATION",
@@ -49,10 +55,14 @@ __all__ = [
     "MetricEvidence",
     "MetricResult",
     "MetricStagingArea",
+    "M2_SNS_DETECTION_PLUGINS",
+    "SNS_DETECTION_CODES",
     "TasMachEnvelope",
     "build_m2_metric_execution_plan",
     "build_m2_air_formal_delivery",
     "build_metric_context",
+    "build_m2_sns_detection_inputs",
     "compute_representative_metrics",
     "register_m2_air_plugins",
+    "register_m2_sns_detection_plugins",
 ]

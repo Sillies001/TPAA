@@ -82,6 +82,8 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m1-source-adapter-check",
         "m2-air-formal-delivery-check",
         "m2-air-formal-delivery-compare",
+        "m2-sns-detection-check",
+        "m2-sns-detection-compare",
         "m1-source-registry-check",
         "m1-session-time-check",
         "m1-aircraft-identity-check",
