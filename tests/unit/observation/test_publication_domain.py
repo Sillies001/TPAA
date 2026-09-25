@@ -95,6 +95,7 @@ def test_representative_metrics_project_to_immutable_capability_observations() -
     replay = compare_replay(
         release,
         context=metric_context,
+        context_version=resolved_context.context_version,
         world=world,
         batch=batch,
     )
