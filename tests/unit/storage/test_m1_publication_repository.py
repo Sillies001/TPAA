@@ -31,6 +31,7 @@ def _release(
         request_hash=request_hash,
         scope_type="SESSION",
         scope_key=session_id,
+        fixture_id="TEST_FIXTURE",
         session_id=session_id,
         context_id=context_id,
         context_version="M1-BASIC-CONTEXT-1.0.0",
