@@ -72,8 +72,10 @@ def test_nominal_five_metric_results_match_independent_expected_values() -> None
     assert metrics["P1-AIR-004"].value_numeric == pytest.approx(0.1)
     sustained_details = dict(metrics["P1-AIR-004"].evidence.details)
     assert sustained_details["operator"] == "ROLLING_MEDIAN_V1"
-    assert sustained_details["supporting_dwell_start_session_time_us"] == "1000000"
-    assert sustained_details["supporting_dwell_end_session_time_us"] == "9000000"
+    assert sustained_details["eligible_window_start_session_time_us"] == "1000000"
+    assert sustained_details["eligible_window_end_session_time_us"] == "9000000"
+    assert sustained_details["supporting_dwell_start_session_time_us"] == "2500000"
+    assert sustained_details["supporting_dwell_end_session_time_us"] == "5500000"
     envelope = metrics["P1-AIR-007"].value_structured
     assert envelope is not None
     assert envelope.as_dict() == {
@@ -193,6 +195,31 @@ def test_rolling_median_uses_centered_not_trailing_windows() -> None:
     ]
     assert [(start, end) for _, start, end in outputs] == [
         (500_000, 3_500_000),
+        (1_500_000, 4_500_000),
+    ]
+
+
+def test_rolling_median_coverage_measures_valid_duration() -> None:
+    values = (
+        TimedValue(1_000_000, 0.0),
+        TimedValue(2_000_000, 1.0),
+        TimedValue(3_000_000, 2.0),
+        TimedValue(4_000_000, 3.0),
+    )
+
+    outputs = rolling_medians(
+        values,
+        duration_s=3.0,
+        min_coverage=1.0,
+        max_gap_us=1_500_000,
+        window_start_us=0,
+        window_end_us=5_000_000,
+    )
+
+    assert [(item.session_time_us, item.value) for item, _, _ in outputs] == [
+        (3_000_000, 2.0),
+    ]
+    assert [(start, end) for _, start, end in outputs] == [
         (1_500_000, 4_500_000),
     ]
 
