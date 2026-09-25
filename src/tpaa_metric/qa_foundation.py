@@ -170,9 +170,9 @@ def _blocked_plugin(request: M2MetricPluginRequest) -> Mapping[str, object]:
 def _qa003(request: M2MetricPluginRequest) -> Mapping[str, object]:
     _metric_guard(request, metric_code="P1-QA-003", value_kind="NUMERIC")
     segments = _mappings(request.input_payload.get("clock_segments"), field="clock_segments")
-    mean = cast("callable", request.operators["MEAN_V1"])
-    rms = cast("callable", request.operators["RMS_V1"])
-    quantile = cast("callable", request.operators["QUANTILE_HF7_V1"])
+    mean = request.operators["MEAN_V1"]
+    rms = request.operators["RMS_V1"]
+    quantile = request.operators["QUANTILE_HF7_V1"]
     instances: list[dict[str, object]] = []
     for segment_index, segment in enumerate(segments):
         segment_id = _text(segment, "segment_id", field=f"clock_segments[{segment_index}]")
@@ -237,8 +237,8 @@ def _qa003(request: M2MetricPluginRequest) -> Mapping[str, object]:
 def _qa004(request: M2MetricPluginRequest) -> Mapping[str, object]:
     _metric_guard(request, metric_code="P1-QA-004", value_kind="NUMERIC")
     samples = _mappings(request.input_payload.get("samples"), field="samples")
-    median = cast("callable", request.operators["MEDIAN_V1"])
-    quantile = cast("callable", request.operators["QUANTILE_HF7_V1"])
+    median = request.operators["MEDIAN_V1"]
+    quantile = request.operators["QUANTILE_HF7_V1"]
     latencies: list[float] = []
     for index, sample in enumerate(samples):
         field = f"samples[{index}]"
@@ -270,8 +270,8 @@ def _qa004(request: M2MetricPluginRequest) -> Mapping[str, object]:
 def _qa005(request: M2MetricPluginRequest) -> Mapping[str, object]:
     _metric_guard(request, metric_code="P1-QA-005", value_kind="NUMERIC")
     samples = _mappings(request.input_payload.get("samples"), field="samples")
-    median = cast("callable", request.operators["MEDIAN_V1"])
-    quantile = cast("callable", request.operators["QUANTILE_HF7_V1"])
+    median = request.operators["MEDIAN_V1"]
+    quantile = request.operators["QUANTILE_HF7_V1"]
     ages: list[float] = []
     rejected = 0
     for index, sample in enumerate(samples):
