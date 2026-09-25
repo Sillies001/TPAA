@@ -108,6 +108,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-measurement-alignment-check
           --evidence evidence/m2-data-004/${{ matrix.platform }}/measurement-alignment.json
 
+      - name: Emit M2-DATA-005 fixture-family evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-fixture-family-check
+          --evidence evidence/m2-data-005/${{ matrix.platform }}/fixture-family.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -226,6 +231,7 @@ jobs:
             evidence/m2-data-002/${{ matrix.platform }}/time-alignment.json
             evidence/m2-data-003/${{ matrix.platform }}/mission-system.json
             evidence/m2-data-004/${{ matrix.platform }}/measurement-alignment.json
+            evidence/m2-data-005/${{ matrix.platform }}/fixture-family.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -275,6 +281,14 @@ jobs:
           --linux downloaded/evidence/cross-platform/linux.json
           --evidence evidence/cross-platform/logical-equivalence.json
 
+      - name: Compare Windows and Linux M2 fixture family
+        run: >-
+          python tools/dev/tpaa_dev.py m2-fixture-family-compare
+          --windows downloaded/evidence/m2-data-005/windows/fixture-family.json
+          --linux downloaded/evidence/m2-data-005/linux/fixture-family.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-data-005-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -313,6 +327,7 @@ jobs:
           name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             evidence/cross-platform/logical-equivalence.json
+            evidence/cross-platform/m2-data-005-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
