@@ -819,7 +819,7 @@ M1 通过必须同时满足：
 15. build manifest/SBOM/baseline hashes 随 M1 artifact 归档；
 16. cold-start 从冻结 source+baseline bundle 完整重现。
 
-M1 Exit 后才允许把 M2 的 backlog 从 Epic 级细化到任务级，并以 M1 暴露的真实架构问题修订 SDIB-1.1。
+M1 Exit 后才允许把 M2 的 backlog 从 Epic 级细化到任务级。本 SDIB-1.1 即是在该 Gate GO 后吸收 M1 暴露的真实架构、Golden、Release/replay 与跨平台反馈形成的任务级修订。
 
 # Part IV — M2～M9 后续路线与进入条件
 
