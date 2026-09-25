@@ -4,6 +4,7 @@ from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 
 from tpaa_context import resolve_evaluation_context
+from tpaa_generated.dto import EvaluationContextDTO
 from tpaa_ingest import load_synthetic_fixture_bundle
 from tpaa_metric import build_metric_context, compute_representative_metrics
 from tpaa_observation import (
@@ -41,6 +42,18 @@ def test_representative_metrics_project_to_immutable_capability_observations() -
     metric_context = build_metric_context(BUNDLE, authority_root=AUTHORITY, world=world)
     batch = compute_representative_metrics(metric_context, world)
     resolved_context = resolve_evaluation_context(BUNDLE, authority_root=AUTHORITY)
+    context_snapshot: EvaluationContextDTO = {
+        "context_id": resolved_context.context_id,
+        "session_id": resolved_context.session_id,
+        "context_version": resolved_context.context_version,
+        "revision_no": resolved_context.revision_no,
+        "rule_set_version": resolved_context.rule_set_version,
+        "metric_profile_version": resolved_context.metric_profile_version,
+        "status": resolved_context.status,
+    }
+    if resolved_context.supersedes_context_id is not None:
+        context_snapshot["supersedes_context_id"] = resolved_context.supersedes_context_id
+
     identity = AircraftPublicationIdentity(
         aircraft_id=world.aircraft_id,
         aircraft_model_id=str(uuid5(NAMESPACE_URL, "tpaa-test-aircraft-model")),
@@ -57,6 +70,7 @@ def test_representative_metrics_project_to_immutable_capability_observations() -
         parent_release_id=None,
         context=metric_context,
         context_version=resolved_context.context_version,
+        context_projection=context_snapshot,
         world=world,
         batch=batch,
         identity=identity,
