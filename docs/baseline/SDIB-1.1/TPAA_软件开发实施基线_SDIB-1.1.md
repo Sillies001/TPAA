@@ -863,6 +863,8 @@ Catalog exact 32 项：
 
 ### 25.3 M2 Task Backlog
 
+本节的 machine-readable 镜像为 `docs/baseline/SDIB-1.1/M2_TASK_BASELINE.json`；Markdown 与 JSON 必须由 contract test 保持 exact 一致。
+
 Task ID 管理可验证交付物；Canonical/Metric/Stage/DTO/schema 语义仍由 CB-1.4.0 machine authority 管理。下表中的最低验收不得通过缩小 frozen Catalog 语义来满足。
 
 | Task ID | Primary WS | 交付物 | 主要依赖 | 最低验收 |
