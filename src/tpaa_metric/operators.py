@@ -97,6 +97,24 @@ def median(values: Sequence[float]) -> float:
     return (ordered[middle - 1] + ordered[middle]) / 2.0
 
 
+def _covered_duration_us(
+    values: Sequence[TimedValue],
+    *,
+    start_us: int,
+    end_us: int,
+) -> int:
+    covered = 0
+    for index, item in enumerate(values):
+        support_start = max(start_us, item.session_time_us)
+        support_end = (
+            values[index + 1].session_time_us if index + 1 < len(values) else end_us
+        )
+        support_end = min(end_us, support_end)
+        if support_end > support_start:
+            covered += support_end - support_start
+    return covered
+
+
 def rolling_medians(
     values: Sequence[TimedValue],
     *,
@@ -126,7 +144,12 @@ def rolling_medians(
             clipped_end = min(window_end_us, requested_end)
             if clipped_end <= clipped_start:
                 continue
-            coverage = (clipped_end - clipped_start) / duration_us
+            covered_duration_us = _covered_duration_us(
+                piece,
+                start_us=clipped_start,
+                end_us=clipped_end,
+            )
+            coverage = covered_duration_us / duration_us
             if coverage < min_coverage:
                 continue
             window = tuple(
