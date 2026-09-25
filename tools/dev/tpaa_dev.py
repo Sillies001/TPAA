@@ -48,6 +48,7 @@ M1_ENTRY_ASSIGN_ROLES_MODULE = "tools.governance.m1_entry_assign_roles"
 M1_DETAILED_DESIGN_VERIFY_MODULE = "tools.governance.verify_m1_detailed_design"
 M1_FIXTURE_HARNESS_MODULE = "tools.testing.m1_fixture_harness"
 M1_SOURCE_ADAPTER_CHECK_MODULE = "tools.testing.m1_source_adapter_check"
+M2_FIXTURE_FAMILY_CHECK_MODULE = "tools.testing.m2_fixture_family_check"
 M2_MEASUREMENT_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_measurement_alignment_check"
 M2_MISSION_SYSTEM_CHECK_MODULE = "tools.testing.m2_mission_system_check"
 M2_REFERENCE_TRUTH_CHECK_MODULE = "tools.testing.m2_reference_truth_check"
@@ -114,6 +115,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-reference-truth-check", "M2-DATA-001", "IMPLEMENTED", "Verify governed M2 reference-relative truth/time/frame provenance."),
     CommandSpec("m2-mission-system-check", "M2-DATA-003", "IMPLEMENTED", "Verify governed RADAR mission-system identity and fail-closed SNS applicability."),
     CommandSpec("m2-measurement-alignment-check", "M2-DATA-004", "IMPLEMENTED", "Verify governed measurement/reference pairing, quality, gap and uncertainty provenance."),
+    CommandSpec("m2-fixture-family-check", "M2-DATA-005", "IMPLEMENTED", "Verify the governed M2 nominal/boundary/gap/insufficient/invalid/applicability fixture family."),
+    CommandSpec("m2-fixture-family-compare", "M2-DATA-005", "IMPLEMENTED", "Compare Windows/Linux M2 fixture-family logical evidence exactly."),
     CommandSpec("m2-time-alignment-check", "M2-DATA-002", "IMPLEMENTED", "Verify governed M2 sensor/INS time-alignment input provenance and fail-closed negatives."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
@@ -532,6 +535,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verify M2-DATA-004 measurement/reference quality projection",
     )
     m2_measurement.add_argument("--evidence", type=Path)
+    m2_family = sub.add_parser(
+        "m2-fixture-family-check",
+        help="Verify M2-DATA-005 frozen fixture family",
+    )
+    m2_family.add_argument("--evidence", type=Path)
+    m2_family_compare = sub.add_parser(
+        "m2-fixture-family-compare",
+        help="Compare Windows/Linux M2-DATA-005 fixture evidence",
+    )
+    m2_family_compare.add_argument("--windows", type=Path, required=True)
+    m2_family_compare.add_argument("--linux", type=Path, required=True)
+    m2_family_compare.add_argument("--expected-revision", required=True)
+    m2_family_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -882,6 +898,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.evidence is not None:
             measurement_args.extend(["--evidence", str(args.evidence)])
         return _run(measurement_args)
+    if command == "m2-fixture-family-check":
+        family_args = [sys.executable, "-m", M2_FIXTURE_FAMILY_CHECK_MODULE, "check"]
+        if args.evidence is not None:
+            family_args.extend(["--evidence", str(args.evidence)])
+        return _run(family_args)
+    if command == "m2-fixture-family-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_FIXTURE_FAMILY_CHECK_MODULE,
+                "compare",
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
     if command == "m1-source-registry-check":
         registry_args = [sys.executable, "-m", M1_SOURCE_REGISTRY_CHECK_MODULE]
         if args.evidence is not None:
