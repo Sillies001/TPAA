@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up CPython
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -131,6 +133,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-stage-quality-check
           --evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
 
+      - name: Emit consolidated M1 Batch 1 core evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-1-core-check
+          --evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -156,7 +163,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: tpaa-ci-${{ matrix.platform }}-${{ github.sha }}
+          name: tpaa-ci-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             evidence/ci/${{ matrix.platform }}.json
             evidence/tests/framework-${{ matrix.platform }}.json
@@ -174,6 +181,7 @@ jobs:
             evidence/m1-world-001/${{ matrix.platform }}/basic-episode.json
             evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
             evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
+            evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
             dist/
           if-no-files-found: error
           retention-days: 14
@@ -186,6 +194,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up CPython
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -196,7 +206,7 @@ jobs:
       - name: Download platform evidence
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: tpaa-ci-*-${{ github.sha }}
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded
           merge-multiple: true
 
@@ -207,12 +217,21 @@ jobs:
           --linux downloaded/evidence/cross-platform/linux.json
           --evidence evidence/cross-platform/logical-equivalence.json
 
+      - name: Compare Windows and Linux M1 Batch 1 products
+        run: >-
+          python tools/dev/tpaa_dev.py m1-batch-1-compare
+          --windows downloaded/evidence/m1-batch-1/windows/core-product.json
+          --linux downloaded/evidence/m1-batch-1/linux/core-product.json
+          --evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json
+
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: tpaa-logical-equivalence-${{ github.sha }}
-          path: evidence/cross-platform/logical-equivalence.json
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/cross-platform/logical-equivalence.json
+            evidence/cross-platform/m1-batch-1-logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
 
@@ -237,6 +256,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up CPython
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -290,7 +311,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: tpaa-m0-exit-postgres-${{ github.sha }}
+          name: tpaa-m0-exit-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m0-exit/
           if-no-files-found: error
           retention-days: 14
@@ -306,6 +327,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up CPython
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -316,26 +339,26 @@ jobs:
       - name: Download Windows/Linux evidence
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: tpaa-ci-*-${{ github.sha }}
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/platform
           merge-multiple: true
 
       - name: Download logical-equivalence evidence
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          name: tpaa-logical-equivalence-${{ github.sha }}
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/logical
 
       - name: Download PostgreSQL Exit evidence
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          name: tpaa-m0-exit-postgres-${{ github.sha }}
+          name: tpaa-m0-exit-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/postgres
 
       - name: Aggregate all 14 M0 Exit Gates
         run: >-
           python tools/ci/m0_exit_review.py
-          --expected-revision ${{ github.sha }}
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --artifact-root downloaded/platform
           --windows-ci downloaded/platform/evidence/ci/windows.json
           --linux-ci downloaded/platform/evidence/ci/linux.json
@@ -353,7 +376,7 @@ jobs:
           --mode auto
           --event-name ${{ github.event_name }}
           --git-ref ${{ github.ref }}
-          --source-revision ${{ github.sha }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --windows-manifest downloaded/platform/evidence/m1-entry/windows/build-manifest.json
           --linux-manifest downloaded/platform/evidence/m1-entry/linux/build-manifest.json
           --output evidence/m1-entry/activation.json
@@ -362,7 +385,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: tpaa-m0-exit-review-${{ github.sha }}
+          name: tpaa-m0-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m0-exit/review.json
           if-no-files-found: error
           retention-days: 30
@@ -371,7 +394,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: tpaa-m1-entry-activation-${{ github.sha }}
+          name: tpaa-m1-entry-activation-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m1-entry/activation.json
           if-no-files-found: error
           retention-days: 30

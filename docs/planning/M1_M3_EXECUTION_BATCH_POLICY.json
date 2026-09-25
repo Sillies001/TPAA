@@ -1,0 +1,52 @@
+{
+  "schema": "TPAA_M1_M3_EXECUTION_BATCH_POLICY_V1",
+  "governance_issue": 85,
+  "max_open_execution_issues_per_milestone": 4,
+  "fine_issue_closure_semantics": "SUPERSEDED_NOT_COMPLETED",
+  "delivery_policy": {
+    "implementation_branches_per_batch": 1,
+    "pull_requests_per_batch": 1,
+    "hosted_ci_after_complete_local_increment": true,
+    "focused_local_tests_during_construction": true,
+    "completion_requires_protected_main_evidence": true
+  },
+  "m1": {
+    "admission_state": "M1_ADMITTED",
+    "batches": [
+      {
+        "order": 1,
+        "issue": 86,
+        "scope": "World + representative Metric core product",
+        "depends_on": []
+      },
+      {
+        "order": 2,
+        "issue": 87,
+        "scope": "Publication, persistence, API + replay backend",
+        "depends_on": [86]
+      },
+      {
+        "order": 3,
+        "issue": 89,
+        "scope": "Desktop vertical slice + Windows/Linux E2E",
+        "depends_on": [87]
+      },
+      {
+        "order": 4,
+        "issue": 88,
+        "scope": "Cross-platform qualification + M1 Exit",
+        "depends_on": [86, 87, 89]
+      }
+    ]
+  },
+  "m2": {
+    "creation_gate": "M1_EXIT_GO",
+    "max_open_execution_issues": 4,
+    "import_fine_grained_open_issues_first": false
+  },
+  "m3": {
+    "creation_gate": "SDIB_M3_PREREQUISITE_GATE",
+    "max_open_execution_issues": 4,
+    "import_fine_grained_open_issues_first": false
+  }
+}

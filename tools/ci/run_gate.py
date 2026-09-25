@@ -148,6 +148,7 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
             ("m1-basic-episode", _dispatcher("m1-basic-episode-check")),
             ("m1-basic-stage", _dispatcher("m1-basic-stage-check")),
             ("m1-stage-quality", _dispatcher("m1-stage-quality-check")),
+            ("m1-batch-1-core", _dispatcher("m1-batch-1-core-check")),
             ("verify-governance", _dispatcher("verify-governance")),
             ("openapi-snapshot", _dispatcher("openapi-snapshot", "--check")),
             ("migration-smoke", _dispatcher("migration-smoke")),
@@ -197,7 +198,14 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
     status = "FAIL" if preflight_failure or failed else "PASS"
     payload: dict[str, object] = {
         "schema": "TPAA_M0_CROSS_PLATFORM_CI_EVIDENCE_V1",
-        "tasks": ["M0-PLAT-004", "M0-PLAT-005", "M1-TST-001", "M1-DATA-001", "M1-DATA-002", "M1-DATA-003", "M1-DATA-004", "M1-DATA-005", "M1-DATA-006", "M1-DATA-007", "M1-WORLD-001", "M1-WORLD-002", "M1-WORLD-003"],
+        "tasks": [
+            "M0-PLAT-004",
+            "M0-PLAT-005",
+            "M1-TST-001..003",
+            "M1-DATA-001..007",
+            "M1-WORLD-001..007",
+            "M1-MET-001..008",
+        ],
         "status": status,
         "preflight_failure": preflight_failure,
         "source_revision": _git_revision(),
@@ -224,10 +232,10 @@ def run(*, expected_platform: str | None, evidence: Path | None) -> int:
         "required_gates": gates,
         "failed_gate_names": [str(gate["name"]) for gate in failed],
         "scope": {
-            "included": "SDIB-1.0.1 Windows/Linux CI over implemented M0 gates plus M1-TST-001 fixture validation, M1-DATA-001 source-adapter validation, M1-DATA-002 immutable registry validation, M1-DATA-003 explicit Session Time validation, M1-DATA-004 replay-stable aircraft identity validation, M1-DATA-005 Canonical flight-channel validation, M1-DATA-006 immutable Evaluation Context validation, M1-DATA-007 lineage/quality propagation validation, M1-WORLD-001 replay-stable Basic Episode validation, M1-WORLD-002 exact BASIC_FLIGHT_V1 Stage projection, and M1-WORLD-003 Stage quality/status projection, package/SBOM/cold-start",
+            "included": "SDIB-1.0.1 Windows/Linux CI over implemented M0 gates plus the M1 fixture/data spine, M1-WORLD-001..007, five representative Metrics M1-MET-001..008, Stage/Metric Golden M1-TST-002..003, package/SBOM/cold-start",
             "excluded": [
                 "M0 Exit Gate",
-                "M1-C execution beyond M1-WORLD-003; Stage revision/hash/evidence refs and World-product/Metric/Release production execution",
+                "M1 Batch 2+ Observation/Release/persistence/API/GUI production execution",
                 "real PostgreSQL server acceptance is retained from M0-STO-003 and is not redefined by this runner task",
             ],
         },

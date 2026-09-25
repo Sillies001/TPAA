@@ -21,6 +21,7 @@ GATE_RUNNER = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 
 EXPECTED_PYTHON = "3.13.5"
 EXPECTED_UV = "0.12.17"
+SOURCE_REVISION = "${{ github.event.pull_request.head.sha || github.sha }}"
 EXPECTED_RUNNERS = {
     "linux": "ubuntu-24.04",
     "windows": "windows-2025",
@@ -113,7 +114,26 @@ def verify() -> dict[str, object]:
         else _fail("all_actions_immutable", f"unpinned actions: {unpinned!r}")
     )
 
+    checks.append(
+        _pass("checkout_exact_candidate_revision", SOURCE_REVISION)
+        if text.count(f"ref: {SOURCE_REVISION}") == 4
+        else _fail(
+            "checkout_exact_candidate_revision",
+            f"expected 4 exact-source checkouts using {SOURCE_REVISION}",
+        )
+    )
+    checks.append(
+        _pass("no_raw_pull_request_merge_sha", SOURCE_REVISION)
+        if "${{ github.sha }}" not in text
+        else _fail(
+            "no_raw_pull_request_merge_sha",
+            "workflow must not use raw github.sha for candidate evidence identity",
+        )
+    )
+
     required_tokens = (
+        f"pattern: tpaa-ci-*-{SOURCE_REVISION}",
+        f"--expected-revision {SOURCE_REVISION}",
         "if: ${{ matrix.platform == 'linux' }}",
         "sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1",
         "uv sync --locked --python 3.13.5",
@@ -156,6 +176,8 @@ def verify() -> dict[str, object]:
         "--evidence evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json",
         "python tools/dev/tpaa_dev.py m1-stage-quality-check",
         "--evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json",
+        "python tools/dev/tpaa_dev.py m1-batch-1-core-check",
+        "--evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json",
         "--evidence evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json",
         "python tools/dev/tpaa_dev.py m1-entry-manifest",
         "--output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json",
@@ -164,11 +186,11 @@ def verify() -> dict[str, object]:
         "--mode auto",
         "--event-name ${{ github.event_name }}",
         "--git-ref ${{ github.ref }}",
-        "--source-revision ${{ github.sha }}",
+        f"--source-revision {SOURCE_REVISION}",
         "--windows-manifest downloaded/platform/evidence/m1-entry/windows/build-manifest.json",
         "--linux-manifest downloaded/platform/evidence/m1-entry/linux/build-manifest.json",
         "--output evidence/m1-entry/activation.json",
-        "tpaa-m1-entry-activation-${{ github.sha }}",
+        f"tpaa-m1-entry-activation-{SOURCE_REVISION}",
         "python tools/dev/tpaa_dev.py package",
         "evidence/devops/${{ matrix.platform }}",
         "evidence/m1-entry/${{ matrix.platform }}/build-manifest.json",
@@ -183,6 +205,11 @@ def verify() -> dict[str, object]:
         "evidence/m1-world-001/${{ matrix.platform }}/basic-episode.json",
         "evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json",
         "evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json",
+        "evidence/m1-batch-1/${{ matrix.platform }}/core-product.json",
+        "python tools/dev/tpaa_dev.py m1-batch-1-compare",
+        "--windows downloaded/evidence/m1-batch-1/windows/core-product.json",
+        "--linux downloaded/evidence/m1-batch-1/linux/core-product.json",
+        "--evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json",
         "dist/",
         "m0-exit-postgres:",
         "image: postgres:16",
@@ -224,6 +251,7 @@ def verify() -> dict[str, object]:
         '_dispatcher("m1-basic-episode-check")',
         '_dispatcher("m1-basic-stage-check")',
         '_dispatcher("m1-stage-quality-check")',
+        '_dispatcher("m1-batch-1-core-check")',
         '_dispatcher("verify-governance")',
         '_dispatcher("openapi-snapshot", "--check")',
         '_dispatcher("migration-smoke")',

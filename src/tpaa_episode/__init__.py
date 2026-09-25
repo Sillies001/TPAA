@@ -17,6 +17,7 @@ from .stage_quality import (
     StageQualityError,
     project_basic_flight_stage_quality,
 )
+from .stage_revision import StageRevisionError, supersede_stage
 
 __all__ = [
     "BasicEpisodeError",
@@ -27,7 +28,9 @@ __all__ = [
     "BasicStageError",
     "QualifiedBasicFlightStage",
     "StageQualityError",
+    "StageRevisionError",
     "detect_basic_episode",
     "project_basic_flight_stages",
     "project_basic_flight_stage_quality",
+    "supersede_stage",
 ]

@@ -11,6 +11,7 @@ VERIFY_PATH = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
 DISPATCHER = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
 GATE_RUNNER = REPO_ROOT / "tools" / "ci" / "run_gate.py"
+SOURCE_REVISION = "${{ github.event.pull_request.head.sha || github.sha }}"
 
 
 def _load_verifier() -> Any:
@@ -41,6 +42,15 @@ def test_workflow_calls_one_governed_ci_gate_command() -> None:
     assert "--expected-platform ${{ matrix.platform }}" in text
     assert "continue-on-error" not in text
     assert "|| true" not in text
+
+
+def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert text.count(f"ref: {SOURCE_REVISION}") == 4
+    assert "${{ github.sha }}" not in text
+    assert f"pattern: tpaa-ci-*-{SOURCE_REVISION}" in text
+    assert f"--expected-revision {SOURCE_REVISION}" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
 
 
 def test_dispatcher_exposes_step8_commands() -> None:
@@ -77,6 +87,7 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
         '_dispatcher("verify-architecture")',
         '_dispatcher("lint")',
         '_dispatcher("typecheck")',
+        '_dispatcher("m1-batch-1-core-check")',
     )
     for token in required:
         assert token in text
@@ -170,11 +181,11 @@ def test_m1_entry_activation_is_inside_required_exit_review_check() -> None:
     assert "--mode auto" in text
     assert "--event-name ${{ github.event_name }}" in text
     assert "--git-ref ${{ github.ref }}" in text
-    assert "--source-revision ${{ github.sha }}" in text
+    assert f"--source-revision {SOURCE_REVISION}" in text
     assert "--windows-manifest downloaded/platform/evidence/m1-entry/windows/build-manifest.json" in text
     assert "--linux-manifest downloaded/platform/evidence/m1-entry/linux/build-manifest.json" in text
     assert "--output evidence/m1-entry/activation.json" in text
-    assert "tpaa-m1-entry-activation-${{ github.sha }}" in text
+    assert f"tpaa-m1-entry-activation-{SOURCE_REVISION}" in text
     assert "m1-entry-activation:" not in text
 
 
@@ -330,3 +341,28 @@ def test_m1_world_003_stage_quality_evidence_is_governed_in_ci() -> None:
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-stage-quality-check")' in gate
+
+
+def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit consolidated M1 Batch 1 core evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-1-core-check" in text
+    assert (
+        "--evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m1-batch-1-compare" in text
+    assert (
+        "--windows downloaded/evidence/m1-batch-1/windows/core-product.json"
+        in text
+    )
+    assert (
+        "--linux downloaded/evidence/m1-batch-1/linux/core-product.json"
+        in text
+    )
+    assert (
+        "--evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-batch-1-core-check")' in gate
