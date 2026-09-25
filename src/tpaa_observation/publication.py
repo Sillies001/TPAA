@@ -11,10 +11,10 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 from uuid import UUID, uuid5
 
-from tpaa_generated.dto import CapabilityObservationDTO
+from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
 from tpaa_metric import MetricBatch, MetricContext, MetricResult
 from tpaa_world import AircraftObservedWorld
 
@@ -272,6 +272,7 @@ class SessionRelease:
     context_id: str
     context_version: str
     context_binding_hash: str
+    context_projection_json: str
     catalog_version: str
     catalog_hash: str
     world_product_id: str
@@ -287,6 +288,27 @@ class SessionRelease:
         _canonical_uuid(self.release_id, field="release_id")
         _require_hash(self.request_hash, field="request_hash")
         _require_hash(self.context_binding_hash, field="context_binding_hash")
+        try:
+            context_projection = json.loads(self.context_projection_json)
+        except json.JSONDecodeError as exc:
+            raise PublicationError(
+                "M1_PUBLICATION_CONTEXT_SNAPSHOT_INVALID",
+                "invalid JSON",
+            ) from exc
+        if not isinstance(context_projection, dict):
+            raise PublicationError(
+                "M1_PUBLICATION_CONTEXT_SNAPSHOT_INVALID",
+                "projection must be object",
+            )
+        if (
+            context_projection.get("context_id") != self.context_id
+            or context_projection.get("session_id") != self.session_id
+            or context_projection.get("context_version") != self.context_version
+        ):
+            raise PublicationError(
+                "M1_PUBLICATION_CONTEXT_SNAPSHOT_BINDING_MISMATCH",
+                self.release_id,
+            )
         _require_hash(self.catalog_hash, field="catalog_hash")
         _require_hash(self.world_logical_hash, field="world_logical_hash")
         _require_hash(self.manifest_hash, field="manifest_hash")
@@ -296,6 +318,11 @@ class SessionRelease:
             raise PublicationError("M1_PUBLICATION_RELEASE_NO_INVALID", str(self.release_no))
         if self.status != "VALIDATED":
             raise PublicationError("M1_PUBLICATION_PRE_PUBLISH_STATUS_INVALID", self.status)
+
+    def context_dto(self) -> EvaluationContextDTO:
+        payload = json.loads(self.context_projection_json)
+        assert isinstance(payload, dict)
+        return cast(EvaluationContextDTO, payload)
 
     def logical_membership(self) -> dict[str, object]:
         return {
@@ -307,6 +334,7 @@ class SessionRelease:
             "context_id": self.context_id,
             "context_version": self.context_version,
             "context_binding_hash": self.context_binding_hash,
+            "context_projection_hash": _hash(json.loads(self.context_projection_json)),
             "catalog_version": self.catalog_version,
             "catalog_hash": self.catalog_hash,
             "world_product_id": self.world_product_id,
@@ -433,6 +461,7 @@ def build_session_release(
     parent_release_id: str | None,
     context: MetricContext,
     context_version: str,
+    context_projection: EvaluationContextDTO,
     world: AircraftObservedWorld,
     batch: MetricBatch,
     identity: AircraftPublicationIdentity,
@@ -442,6 +471,17 @@ def build_session_release(
     canonical_release_id = _canonical_uuid(release_id, field="release_id")
     if not context_version.strip():
         raise PublicationError("M1_PUBLICATION_CONTEXT_VERSION_MISSING", "")
+    context_projection_payload = dict(context_projection)
+    if (
+        context_projection_payload.get("context_id") != context.context_id
+        or context_projection_payload.get("session_id") != context.session_id
+        or context_projection_payload.get("context_version") != context_version
+    ):
+        raise PublicationError(
+            "M1_PUBLICATION_CONTEXT_SNAPSHOT_BINDING_MISMATCH",
+            canonical_release_id,
+        )
+    context_projection_json = _canonical_json(context_projection_payload)
     if world.release_id != canonical_release_id:
         raise PublicationError(
             "M1_PUBLICATION_WORLD_RELEASE_MISMATCH",
@@ -590,6 +630,7 @@ def build_session_release(
         "context_id": context.context_id,
         "context_version": context_version,
         "context_binding_hash": context_binding_hash,
+        "context_projection": json.loads(context_projection_json),
         "catalog_version": context.catalog_version,
         "catalog_hash": context.catalog_sha256,
         "world_product_id": world.world_product_id,
@@ -613,6 +654,7 @@ def build_session_release(
         context_id=context.context_id,
         context_version=context_version,
         context_binding_hash=context_binding_hash,
+        context_projection_json=context_projection_json,
         catalog_version=context.catalog_version,
         catalog_hash=context.catalog_sha256,
         world_product_id=world.world_product_id,
