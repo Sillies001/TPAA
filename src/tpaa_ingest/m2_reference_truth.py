@@ -196,7 +196,10 @@ def _matrix(value: object, *, field: str) -> tuple[tuple[float, ...], ...]:
             "M2_REFERENCE_TRUTH_SOURCE_INVALID",
             f"{field} must be non-empty matrix",
         )
-    rows = tuple(_vector(row, field=f"{field}[{index}]", length=6) for index, row in enumerate(value))
+    rows = tuple(
+        _vector(row, field=f"{field}[{index}]", length=6)
+        for index, row in enumerate(value)
+    )
     if len(rows) != 3:
         raise M2ReferenceTruthError(
             "M2_REFERENCE_TRUTH_SOURCE_INVALID",
