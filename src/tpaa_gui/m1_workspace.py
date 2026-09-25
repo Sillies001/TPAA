@@ -178,9 +178,15 @@ def create_m1_workspace(
         "INVALID": "QLabel { border: 2px solid #b91c1c; padding: 4px; font-weight: bold; }",
         "SYSTEM_ERROR": "QLabel { border: 3px double #7e22ce; padding: 4px; font-weight: bold; }",
     }
+    state_object_names = {
+        "N_A": "tpaaM1StateNA",
+        "INSUFFICIENT": "tpaaM1StateINSUFFICIENT",
+        "INVALID": "tpaaM1StateINVALID",
+        "SYSTEM_ERROR": "tpaaM1StateSYSTEMERROR",
+    }
     for state, style in state_styles.items():
         badge = qt_widgets.QLabel(state, state_group)
-        badge.setObjectName(f"tpaaM1State{state.replace('_', '')}")
+        badge.setObjectName(state_object_names[state])
         badge.setStyleSheet(style)
         state_layout.addWidget(badge)
     outer.addWidget(state_group)
@@ -218,7 +224,7 @@ def create_m1_workspace(
         return _require_success(status, payload)
 
     def explicit_value(object_name: str) -> str:
-        value = identity_inputs[object_name].text().strip()
+        value = str(identity_inputs[object_name].text()).strip()
         if not value:
             raise M1WorkspaceError("EXPLICIT_PUBLICATION_IDENTITY_REQUIRED")
         return value

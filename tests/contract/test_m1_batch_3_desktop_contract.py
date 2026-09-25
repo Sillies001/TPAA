@@ -6,7 +6,11 @@ from typing import Never
 from fastapi.testclient import TestClient
 
 from tpaa_api import create_desktop_app
-from tpaa_application import ApplicationService, M1PublicationService, build_trusted_runtime_status_use_case
+from tpaa_application import (
+    ApplicationService,
+    M1PublicationService,
+    build_trusted_runtime_status_use_case,
+)
 from tpaa_application.m1_repository import InMemorySessionPublicationRepository
 
 ROOT = Path(__file__).resolve().parents[2]

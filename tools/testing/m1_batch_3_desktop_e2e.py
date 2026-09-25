@@ -67,7 +67,7 @@ def run(
     try:
         from PySide6 import QtCore, QtWidgets
     except ModuleNotFoundError as exc:
-        payload = {
+        dependency_failure = {
             "schema": SCHEMA,
             "tracking_issue": 89,
             "source_revision": source_revision,
@@ -77,7 +77,10 @@ def run(
             "failures": [f"PYSIDE6_DEPENDENCY_MISSING:{exc}"],
         }
         evidence.parent.mkdir(parents=True, exist_ok=True)
-        evidence.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        evidence.write_text(
+            json.dumps(dependency_failure, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
         return 2
 
     app = QtWidgets.QApplication.instance()
@@ -208,7 +211,7 @@ def run(
         slider.setValue(500)
         cursor_value = _text(cursor).removeprefix("Cursor: ")
         acceptance["M1-GUI-003"] = (
-            cursor_value
+            bool(cursor_value)
             and _text(metric_cursor) == f"Metric cursor: {cursor_value}"
             and _text(evidence_cursor) == f"Evidence cursor: {cursor_value}"
             and stages.currentRow() >= 0
@@ -273,8 +276,8 @@ def run(
             detail_json = {}
             evidence_json = {}
         evidence_refs = evidence_json.get("refs") if isinstance(evidence_json, dict) else None
-        ref_classes = {
-            ref.get("ref_class")
+        ref_classes: set[str] = {
+            str(ref["ref_class"])
             for ref in evidence_refs
             if isinstance(ref, dict) and isinstance(ref.get("ref_class"), str)
         } if isinstance(evidence_refs, list) else set()
