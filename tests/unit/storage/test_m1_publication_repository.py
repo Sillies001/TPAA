@@ -6,7 +6,7 @@ from uuid import NAMESPACE_URL, uuid5
 import pytest
 
 from tpaa_observation import SessionRelease
-from tpaa_storage.publication import (
+from tpaa_application.m1_repository import (
     InMemorySessionPublicationRepository,
     PublishCASConflict,
 )
