@@ -63,6 +63,7 @@ M1_BATCH_1_CORE_CHECK_MODULE = "tools.testing.m1_batch_1_core_check"
 M1_BATCH_1_COMPARE_MODULE = "tools.testing.m1_batch_1_compare"
 M1_BATCH_2_SERVICE_SMOKE_MODULE = "tools.testing.m1_batch_2_service_smoke"
 M1_BATCH_2_SERVICE_COMPARE_MODULE = "tools.testing.m1_batch_2_service_compare"
+M1_BATCH_2_STORAGE_PARITY_MODULE = "tools.testing.m1_batch_2_storage_parity"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -111,6 +112,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-batch-1-compare", "M1-WORLD-006/M1-TST-002", "IMPLEMENTED", "Compare Windows/Linux Batch 1 logical evidence exactly."),
     CommandSpec("m1-batch-2-service-smoke", "M1-PLAT-003", "IMPLEMENTED", "Run the M1 Batch 2 Application/Repository service contract and emit logical evidence."),
     CommandSpec("m1-batch-2-service-compare", "M1-PLAT-003", "IMPLEMENTED", "Compare Windows/Linux Batch 2 service logical evidence exactly."),
+    CommandSpec("m1-batch-2-storage-parity", "M1-STO-001/M1-STO-003", "IMPLEMENTED", "Publish the same Batch 2 Release to real SQLite/PostgreSQL Core schemas and compare logical membership exactly."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -561,6 +563,22 @@ def build_parser() -> argparse.ArgumentParser:
     m1_batch_2_service_compare.add_argument("--windows", type=Path, required=True)
     m1_batch_2_service_compare.add_argument("--linux", type=Path, required=True)
     m1_batch_2_service_compare.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_storage = sub.add_parser(
+        "m1-batch-2-storage-parity",
+        help="Verify real SQLite/PostgreSQL M1 Batch 2 publication parity",
+    )
+    m1_batch_2_storage.add_argument("--user", default="tpaa")
+    m1_batch_2_storage.add_argument("--host")
+    m1_batch_2_storage.add_argument("--port", type=int)
+    m1_batch_2_storage.add_argument("--psql", default="psql")
+    m1_batch_2_storage.add_argument("--admin-database", default="postgres")
+    m1_batch_2_storage.add_argument(
+        "--database",
+        default="tpaa_m1_batch_2_parity",
+    )
+    m1_batch_2_storage.add_argument("--conninfo-template", required=True)
+    m1_batch_2_storage.add_argument("--source-revision", required=True)
+    m1_batch_2_storage.add_argument("--evidence", type=Path, required=True)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -814,6 +832,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 str(args.evidence),
             ]
         )
+    if command == "m1-batch-2-storage-parity":
+        parity_args = [
+            sys.executable,
+            "-m",
+            M1_BATCH_2_STORAGE_PARITY_MODULE,
+            "--user",
+            args.user,
+            "--admin-database",
+            args.admin_database,
+            "--database",
+            args.database,
+            "--conninfo-template",
+            args.conninfo_template,
+            "--source-revision",
+            args.source_revision,
+            "--evidence",
+            str(args.evidence),
+        ]
+        if args.host:
+            parity_args.extend(["--host", args.host])
+        if args.port is not None:
+            parity_args.extend(["--port", str(args.port)])
+        if args.psql:
+            parity_args.extend(["--psql", args.psql])
+        return _run(parity_args)
     if command == "m1-fixture-check":
         fixture_args = [sys.executable, "-m", M1_FIXTURE_HARNESS_MODULE]
         if args.bundle is not None:
