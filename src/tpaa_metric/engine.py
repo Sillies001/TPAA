@@ -188,6 +188,18 @@ def _select_rows(
     )
 
 
+def _window_bounds(
+    world: AircraftObservedWorld,
+    stage_id: str | None,
+) -> tuple[int, int]:
+    if stage_id is None:
+        return world.start_session_time_us, world.end_session_time_us
+    stage = next((candidate for candidate in world.stages if candidate.stage_id == stage_id), None)
+    if stage is None:
+        raise MetricComputationError("M1_METRIC_STAGE_NOT_FOUND", stage_id)
+    return stage.start_session_time_us, stage.end_session_time_us
+
+
 def _has_excessive_gap(rows: tuple[CanonicalFlightRow, ...], max_gap_us: int) -> bool:
     times = [row.session_time_us for row in rows]
     return any(
@@ -400,6 +412,8 @@ def _air_004(
     rows: tuple[CanonicalFlightRow, ...],
     stage_id: str | None,
     rates: tuple[TimedValue, ...],
+    window_start_us: int,
+    window_end_us: int,
 ) -> MetricResult:
     authority = context.authority("P1-AIR-004")
     if _has_excessive_gap(rows, context.max_gap_us):
@@ -407,7 +421,10 @@ def _air_004(
     medians = rolling_medians(
         rates,
         duration_s=context.sustain_duration_s,
+        min_coverage=context.min_coverage,
         max_gap_us=context.max_gap_us,
+        window_start_us=window_start_us,
+        window_end_us=window_end_us,
     )
     if not medians:
         return _insufficient(context, authority, world, stage_id, "SUSTAIN_DURATION_NOT_MET")
@@ -421,8 +438,11 @@ def _air_004(
         numeric=best[0].value,
         details=(
             ("operator", "ROLLING_MEDIAN_V1"),
-            ("supporting_dwell_start_session_time_us", str(world.start_session_time_us)),
-            ("supporting_dwell_end_session_time_us", str(world.end_session_time_us)),
+            ("supporting_dwell_start_session_time_us", str(window_start_us)),
+            ("supporting_dwell_end_session_time_us", str(window_end_us)),
+            ("selected_center_session_time_us", str(best[0].session_time_us)),
+            ("selected_centered_window_start_session_time_us", str(best[1])),
+            ("selected_centered_window_end_session_time_us", str(best[2])),
         ),
     )
 
@@ -490,12 +510,21 @@ def compute_representative_metrics(
     rows = _select_rows(world, stage_id)
     if not rows:
         raise MetricComputationError("M1_METRIC_WINDOW_EMPTY", repr(stage_id))
+    window_start_us, window_end_us = _window_bounds(world, stage_id)
     rates = _heading_rates(context, rows)
     results = (
         _air_001(context, world, rows, stage_id),
         _air_002(context, world, rows, stage_id),
         _air_003(context, world, rows, stage_id, rates),
-        _air_004(context, world, rows, stage_id, rates),
+        _air_004(
+            context,
+            world,
+            rows,
+            stage_id,
+            rates,
+            window_start_us,
+            window_end_us,
+        ),
         _air_007(context, world, rows, stage_id),
     )
     if tuple(result.metric_code for result in results) != tuple(
