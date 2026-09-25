@@ -312,6 +312,18 @@ jobs:
             --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}" \
             > evidence/m0-exit/postgres-repository.json
 
+      - name: Emit M1 Batch 2 SQLite PostgreSQL parity evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-storage-parity
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_m1_batch_2_parity
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m1-batch-2/postgres/storage-parity.json
+
       - name: Cold-start full M0 with live PostgreSQL
         run: >-
           uv run --locked python tools/ci/cold_start.py
@@ -329,6 +341,15 @@ jobs:
         with:
           name: tpaa-m0-exit-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m0-exit/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload M1 Batch 2 PostgreSQL parity evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m1-batch-2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m1-batch-2/postgres/storage-parity.json
           if-no-files-found: error
           retention-days: 14
 
