@@ -14,6 +14,12 @@ from .job_control import (
     M0JobControl,
     business_outcome,
 )
+from .m1_publication import (
+    M1ApplicationError,
+    M1PublicationService,
+    M1PublishSessionCommand,
+    M1PublishSessionResult,
+)
 from .models import StorageBaselineStatus
 from .runtime import (
     GetRuntimeBaselineStatus,
@@ -34,6 +40,10 @@ __all__ = [
     "JobStatus",
     "JobSubmission",
     "M0JobControl",
+    "M1ApplicationError",
+    "M1PublicationService",
+    "M1PublishSessionCommand",
+    "M1PublishSessionResult",
     "GetRuntimeBaselineStatus",
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",
