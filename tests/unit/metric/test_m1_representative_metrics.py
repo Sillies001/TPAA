@@ -11,6 +11,7 @@ from tpaa_metric import (
     build_metric_context,
     compute_representative_metrics,
 )
+from tpaa_metric.operators import TimedValue, rolling_medians
 from tpaa_world import project_minimal_p1_world
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -69,6 +70,10 @@ def test_nominal_five_metric_results_match_independent_expected_values() -> None
     assert dict(metrics["P1-AIR-002"].evidence.details)["diagnostic_min_nz_g"] == "1.0"
     assert metrics["P1-AIR-003"].value_numeric == pytest.approx(0.1)
     assert metrics["P1-AIR-004"].value_numeric == pytest.approx(0.1)
+    sustained_details = dict(metrics["P1-AIR-004"].evidence.details)
+    assert sustained_details["operator"] == "ROLLING_MEDIAN_V1"
+    assert sustained_details["supporting_dwell_start_session_time_us"] == "1000000"
+    assert sustained_details["supporting_dwell_end_session_time_us"] == "9000000"
     envelope = metrics["P1-AIR-007"].value_structured
     assert envelope is not None
     assert envelope.as_dict() == {
@@ -116,6 +121,34 @@ def test_gap_fails_closed_without_fabricating_zero() -> None:
         assert result.reason_codes == ("MAX_GAP_EXCEEDED",)
         assert result.value_numeric is None
         assert result.value_structured is None
+
+
+def test_rolling_median_uses_centered_not_trailing_windows() -> None:
+    values = (
+        TimedValue(0, 0.0),
+        TimedValue(1_000_000, 0.0),
+        TimedValue(2_000_000, 0.0),
+        TimedValue(3_000_000, 100.0),
+        TimedValue(4_000_000, 100.0),
+    )
+
+    outputs = rolling_medians(
+        values,
+        duration_s=3.0,
+        min_coverage=1.0,
+        max_gap_us=1_500_000,
+        window_start_us=0,
+        window_end_us=5_000_000,
+    )
+
+    assert [(item.session_time_us, item.value) for item, _, _ in outputs] == [
+        (2_000_000, 0.0),
+        (3_000_000, 100.0),
+    ]
+    assert [(start, end) for _, start, end in outputs] == [
+        (500_000, 3_500_000),
+        (1_500_000, 4_500_000),
+    ]
 
 
 def test_structured_partial_channels_are_independent_and_typed() -> None:
