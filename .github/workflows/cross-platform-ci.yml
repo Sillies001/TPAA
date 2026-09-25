@@ -131,6 +131,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m1-stage-quality-check
           --evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
 
+      - name: Emit consolidated M1 Batch 1 core evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-1-core-check
+          --evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
+
       - name: Emit M1 Entry build-manifest candidate
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
@@ -174,6 +179,7 @@ jobs:
             evidence/m1-world-001/${{ matrix.platform }}/basic-episode.json
             evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
             evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
+            evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
             dist/
           if-no-files-found: error
           retention-days: 14
@@ -207,12 +213,21 @@ jobs:
           --linux downloaded/evidence/cross-platform/linux.json
           --evidence evidence/cross-platform/logical-equivalence.json
 
+      - name: Compare Windows and Linux M1 Batch 1 products
+        run: >-
+          python tools/dev/tpaa_dev.py m1-batch-1-compare
+          --windows downloaded/evidence/m1-batch-1/windows/core-product.json
+          --linux downloaded/evidence/m1-batch-1/linux/core-product.json
+          --evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json
+
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: tpaa-logical-equivalence-${{ github.sha }}
-          path: evidence/cross-platform/logical-equivalence.json
+          path: |
+            evidence/cross-platform/logical-equivalence.json
+            evidence/cross-platform/m1-batch-1-logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
 

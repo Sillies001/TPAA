@@ -77,6 +77,7 @@ def test_ci_gate_contains_formal_step8_minimum_and_current_required_gates() -> N
         '_dispatcher("verify-architecture")',
         '_dispatcher("lint")',
         '_dispatcher("typecheck")',
+        '_dispatcher("m1-batch-1-core-check")',
     )
     for token in required:
         assert token in text
@@ -330,3 +331,28 @@ def test_m1_world_003_stage_quality_evidence_is_governed_in_ci() -> None:
     )
     gate = GATE_RUNNER.read_text(encoding="utf-8")
     assert '_dispatcher("m1-stage-quality-check")' in gate
+
+
+def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit consolidated M1 Batch 1 core evidence" in text
+    assert "python tools/dev/tpaa_dev.py m1-batch-1-core-check" in text
+    assert (
+        "--evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m1-batch-1-compare" in text
+    assert (
+        "--windows downloaded/evidence/m1-batch-1/windows/core-product.json"
+        in text
+    )
+    assert (
+        "--linux downloaded/evidence/m1-batch-1/linux/core-product.json"
+        in text
+    )
+    assert (
+        "--evidence evidence/cross-platform/m1-batch-1-logical-equivalence.json"
+        in text
+    )
+    gate = GATE_RUNNER.read_text(encoding="utf-8")
+    assert '_dispatcher("m1-batch-1-core-check")' in gate

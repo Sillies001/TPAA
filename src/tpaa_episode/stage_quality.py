@@ -50,6 +50,7 @@ class QualifiedBasicFlightStage:
     coverage: float
     confidence: float
     detector_version: str
+    supersedes_stage_id: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.stage_status, str) or not self.stage_status.strip():
@@ -60,6 +61,11 @@ class QualifiedBasicFlightStage:
             raise StageQualityError(
                 "M1_STAGE_DETECTOR_VERSION_INVALID",
                 repr(self.detector_version),
+            )
+        if self.supersedes_stage_id == self.stage_id:
+            raise StageQualityError(
+                "M1_STAGE_SUPERSEDES_SELF",
+                self.stage_id,
             )
 
     def contains(self, session_time_us: int) -> bool:
