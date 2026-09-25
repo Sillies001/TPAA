@@ -7,6 +7,7 @@ import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 
 from tpaa_context import resolve_evaluation_context
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
@@ -35,6 +36,45 @@ from tpaa_application.m1_repository import (
     SessionPublicationRepository,
 )
 from tpaa_world import AircraftObservedWorld, project_minimal_p1_world
+
+
+class M1SessionProjection(TypedDict):
+    """Explicit JSON-safe Session projection for M1 API reads."""
+
+    session_id: str
+    start_session_time_us: str
+    end_session_time_us: str
+
+
+class M1EpisodeProjection(TypedDict):
+    """Explicit JSON-safe Episode projection for M1 API reads."""
+
+    episode_id: str
+    session_id: str
+
+
+class M1StageProjection(TypedDict):
+    """Explicit JSON-safe Stage projection for M1 API reads."""
+
+    stage_id: str
+    episode_id: str
+    stage_type: str
+    stage_order: int
+    start_session_time_us: str
+    end_session_time_us: str
+    stage_status: str
+    coverage: float
+    confidence: float
+    detector_version: str
+
+
+class M1SessionEpisodeStageProjection(TypedDict):
+    """Release-bound transport projection; no domain objects cross the boundary."""
+
+    release_id: str
+    session: M1SessionProjection
+    episode: M1EpisodeProjection
+    stages: list[M1StageProjection]
 
 
 class M1ApplicationError(RuntimeError):
@@ -589,21 +629,15 @@ class M1PublicationService:
             result["supersedes_context_id"] = resolved.supersedes_context_id
         return result
 
-    def session_episode_stage_projection(self, release_id: str) -> dict[str, object]:
+    def session_episode_stage_projection(
+        self,
+        release_id: str,
+    ) -> M1SessionEpisodeStageProjection:
         release = self._release(release_id).release
         world = self._replay_world(release_id)
-        return {
-            "release_id": release.release_id,
-            "session": {
-                "session_id": world.session_id,
-                "start_session_time_us": str(world.start_session_time_us),
-                "end_session_time_us": str(world.end_session_time_us),
-            },
-            "episode": {
-                "episode_id": world.episode_id,
-                "session_id": world.session_id,
-            },
-            "stages": [
+        stages: list[M1StageProjection] = []
+        for stage in world.stages:
+            stages.append(
                 {
                     "stage_id": stage.stage_id,
                     "episode_id": stage.episode_id,
@@ -616,8 +650,19 @@ class M1PublicationService:
                     "confidence": stage.confidence,
                     "detector_version": stage.detector_version,
                 }
-                for stage in world.stages
-            ],
+            )
+        return {
+            "release_id": release.release_id,
+            "session": {
+                "session_id": world.session_id,
+                "start_session_time_us": str(world.start_session_time_us),
+                "end_session_time_us": str(world.end_session_time_us),
+            },
+            "episode": {
+                "episode_id": world.episode_id,
+                "session_id": world.session_id,
+            },
+            "stages": stages,
         }
 
     def _replay_world(self, release_id: str) -> AircraftObservedWorld:
