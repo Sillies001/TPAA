@@ -35,7 +35,7 @@
       "category": "WRAP_BOUNDARY",
       "expected_status": "READY",
       "fixture_id": "MA_M2_WRAP_BOUNDARY_V1",
-      "input_sha256": "b34906716f54f480dfe6bd9aed66b404895b7f802a1c978af4567167f2b4151c",
+      "input_sha256": "f7880bfbd3007e425c9f8ad89c4e91566577d76ab0e8aeadf3206a46240c6e88",
       "loader": "MEASUREMENT_ALIGNMENT"
     },
     {
