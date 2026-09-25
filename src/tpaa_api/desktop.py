@@ -12,9 +12,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from tpaa_application import ApplicationService
 
 from .app import _readiness_payload, _version_payload
+from .m1_app import register_m1_routes
 
 _bearer = HTTPBearer(auto_error=False)
 _DESKTOP_ALLOWED_PATHS = frozenset({"/health", "/readiness", "/version"})
+_M1_PATH_PREFIX = "/m1/"
 
 
 def create_desktop_app(*, application: ApplicationService, bearer_token: str) -> FastAPI:
@@ -48,7 +50,9 @@ def create_desktop_app(*, application: ApplicationService, bearer_token: str) ->
 
     @app.middleware("http")
     async def enforce_desktop_surface(request: Request, call_next):  # type: ignore[no-untyped-def]
-        if request.url.path not in _DESKTOP_ALLOWED_PATHS:
+        if request.url.path not in _DESKTOP_ALLOWED_PATHS and not request.url.path.startswith(
+            _M1_PATH_PREFIX
+        ):
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "PATH_NOT_ALLOWED"},
@@ -74,4 +78,4 @@ def create_desktop_app(*, application: ApplicationService, bearer_token: str) ->
     def version() -> dict[str, object]:
         return _version_payload(application.runtime_baseline_status())
 
-    return app
+    return register_m1_routes(app, application)
