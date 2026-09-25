@@ -7,7 +7,7 @@ from tpaa_application import (
     M1PublicationService,
     M1PublishSessionCommand,
 )
-from tpaa_storage.publication import InMemorySessionPublicationRepository
+from tpaa_application.m1_repository import InMemorySessionPublicationRepository
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURES = ROOT / "tests" / "fixtures" / "m1"
