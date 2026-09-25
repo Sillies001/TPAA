@@ -1,0 +1,98 @@
+{
+  "clock_segments": [
+    {
+      "records": [
+        {
+          "aligned_session_time_us": 1002000,
+          "sensor_timestamp_mapped_to_session_time_us": 1000000
+        },
+        {
+          "aligned_session_time_us": 2002000,
+          "sensor_timestamp_mapped_to_session_time_us": 2000000
+        }
+      ],
+      "segment_id": "seg-a",
+      "sensor_system_instance_id": "radar-001",
+      "time_transform_id": "66666666-6666-4666-8666-666666666661"
+    },
+    {
+      "records": [
+        {
+          "aligned_session_time_us": 3002000,
+          "sensor_timestamp_mapped_to_session_time_us": 3000000
+        },
+        {
+          "aligned_session_time_us": 4002000,
+          "sensor_timestamp_mapped_to_session_time_us": 4000000
+        }
+      ],
+      "segment_id": "seg-b",
+      "sensor_system_instance_id": "radar-001",
+      "time_transform_id": "66666666-6666-4666-8666-666666666662"
+    }
+  ],
+  "data_classification": "SYNTHETIC",
+  "fixture_id": "TA_M2_NOMINAL_V1",
+  "interpolation_records": [
+    {
+      "left_truth_time_us": 1000000,
+      "measurement_time_us": 1050000,
+      "right_truth_time_us": 1100000,
+      "target_pair_id": "own-001:target-001"
+    },
+    {
+      "left_truth_time_us": 2000000,
+      "measurement_time_us": 2050000,
+      "right_truth_time_us": 2100000,
+      "target_pair_id": "own-001:target-001"
+    },
+    {
+      "left_truth_time_us": 3000000,
+      "measurement_time_us": 3050000,
+      "right_truth_time_us": 3100000,
+      "target_pair_id": "own-001:target-001"
+    }
+  ],
+  "latency_records": [
+    {
+      "referenced_ownship_state_effective_time_us": 1000000,
+      "sensor_measurement_effective_time_us": 1040000,
+      "sensor_system_instance_id": "radar-001"
+    },
+    {
+      "referenced_ownship_state_effective_time_us": 2000000,
+      "sensor_measurement_effective_time_us": 2040000,
+      "sensor_system_instance_id": "radar-001"
+    },
+    {
+      "referenced_ownship_state_effective_time_us": 3000000,
+      "sensor_measurement_effective_time_us": 3050000,
+      "sensor_system_instance_id": "radar-001"
+    }
+  ],
+  "profile": {
+    "max_gap_us": 60000,
+    "profile_id": "M2_QA_FOUNDATION_PROFILE_V1"
+  },
+  "schema": "TPAA_M2_TIME_ALIGNMENT_SOURCE_V1",
+  "session": {
+    "session_id": "m2-time-session-001",
+    "session_time_basis": "TPAA_SESSION_US"
+  },
+  "transform_residuals": {
+    "ownship_clock_transform_residual_sigma_us": 100,
+    "target_clock_transform_residual_sigma_us": 200
+  },
+  "uncertainty_records": {
+    "ownship_nav_time_uncertainty_ref": {
+      "bound_us": 500,
+      "provenance_ref": "ins-clock:own:v1",
+      "representation": "TWO_SIDED_HARD_BOUND"
+    },
+    "target_nav_time_uncertainty_ref": {
+      "bound_us": 800,
+      "provenance_ref": "ins-clock:target:v1",
+      "representation": "TWO_SIDED_HARD_BOUND"
+    }
+  }
+}
