@@ -1,0 +1,223 @@
+{
+  "data_classification": "SYNTHETIC",
+  "fixture_id": "MA_M2_GAP_V1",
+  "mission_system_fixture_id": "MSI_M2_RADAR_V1",
+  "mission_system_instance_id": "77777777-7777-4777-8777-777777777701",
+  "quality_profile": {
+    "max_gap_us": 50000,
+    "min_coverage": 0.8,
+    "profile_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "profile_id": "M2_REFERENCE_MATCH_QUALITY_V1",
+    "profile_version": "1.0.0"
+  },
+  "records": [
+    {
+      "alignment_uncertainty": 1,
+      "error_domain": "RANGE",
+      "measured_az_rad": 0.101,
+      "measured_el_rad": 0.0105,
+      "measured_position_ecef_m": [
+        6378137,
+        1010,
+        100
+      ],
+      "measured_position_local": [
+        100,
+        1005,
+        20
+      ],
+      "measured_position_sensor_frame": [
+        1005,
+        5,
+        2
+      ],
+      "measured_radial_velocity_mps": -19.5,
+      "measured_range_m": 1005,
+      "measurement_error": 5,
+      "measurement_id": "meas-1005000",
+      "measurement_time_us": 1005000,
+      "reference_az_rad": 0.1,
+      "reference_el_rad": 0.01,
+      "reference_position_local": [
+        100,
+        1000,
+        20
+      ],
+      "reference_position_sensor_frame": [
+        1000,
+        4,
+        2
+      ],
+      "reference_range_m": 1000,
+      "reference_range_rate_mps": -20,
+      "reference_relative_state": {
+        "az_rad": 0.1,
+        "el_rad": 0.01,
+        "range_m": 1000,
+        "range_rate_mps": -20
+      },
+      "reference_state_id": "ref-1000000",
+      "reference_target_position_ecef_m": [
+        6378137,
+        1000,
+        100
+      ],
+      "reference_time_us": 1000000,
+      "reference_truth_uncertainty": 3,
+      "reference_uncertainty": 3,
+      "residual_unit": "m",
+      "sensor_measurement": {
+        "az_rad": 0.101,
+        "el_rad": 0.0105,
+        "range_m": 1005
+      },
+      "sensor_measurement_uncertainty": 2,
+      "uncertainty_provenance": {
+        "alignment_uncertainty_ref": "navu:time-alignment:v1",
+        "reference_uncertainty_ref": "navu:target-position:v1",
+        "sensor_measurement_uncertainty_ref": "radar-measurement-uncertainty:v1"
+      },
+      "valid": true
+    },
+    {
+      "alignment_uncertainty": 1,
+      "error_domain": "RANGE",
+      "measured_az_rad": 0.111,
+      "measured_el_rad": 0.0115,
+      "measured_position_ecef_m": [
+        6378137,
+        990,
+        100
+      ],
+      "measured_position_local": [
+        100,
+        985,
+        20
+      ],
+      "measured_position_sensor_frame": [
+        985,
+        5,
+        2
+      ],
+      "measured_radial_velocity_mps": -19.5,
+      "measured_range_m": 985,
+      "measurement_error": 5,
+      "measurement_id": "meas-2200000",
+      "measurement_time_us": 2200000,
+      "reference_az_rad": 0.11,
+      "reference_el_rad": 0.011,
+      "reference_position_local": [
+        100,
+        980,
+        20
+      ],
+      "reference_position_sensor_frame": [
+        980,
+        4,
+        2
+      ],
+      "reference_range_m": 980,
+      "reference_range_rate_mps": -20,
+      "reference_relative_state": {
+        "az_rad": 0.11,
+        "el_rad": 0.011,
+        "range_m": 980,
+        "range_rate_mps": -20
+      },
+      "reference_state_id": "ref-2000000",
+      "reference_target_position_ecef_m": [
+        6378137,
+        980,
+        100
+      ],
+      "reference_time_us": 2000000,
+      "reference_truth_uncertainty": 3,
+      "reference_uncertainty": 3,
+      "residual_unit": "m",
+      "sensor_measurement": {
+        "az_rad": 0.111,
+        "el_rad": 0.0115,
+        "range_m": 985
+      },
+      "sensor_measurement_uncertainty": 2,
+      "uncertainty_provenance": {
+        "alignment_uncertainty_ref": "navu:time-alignment:v1",
+        "reference_uncertainty_ref": "navu:target-position:v1",
+        "sensor_measurement_uncertainty_ref": "radar-measurement-uncertainty:v1"
+      },
+      "valid": true
+    },
+    {
+      "alignment_uncertainty": 1,
+      "error_domain": "RANGE",
+      "measured_az_rad": 0.121,
+      "measured_el_rad": 0.0125,
+      "measured_position_ecef_m": [
+        6378137,
+        970,
+        100
+      ],
+      "measured_position_local": [
+        100,
+        965,
+        20
+      ],
+      "measured_position_sensor_frame": [
+        965,
+        5,
+        2
+      ],
+      "measured_radial_velocity_mps": -19.5,
+      "measured_range_m": 965,
+      "measurement_error": 5,
+      "measurement_id": "meas-3005000",
+      "measurement_time_us": 3005000,
+      "reference_az_rad": 0.12,
+      "reference_el_rad": 0.012,
+      "reference_position_local": [
+        100,
+        960,
+        20
+      ],
+      "reference_position_sensor_frame": [
+        960,
+        4,
+        2
+      ],
+      "reference_range_m": 960,
+      "reference_range_rate_mps": -20,
+      "reference_relative_state": {
+        "az_rad": 0.12,
+        "el_rad": 0.012,
+        "range_m": 960,
+        "range_rate_mps": -20
+      },
+      "reference_state_id": "ref-3000000",
+      "reference_target_position_ecef_m": [
+        6378137,
+        960,
+        100
+      ],
+      "reference_time_us": 3000000,
+      "reference_truth_uncertainty": 3,
+      "reference_uncertainty": 3,
+      "residual_unit": "m",
+      "sensor_measurement": {
+        "az_rad": 0.121,
+        "el_rad": 0.0125,
+        "range_m": 965
+      },
+      "sensor_measurement_uncertainty": 2,
+      "uncertainty_provenance": {
+        "alignment_uncertainty_ref": "navu:time-alignment:v1",
+        "reference_uncertainty_ref": "navu:target-position:v1",
+        "sensor_measurement_uncertainty_ref": "radar-measurement-uncertainty:v1"
+      },
+      "valid": true
+    }
+  ],
+  "reference_fixture_id": "RT_M2_NOMINAL_V1",
+  "schema": "TPAA_M2_MEASUREMENT_ALIGNMENT_SOURCE_V1",
+  "session_id": "11111111-1111-4111-8111-111111111111",
+  "target_pair_id": "22222222-2222-4222-8222-222222222222:33333333-3333-4333-8333-333333333333"
+}
