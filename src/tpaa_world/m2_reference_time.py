@@ -83,28 +83,28 @@ class CoreWorldManifest:
     world_product_id: str
     release_id: str
     session_id: str
-    episode_id: None
-    stage_id: None
+    episode_id: str | None
+    stage_id: str | None
     world_kind: str
-    subject_id: None
-    observer_id: None
-    actor_id: None
-    aircraft_id: None
-    aircraft_instance_id: None
-    dataset_id: None
+    subject_id: str | None
+    observer_id: str | None
+    actor_id: str | None
+    aircraft_id: str | None
+    aircraft_instance_id: str | None
+    dataset_id: str | None
     start_session_time_us: int
     end_session_time_us: int
     status: str
     coverage: float
     confidence: float
     reason_codes: tuple[str, ...]
-    source_authority_signature: str
+    source_authority_signature: str | None
     world_version: str
     policy_version: str
-    artifact_sha256: str
+    artifact_sha256: str | None
     logical_content_hash: str
     request_hash: str
-    supersedes_id: None
+    supersedes_id: str | None
 
 
 @dataclass(frozen=True)
