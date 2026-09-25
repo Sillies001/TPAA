@@ -11,7 +11,7 @@ from tpaa_api import create_m1_app
 from tpaa_application import ApplicationService, M1PublicationService
 from tpaa_application.m1_repository import InMemorySessionPublicationRepository
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests" / "fixtures" / "m1"
 AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
 DECIMAL_STRING = re.compile(r"^-?[0-9]+$")
