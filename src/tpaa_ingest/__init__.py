@@ -1,5 +1,12 @@
 """TPAA ingest-layer public contracts."""
 
+from tpaa_ingest.m2_mission_system import (
+    M2MissionSystemError,
+    M2MissionSystemProjection,
+    MissionSystemIdentity,
+    MissionSystemInstance,
+    load_m2_mission_system,
+)
 from tpaa_ingest.m2_reference_truth import (
     M2ReferenceTruthError,
     M2ReferenceTruthProjection,
@@ -36,10 +43,14 @@ __all__ = [
     "GOVERNED_FIXTURE_IDS",
     "InterpolationInput",
     "LatencyInput",
+    "M2MissionSystemError",
+    "M2MissionSystemProjection",
     "M2ReferenceTruthError",
     "M2ReferenceTruthProjection",
     "M2TimeAlignmentError",
     "M2TimeAlignmentProjection",
+    "MissionSystemIdentity",
+    "MissionSystemInstance",
     "NavTimeUncertaintyInput",
     "ReferenceFrameProvenance",
     "ReferenceIdentity",
@@ -51,6 +62,7 @@ __all__ = [
     "SyntheticSourceBundle",
     "SyntheticSourceMarker",
     "SyntheticSourceRow",
+    "load_m2_mission_system",
     "load_m2_reference_truth",
     "load_m2_time_alignment",
     "load_synthetic_fixture_bundle",
