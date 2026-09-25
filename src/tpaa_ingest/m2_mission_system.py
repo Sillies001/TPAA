@@ -361,7 +361,7 @@ def load_m2_mission_system(bundle: Path) -> M2MissionSystemProjection:
         }
     )
     return M2MissionSystemProjection(
-        fixture_id=cast(str, fixture_id),
+        fixture_id=fixture_id,
         fixture_version=EXPECTED_FIXTURE_VERSION,
         input_sha256=source_sha256,
         source_sha256=source_sha256,
