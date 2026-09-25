@@ -257,6 +257,16 @@ def create_m1_app(application: ApplicationService):
         except M1ApplicationError as exc:
             return _m1_error(exc)
 
+    @app.get("/m1/releases/{release_id}/metrics/{metric_code}/evidence")
+    def get_metric_evidence(release_id: str, metric_code: str) -> JSONResponse:
+        try:
+            return JSONResponse(
+                status_code=200,
+                content=application.m1_metric_evidence(release_id, metric_code),
+            )
+        except M1ApplicationError as exc:
+            return _m1_error(exc)
+
     @app.get("/m1/releases/{release_id}/context")
     def get_context(release_id: str) -> JSONResponse:
         try:
