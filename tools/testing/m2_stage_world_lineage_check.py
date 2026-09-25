@@ -8,6 +8,10 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from tpaa_world import M2StageWorldLineage
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
@@ -36,7 +40,7 @@ def _git_revision() -> str:
     return value if len(value) == 40 else "UNKNOWN"
 
 
-def _project(alignment: Path, release_id: str):
+def _project(alignment: Path, release_id: str) -> M2StageWorldLineage:
     from tpaa_world import project_m2_stage_world_lineage
 
     return project_m2_stage_world_lineage(
