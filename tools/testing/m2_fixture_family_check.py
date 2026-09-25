@@ -322,7 +322,14 @@ def compare_evidence(windows: Path, linux: Path, *, expected_revision: str) -> d
         "family_logical_hash_equal": left.get("fixture_family_logical_hash")
         == right.get("fixture_family_logical_hash"),
         "logical_product_equal": left.get("logical_product") == right.get("logical_product"),
-        "host_path_absent": "host_path" not in json.dumps(left.get("logical_product")),
+        "host_path_absent": all(
+            "host_path" not in member and "path" not in member
+            for member in cast(
+                dict[str, object],
+                left.get("logical_product", {}),
+            ).get("members", [])
+            if isinstance(member, dict)
+        ),
     }
     failed = sorted(key for key, value in checks.items() if not value)
     return {
