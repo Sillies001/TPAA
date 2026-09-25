@@ -267,6 +267,7 @@ class SessionRelease:
     request_hash: str
     scope_type: str
     scope_key: str
+    fixture_id: str
     session_id: str
     context_id: str
     context_version: str
@@ -301,6 +302,7 @@ class SessionRelease:
             "release_id": self.release_id,
             "scope_type": self.scope_type,
             "scope_key": self.scope_key,
+            "fixture_id": self.fixture_id,
             "session_id": self.session_id,
             "context_id": self.context_id,
             "context_version": self.context_version,
@@ -583,6 +585,7 @@ def build_session_release(
         "parent_release_id": parent_release_id,
         "scope_type": SESSION_SCOPE,
         "scope_key": world.session_id,
+        "fixture_id": world.fixture_id,
         "session_id": world.session_id,
         "context_id": context.context_id,
         "context_version": context_version,
@@ -605,6 +608,7 @@ def build_session_release(
         request_hash=_require_hash(request_hash, field="request_hash"),
         scope_type=SESSION_SCOPE,
         scope_key=world.session_id,
+        fixture_id=world.fixture_id,
         session_id=world.session_id,
         context_id=context.context_id,
         context_version=context_version,
@@ -625,6 +629,7 @@ def compare_replay(
     release: SessionRelease,
     *,
     context: MetricContext,
+    context_version: str,
     world: AircraftObservedWorld,
     batch: MetricBatch,
 ) -> ReplayComparison:
@@ -632,6 +637,7 @@ def compare_replay(
 
     context_equal = (
         release.context_id == context.context_id
+        and release.context_version == context_version
         and release.catalog_hash == context.catalog_sha256
         and not context.latest_fallback_used
     )
