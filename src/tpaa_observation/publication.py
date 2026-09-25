@@ -430,6 +430,7 @@ def build_session_release(
     release_no: int,
     parent_release_id: str | None,
     context: MetricContext,
+    context_version: str,
     world: AircraftObservedWorld,
     batch: MetricBatch,
     identity: AircraftPublicationIdentity,
@@ -437,6 +438,8 @@ def build_session_release(
     """Bind exact Batch 1 products into one immutable pre-publish SESSION Release."""
 
     canonical_release_id = _canonical_uuid(release_id, field="release_id")
+    if not context_version.strip():
+        raise PublicationError("M1_PUBLICATION_CONTEXT_VERSION_MISSING", "")
     if world.release_id != canonical_release_id:
         raise PublicationError(
             "M1_PUBLICATION_WORLD_RELEASE_MISMATCH",
@@ -565,6 +568,7 @@ def build_session_release(
     context_binding_hash = _hash(
         {
             "context_id": context.context_id,
+            "context_version": context_version,
             "profile_id": context.profile_id,
             "profile_sha256": context.profile_sha256,
             "input_refs": [
@@ -581,7 +585,7 @@ def build_session_release(
         "scope_key": world.session_id,
         "session_id": world.session_id,
         "context_id": context.context_id,
-        "context_version": context.profile_id,
+        "context_version": context_version,
         "context_binding_hash": context_binding_hash,
         "catalog_version": context.catalog_version,
         "catalog_hash": context.catalog_sha256,
@@ -603,7 +607,7 @@ def build_session_release(
         scope_key=world.session_id,
         session_id=world.session_id,
         context_id=context.context_id,
-        context_version=context.profile_id,
+        context_version=context_version,
         context_binding_hash=context_binding_hash,
         catalog_version=context.catalog_version,
         catalog_hash=context.catalog_sha256,
