@@ -119,7 +119,9 @@ def test_air_001_coverage_is_session_time_duration_not_sample_fraction() -> None
             session_time_us=session_time_us,
             quality_mask=1 if index == 0 else 0,
         )
-        for index, (row, session_time_us) in enumerate(zip(world.canonical_rows, times, strict=True))
+        for index, (row, session_time_us) in enumerate(
+            zip(world.canonical_rows, times, strict=True)
+        )
     )
     altered_world = replace(world, canonical_rows=rows)
     altered_context = replace(context, min_coverage=0.8, max_gap_us=10_000_000)
