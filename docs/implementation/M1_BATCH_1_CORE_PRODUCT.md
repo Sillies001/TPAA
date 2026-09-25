@@ -29,7 +29,7 @@ Aircraft subject and immutable input refs in `MetricContext`. It implements:
 - P1-AIR-001 maximum absolute body roll rate with coverage and max-gap gates;
 - P1-AIR-002 maximum Nz with diagnostic minimum retained only in Evidence;
 - P1-AIR-003 heading unwrap plus `DERIVATIVE_LLS_V1`;
-- P1-AIR-004 `ROLLING_MEDIAN_V1` sustained heading-rate evidence;
+- P1-AIR-004 centered `ROLLING_MEDIAN_V1` with governed coverage/max-gap eligibility and sustained heading-rate evidence;
 - P1-AIR-007 typed `STRUCT_P1_AIR_007_V1` TAS/Mach envelope using
   `QUANTILE_HF7_V1`.
 
@@ -48,7 +48,9 @@ python tools/dev/tpaa_dev.py m1-batch-1-core-check --evidence <path>
 
 It evaluates all eight governed fixtures, Stage Golden boundaries, nominal and
 edge/failure Metric expectations, immutable Stage supersede behavior, replay
-stability and exact evidence refs. Windows and Linux artifacts are compared by
+stability, exact evidence refs, and a centered-window regression that distinguishes
+the frozen `ROLLING_MEDIAN_V1` contract from a trailing-window implementation.
+Windows and Linux artifacts are compared by
 `m1-batch-1-compare`; exact equality is required.
 
 This batch does not implement Observation, Release, persistence, API or GUI.
