@@ -5,7 +5,7 @@ The current software-development implementation baseline for this repository is
 
 - Current baseline directory: `docs/baseline/SDIB-1.1/`
 - Main document SHA-256:
-  `569cc4f677b866f318e3d3e3b24a20d004c02c5d3b1b90326281d1cef2769121`
+  `ba6cfd3765c53fec7ea322b2ec964ee78f09392d1e6a1e32d9754584b71132fe`
 - M2 task baseline SHA-256:
   `733b4180ad6941ca1361e1a5857c802e698ad69351b07cf9c591c80045a63d4b`
 - Parent implementation baseline: SDIB-1.0.1
