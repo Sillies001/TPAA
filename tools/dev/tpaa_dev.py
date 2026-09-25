@@ -61,6 +61,8 @@ M1_BASIC_STAGE_CHECK_MODULE = "tools.testing.m1_basic_stage_check"
 M1_STAGE_QUALITY_CHECK_MODULE = "tools.testing.m1_stage_quality_check"
 M1_BATCH_1_CORE_CHECK_MODULE = "tools.testing.m1_batch_1_core_check"
 M1_BATCH_1_COMPARE_MODULE = "tools.testing.m1_batch_1_compare"
+M1_BATCH_2_SERVICE_SMOKE_MODULE = "tools.testing.m1_batch_2_service_smoke"
+M1_BATCH_2_SERVICE_COMPARE_MODULE = "tools.testing.m1_batch_2_service_compare"
 PLATFORM_SMOKE = REPO_ROOT / "tools" / "platform" / "smoke.py"
 OPENAPI_SNAPSHOT = REPO_ROOT / "tools" / "api" / "openapi_snapshot.py"
 MIGRATION_HARNESS = REPO_ROOT / "tools" / "storage" / "migration_harness.py"
@@ -107,6 +109,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m1-stage-quality-check", "M1-WORLD-003", "IMPLEMENTED", "Verify governed Stage status, coverage, confidence, and detector version over all M1 bundles."),
     CommandSpec("m1-batch-1-core-check", "M1-WORLD-004..007/M1-MET-001..008/M1-TST-002..003", "IMPLEMENTED", "Verify consolidated M1 Batch 1 World, representative Metric, staging, and Golden acceptance."),
     CommandSpec("m1-batch-1-compare", "M1-WORLD-006/M1-TST-002", "IMPLEMENTED", "Compare Windows/Linux Batch 1 logical evidence exactly."),
+    CommandSpec("m1-batch-2-service-smoke", "M1-PLAT-003", "IMPLEMENTED", "Run the M1 Batch 2 Application/Repository service contract and emit logical evidence."),
+    CommandSpec("m1-batch-2-service-compare", "M1-PLAT-003", "IMPLEMENTED", "Compare Windows/Linux Batch 2 service logical evidence exactly."),
     CommandSpec("generate", "M0-CORE-003", "IMPLEMENTED", "Generate deterministic projections from Canonical authorities."),
     CommandSpec("verify-generated", "M0-CORE-004", "IMPLEMENTED", "Verify exact generated tree and provenance without rewriting it."),
     CommandSpec("regenerate-diff", "M0-CORE-004", "IMPLEMENTED", "Regenerate and require zero Git diff for governed generated source."),
@@ -539,6 +543,24 @@ def build_parser() -> argparse.ArgumentParser:
     m1_batch_1_compare.add_argument("--windows", type=Path, required=True)
     m1_batch_1_compare.add_argument("--linux", type=Path, required=True)
     m1_batch_1_compare.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_service = sub.add_parser(
+        "m1-batch-2-service-smoke",
+        help="Run M1 Batch 2 cross-platform service smoke",
+    )
+    m1_batch_2_service.add_argument(
+        "--expected-platform",
+        choices=("windows", "linux"),
+        required=True,
+    )
+    m1_batch_2_service.add_argument("--source-revision", required=True)
+    m1_batch_2_service.add_argument("--evidence", type=Path, required=True)
+    m1_batch_2_service_compare = sub.add_parser(
+        "m1-batch-2-service-compare",
+        help="Compare Windows/Linux M1 Batch 2 service evidence",
+    )
+    m1_batch_2_service_compare.add_argument("--windows", type=Path, required=True)
+    m1_batch_2_service_compare.add_argument("--linux", type=Path, required=True)
+    m1_batch_2_service_compare.add_argument("--evidence", type=Path, required=True)
     m1_activation = sub.add_parser(
         "m1-entry-activation",
         help="Verify/activate an M1 Entry admission candidate",
@@ -756,6 +778,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M1_BATCH_1_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-2-service-smoke":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_SERVICE_SMOKE_MODULE,
+                "--expected-platform",
+                args.expected_platform,
+                "--source-revision",
+                args.source_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m1-batch-2-service-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M1_BATCH_2_SERVICE_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
