@@ -22,6 +22,7 @@ from .bootstrap import (
     _postgres_expected_tables,
     _schema_fingerprint,
 )
+from .core_publication_ledger import PostgreSQLCorePublicationLedger
 from .ports import RepositoryBaselineMetadata
 
 
@@ -175,6 +176,7 @@ class PostgreSQLServiceUnitOfWork:
         self._connection: Any | None = None
         self._finalized = True
         self.metadata: PostgreSQLBaselineMetadataRepository
+        self.publication: PostgreSQLCorePublicationLedger
 
     @property
     def active(self) -> bool:
@@ -194,6 +196,7 @@ class PostgreSQLServiceUnitOfWork:
             self._connection = connection
             self._finalized = False
             self.metadata = PostgreSQLBaselineMetadataRepository(connection)
+            self.publication = PostgreSQLCorePublicationLedger(connection)
             return self
         except Exception:
             try:
