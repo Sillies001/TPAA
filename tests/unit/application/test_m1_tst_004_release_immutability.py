@@ -36,12 +36,15 @@ def test_published_release_definition_and_context_are_immutable_snapshots() -> N
     published = service.publish_session(_command(), idempotency_key="tst-004")
     stored = repository.get_release(published.release_id).release
 
+    manifest_field = "manifest_hash"
+    algorithm_field = "algorithm_version"
+    status_field = "status"
     with pytest.raises(FrozenInstanceError):
-        setattr(stored, "manifest_hash", "0" * 64)
+        setattr(stored, manifest_field, "0" * 64)
     with pytest.raises(FrozenInstanceError):
-        setattr(stored.definitions[0], "algorithm_version", "tampered")
+        setattr(stored.definitions[0], algorithm_field, "tampered")
     with pytest.raises(FrozenInstanceError):
-        setattr(stored.metric_instances[0], "status", "INVALID")
+        setattr(stored.metric_instances[0], status_field, "INVALID")
 
     summary_before = service.release_summary(published.release_id)
     expected_manifest = summary_before["manifest_hash"]
