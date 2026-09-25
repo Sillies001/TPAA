@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from concurrent.futures import ThreadPoolExecutor
 from uuid import NAMESPACE_URL, uuid5
 
@@ -36,6 +37,19 @@ def _release(
         context_id=context_id,
         context_version="M1-BASIC-CONTEXT-1.0.0",
         context_binding_hash=fixed_hash,
+        context_projection_json=json.dumps(
+            {
+                "context_id": context_id,
+                "session_id": session_id,
+                "context_version": "M1-BASIC-CONTEXT-1.0.0",
+                "revision_no": 1,
+                "rule_set_version": "TEST_RULE_SET",
+                "metric_profile_version": "TEST_METRIC_PROFILE",
+                "status": "ACTIVE",
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
         catalog_version="1.14.0",
         catalog_hash="b" * 64,
         world_product_id=str(uuid5(NAMESPACE_URL, f"world:{label}")),
