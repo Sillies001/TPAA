@@ -19,6 +19,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from fastapi.testclient import TestClient  # noqa: E402
+
 from tpaa_api import create_m1_app  # noqa: E402
 from tpaa_application import (  # noqa: E402
     ApplicationService,
