@@ -511,6 +511,27 @@ class M1PublicationService:
         except ReleaseNotFound as exc:
             raise M1ApplicationError("RELEASE_NOT_FOUND", release_id) from exc
 
+    def _release_provenance(self, release: SessionRelease) -> dict[str, object]:
+        return {
+            "fixture_id": release.fixture_id,
+            "session_id": release.session_id,
+            "context": {
+                "context_id": release.context_id,
+                "context_version": release.context_version,
+                "context_binding_hash": release.context_binding_hash,
+            },
+            "catalog": {
+                "catalog_version": release.catalog_version,
+                "catalog_hash": release.catalog_hash,
+            },
+            "world": {
+                "world_product_id": release.world_product_id,
+                "world_logical_hash": release.world_logical_hash,
+            },
+            "request_hash": release.request_hash,
+            "manifest_hash": release.manifest_hash,
+        }
+
     def release_summary(self, release_id: str) -> dict[str, object]:
         published = self._release(release_id)
         release = published.release
@@ -533,6 +554,14 @@ class M1PublicationService:
             "request_hash": release.request_hash,
             "status": published.status,
             "version_token": published.version_token,
+            "identity": {
+                "release_id": release.release_id,
+                "scope_type": release.scope_type,
+                "scope_key": release.scope_key,
+                "release_no": release.release_no,
+                "parent_release_id": release.parent_release_id,
+            },
+            "provenance": self._release_provenance(release),
         }
 
     def observations(self, release_id: str) -> list[CapabilityObservationDTO]:
@@ -714,7 +743,8 @@ class M1PublicationService:
         return world
 
     def replay(self, release_id: str) -> dict[str, object]:
-        release = self._release(release_id).release
+        published = self._release(release_id)
+        release = published.release
         bundle_path = self._bundle_path(release.fixture_id)
         world = self._replay_world(release_id)
         context = build_metric_context(
@@ -733,7 +763,9 @@ class M1PublicationService:
         )
         return {
             "release_id": release.release_id,
+            "release_status": published.status,
             "status": "PASS" if comparison.exact_logical_products_equal else "FAIL",
+            "provenance": self._release_provenance(release),
             "world_equal": comparison.world_equal,
             "metric_batch_equal": comparison.metric_batch_equal,
             "context_equal": comparison.context_equal,
