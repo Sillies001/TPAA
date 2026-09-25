@@ -6,7 +6,7 @@
   "quality_profile": {
     "max_gap_us": 50000,
     "min_coverage": 0.8,
-    "profile_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "profile_hash": "5aa7154f55710d303f9683051ab64a952bf10e4ac291a890390e762b27f5d713",
     "profile_id": "M2_REFERENCE_MATCH_QUALITY_V1",
     "profile_version": "1.0.0"
   },
