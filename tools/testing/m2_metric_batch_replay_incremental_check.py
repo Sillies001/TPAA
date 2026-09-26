@@ -354,6 +354,9 @@ def verify() -> dict[str, object]:
             tampered_record_by_code["P1-AIR-001"].input_payload_hash
             != record_by_code["P1-AIR-001"].input_payload_hash
         ),
+        "generated_metric_projection_hash_well_formed": _is_sha256(
+            plan.generated_metric_projection_sha256
+        ),
         "execution_identity_hash_well_formed": _is_sha256(plan.execution_identity_sha256),
         "registry_lineage_hashes_well_formed": all(
             _is_sha256(value)
@@ -421,6 +424,7 @@ def verify() -> dict[str, object]:
         },
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
+            "generated_metric_projection_sha256": plan.generated_metric_projection_sha256,
             "execution_identity_sha256": plan.execution_identity_sha256,
             "input_lineage_encoding": plan.input_lineage_encoding,
             "registry_authority_hashes": {

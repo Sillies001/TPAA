@@ -35,6 +35,24 @@ M2_EXPECTED_FAMILY_COUNTS = MappingProxyType(
 )
 M2_DISPATCH_KEY = "algorithm_id"
 M2_INPUT_LINEAGE_ENCODING = "TPAA_M2_INPUT_LINEAGE_JSON_V1"
+M2_GENERATED_PROJECTION_FIELDS = (
+    "metric_code",
+    "name",
+    "semantic_id",
+    "semantic_version",
+    "family",
+    "subject_type",
+    "unit",
+    "value_kind",
+    "algorithm_id",
+    "algorithm_version",
+    "delivery_milestone",
+    "delivery_batch",
+    "observation_lane",
+    "publication_route",
+    "structured_output_schema_id",
+    "p1_longitudinal_trend_eligibility",
+)
 _REFERENCE_MATCH_QUALITY_PROFILE_CONTRACT = "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
 _REFERENCE_MATCH_QUALITY_PROFILE_IDENTITY_FIELDS = (
     "reference_match_quality_profile_id",
@@ -128,6 +146,7 @@ class M2MetricExecutionPlan:
     upstream_contract_registry_sha256: str
     structured_output_schema_registry_sha256: str
     family_applicability_contracts_sha256: str
+    generated_metric_projection_sha256: str
     execution_identity_sha256: str
     input_lineage_encoding: str
     allowed_result_statuses: tuple[str, ...]
@@ -1752,6 +1771,11 @@ def _generated_metadata_by_code() -> dict[str, Mapping[str, object]]:
                 "M2_METRIC_GENERATED_REGISTRY_INVALID",
                 repr(code),
             )
+        if code in result:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_GENERATED_REGISTRY_DUPLICATE",
+                code,
+            )
         result[code] = raw
     return result
 
@@ -1761,24 +1785,7 @@ def _validate_generated_projection(
     generated: Mapping[str, object],
 ) -> None:
     code = _text(raw, "metric_code", field="metric")
-    keys = (
-        "metric_code",
-        "semantic_id",
-        "semantic_version",
-        "family",
-        "subject_type",
-        "unit",
-        "value_kind",
-        "algorithm_id",
-        "algorithm_version",
-        "delivery_milestone",
-        "delivery_batch",
-        "observation_lane",
-        "publication_route",
-        "structured_output_schema_id",
-        "p1_longitudinal_trend_eligibility",
-    )
-    for key in keys:
+    for key in M2_GENERATED_PROJECTION_FIELDS:
         if raw.get(key) != generated.get(key):
             raise CatalogMetricEngineError(
                 "M2_METRIC_GENERATED_REGISTRY_DRIFT",
@@ -1914,6 +1921,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         catalog,
     )
     definitions: list[M2MetricDefinition] = []
+    generated_projection_rows: list[dict[str, object]] = []
 
     for index, raw in selected_with_index:
         code = _text(raw, "metric_code", field=f"metrics[{index}]")
@@ -1924,6 +1932,12 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                 code,
             )
         _validate_generated_projection(raw, generated)
+        generated_projection_rows.append(
+            {
+                key: generated.get(key)
+                for key in M2_GENERATED_PROJECTION_FIELDS
+            }
+        )
 
         operators = _string_list(raw, "operator_bindings", field=code)
         constants = _string_list(raw, "constant_bindings", field=code)
@@ -2247,6 +2261,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             }
         )
     )
+    generated_metric_projection_sha256 = _sha256_object(generated_projection_rows)
     execution_identity_sha256 = _sha256_object(
         [
             {
@@ -2276,6 +2291,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "upstream_contract_registry_sha256": upstream_contract_registry_sha256,
             "structured_output_schema_registry_sha256": structured_output_schema_registry_sha256,
             "family_applicability_contracts_sha256": family_applicability_contracts_sha256,
+            "generated_metric_projection_sha256": generated_metric_projection_sha256,
             "execution_identity_sha256": execution_identity_sha256,
             "input_lineage_encoding": M2_INPUT_LINEAGE_ENCODING,
             "allowed_result_statuses": allowed_result_statuses,
@@ -2313,6 +2329,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         upstream_contract_registry_sha256=upstream_contract_registry_sha256,
         structured_output_schema_registry_sha256=structured_output_schema_registry_sha256,
         family_applicability_contracts_sha256=family_applicability_contracts_sha256,
+        generated_metric_projection_sha256=generated_metric_projection_sha256,
         execution_identity_sha256=execution_identity_sha256,
         input_lineage_encoding=M2_INPUT_LINEAGE_ENCODING,
         allowed_result_statuses=allowed_result_statuses,

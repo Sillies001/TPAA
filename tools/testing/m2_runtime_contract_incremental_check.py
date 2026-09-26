@@ -619,6 +619,9 @@ def verify() -> dict[str, object]:
                 "CONTRACT_TIME_TRANSFORM_V1",
             )
         ),
+        "generated_metric_projection_hash_well_formed": (
+            len(plan.generated_metric_projection_sha256) == 64
+        ),
         "execution_identity_hash_well_formed": len(plan.execution_identity_sha256) == 64,
         "governed_formula_dependency_closure_exact_32": all(
             len(definition.operator_bindings) == len(set(definition.operator_bindings))
@@ -832,6 +835,7 @@ def verify() -> dict[str, object]:
         },
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
+            "generated_metric_projection_sha256": plan.generated_metric_projection_sha256,
             "execution_identity_sha256": plan.execution_identity_sha256,
             "input_lineage_encoding": plan.input_lineage_encoding,
             "registry_authority_hashes": registry_authority_hashes,

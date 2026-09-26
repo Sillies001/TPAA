@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+import tpaa_metric.catalog_engine as catalog_engine
 from tpaa_metric import (
     CatalogMetricEngine,
     CatalogMetricEngineError,
@@ -136,6 +137,7 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
     assert len(plan.upstream_contract_registry_sha256) == 64
     assert len(plan.structured_output_schema_registry_sha256) == 64
     assert len(plan.family_applicability_contracts_sha256) == 64
+    assert len(plan.generated_metric_projection_sha256) == 64
     assert len(plan.execution_identity_sha256) == 64
     assert plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
     assert plan.allowed_result_statuses == (
@@ -392,6 +394,37 @@ def test_m2_versioned_registry_entry_shape_fails_closed(
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_metric_execution_plan(authority)
     assert caught.value.code == "M2_METRIC_CATALOG_FIELD_INVALID"
+
+
+def test_m2_generated_projection_name_drift_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mutated = []
+    for raw in catalog_engine.P1_METRICS:
+        item = dict(raw)
+        if item["metric_code"] == "P1-AIR-001":
+            item["name"] = "TEST_ONLY_GENERATED_NAME_DRIFT"
+        mutated.append(item)
+    monkeypatch.setattr(catalog_engine, "P1_METRICS", tuple(mutated))
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(AUTHORITY)
+    assert caught.value.code == "M2_METRIC_GENERATED_REGISTRY_DRIFT"
+
+
+def test_m2_generated_projection_duplicate_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    duplicate = dict(catalog_engine.P1_METRICS[0])
+    monkeypatch.setattr(
+        catalog_engine,
+        "P1_METRICS",
+        (*catalog_engine.P1_METRICS, duplicate),
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(AUTHORITY)
+    assert caught.value.code == "M2_METRIC_GENERATED_REGISTRY_DUPLICATE"
 
 
 def test_m2_algorithm_identity_common_rule_drift_fails_closed(

@@ -67,6 +67,8 @@ def test_m2_met_001_evidence_proves_general_engine_contract(tmp_path: Path) -> N
     assert len(product["required_operator_ids"]) == 8
     assert len(product["plan_logical_hash"]) == 64
     assert len(product["execution_logical_hash"]) == 64
+    assert len(product["generated_metric_projection_sha256"]) == 64
+    assert evidence["acceptance"]["generated_metric_projection_hash_bound"]
     assert evidence["acceptance"]["governed_formula_dependency_closure_exact_32"]
     assert product["formula_dependency_references"]["P1-QA-003"] == [
         ["OPERATOR", "MEAN_V1"],

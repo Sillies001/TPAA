@@ -207,6 +207,9 @@ def verify() -> dict[str, object]:
         "definition_hashes_complete": all(
             len(definition.definition_hash) == 64 for definition in plan.definitions
         ),
+        "generated_metric_projection_hash_bound": (
+            len(plan.generated_metric_projection_sha256) == 64
+        ),
         "governed_formula_dependency_closure_exact_32": all(
             len(definition.operator_bindings) == len(set(definition.operator_bindings))
             and len(definition.constant_bindings) == len(set(definition.constant_bindings))
@@ -229,6 +232,7 @@ def verify() -> dict[str, object]:
         "catalog_id": plan.catalog_id,
         "catalog_version": plan.catalog_version,
         "catalog_sha256": plan.catalog_sha256,
+        "generated_metric_projection_sha256": plan.generated_metric_projection_sha256,
         "input_authority_matrix_sha256": plan.input_authority_matrix_sha256,
         "source_provenance_sha256": plan.source_provenance_sha256,
         "world_capability_registry_sha256": plan.world_capability_registry_sha256,

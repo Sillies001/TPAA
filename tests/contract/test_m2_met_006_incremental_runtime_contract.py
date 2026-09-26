@@ -45,6 +45,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["structured_schema_closed_world_authority_enforced"]
 
     product = evidence["logical_product"]
+    assert len(product["generated_metric_projection_sha256"]) == 64
     assert len(product["execution_identity_sha256"]) == 64
     assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
     assert set(product["registry_authority_hashes"]) == {
@@ -109,6 +110,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["registry_authority_hashes_well_formed"]
     assert evidence["acceptance"]["required_state_machine_ids_exact"]
     assert evidence["acceptance"]["required_external_dependency_ids_exact"]
+    assert evidence["acceptance"]["generated_metric_projection_hash_well_formed"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["governed_formula_dependency_closure_exact_32"]
     assert evidence["acceptance"]["canonical_detection_event_authority_bound"]

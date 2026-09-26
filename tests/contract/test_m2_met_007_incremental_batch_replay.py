@@ -69,8 +69,10 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["acceptance"]["input_payload_hash_binding_exact_32"]
     assert evidence["acceptance"]["authority_lineage_hash_binding_exact_32"]
     assert evidence["acceptance"]["tampered_input_payload_hash_changes"]
+    assert evidence["acceptance"]["generated_metric_projection_hash_well_formed"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
+    assert len(product["generated_metric_projection_sha256"]) == 64
     assert len(product["execution_identity_sha256"]) == 64
     assert len(product["plugin_manifest_hash"]) == 64
     assert len(product["plugin_identity_manifest"]) == 32
