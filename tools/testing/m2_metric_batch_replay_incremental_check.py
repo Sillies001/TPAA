@@ -184,6 +184,7 @@ def verify() -> dict[str, object]:
             )
         return {
             "metric_code": definition.metric_code,
+            "subject_type": definition.subject_type,
             "probe_evidence_hash": probe_hash,
             "instances": [
                 {
