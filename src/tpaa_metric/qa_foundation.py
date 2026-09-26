@@ -239,6 +239,7 @@ def _qa003(request: M2MetricPluginRequest) -> Mapping[str, object]:
         )
     return {
         "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
         "instances": instances,
     }
 
@@ -273,7 +274,11 @@ def _qa004(request: M2MetricPluginRequest) -> Mapping[str, object]:
                 "p95_us": _operator_finite(quantile(tuple(latencies), 0.95), field="P1-QA-004.QUANTILE_HF7_V1"),
             },
         )
-    return {"metric_code": request.definition.metric_code, "instances": [instance]}
+    return {
+        "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
+        "instances": [instance],
+    }
 
 
 def _qa005(request: M2MetricPluginRequest) -> Mapping[str, object]:
@@ -314,7 +319,11 @@ def _qa005(request: M2MetricPluginRequest) -> Mapping[str, object]:
                 "max_us": max(ages),
             },
         )
-    return {"metric_code": request.definition.metric_code, "instances": [instance]}
+    return {
+        "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
+        "instances": [instance],
+    }
 
 
 def _qa006(request: M2MetricPluginRequest) -> Mapping[str, object]:
@@ -372,7 +381,11 @@ def _qa006(request: M2MetricPluginRequest) -> Mapping[str, object]:
                 reason_codes=("REFERENCE_QUALITY_INVALID",),
             )
         )
-    return {"metric_code": request.definition.metric_code, "instances": instances}
+    return {
+        "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
+        "instances": instances,
+    }
 
 
 def _uncertainty_sigma_us(record: Mapping[str, object], *, field: str) -> float:
@@ -413,6 +426,7 @@ def _time_uncertainty(
     )
     return {
         "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
         "instances": [
             _instance(
                 value_kind="NUMERIC",
