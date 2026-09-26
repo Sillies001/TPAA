@@ -307,7 +307,7 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {},
             {
                 "metric_code": numeric.metric_code,
-            "subject_type": numeric.subject_type,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -354,7 +354,7 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {},
             {
                 "metric_code": structured.metric_code,
-            "subject_type": structured.subject_type,
+                "subject_type": structured.subject_type,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="STRUCTURED",
@@ -408,7 +408,7 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {"system_type": "EO"},
             {
                 "metric_code": sns.metric_code,
-            "subject_type": sns.subject_type,
+                "subject_type": sns.subject_type,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -425,7 +425,7 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {"system_type": "RADAR"},
             {
                 "metric_code": sns.metric_code,
-            "subject_type": sns.subject_type,
+                "subject_type": sns.subject_type,
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
@@ -466,7 +466,7 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {},
             {
                 "metric_code": numeric.metric_code,
-            "subject_type": numeric.subject_type,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     {
                         "status": status,
@@ -485,7 +485,7 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {},
             {
                 "metric_code": numeric.metric_code,
-            "subject_type": numeric.subject_type,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     {
                         "status": "TEST_ONLY_UNKNOWN_STATUS",
@@ -506,7 +506,7 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
                 {},
                 {
                     "metric_code": numeric.metric_code,
-            "subject_type": numeric.subject_type,
+                    "subject_type": numeric.subject_type,
                     "instances": [
                         {
                             "status": status,
