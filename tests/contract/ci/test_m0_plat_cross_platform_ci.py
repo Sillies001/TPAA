@@ -616,4 +616,15 @@ def test_m2_batch_2_review_aggregates_exact_revision_without_unblocking() -> Non
     assert "--logical-root evidence/cross-platform" in text
     assert "--expected-revision ${{ github.event.pull_request.head.sha || github.sha }}" in text
     assert "--output evidence/m2-batch-2/review.json" in text
-    assert "evidence/m2-batch-2/review.json" in text
+
+    logical_upload = text.split(
+        "- name: Upload logical-equivalence evidence", 1
+    )[1].split("- name: Upload M2 Batch 2 review evidence", 1)[0]
+    assert "evidence/m2-batch-2/review.json" not in logical_upload
+
+    review_upload = text.split("- name: Upload M2 Batch 2 review evidence", 1)[1]
+    assert (
+        "name: tpaa-m2-batch-2-review-${{ github.event.pull_request.head.sha || github.sha }}"
+        in review_upload
+    )
+    assert "path: evidence/m2-batch-2/review.json" in review_upload
