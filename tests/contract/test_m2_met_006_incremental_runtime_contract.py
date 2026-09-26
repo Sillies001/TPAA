@@ -42,6 +42,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["blocked_predecessors"] == ["M2-MET-002", "M2-MET-005"]
     assert evidence["failed_acceptance"] == []
     assert all(evidence["acceptance"].values())
+    assert evidence["acceptance"]["structured_schema_closed_world_authority_enforced"]
 
     product = evidence["logical_product"]
     assert len(product["runtime_metric_codes"]) == 32

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import shutil
@@ -167,6 +168,32 @@ def test_m2_input_authority_optional_marker_drift_fails_closed(
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_metric_execution_plan(authority)
     assert caught.value.code == "M2_METRIC_INPUT_AUTHORITY_OPTIONAL_DRIFT"
+
+
+def test_m2_structured_schema_object_must_remain_closed_even_with_valid_hash(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    entry = payload["structured_output_schema_registry"]["STRUCT_P1_QA_006_V1"]
+    schema = entry["json_schema"]
+    schema["additionalProperties"] = True
+    canonical = json.dumps(
+        schema,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    entry["schema_hash_sha256"] = hashlib.sha256(canonical).hexdigest()
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED"
 
 
 def test_m2_plan_is_dependency_ordered_and_sns_stays_radar_only() -> None:

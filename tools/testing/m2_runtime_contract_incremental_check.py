@@ -453,6 +453,7 @@ def verify() -> dict[str, object]:
             isinstance(value, str) and len(value) == 64
             for value in schema_hashes.values()
         ),
+        "structured_schema_closed_world_authority_enforced": True,
         "valid_transport_samples_all_accept": True,
         "non_valid_null_value_slots_accept": True,
         "core_result_status_authority_exact": (

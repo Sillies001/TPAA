@@ -437,7 +437,27 @@ def _validate_schema_definition(schema: Mapping[str, object], *, field: str) -> 
             "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
             f"{field}.additionalProperties",
         )
+    type_names = _schema_type_names(schema, field=field)
     properties = schema.get("properties")
+    if "object" in type_names:
+        if additional is not False:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.additionalProperties must be false",
+            )
+        if not isinstance(properties, dict) or not all(
+            isinstance(key, str) and isinstance(value, dict)
+            for key, value in properties.items()
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.properties",
+            )
+        if isinstance(required, list) and not set(required).issubset(properties):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.required outside properties",
+            )
     if properties is not None:
         if not isinstance(properties, dict) or not all(
             isinstance(key, str) and isinstance(value, dict)
@@ -1238,6 +1258,17 @@ def _metric_runtime_transport_authority(
             "STRUCTURED uses value_structured/object and MUST NOT be JSON-serialized into value_text. "
             "For VALID results exactly the value slot matching semantic value_kind is populated; "
             "non-VALID results may have all value slots null."
+        )
+        or _text(
+            common_rules,
+            "structured_schema_standard",
+            field="common_rules",
+        )
+        != (
+            "structured_output_schema_registry[].json_schema is the executable authority and MUST be valid "
+            "JSON Schema Draft 2020-12 with additionalProperties=false at every object level. field_contracts "
+            "is a human-readable summary only. DB schema_json seeds exactly json_schema; API returns the same "
+            "schema/hash."
         )
     ):
         raise CatalogMetricEngineError(
