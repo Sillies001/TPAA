@@ -96,6 +96,7 @@ class M2MetricDefinition:
     state_machine_bindings: tuple[str, ...]
     input_authority_bindings: tuple[InputAuthorityBinding, ...]
     allowed_result_statuses: tuple[str, ...]
+    allowed_mission_system_types: tuple[str, ...]
     applicability: ApplicabilityContract
     definition_hash: str
 
@@ -111,6 +112,7 @@ class M2MetricExecutionPlan:
     core_logical_model_sha256: str
     core_rules_sha256: str
     allowed_result_statuses: tuple[str, ...]
+    allowed_mission_system_types: tuple[str, ...]
     db_schema_version: str
     delivery_milestone: str
     delivery_batch: str
@@ -702,10 +704,13 @@ def validate_m2_runtime_output(
     applicability = definition.applicability
     if applicability.applicability_mode == "SYSTEM_TYPE_EXACT":
         system_type = input_payload.get("system_type")
-        if not isinstance(system_type, str) or not system_type:
+        if (
+            not isinstance(system_type, str)
+            or system_type not in definition.allowed_mission_system_types
+        ):
             raise CatalogMetricEngineError(
                 "M2_METRIC_APPLICABILITY_INPUT_INVALID",
-                definition.metric_code,
+                f"{definition.metric_code}:{system_type!r}",
             )
         runtime_applicable = system_type in applicability.allowed_system_types
         if not runtime_applicable:
@@ -1156,7 +1161,7 @@ def _world_capability_registry_hash(authority_root: Path) -> str:
 
 def _metric_result_status_authority(
     authority_root: Path,
-) -> tuple[tuple[str, ...], str]:
+) -> tuple[tuple[str, ...], tuple[str, ...], str]:
     path = authority_root / "CORE_LOGICAL_MODEL.json"
     model, raw_bytes = _load_object(path)
     if _text(model, "authority_id", field="core_logical_model") != "CORE_LOGICAL_MODEL":
@@ -1204,7 +1209,60 @@ def _metric_result_status_authority(
             "M2_METRIC_RESULT_STATUS_AUTHORITY_INVALID",
             "metric.metric_instance.status values",
         )
-    return statuses, hashlib.sha256(raw_bytes).hexdigest()
+
+    mission_system = _object(
+        tables.get("master.mission_system_instance"),
+        field="core_logical_model.tables.master.mission_system_instance",
+    )
+    mission_system_fields = _objects(
+        mission_system.get("fields"),
+        field="core_logical_model.tables.master.mission_system_instance.fields",
+    )
+    system_type_fields = [
+        field for field in mission_system_fields if field.get("name") == "system_type"
+    ]
+    if len(system_type_fields) != 1:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_SYSTEM_TYPE_AUTHORITY_INVALID",
+            "master.mission_system_instance.system_type cardinality",
+        )
+    system_type_field = system_type_fields[0]
+    if (
+        _text(
+            system_type_field,
+            "type",
+            field="master.mission_system_instance.system_type",
+        )
+        != "text"
+        or system_type_field.get("nullable") is not False
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_SYSTEM_TYPE_AUTHORITY_INVALID",
+            "master.mission_system_instance.system_type type/nullability",
+        )
+    system_type_sql = _text(
+        system_type_field,
+        "sql",
+        field="master.mission_system_instance.system_type",
+    )
+    system_type_match = re.fullmatch(
+        r"system_type text NOT NULL CHECK \(system_type IN \((?P<values>(?:'[^']+'(?:,'[^']+')*)+)\)\)",
+        system_type_sql,
+    )
+    if system_type_match is None:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_SYSTEM_TYPE_AUTHORITY_INVALID",
+            "master.mission_system_instance.system_type SQL",
+        )
+    system_types = tuple(
+        re.findall(r"'([^']+)'", system_type_match.group("values"))
+    )
+    if not system_types or len(set(system_types)) != len(system_types):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_SYSTEM_TYPE_AUTHORITY_INVALID",
+            "master.mission_system_instance.system_type values",
+        )
+    return statuses, system_types, hashlib.sha256(raw_bytes).hexdigest()
 
 
 def _metric_runtime_transport_authority(
@@ -1432,9 +1490,11 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         selected_semantic_ids=selected_semantic_ids,
     )
     world_capability_registry_sha256 = _world_capability_registry_hash(authority_root)
-    allowed_result_statuses, core_logical_model_sha256 = (
-        _metric_result_status_authority(authority_root)
-    )
+    (
+        allowed_result_statuses,
+        allowed_mission_system_types,
+        core_logical_model_sha256,
+    ) = _metric_result_status_authority(authority_root)
     core_rules_sha256 = _metric_runtime_transport_authority(
         authority_root,
         catalog,
@@ -1570,6 +1630,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             state_machine_bindings=state_machines,
             input_authority_bindings=authority_bindings,
             allowed_result_statuses=allowed_result_statuses,
+            allowed_mission_system_types=allowed_mission_system_types,
             applicability=_applicability(raw, family_contracts),
             definition_hash=_sha256_object(raw),
         )
@@ -1590,6 +1651,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "core_logical_model_sha256": core_logical_model_sha256,
             "core_rules_sha256": core_rules_sha256,
             "allowed_result_statuses": allowed_result_statuses,
+            "allowed_mission_system_types": allowed_mission_system_types,
             "db_schema_version": db_schema_version,
             "delivery_milestone": M2_DELIVERY_MILESTONE,
             "delivery_batch": M2_DELIVERY_BATCH,
@@ -1612,6 +1674,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         core_logical_model_sha256=core_logical_model_sha256,
         core_rules_sha256=core_rules_sha256,
         allowed_result_statuses=allowed_result_statuses,
+        allowed_mission_system_types=allowed_mission_system_types,
         db_schema_version=db_schema_version,
         delivery_milestone=M2_DELIVERY_MILESTONE,
         delivery_batch=M2_DELIVERY_BATCH,

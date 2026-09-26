@@ -74,6 +74,20 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "INVALID",
         "REVIEW_REQUIRED",
     ]
+    assert product["allowed_mission_system_types"] == [
+        "RADAR",
+        "IRST",
+        "EO",
+        "RWR",
+        "ESM",
+        "DATALINK",
+        "FUSION",
+        "MISSION_COMPUTER",
+        "OTHER",
+    ]
+    assert product["negative_error_codes"]["unknown_system_type"] == (
+        "M2_METRIC_APPLICABILITY_INPUT_INVALID"
+    )
     assert evidence["scope"] == {
         "business_metric_semantics_executed": False,
         "business_status_selection_semantics_executed": False,

@@ -122,6 +122,17 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         "INVALID",
         "REVIEW_REQUIRED",
     )
+    assert plan.allowed_mission_system_types == (
+        "RADAR",
+        "IRST",
+        "EO",
+        "RWR",
+        "ESM",
+        "DATALINK",
+        "FUSION",
+        "MISSION_COMPUTER",
+        "OTHER",
+    )
     assert all(
         binding.metric_semantic_id == definition.semantic_id
         and binding.optional == binding.input_field.endswith("?")
@@ -460,6 +471,20 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             },
         )
     assert caught.value.code == "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID"
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            sns,
+            {"system_type": "TEST_ONLY_UNKNOWN_SYSTEM_TYPE"},
+            {
+                "metric_code": sns.metric_code,
+                "subject_type": sns.subject_type,
+                "applicable": False,
+                "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
+                "instances": [],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_APPLICABILITY_INPUT_INVALID"
 
     with pytest.raises(CatalogMetricEngineError) as caught:
         validate_m2_runtime_output(

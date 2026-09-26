@@ -380,6 +380,17 @@ def verify() -> dict[str, object]:
             "instances": [],
         },
     )
+    unknown_system_type = error_code(
+        sns,
+        {"system_type": "TEST_ONLY_UNKNOWN_SYSTEM_TYPE"},
+        {
+            "metric_code": sns.metric_code,
+            "subject_type": sns.subject_type,
+            "applicable": False,
+            "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
+            "instances": [],
+        },
+    )
     radar_false_not_applicable = error_code(
         sns,
         {"system_type": "RADAR"},
@@ -434,6 +445,7 @@ def verify() -> dict[str, object]:
         "insufficient_without_reason": insufficient_without_reason,
         "non_radar_fake_observation": non_radar_fake_observation,
         "non_radar_missing_subject_type": non_radar_missing_subject_type,
+        "unknown_system_type": unknown_system_type,
         "radar_false_not_applicable": radar_false_not_applicable,
         "radar_missing_applicable": radar_missing_applicable,
     }
@@ -461,6 +473,20 @@ def verify() -> dict[str, object]:
             == ("VALID", "N_A", "INSUFFICIENT_DATA", "INVALID", "REVIEW_REQUIRED")
         ),
         "core_runtime_rule_authority_bound": len(plan.core_rules_sha256) == 64,
+        "core_mission_system_type_authority_exact": (
+            plan.allowed_mission_system_types
+            == (
+                "RADAR",
+                "IRST",
+                "EO",
+                "RWR",
+                "ESM",
+                "DATALINK",
+                "FUSION",
+                "MISSION_COMPUTER",
+                "OTHER",
+            )
+        ),
         "na_insufficient_invalid_transport_branches_accept": True,
         "unknown_status_fails_closed": (
             unknown_status == "M2_METRIC_RUNTIME_STATUS_INVALID"
@@ -509,6 +535,9 @@ def verify() -> dict[str, object]:
             non_radar_missing_subject_type
             == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
         ),
+        "unknown_system_type_fails_closed": (
+            unknown_system_type == "M2_METRIC_APPLICABILITY_INPUT_INVALID"
+        ),
         "sns_radar_false_not_applicable_fails_closed": (
             radar_false_not_applicable == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
         ),
@@ -546,6 +575,7 @@ def verify() -> dict[str, object]:
             "core_logical_model_sha256": plan.core_logical_model_sha256,
             "core_rules_sha256": plan.core_rules_sha256,
             "allowed_result_statuses": list(plan.allowed_result_statuses),
+            "allowed_mission_system_types": list(plan.allowed_mission_system_types),
             "runtime_metric_codes": list(plan.metric_codes),
             "subject_types": subject_types,
             "numeric_metric_codes": [
