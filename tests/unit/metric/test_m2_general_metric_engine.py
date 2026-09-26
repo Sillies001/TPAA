@@ -375,7 +375,7 @@ def test_runtime_contract_gate_enforces_subject_type_metadata() -> None:
             {},
             {
                 "metric_code": numeric.metric_code,
-                "subject_type": "MISSION_SYSTEM_INSTANCE",
+                "subject_type": "AIRCRAFT",
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
