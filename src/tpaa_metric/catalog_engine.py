@@ -391,6 +391,7 @@ def _canonical_schema_json(value: Mapping[str, object]) -> str:
 
 def _schema_type_names(schema: Mapping[str, object], *, field: str) -> tuple[str, ...]:
     raw = schema.get("type")
+    names: tuple[str, ...]
     if isinstance(raw, str):
         names = (raw,)
     elif isinstance(raw, list) and raw and all(isinstance(item, str) for item in raw):
