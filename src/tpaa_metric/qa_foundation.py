@@ -240,6 +240,8 @@ def _qa003(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "instances": instances,
     }
 
@@ -277,6 +279,8 @@ def _qa004(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "instances": [instance],
     }
 
@@ -322,6 +326,8 @@ def _qa005(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "instances": [instance],
     }
 
@@ -384,6 +390,8 @@ def _qa006(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "instances": instances,
     }
 
@@ -427,6 +435,8 @@ def _time_uncertainty(
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "instances": [
             _instance(
                 value_kind="NUMERIC",

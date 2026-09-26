@@ -113,6 +113,8 @@ def verify() -> dict[str, object]:
         output: dict[str, object] = {
             "metric_code": definition.metric_code,
             "subject_type": definition.subject_type,
+            "observation_lane": definition.observation_lane,
+            "publication_route": definition.publication_route,
             "instances": [instance],
         }
         if definition.applicability.applicability_mode == "SYSTEM_TYPE_EXACT":
@@ -143,6 +145,8 @@ def verify() -> dict[str, object]:
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
+                "observation_lane": numeric.observation_lane,
+                "publication_route": numeric.publication_route,
                 "instances": [
                     _instance(
                         "NUMERIC",
@@ -158,6 +162,8 @@ def verify() -> dict[str, object]:
             {
                 "metric_code": structured.metric_code,
                 "subject_type": structured.subject_type,
+                "observation_lane": structured.observation_lane,
+                "publication_route": structured.publication_route,
                 "instances": [
                     _instance(
                         "STRUCTURED",
@@ -181,6 +187,8 @@ def verify() -> dict[str, object]:
             {
                 "metric_code": code,
                 "subject_type": definition.subject_type,
+                "observation_lane": definition.observation_lane,
+                "publication_route": definition.publication_route,
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
@@ -194,6 +202,8 @@ def verify() -> dict[str, object]:
     ) -> str | None:
         candidate = dict(output)
         candidate.setdefault("subject_type", definition.subject_type)
+        candidate.setdefault("observation_lane", definition.observation_lane)
+        candidate.setdefault("publication_route", definition.publication_route)
         try:
             validate_m2_runtime_output(definition, input_payload, candidate)
         except CatalogMetricEngineError as exc:
@@ -206,6 +216,24 @@ def verify() -> dict[str, object]:
         {
             "metric_code": numeric.metric_code,
             "subject_type": "AIRCRAFT",
+            "instances": [_instance("NUMERIC", value_numeric=1.0)],
+        },
+    )
+    observation_lane_mismatch = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "observation_lane": "TEST_ONLY_WRONG_LANE",
+            "instances": [_instance("NUMERIC", value_numeric=1.0)],
+        },
+    )
+    publication_route_mismatch = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "publication_route": "TEST_ONLY_WRONG_ROUTE",
             "instances": [_instance("NUMERIC", value_numeric=1.0)],
         },
     )
@@ -429,8 +457,18 @@ def verify() -> dict[str, object]:
         definition.metric_code: definition.subject_type
         for definition in plan.definitions
     }
+    observation_lanes = {
+        definition.metric_code: definition.observation_lane
+        for definition in plan.definitions
+    }
+    publication_routes = {
+        definition.metric_code: definition.publication_route
+        for definition in plan.definitions
+    }
     negative_error_codes = {
         "subject_type_mismatch": subject_type_mismatch,
+        "observation_lane_mismatch": observation_lane_mismatch,
+        "publication_route_mismatch": publication_route_mismatch,
         "wrong_metric_code": wrong_metric_code,
         "value_kind_mismatch": value_kind_mismatch,
         "valid_missing_value": valid_missing_value,
@@ -455,6 +493,16 @@ def verify() -> dict[str, object]:
         "subject_metadata_coverage_exact_32": len(subject_types) == 32,
         "subject_type_mismatch_fails_closed": (
             subject_type_mismatch == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
+        ),
+        "observation_lane_coverage_exact_32": len(observation_lanes) == 32,
+        "publication_route_coverage_exact_32": len(publication_routes) == 32,
+        "observation_lane_mismatch_fails_closed": (
+            observation_lane_mismatch
+            == "M2_METRIC_RUNTIME_OBSERVATION_LANE_MISMATCH"
+        ),
+        "publication_route_mismatch_fails_closed": (
+            publication_route_mismatch
+            == "M2_METRIC_RUNTIME_PUBLICATION_ROUTE_MISMATCH"
         ),
         "numeric_value_kind_coverage_exact_29": len(numeric_definitions) == 29,
         "structured_value_kind_coverage_exact_3": (
@@ -566,6 +614,7 @@ def verify() -> dict[str, object]:
             "business_metric_semantics_executed": False,
             "business_status_selection_semantics_executed": False,
             "subject_metadata_binding_only": True,
+            "publication_metadata_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -578,6 +627,8 @@ def verify() -> dict[str, object]:
             "allowed_mission_system_types": list(plan.allowed_mission_system_types),
             "runtime_metric_codes": list(plan.metric_codes),
             "subject_types": subject_types,
+            "observation_lanes": observation_lanes,
+            "publication_routes": publication_routes,
             "numeric_metric_codes": [
                 definition.metric_code for definition in numeric_definitions
             ],

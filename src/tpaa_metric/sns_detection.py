@@ -183,6 +183,8 @@ def _not_applicable(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "applicable": False,
         "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
         "instances": [],
@@ -277,6 +279,8 @@ def _sns001(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "applicable": True,
         "instances": [instance],
     }
@@ -312,6 +316,8 @@ def _sns002(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "applicable": True,
         "instances": [instance],
     }
@@ -351,6 +357,8 @@ def _sns003(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "applicable": True,
         "instances": instances,
     }
@@ -413,6 +421,8 @@ def _sns004(request: M2MetricPluginRequest) -> Mapping[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "applicable": True,
         "instances": instances,
     }

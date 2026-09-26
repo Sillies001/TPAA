@@ -52,6 +52,24 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "MISSION_SYSTEM_INSTANCE",
         "TARGET_PAIR",
     }
+    assert len(product["observation_lanes"]) == 32
+    assert set(product["observation_lanes"].values()) == {
+        "AIRCRAFT_CAP_L1_OBSERVATION",
+        "SYSTEM_PERFORMANCE_OBSERVATION",
+        "QUALITY_EVIDENCE_ONLY",
+    }
+    assert len(product["publication_routes"]) == 32
+    assert set(product["publication_routes"].values()) == {
+        "CAPABILITY_OBSERVATION",
+        "SYSTEM_PERFORMANCE_OBSERVATION",
+        "METRIC_INSTANCE_EVIDENCE_ONLY",
+    }
+    assert product["negative_error_codes"]["observation_lane_mismatch"] == (
+        "M2_METRIC_RUNTIME_OBSERVATION_LANE_MISMATCH"
+    )
+    assert product["negative_error_codes"]["publication_route_mismatch"] == (
+        "M2_METRIC_RUNTIME_PUBLICATION_ROUTE_MISMATCH"
+    )
     assert len(product["numeric_metric_codes"]) == 29
     assert set(product["structured_schema_hashes"]) == {
         "P1-QA-001",
@@ -92,6 +110,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "business_metric_semantics_executed": False,
         "business_status_selection_semantics_executed": False,
         "subject_metadata_binding_only": True,
+        "publication_metadata_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }

@@ -50,6 +50,8 @@ def _probe(request: M2MetricPluginRequest) -> dict[str, object]:
     return {
         "metric_code": request.definition.metric_code,
         "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
         "algorithm_id": request.definition.algorithm_id,
         "operators": sorted(request.operators),
         "input": dict(request.input_payload),
@@ -333,6 +335,8 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
         {
             "metric_code": numeric.metric_code,
             "subject_type": numeric.subject_type,
+            "observation_lane": numeric.observation_lane,
+            "publication_route": numeric.publication_route,
             "instances": [
                 _valid_runtime_instance(
                     value_kind="NUMERIC",
@@ -349,6 +353,10 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
+            "observation_lane": numeric.observation_lane,
+            "publication_route": numeric.publication_route,
+                "observation_lane": numeric.observation_lane,
+                "publication_route": numeric.publication_route,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -376,6 +384,8 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
         {
             "metric_code": structured.metric_code,
             "subject_type": structured.subject_type,
+            "observation_lane": structured.observation_lane,
+            "publication_route": structured.publication_route,
             "instances": [
                 _valid_runtime_instance(
                     value_kind="STRUCTURED",
@@ -396,6 +406,10 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {
                 "metric_code": structured.metric_code,
                 "subject_type": structured.subject_type,
+            "observation_lane": structured.observation_lane,
+            "publication_route": structured.publication_route,
+                "observation_lane": structured.observation_lane,
+                "publication_route": structured.publication_route,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="STRUCTURED",
@@ -417,6 +431,8 @@ def test_runtime_contract_gate_enforces_subject_type_metadata() -> None:
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": "AIRCRAFT",
+                "observation_lane": numeric.observation_lane,
+                "publication_route": numeric.publication_route,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -428,6 +444,35 @@ def test_runtime_contract_gate_enforces_subject_type_metadata() -> None:
     assert caught.value.code == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
 
 
+def test_runtime_contract_gate_enforces_publication_metadata() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    numeric = plan.definition("P1-QA-003")
+    base = {
+        "metric_code": numeric.metric_code,
+        "subject_type": numeric.subject_type,
+        "observation_lane": numeric.observation_lane,
+        "publication_route": numeric.publication_route,
+        "instances": [
+            _valid_runtime_instance(
+                value_kind="NUMERIC",
+                value_numeric=1.0,
+            )
+        ],
+    }
+
+    wrong_lane = dict(base)
+    wrong_lane["observation_lane"] = "TEST_ONLY_WRONG_LANE"
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(numeric, {}, wrong_lane)
+    assert caught.value.code == "M2_METRIC_RUNTIME_OBSERVATION_LANE_MISMATCH"
+
+    wrong_route = dict(base)
+    wrong_route["publication_route"] = "TEST_ONLY_WRONG_ROUTE"
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(numeric, {}, wrong_route)
+    assert caught.value.code == "M2_METRIC_RUNTIME_PUBLICATION_ROUTE_MISMATCH"
+
+
 def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
     plan = build_m2_metric_execution_plan(AUTHORITY)
     sns = plan.definition("P1-SNS-001")
@@ -437,6 +482,8 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
         {
             "metric_code": sns.metric_code,
             "subject_type": sns.subject_type,
+            "observation_lane": sns.observation_lane,
+            "publication_route": sns.publication_route,
             "applicable": False,
             "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
             "instances": [],
@@ -463,6 +510,10 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
+            "observation_lane": sns.observation_lane,
+            "publication_route": sns.publication_route,
+                "observation_lane": sns.observation_lane,
+                "publication_route": sns.publication_route,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -480,6 +531,10 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
+            "observation_lane": sns.observation_lane,
+            "publication_route": sns.publication_route,
+                "observation_lane": sns.observation_lane,
+                "publication_route": sns.publication_route,
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
@@ -494,6 +549,10 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
+            "observation_lane": sns.observation_lane,
+            "publication_route": sns.publication_route,
+                "observation_lane": sns.observation_lane,
+                "publication_route": sns.publication_route,
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
@@ -508,6 +567,10 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
+            "observation_lane": sns.observation_lane,
+            "publication_route": sns.publication_route,
+                "observation_lane": sns.observation_lane,
+                "publication_route": sns.publication_route,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -552,6 +615,10 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
+            "observation_lane": numeric.observation_lane,
+            "publication_route": numeric.publication_route,
+                "observation_lane": numeric.observation_lane,
+                "publication_route": numeric.publication_route,
                 "instances": [
                     {
                         "status": status,
@@ -571,6 +638,10 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
+            "observation_lane": numeric.observation_lane,
+            "publication_route": numeric.publication_route,
+                "observation_lane": numeric.observation_lane,
+                "publication_route": numeric.publication_route,
                 "instances": [
                     {
                         "status": "TEST_ONLY_UNKNOWN_STATUS",
@@ -592,6 +663,10 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
                 {
                     "metric_code": numeric.metric_code,
                     "subject_type": numeric.subject_type,
+            "observation_lane": numeric.observation_lane,
+            "publication_route": numeric.publication_route,
+                "observation_lane": numeric.observation_lane,
+                "publication_route": numeric.publication_route,
                     "instances": [
                         {
                             "status": status,

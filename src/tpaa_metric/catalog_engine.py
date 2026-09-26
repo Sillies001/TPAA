@@ -700,6 +700,22 @@ def validate_m2_runtime_output(
                 f"{output.get('subject_type')!r}->{definition.subject_type}"
             ),
         )
+    if output.get("observation_lane") != definition.observation_lane:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_OBSERVATION_LANE_MISMATCH",
+            (
+                f"{definition.metric_code}:"
+                f"{output.get('observation_lane')!r}->{definition.observation_lane}"
+            ),
+        )
+    if output.get("publication_route") != definition.publication_route:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_PUBLICATION_ROUTE_MISMATCH",
+            (
+                f"{definition.metric_code}:"
+                f"{output.get('publication_route')!r}->{definition.publication_route}"
+            ),
+        )
 
     applicability = definition.applicability
     if applicability.applicability_mode == "SYSTEM_TYPE_EXACT":
@@ -1290,6 +1306,14 @@ def _metric_runtime_transport_authority(
             "Typed Metric Value",
             "value_kind determines one legal value slot; STRUCTURED is object and binds exactly one executable structured schema.",
         ),
+        "CR-009": (
+            "Stable Subjects",
+            "P1 primary subjects are AIRCRAFT and MISSION_SYSTEM_INSTANCE; TARGET_PAIR is reference/evaluation quality only and never a longitudinal subject.",
+        ),
+        "CR-010": (
+            "Observation Lanes",
+            "AIRCRAFT_CAP_L1_OBSERVATION, SYSTEM_PERFORMANCE_OBSERVATION and QUALITY_EVIDENCE_ONLY are mutually governed publication lanes.",
+        ),
     }
     for rule_id, (expected_name, expected_rule) in expected_core_rules.items():
         rule = by_id.get(rule_id)
@@ -1316,6 +1340,19 @@ def _metric_runtime_transport_authority(
             "STRUCTURED uses value_structured/object and MUST NOT be JSON-serialized into value_text. "
             "For VALID results exactly the value slot matching semantic value_kind is populated; "
             "non-VALID results may have all value slots null."
+        )
+        or _text(
+            common_rules,
+            "observation_lane_routing",
+            field="common_rules",
+        )
+        != (
+            "Every P1 metric declares observation_lane and publication_route. P1-AIR-* publishes to "
+            "AIRCRAFT_CAP_L1_OBSERVATION/CAPABILITY_OBSERVATION; MISSION_SYSTEM_INSTANCE metrics publish "
+            "to SYSTEM_PERFORMANCE_OBSERVATION; reference/alignment/data-quality metrics that must not "
+            "become capability/system observations publish to QUALITY_EVIDENCE_ONLY/METRIC_INSTANCE_EVIDENCE_ONLY. "
+            "QUALITY_EVIDENCE_ONLY metrics MUST have p1_longitudinal_trend_eligibility=false and MUST NOT create "
+            "longitudinal_sample rows."
         )
         or _text(
             common_rules,
