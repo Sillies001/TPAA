@@ -501,11 +501,19 @@ jobs:
             evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
             evidence/cross-platform/m2-authority-gap-sentinel.json
-            evidence/m2-batch-2/review.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
             evidence/cross-platform/m1-batch-4-logical-equivalence.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload M2 Batch 2 review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m2-batch-2-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m2-batch-2/review.json
           if-no-files-found: error
           retention-days: 14
 
