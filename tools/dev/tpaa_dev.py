@@ -72,6 +72,12 @@ M2_SNS_ACCURACY_INCREMENTAL_CHECK_MODULE = (
 M2_SNS_ACCURACY_INCREMENTAL_COMPARE_MODULE = (
     "tools.testing.m2_sns_accuracy_incremental_compare"
 )
+M2_RUNTIME_CONTRACT_INCREMENTAL_CHECK_MODULE = (
+    "tools.testing.m2_runtime_contract_incremental_check"
+)
+M2_RUNTIME_CONTRACT_INCREMENTAL_COMPARE_MODULE = (
+    "tools.testing.m2_runtime_contract_incremental_compare"
+)
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -154,6 +160,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-sns-detection-compare", "M2-MET-004", "IMPLEMENTED", "Compare Windows/Linux M2-MET-004 SNS detection evidence exactly."),
     CommandSpec("m2-sns-accuracy-incremental-check", "M2-MET-005", "IMPLEMENTED", "Verify all 17 SNS accuracy formulas and fail-closed authority blockers without claiming task completion."),
     CommandSpec("m2-sns-accuracy-incremental-compare", "M2-MET-005", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-005 SNS accuracy evidence exactly."),
+    CommandSpec("m2-runtime-contract-incremental-check", "M2-MET-006", "IMPLEMENTED", "Verify frozen runtime applicability/value-kind/schema gates without claiming task completion."),
+    CommandSpec("m2-runtime-contract-incremental-compare", "M2-MET-006", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-006 runtime-contract evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -688,6 +696,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_sns_accuracy_compare.add_argument("--linux", type=Path, required=True)
     m2_sns_accuracy_compare.add_argument("--expected-revision", required=True)
     m2_sns_accuracy_compare.add_argument("--evidence", type=Path, required=True)
+    m2_runtime_contract = sub.add_parser(
+        "m2-runtime-contract-incremental-check",
+        help="Verify authority-safe incremental M2-MET-006 runtime gates",
+    )
+    m2_runtime_contract.add_argument("--evidence", type=Path)
+    m2_runtime_contract_compare = sub.add_parser(
+        "m2-runtime-contract-incremental-compare",
+        help="Compare Windows/Linux incremental M2-MET-006 evidence",
+    )
+    m2_runtime_contract_compare.add_argument("--windows", type=Path, required=True)
+    m2_runtime_contract_compare.add_argument("--linux", type=Path, required=True)
+    m2_runtime_contract_compare.add_argument("--expected-revision", required=True)
+    m2_runtime_contract_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1222,6 +1243,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_SNS_ACCURACY_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-runtime-contract-incremental-check":
+        runtime_args = [
+            sys.executable,
+            "-m",
+            M2_RUNTIME_CONTRACT_INCREMENTAL_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            runtime_args.extend(["--evidence", str(args.evidence)])
+        return _run(runtime_args)
+    if command == "m2-runtime-contract-incremental-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_RUNTIME_CONTRACT_INCREMENTAL_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",

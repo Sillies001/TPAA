@@ -520,3 +520,31 @@ def test_m1_batch_3_desktop_e2e_is_cross_platform_compared_and_reviewed() -> Non
     assert "--logical downloaded/logical/m1-batch-3-desktop-logical-equivalence.json" in text
     assert "--output evidence/m1-batch-3/review.json" in text
     assert f"tpaa-m1-batch-3-review-{SOURCE_REVISION}" in text
+
+
+
+def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit incremental M2-MET-006 runtime-contract evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check" in text
+    assert (
+        "evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json"
+        in text
+    )
+    assert (
+        "- name: Compare Windows and Linux incremental M2-MET-006 runtime contract"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-compare" in text
+    assert (
+        "downloaded/evidence/m2-met-006/windows/runtime-contract-incremental.json"
+        in text
+    )
+    assert (
+        "downloaded/evidence/m2-met-006/linux/runtime-contract-incremental.json"
+        in text
+    )
+    assert (
+        "evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json"
+        in text
+    )

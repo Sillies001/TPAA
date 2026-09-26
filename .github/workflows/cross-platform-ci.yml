@@ -153,6 +153,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-check
           --evidence evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json
 
+      - name: Emit incremental M2-MET-006 runtime-contract evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check
+          --evidence evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -400,6 +405,14 @@ jobs:
           --linux downloaded/evidence/m2-met-005/linux/sns-accuracy-incremental.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json
+
+      - name: Compare Windows and Linux incremental M2-MET-006 runtime contract
+        run: >-
+          python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-compare
+          --windows downloaded/evidence/m2-met-006/windows/runtime-contract-incremental.json
+          --linux downloaded/evidence/m2-met-006/linux/runtime-contract-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
 
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
