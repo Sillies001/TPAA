@@ -201,7 +201,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
-            "subject_type": "MISSION_SYSTEM_INSTANCE",
+            "subject_type": "AIRCRAFT",
             "instances": [_instance("NUMERIC", value_numeric=1.0)],
         },
     )
