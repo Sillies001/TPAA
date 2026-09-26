@@ -478,6 +478,14 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
         if definition.profile_parameters
     }
+    registry_authority_hashes: dict[str, str] = {
+        "operator_registry": plan.operator_registry_sha256,
+        "constant_registry": plan.constant_registry_sha256,
+        "state_machine_registry": plan.state_machine_registry_sha256,
+        "upstream_contract_registry": plan.upstream_contract_registry_sha256,
+        "structured_output_schema_registry": plan.structured_output_schema_registry_sha256,
+        "family_applicability_contracts": plan.family_applicability_contracts_sha256,
+    }
     metric_execution_identities = {
         definition.metric_code: {
             "semantic_id": definition.semantic_id,
@@ -581,6 +589,26 @@ def verify() -> dict[str, object]:
                 "P1-AIR-003": ["derivative_window_s", "max_gap_us"],
             }
         ),
+        "registry_authority_hashes_well_formed": all(
+            len(value) == 64 for value in registry_authority_hashes.values()
+        ),
+        "required_state_machine_ids_exact": (
+            plan.required_state_machine_ids
+            == ("SM_CLOCK_SEGMENT_V1", "SM_VALIDITY_PIECE_V1")
+        ),
+        "required_external_dependency_ids_exact": (
+            plan.required_external_dependency_ids
+            == (
+                "CONTRACT_ASSOCIATION_RELATION_V1",
+                "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1",
+                "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1",
+                "CONTRACT_NAV_UNCERTAINTY_REPRESENTATION_V1",
+                "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1",
+                "CONTRACT_REFERENCE_RELATIVE_STATE_V1",
+                "CONTRACT_TIME_TRANSFORM_V1",
+            )
+        ),
+        "execution_identity_hash_well_formed": len(plan.execution_identity_sha256) == 64,
         "execution_identity_metadata_coverage_exact_32": (
             len(metric_execution_identities) == 32
             and all(
@@ -744,11 +772,17 @@ def verify() -> dict[str, object]:
             "profile_parameter_name_binding_only": True,
             "reference_match_profile_identity_binding_only": True,
             "execution_identity_binding_only": True,
+            "registry_lineage_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
+            "execution_identity_sha256": plan.execution_identity_sha256,
+            "registry_authority_hashes": registry_authority_hashes,
+            "required_operator_ids": list(plan.required_operator_ids),
+            "required_state_machine_ids": list(plan.required_state_machine_ids),
+            "required_external_dependency_ids": list(plan.required_external_dependency_ids),
             "catalog_sha256": plan.catalog_sha256,
             "core_logical_model_sha256": plan.core_logical_model_sha256,
             "core_rules_sha256": plan.core_rules_sha256,

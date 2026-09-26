@@ -48,6 +48,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         "business_metric_semantics_executed": False,
         "synthetic_runtime_probe_only": True,
         "execution_identity_lineage_only": True,
+        "registry_lineage_binding_only": True,
         "formal_32_metric_replay_claimed": False,
         "authority_values_invented": False,
     }
@@ -59,6 +60,10 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert len(product["tampered_batch_logical_hash"]) == 64
     assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
     assert evidence["acceptance"]["record_identity_binding_exact_32"]
+    assert evidence["acceptance"]["execution_identity_hash_well_formed"]
+    assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
+    assert len(product["execution_identity_sha256"]) == 64
+    assert all(len(value) == 64 for value in product["registry_authority_hashes"].values())
     assert len(product["per_metric_hashes"]) == 32
     for row in product["per_metric_hashes"]:
         assert row["semantic_id"]

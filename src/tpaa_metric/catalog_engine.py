@@ -119,6 +119,13 @@ class M2MetricExecutionPlan:
     world_capability_registry_sha256: str
     core_logical_model_sha256: str
     core_rules_sha256: str
+    operator_registry_sha256: str
+    constant_registry_sha256: str
+    state_machine_registry_sha256: str
+    upstream_contract_registry_sha256: str
+    structured_output_schema_registry_sha256: str
+    family_applicability_contracts_sha256: str
+    execution_identity_sha256: str
     allowed_result_statuses: tuple[str, ...]
     allowed_mission_system_types: tuple[str, ...]
     db_schema_version: str
@@ -127,6 +134,8 @@ class M2MetricExecutionPlan:
     catalog_metric_codes: tuple[str, ...]
     definitions: tuple[M2MetricDefinition, ...]
     required_operator_ids: tuple[str, ...]
+    required_state_machine_ids: tuple[str, ...]
+    required_external_dependency_ids: tuple[str, ...]
     logical_hash: str
 
     @property
@@ -962,6 +971,17 @@ def _string_list(mapping: Mapping[str, object], name: str, *, field: str) -> tup
     return tuple(cast(list[str], value))
 
 
+def _validate_versioned_registry_entry(
+    registry: Mapping[str, object],
+    entry_id: str,
+    *,
+    field: str,
+) -> None:
+    entry = _object(registry.get(entry_id), field=f"{field}.{entry_id}")
+    _text(entry, "version", field=f"{field}.{entry_id}")
+    _text(entry, "definition", field=f"{field}.{entry_id}")
+
+
 def _optional_text(mapping: Mapping[str, object], name: str, *, field: str) -> str | None:
     value = mapping.get(name)
     if value is None:
@@ -1592,6 +1612,12 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         catalog.get("family_applicability_contracts"),
         field="family_applicability_contracts",
     )
+    operator_registry_sha256 = _sha256_object(operator_registry)
+    constant_registry_sha256 = _sha256_object(constant_registry)
+    state_machine_registry_sha256 = _sha256_object(state_machine_registry)
+    upstream_contract_registry_sha256 = _sha256_object(upstream_registry)
+    structured_output_schema_registry_sha256 = _sha256_object(schema_registry)
+    family_applicability_contracts_sha256 = _sha256_object(family_contracts)
     generated_by_code = _generated_metadata_by_code()
     selected_codes = set(catalog_codes)
     selected_semantic_ids = {
@@ -1721,6 +1747,11 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                     "M2_METRIC_OPERATOR_AUTHORITY_MISSING",
                     f"{code}:{operator_id}",
                 )
+            _validate_versioned_registry_entry(
+                operator_registry,
+                operator_id,
+                field="operator_registry",
+            )
             if operator_id not in M2_OPERATOR_IMPLEMENTATIONS:
                 raise CatalogMetricEngineError(
                     "M2_METRIC_OPERATOR_IMPLEMENTATION_MISSING",
@@ -1738,6 +1769,11 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                     "M2_METRIC_STATE_MACHINE_AUTHORITY_MISSING",
                     f"{code}:{state_machine_id}",
                 )
+            _validate_versioned_registry_entry(
+                state_machine_registry,
+                state_machine_id,
+                field="state_machine_registry",
+            )
 
         metric_dependencies = tuple(item for item in upstream if item in selected_codes)
         external_dependencies = tuple(item for item in upstream if item not in selected_codes)
@@ -1747,6 +1783,11 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                     "M2_METRIC_UPSTREAM_AUTHORITY_MISSING",
                     f"{code}:{dependency}",
                 )
+            _validate_versioned_registry_entry(
+                upstream_registry,
+                dependency,
+                field="upstream_contract_registry",
+            )
 
         value_kind = _text(raw, "value_kind", field=code)
         trend_eligible = raw.get("p1_longitudinal_trend_eligibility")
@@ -1861,6 +1902,37 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
     required_operator_ids = tuple(
         sorted({operator for definition in ordered for operator in definition.operator_bindings})
     )
+    required_state_machine_ids = tuple(
+        sorted(
+            {
+                state_machine
+                for definition in ordered
+                for state_machine in definition.state_machine_bindings
+            }
+        )
+    )
+    required_external_dependency_ids = tuple(
+        sorted(
+            {
+                dependency
+                for definition in ordered
+                for dependency in definition.external_dependencies
+            }
+        )
+    )
+    execution_identity_sha256 = _sha256_object(
+        [
+            {
+                "metric_code": definition.metric_code,
+                "semantic_id": definition.semantic_id,
+                "semantic_version": definition.semantic_version,
+                "algorithm_id": definition.algorithm_id,
+                "algorithm_version": definition.algorithm_version,
+                "definition_hash": definition.definition_hash,
+            }
+            for definition in ordered
+        ]
+    )
     logical_hash = _sha256_object(
         {
             "catalog_id": "P1_METRIC_CATALOG",
@@ -1871,6 +1943,13 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "world_capability_registry_sha256": world_capability_registry_sha256,
             "core_logical_model_sha256": core_logical_model_sha256,
             "core_rules_sha256": core_rules_sha256,
+            "operator_registry_sha256": operator_registry_sha256,
+            "constant_registry_sha256": constant_registry_sha256,
+            "state_machine_registry_sha256": state_machine_registry_sha256,
+            "upstream_contract_registry_sha256": upstream_contract_registry_sha256,
+            "structured_output_schema_registry_sha256": structured_output_schema_registry_sha256,
+            "family_applicability_contracts_sha256": family_applicability_contracts_sha256,
+            "execution_identity_sha256": execution_identity_sha256,
             "allowed_result_statuses": allowed_result_statuses,
             "allowed_mission_system_types": allowed_mission_system_types,
             "db_schema_version": db_schema_version,
@@ -1882,6 +1961,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                 (definition.metric_code, definition.definition_hash) for definition in ordered
             ],
             "required_operator_ids": required_operator_ids,
+            "required_state_machine_ids": required_state_machine_ids,
+            "required_external_dependency_ids": required_external_dependency_ids,
             "dispatch_key": M2_DISPATCH_KEY,
         }
     )
@@ -1894,6 +1975,13 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         world_capability_registry_sha256=world_capability_registry_sha256,
         core_logical_model_sha256=core_logical_model_sha256,
         core_rules_sha256=core_rules_sha256,
+        operator_registry_sha256=operator_registry_sha256,
+        constant_registry_sha256=constant_registry_sha256,
+        state_machine_registry_sha256=state_machine_registry_sha256,
+        upstream_contract_registry_sha256=upstream_contract_registry_sha256,
+        structured_output_schema_registry_sha256=structured_output_schema_registry_sha256,
+        family_applicability_contracts_sha256=family_applicability_contracts_sha256,
+        execution_identity_sha256=execution_identity_sha256,
         allowed_result_statuses=allowed_result_statuses,
         allowed_mission_system_types=allowed_mission_system_types,
         db_schema_version=db_schema_version,
@@ -1902,5 +1990,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         catalog_metric_codes=catalog_codes,
         definitions=ordered,
         required_operator_ids=required_operator_ids,
+        required_state_machine_ids=required_state_machine_ids,
+        required_external_dependency_ids=required_external_dependency_ids,
         logical_hash=logical_hash,
     )

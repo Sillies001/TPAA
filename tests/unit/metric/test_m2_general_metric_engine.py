@@ -111,6 +111,19 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         "RMS_V1",
         "WRAP_PI_V1",
     )
+    assert plan.required_state_machine_ids == (
+        "SM_CLOCK_SEGMENT_V1",
+        "SM_VALIDITY_PIECE_V1",
+    )
+    assert plan.required_external_dependency_ids == (
+        "CONTRACT_ASSOCIATION_RELATION_V1",
+        "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1",
+        "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1",
+        "CONTRACT_NAV_UNCERTAINTY_REPRESENTATION_V1",
+        "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1",
+        "CONTRACT_REFERENCE_RELATIVE_STATE_V1",
+        "CONTRACT_TIME_TRANSFORM_V1",
+    )
     assert len(plan.logical_hash) == 64
     assert len(plan.catalog_sha256) == 64
     assert len(plan.input_authority_matrix_sha256) == 64
@@ -118,6 +131,13 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
     assert len(plan.world_capability_registry_sha256) == 64
     assert len(plan.core_logical_model_sha256) == 64
     assert len(plan.core_rules_sha256) == 64
+    assert len(plan.operator_registry_sha256) == 64
+    assert len(plan.constant_registry_sha256) == 64
+    assert len(plan.state_machine_registry_sha256) == 64
+    assert len(plan.upstream_contract_registry_sha256) == 64
+    assert len(plan.structured_output_schema_registry_sha256) == 64
+    assert len(plan.family_applicability_contracts_sha256) == 64
+    assert len(plan.execution_identity_sha256) == 64
     assert plan.allowed_result_statuses == (
         "VALID",
         "N_A",
@@ -277,6 +297,23 @@ def test_m2_profile_parameter_input_exact_name_contract_fails_closed(
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_metric_execution_plan(authority)
     assert caught.value.code == "M2_METRIC_PROFILE_INPUT_CONTRACT_DRIFT"
+
+
+def test_m2_versioned_registry_entry_shape_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    del payload["upstream_contract_registry"]["CONTRACT_TIME_TRANSFORM_V1"]["version"]
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_CATALOG_FIELD_INVALID"
 
 
 def test_m2_algorithm_identity_common_rule_drift_fails_closed(

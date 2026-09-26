@@ -45,6 +45,21 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["structured_schema_closed_world_authority_enforced"]
 
     product = evidence["logical_product"]
+    assert len(product["execution_identity_sha256"]) == 64
+    assert set(product["registry_authority_hashes"]) == {
+        "operator_registry",
+        "constant_registry",
+        "state_machine_registry",
+        "upstream_contract_registry",
+        "structured_output_schema_registry",
+        "family_applicability_contracts",
+    }
+    assert all(len(value) == 64 for value in product["registry_authority_hashes"].values())
+    assert product["required_state_machine_ids"] == [
+        "SM_CLOCK_SEGMENT_V1",
+        "SM_VALIDITY_PIECE_V1",
+    ]
+    assert len(product["required_external_dependency_ids"]) == 7
     assert len(product["runtime_metric_codes"]) == 32
     assert len(product["metric_execution_identities"]) == 32
     assert all(
@@ -81,6 +96,10 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["target_pair_never_longitudinal"]
     assert evidence["acceptance"]["trend_subject_types_exact"]
     assert evidence["acceptance"]["profile_input_exact_name_contract_enforced"]
+    assert evidence["acceptance"]["registry_authority_hashes_well_formed"]
+    assert evidence["acceptance"]["required_state_machine_ids_exact"]
+    assert evidence["acceptance"]["required_external_dependency_ids_exact"]
+    assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["execution_identity_metadata_coverage_exact_32"]
     assert evidence["acceptance"]["reference_match_profile_identity_binding_exact_17"]
     assert product["profile_parameter_bindings"] == {
@@ -157,6 +176,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "profile_parameter_name_binding_only": True,
         "reference_match_profile_identity_binding_only": True,
         "execution_identity_binding_only": True,
+        "registry_lineage_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }

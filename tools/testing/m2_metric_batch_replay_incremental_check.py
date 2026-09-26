@@ -48,6 +48,14 @@ def _canonical_hash(value: object) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
 def _mapping(value: object, *, field: str) -> dict[str, object]:
     if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
         raise ValueError(f"{field} must be string-keyed object")
@@ -279,7 +287,7 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
     ]
     all_hashes_well_formed = all(
-        isinstance(item[key], str) and len(item[key]) == 64
+        _is_sha256(item[key])
         for item in per_metric_hashes
         for key in (
             "definition_hash",
@@ -306,6 +314,18 @@ def verify() -> dict[str, object]:
         "dependency_order_exact": dependency_order_exact,
         "dependency_hash_binding_exact": dependency_hash_binding_exact,
         "record_identity_binding_exact_32": record_identity_binding_exact,
+        "execution_identity_hash_well_formed": _is_sha256(plan.execution_identity_sha256),
+        "registry_lineage_hashes_well_formed": all(
+            _is_sha256(value)
+            for value in (
+                plan.operator_registry_sha256,
+                plan.constant_registry_sha256,
+                plan.state_machine_registry_sha256,
+                plan.upstream_contract_registry_sha256,
+                plan.structured_output_schema_registry_sha256,
+                plan.family_applicability_contracts_sha256,
+            )
+        ),
         "plan_recompile_exact": replay_plan == plan,
         "input_mapping_order_independent": replayed == first,
         "request_order_independent": reversed_request == first,
@@ -352,11 +372,21 @@ def verify() -> dict[str, object]:
             "business_metric_semantics_executed": False,
             "synthetic_runtime_probe_only": True,
             "execution_identity_lineage_only": True,
+            "registry_lineage_binding_only": True,
             "formal_32_metric_replay_claimed": False,
             "authority_values_invented": False,
         },
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
+            "execution_identity_sha256": plan.execution_identity_sha256,
+            "registry_authority_hashes": {
+                "operator_registry": plan.operator_registry_sha256,
+                "constant_registry": plan.constant_registry_sha256,
+                "state_machine_registry": plan.state_machine_registry_sha256,
+                "upstream_contract_registry": plan.upstream_contract_registry_sha256,
+                "structured_output_schema_registry": plan.structured_output_schema_registry_sha256,
+                "family_applicability_contracts": plan.family_applicability_contracts_sha256,
+            },
             "catalog_metric_codes": list(plan.catalog_metric_codes),
             "execution_metric_codes": list(first.metric_codes),
             "dependency_edges": dependency_edges,
