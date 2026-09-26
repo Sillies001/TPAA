@@ -15,6 +15,7 @@ from tpaa_metric import (
     build_m2_metric_execution_plan,
     build_m2_sns_accuracy_inputs,
     register_m2_sns_accuracy_plugins,
+    validate_m2_runtime_output,
 )
 from tpaa_metric.operators import M2_OPERATOR_IMPLEMENTATIONS
 from tpaa_metric.qa_foundation import register_m2_qa_plugins
@@ -107,6 +108,39 @@ def _payload() -> dict[str, object]:
     }
 
 
+def _discriminating_payload() -> dict[str, object]:
+    payload = _payload()
+    range_errors = (-10.0, 0.0, 30.0, 80.0, -20.0)
+    azimuth_errors = (0.1, -0.2, 0.3, -0.4, 0.5)
+    elevation_errors = (-0.05, 0.1, -0.15, 0.2, 0.3)
+    samples: list[dict[str, object]] = []
+    for offset, index in enumerate(range(1, 6)):
+        sample = _sample(index)
+        reference_range = float(index * 1_000)
+        measured_range = reference_range + range_errors[offset]
+        sample["measured_range_m"] = measured_range
+        sample["reference_range_m"] = reference_range
+        sample["sensor_measurement"] = {"range_m": measured_range}
+        sample["reference_relative_state"] = {"range_m": reference_range}
+        sample["measured_az_rad"] = float(sample["reference_az_rad"]) + azimuth_errors[offset]
+        sample["measured_el_rad"] = float(sample["reference_el_rad"]) + elevation_errors[offset]
+        sample["measured_position_ecef_m"] = [float(index), 0.0, float(index)]
+        sample["reference_target_position_ecef_m"] = [0.0, 0.0, float(index)]
+        sample["measured_radial_velocity_mps"] = 10.0 + 2.0 * index
+        sample["reference_range_rate_mps"] = 10.0
+        sample["measured_position_sensor_frame"] = [
+            10.0 + 5.0 * index,
+            3.0 * index,
+            0.0,
+        ]
+        sample["reference_position_sensor_frame"] = [10.0, 0.0, 0.0]
+        sample["measured_position_local"] = [0.0, 0.0, 10.0 + 4.0 * index]
+        sample["reference_position_local"] = [0.0, 0.0, 10.0]
+        samples.append(sample)
+    payload["samples"] = samples
+    return payload
+
+
 def _runtime(payload: Mapping[str, object] | None = None):
     plan = build_m2_metric_execution_plan(AUTHORITY)
     registry = MetricPluginRegistry()
@@ -187,6 +221,31 @@ def test_sns_accuracy_exact_17_catalog_algorithms_and_golden_values() -> None:
         assert _value(outputs[code]) == pytest.approx(value)
 
 
+def test_sns_accuracy_discriminating_golden_distinguishes_all_aggregations() -> None:
+    outputs = _direct_outputs(_discriminating_payload())
+    expected = {
+        "P1-SNS-005": 16.0,
+        "P1-SNS-006": 39.496835316262995,
+        "P1-SNS-007": 70.0,
+        "P1-SNS-008": 0.06054936970668068,
+        "P1-SNS-009": 0.33166247903554,
+        "P1-SNS-010": 0.1816590212458495,
+        "P1-SNS-011": 3.3166247903554,
+        "P1-SNS-012": 6.6332495807108,
+        "P1-SNS-013": 9.9498743710662,
+        "P1-SNS-014": 13.2664991614216,
+        "P1-SNS-015": 28.0,
+        "P1-SNS-016": 20.0,
+        "P1-SNS-017": 80.0,
+        "P1-SNS-018": 0.48,
+        "P1-SNS-019": 0.08,
+        "P1-SNS-020": 0.28,
+        "P1-SNS-021": 16.583123951777,
+    }
+    for code, value in expected.items():
+        assert _value(outputs[code]) == pytest.approx(value, rel=0.0, abs=1e-12)
+
+
 def test_azimuth_wrap_boundary_uses_frozen_wrap_operator() -> None:
     payload = _payload()
     sample = payload["samples"][0]
@@ -223,6 +282,115 @@ def test_non_radar_applicability_emits_no_fake_observation() -> None:
     assert all(output["instances"] == [] for output in outputs.values())
 
 
+def test_profile_component_cap_is_applied_per_required_component() -> None:
+    payload = _payload()
+    profile = payload["reference_match_quality_profile"]
+    assert isinstance(profile, dict)
+    caps = profile["max_sigma_by_error_domain"]
+    assert isinstance(caps, dict)
+    for domain in caps:
+        caps[domain] = 3.0
+
+    outputs = _direct_outputs(payload)
+    assert all(output["instances"][0]["status"] == "VALID" for output in outputs.values())
+
+
+def test_full_profile_rejection_reason_surface_is_deterministic() -> None:
+    payload = _payload()
+    samples = [_sample(index) for index in range(1, 7)]
+    samples[0]["association_valid"] = False
+    samples[1]["match_status"] = "UNMATCHED"
+    samples[2]["reference_time_us"] = 0
+    samples[3]["reference_quality_status"] = "REJECTED"
+    missing_uncertainty = samples[4]["uncertainty_components"]
+    assert isinstance(missing_uncertainty, dict)
+    del missing_uncertainty["alignment_uncertainty"]
+    profile = payload["reference_match_quality_profile"]
+    assert isinstance(profile, dict)
+    caps = profile["max_sigma_by_error_domain"]
+    assert isinstance(caps, dict)
+    for domain in caps:
+        caps[domain] = 2.5
+    payload["samples"] = samples
+
+    expected_reasons = [
+        "ASSOCIATION_INVALID",
+        "INTERPOLATION_AGE_EXCEEDED",
+        "MATCH_STATUS_INVALID",
+        "REFERENCE_QUALITY_REJECTED",
+        "UNCERTAINTY_COMPONENT_MISSING",
+        "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
+    ]
+    outputs = _direct_outputs(payload)
+    for output in outputs.values():
+        instance = output["instances"][0]
+        assert instance["status"] == "N_A"
+        assert instance["value_numeric"] is None
+        assert instance["reason_codes"] == expected_reasons
+
+
+def test_rejected_sample_cannot_bias_statistics_and_empty_uses_profile_reason() -> None:
+    payload = _payload()
+    accepted = _sample(1)
+    rejected = _sample(2)
+    rejected["association_valid"] = False
+    rejected["measured_range_m"] = 100_000.0
+    payload["samples"] = [accepted, rejected]
+    output = _direct_outputs(payload)["P1-SNS-005"]
+    assert _value(output) == pytest.approx(50.0)
+    evidence = output["instances"][0]["evidence"]
+    assert evidence["eligible_measurement_ids"] == ["measurement-1"]
+    assert evidence["eligible_sample_count"] == 1
+    assert evidence["rejected_sample_count"] == 1
+
+    empty = _payload()
+    empty["samples"] = []
+    empty_output = _direct_outputs(empty)["P1-SNS-005"]
+    instance = empty_output["instances"][0]
+    assert instance["status"] == "N_A"
+    assert instance["reason_codes"] == ["NO_VALID_MATCHED_SAMPLES"]
+
+
+def test_profile_identity_is_persisted_and_segments_evidence() -> None:
+    first_payload = _payload()
+    second_payload = _payload()
+    profile = second_payload["reference_match_quality_profile"]
+    assert isinstance(profile, dict)
+    profile["profile_id"] = "SYNTHETIC_COMPLETE_PROFILE_V2"
+    profile["profile_version"] = "2.0.0"
+    profile["profile_hash"] = "d" * 64
+
+    first = _direct_outputs(first_payload)["P1-SNS-005"]
+    second = _direct_outputs(second_payload)["P1-SNS-005"]
+    assert _value(first) == _value(second)
+    first_evidence = first["instances"][0]["evidence"]
+    second_evidence = second["instances"][0]["evidence"]
+    assert first_evidence["reference_truth_profile_id"] == "SYNTHETIC_COMPLETE_PROFILE_V1"
+    assert first_evidence["reference_truth_profile_version"] == "1.0.0"
+    assert first_evidence["reference_truth_profile_hash"] == "c" * 64
+    assert second_evidence["reference_truth_profile_id"] == "SYNTHETIC_COMPLETE_PROFILE_V2"
+    assert second_evidence["reference_truth_profile_version"] == "2.0.0"
+    assert second_evidence["reference_truth_profile_hash"] == "d" * 64
+    assert first_evidence != second_evidence
+
+
+def test_direct_outputs_pass_shared_runtime_transport_validation() -> None:
+    plan, _registry, inputs = _runtime()
+    outputs = _direct_outputs()
+    for code in SNS_ACCURACY_CODES:
+        validate_m2_runtime_output(plan.definition(code), inputs[code], outputs[code])
+
+    non_radar = _payload()
+    non_radar["system_type"] = "IRST"
+    non_radar_outputs = _direct_outputs(non_radar)
+    for code in SNS_ACCURACY_CODES:
+        validate_m2_runtime_output(
+            plan.definition(code),
+            {"system_type": "IRST"},
+            non_radar_outputs[code],
+        )
+
+
 def test_shared_engine_dependency_closure_remains_blocked_by_qa_authority() -> None:
     plan, registry, inputs = _runtime()
     register_m2_qa_plugins(plan, registry)
@@ -238,7 +406,7 @@ def test_shared_engine_dependency_closure_remains_blocked_by_qa_authority() -> N
     assert caught.value.code == "M2_QA_AUTHORITY_GAP"
 
 
-def test_world_adapter_requires_complete_external_profile_and_associations() -> None:
+def test_world_adapter_requires_and_preserves_complete_external_contracts() -> None:
     stage_world = project_m2_stage_world_lineage(
         M1_FIXTURES / "BF_M1_NOMINAL_V1",
         M2_FIXTURES / "RT_M2_NOMINAL_V1",
@@ -263,3 +431,42 @@ def test_world_adapter_requires_complete_external_profile_and_associations() -> 
             associations={},
         )
     assert caught.value.code == "M2_SNS_MATCH_QUALITY_PROFILE_INCOMPLETE"
+
+    associations = {
+        row.measurement_id: {
+            "association_id": f"assoc::{row.measurement_id}",
+            "association_provenance": "unit-test:external-association:v1",
+            "association_valid": True,
+            "reference_quality_status": "ACCEPTED",
+        }
+        for row in stage_world.radar_sensor_world.measurement_alignment.rows
+    }
+    profile = _profile()
+    inputs = build_m2_sns_accuracy_inputs(
+        stage_world.radar_sensor_world,
+        stage_world,
+        reference_match_quality_profile=profile,
+        associations=associations,
+    )
+    assert tuple(inputs) == SNS_ACCURACY_CODES
+    for payload in inputs.values():
+        assert payload["world_logical_hash"] == stage_world.radar_sensor_world.logical_hash
+        assert payload["stage_world_logical_hash"] == stage_world.logical_hash
+        assert payload["reference_match_quality_profile"] == profile
+        assert payload["association_contract_supplied"] is True
+        assert payload["quality_profile_contract_supplied"] is True
+        assert payload["association_rebuilt_by_metric"] is False
+        assert payload["quality_policy_defaulted_by_metric"] is False
+        assert payload["frame_transform_executed_by_metric"] is False
+
+    missing_associations = dict(associations)
+    first_measurement_id = next(iter(missing_associations))
+    del missing_associations[first_measurement_id]
+    with pytest.raises(CatalogMetricEngineError) as missing:
+        build_m2_sns_accuracy_inputs(
+            stage_world.radar_sensor_world,
+            stage_world,
+            reference_match_quality_profile=profile,
+            associations=missing_associations,
+        )
+    assert missing.value.code == "M2_SNS_ASSOCIATION_CONTRACT_MISSING"

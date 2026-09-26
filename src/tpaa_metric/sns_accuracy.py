@@ -165,6 +165,8 @@ def _profile(payload: Mapping[str, object], *, domain: str) -> Mapping[str, obje
             "M2_SNS_MATCH_QUALITY_PROFILE_INCOMPLETE",
             repr(missing),
         )
+    _text(profile, "profile_id", field="quality_profile")
+    _text(profile, "profile_version", field="quality_profile")
     profile_hash = _text(profile, "profile_hash", field="quality_profile")
     if len(profile_hash) != 64:
         raise ValueError("M2_SNS_ACCURACY_PROFILE_HASH_INVALID")
@@ -262,8 +264,10 @@ def _eligible_samples(
                     break
                 component_values.append(float(value))
         if rejection_key is None and cap is not None:
-            combined_sigma = math.sqrt(sum(value * value for value in component_values))
-            if combined_sigma > cap:
+            # Frozen Catalog rule: every required uncertainty component must be
+            # individually within the domain cap. Do not invent a combined-sigma
+            # policy here; a different combination rule would be C3 authority.
+            if any(value > cap for value in component_values):
                 rejection_key = "UNCERTAINTY_DOMAIN_CAP_EXCEEDED"
         if rejection_key is None:
             eligible.append(sample)
@@ -413,8 +417,8 @@ def _execute(request: M2MetricPluginRequest) -> Mapping[str, object]:
         return {
             "metric_code": request.definition.metric_code,
             "subject_type": request.definition.subject_type,
-        "observation_lane": request.definition.observation_lane,
-        "publication_route": request.definition.publication_route,
+            "observation_lane": request.definition.observation_lane,
+            "publication_route": request.definition.publication_route,
             "applicable": False,
             "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
             "instances": [],
@@ -423,10 +427,15 @@ def _execute(request: M2MetricPluginRequest) -> Mapping[str, object]:
     samples, rejected, profile = _eligible_samples(request.input_payload, domain=domain)
     evidence = {
         "error_domain": domain,
+        "reference_truth_profile_id": profile["profile_id"],
+        "reference_truth_profile_version": profile["profile_version"],
+        "reference_truth_profile_hash": profile["profile_hash"],
         "reference_match_quality_profile_id": profile["profile_id"],
         "reference_match_quality_profile_version": profile["profile_version"],
         "reference_match_quality_profile_hash": profile["profile_hash"],
         "eligible_measurement_ids": [item["measurement_id"] for item in samples],
+        "eligible_sample_count": len(samples),
+        "rejected_sample_count": len(rejected),
         "rejected_samples": list(rejected),
     }
     if not samples:
