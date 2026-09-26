@@ -5,8 +5,8 @@
     "engineering": "ED-2.0",
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
-    "date": "2026-09-20",
-    "rebaseline": "R3.3_METRIC_DESIGN_GUIDE"
+    "date": "2026-09-26",
+    "rebaseline": "R3.4_M2_QA_SNS_AUTHORITY"
   },
   "artifacts": [
     {
@@ -53,6 +53,11 @@
       "file": "KNOWLEDGE_FIDELITY_MATRIX.json",
       "sha256": "2581ad99c061cc1c0e84f10c4ab8ca30ef70c0ba3f1b8843830d3536d6f06f49",
       "bytes": 227087
+    },
+    {
+      "file": "M2_QA_SNS_AUTHORITY.json",
+      "sha256": "1f0755836e7ea40b3b69c83dae1b2b636ff80e37d8630c5ce158d5dfccffd5d3",
+      "bytes": 14211
     },
     {
       "file": "METRIC_INPUT_AUTHORITY_MATRIX.json",

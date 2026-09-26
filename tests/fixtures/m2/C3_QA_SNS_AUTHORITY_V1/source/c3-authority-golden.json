@@ -1,0 +1,318 @@
+{
+  "schema": "TPAA_M2_C3_QA_SNS_AUTHORITY_GOLDEN_V1",
+  "authority_id": "M2_QA_SNS_AUTHORITY",
+  "authority_version": "1.0.0",
+  "authority_sha256": "1f0755836e7ea40b3b69c83dae1b2b636ff80e37d8630c5ce158d5dfccffd5d3",
+  "golden_vectors": {
+    "qa_001": {
+      "case_id": "QA001_NONIDENTITY_FRAME_AND_BORESIGHT_V1",
+      "input": {
+        "own_position_ecef_m": [
+          6378137,
+          0,
+          0
+        ],
+        "target_position_ecef_m": [
+          6378137,
+          1000,
+          0
+        ],
+        "own_velocity_ecef_mps": [
+          0,
+          0,
+          0
+        ],
+        "target_velocity_ecef_mps": [
+          0,
+          0,
+          0
+        ],
+        "own_attitude_quat": [
+          0.7071067811865476,
+          0,
+          0,
+          0.7071067811865475
+        ],
+        "sensor_boresight_quat": [
+          0.9238795325112867,
+          0,
+          0,
+          0.3826834323650898
+        ]
+      },
+      "expected": {
+        "r_rel_ecef_m": [
+          0,
+          1000,
+          0
+        ],
+        "v_rel_ecef_mps": [
+          0,
+          0,
+          0
+        ],
+        "range_m": 1000,
+        "range_rate_mps": 0,
+        "own_body_vector_m": [
+          1000,
+          0,
+          0
+        ],
+        "own_body_az_rad": 0,
+        "own_body_el_rad": 0,
+        "sensor_vector_m": [
+          707.1067811865476,
+          -707.1067811865476,
+          0
+        ],
+        "sensor_az_rad": -0.7853981633974483,
+        "sensor_el_rad": 0,
+        "sensor_frame_status": "AVAILABLE"
+      }
+    },
+    "qa_002": {
+      "case_id": "QA002_NONDEGENERATE_POSITION_TIME_ATTITUDE_V1",
+      "input": {
+        "target_position_covariance_ecef_m2": [
+          [
+            9,
+            0,
+            0
+          ],
+          [
+            0,
+            16,
+            0
+          ],
+          [
+            0,
+            0,
+            25
+          ]
+        ],
+        "own_position_covariance_ecef_m2": [
+          [
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            9,
+            0
+          ],
+          [
+            0,
+            0,
+            16
+          ]
+        ],
+        "target_velocity_ecef_mps": [
+          0,
+          180,
+          0
+        ],
+        "own_velocity_ecef_mps": [
+          0,
+          200,
+          0
+        ],
+        "own_attitude_sigma_rad": 0.01,
+        "target_attitude_sigma_rad": 0.02,
+        "time_alignment_two_sided_hard_bound_us": 3000,
+        "relative_state_jacobian": [
+          [
+            1,
+            0,
+            0,
+            -1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            -1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            -1
+          ]
+        ],
+        "own_attitude_quat": [
+          0.7071067811865476,
+          0,
+          0,
+          0.7071067811865475
+        ],
+        "r_rel_ecef_m": [
+          0,
+          1000,
+          0
+        ]
+      },
+      "expected": {
+        "time_alignment_sigma_s": 0.0017320508075688774,
+        "p_inputs_m2": [
+          [
+            9,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            16.0972,
+            0,
+            0,
+            0.10800000000000001,
+            0
+          ],
+          [
+            0,
+            0,
+            25,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            0.10800000000000001,
+            0,
+            0,
+            9.12,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            16
+          ]
+        ],
+        "p_rel_ecef_m2": [
+          [
+            13,
+            0,
+            0
+          ],
+          [
+            0,
+            25.001199999999997,
+            0
+          ],
+          [
+            0,
+            0,
+            41
+          ]
+        ],
+        "p_rel_own_body_m2": [
+          [
+            25.001199999999997,
+            0,
+            0
+          ],
+          [
+            0,
+            13,
+            0
+          ],
+          [
+            0,
+            0,
+            41
+          ]
+        ],
+        "sigma_range_m": 5.000119998560034,
+        "sigma_az_rad": 0.01063014581273465,
+        "sigma_el_rad": 0.011874342087037918,
+        "sigma_position_3d_m": 8.888261922333298,
+        "target_attitude_sensitivity": "ZERO_FOR_QA001_V1_RELATIVE_POSITION_AND_OWN_BODY_ANGLES"
+      }
+    }
+  },
+  "negative_discriminators": {
+    "qa_001_zero_norm_quaternion": {
+      "input_quaternion": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "expected_result": "FAIL_CLOSED_NONZERO_QUATERNION_REQUIRED"
+    },
+    "qa_002_wrong_jacobian_shape": {
+      "input_shape": [
+        3,
+        5
+      ],
+      "expected_result": "FAIL_CLOSED_EXPECTED_3X6"
+    },
+    "profile_missing_required_field": {
+      "removed_field": "accepted_reference_quality_statuses",
+      "expected_result": "FAIL_CLOSED_PROFILE_INCOMPLETE"
+    }
+  },
+  "reference_match_quality_profile": {
+    "profile_id": "M2_REFERENCE_MATCH_QUALITY_V1",
+    "profile_version": "1.1.0",
+    "max_gap_us": 50000,
+    "min_coverage": 0.8,
+    "max_interpolation_age_us": 50000,
+    "accepted_reference_quality_statuses": [
+      "ACCEPTED"
+    ],
+    "max_sigma_by_error_domain": {
+      "AZIMUTH": null,
+      "CROSS_RANGE": null,
+      "ELEVATION": null,
+      "POSITION_3D": null,
+      "RADIAL_POSITION": null,
+      "RADIAL_VELOCITY": null,
+      "RANGE": null,
+      "VERTICAL_POSITION": null
+    },
+    "required_uncertainty_components": [
+      "reference_truth_uncertainty",
+      "alignment_uncertainty",
+      "sensor_measurement_uncertainty"
+    ],
+    "na_reason_map": {
+      "ASSOCIATION_INVALID": "ASSOCIATION_INVALID",
+      "MATCH_STATUS_INVALID": "MATCH_STATUS_INVALID",
+      "INTERPOLATION_AGE_EXCEEDED": "INTERPOLATION_AGE_EXCEEDED",
+      "REFERENCE_QUALITY_REJECTED": "REFERENCE_QUALITY_REJECTED",
+      "UNCERTAINTY_COMPONENT_MISSING": "UNCERTAINTY_COMPONENT_MISSING",
+      "UNCERTAINTY_DOMAIN_CAP_EXCEEDED": "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
+      "NO_VALID_MATCHED_SAMPLES": "NO_VALID_MATCHED_SAMPLES"
+    },
+    "profile_hash": "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1",
+    "profile_hash_algorithm": "SHA256_CANONICAL_JSON_ASCII_SORTED_KEYS_EXCLUDING_PROFILE_HASH",
+    "relationship_to_existing_profile_fields": {
+      "mode": "GOVERNED_EXPANSION_OF_EXISTING_M2_REFERENCE_MATCH_QUALITY_V1",
+      "max_interpolation_age_us_relation": "For profile version 1.1.0 max_interpolation_age_us is explicitly 50000 and numerically equals max_gap_us; the names remain distinct and both are hash inputs.",
+      "min_coverage_relation": "min_coverage=0.8 remains the aggregate alignment coverage gate and is not an alias for per-sample interpolation age."
+    }
+  }
+}

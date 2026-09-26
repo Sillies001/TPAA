@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Executable sentinel for the audited M2 Batch 2 C3 authority-gap state.
-
-PASS means the current frozen authority still matches the conditions audited
-into Baseline Change #106, so blocked Metric tasks must remain fail-closed.
-Any authority or discriminating-fixture change intentionally invalidates this
-sentinel and requires a new governed closure review before consumers change.
-"""
+"""Executable sentinel for the adopted M2 Batch 2 C3 authority state."""
 
 from __future__ import annotations
 
@@ -19,15 +13,7 @@ from typing import cast
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0"
 CANONICAL_ROOT = BASELINE_ROOT / "canonical"
-REFERENCE_FIXTURE = (
-    REPO_ROOT
-    / "tests"
-    / "fixtures"
-    / "m2"
-    / "RT_M2_NOMINAL_V1"
-    / "source"
-    / "reference-truth.json"
-)
+AUTHORITY = CANONICAL_ROOT / "M2_QA_SNS_AUTHORITY.json"
 ALIGNMENT_FIXTURE = (
     REPO_ROOT
     / "tests"
@@ -37,18 +23,16 @@ ALIGNMENT_FIXTURE = (
     / "source"
     / "measurement-alignment.json"
 )
-
-AUDITED_BASELINE_LOCK_SHA256 = (
-    "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa"
+ADOPTED_BASELINE_LOCK_SHA256 = (
+    "d6ebab2b5402cf81a0b5f73a2da4ed2aaa2d530bc7445c7f6132dcf7fa72224d"
 )
-EXPECTED_QA2_UNCERTAINTY_INPUTS = (
-    "own_position_uncertainty_ref",
-    "target_position_uncertainty_ref",
-    "own_attitude_uncertainty_ref",
-    "target_attitude_uncertainty_ref",
-    "time_alignment_uncertainty_ref",
+ADOPTED_AUTHORITY_SHA256 = (
+    "1f0755836e7ea40b3b69c83dae1b2b636ff80e37d8630c5ce158d5dfccffd5d3"
 )
-EXPECTED_PROFILE_MISSING_FIELDS = (
+ADOPTED_PROFILE_SHA256 = (
+    "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+)
+REQUIRED_PROFILE_FIELDS = (
     "accepted_reference_quality_statuses",
     "max_interpolation_age_us",
     "max_sigma_by_error_domain",
@@ -81,130 +65,109 @@ def _load(path: Path) -> dict[str, object]:
     return cast(dict[str, object], value)
 
 
-def _metric(catalog: dict[str, object], code: str) -> dict[str, object]:
-    raw = catalog.get("metrics")
-    if not isinstance(raw, list):
-        raise ValueError("catalog.metrics must be list")
-    matches = [
-        item
-        for item in raw
-        if isinstance(item, dict) and item.get("metric_code") == code
-    ]
-    if len(matches) != 1:
-        raise ValueError(f"{code}: expected exactly one Catalog definition")
-    return cast(dict[str, object], matches[0])
-
-
-def _matrix_shape(value: object) -> tuple[int, int] | None:
-    if not isinstance(value, list) or not value:
-        return None
-    if not all(isinstance(row, list) for row in value):
-        return None
-    rows = cast(list[list[object]], value)
-    widths = {len(row) for row in rows}
-    if len(widths) != 1:
-        return None
-    return len(rows), widths.pop()
+def _canonical_hash(value: object) -> str:
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("ascii")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def verify() -> dict[str, object]:
-    catalog_path = CANONICAL_ROOT / "P1_METRIC_CATALOG.json"
-    matrix_path = CANONICAL_ROOT / "METRIC_INPUT_AUTHORITY_MATRIX.json"
-    provenance_path = CANONICAL_ROOT / "SOURCE_PROVENANCE.json"
     lock_path = BASELINE_ROOT / "BASELINE_LOCK.json"
+    authority = _load(AUTHORITY)
+    alignment = _load(ALIGNMENT_FIXTURE)
 
-    catalog = _load(catalog_path)
-    reference_fixture = _load(REFERENCE_FIXTURE)
-    alignment_fixture = _load(ALIGNMENT_FIXTURE)
+    qa1_raw = authority.get("qa_001_frame_convention")
+    qa2_raw = authority.get("qa_002_uncertainty_contract")
+    profile_raw = authority.get("reference_match_quality_profile")
+    golden_raw = authority.get("golden_vectors")
+    if not isinstance(qa1_raw, dict) or not isinstance(qa2_raw, dict):
+        raise ValueError("C3 QA authority sections missing")
+    if not isinstance(profile_raw, dict) or not isinstance(golden_raw, dict):
+        raise ValueError("C3 profile/golden sections missing")
 
-    qa1 = _metric(catalog, "P1-QA-001")
-    qa2 = _metric(catalog, "P1-QA-002")
+    qa1 = cast(dict[str, object], qa1_raw)
+    qa2 = cast(dict[str, object], qa2_raw)
+    profile = cast(dict[str, object], profile_raw)
+    golden = cast(dict[str, object], golden_raw)
+    qa1_golden = golden.get("qa_001")
+    qa2_golden = golden.get("qa_002")
+    if not isinstance(qa1_golden, dict) or not isinstance(qa2_golden, dict):
+        raise ValueError("C3 discriminating Goldens missing")
 
-    qa1_records = reference_fixture.get("records")
-    if not isinstance(qa1_records, list) or not qa1_records:
-        raise ValueError("reference fixture records missing")
+    qa1_input = qa1_golden.get("input")
+    qa2_expected = qa2_golden.get("expected")
+    if not isinstance(qa1_input, dict) or not isinstance(qa2_expected, dict):
+        raise ValueError("C3 Golden payload shape invalid")
 
-    own_quaternions: list[object] = []
-    boresights: list[object] = []
-    jacobian_shapes: list[tuple[int, int] | None] = []
-    for raw_record in qa1_records:
-        if not isinstance(raw_record, dict):
-            raise ValueError("reference fixture record must be object")
-        own = raw_record.get("own")
-        if not isinstance(own, dict):
-            raise ValueError("reference fixture own must be object")
-        own_quaternions.append(own.get("attitude_quat"))
-        boresights.append(raw_record.get("sensor_boresight_quat"))
-        jacobian_shapes.append(_matrix_shape(raw_record.get("relative_state_jacobian")))
+    hash_payload = dict(profile)
+    profile_hash = hash_payload.pop("profile_hash", None)
+    hash_payload.pop("profile_hash_algorithm", None)
+    hash_payload.pop("relationship_to_existing_profile_fields", None)
 
-    identity_quaternion = [1, 0, 0, 0]
-    qa1_fixture_non_discriminating = (
-        all(value == identity_quaternion for value in own_quaternions)
-        and all(value is None for value in boresights)
+    legacy_profile = alignment.get("quality_profile")
+    if not isinstance(legacy_profile, dict):
+        raise ValueError("legacy alignment quality_profile missing")
+    legacy_missing = sorted(set(REQUIRED_PROFILE_FIELDS) - set(legacy_profile))
+
+    p_inputs_order = qa2.get("p_inputs_order")
+    jacobian = qa2.get("relative_state_jacobian")
+    if not isinstance(jacobian, dict):
+        raise ValueError("C3 QA-002 jacobian authority missing")
+    p_inputs = qa2_expected.get("p_inputs_m2")
+    if not isinstance(p_inputs, list) or len(p_inputs) != 6:
+        raise ValueError("C3 QA-002 Golden P_inputs missing")
+
+    attitude_semantics_raw = qa1.get("own_attitude_quaternion_semantics")
+    attitude_semantics = (
+        cast(dict[str, object], attitude_semantics_raw)
+        if isinstance(attitude_semantics_raw, dict)
+        else {}
     )
-
-    qa2_inputs_raw = qa2.get("input_fields")
-    if not isinstance(qa2_inputs_raw, list) or not all(
-        isinstance(item, str) for item in qa2_inputs_raw
-    ):
-        raise ValueError("P1-QA-002 input_fields invalid")
-    qa2_inputs = cast(list[str], qa2_inputs_raw)
-    qa2_uncertainty_inputs = tuple(
-        field for field in qa2_inputs if field.endswith("_uncertainty_ref")
-    )
-    qa2_current_shape_is_3x6 = (
-        bool(jacobian_shapes)
-        and all(shape == (3, 6) for shape in jacobian_shapes)
-    )
-
-    profile_registry = catalog.get("reference_match_quality_profile_registry")
-    if not isinstance(profile_registry, dict):
-        raise ValueError("reference_match_quality_profile_registry missing")
-    contract = profile_registry.get("CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1")
-    if not isinstance(contract, dict):
-        raise ValueError("CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1 missing")
-    required_raw = contract.get("required_instance_fields")
-    if not isinstance(required_raw, list) or not all(
-        isinstance(item, str) for item in required_raw
-    ):
-        raise ValueError("required_instance_fields invalid")
-    required_fields = set(cast(list[str], required_raw))
-
-    profile = alignment_fixture.get("quality_profile")
-    if not isinstance(profile, dict) or not all(
-        isinstance(key, str) for key in profile
-    ):
-        raise ValueError("alignment fixture quality_profile invalid")
-    profile_keys = set(cast(dict[str, object], profile))
-    missing_profile_fields = tuple(sorted(required_fields - profile_keys))
-
-    current_hashes = {
-        "BASELINE_LOCK.json": _sha256(lock_path),
-        "P1_METRIC_CATALOG.json": _sha256(catalog_path),
-        "METRIC_INPUT_AUTHORITY_MATRIX.json": _sha256(matrix_path),
-        "SOURCE_PROVENANCE.json": _sha256(provenance_path),
-        "RT_M2_NOMINAL_V1/reference-truth.json": _sha256(REFERENCE_FIXTURE),
-        "MA_M2_NOMINAL_V1/measurement-alignment.json": _sha256(ALIGNMENT_FIXTURE),
-    }
 
     acceptance = {
-        "audited_baseline_lock_unchanged": (
-            current_hashes["BASELINE_LOCK.json"]
-            == AUDITED_BASELINE_LOCK_SHA256
+        "adopted_baseline_lock_exact": _sha256(lock_path)
+        == ADOPTED_BASELINE_LOCK_SHA256,
+        "adopted_authority_artifact_exact": _sha256(AUTHORITY)
+        == ADOPTED_AUTHORITY_SHA256,
+        "authority_status_approved": (
+            authority.get("status") == "APPROVED_BY_DELEGATED_OWNER_AUTHORITY"
         ),
-        "qa1_formula_still_requires_body_transform": (
-            isinstance(qa1.get("formula"), str)
-            and "Transform r_rel into own-body" in cast(str, qa1["formula"])
+        "qa1_quaternion_order_frozen": qa1.get("quaternion_element_order")
+        == ["w", "x", "y", "z"],
+        "qa1_rotation_direction_frozen": (
+            attitude_semantics.get("source_frame") == "OWN_BODY_FRD"
+            and attitude_semantics.get("destination_frame") == "ECEF"
         ),
-        "qa1_fixture_still_non_discriminating": qa1_fixture_non_discriminating,
-        "qa2_uncertainty_inputs_exact_five": (
-            qa2_uncertainty_inputs == EXPECTED_QA2_UNCERTAINTY_INPUTS
+        "qa1_nonidentity_golden_discriminating": (
+            qa1_input.get("own_attitude_quat") != [1, 0, 0, 0]
+            and qa1_input.get("sensor_boresight_quat") is not None
         ),
-        "qa2_fixture_jacobian_shape_still_3x6": qa2_current_shape_is_3x6,
-        "profile_required_fields_still_missing_exact_five": (
-            missing_profile_fields == EXPECTED_PROFILE_MISSING_FIELDS
+        "qa2_p_inputs_exact_6d": (
+            qa2.get("p_inputs_dimension") == 6
+            and isinstance(p_inputs_order, list)
+            and len(p_inputs_order) == 6
         ),
-        "formal_tasks_remain_non_completing": True,
+        "qa2_jacobian_shape_exact": jacobian.get("shape") == [3, 6],
+        "qa2_shared_time_cross_covariance_golden": (
+            isinstance(p_inputs[1], list)
+            and len(p_inputs[1]) == 6
+            and p_inputs[1][4] != 0
+        ),
+        "profile_required_fields_complete": all(
+            field in profile for field in REQUIRED_PROFILE_FIELDS
+        ),
+        "profile_hash_exact": (
+            profile_hash == ADOPTED_PROFILE_SHA256
+            and _canonical_hash(hash_payload) == ADOPTED_PROFILE_SHA256
+        ),
+        "legacy_fixture_stays_non_authoritative": legacy_missing
+        == sorted(REQUIRED_PROFILE_FIELDS),
+        "authority_resolution_ready": True,
     }
     failed = sorted(key for key, passed in acceptance.items() if not passed)
 
@@ -214,31 +177,25 @@ def verify() -> dict[str, object]:
         "baseline_change_issue": 106,
         "status": "PASS" if not failed else "FAIL",
         "source_revision": _git_revision(),
-        "authority_resolution_ready": False,
-        "task_complete": False,
-        "blocked_tasks": [
-            "M2-MET-002",
-            "M2-MET-005",
-            "M2-MET-006",
-            "M2-MET-007",
-        ],
+        "authority_resolution_ready": not failed,
+        "task_complete": not failed,
+        "blocked_tasks": [],
         "scope": {
-            "semantic_decision_made": False,
-            "authority_values_invented": False,
+            "semantic_decision_adopted": True,
+            "authority_values_invented_by_implementation": False,
             "sentinel_only": True,
         },
         "logical_product": {
-            "audited_baseline_lock_sha256": AUDITED_BASELINE_LOCK_SHA256,
-            "current_hashes": current_hashes,
-            "qa1_fixture_non_discriminating": qa1_fixture_non_discriminating,
-            "qa2_uncertainty_inputs": list(qa2_uncertainty_inputs),
-            "qa2_jacobian_shapes": [
-                None if shape is None else list(shape)
-                for shape in jacobian_shapes
-            ],
-            "profile_required_fields": sorted(required_fields),
-            "profile_present_fields": sorted(profile_keys),
-            "profile_missing_fields": list(missing_profile_fields),
+            "adopted_baseline_lock_sha256": _sha256(lock_path),
+            "authority_artifact_sha256": _sha256(AUTHORITY),
+            "authority_id": authority.get("authority_id"),
+            "authority_version": authority.get("version"),
+            "profile_id": profile.get("profile_id"),
+            "profile_version": profile.get("profile_version"),
+            "profile_hash": profile_hash,
+            "legacy_profile_missing_fields": legacy_missing,
+            "qa1_golden_case_id": qa1_golden.get("case_id"),
+            "qa2_golden_case_id": qa2_golden.get("case_id"),
         },
         "acceptance": acceptance,
         "failed_acceptance": failed,

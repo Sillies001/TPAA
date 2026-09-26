@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-platform comparison for incremental M2-MET-002 QA evidence."""
+"""Cross-platform comparison for formal M2-MET-002 QA evidence."""
 
 from __future__ import annotations
 
@@ -35,20 +35,36 @@ def compare(
         "linux_task_exact": linux.get("task_id") == TASK_ID,
         "windows_tracking_issue_exact": windows.get("tracking_issue") == TRACKING_ISSUE,
         "linux_tracking_issue_exact": linux.get("tracking_issue") == TRACKING_ISSUE,
-        "windows_incremental_pass": windows.get("status") == "PASS",
-        "linux_incremental_pass": linux.get("status") == "PASS",
-        "windows_task_not_complete": windows.get("task_complete") is False,
-        "linux_task_not_complete": linux.get("task_complete") is False,
+        "windows_pass": windows.get("status") == "PASS",
+        "linux_pass": linux.get("status") == "PASS",
+        "windows_implementation_complete": windows.get("implementation_complete") is True,
+        "linux_implementation_complete": linux.get("implementation_complete") is True,
+        "windows_task_complete": windows.get("task_complete") is True,
+        "linux_task_complete": linux.get("task_complete") is True,
+        "windows_authority_ready": windows.get("authority_resolution_ready") is True,
+        "linux_authority_ready": linux.get("authority_resolution_ready") is True,
+        "windows_authority_not_blocking": (
+            windows.get("formal_completion_blocked_by_authority") is False
+        ),
+        "linux_authority_not_blocking": (
+            linux.get("formal_completion_blocked_by_authority") is False
+        ),
         "windows_revision_exact": windows.get("source_revision") == expected_revision,
         "linux_revision_exact": linux.get("source_revision") == expected_revision,
+        "authority_equal": windows.get("authority") == linux.get("authority"),
         "logical_product_equal": windows.get("logical_product") == linux.get("logical_product"),
         "acceptance_equal": windows.get("acceptance") == linux.get("acceptance"),
-        "authority_gaps_equal": windows.get("authority_gaps") == linux.get("authority_gaps"),
-        "dependency_effects_equal": (
-            windows.get("dependency_effects") == linux.get("dependency_effects")
+        "authority_gaps_empty": (
+            windows.get("authority_gaps") == {}
+            and linux.get("authority_gaps") == {}
         ),
-        "blocked_error_codes_equal": (
-            windows.get("blocked_error_codes") == linux.get("blocked_error_codes")
+        "dependency_effects_empty": (
+            windows.get("dependency_effects") == {}
+            and linux.get("dependency_effects") == {}
+        ),
+        "blocked_error_codes_empty": (
+            windows.get("blocked_error_codes") == {}
+            and linux.get("blocked_error_codes") == {}
         ),
         "failed_acceptance_empty": (
             windows.get("failed_acceptance") == []
@@ -61,12 +77,14 @@ def compare(
         "task_id": TASK_ID,
         "tracking_issue": TRACKING_ISSUE,
         "status": "PASS" if not failed_acceptance else "FAIL",
-        "task_complete": False,
+        "implementation_complete": not failed_acceptance,
+        "task_complete": not failed_acceptance,
+        "formal_completion_blocked_by_authority": False,
+        "authority_resolution_ready": True,
         "source_revision": expected_revision,
         "windows_source_revision": windows.get("source_revision"),
         "linux_source_revision": linux.get("source_revision"),
-        "authority_gaps": windows.get("authority_gaps"),
-        "dependency_effects": windows.get("dependency_effects"),
+        "authority": windows.get("authority"),
         "logical_product": windows.get("logical_product"),
         "checks": checks,
         "failed_acceptance": failed_acceptance,
@@ -94,7 +112,10 @@ def main() -> int:
             "task_id": TASK_ID,
             "tracking_issue": TRACKING_ISSUE,
             "status": "FAIL",
+            "implementation_complete": False,
             "task_complete": False,
+            "formal_completion_blocked_by_authority": False,
+            "authority_resolution_ready": True,
             "source_revision": args.expected_revision,
             "error": f"{type(exc).__name__}: {exc}",
         }

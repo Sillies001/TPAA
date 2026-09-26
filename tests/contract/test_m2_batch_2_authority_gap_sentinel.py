@@ -20,8 +20,8 @@ def _run(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_m2_batch_2_authority_gap_sentinel_is_fail_closed(tmp_path: Path) -> None:
-    path = tmp_path / "authority-gap-sentinel.json"
+def test_m2_batch_2_authority_sentinel_reports_adopted_c3(tmp_path: Path) -> None:
+    path = tmp_path / "authority-sentinel.json"
     completed = _run(
         "m2-authority-gap-sentinel-check",
         "--evidence",
@@ -34,31 +34,22 @@ def test_m2_batch_2_authority_gap_sentinel_is_fail_closed(tmp_path: Path) -> Non
     assert evidence["tracking_issue"] == 97
     assert evidence["baseline_change_issue"] == 106
     assert evidence["status"] == "PASS"
-    assert evidence["authority_resolution_ready"] is False
-    assert evidence["task_complete"] is False
-    assert evidence["blocked_tasks"] == [
-        "M2-MET-002",
-        "M2-MET-005",
-        "M2-MET-006",
-        "M2-MET-007",
-    ]
+    assert evidence["authority_resolution_ready"] is True
+    assert evidence["task_complete"] is True
+    assert evidence["blocked_tasks"] == []
     assert evidence["failed_acceptance"] == []
     assert all(evidence["acceptance"].values())
     assert evidence["scope"] == {
-        "semantic_decision_made": False,
-        "authority_values_invented": False,
+        "semantic_decision_adopted": True,
+        "authority_values_invented_by_implementation": False,
         "sentinel_only": True,
     }
     product = evidence["logical_product"]
-    assert product["qa1_fixture_non_discriminating"] is True
-    assert product["qa2_uncertainty_inputs"] == [
-        "own_position_uncertainty_ref",
-        "target_position_uncertainty_ref",
-        "own_attitude_uncertainty_ref",
-        "target_attitude_uncertainty_ref",
-        "time_alignment_uncertainty_ref",
-    ]
-    assert product["profile_missing_fields"] == [
+    assert product["authority_id"] == "M2_QA_SNS_AUTHORITY"
+    assert product["authority_version"] == "1.0.0"
+    assert product["profile_id"] == "M2_REFERENCE_MATCH_QUALITY_V1"
+    assert product["profile_version"] == "1.1.0"
+    assert product["legacy_profile_missing_fields"] == [
         "accepted_reference_quality_statuses",
         "max_interpolation_age_us",
         "max_sigma_by_error_domain",
@@ -67,7 +58,7 @@ def test_m2_batch_2_authority_gap_sentinel_is_fail_closed(tmp_path: Path) -> Non
     ]
 
 
-def test_m2_batch_2_authority_gap_sentinel_compare_is_revision_exact(
+def test_m2_batch_2_authority_sentinel_compare_is_revision_exact(
     tmp_path: Path,
 ) -> None:
     source = tmp_path / "source.json"
@@ -102,7 +93,7 @@ def test_m2_batch_2_authority_gap_sentinel_compare_is_revision_exact(
         "TPAA_M2_BATCH_2_AUTHORITY_GAP_SENTINEL_CROSS_PLATFORM_V1"
     )
     assert evidence["status"] == "PASS"
-    assert evidence["authority_resolution_ready"] is False
-    assert evidence["task_complete"] is False
+    assert evidence["authority_resolution_ready"] is True
+    assert evidence["task_complete"] is True
     assert evidence["failed_acceptance"] == []
     assert all(evidence["checks"].values())

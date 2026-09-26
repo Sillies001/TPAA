@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-platform comparison for the M2 Batch 2 authority-gap sentinel."""
+"""Cross-platform comparison for the adopted M2 Batch 2 authority sentinel."""
 
 from __future__ import annotations
 
@@ -34,15 +34,18 @@ def compare(
             == linux.get("source_revision")
             == expected_revision
         ),
-        "resolution_stays_blocked": (
-            windows.get("authority_resolution_ready") is False
-            and linux.get("authority_resolution_ready") is False
+        "resolution_ready": (
+            windows.get("authority_resolution_ready") is True
+            and linux.get("authority_resolution_ready") is True
         ),
-        "tasks_stay_incomplete": (
-            windows.get("task_complete") is False
-            and linux.get("task_complete") is False
+        "authority_sentinel_complete": (
+            windows.get("task_complete") is True
+            and linux.get("task_complete") is True
         ),
-        "blocked_tasks_equal": windows.get("blocked_tasks") == linux.get("blocked_tasks"),
+        "blocked_tasks_empty": (
+            windows.get("blocked_tasks") == []
+            and linux.get("blocked_tasks") == []
+        ),
         "scope_equal": windows.get("scope") == linux.get("scope"),
         "logical_products_equal": (
             windows.get("logical_product") == linux.get("logical_product")
@@ -60,8 +63,8 @@ def compare(
         "baseline_change_issue": 106,
         "status": "PASS" if not failed else "FAIL",
         "source_revision": expected_revision,
-        "authority_resolution_ready": False,
-        "task_complete": False,
+        "authority_resolution_ready": not failed,
+        "task_complete": not failed,
         "logical_product": windows.get("logical_product"),
         "checks": checks,
         "failed_acceptance": failed,

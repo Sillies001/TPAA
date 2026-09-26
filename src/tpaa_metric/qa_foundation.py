@@ -1,12 +1,12 @@
-"""Executable M2 QA foundation Metric plugins with explicit authority blockers.
+"""Executable M2 QA foundation Metric plugins.
 
 M2-MET-002 owns P1-QA-001..008. The general CatalogMetricEngine remains the
 only execution engine. This module supplies algorithm plugins and a World-input
 adapter only; it does not create a family-specific engine.
 
-P1-QA-001 and P1-QA-002 intentionally fail closed until the frozen authority
-gaps recorded on #97/#85 are resolved. The other six plugins implement only
-formula semantics already frozen by P1_METRIC_CATALOG.
+P1-QA-001 and P1-QA-002 consume the adopted C3 machine authority frozen in
+M2_QA_SNS_AUTHORITY.json. The remaining six plugins continue to implement the
+formula semantics frozen by P1_METRIC_CATALOG.
 """
 
 from __future__ import annotations
@@ -38,15 +38,8 @@ QA_FOUNDATION_CODES = (
     "P1-QA-007",
     "P1-QA-008",
 )
-QA_AUTHORITY_BLOCKED_CODES = ("P1-QA-001", "P1-QA-002")
-QA_EXECUTABLE_CODES = (
-    "P1-QA-003",
-    "P1-QA-004",
-    "P1-QA-005",
-    "P1-QA-006",
-    "P1-QA-007",
-    "P1-QA-008",
-)
+QA_AUTHORITY_BLOCKED_CODES: tuple[str, ...] = ()
+QA_EXECUTABLE_CODES = QA_FOUNDATION_CODES
 
 
 def _mapping(value: object, *, field: str) -> Mapping[str, object]:
@@ -159,21 +152,466 @@ def _instance(
     }
 
 
-def _blocked_plugin(request: M2MetricPluginRequest) -> Mapping[str, object]:
-    if request.definition.metric_code == "P1-QA-001":
-        detail = (
-            "P1-QA-001 requires frozen quaternion ordering/rotation/body-axis/"
-            "az-el convention before non-identity frame transforms are executable"
+def _numeric_value(value: object, *, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"M2_QA_INPUT_INVALID:{field}")
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError(f"M2_QA_INPUT_NONFINITE:{field}")
+    return result
+
+
+def _vector(value: object, *, length: int, field: str) -> tuple[float, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        raise ValueError(f"M2_QA_INPUT_INVALID:{field}")
+    if len(value) != length:
+        raise ValueError(f"M2_QA_INPUT_SHAPE_INVALID:{field}:expected={length}")
+    return tuple(
+        _numeric_value(item, field=f"{field}[{index}]")
+        for index, item in enumerate(value)
+    )
+
+
+def _matrix(
+    value: object,
+    *,
+    rows: int,
+    columns: int,
+    field: str,
+) -> tuple[tuple[float, ...], ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        raise ValueError(f"M2_QA_INPUT_INVALID:{field}")
+    if len(value) != rows:
+        raise ValueError(
+            f"M2_QA_INPUT_SHAPE_INVALID:{field}:expected={rows}x{columns}"
         )
-    elif request.definition.metric_code == "P1-QA-002":
-        detail = (
-            "P1-QA-002 requires frozen mapping from position/attitude/time "
-            "uncertainty records into the six dimensions consumed by the 3x6 "
-            "relative_state_jacobian"
+    result: list[tuple[float, ...]] = []
+    for row_index, row in enumerate(value):
+        result.append(
+            _vector(
+                row,
+                length=columns,
+                field=f"{field}[{row_index}]",
+            )
         )
+    return tuple(result)
+
+
+def _transpose(
+    value: tuple[tuple[float, ...], ...],
+) -> tuple[tuple[float, ...], ...]:
+    return tuple(tuple(row[index] for row in value) for index in range(len(value[0])))
+
+
+def _matmul(
+    left: tuple[tuple[float, ...], ...],
+    right: tuple[tuple[float, ...], ...],
+) -> tuple[tuple[float, ...], ...]:
+    return tuple(
+        tuple(
+            sum(left[i][k] * right[k][j] for k in range(len(right)))
+            for j in range(len(right[0]))
+        )
+        for i in range(len(left))
+    )
+
+
+def _matvec(
+    matrix: tuple[tuple[float, ...], ...],
+    vector: tuple[float, ...],
+) -> tuple[float, ...]:
+    return tuple(
+        sum(row[index] * vector[index] for index in range(len(vector)))
+        for row in matrix
+    )
+
+
+def _quadratic(
+    vector: tuple[float, ...],
+    covariance: tuple[tuple[float, ...], ...],
+) -> float:
+    return sum(
+        vector[i] * covariance[i][j] * vector[j]
+        for i in range(len(vector))
+        for j in range(len(vector))
+    )
+
+
+def _sqrt_variance(value: float, *, field: str) -> float:
+    if value < -1e-12:
+        raise ValueError(f"M2_QA_VARIANCE_NEGATIVE:{field}:{value}")
+    return math.sqrt(max(value, 0.0))
+
+
+def _quat_rotation(
+    value: object,
+    *,
+    field: str,
+) -> tuple[tuple[float, ...], ...]:
+    raw = _vector(value, length=4, field=field)
+    norm = math.sqrt(sum(component * component for component in raw))
+    if norm == 0.0:
+        raise ValueError(f"M2_QA_QUATERNION_ZERO_NORM:{field}")
+    w, x, y, z = (component / norm for component in raw)
+    return (
+        (
+            1.0 - 2.0 * (y * y + z * z),
+            2.0 * (x * y - z * w),
+            2.0 * (x * z + y * w),
+        ),
+        (
+            2.0 * (x * y + z * w),
+            1.0 - 2.0 * (x * x + z * z),
+            2.0 * (y * z - x * w),
+        ),
+        (
+            2.0 * (x * z - y * w),
+            2.0 * (y * z + x * w),
+            1.0 - 2.0 * (x * x + y * y),
+        ),
+    )
+
+
+def _azimuth_elevation(vector: tuple[float, ...]) -> tuple[float, float]:
+    x, y, z = vector
+    azimuth = math.atan2(y, x)
+    if azimuth == math.pi:
+        azimuth = -math.pi
+    return azimuth, math.atan2(-z, math.hypot(x, y))
+
+
+def _qa001(request: M2MetricPluginRequest) -> Mapping[str, object]:
+    _metric_guard(request, metric_code="P1-QA-001", value_kind="STRUCTURED")
+    samples = _mappings(request.input_payload.get("samples"), field="samples")
+    instances: list[dict[str, object]] = []
+    for index, sample in enumerate(samples):
+        field = f"samples[{index}]"
+        own = _mapping(sample.get("own"), field=f"{field}.own")
+        target = _mapping(sample.get("target"), field=f"{field}.target")
+        own_position = _vector(
+            own.get("position_ecef_m"),
+            length=3,
+            field=f"{field}.own.position_ecef_m",
+        )
+        target_position = _vector(
+            target.get("position_ecef_m"),
+            length=3,
+            field=f"{field}.target.position_ecef_m",
+        )
+        own_velocity = _vector(
+            own.get("velocity_ecef_mps"),
+            length=3,
+            field=f"{field}.own.velocity_ecef_mps",
+        )
+        target_velocity = _vector(
+            target.get("velocity_ecef_mps"),
+            length=3,
+            field=f"{field}.target.velocity_ecef_mps",
+        )
+        r_rel = tuple(
+            target_position[axis] - own_position[axis] for axis in range(3)
+        )
+        v_rel = tuple(
+            target_velocity[axis] - own_velocity[axis] for axis in range(3)
+        )
+        range_m = math.sqrt(sum(component * component for component in r_rel))
+        if range_m <= 0.0:
+            raise ValueError(f"M2_QA_RANGE_INVALID:{field}")
+        range_rate = sum(
+            r_rel[axis] * v_rel[axis] for axis in range(3)
+        ) / range_m
+
+        body_from_ecef = _transpose(
+            _quat_rotation(
+                own.get("attitude_quat"),
+                field=f"{field}.own.attitude_quat",
+            )
+        )
+        r_body = _matvec(body_from_ecef, r_rel)
+        own_azimuth, own_elevation = _azimuth_elevation(r_body)
+
+        boresight = sample.get("sensor_boresight_quat")
+        sensor_azimuth: float | None = None
+        sensor_elevation: float | None = None
+        sensor_status = "NOT_CONFIGURED"
+        if boresight is not None:
+            sensor_from_body = _transpose(
+                _quat_rotation(
+                    boresight,
+                    field=f"{field}.sensor_boresight_quat",
+                )
+            )
+            r_sensor = _matvec(sensor_from_body, r_body)
+            sensor_azimuth, sensor_elevation = _azimuth_elevation(r_sensor)
+            sensor_status = "AVAILABLE"
+
+        structured = {
+            "r_rel_ecef_m": list(r_rel),
+            "v_rel_ecef_mps": list(v_rel),
+            "range_m": range_m,
+            "range_rate_mps": range_rate,
+            "own_body_az_rad": own_azimuth,
+            "own_body_el_rad": own_elevation,
+            "sensor_az_rad": sensor_azimuth,
+            "sensor_el_rad": sensor_elevation,
+            "sensor_frame_status": sensor_status,
+        }
+        instances.append(
+            _instance(
+                value_kind="STRUCTURED",
+                value_structured=structured,
+                diagnostics={
+                    "sample_index": index,
+                    "session_time_us": _integer(
+                        sample,
+                        "session_time_us",
+                        field=field,
+                    ),
+                },
+            )
+        )
+    return {
+        "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
+        "instances": instances,
+    }
+
+
+def _position_covariance(
+    record: Mapping[str, object],
+    *,
+    field: str,
+) -> tuple[tuple[float, ...], ...]:
+    if _text(record, "representation", field=field) != "COVARIANCE":
+        raise ValueError(f"M2_QA_POSITION_REPRESENTATION_INVALID:{field}")
+    if _text(record, "unit", field=field) != "m^2":
+        raise ValueError(f"M2_QA_POSITION_UNIT_INVALID:{field}")
+    if _text(record, "frame_ref", field=field) != "ECEF":
+        raise ValueError(f"M2_QA_POSITION_FRAME_INVALID:{field}")
+    covariance = _matrix(record.get("value"), rows=3, columns=3, field=f"{field}.value")
+    for i in range(3):
+        if covariance[i][i] < 0.0:
+            raise ValueError(f"M2_QA_POSITION_VARIANCE_NEGATIVE:{field}[{i},{i}]")
+        for j in range(3):
+            if not math.isclose(
+                covariance[i][j],
+                covariance[j][i],
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            ):
+                raise ValueError(f"M2_QA_POSITION_COVARIANCE_NOT_SYMMETRIC:{field}")
+    return covariance
+
+
+def _scalar_sigma(
+    record: Mapping[str, object],
+    *,
+    unit: str,
+    field: str,
+) -> float:
+    if _text(record, "unit", field=field) != unit:
+        raise ValueError(f"M2_QA_UNCERTAINTY_UNIT_INVALID:{field}")
+    representation = _text(record, "representation", field=field)
+    if representation == "SIGMA_1D":
+        sigma = _numeric_value(record.get("value"), field=f"{field}.value")
+    elif representation == "TWO_SIDED_HARD_BOUND":
+        bound = _numeric_value(record.get("value"), field=f"{field}.value")
+        if bound < 0.0:
+            raise ValueError(f"M2_QA_UNCERTAINTY_NEGATIVE:{field}")
+        sigma = bound / math.sqrt(3.0)
+    elif representation == "COVARIANCE":
+        variance = _matrix(
+            record.get("value"),
+            rows=1,
+            columns=1,
+            field=f"{field}.value",
+        )[0][0]
+        sigma = _sqrt_variance(variance, field=field)
     else:
-        detail = request.definition.metric_code
-    raise CatalogMetricEngineError("M2_QA_AUTHORITY_GAP", detail)
+        raise ValueError(
+            f"M2_QA_UNCERTAINTY_REPRESENTATION_UNSUPPORTED:{representation}"
+        )
+    if sigma < 0.0:
+        raise ValueError(f"M2_QA_UNCERTAINTY_NEGATIVE:{field}")
+    return sigma
+
+
+def _qa002(request: M2MetricPluginRequest) -> Mapping[str, object]:
+    _metric_guard(request, metric_code="P1-QA-002", value_kind="STRUCTURED")
+    samples = _mappings(request.input_payload.get("samples"), field="samples")
+    canonical_jacobian = (
+        (1.0, 0.0, 0.0, -1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0, 0.0, -1.0, 0.0),
+        (0.0, 0.0, 1.0, 0.0, 0.0, -1.0),
+    )
+    instances: list[dict[str, object]] = []
+    for index, sample in enumerate(samples):
+        field = f"samples[{index}]"
+        own_position = _position_covariance(
+            _mapping(
+                sample.get("own_position_uncertainty_ref"),
+                field=f"{field}.own_position_uncertainty_ref",
+            ),
+            field=f"{field}.own_position_uncertainty_ref",
+        )
+        target_position = _position_covariance(
+            _mapping(
+                sample.get("target_position_uncertainty_ref"),
+                field=f"{field}.target_position_uncertainty_ref",
+            ),
+            field=f"{field}.target_position_uncertainty_ref",
+        )
+        own_attitude_record = _mapping(
+            sample.get("own_attitude_uncertainty_ref"),
+            field=f"{field}.own_attitude_uncertainty_ref",
+        )
+        target_attitude_record = _mapping(
+            sample.get("target_attitude_uncertainty_ref"),
+            field=f"{field}.target_attitude_uncertainty_ref",
+        )
+        time_record = _mapping(
+            sample.get("time_alignment_uncertainty_ref"),
+            field=f"{field}.time_alignment_uncertainty_ref",
+        )
+        own_attitude_sigma = _scalar_sigma(
+            own_attitude_record,
+            unit="rad",
+            field=f"{field}.own_attitude_uncertainty_ref",
+        )
+        target_attitude_sigma = _scalar_sigma(
+            target_attitude_record,
+            unit="rad",
+            field=f"{field}.target_attitude_uncertainty_ref",
+        )
+        time_sigma_seconds = (
+            _scalar_sigma(
+                time_record,
+                unit="us",
+                field=f"{field}.time_alignment_uncertainty_ref",
+            )
+            / 1_000_000.0
+        )
+
+        jacobian = _matrix(
+            sample.get("relative_state_jacobian"),
+            rows=3,
+            columns=6,
+            field=f"{field}.relative_state_jacobian",
+        )
+        if jacobian != canonical_jacobian:
+            raise ValueError(f"M2_QA_JACOBIAN_SEMANTICS_INVALID:{field}")
+
+        basis = _mapping(sample.get("qa_001_basis"), field=f"{field}.qa_001_basis")
+        target_velocity = _vector(
+            basis.get("target_velocity_ecef_mps"),
+            length=3,
+            field=f"{field}.qa_001_basis.target_velocity_ecef_mps",
+        )
+        own_velocity = _vector(
+            basis.get("own_velocity_ecef_mps"),
+            length=3,
+            field=f"{field}.qa_001_basis.own_velocity_ecef_mps",
+        )
+        r_rel_ecef = _vector(
+            basis.get("r_rel_ecef_m"),
+            length=3,
+            field=f"{field}.qa_001_basis.r_rel_ecef_m",
+        )
+        body_from_ecef = _transpose(
+            _quat_rotation(
+                basis.get("own_attitude_quat"),
+                field=f"{field}.qa_001_basis.own_attitude_quat",
+            )
+        )
+
+        p_inputs = [[0.0] * 6 for _ in range(6)]
+        for i in range(3):
+            for j in range(3):
+                p_inputs[i][j] = target_position[i][j]
+                p_inputs[i + 3][j + 3] = own_position[i][j]
+        g_time = target_velocity + own_velocity
+        for i in range(6):
+            for j in range(6):
+                p_inputs[i][j] += (
+                    time_sigma_seconds
+                    * time_sigma_seconds
+                    * g_time[i]
+                    * g_time[j]
+                )
+        p_inputs_matrix = tuple(tuple(row) for row in p_inputs)
+        p_rel_ecef = _matmul(
+            _matmul(jacobian, p_inputs_matrix),
+            _transpose(jacobian),
+        )
+        p_rel_body = _matmul(
+            _matmul(body_from_ecef, p_rel_ecef),
+            _transpose(body_from_ecef),
+        )
+        r_body = _matvec(body_from_ecef, r_rel_ecef)
+        x, y, z = r_body
+        horizontal = math.hypot(x, y)
+        distance = math.sqrt(x * x + y * y + z * z)
+        if distance <= 0.0 or horizontal <= 0.0:
+            raise ValueError(f"M2_QA_UNCERTAINTY_GEOMETRY_SINGULAR:{field}")
+        elevation = math.atan2(-z, horizontal)
+
+        g_range = (x / distance, y / distance, z / distance)
+        g_az = (-y / (horizontal * horizontal), x / (horizontal * horizontal), 0.0)
+        g_el = (
+            z * x / (distance * distance * horizontal),
+            z * y / (distance * distance * horizontal),
+            -horizontal / (distance * distance),
+        )
+        range_variance = _quadratic(g_range, p_rel_body)
+        az_variance = _quadratic(g_az, p_rel_body) + (
+            own_attitude_sigma * own_attitude_sigma
+        ) / (math.cos(elevation) ** 2)
+        el_variance = _quadratic(g_el, p_rel_body) + (
+            own_attitude_sigma * own_attitude_sigma
+        )
+        position_variance = sum(p_rel_ecef[axis][axis] for axis in range(3))
+
+        structured = {
+            "sigma_range_m": _sqrt_variance(
+                range_variance,
+                field=f"{field}.sigma_range_m",
+            ),
+            "sigma_az_rad": _sqrt_variance(
+                az_variance,
+                field=f"{field}.sigma_az_rad",
+            ),
+            "sigma_el_rad": _sqrt_variance(
+                el_variance,
+                field=f"{field}.sigma_el_rad",
+            ),
+            "sigma_position_3d_m": _sqrt_variance(
+                position_variance,
+                field=f"{field}.sigma_position_3d_m",
+            ),
+        }
+        instances.append(
+            _instance(
+                value_kind="STRUCTURED",
+                value_structured=structured,
+                diagnostics={
+                    "sample_index": index,
+                    "time_alignment_sigma_s": time_sigma_seconds,
+                    "target_attitude_sigma_rad": target_attitude_sigma,
+                    "target_attitude_sensitivity": (
+                        "ZERO_FOR_QA001_V1_RELATIVE_POSITION_AND_OWN_BODY_ANGLES"
+                    ),
+                },
+            )
+        )
+    return {
+        "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
+        "instances": instances,
+    }
 
 
 def _qa003(request: M2MetricPluginRequest) -> Mapping[str, object]:
@@ -471,8 +909,8 @@ def _qa008(request: M2MetricPluginRequest) -> Mapping[str, object]:
 
 M2_QA_PLUGIN_IMPLEMENTATIONS: Mapping[str, M2MetricPlugin] = MappingProxyType(
     {
-        "P1-QA-001": _blocked_plugin,
-        "P1-QA-002": _blocked_plugin,
+        "P1-QA-001": _qa001,
+        "P1-QA-002": _qa002,
         "P1-QA-003": _qa003,
         "P1-QA-004": _qa004,
         "P1-QA-005": _qa005,
@@ -580,15 +1018,83 @@ def build_m2_qa_inputs(
         if row.match_status == "MATCHED"
     ]
 
+    truth = reference_time_world.reference_truth
+
+    def resolved_uncertainty(
+        row_index: int,
+        reference_name: str,
+    ) -> dict[str, object]:
+        row = truth.rows[row_index]
+        reference_id = row.uncertainty_refs.get(reference_name)
+        if not isinstance(reference_id, str):
+            raise CatalogMetricEngineError(
+                "M2_QA_UNCERTAINTY_REF_MISSING",
+                f"row={row_index} field={reference_name}",
+            )
+        raw = truth.uncertainty_records.get(reference_id)
+        record = _mapping(
+            raw,
+            field=f"uncertainty_records[{reference_id}]",
+        )
+        return {"uncertainty_ref_id": reference_id, **dict(record)}
+
+    qa001_samples: list[dict[str, object]] = []
+    qa002_samples: list[dict[str, object]] = []
+    for row_index, row in enumerate(truth.rows):
+        r_rel = [
+            row.target_position_ecef_m[axis] - row.own_position_ecef_m[axis]
+            for axis in range(3)
+        ]
+        qa001_samples.append(
+            {
+                "own": {
+                    "position_ecef_m": row.own_position_ecef_m,
+                    "velocity_ecef_mps": row.own_velocity_ecef_mps,
+                    "attitude_quat": row.own_attitude_quat,
+                },
+                "target": {
+                    "position_ecef_m": row.target_position_ecef_m,
+                    "velocity_ecef_mps": row.target_velocity_ecef_mps,
+                },
+                "sensor_boresight_quat": row.sensor_boresight_quat,
+                "session_time_us": row.session_time_us,
+            }
+        )
+        qa002_samples.append(
+            {
+                "own_position_uncertainty_ref": resolved_uncertainty(
+                    row_index,
+                    "own_position_uncertainty_ref",
+                ),
+                "target_position_uncertainty_ref": resolved_uncertainty(
+                    row_index,
+                    "target_position_uncertainty_ref",
+                ),
+                "own_attitude_uncertainty_ref": resolved_uncertainty(
+                    row_index,
+                    "own_attitude_uncertainty_ref",
+                ),
+                "target_attitude_uncertainty_ref": resolved_uncertainty(
+                    row_index,
+                    "target_attitude_uncertainty_ref",
+                ),
+                "time_alignment_uncertainty_ref": resolved_uncertainty(
+                    row_index,
+                    "time_alignment_uncertainty_ref",
+                ),
+                "relative_state_jacobian": row.relative_state_jacobian,
+                "qa_001_basis": {
+                    "target_velocity_ecef_mps": row.target_velocity_ecef_mps,
+                    "own_velocity_ecef_mps": row.own_velocity_ecef_mps,
+                    "own_attitude_quat": row.own_attitude_quat,
+                    "r_rel_ecef_m": r_rel,
+                },
+            }
+        )
+
     return {
-        "P1-QA-001": {
-            "authority_gap": "FRAME_CONVENTION_UNRESOLVED",
-            "world_logical_hash": reference_time_world.logical_hash,
-        },
-        "P1-QA-002": {
-            "authority_gap": "UNCERTAINTY_JACOBIAN_DIMENSION_MAPPING_UNRESOLVED",
-            "world_logical_hash": reference_time_world.logical_hash,
-        },
+        "P1-QA-001": {"samples": qa001_samples},
+        "P1-QA-002": {"samples": qa002_samples},
         "P1-QA-003": {"clock_segments": qa003_segments},
         "P1-QA-004": {"samples": qa004_samples},
         "P1-QA-005": {"samples": qa005_samples},

@@ -20,7 +20,7 @@ def _run(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_m2_met_002_incremental_contract_keeps_task_open(tmp_path: Path) -> None:
+def test_m2_met_002_contract_is_formally_complete(tmp_path: Path) -> None:
     evidence_path = tmp_path / "qa.json"
     completed = _run(
         "m2-qa-foundation-incremental-check",
@@ -34,23 +34,25 @@ def test_m2_met_002_incremental_contract_keeps_task_open(tmp_path: Path) -> None
     assert evidence["task_id"] == "M2-MET-002"
     assert evidence["tracking_issue"] == 97
     assert evidence["status"] == "PASS"
-    assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["task_complete"] is True
+    assert evidence["formal_completion_blocked_by_authority"] is False
+    assert evidence["authority_resolution_ready"] is True
+    assert evidence["authority_gaps"] == {}
+    assert evidence["dependency_effects"] == {}
+    assert evidence["blocked_error_codes"] == {}
     assert evidence["failed_acceptance"] == []
-    assert set(evidence["authority_gaps"]) == {"P1-QA-001", "P1-QA-002"}
-    assert set(evidence["dependency_effects"]) == {"P1-QA-006"}
+    assert evidence["authority"]["baseline_change_issue"] == 106
+    assert evidence["authority"]["authority_artifact_id"] == "M2_QA_SNS_AUTHORITY"
     assert evidence["acceptance"]["registry_uses_catalog_algorithm_identities_exact"]
-    assert evidence["acceptance"]["safe_subset_executes_through_general_engine"]
+    assert evidence["acceptance"]["full_qa_set_executes_through_general_engine"]
     product = evidence["logical_product"]
     assert product["dispatch_key"] == "algorithm_id+algorithm_version"
+    assert len(product["engine_records"]) == 8
     assert all(
         record["algorithm_version"] and len(record["dependency_manifest_hash"]) == 64
-        for record in product["safe_engine_records"]
+        for record in product["engine_records"]
     )
-    assert evidence["blocked_error_codes"] == {
-        "P1-QA-001": "M2_QA_AUTHORITY_GAP",
-        "P1-QA-002": "M2_QA_AUTHORITY_GAP",
-        "P1-QA-006": "M2_QA_AUTHORITY_GAP",
-    }
 
 
 def test_m2_met_002_cross_platform_compare_is_revision_exact(tmp_path: Path) -> None:
@@ -84,5 +86,9 @@ def test_m2_met_002_cross_platform_compare_is_revision_exact(tmp_path: Path) -> 
     assert result.returncode == 0, result.stdout + result.stderr
     evidence = json.loads(compared.read_text(encoding="utf-8"))
     assert evidence["status"] == "PASS"
-    assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["task_complete"] is True
+    assert evidence["formal_completion_blocked_by_authority"] is False
+    assert evidence["authority_resolution_ready"] is True
     assert evidence["failed_acceptance"] == []
+    assert all(evidence["checks"].values())
