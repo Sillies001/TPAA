@@ -758,6 +758,21 @@ def test_input_payload_lineage_rejects_opaque_runtime_objects() -> None:
     assert caught.value.code == "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED"
 
 
+def test_input_payload_lineage_rejects_nonfinite_values() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    engine = CatalogMetricEngine(plan, _registry())
+    inputs = _inputs()
+    inputs["P1-AIR-001"]["nonfinite"] = float("nan")
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        engine.execute(
+            inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    assert caught.value.code == "M2_METRIC_CANONICALIZATION_FAILED"
+
+
 def test_authority_lineage_hash_is_scoped_to_referenced_registry_entries(
     tmp_path: Path,
 ) -> None:

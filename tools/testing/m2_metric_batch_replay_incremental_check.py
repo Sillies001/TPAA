@@ -285,6 +285,96 @@ def verify() -> dict[str, object]:
     except CatalogMetricEngineError as exc:
         missing_subset_error_code = exc.code
 
+    request_error_codes: dict[str, str | None] = {
+        "duplicate_request": None,
+        "unknown_request": None,
+        "missing_plugin": None,
+        "version_mismatch": None,
+        "version_unbound": None,
+        "opaque_input_lineage": None,
+        "nonfinite_input_lineage": None,
+    }
+
+    try:
+        engine.execute(
+            inputs,
+            metric_codes=("P1-SNS-005", "P1-SNS-005"),
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["duplicate_request"] = exc.code
+
+    try:
+        engine.execute(
+            inputs,
+            metric_codes=("P1-SNS-005", "P1-UNKNOWN-999"),
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["unknown_request"] = exc.code
+
+    empty_registry = MetricPluginRegistry()
+    try:
+        CatalogMetricEngine(plan, empty_registry).execute(
+            inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["missing_plugin"] = exc.code
+
+    air001 = plan.definition("P1-AIR-001")
+    wrong_version_registry = MetricPluginRegistry()
+    wrong_version_registry.register(
+        air001.algorithm_id,
+        algorithm_version="0.0.0",
+        plugin_id="m2-met-007-wrong-version-probe-v1",
+        plugin=probe,
+    )
+    try:
+        CatalogMetricEngine(plan, wrong_version_registry).execute(
+            inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["version_mismatch"] = exc.code
+
+    unversioned_registry = MetricPluginRegistry()
+    unversioned_registry.register(
+        air001.algorithm_id,
+        plugin_id="m2-met-007-unversioned-probe-v1",
+        plugin=probe,
+    )
+    try:
+        CatalogMetricEngine(plan, unversioned_registry).execute(
+            inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["version_unbound"] = exc.code
+
+    opaque_inputs = {code: dict(payload) for code, payload in inputs.items()}
+    opaque_inputs["P1-AIR-001"]["opaque"] = object()
+    try:
+        engine.execute(
+            opaque_inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["opaque_input_lineage"] = exc.code
+
+    nonfinite_inputs = {code: dict(payload) for code, payload in inputs.items()}
+    nonfinite_inputs["P1-AIR-001"]["nonfinite"] = float("nan")
+    try:
+        engine.execute(
+            nonfinite_inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    except CatalogMetricEngineError as exc:
+        request_error_codes["nonfinite_input_lineage"] = exc.code
+
     plan_tampered = replace(plan, logical_hash="0" * 64)
     plan_tampered_batch = CatalogMetricEngine(plan_tampered, registry).execute(inputs)
 
@@ -466,6 +556,16 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
         for dependency in definition.metric_dependencies
     ]
+    replay_manifest = {
+        "plan_hash": plan.logical_hash,
+        "dispatch_key": first.dispatch_key,
+        "plugin_manifest_hash": first.plugin_manifest_hash,
+        "batch_logical_hash": first.logical_hash,
+        "dependency_edges": dependency_edges,
+        "subset_execution_metric_codes": list(subset.metric_codes),
+        "per_metric_hashes": per_metric_hashes,
+    }
+    replay_manifest_hash = _canonical_hash(replay_manifest)
 
     acceptance = {
         "catalog_membership_exact_32": (
@@ -601,16 +701,45 @@ def verify() -> dict[str, object]:
             len(per_metric_hashes) == 32 and all_hashes_well_formed
         ),
         "tampered_input_changes_batch_hash": tampered.logical_hash != first.logical_hash,
+        "duplicate_request_fails_closed": (
+            request_error_codes["duplicate_request"] == "M2_METRIC_REQUEST_DUPLICATE"
+        ),
+        "unknown_request_fails_closed": (
+            request_error_codes["unknown_request"] == "M2_METRIC_REQUEST_UNKNOWN"
+        ),
+        "missing_plugin_fails_closed": (
+            request_error_codes["missing_plugin"] == "M2_METRIC_PLUGIN_MISSING"
+        ),
+        "plugin_version_mismatch_fails_closed": (
+            request_error_codes["version_mismatch"]
+            == "M2_METRIC_PLUGIN_VERSION_MISMATCH"
+        ),
+        "unversioned_plugin_fails_closed": (
+            request_error_codes["version_unbound"]
+            == "M2_METRIC_PLUGIN_VERSION_UNBOUND"
+        ),
+        "opaque_input_lineage_fails_closed": (
+            request_error_codes["opaque_input_lineage"]
+            == "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED"
+        ),
+        "nonfinite_input_lineage_fails_closed": (
+            request_error_codes["nonfinite_input_lineage"]
+            == "M2_METRIC_CANONICALIZATION_FAILED"
+        ),
+        "replay_manifest_hash_well_formed": _is_sha256(replay_manifest_hash),
         "runtime_validation_enabled_for_probe_batch": True,
         "formal_predecessor_gate_preserved": True,
     }
     failed = sorted(key for key, passed in acceptance.items() if not passed)
+    implementation_complete = not failed
     return {
         "schema": "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_EVIDENCE_V1",
         "task_id": "M2-MET-007",
         "tracking_issue": 97,
         "status": "PASS" if not failed else "FAIL",
         "task_complete": False,
+        "implementation_complete": implementation_complete,
+        "formal_completion_blocked_by_predecessors": True,
         "source_revision": _git_revision(),
         "frozen_predecessors": [
             "M2-MET-002",
@@ -643,8 +772,13 @@ def verify() -> dict[str, object]:
             "governed_dependency_lineage_only": True,
             "formal_32_metric_replay_claimed": False,
             "authority_values_invented": False,
+            "implementation_side_batch_replay_complete": True,
+            "formal_task_completion_claimed": False,
         },
         "logical_product": {
+            "replay_manifest_hash": replay_manifest_hash,
+            "replay_manifest": replay_manifest,
+            "request_error_codes": request_error_codes,
             "plan_logical_hash": plan.logical_hash,
             "generated_metric_projection_sha256": plan.generated_metric_projection_sha256,
             "execution_identity_sha256": plan.execution_identity_sha256,
@@ -705,6 +839,8 @@ def main() -> int:
             "tracking_issue": 97,
             "status": "FAIL",
             "task_complete": False,
+            "implementation_complete": False,
+            "formal_completion_blocked_by_predecessors": True,
             "source_revision": _git_revision(),
             "error": f"{type(exc).__name__}: {exc}",
         }

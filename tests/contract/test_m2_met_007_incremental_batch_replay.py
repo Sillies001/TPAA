@@ -37,6 +37,8 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["tracking_issue"] == 97
     assert evidence["status"] == "PASS"
     assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["formal_completion_blocked_by_predecessors"] is True
     assert evidence["blocked_predecessors"] == [
         "M2-MET-002",
         "M2-MET-005",
@@ -56,9 +58,22 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         "governed_dependency_lineage_only": True,
         "formal_32_metric_replay_claimed": False,
         "authority_values_invented": False,
+        "implementation_side_batch_replay_complete": True,
+        "formal_task_completion_claimed": False,
     }
 
     product = evidence["logical_product"]
+    assert len(product["replay_manifest_hash"]) == 64
+    assert product["replay_manifest"]["batch_logical_hash"] == product["batch_logical_hash"]
+    assert product["request_error_codes"] == {
+        "duplicate_request": "M2_METRIC_REQUEST_DUPLICATE",
+        "unknown_request": "M2_METRIC_REQUEST_UNKNOWN",
+        "missing_plugin": "M2_METRIC_PLUGIN_MISSING",
+        "version_mismatch": "M2_METRIC_PLUGIN_VERSION_MISMATCH",
+        "version_unbound": "M2_METRIC_PLUGIN_VERSION_UNBOUND",
+        "opaque_input_lineage": "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED",
+        "nonfinite_input_lineage": "M2_METRIC_CANONICALIZATION_FAILED",
+    }
     assert len(product["catalog_metric_codes"]) == 32
     assert len(product["execution_metric_codes"]) == 32
     assert product["dispatch_key"] == "algorithm_id+algorithm_version"
@@ -97,6 +112,14 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["acceptance"]["generated_metric_projection_hash_well_formed"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
+    assert evidence["acceptance"]["duplicate_request_fails_closed"]
+    assert evidence["acceptance"]["unknown_request_fails_closed"]
+    assert evidence["acceptance"]["missing_plugin_fails_closed"]
+    assert evidence["acceptance"]["plugin_version_mismatch_fails_closed"]
+    assert evidence["acceptance"]["unversioned_plugin_fails_closed"]
+    assert evidence["acceptance"]["opaque_input_lineage_fails_closed"]
+    assert evidence["acceptance"]["nonfinite_input_lineage_fails_closed"]
+    assert evidence["acceptance"]["replay_manifest_hash_well_formed"]
     assert len(product["generated_metric_projection_sha256"]) == 64
     assert len(product["execution_identity_sha256"]) == 64
     assert len(product["plugin_manifest_hash"]) == 64
@@ -169,5 +192,7 @@ def test_m2_met_007_incremental_cross_platform_compare_is_revision_exact(
     )
     assert evidence["status"] == "PASS"
     assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["formal_completion_blocked_by_predecessors"] is True
     assert evidence["failed_acceptance"] == []
     assert all(evidence["checks"].values())

@@ -34,6 +34,14 @@ def compare(
             windows.get("task_complete") is False
             and linux.get("task_complete") is False
         ),
+        "implementation_complete": (
+            windows.get("implementation_complete") is True
+            and linux.get("implementation_complete") is True
+        ),
+        "formal_completion_blocked_by_predecessors": (
+            windows.get("formal_completion_blocked_by_predecessors") is True
+            and linux.get("formal_completion_blocked_by_predecessors") is True
+        ),
         "revisions_exact": (
             windows.get("source_revision")
             == linux.get("source_revision")
@@ -69,7 +77,13 @@ def compare(
         "tracking_issue": 97,
         "status": "PASS" if not failed else "FAIL",
         "task_complete": False,
+        "implementation_complete": not failed,
+        "formal_completion_blocked_by_predecessors": True,
         "source_revision": expected_revision,
+        "frozen_predecessors": windows.get("frozen_predecessors"),
+        "blocked_predecessors": windows.get("blocked_predecessors"),
+        "external_authority_gaps": windows.get("external_authority_gaps"),
+        "scope": windows.get("scope"),
         "logical_product": windows.get("logical_product"),
         "checks": checks,
         "failed_acceptance": failed,
@@ -100,6 +114,8 @@ def main() -> int:
             "tracking_issue": 97,
             "status": "FAIL",
             "task_complete": False,
+            "implementation_complete": False,
+            "formal_completion_blocked_by_predecessors": True,
             "source_revision": args.expected_revision,
             "error": f"{type(exc).__name__}: {exc}",
         }
