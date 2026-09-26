@@ -88,6 +88,8 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m2-sns-accuracy-incremental-compare",
         "m2-runtime-contract-incremental-check",
         "m2-runtime-contract-incremental-compare",
+        "m2-batch-replay-incremental-check",
+        "m2-batch-replay-incremental-compare",
         "m1-source-registry-check",
         "m1-session-time-check",
         "m1-aircraft-identity-check",

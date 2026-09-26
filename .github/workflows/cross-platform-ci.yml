@@ -158,6 +158,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check
           --evidence evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
 
+      - name: Emit incremental M2-MET-007 batch/replay evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-batch-replay-incremental-check
+          --evidence evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -286,6 +291,7 @@ jobs:
             evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json
             evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json
             evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
+            evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -415,6 +421,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
 
+      - name: Compare Windows and Linux incremental M2-MET-007 batch/replay
+        run: >-
+          python tools/dev/tpaa_dev.py m2-batch-replay-incremental-compare
+          --windows downloaded/evidence/m2-met-007/windows/batch-replay-incremental.json
+          --linux downloaded/evidence/m2-met-007/linux/batch-replay-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -463,6 +477,7 @@ jobs:
             evidence/cross-platform/m2-met-004-logical-equivalence.json
             evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
+            evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json

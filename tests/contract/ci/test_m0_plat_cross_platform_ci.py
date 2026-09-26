@@ -552,3 +552,35 @@ def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> N
         )
         >= 2
     )
+
+
+
+def test_m2_met_007_batch_replay_increment_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit incremental M2-MET-007 batch/replay evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-batch-replay-incremental-check" in text
+    assert (
+        text.count(
+            "evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json"
+        )
+        >= 2
+    )
+    assert (
+        "- name: Compare Windows and Linux incremental M2-MET-007 batch/replay"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-batch-replay-incremental-compare" in text
+    assert (
+        "downloaded/evidence/m2-met-007/windows/batch-replay-incremental.json"
+        in text
+    )
+    assert (
+        "downloaded/evidence/m2-met-007/linux/batch-replay-incremental.json"
+        in text
+    )
+    assert (
+        text.count(
+            "evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json"
+        )
+        >= 2
+    )
