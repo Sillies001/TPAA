@@ -353,8 +353,6 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
-            "observation_lane": numeric.observation_lane,
-            "publication_route": numeric.publication_route,
                 "observation_lane": numeric.observation_lane,
                 "publication_route": numeric.publication_route,
                 "instances": [
@@ -406,8 +404,6 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {
                 "metric_code": structured.metric_code,
                 "subject_type": structured.subject_type,
-            "observation_lane": structured.observation_lane,
-            "publication_route": structured.publication_route,
                 "observation_lane": structured.observation_lane,
                 "publication_route": structured.publication_route,
                 "instances": [
@@ -510,8 +506,6 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
-            "observation_lane": sns.observation_lane,
-            "publication_route": sns.publication_route,
                 "observation_lane": sns.observation_lane,
                 "publication_route": sns.publication_route,
                 "instances": [
@@ -531,8 +525,6 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
-            "observation_lane": sns.observation_lane,
-            "publication_route": sns.publication_route,
                 "observation_lane": sns.observation_lane,
                 "publication_route": sns.publication_route,
                 "applicable": False,
@@ -549,8 +541,6 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
-            "observation_lane": sns.observation_lane,
-            "publication_route": sns.publication_route,
                 "observation_lane": sns.observation_lane,
                 "publication_route": sns.publication_route,
                 "applicable": False,
@@ -567,8 +557,6 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {
                 "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
-            "observation_lane": sns.observation_lane,
-            "publication_route": sns.publication_route,
                 "observation_lane": sns.observation_lane,
                 "publication_route": sns.publication_route,
                 "instances": [
@@ -615,8 +603,6 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
-            "observation_lane": numeric.observation_lane,
-            "publication_route": numeric.publication_route,
                 "observation_lane": numeric.observation_lane,
                 "publication_route": numeric.publication_route,
                 "instances": [
@@ -638,8 +624,6 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {
                 "metric_code": numeric.metric_code,
                 "subject_type": numeric.subject_type,
-            "observation_lane": numeric.observation_lane,
-            "publication_route": numeric.publication_route,
                 "observation_lane": numeric.observation_lane,
                 "publication_route": numeric.publication_route,
                 "instances": [
@@ -663,8 +647,6 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
                 {
                     "metric_code": numeric.metric_code,
                     "subject_type": numeric.subject_type,
-            "observation_lane": numeric.observation_lane,
-            "publication_route": numeric.publication_route,
                 "observation_lane": numeric.observation_lane,
                 "publication_route": numeric.publication_route,
                     "instances": [
