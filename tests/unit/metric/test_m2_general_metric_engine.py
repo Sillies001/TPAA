@@ -49,6 +49,7 @@ def _copy_authority(tmp_path: Path) -> Path:
 def _probe(request: M2MetricPluginRequest) -> dict[str, object]:
     return {
         "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
         "algorithm_id": request.definition.algorithm_id,
         "operators": sorted(request.operators),
         "input": dict(request.input_payload),
