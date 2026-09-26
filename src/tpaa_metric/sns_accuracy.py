@@ -498,13 +498,15 @@ def build_m2_sns_accuracy_inputs(
     radar_world: M2RadarSensorWorld,
     stage_world: M2StageWorldLineage,
     *,
-    reference_match_quality_profile: Mapping[str, object],
     associations: Mapping[str, Mapping[str, object]],
+    reference_match_quality_profile: Mapping[str, object] | None = None,
 ) -> dict[str, Mapping[str, object]]:
-    """Bind World rows to caller-supplied association and quality contracts.
+    """Bind World rows to association and governed match-quality contracts.
 
-    The caller is required to provide both external contracts.  This adapter
-    deliberately has no fallback profile, association inference, or frame
+    M2 consumes the C3-adopted match-quality profile carried by the measurement
+    alignment World product. Callers may provide the profile explicitly only
+    when it is byte-for-byte logically equal to that adopted contract. There is
+    no synthetic/default profile fallback, association inference, or frame
     conversion.
     """
 
@@ -517,7 +519,25 @@ def build_m2_sns_accuracy_inputs(
         or stage_world.status != "READY"
     ):
         raise CatalogMetricEngineError("M2_SNS_STAGE_WORLD_MISMATCH", stage_world.logical_hash)
-    missing = sorted(_REQUIRED_PROFILE_FIELDS - set(reference_match_quality_profile))
+
+    adopted_profile = dict(
+        radar_world.measurement_alignment.quality_profile.as_contract()
+    )
+    if reference_match_quality_profile is None:
+        quality_profile = adopted_profile
+    else:
+        quality_profile = dict(reference_match_quality_profile)
+        if quality_profile != adopted_profile:
+            raise CatalogMetricEngineError(
+                "M2_SNS_MATCH_QUALITY_PROFILE_AUTHORITY_MISMATCH",
+                (
+                    f"supplied={quality_profile.get('profile_id')!r}@"
+                    f"{quality_profile.get('profile_version')!r} "
+                    f"adopted={adopted_profile.get('profile_id')!r}@"
+                    f"{adopted_profile.get('profile_version')!r}"
+                ),
+            )
+    missing = sorted(_REQUIRED_PROFILE_FIELDS - set(quality_profile))
     if missing:
         raise CatalogMetricEngineError("M2_SNS_MATCH_QUALITY_PROFILE_INCOMPLETE", repr(missing))
     rows: list[dict[str, object]] = []
@@ -572,7 +592,7 @@ def build_m2_sns_accuracy_inputs(
             "mission_system_instance_id": radar_world.mission_system_instance_id,
             "world_logical_hash": radar_world.logical_hash,
             "stage_world_logical_hash": stage_world.logical_hash,
-            "reference_match_quality_profile": dict(reference_match_quality_profile),
+            "reference_match_quality_profile": quality_profile,
             "samples": tuple(rows),
             "association_contract_supplied": True,
             "quality_profile_contract_supplied": True,

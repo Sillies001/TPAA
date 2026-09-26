@@ -406,7 +406,7 @@ def test_shared_engine_rejects_invalid_qa_payload_after_c3_adoption() -> None:
     assert caught.value.code == "M2_METRIC_PLUGIN_OUTPUT_INVALID"
 
 
-def test_world_adapter_requires_and_preserves_complete_external_contracts() -> None:
+def test_world_adapter_consumes_adopted_c3_profile_and_preserves_associations() -> None:
     stage_world = project_m2_stage_world_lineage(
         M1_FIXTURES / "BF_M1_NOMINAL_V1",
         M2_FIXTURES / "RT_M2_NOMINAL_V1",
@@ -416,12 +416,22 @@ def test_world_adapter_requires_and_preserves_complete_external_contracts() -> N
         authority_root=AUTHORITY,
         release_id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa9",
     )
+    adopted_profile = dict(
+        stage_world.radar_sensor_world.measurement_alignment.quality_profile.as_contract()
+    )
+    assert adopted_profile["profile_id"] == "M2_REFERENCE_MATCH_QUALITY_V1"
+    assert adopted_profile["profile_version"] == "1.1.0"
+    assert (
+        adopted_profile["profile_hash"]
+        == "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+    )
+
     partial = {
-        "profile_id": stage_world.radar_sensor_world.measurement_alignment.quality_profile.profile_id,
-        "profile_version": stage_world.radar_sensor_world.measurement_alignment.quality_profile.profile_version,
-        "profile_hash": stage_world.radar_sensor_world.measurement_alignment.quality_profile.profile_hash,
-        "max_gap_us": 50_000,
-        "min_coverage": 0.8,
+        "profile_id": adopted_profile["profile_id"],
+        "profile_version": adopted_profile["profile_version"],
+        "profile_hash": adopted_profile["profile_hash"],
+        "max_gap_us": adopted_profile["max_gap_us"],
+        "min_coverage": adopted_profile["min_coverage"],
     }
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_sns_accuracy_inputs(
@@ -430,7 +440,7 @@ def test_world_adapter_requires_and_preserves_complete_external_contracts() -> N
             reference_match_quality_profile=partial,
             associations={},
         )
-    assert caught.value.code == "M2_SNS_MATCH_QUALITY_PROFILE_INCOMPLETE"
+    assert caught.value.code == "M2_SNS_MATCH_QUALITY_PROFILE_AUTHORITY_MISMATCH"
 
     associations = {
         row.measurement_id: {
@@ -441,23 +451,32 @@ def test_world_adapter_requires_and_preserves_complete_external_contracts() -> N
         }
         for row in stage_world.radar_sensor_world.measurement_alignment.rows
     }
-    profile = _profile()
     inputs = build_m2_sns_accuracy_inputs(
         stage_world.radar_sensor_world,
         stage_world,
-        reference_match_quality_profile=profile,
         associations=associations,
     )
     assert tuple(inputs) == SNS_ACCURACY_CODES
     for payload in inputs.values():
         assert payload["world_logical_hash"] == stage_world.radar_sensor_world.logical_hash
         assert payload["stage_world_logical_hash"] == stage_world.logical_hash
-        assert payload["reference_match_quality_profile"] == profile
+        assert payload["reference_match_quality_profile"] == adopted_profile
         assert payload["association_contract_supplied"] is True
         assert payload["quality_profile_contract_supplied"] is True
         assert payload["association_rebuilt_by_metric"] is False
         assert payload["quality_policy_defaulted_by_metric"] is False
         assert payload["frame_transform_executed_by_metric"] is False
+
+    mismatched_profile = dict(adopted_profile)
+    mismatched_profile["profile_version"] = "9.9.9"
+    with pytest.raises(CatalogMetricEngineError) as mismatch:
+        build_m2_sns_accuracy_inputs(
+            stage_world.radar_sensor_world,
+            stage_world,
+            reference_match_quality_profile=mismatched_profile,
+            associations=associations,
+        )
+    assert mismatch.value.code == "M2_SNS_MATCH_QUALITY_PROFILE_AUTHORITY_MISMATCH"
 
     missing_associations = dict(associations)
     first_measurement_id = next(iter(missing_associations))
@@ -466,7 +485,6 @@ def test_world_adapter_requires_and_preserves_complete_external_contracts() -> N
         build_m2_sns_accuracy_inputs(
             stage_world.radar_sensor_world,
             stage_world,
-            reference_match_quality_profile=profile,
             associations=missing_associations,
         )
     assert missing.value.code == "M2_SNS_ASSOCIATION_CONTRACT_MISSING"

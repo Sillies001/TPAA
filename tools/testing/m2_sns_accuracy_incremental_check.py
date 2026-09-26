@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Post-C3 incremental evidence for M2-MET-005 SNS accuracy.
+"""Post-C3 formal evidence for M2-MET-005 SNS accuracy.
 
-All 17 frozen formulas and negative gates are executable. The task remains
-formally incomplete while the approved C3 reference-match-quality profile has
-not yet been integrated into the M2 SNS consumer path.
+All 17 frozen formulas, negative gates, and the adopted C3 match-quality
+profile are executed through the M2 SNS consumer path. Formal completion is
+claimed only when the governed profile carried by the World product is consumed
+exactly and all cross-platform evidence remains deterministic.
 """
 
 from __future__ import annotations
@@ -29,13 +30,17 @@ from tpaa_metric import (  # noqa: E402
     M2MetricPluginRequest,
     MetricPluginRegistry,
     build_m2_metric_execution_plan,
+    build_m2_sns_accuracy_inputs,
     register_m2_sns_accuracy_plugins,
     validate_m2_runtime_output,
 )
 from tpaa_metric.operators import M2_OPERATOR_IMPLEMENTATIONS  # noqa: E402
 from tpaa_metric.qa_foundation import register_m2_qa_plugins  # noqa: E402
+from tpaa_world import project_m2_stage_world_lineage  # noqa: E402
 
 AUTHORITY = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
+M1_FIXTURES = REPO_ROOT / "tests" / "fixtures" / "m1"
+M2_FIXTURES = REPO_ROOT / "tests" / "fixtures" / "m2"
 
 
 def _git_revision() -> str:
@@ -52,41 +57,23 @@ def _git_revision() -> str:
 
 
 def _profile() -> dict[str, object]:
-    domains = {
-        "RANGE",
-        "AZIMUTH",
-        "ELEVATION",
-        "POSITION_3D",
-        "RADIAL_VELOCITY",
-        "CROSS_RANGE",
-        "VERTICAL_POSITION",
-        "RADIAL_POSITION",
-    }
-    return {
-        "profile_id": "SYNTHETIC_COMPLETE_PROFILE_V1",
-        "profile_version": "1.0.0",
-        "profile_hash": "c" * 64,
-        "max_interpolation_age_us": 100,
-        "accepted_reference_quality_statuses": ["ACCEPTED"],
-        "max_sigma_by_error_domain": {domain: None for domain in sorted(domains)},
-        "required_uncertainty_components": [
-            "reference_truth_uncertainty",
-            "alignment_uncertainty",
-            "sensor_measurement_uncertainty",
-        ],
-        "na_reason_map": {
-            key: key
-            for key in (
-                "ASSOCIATION_INVALID",
-                "MATCH_STATUS_INVALID",
-                "INTERPOLATION_AGE_EXCEEDED",
-                "REFERENCE_QUALITY_REJECTED",
-                "UNCERTAINTY_COMPONENT_MISSING",
-                "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
-                "NO_VALID_MATCHED_SAMPLES",
-            )
-        },
-    }
+    authority_document = json.loads(
+        (AUTHORITY / "M2_QA_SNS_AUTHORITY.json").read_text(encoding="utf-8")
+    )
+    raw = authority_document["reference_match_quality_profile"]
+    fields = (
+        "profile_id",
+        "profile_version",
+        "profile_hash",
+        "max_gap_us",
+        "min_coverage",
+        "max_interpolation_age_us",
+        "accepted_reference_quality_statuses",
+        "max_sigma_by_error_domain",
+        "required_uncertainty_components",
+        "na_reason_map",
+    )
+    return {field: raw[field] for field in fields}
 
 
 def _sample(index: int) -> dict[str, object]:
@@ -302,7 +289,7 @@ def verify() -> dict[str, object]:
     rejected_samples = [_sample(1), _sample(2), _sample(3)]
     rejected_samples[0]["association_valid"] = False
     rejected_samples[1]["reference_quality_status"] = "REJECTED"
-    rejected_samples[2]["reference_time_us"] = 0
+    rejected_samples[2]["reference_time_us"] = 100_000
     rejected_payload["samples"] = rejected_samples
     rejected = {
         code: _direct(plan, registry, code, rejected_payload) for code in SNS_ACCURACY_CODES
@@ -312,7 +299,7 @@ def verify() -> dict[str, object]:
     full_rejection_samples = [_sample(index) for index in range(1, 7)]
     full_rejection_samples[0]["association_valid"] = False
     full_rejection_samples[1]["match_status"] = "UNMATCHED"
-    full_rejection_samples[2]["reference_time_us"] = 0
+    full_rejection_samples[2]["reference_time_us"] = 100_000
     full_rejection_samples[3]["reference_quality_status"] = "REJECTED"
     missing_uncertainty = full_rejection_samples[4]["uncertainty_components"]
     if not isinstance(missing_uncertainty, dict):
@@ -431,6 +418,45 @@ def verify() -> dict[str, object]:
         ).read_text(encoding="utf-8")
     )["quality_profile"]
     fixture_profile_missing = sorted(required_profile_fields - set(fixture_profile))
+    adopted_profile = _profile()
+
+    stage_world = project_m2_stage_world_lineage(
+        M1_FIXTURES / "BF_M1_NOMINAL_V1",
+        M2_FIXTURES / "RT_M2_NOMINAL_V1",
+        M2_FIXTURES / "TA_M2_NOMINAL_V1",
+        M2_FIXTURES / "MSI_M2_RADAR_V1",
+        M2_FIXTURES / "MA_M2_NOMINAL_V1",
+        authority_root=AUTHORITY,
+        release_id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5",
+    )
+    associations = {
+        row.measurement_id: {
+            "association_id": f"assoc::{row.measurement_id}",
+            "association_provenance": "m2-met-005:formal-c3:v1",
+            "association_valid": True,
+            "reference_quality_status": "ACCEPTED",
+        }
+        for row in stage_world.radar_sensor_world.measurement_alignment.rows
+    }
+    adopted_inputs = build_m2_sns_accuracy_inputs(
+        stage_world.radar_sensor_world,
+        stage_world,
+        associations=associations,
+    )
+    adopted_outputs = {
+        code: _direct(plan, registry, code, adopted_inputs[code])
+        for code in SNS_ACCURACY_CODES
+    }
+    adopted_runtime_transport_valid = True
+    try:
+        for code in SNS_ACCURACY_CODES:
+            validate_m2_runtime_output(
+                plan.definition(code),
+                adopted_inputs[code],
+                adopted_outputs[code],
+            )
+    except CatalogMetricEngineError:
+        adopted_runtime_transport_valid = False
 
     definitions = [plan.definition(code) for code in SNS_ACCURACY_CODES]
     rejection_reasons = [
@@ -447,7 +473,9 @@ def verify() -> dict[str, object]:
         "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
     ]
     catalog_domain_map = catalog_profile["metric_error_domain_map"]
-    profile_required_fields_exact = required_profile_fields == set(_profile())
+    profile_required_fields_exact = required_profile_fields == (
+        set(adopted_profile) - {"max_gap_us", "min_coverage"}
+    )
     catalog_domain_map_exact = all(
         _evidence(outputs[code])["error_domain"] == catalog_domain_map[code]
         for code in SNS_ACCURACY_CODES
@@ -532,9 +560,10 @@ def verify() -> dict[str, object]:
         ),
         "profile_provenance_persisted_exact_17": all(
             _evidence(output)["reference_truth_profile_id"]
-            == "SYNTHETIC_COMPLETE_PROFILE_V1"
-            and _evidence(output)["reference_truth_profile_version"] == "1.0.0"
-            and _evidence(output)["reference_truth_profile_hash"] == "c" * 64
+            == "M2_REFERENCE_MATCH_QUALITY_V1"
+            and _evidence(output)["reference_truth_profile_version"] == "1.1.0"
+            and _evidence(output)["reference_truth_profile_hash"]
+            == "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
             for output in outputs.values()
         ),
         "profile_identity_change_segments_evidence": (
@@ -560,14 +589,33 @@ def verify() -> dict[str, object]:
         "invalid_qa_dependency_payload_fails_closed": (
             dependency_error == "M2_METRIC_PLUGIN_OUTPUT_INVALID"
         ),
-        "frozen_fixture_profile_gap_detected": fixture_profile_missing
-        == [
-            "accepted_reference_quality_statuses",
-            "max_interpolation_age_us",
-            "max_sigma_by_error_domain",
-            "na_reason_map",
-            "required_uncertainty_components",
-        ],
+        "adopted_c3_profile_fixture_exact": (
+            fixture_profile_missing == []
+            and fixture_profile == adopted_profile
+        ),
+        "adopted_c3_profile_consumed_by_world_adapter": (
+            dict(
+                stage_world.radar_sensor_world.measurement_alignment.quality_profile.as_contract()
+            )
+            == adopted_profile
+            and all(
+                input_payload["reference_match_quality_profile"] == adopted_profile
+                for input_payload in adopted_inputs.values()
+            )
+        ),
+        "adopted_c3_profile_outputs_valid_17": (
+            adopted_runtime_transport_valid
+            and all(
+                _instance(output).get("status") == "VALID"
+                and _evidence(output)["reference_match_quality_profile_id"]
+                == "M2_REFERENCE_MATCH_QUALITY_V1"
+                and _evidence(output)["reference_match_quality_profile_version"]
+                == "1.1.0"
+                and _evidence(output)["reference_match_quality_profile_hash"]
+                == "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+                for output in adopted_outputs.values()
+            )
+        ),
         "algorithm_replay_exact": outputs
         == {code: _direct(plan, registry, code, payload) for code in SNS_ACCURACY_CODES},
     }
@@ -578,21 +626,21 @@ def verify() -> dict[str, object]:
         "task_id": "M2-MET-005",
         "tracking_issue": 97,
         "status": "PASS" if not failed else "FAIL",
-        "task_complete": False,
+        "task_complete": implementation_complete,
         "implementation_complete": implementation_complete,
         "formal_completion_blocked_by_authority": False,
-        "formal_completion_blocked_by_profile_integration": True,
+        "formal_completion_blocked_by_profile_integration": False,
         "source_revision": _git_revision(),
         "authority_gaps": {},
         "invalid_qa_payload_error_code": dependency_error,
         "fixture_profile_missing_fields": fixture_profile_missing,
         "scope": {
             "authority_independent_algorithms_executed": True,
-            "synthetic_complete_profile_only": True,
+            "synthetic_complete_profile_only": False,
             "approved_c3_authority_available": True,
-            "approved_c3_profile_consumed": False,
+            "approved_c3_profile_consumed": True,
             "adopted_qa_semantics_executed_by_this_check": False,
-            "formal_task_completion_claimed": False,
+            "formal_task_completion_claimed": implementation_complete,
         },
         "logical_product": {
             "delivery_membership": list(SNS_ACCURACY_CODES),
@@ -612,6 +660,10 @@ def verify() -> dict[str, object]:
             "mixed_rejection_output": mixed_output,
             "empty_output": empty_output,
             "segmented_profile_output": segmented_output,
+            "adopted_profile_contract": adopted_profile,
+            "adopted_profile_outputs": adopted_outputs,
+            "adopted_world_logical_hash": stage_world.radar_sensor_world.logical_hash,
+            "adopted_stage_world_logical_hash": stage_world.logical_hash,
             "catalog_profile_contract": {
                 "required_instance_fields": catalog_profile["required_instance_fields"],
                 "metric_error_domain_map": {
@@ -642,7 +694,7 @@ def main() -> int:
             "task_complete": False,
             "implementation_complete": False,
             "formal_completion_blocked_by_authority": False,
-            "formal_completion_blocked_by_profile_integration": True,
+            "formal_completion_blocked_by_profile_integration": False,
             "source_revision": _git_revision(),
             "error": f"{type(exc).__name__}: {exc}",
         }

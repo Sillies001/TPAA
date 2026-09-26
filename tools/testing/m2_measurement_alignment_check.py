@@ -85,6 +85,26 @@ def verify() -> dict[str, object]:
             and nominal.coverage == 1.0
             and nominal.max_observed_gap_us == 5000
         ),
+        "adopted_c3_match_quality_profile_exact": (
+            nominal.quality_profile.profile_id == "M2_REFERENCE_MATCH_QUALITY_V1"
+            and nominal.quality_profile.profile_version == "1.1.0"
+            and nominal.quality_profile.profile_hash
+            == "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+            and nominal.quality_profile.max_gap_us == 50000
+            and nominal.quality_profile.max_interpolation_age_us == 50000
+            and nominal.quality_profile.accepted_reference_quality_statuses
+            == ("ACCEPTED",)
+            and nominal.quality_profile.required_uncertainty_components
+            == (
+                "reference_truth_uncertainty",
+                "alignment_uncertainty",
+                "sensor_measurement_uncertainty",
+            )
+            and all(
+                value is None
+                for value in nominal.quality_profile.max_sigma_by_error_domain.values()
+            )
+        ),
         "gap_fixture_preserved_fail_closed": (
             gap.status == "INSUFFICIENT"
             and gap.reason_codes == ("MAX_GAP_EXCEEDED", "MIN_COVERAGE_NOT_MET")
@@ -119,6 +139,7 @@ def verify() -> dict[str, object]:
         "quality_profile_id": nominal.quality_profile.profile_id,
         "quality_profile_version": nominal.quality_profile.profile_version,
         "quality_profile_hash": nominal.quality_profile.profile_hash,
+        "quality_profile_contract": dict(nominal.quality_profile.as_contract()),
         "coverage": nominal.coverage,
         "max_observed_gap_us": nominal.max_observed_gap_us,
         "gap_coverage": gap.coverage,

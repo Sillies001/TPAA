@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-platform comparison for incremental M2-MET-005 evidence."""
+"""Cross-platform comparison for post-C3 M2-MET-005 formal evidence."""
 
 from __future__ import annotations
 
@@ -25,17 +25,17 @@ def compare(windows_path: Path, linux_path: Path, *, expected_revision: str) -> 
         "schemas_exact": windows.get("schema") == linux.get("schema") == SCHEMA,
         "tasks_exact": windows.get("task_id") == linux.get("task_id") == "M2-MET-005",
         "statuses_pass": windows.get("status") == linux.get("status") == "PASS",
-        "tasks_remain_incomplete": windows.get("task_complete") is False
-        and linux.get("task_complete") is False,
+        "tasks_complete": windows.get("task_complete") is True
+        and linux.get("task_complete") is True,
         "implementation_complete": windows.get("implementation_complete") is True
         and linux.get("implementation_complete") is True,
         "formal_completion_not_blocked_by_authority": (
             windows.get("formal_completion_blocked_by_authority") is False
             and linux.get("formal_completion_blocked_by_authority") is False
         ),
-        "formal_completion_blocked_by_profile_integration": (
-            windows.get("formal_completion_blocked_by_profile_integration") is True
-            and linux.get("formal_completion_blocked_by_profile_integration") is True
+        "formal_completion_not_blocked_by_profile_integration": (
+            windows.get("formal_completion_blocked_by_profile_integration") is False
+            and linux.get("formal_completion_blocked_by_profile_integration") is False
         ),
         "revisions_exact": windows.get("source_revision")
         == linux.get("source_revision")
@@ -50,9 +50,9 @@ def compare(windows_path: Path, linux_path: Path, *, expected_revision: str) -> 
             windows.get("invalid_qa_payload_error_code")
             == linux.get("invalid_qa_payload_error_code")
         ),
-        "fixture_profile_missing_fields_equal": (
-            windows.get("fixture_profile_missing_fields")
-            == linux.get("fixture_profile_missing_fields")
+        "fixture_profile_missing_fields_empty": (
+            windows.get("fixture_profile_missing_fields") == []
+            and linux.get("fixture_profile_missing_fields") == []
         ),
         "scope_equal": windows.get("scope") == linux.get("scope"),
         "failed_acceptance_empty": windows.get("failed_acceptance") == []
@@ -64,10 +64,10 @@ def compare(windows_path: Path, linux_path: Path, *, expected_revision: str) -> 
         "task_id": "M2-MET-005",
         "tracking_issue": 97,
         "status": "PASS" if not failed else "FAIL",
-        "task_complete": False,
+        "task_complete": not failed,
         "implementation_complete": not failed,
         "formal_completion_blocked_by_authority": False,
-        "formal_completion_blocked_by_profile_integration": True,
+        "formal_completion_blocked_by_profile_integration": False,
         "source_revision": expected_revision,
         "authority_gaps": windows.get("authority_gaps"),
         "invalid_qa_payload_error_code": windows.get("invalid_qa_payload_error_code"),
@@ -98,7 +98,7 @@ def main() -> int:
             "task_complete": False,
             "implementation_complete": False,
             "formal_completion_blocked_by_authority": False,
-            "formal_completion_blocked_by_profile_integration": True,
+            "formal_completion_blocked_by_profile_integration": False,
             "source_revision": args.expected_revision,
             "error": f"{type(exc).__name__}: {exc}",
         }
