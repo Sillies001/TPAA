@@ -273,6 +273,12 @@ def verify() -> dict[str, object]:
             "algorithm_id": record_by_code[definition.metric_code].algorithm_id,
             "algorithm_version": record_by_code[definition.metric_code].algorithm_version,
             "definition_hash": definition.definition_hash,
+            "authority_lineage_hash": record_by_code[
+                definition.metric_code
+            ].authority_lineage_hash,
+            "input_payload_hash": record_by_code[
+                definition.metric_code
+            ].input_payload_hash,
             "probe_evidence_hash": evidence_hash(
                 definition,
                 inputs[definition.metric_code],
@@ -291,10 +297,25 @@ def verify() -> dict[str, object]:
         for item in per_metric_hashes
         for key in (
             "definition_hash",
+            "authority_lineage_hash",
+            "input_payload_hash",
             "probe_evidence_hash",
             "plugin_output_hash",
             "record_logical_hash",
         )
+    )
+    tampered_record_by_code = {
+        record.metric_code: record for record in tampered.records
+    }
+    input_payload_hash_binding_exact = all(
+        record_by_code[definition.metric_code].input_payload_hash
+        == _canonical_hash(inputs[definition.metric_code])
+        for definition in plan.definitions
+    )
+    authority_lineage_hash_binding_exact = all(
+        record_by_code[definition.metric_code].authority_lineage_hash
+        == definition.authority_lineage_hash
+        for definition in plan.definitions
     )
     dependency_edges = [
         [dependency, definition.metric_code]
@@ -314,6 +335,12 @@ def verify() -> dict[str, object]:
         "dependency_order_exact": dependency_order_exact,
         "dependency_hash_binding_exact": dependency_hash_binding_exact,
         "record_identity_binding_exact_32": record_identity_binding_exact,
+        "input_payload_hash_binding_exact_32": input_payload_hash_binding_exact,
+        "authority_lineage_hash_binding_exact_32": authority_lineage_hash_binding_exact,
+        "tampered_input_payload_hash_changes": (
+            tampered_record_by_code["P1-AIR-001"].input_payload_hash
+            != record_by_code["P1-AIR-001"].input_payload_hash
+        ),
         "execution_identity_hash_well_formed": _is_sha256(plan.execution_identity_sha256),
         "registry_lineage_hashes_well_formed": all(
             _is_sha256(value)
@@ -373,6 +400,8 @@ def verify() -> dict[str, object]:
             "synthetic_runtime_probe_only": True,
             "execution_identity_lineage_only": True,
             "registry_lineage_binding_only": True,
+            "per_metric_authority_lineage_binding_only": True,
+            "input_payload_lineage_binding_only": True,
             "formal_32_metric_replay_claimed": False,
             "authority_values_invented": False,
         },

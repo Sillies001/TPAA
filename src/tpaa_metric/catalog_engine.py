@@ -107,6 +107,7 @@ class M2MetricDefinition:
     allowed_mission_system_types: tuple[str, ...]
     applicability: ApplicabilityContract
     definition_hash: str
+    authority_lineage_hash: str
 
 
 @dataclass(frozen=True)
@@ -170,6 +171,8 @@ class M2MetricExecutionRecord:
     algorithm_id: str
     algorithm_version: str
     definition_hash: str
+    authority_lineage_hash: str
+    input_payload_hash: str
     plugin_id: str
     operator_bindings: tuple[str, ...]
     upstream_result_hashes: tuple[tuple[str, str], ...]
@@ -296,6 +299,7 @@ class CatalogMetricEngine:
                     definition.metric_code,
                 )
             plugin_id, plugin = self.plugins.resolve(definition.algorithm_id)
+            input_payload_hash = _sha256_object(dict(input_payload))
             upstream_hashes = tuple(
                 (dependency, result_hashes[dependency])
                 for dependency in definition.metric_dependencies
@@ -333,6 +337,8 @@ class CatalogMetricEngine:
                     "semantic_id": definition.semantic_id,
                     "semantic_version": definition.semantic_version,
                     "definition_hash": definition.definition_hash,
+                    "authority_lineage_hash": definition.authority_lineage_hash,
+                    "input_payload_hash": input_payload_hash,
                     "algorithm_id": definition.algorithm_id,
                     "algorithm_version": definition.algorithm_version,
                     "plugin_id": plugin_id,
@@ -348,6 +354,8 @@ class CatalogMetricEngine:
                 algorithm_id=definition.algorithm_id,
                 algorithm_version=definition.algorithm_version,
                 definition_hash=definition.definition_hash,
+                authority_lineage_hash=definition.authority_lineage_hash,
+                input_payload_hash=input_payload_hash,
                 plugin_id=plugin_id,
                 operator_bindings=definition.operator_bindings,
                 upstream_result_hashes=upstream_hashes,
@@ -1860,6 +1868,50 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                 f"{code}:{value_kind}",
             )
 
+        applicability = _applicability(raw, family_contracts)
+        definition_hash = _sha256_object(raw)
+        authority_lineage_hash = _sha256_object(
+            {
+                "metric_code": code,
+                "definition_hash": definition_hash,
+                "input_authority_bindings": [
+                    {
+                        "metric_semantic_id": binding.metric_semantic_id,
+                        "input_field": binding.input_field,
+                        "optional": binding.optional,
+                        "binding_kind": binding.binding_kind,
+                        "authority_id": binding.authority_id,
+                        "authority_field": binding.authority_field,
+                        "normalization_rule": binding.normalization_rule,
+                    }
+                    for binding in authority_bindings
+                ],
+                "operator_authority": {
+                    operator_id: operator_registry[operator_id]
+                    for operator_id in operators
+                },
+                "constant_authority": {
+                    constant_id: constant_registry[constant_id]
+                    for constant_id in constants
+                },
+                "state_machine_authority": {
+                    state_machine_id: state_machine_registry[state_machine_id]
+                    for state_machine_id in state_machines
+                },
+                "external_dependency_authority": {
+                    dependency: upstream_registry[dependency]
+                    for dependency in external_dependencies
+                },
+                "structured_output_schema_id": schema_id,
+                "structured_output_schema_hash_sha256": schema_hash,
+                "family_applicability_contract": family_contracts[applicability.key],
+                "source_provenance_sha256": source_provenance_sha256,
+                "world_capability_registry_sha256": world_capability_registry_sha256,
+                "core_logical_model_sha256": core_logical_model_sha256,
+                "core_rules_sha256": core_rules_sha256,
+            }
+        )
+
         definition = M2MetricDefinition(
             catalog_index=index,
             metric_code=code,
@@ -1893,8 +1945,9 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             input_authority_bindings=authority_bindings,
             allowed_result_statuses=allowed_result_statuses,
             allowed_mission_system_types=allowed_mission_system_types,
-            applicability=_applicability(raw, family_contracts),
-            definition_hash=_sha256_object(raw),
+            applicability=applicability,
+            definition_hash=definition_hash,
+            authority_lineage_hash=authority_lineage_hash,
         )
         definitions.append(definition)
 
@@ -1959,6 +2012,10 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "execution_metric_codes": [definition.metric_code for definition in ordered],
             "definition_hashes": [
                 (definition.metric_code, definition.definition_hash) for definition in ordered
+            ],
+            "authority_lineage_hashes": [
+                (definition.metric_code, definition.authority_lineage_hash)
+                for definition in ordered
             ],
             "required_operator_ids": required_operator_ids,
             "required_state_machine_ids": required_state_machine_ids,

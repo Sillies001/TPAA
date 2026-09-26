@@ -486,6 +486,10 @@ def verify() -> dict[str, object]:
         "structured_output_schema_registry": plan.structured_output_schema_registry_sha256,
         "family_applicability_contracts": plan.family_applicability_contracts_sha256,
     }
+    authority_lineage_hashes = {
+        definition.metric_code: definition.authority_lineage_hash
+        for definition in plan.definitions
+    }
     metric_execution_identities = {
         definition.metric_code: {
             "semantic_id": definition.semantic_id,
@@ -609,6 +613,10 @@ def verify() -> dict[str, object]:
             )
         ),
         "execution_identity_hash_well_formed": len(plan.execution_identity_sha256) == 64,
+        "authority_lineage_hash_coverage_exact_32": (
+            len(authority_lineage_hashes) == 32
+            and all(len(value) == 64 for value in authority_lineage_hashes.values())
+        ),
         "execution_identity_metadata_coverage_exact_32": (
             len(metric_execution_identities) == 32
             and all(
@@ -773,6 +781,8 @@ def verify() -> dict[str, object]:
             "reference_match_profile_identity_binding_only": True,
             "execution_identity_binding_only": True,
             "registry_lineage_binding_only": True,
+            "per_metric_authority_lineage_binding_only": True,
+            "input_payload_lineage_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -790,6 +800,7 @@ def verify() -> dict[str, object]:
             "allowed_mission_system_types": list(plan.allowed_mission_system_types),
             "runtime_metric_codes": list(plan.metric_codes),
             "metric_execution_identities": metric_execution_identities,
+            "authority_lineage_hashes": authority_lineage_hashes,
             "subject_types": subject_types,
             "observation_lanes": observation_lanes,
             "publication_routes": publication_routes,

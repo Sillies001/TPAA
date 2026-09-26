@@ -209,6 +209,7 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         and definition.algorithm_id
         and definition.algorithm_version
         and len(definition.definition_hash) == 64
+        and len(definition.authority_lineage_hash) == 64
         for definition in plan.definitions
     )
     reference_match_definitions = tuple(
@@ -459,12 +460,79 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
         assert record.algorithm_id == definition.algorithm_id
         assert record.algorithm_version == definition.algorithm_version
         assert record.definition_hash == definition.definition_hash
+        assert record.authority_lineage_hash == definition.authority_lineage_hash
+        assert len(record.input_payload_hash) == 64
         assert record.operator_bindings == definition.operator_bindings
         assert record.upstream_result_hashes == tuple(
             (dependency, seen[dependency])
             for dependency in definition.metric_dependencies
         )
         seen[record.metric_code] = record.logical_hash
+
+
+def test_input_payload_hash_changes_record_even_when_plugin_output_is_constant() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+
+    def constant_probe(request: M2MetricPluginRequest) -> dict[str, object]:
+        return {"metric_code": request.definition.metric_code, "constant": True}
+
+    registry = MetricPluginRegistry()
+    for algorithm_id in dict.fromkeys(
+        definition.algorithm_id for definition in plan.definitions
+    ):
+        registry.register(
+            algorithm_id,
+            plugin_id="constant-lineage-probe-v1",
+            plugin=constant_probe,
+        )
+
+    engine = CatalogMetricEngine(plan, registry)
+    first_inputs = _inputs()
+    second_inputs = {code: dict(payload) for code, payload in first_inputs.items()}
+    second_inputs["P1-AIR-001"]["fixture"] = "M2-MET-001-CONTRACT-MUTATED"
+
+    first = engine.execute(first_inputs, validate_runtime_contract=False)
+    second = engine.execute(second_inputs, validate_runtime_contract=False)
+    first_record = next(record for record in first.records if record.metric_code == "P1-AIR-001")
+    second_record = next(record for record in second.records if record.metric_code == "P1-AIR-001")
+
+    assert first_record.plugin_output_hash == second_record.plugin_output_hash
+    assert first_record.input_payload_hash != second_record.input_payload_hash
+    assert first_record.logical_hash != second_record.logical_hash
+    assert first.logical_hash != second.logical_hash
+
+
+def test_authority_lineage_hash_is_scoped_to_referenced_registry_entries(
+    tmp_path: Path,
+) -> None:
+    baseline = build_m2_metric_execution_plan(AUTHORITY)
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["operator_registry"]["MEAN_V1"]["definition"] += " TEST_ONLY_LINEAGE_MUTATION"
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    mutated = build_m2_metric_execution_plan(authority)
+
+    baseline_by_code = {item.metric_code: item for item in baseline.definitions}
+    mutated_by_code = {item.metric_code: item for item in mutated.definitions}
+    expected_changed = {
+        item.metric_code
+        for item in baseline.definitions
+        if "MEAN_V1" in item.operator_bindings
+    }
+    actual_changed = {
+        code
+        for code in baseline_by_code
+        if baseline_by_code[code].authority_lineage_hash
+        != mutated_by_code[code].authority_lineage_hash
+    }
+
+    assert expected_changed
+    assert actual_changed == expected_changed
+    assert baseline.logical_hash != mutated.logical_hash
 
 
 def test_subset_execution_closes_metric_dependencies_and_missing_plugin_fails_closed() -> None:
