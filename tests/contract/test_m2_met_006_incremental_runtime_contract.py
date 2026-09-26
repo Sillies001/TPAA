@@ -46,6 +46,15 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
 
     product = evidence["logical_product"]
     assert len(product["runtime_metric_codes"]) == 32
+    assert len(product["metric_execution_identities"]) == 32
+    assert all(
+        identity["semantic_id"]
+        and isinstance(identity["semantic_version"], int)
+        and identity["algorithm_id"]
+        and identity["algorithm_version"]
+        and len(identity["definition_hash"]) == 64
+        for identity in product["metric_execution_identities"].values()
+    )
     assert len(product["subject_types"]) == 32
     assert set(product["subject_types"].values()) == {
         "AIRCRAFT",
@@ -72,6 +81,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["target_pair_never_longitudinal"]
     assert evidence["acceptance"]["trend_subject_types_exact"]
     assert evidence["acceptance"]["profile_input_exact_name_contract_enforced"]
+    assert evidence["acceptance"]["execution_identity_metadata_coverage_exact_32"]
     assert evidence["acceptance"]["reference_match_profile_identity_binding_exact_17"]
     assert product["profile_parameter_bindings"] == {
         "P1-QA-005": ["max_gap_us"],
@@ -146,6 +156,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "longitudinal_metadata_binding_only": True,
         "profile_parameter_name_binding_only": True,
         "reference_match_profile_identity_binding_only": True,
+        "execution_identity_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }

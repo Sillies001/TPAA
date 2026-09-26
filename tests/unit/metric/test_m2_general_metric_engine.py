@@ -183,6 +183,14 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         for definition in plan.definitions
         for binding in definition.input_authority_bindings
     )
+    assert all(
+        definition.semantic_id
+        and isinstance(definition.semantic_version, int)
+        and definition.algorithm_id
+        and definition.algorithm_version
+        and len(definition.definition_hash) == 64
+        for definition in plan.definitions
+    )
     reference_match_definitions = tuple(
         definition
         for definition in plan.definitions
@@ -269,6 +277,23 @@ def test_m2_profile_parameter_input_exact_name_contract_fails_closed(
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_metric_execution_plan(authority)
     assert caught.value.code == "M2_METRIC_PROFILE_INPUT_CONTRACT_DRIFT"
+
+
+def test_m2_algorithm_identity_common_rule_drift_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["common_rules"]["algorithm_identity"] = "TEST_ONLY_DRIFT"
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_RUNTIME_RULE_AUTHORITY_INVALID"
 
 
 def test_m2_input_authority_version_bridge_requires_frozen_provenance(
@@ -392,7 +417,11 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
     seen: dict[str, str] = {}
     for record in first.records:
         definition = plan.definition(record.metric_code)
+        assert record.semantic_id == definition.semantic_id
+        assert record.semantic_version == definition.semantic_version
         assert record.algorithm_id == definition.algorithm_id
+        assert record.algorithm_version == definition.algorithm_version
+        assert record.definition_hash == definition.definition_hash
         assert record.operator_bindings == definition.operator_bindings
         assert record.upstream_result_hashes == tuple(
             (dependency, seen[dependency])

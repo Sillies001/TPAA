@@ -47,6 +47,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["scope"] == {
         "business_metric_semantics_executed": False,
         "synthetic_runtime_probe_only": True,
+        "execution_identity_lineage_only": True,
         "formal_32_metric_replay_claimed": False,
         "authority_values_invented": False,
     }
@@ -57,8 +58,13 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert len(product["batch_logical_hash"]) == 64
     assert len(product["tampered_batch_logical_hash"]) == 64
     assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
+    assert evidence["acceptance"]["record_identity_binding_exact_32"]
     assert len(product["per_metric_hashes"]) == 32
     for row in product["per_metric_hashes"]:
+        assert row["semantic_id"]
+        assert isinstance(row["semantic_version"], int)
+        assert row["algorithm_id"]
+        assert row["algorithm_version"]
         assert len(row["definition_hash"]) == 64
         assert len(row["probe_evidence_hash"]) == 64
         assert len(row["plugin_output_hash"]) == 64

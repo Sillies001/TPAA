@@ -245,9 +245,25 @@ def verify() -> dict[str, object]:
         )
         for definition in plan.definitions
     )
+    record_identity_binding_exact = all(
+        record_by_code[definition.metric_code].semantic_id == definition.semantic_id
+        and record_by_code[definition.metric_code].semantic_version
+        == definition.semantic_version
+        and record_by_code[definition.metric_code].algorithm_id
+        == definition.algorithm_id
+        and record_by_code[definition.metric_code].algorithm_version
+        == definition.algorithm_version
+        and record_by_code[definition.metric_code].definition_hash
+        == definition.definition_hash
+        for definition in plan.definitions
+    )
     per_metric_hashes = [
         {
             "metric_code": definition.metric_code,
+            "semantic_id": record_by_code[definition.metric_code].semantic_id,
+            "semantic_version": record_by_code[definition.metric_code].semantic_version,
+            "algorithm_id": record_by_code[definition.metric_code].algorithm_id,
+            "algorithm_version": record_by_code[definition.metric_code].algorithm_version,
             "definition_hash": definition.definition_hash,
             "probe_evidence_hash": evidence_hash(
                 definition,
@@ -289,6 +305,7 @@ def verify() -> dict[str, object]:
         ),
         "dependency_order_exact": dependency_order_exact,
         "dependency_hash_binding_exact": dependency_hash_binding_exact,
+        "record_identity_binding_exact_32": record_identity_binding_exact,
         "plan_recompile_exact": replay_plan == plan,
         "input_mapping_order_independent": replayed == first,
         "request_order_independent": reversed_request == first,
@@ -334,6 +351,7 @@ def verify() -> dict[str, object]:
         "scope": {
             "business_metric_semantics_executed": False,
             "synthetic_runtime_probe_only": True,
+            "execution_identity_lineage_only": True,
             "formal_32_metric_replay_claimed": False,
             "authority_values_invented": False,
         },

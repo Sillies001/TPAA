@@ -478,6 +478,16 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
         if definition.profile_parameters
     }
+    metric_execution_identities = {
+        definition.metric_code: {
+            "semantic_id": definition.semantic_id,
+            "semantic_version": definition.semantic_version,
+            "algorithm_id": definition.algorithm_id,
+            "algorithm_version": definition.algorithm_version,
+            "definition_hash": definition.definition_hash,
+        }
+        for definition in plan.definitions
+    }
     reference_match_profile_identity_bindings = {
         definition.metric_code: [
             {
@@ -570,6 +580,18 @@ def verify() -> dict[str, object]:
                 "P1-AIR-001": ["max_gap_us", "min_coverage"],
                 "P1-AIR-003": ["derivative_window_s", "max_gap_us"],
             }
+        ),
+        "execution_identity_metadata_coverage_exact_32": (
+            len(metric_execution_identities) == 32
+            and all(
+                item["semantic_id"]
+                and isinstance(item["semantic_version"], int)
+                and item["algorithm_id"]
+                and item["algorithm_version"]
+                and isinstance(item["definition_hash"], str)
+                and len(item["definition_hash"]) == 64
+                for item in metric_execution_identities.values()
+            )
         ),
         "reference_match_profile_identity_binding_exact_17": (
             set(reference_match_profile_identity_bindings)
@@ -721,6 +743,7 @@ def verify() -> dict[str, object]:
             "longitudinal_metadata_binding_only": True,
             "profile_parameter_name_binding_only": True,
             "reference_match_profile_identity_binding_only": True,
+            "execution_identity_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -732,6 +755,7 @@ def verify() -> dict[str, object]:
             "allowed_result_statuses": list(plan.allowed_result_statuses),
             "allowed_mission_system_types": list(plan.allowed_mission_system_types),
             "runtime_metric_codes": list(plan.metric_codes),
+            "metric_execution_identities": metric_execution_identities,
             "subject_types": subject_types,
             "observation_lanes": observation_lanes,
             "publication_routes": publication_routes,

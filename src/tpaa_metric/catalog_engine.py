@@ -156,7 +156,11 @@ class M2MetricPlugin(Protocol):
 @dataclass(frozen=True)
 class M2MetricExecutionRecord:
     metric_code: str
+    semantic_id: str
+    semantic_version: int
     algorithm_id: str
+    algorithm_version: str
+    definition_hash: str
     plugin_id: str
     operator_bindings: tuple[str, ...]
     upstream_result_hashes: tuple[tuple[str, str], ...]
@@ -317,8 +321,11 @@ class CatalogMetricEngine:
             logical_hash = _sha256_object(
                 {
                     "metric_code": definition.metric_code,
+                    "semantic_id": definition.semantic_id,
+                    "semantic_version": definition.semantic_version,
                     "definition_hash": definition.definition_hash,
                     "algorithm_id": definition.algorithm_id,
+                    "algorithm_version": definition.algorithm_version,
                     "plugin_id": plugin_id,
                     "operator_bindings": definition.operator_bindings,
                     "upstream_result_hashes": upstream_hashes,
@@ -327,7 +334,11 @@ class CatalogMetricEngine:
             )
             record = M2MetricExecutionRecord(
                 metric_code=definition.metric_code,
+                semantic_id=definition.semantic_id,
+                semantic_version=definition.semantic_version,
                 algorithm_id=definition.algorithm_id,
+                algorithm_version=definition.algorithm_version,
+                definition_hash=definition.definition_hash,
                 plugin_id=plugin_id,
                 operator_bindings=definition.operator_bindings,
                 upstream_result_hashes=upstream_hashes,
@@ -1395,6 +1406,16 @@ def _metric_runtime_transport_authority(
             "not a free formula selector. Current values are MEDIAN for trend-eligible "
             "NUMERIC metrics and NONE for metrics that do not enter P1 longitudinal. "
             "Approved alternate sample profiles are governed separately and segment comparison keys."
+        )
+        or _text(
+            common_rules,
+            "algorithm_identity",
+            field="common_rules",
+        )
+        != (
+            "Every metric has exactly one algorithm_id + algorithm_version. The pair is immutable inside "
+            "a released Metric Definition. Profile parameters are part of provenance/comparison_key but never "
+            "substitute for algorithm identity."
         )
         or _text(
             common_rules,
