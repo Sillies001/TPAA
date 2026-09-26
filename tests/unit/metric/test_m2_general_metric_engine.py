@@ -291,6 +291,7 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
         {},
         {
             "metric_code": numeric.metric_code,
+                "subject_type": numeric.subject_type,
             "instances": [
                 _valid_runtime_instance(
                     value_kind="NUMERIC",
@@ -306,6 +307,7 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {},
             {
                 "metric_code": numeric.metric_code,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -332,6 +334,7 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
         {},
         {
             "metric_code": structured.metric_code,
+                "subject_type": structured.subject_type,
             "instances": [
                 _valid_runtime_instance(
                     value_kind="STRUCTURED",
@@ -351,6 +354,7 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
             {},
             {
                 "metric_code": structured.metric_code,
+                "subject_type": structured.subject_type,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="STRUCTURED",
@@ -362,6 +366,27 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
     assert caught.value.code == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
 
 
+def test_runtime_contract_gate_enforces_subject_type_metadata() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    numeric = plan.definition("P1-QA-003")
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            numeric,
+            {},
+            {
+                "metric_code": numeric.metric_code,
+                "subject_type": "MISSION_SYSTEM_INSTANCE",
+                "instances": [
+                    _valid_runtime_instance(
+                        value_kind="NUMERIC",
+                        value_numeric=1.0,
+                    )
+                ],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
+
+
 def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
     plan = build_m2_metric_execution_plan(AUTHORITY)
     sns = plan.definition("P1-SNS-001")
@@ -370,6 +395,7 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
         {"system_type": "EO"},
         {
             "metric_code": sns.metric_code,
+                "subject_type": sns.subject_type,
             "applicable": False,
             "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
             "instances": [],
@@ -382,6 +408,7 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {"system_type": "EO"},
             {
                 "metric_code": sns.metric_code,
+                "subject_type": sns.subject_type,
                 "instances": [
                     _valid_runtime_instance(
                         value_kind="NUMERIC",
@@ -398,6 +425,7 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {"system_type": "RADAR"},
             {
                 "metric_code": sns.metric_code,
+                "subject_type": sns.subject_type,
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
@@ -438,6 +466,7 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {},
             {
                 "metric_code": numeric.metric_code,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     {
                         "status": status,
@@ -456,6 +485,7 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
             {},
             {
                 "metric_code": numeric.metric_code,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     {
                         "status": "TEST_ONLY_UNKNOWN_STATUS",
@@ -476,6 +506,7 @@ def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() 
                 {},
                 {
                     "metric_code": numeric.metric_code,
+                "subject_type": numeric.subject_type,
                     "instances": [
                         {
                             "status": status,
