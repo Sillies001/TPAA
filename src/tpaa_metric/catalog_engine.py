@@ -13,10 +13,10 @@ import math
 import re
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, is_dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
 from tpaa_generated.metric_registry import P1_METRICS
 from tpaa_metric.operators import M2_OPERATOR_IMPLEMENTATIONS
@@ -34,6 +34,7 @@ M2_EXPECTED_FAMILY_COUNTS = MappingProxyType(
     }
 )
 M2_DISPATCH_KEY = "algorithm_id"
+M2_INPUT_LINEAGE_ENCODING = "TPAA_M2_INPUT_LINEAGE_JSON_V1"
 _REFERENCE_MATCH_QUALITY_PROFILE_CONTRACT = "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
 _REFERENCE_MATCH_QUALITY_PROFILE_IDENTITY_FIELDS = (
     "reference_match_quality_profile_id",
@@ -127,6 +128,7 @@ class M2MetricExecutionPlan:
     structured_output_schema_registry_sha256: str
     family_applicability_contracts_sha256: str
     execution_identity_sha256: str
+    input_lineage_encoding: str
     allowed_result_statuses: tuple[str, ...]
     allowed_mission_system_types: tuple[str, ...]
     db_schema_version: str
@@ -172,6 +174,7 @@ class M2MetricExecutionRecord:
     algorithm_version: str
     definition_hash: str
     authority_lineage_hash: str
+    input_lineage_encoding: str
     input_payload_hash: str
     plugin_id: str
     operator_bindings: tuple[str, ...]
@@ -299,7 +302,7 @@ class CatalogMetricEngine:
                     definition.metric_code,
                 )
             plugin_id, plugin = self.plugins.resolve(definition.algorithm_id)
-            input_payload_hash = _sha256_object(dict(input_payload))
+            input_payload_hash = _sha256_input_payload(input_payload)
             upstream_hashes = tuple(
                 (dependency, result_hashes[dependency])
                 for dependency in definition.metric_dependencies
@@ -338,6 +341,7 @@ class CatalogMetricEngine:
                     "semantic_version": definition.semantic_version,
                     "definition_hash": definition.definition_hash,
                     "authority_lineage_hash": definition.authority_lineage_hash,
+                    "input_lineage_encoding": M2_INPUT_LINEAGE_ENCODING,
                     "input_payload_hash": input_payload_hash,
                     "algorithm_id": definition.algorithm_id,
                     "algorithm_version": definition.algorithm_version,
@@ -355,6 +359,7 @@ class CatalogMetricEngine:
                 algorithm_version=definition.algorithm_version,
                 definition_hash=definition.definition_hash,
                 authority_lineage_hash=definition.authority_lineage_hash,
+                input_lineage_encoding=M2_INPUT_LINEAGE_ENCODING,
                 input_payload_hash=input_payload_hash,
                 plugin_id=plugin_id,
                 operator_bindings=definition.operator_bindings,
@@ -398,6 +403,48 @@ def _canonical_bytes(value: object) -> bytes:
 
 def _sha256_object(value: object) -> str:
     return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+
+
+def _lineage_json_value(value: object, *, field: str) -> object:
+    if value is None or isinstance(value, (str, bool, int, float)):
+        return value
+    if isinstance(value, Mapping):
+        if not all(isinstance(key, str) for key in value):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED",
+                f"{field}: mapping keys must be strings",
+            )
+        return {
+            cast(str, key): _lineage_json_value(item, field=f"{field}.{key}")
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [
+            _lineage_json_value(item, field=f"{field}[{index}]")
+            for index, item in enumerate(value)
+        ]
+    if is_dataclass(value) and not isinstance(value, type):
+        dataclass_type = type(value)
+        return {
+            "$dataclass": (
+                f"{dataclass_type.__module__}.{dataclass_type.__qualname__}"
+            ),
+            "fields": {
+                item.name: _lineage_json_value(
+                    getattr(value, item.name),
+                    field=f"{field}.{item.name}",
+                )
+                for item in fields(cast(Any, value))
+            },
+        }
+    raise CatalogMetricEngineError(
+        "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED",
+        f"{field}: {type(value).__module__}.{type(value).__qualname__}",
+    )
+
+
+def _sha256_input_payload(value: Mapping[str, object]) -> str:
+    return _sha256_object(_lineage_json_value(value, field="input_payload"))
 
 
 _SUPPORTED_SCHEMA_KEYS = frozenset(
@@ -2003,6 +2050,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "structured_output_schema_registry_sha256": structured_output_schema_registry_sha256,
             "family_applicability_contracts_sha256": family_applicability_contracts_sha256,
             "execution_identity_sha256": execution_identity_sha256,
+            "input_lineage_encoding": M2_INPUT_LINEAGE_ENCODING,
             "allowed_result_statuses": allowed_result_statuses,
             "allowed_mission_system_types": allowed_mission_system_types,
             "db_schema_version": db_schema_version,
@@ -2039,6 +2087,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         structured_output_schema_registry_sha256=structured_output_schema_registry_sha256,
         family_applicability_contracts_sha256=family_applicability_contracts_sha256,
         execution_identity_sha256=execution_identity_sha256,
+        input_lineage_encoding=M2_INPUT_LINEAGE_ENCODING,
         allowed_result_statuses=allowed_result_statuses,
         allowed_mission_system_types=allowed_mission_system_types,
         db_schema_version=db_schema_version,

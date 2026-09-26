@@ -62,12 +62,14 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert len(product["tampered_batch_logical_hash"]) == 64
     assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
     assert evidence["acceptance"]["record_identity_binding_exact_32"]
+    assert evidence["acceptance"]["input_lineage_encoding_exact"]
     assert evidence["acceptance"]["input_payload_hash_binding_exact_32"]
     assert evidence["acceptance"]["authority_lineage_hash_binding_exact_32"]
     assert evidence["acceptance"]["tampered_input_payload_hash_changes"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
     assert len(product["execution_identity_sha256"]) == 64
+    assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
     assert all(len(value) == 64 for value in product["registry_authority_hashes"].values())
     assert len(product["per_metric_hashes"]) == 32
     for row in product["per_metric_hashes"]:

@@ -138,6 +138,7 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
     assert len(plan.structured_output_schema_registry_sha256) == 64
     assert len(plan.family_applicability_contracts_sha256) == 64
     assert len(plan.execution_identity_sha256) == 64
+    assert plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
     assert plan.allowed_result_statuses == (
         "VALID",
         "N_A",
@@ -461,6 +462,7 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
         assert record.algorithm_version == definition.algorithm_version
         assert record.definition_hash == definition.definition_hash
         assert record.authority_lineage_hash == definition.authority_lineage_hash
+        assert record.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
         assert len(record.input_payload_hash) == 64
         assert record.operator_bindings == definition.operator_bindings
         assert record.upstream_result_hashes == tuple(
@@ -500,6 +502,21 @@ def test_input_payload_hash_changes_record_even_when_plugin_output_is_constant()
     assert first_record.input_payload_hash != second_record.input_payload_hash
     assert first_record.logical_hash != second_record.logical_hash
     assert first.logical_hash != second.logical_hash
+
+
+def test_input_payload_lineage_rejects_opaque_runtime_objects() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    engine = CatalogMetricEngine(plan, _registry())
+    inputs = _inputs()
+    inputs["P1-AIR-001"]["opaque"] = object()
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        engine.execute(
+            inputs,
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    assert caught.value.code == "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED"
 
 
 def test_authority_lineage_hash_is_scoped_to_referenced_registry_entries(

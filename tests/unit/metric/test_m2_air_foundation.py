@@ -90,6 +90,11 @@ def test_air_delivery_uses_shared_catalog_engine_and_exact_m2_membership() -> No
     assert first == replay
     assert first.metric_codes == AIR_M2_FORMAL_CODES
     assert all(
+        record.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
+        and len(record.input_payload_hash) == 64
+        for record in first.records
+    )
+    assert all(
         output["implementation_reuse"] == AIR_M1_IMPLEMENTATION
         for output in _engine_outputs(delivery, plan, registry).values()
     )

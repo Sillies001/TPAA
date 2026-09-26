@@ -335,6 +335,13 @@ def verify() -> dict[str, object]:
         "dependency_order_exact": dependency_order_exact,
         "dependency_hash_binding_exact": dependency_hash_binding_exact,
         "record_identity_binding_exact_32": record_identity_binding_exact,
+        "input_lineage_encoding_exact": (
+            plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
+            and all(
+                record.input_lineage_encoding == plan.input_lineage_encoding
+                for record in first.records
+            )
+        ),
         "input_payload_hash_binding_exact_32": input_payload_hash_binding_exact,
         "authority_lineage_hash_binding_exact_32": authority_lineage_hash_binding_exact,
         "tampered_input_payload_hash_changes": (
@@ -408,6 +415,7 @@ def verify() -> dict[str, object]:
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
             "execution_identity_sha256": plan.execution_identity_sha256,
+            "input_lineage_encoding": plan.input_lineage_encoding,
             "registry_authority_hashes": {
                 "operator_registry": plan.operator_registry_sha256,
                 "constant_registry": plan.constant_registry_sha256,

@@ -613,6 +613,9 @@ def verify() -> dict[str, object]:
             )
         ),
         "execution_identity_hash_well_formed": len(plan.execution_identity_sha256) == 64,
+        "input_lineage_encoding_exact": (
+            plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
+        ),
         "authority_lineage_hash_coverage_exact_32": (
             len(authority_lineage_hashes) == 32
             and all(len(value) == 64 for value in authority_lineage_hashes.values())
@@ -789,6 +792,7 @@ def verify() -> dict[str, object]:
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
             "execution_identity_sha256": plan.execution_identity_sha256,
+            "input_lineage_encoding": plan.input_lineage_encoding,
             "registry_authority_hashes": registry_authority_hashes,
             "required_operator_ids": list(plan.required_operator_ids),
             "required_state_machine_ids": list(plan.required_state_machine_ids),

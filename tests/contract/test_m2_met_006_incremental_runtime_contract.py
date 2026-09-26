@@ -46,6 +46,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
 
     product = evidence["logical_product"]
     assert len(product["execution_identity_sha256"]) == 64
+    assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
     assert set(product["registry_authority_hashes"]) == {
         "operator_registry",
         "constant_registry",
@@ -102,6 +103,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["required_state_machine_ids_exact"]
     assert evidence["acceptance"]["required_external_dependency_ids_exact"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
+    assert evidence["acceptance"]["input_lineage_encoding_exact"]
     assert evidence["acceptance"]["authority_lineage_hash_coverage_exact_32"]
     assert evidence["acceptance"]["execution_identity_metadata_coverage_exact_32"]
     assert evidence["acceptance"]["reference_match_profile_identity_binding_exact_17"]
