@@ -112,6 +112,7 @@ def verify() -> dict[str, object]:
             raise ValueError(f"unsupported value kind: {definition.value_kind}")
         return {
             "metric_code": definition.metric_code,
+            "subject_type": definition.subject_type,
             "instances": [instance],
         }
 
@@ -185,12 +186,23 @@ def verify() -> dict[str, object]:
         input_payload: Mapping[str, object],
         output: Mapping[str, object],
     ) -> str | None:
+        candidate = dict(output)
+        candidate.setdefault("subject_type", definition.subject_type)
         try:
-            validate_m2_runtime_output(definition, input_payload, output)
+            validate_m2_runtime_output(definition, input_payload, candidate)
         except CatalogMetricEngineError as exc:
             return exc.code
         return None
 
+    subject_type_mismatch = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "subject_type": "MISSION_SYSTEM_INSTANCE",
+            "instances": [_instance("NUMERIC", value_numeric=1.0)],
+        },
+    )
     wrong_metric_code = error_code(
         numeric,
         {},
@@ -204,6 +216,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
+            "subject_type": numeric.subject_type,
             "instances": [_instance("STRUCTURED", value_structured={})],
         },
     )
@@ -212,6 +225,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
+            "subject_type": numeric.subject_type,
             "instances": [_instance("NUMERIC")],
         },
     )
@@ -220,6 +234,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
+            "subject_type": numeric.subject_type,
             "instances": [
                 _instance(
                     "NUMERIC",
@@ -236,6 +251,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": structured.metric_code,
+            "subject_type": structured.subject_type,
             "instances": [
                 _instance(
                     "STRUCTURED",
@@ -252,6 +268,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": structured.metric_code,
+            "subject_type": structured.subject_type,
             "instances": [
                 _instance(
                     "STRUCTURED",
@@ -268,6 +285,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": structured.metric_code,
+            "subject_type": structured.subject_type,
             "instances": [
                 _instance(
                     "STRUCTURED",
@@ -298,6 +316,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
+            "subject_type": numeric.subject_type,
             "instances": [
                 _instance(
                     "NUMERIC",
@@ -313,6 +332,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
+            "subject_type": numeric.subject_type,
             "instances": [missing_reason_codes_instance],
         },
     )
@@ -321,6 +341,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": numeric.metric_code,
+            "subject_type": numeric.subject_type,
             "instances": [_instance("NUMERIC", status="N_A")],
         },
     )
@@ -329,6 +350,7 @@ def verify() -> dict[str, object]:
         {},
         {
             "metric_code": structured.metric_code,
+            "subject_type": structured.subject_type,
             "instances": [_instance("STRUCTURED", status="INSUFFICIENT_DATA")],
         },
     )
@@ -366,7 +388,12 @@ def verify() -> dict[str, object]:
         definition.metric_code: definition.structured_output_schema_hash_sha256
         for definition in structured_definitions
     }
+    subject_types = {
+        definition.metric_code: definition.subject_type
+        for definition in plan.definitions
+    }
     negative_error_codes = {
+        "subject_type_mismatch": subject_type_mismatch,
         "wrong_metric_code": wrong_metric_code,
         "value_kind_mismatch": value_kind_mismatch,
         "valid_missing_value": valid_missing_value,
@@ -385,6 +412,10 @@ def verify() -> dict[str, object]:
 
     acceptance = {
         "catalog_runtime_gate_coverage_exact_32": len(plan.definitions) == 32,
+        "subject_metadata_coverage_exact_32": len(subject_types) == 32,
+        "subject_type_mismatch_fails_closed": (
+            subject_type_mismatch == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
+        ),
         "numeric_value_kind_coverage_exact_29": len(numeric_definitions) == 29,
         "structured_value_kind_coverage_exact_3": (
             tuple(item.metric_code for item in structured_definitions)
@@ -468,6 +499,7 @@ def verify() -> dict[str, object]:
         "scope": {
             "business_metric_semantics_executed": False,
             "business_status_selection_semantics_executed": False,
+            "subject_metadata_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -477,6 +509,7 @@ def verify() -> dict[str, object]:
             "core_logical_model_sha256": plan.core_logical_model_sha256,
             "allowed_result_statuses": list(plan.allowed_result_statuses),
             "runtime_metric_codes": list(plan.metric_codes),
+            "subject_types": subject_types,
             "numeric_metric_codes": [
                 definition.metric_code for definition in numeric_definitions
             ],
