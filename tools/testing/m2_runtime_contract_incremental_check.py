@@ -180,6 +180,7 @@ def verify() -> dict[str, object]:
             {"system_type": "EO"},
             {
                 "metric_code": code,
+                "subject_type": definition.subject_type,
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
@@ -368,6 +369,17 @@ def verify() -> dict[str, object]:
             "instances": [_instance("NUMERIC", value_numeric=1.0)],
         },
     )
+    non_radar_missing_subject_type = error_code(
+        sns,
+        {"system_type": "EO"},
+        {
+            "metric_code": sns.metric_code,
+            "subject_type": None,
+            "applicable": False,
+            "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
+            "instances": [],
+        },
+    )
     radar_false_not_applicable = error_code(
         sns,
         {"system_type": "RADAR"},
@@ -421,6 +433,7 @@ def verify() -> dict[str, object]:
         "na_without_reason": na_without_reason,
         "insufficient_without_reason": insufficient_without_reason,
         "non_radar_fake_observation": non_radar_fake_observation,
+        "non_radar_missing_subject_type": non_radar_missing_subject_type,
         "radar_false_not_applicable": radar_false_not_applicable,
         "radar_missing_applicable": radar_missing_applicable,
     }
@@ -490,6 +503,10 @@ def verify() -> dict[str, object]:
         "sns_non_radar_fake_observation_fails_closed": (
             non_radar_fake_observation
             == "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID"
+        ),
+        "sns_non_radar_subject_metadata_required": (
+            non_radar_missing_subject_type
+            == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
         ),
         "sns_radar_false_not_applicable_fails_closed": (
             radar_false_not_applicable == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"

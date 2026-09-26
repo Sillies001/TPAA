@@ -412,6 +412,7 @@ def _execute(request: M2MetricPluginRequest) -> Mapping[str, object]:
     if not _guard(request):
         return {
             "metric_code": request.definition.metric_code,
+            "subject_type": request.definition.subject_type,
             "applicable": False,
             "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
             "instances": [],

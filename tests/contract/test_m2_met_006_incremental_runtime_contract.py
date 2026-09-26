@@ -63,6 +63,9 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert product["negative_error_codes"]["radar_missing_applicable"] == (
         "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
     )
+    assert product["negative_error_codes"]["non_radar_missing_subject_type"] == (
+        "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
+    )
     assert product["allowed_result_statuses"] == [
         "VALID",
         "N_A",

@@ -410,6 +410,19 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
             {"system_type": "EO"},
             {
                 "metric_code": sns.metric_code,
+                "applicable": False,
+                "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
+                "instances": [],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH"
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            sns,
+            {"system_type": "EO"},
+            {
+                "metric_code": sns.metric_code,
                 "subject_type": sns.subject_type,
                 "instances": [
                     _valid_runtime_instance(
