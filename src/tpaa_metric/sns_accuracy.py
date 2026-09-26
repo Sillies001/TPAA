@@ -479,6 +479,7 @@ def register_m2_sns_accuracy_plugins(
         definition = plan.definition(metric_code)
         registry.register(
             definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
             plugin_id=f"m2-sns-accuracy:{metric_code}:v1",
             plugin=M2_SNS_ACCURACY_PLUGINS[metric_code],
         )

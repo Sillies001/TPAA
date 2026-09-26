@@ -67,6 +67,9 @@ def test_m2_met_001_evidence_proves_general_engine_contract(tmp_path: Path) -> N
     assert len(product["required_operator_ids"]) == 8
     assert len(product["plan_logical_hash"]) == 64
     assert len(product["execution_logical_hash"]) == 64
+    assert len(product["plugin_manifest_hash"]) == 64
+    assert len(product["plugin_identity_manifest"]) == 32
+    assert all(len(item) == 3 and item[1] != "UNVERSIONED" for item in product["plugin_identity_manifest"])
 
     scope = evidence["scope"]
     assert scope["business_metric_semantics_executed"] is False

@@ -62,11 +62,10 @@ def _probe(request: M2MetricPluginRequest) -> dict[str, object]:
 def _registry() -> MetricPluginRegistry:
     plan = build_m2_metric_execution_plan(AUTHORITY)
     registry = MetricPluginRegistry()
-    for algorithm_id in dict.fromkeys(
-        definition.algorithm_id for definition in plan.definitions
-    ):
+    for definition in plan.definitions:
         registry.register(
-            algorithm_id,
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
             plugin_id="contract-probe-v1",
             plugin=_probe,
         )
@@ -479,11 +478,10 @@ def test_input_payload_hash_changes_record_even_when_plugin_output_is_constant()
         return {"metric_code": request.definition.metric_code, "constant": True}
 
     registry = MetricPluginRegistry()
-    for algorithm_id in dict.fromkeys(
-        definition.algorithm_id for definition in plan.definitions
-    ):
+    for definition in plan.definitions:
         registry.register(
-            algorithm_id,
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
             plugin_id="constant-lineage-probe-v1",
             plugin=constant_probe,
         )
@@ -572,20 +570,68 @@ def test_subset_execution_closes_metric_dependencies_and_missing_plugin_fails_cl
     assert caught.value.code == "M2_METRIC_PLUGIN_MISSING"
 
 
-def test_plugin_registry_rejects_duplicate_algorithm_registration() -> None:
+def test_plugin_registry_is_version_qualified_and_fails_closed() -> None:
     registry = MetricPluginRegistry()
     registry.register(
         "alg.example",
+        algorithm_version="1.0.0",
         plugin_id="contract-probe-v1",
         plugin=_probe,
     )
     with pytest.raises(CatalogMetricEngineError) as caught:
         registry.register(
             "alg.example",
+            algorithm_version="1.0.0",
             plugin_id="contract-probe-v1",
             plugin=_probe,
         )
     assert caught.value.code == "M2_METRIC_PLUGIN_DUPLICATE"
+
+    registry.register(
+        "alg.example",
+        algorithm_version="1.0.1",
+        plugin_id="contract-probe-v2",
+        plugin=_probe,
+    )
+    assert registry.resolve("alg.example", "1.0.0")[0] == "contract-probe-v1"
+    assert registry.resolve("alg.example", "1.0.1")[0] == "contract-probe-v2"
+    with pytest.raises(CatalogMetricEngineError) as ambiguous:
+        registry.resolve("alg.example")
+    assert ambiguous.value.code == "M2_METRIC_PLUGIN_VERSION_AMBIGUOUS"
+
+
+def test_engine_rejects_wrong_or_unversioned_algorithm_plugin() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    definition = plan.definition("P1-AIR-001")
+
+    wrong_version = MetricPluginRegistry()
+    wrong_version.register(
+        definition.algorithm_id,
+        algorithm_version="0.0.0",
+        plugin_id="wrong-version-probe-v1",
+        plugin=_probe,
+    )
+    with pytest.raises(CatalogMetricEngineError) as mismatch:
+        CatalogMetricEngine(plan, wrong_version).execute(
+            _inputs(),
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    assert mismatch.value.code == "M2_METRIC_PLUGIN_VERSION_MISMATCH"
+
+    unversioned = MetricPluginRegistry()
+    unversioned.register(
+        definition.algorithm_id,
+        plugin_id="unversioned-probe-v1",
+        plugin=_probe,
+    )
+    with pytest.raises(CatalogMetricEngineError) as unbound:
+        CatalogMetricEngine(plan, unversioned).execute(
+            _inputs(),
+            metric_codes=("P1-AIR-001",),
+            validate_runtime_contract=False,
+        )
+    assert unbound.value.code == "M2_METRIC_PLUGIN_VERSION_UNBOUND"
 
 
 def test_governed_m2_operator_primitives_are_deterministic_and_fail_closed() -> None:

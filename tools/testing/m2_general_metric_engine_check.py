@@ -65,12 +65,14 @@ def verify() -> dict[str, object]:
     plan = build_m2_metric_execution_plan(AUTHORITY_ROOT)
     replay_plan = build_m2_metric_execution_plan(AUTHORITY_ROOT)
     registry = MetricPluginRegistry()
-    algorithm_ids = tuple(
-        dict.fromkeys(definition.algorithm_id for definition in plan.definitions)
+    algorithm_identities = tuple(
+        (definition.algorithm_id, definition.algorithm_version)
+        for definition in plan.definitions
     )
-    for algorithm_id in algorithm_ids:
+    for algorithm_id, algorithm_version in algorithm_identities:
         registry.register(
             algorithm_id,
+            algorithm_version=algorithm_version,
             plugin_id="m2-met-001-contract-probe-v1",
             plugin=contract_probe,
         )
@@ -153,8 +155,17 @@ def verify() -> dict[str, object]:
         "execution_replay_stable": first == replayed,
         "dependency_order_exact": dependency_order_exact,
         "algorithm_plugin_coverage_exact": (
-            set(registry.plugin_ids) == set(algorithm_ids)
-            and len(algorithm_ids) == 32
+            {
+                (algorithm_id, algorithm_version)
+                for algorithm_id, algorithm_version, _plugin_id
+                in registry.plugin_identity_manifest
+            }
+            == set(algorithm_identities)
+            and len(algorithm_identities) == 32
+        ),
+        "version_qualified_plugin_dispatch": (
+            len(first.plugin_manifest_hash) == 64
+            and first.plugin_manifest_hash == replayed.plugin_manifest_hash
         ),
         "single_general_plugin_mechanism": (
             set(registry.plugin_ids.values()) == {"m2-met-001-contract-probe-v1"}
@@ -248,6 +259,8 @@ def verify() -> dict[str, object]:
         "operator_probe": operator_probe,
         "plan_logical_hash": plan.logical_hash,
         "execution_logical_hash": first.logical_hash,
+        "plugin_manifest_hash": first.plugin_manifest_hash,
+        "plugin_identity_manifest": [list(item) for item in registry.plugin_identity_manifest],
         "dispatch_key": first.dispatch_key,
         "plugin_id": "m2-met-001-contract-probe-v1",
     }

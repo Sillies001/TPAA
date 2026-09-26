@@ -166,6 +166,7 @@ def register_m2_air_plugins(
         definition = plan.definition(metric_code)
         registry.register(
             definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
             plugin_id=f"m2-air-formal-delivery:{metric_code}:v1",
             plugin=_air_plugin,
         )

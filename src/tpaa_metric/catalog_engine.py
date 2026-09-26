@@ -187,6 +187,7 @@ class M2MetricExecutionRecord:
 class M2MetricExecutionBatch:
     plan_hash: str
     dispatch_key: str
+    plugin_manifest_hash: str
     records: tuple[M2MetricExecutionRecord, ...]
     logical_hash: str
 
@@ -199,37 +200,101 @@ class MetricPluginRegistry:
     """Algorithm-id plugin registry shared by every Metric family."""
 
     def __init__(self) -> None:
-        self._plugins: dict[str, tuple[str, M2MetricPlugin]] = {}
+        self._plugins: dict[tuple[str, str | None], tuple[str, M2MetricPlugin]] = {}
 
     def register(
         self,
         algorithm_id: str,
         *,
+        algorithm_version: str | None = None,
         plugin_id: str,
         plugin: M2MetricPlugin,
     ) -> None:
-        if not algorithm_id or not plugin_id:
+        if (
+            not algorithm_id
+            or not plugin_id
+            or (algorithm_version is not None and not algorithm_version)
+        ):
             raise CatalogMetricEngineError(
                 "M2_METRIC_PLUGIN_ID_INVALID",
-                repr((algorithm_id, plugin_id)),
+                repr((algorithm_id, algorithm_version, plugin_id)),
             )
-        if algorithm_id in self._plugins:
-            raise CatalogMetricEngineError("M2_METRIC_PLUGIN_DUPLICATE", algorithm_id)
-        self._plugins[algorithm_id] = (plugin_id, plugin)
+        identity = (algorithm_id, algorithm_version)
+        if identity in self._plugins:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_PLUGIN_DUPLICATE",
+                f"{algorithm_id}@{algorithm_version or 'UNVERSIONED'}",
+            )
+        self._plugins[identity] = (plugin_id, plugin)
 
-    def resolve(self, algorithm_id: str) -> tuple[str, M2MetricPlugin]:
-        try:
-            return self._plugins[algorithm_id]
-        except KeyError as exc:
+    def resolve(
+        self,
+        algorithm_id: str,
+        algorithm_version: str | None = None,
+    ) -> tuple[str, M2MetricPlugin]:
+        if algorithm_version is not None:
+            exact = self._plugins.get((algorithm_id, algorithm_version))
+            if exact is not None:
+                return exact
+            registered_versions = tuple(
+                sorted(
+                    "UNVERSIONED" if version is None else version
+                    for registered_id, version in self._plugins
+                    if registered_id == algorithm_id
+                )
+            )
+            if registered_versions:
+                code = (
+                    "M2_METRIC_PLUGIN_VERSION_UNBOUND"
+                    if "UNVERSIONED" in registered_versions
+                    else "M2_METRIC_PLUGIN_VERSION_MISMATCH"
+                )
+                raise CatalogMetricEngineError(
+                    code,
+                    f"{algorithm_id}@{algorithm_version}:registered={registered_versions!r}",
+                )
             raise CatalogMetricEngineError(
                 "M2_METRIC_PLUGIN_MISSING",
+                f"{algorithm_id}@{algorithm_version}",
+            )
+
+        matches = tuple(
+            value
+            for (registered_id, _version), value in self._plugins.items()
+            if registered_id == algorithm_id
+        )
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_PLUGIN_VERSION_AMBIGUOUS",
                 algorithm_id,
-            ) from exc
+            )
+        raise CatalogMetricEngineError("M2_METRIC_PLUGIN_MISSING", algorithm_id)
 
     @property
     def plugin_ids(self) -> Mapping[str, str]:
-        return MappingProxyType(
-            {algorithm_id: value[0] for algorithm_id, value in self._plugins.items()}
+        result: dict[str, str] = {}
+        for (algorithm_id, _version), value in self._plugins.items():
+            if algorithm_id in result:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_PLUGIN_VERSION_AMBIGUOUS",
+                    algorithm_id,
+                )
+            result[algorithm_id] = value[0]
+        return MappingProxyType(result)
+
+    @property
+    def plugin_identity_manifest(self) -> tuple[tuple[str, str, str], ...]:
+        return tuple(
+            sorted(
+                (
+                    algorithm_id,
+                    version if version is not None else "UNVERSIONED",
+                    value[0],
+                )
+                for (algorithm_id, version), value in self._plugins.items()
+            )
         )
 
 
@@ -293,6 +358,7 @@ class CatalogMetricEngine:
         definitions = self._execution_definitions(metric_codes)
         records: list[M2MetricExecutionRecord] = []
         result_hashes: dict[str, str] = {}
+        plugin_manifest: list[tuple[str, str, str]] = []
 
         for definition in definitions:
             input_payload = inputs.get(definition.metric_code)
@@ -301,7 +367,13 @@ class CatalogMetricEngine:
                     "M2_METRIC_INPUT_PAYLOAD_MISSING",
                     definition.metric_code,
                 )
-            plugin_id, plugin = self.plugins.resolve(definition.algorithm_id)
+            plugin_id, plugin = self.plugins.resolve(
+                definition.algorithm_id,
+                definition.algorithm_version,
+            )
+            plugin_manifest.append(
+                (definition.algorithm_id, definition.algorithm_version, plugin_id)
+            )
             input_payload_hash = _sha256_input_payload(input_payload)
             upstream_hashes = tuple(
                 (dependency, result_hashes[dependency])
@@ -370,16 +442,19 @@ class CatalogMetricEngine:
             records.append(record)
             result_hashes[definition.metric_code] = logical_hash
 
+        plugin_manifest_hash = _sha256_object(plugin_manifest)
         batch_hash = _sha256_object(
             {
                 "plan_hash": self.plan.logical_hash,
                 "dispatch_key": self.dispatch_key,
+                "plugin_manifest_hash": plugin_manifest_hash,
                 "record_hashes": [record.logical_hash for record in records],
             }
         )
         return M2MetricExecutionBatch(
             plan_hash=self.plan.logical_hash,
             dispatch_key=self.dispatch_key,
+            plugin_manifest_hash=plugin_manifest_hash,
             records=tuple(records),
             logical_hash=batch_hash,
         )

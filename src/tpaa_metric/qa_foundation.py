@@ -493,6 +493,7 @@ def register_m2_qa_plugins(
         definition = plan.definition(metric_code)
         registry.register(
             definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
             plugin_id=f"m2-qa-foundation:{metric_code}:v1",
             plugin=M2_QA_PLUGIN_IMPLEMENTATIONS[metric_code],
         )

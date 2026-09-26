@@ -51,6 +51,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         "registry_lineage_binding_only": True,
         "per_metric_authority_lineage_binding_only": True,
         "input_payload_lineage_binding_only": True,
+        "version_qualified_plugin_dispatch_only": True,
         "formal_32_metric_replay_claimed": False,
         "authority_values_invented": False,
     }
@@ -62,6 +63,8 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert len(product["tampered_batch_logical_hash"]) == 64
     assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
     assert evidence["acceptance"]["record_identity_binding_exact_32"]
+    assert evidence["acceptance"]["plugin_manifest_hash_well_formed"]
+    assert evidence["acceptance"]["plugin_manifest_replay_exact"]
     assert evidence["acceptance"]["input_lineage_encoding_exact"]
     assert evidence["acceptance"]["input_payload_hash_binding_exact_32"]
     assert evidence["acceptance"]["authority_lineage_hash_binding_exact_32"]
@@ -69,6 +72,9 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
     assert len(product["execution_identity_sha256"]) == 64
+    assert len(product["plugin_manifest_hash"]) == 64
+    assert len(product["plugin_identity_manifest"]) == 32
+    assert all(item[1] != "UNVERSIONED" for item in product["plugin_identity_manifest"])
     assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
     assert all(len(value) == 64 for value in product["registry_authority_hashes"].values())
     assert len(product["per_metric_hashes"]) == 32

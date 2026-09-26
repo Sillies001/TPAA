@@ -212,11 +212,10 @@ def verify() -> dict[str, object]:
         return output
 
     registry = MetricPluginRegistry()
-    for algorithm_id in dict.fromkeys(
-        definition.algorithm_id for definition in plan.definitions
-    ):
+    for definition in plan.definitions:
         registry.register(
-            algorithm_id,
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
             plugin_id="m2-met-007-runtime-replay-probe-v1",
             plugin=probe,
         )
@@ -335,6 +334,13 @@ def verify() -> dict[str, object]:
         "dependency_order_exact": dependency_order_exact,
         "dependency_hash_binding_exact": dependency_hash_binding_exact,
         "record_identity_binding_exact_32": record_identity_binding_exact,
+        "plugin_manifest_hash_well_formed": _is_sha256(first.plugin_manifest_hash),
+        "plugin_manifest_replay_exact": (
+            first.plugin_manifest_hash
+            == replayed.plugin_manifest_hash
+            == reversed_request.plugin_manifest_hash
+            == tampered.plugin_manifest_hash
+        ),
         "input_lineage_encoding_exact": (
             plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
             and all(
@@ -409,6 +415,7 @@ def verify() -> dict[str, object]:
             "registry_lineage_binding_only": True,
             "per_metric_authority_lineage_binding_only": True,
             "input_payload_lineage_binding_only": True,
+            "version_qualified_plugin_dispatch_only": True,
             "formal_32_metric_replay_claimed": False,
             "authority_values_invented": False,
         },
@@ -429,6 +436,11 @@ def verify() -> dict[str, object]:
             "dependency_edges": dependency_edges,
             "batch_logical_hash": first.logical_hash,
             "tampered_batch_logical_hash": tampered.logical_hash,
+            "plugin_manifest_hash": first.plugin_manifest_hash,
+            "plugin_identity_manifest": [
+                [record.algorithm_id, record.algorithm_version, record.plugin_id]
+                for record in first.records
+            ],
             "per_metric_hashes": per_metric_hashes,
         },
         "acceptance": acceptance,
