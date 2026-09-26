@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import re
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -79,6 +81,8 @@ class M2MetricDefinition:
     observation_lane: str
     publication_route: str
     structured_output_schema_id: str | None
+    structured_output_schema_json: str | None
+    structured_output_schema_hash_sha256: str | None
     input_fields: tuple[str, ...]
     formula: str
     validity_conditions: str
@@ -251,6 +255,7 @@ class CatalogMetricEngine:
         inputs: Mapping[str, Mapping[str, object]],
         *,
         metric_codes: Sequence[str] | None = None,
+        validate_runtime_contract: bool = True,
     ) -> M2MetricExecutionBatch:
         definitions = self._execution_definitions(metric_codes)
         records: list[M2MetricExecutionRecord] = []
@@ -282,12 +287,18 @@ class CatalogMetricEngine:
             )
             try:
                 output = dict(plugin(request))
-                output_hash = _sha256_object(output)
             except (TypeError, ValueError, OverflowError) as exc:
                 raise CatalogMetricEngineError(
                     "M2_METRIC_PLUGIN_OUTPUT_INVALID",
                     f"{definition.metric_code}: {exc}",
                 ) from exc
+            if validate_runtime_contract:
+                validate_m2_runtime_output(
+                    definition,
+                    input_payload,
+                    output,
+                )
+            output_hash = _sha256_object(output)
 
             logical_hash = _sha256_object(
                 {
@@ -345,6 +356,461 @@ def _canonical_bytes(value: object) -> bytes:
 
 def _sha256_object(value: object) -> str:
     return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+
+
+_SUPPORTED_SCHEMA_KEYS = frozenset(
+    {
+        "$schema",
+        "$id",
+        "type",
+        "additionalProperties",
+        "required",
+        "properties",
+        "items",
+        "minItems",
+        "maxItems",
+        "enum",
+        "minimum",
+        "pattern",
+    }
+)
+_SUPPORTED_JSON_TYPES = frozenset(
+    {"object", "array", "number", "integer", "string", "boolean", "null"}
+)
+
+
+def _canonical_schema_json(value: Mapping[str, object]) -> str:
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+
+
+def _schema_type_names(schema: Mapping[str, object], *, field: str) -> tuple[str, ...]:
+    raw = schema.get("type")
+    if isinstance(raw, str):
+        names = (raw,)
+    elif isinstance(raw, list) and raw and all(isinstance(item, str) for item in raw):
+        names = tuple(cast(list[str], raw))
+    else:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}.type",
+        )
+    if not set(names).issubset(_SUPPORTED_JSON_TYPES):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}.type={names!r}",
+        )
+    return names
+
+
+def _validate_schema_definition(schema: Mapping[str, object], *, field: str) -> None:
+    unsupported = set(schema) - _SUPPORTED_SCHEMA_KEYS
+    if unsupported:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}: {sorted(unsupported)!r}",
+        )
+    _schema_type_names(schema, field=field)
+    required = schema.get("required")
+    if required is not None and (
+        not isinstance(required, list)
+        or not all(isinstance(item, str) for item in required)
+        or len(set(required)) != len(required)
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}.required",
+        )
+    additional = schema.get("additionalProperties")
+    if additional is not None and not isinstance(additional, bool):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}.additionalProperties",
+        )
+    properties = schema.get("properties")
+    if properties is not None:
+        if not isinstance(properties, dict) or not all(
+            isinstance(key, str) and isinstance(value, dict)
+            for key, value in properties.items()
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.properties",
+            )
+        for name, nested in properties.items():
+            _validate_schema_definition(
+                cast(dict[str, object], nested),
+                field=f"{field}.properties.{name}",
+            )
+    items = schema.get("items")
+    if items is not None:
+        if not isinstance(items, dict):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.items",
+            )
+        _validate_schema_definition(
+            cast(dict[str, object], items),
+            field=f"{field}.items",
+        )
+    for name in ("minItems", "maxItems"):
+        raw = schema.get(name)
+        if raw is not None and (
+            isinstance(raw, bool) or not isinstance(raw, int) or raw < 0
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.{name}",
+            )
+    minimum = schema.get("minimum")
+    if minimum is not None and (
+        isinstance(minimum, bool) or not isinstance(minimum, (int, float))
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}.minimum",
+        )
+    enum = schema.get("enum")
+    if enum is not None and not isinstance(enum, list):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+            f"{field}.enum",
+        )
+    pattern = schema.get("pattern")
+    if pattern is not None:
+        if not isinstance(pattern, str):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.pattern",
+            )
+        try:
+            re.compile(pattern)
+        except re.error as exc:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                f"{field}.pattern",
+            ) from exc
+
+
+def _compile_structured_output_schema(
+    schema_registry: Mapping[str, object],
+    *,
+    metric_code: str,
+    schema_id: str,
+) -> tuple[str, str]:
+    entry = _object(
+        schema_registry.get(schema_id),
+        field=f"structured_output_schema_registry.{schema_id}",
+    )
+    if _text(entry, "metric_code", field=schema_id) != metric_code:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_METRIC_DRIFT",
+            f"{metric_code}:{schema_id}",
+        )
+    dialect = _text(entry, "json_schema_dialect", field=schema_id)
+    if dialect != "https://json-schema.org/draft/2020-12/schema":
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_DIALECT_DRIFT",
+            f"{schema_id}:{dialect}",
+        )
+    schema = _object(entry.get("json_schema"), field=f"{schema_id}.json_schema")
+    _validate_schema_definition(schema, field=schema_id)
+    canonical = _canonical_schema_json(schema)
+    computed_hash = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    authority_hash = _text(entry, "schema_hash_sha256", field=schema_id)
+    if computed_hash != authority_hash:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_SCHEMA_HASH_DRIFT",
+            schema_id,
+        )
+    return canonical, authority_hash
+
+
+def _json_type_matches(value: object, type_name: str) -> bool:
+    if type_name == "null":
+        return value is None
+    if type_name == "boolean":
+        return isinstance(value, bool)
+    if type_name == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if type_name == "number":
+        return (
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(float(value))
+        )
+    if type_name == "string":
+        return isinstance(value, str)
+    if type_name == "array":
+        return isinstance(value, Sequence) and not isinstance(value, (str, bytes))
+    if type_name == "object":
+        return isinstance(value, Mapping) and all(
+            isinstance(key, str) for key in value
+        )
+    return False
+
+
+def _validate_json_value(
+    value: object,
+    schema: Mapping[str, object],
+    *,
+    metric_code: str,
+    field: str,
+) -> None:
+    type_names = _schema_type_names(schema, field=field)
+    if not any(_json_type_matches(value, name) for name in type_names):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+            f"{metric_code}:{field}:type",
+        )
+    enum = schema.get("enum")
+    if isinstance(enum, list) and value not in enum:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+            f"{metric_code}:{field}:enum",
+        )
+    if isinstance(value, Mapping):
+        required = schema.get("required", [])
+        if isinstance(required, list):
+            missing = [name for name in required if name not in value]
+            if missing:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+                    f"{metric_code}:{field}:missing={missing!r}",
+                )
+        properties_raw = schema.get("properties", {})
+        properties = (
+            cast(dict[str, object], properties_raw)
+            if isinstance(properties_raw, dict)
+            else {}
+        )
+        if schema.get("additionalProperties") is False:
+            extra = sorted(set(value) - set(properties))
+            if extra:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+                    f"{metric_code}:{field}:extra={extra!r}",
+                )
+        for name, item in value.items():
+            nested = properties.get(name)
+            if nested is not None:
+                if not isinstance(nested, dict):
+                    raise CatalogMetricEngineError(
+                        "M2_METRIC_STRUCTURED_SCHEMA_UNSUPPORTED",
+                        f"{field}.properties.{name}",
+                    )
+                _validate_json_value(
+                    item,
+                    cast(dict[str, object], nested),
+                    metric_code=metric_code,
+                    field=f"{field}.{name}",
+                )
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        min_items = schema.get("minItems")
+        max_items = schema.get("maxItems")
+        if isinstance(min_items, int) and len(value) < min_items:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+                f"{metric_code}:{field}:minItems",
+            )
+        if isinstance(max_items, int) and len(value) > max_items:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+                f"{metric_code}:{field}:maxItems",
+            )
+        items = schema.get("items")
+        if isinstance(items, dict):
+            for index, item in enumerate(value):
+                _validate_json_value(
+                    item,
+                    cast(dict[str, object], items),
+                    metric_code=metric_code,
+                    field=f"{field}[{index}]",
+                )
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        minimum = schema.get("minimum")
+        if isinstance(minimum, (int, float)) and value < minimum:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+                f"{metric_code}:{field}:minimum",
+            )
+    if isinstance(value, str):
+        pattern = schema.get("pattern")
+        if isinstance(pattern, str) and re.search(pattern, value) is None:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION",
+                f"{metric_code}:{field}:pattern",
+            )
+
+
+def validate_m2_runtime_output(
+    definition: M2MetricDefinition,
+    input_payload: Mapping[str, object],
+    output: Mapping[str, object],
+) -> None:
+    """Enforce frozen applicability, value-slot and structured-schema contracts."""
+
+    if not all(isinstance(key, str) for key in output):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID",
+            f"{definition.metric_code}:root keys",
+        )
+    if output.get("metric_code") != definition.metric_code:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_METRIC_CODE_MISMATCH",
+            definition.metric_code,
+        )
+
+    applicability = definition.applicability
+    if applicability.applicability_mode == "SYSTEM_TYPE_EXACT":
+        system_type = input_payload.get("system_type")
+        if not isinstance(system_type, str) or not system_type:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABILITY_INPUT_INVALID",
+                definition.metric_code,
+            )
+        runtime_applicable = system_type in applicability.allowed_system_types
+        if not runtime_applicable:
+            if output.get("applicable") is not False or output.get("instances") != []:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID",
+                    f"{definition.metric_code}:{system_type}",
+                )
+            return
+        if output.get("applicable") is False:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
+                f"{definition.metric_code}:{system_type}",
+            )
+    elif applicability.applicability_mode not in {
+        "SUBJECT_TYPE",
+        "QUALITY_FOUNDATION",
+    }:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_APPLICABILITY_MODE_UNSUPPORTED",
+            f"{definition.metric_code}:{applicability.applicability_mode}",
+        )
+
+    raw_instances = output.get("instances")
+    if raw_instances is None:
+        if "status" not in output or "value_kind" not in output:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID",
+                definition.metric_code,
+            )
+        instances: tuple[Mapping[str, object], ...] = (output,)
+    else:
+        if not isinstance(raw_instances, list):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID",
+                f"{definition.metric_code}:instances",
+            )
+        normalized: list[Mapping[str, object]] = []
+        for index, item in enumerate(raw_instances):
+            if not isinstance(item, Mapping) or not all(
+                isinstance(key, str) for key in item
+            ):
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID",
+                    f"{definition.metric_code}:instances[{index}]",
+                )
+            normalized.append(cast(Mapping[str, object], item))
+        instances = tuple(normalized)
+
+    schema: Mapping[str, object] | None = None
+    if definition.value_kind == "STRUCTURED":
+        if definition.structured_output_schema_json is None:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_MISSING",
+                definition.metric_code,
+            )
+        parsed: object = json.loads(definition.structured_output_schema_json)
+        if not isinstance(parsed, dict):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_SCHEMA_MISSING",
+                definition.metric_code,
+            )
+        schema = cast(dict[str, object], parsed)
+
+    for index, instance in enumerate(instances):
+        value_kind = instance.get("value_kind")
+        if value_kind != definition.value_kind:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_VALUE_KIND_MISMATCH",
+                f"{definition.metric_code}:instances[{index}]",
+            )
+        status = instance.get("status")
+        if not isinstance(status, str) or not status:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_STATUS_INVALID",
+                f"{definition.metric_code}:instances[{index}]",
+            )
+        reason_codes = instance.get("reason_codes")
+        if reason_codes is not None and (
+            not isinstance(reason_codes, list)
+            or not all(isinstance(item, str) and item for item in reason_codes)
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_REASON_CODES_INVALID",
+                f"{definition.metric_code}:instances[{index}]",
+            )
+        for other_slot in ("value_text", "value_boolean"):
+            if instance.get(other_slot) is not None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH",
+                    f"{definition.metric_code}:instances[{index}].{other_slot}",
+                )
+        numeric = instance.get("value_numeric")
+        structured = instance.get("value_structured")
+        if definition.value_kind == "NUMERIC":
+            if structured is not None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH",
+                    f"{definition.metric_code}:instances[{index}].value_structured",
+                )
+            if numeric is not None and not _json_type_matches(numeric, "number"):
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_NUMERIC_INVALID",
+                    f"{definition.metric_code}:instances[{index}]",
+                )
+            if status == "VALID" and numeric is None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_VALID_VALUE_MISSING",
+                    f"{definition.metric_code}:instances[{index}]",
+                )
+        elif definition.value_kind == "STRUCTURED":
+            if numeric is not None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH",
+                    f"{definition.metric_code}:instances[{index}].value_numeric",
+                )
+            if structured is not None:
+                if schema is None:
+                    raise CatalogMetricEngineError(
+                        "M2_METRIC_STRUCTURED_SCHEMA_MISSING",
+                        definition.metric_code,
+                    )
+                _validate_json_value(
+                    structured,
+                    schema,
+                    metric_code=definition.metric_code,
+                    field=f"instances[{index}].value_structured",
+                )
+            if status == "VALID" and structured is None:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_RUNTIME_VALID_VALUE_MISSING",
+                    f"{definition.metric_code}:instances[{index}]",
+                )
+        else:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_VALUE_KIND_UNSUPPORTED",
+                f"{definition.metric_code}:{definition.value_kind}",
+            )
 
 
 def _load_object(path: Path) -> tuple[dict[str, object], bytes]:
@@ -877,12 +1343,19 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
 
         value_kind = _text(raw, "value_kind", field=code)
         schema_id = _optional_text(raw, "structured_output_schema_id", field=code)
+        schema_json: str | None = None
+        schema_hash: str | None = None
         if value_kind == "STRUCTURED":
             if schema_id is None or schema_id not in schema_registry:
                 raise CatalogMetricEngineError(
                     "M2_METRIC_STRUCTURED_SCHEMA_MISSING",
                     code,
                 )
+            schema_json, schema_hash = _compile_structured_output_schema(
+                schema_registry,
+                metric_code=code,
+                schema_id=schema_id,
+            )
         elif value_kind == "NUMERIC":
             if schema_id is not None:
                 raise CatalogMetricEngineError(
@@ -910,6 +1383,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             observation_lane=_text(raw, "observation_lane", field=code),
             publication_route=_text(raw, "publication_route", field=code),
             structured_output_schema_id=schema_id,
+            structured_output_schema_json=schema_json,
+            structured_output_schema_hash_sha256=schema_hash,
             input_fields=input_fields,
             formula=_text(raw, "formula", field=code),
             validity_conditions=_text(raw, "validity_conditions", field=code),

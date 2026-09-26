@@ -17,6 +17,7 @@ from .catalog_engine import (
     M2MetricPluginRequest,
     MetricPluginRegistry,
     build_m2_metric_execution_plan,
+    validate_m2_runtime_output,
 )
 from .context import MetricAuthority, MetricContext, MetricContextError, build_metric_context
 from .engine import (

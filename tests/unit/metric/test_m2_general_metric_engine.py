@@ -14,6 +14,7 @@ from tpaa_metric import (
     M2MetricPluginRequest,
     MetricPluginRegistry,
     build_m2_metric_execution_plan,
+    validate_m2_runtime_output,
 )
 from tpaa_metric.operators import (
     TimedValue,
@@ -178,8 +179,8 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
     engine = CatalogMetricEngine(plan, _registry())
     inputs = _inputs()
 
-    first = engine.execute(inputs)
-    second = engine.execute(inputs)
+    first = engine.execute(inputs, validate_runtime_contract=False)
+    second = engine.execute(inputs, validate_runtime_contract=False)
 
     assert first == second
     assert first.dispatch_key == "algorithm_id"
@@ -204,7 +205,11 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
 def test_subset_execution_closes_metric_dependencies_and_missing_plugin_fails_closed() -> None:
     plan = build_m2_metric_execution_plan(AUTHORITY)
     engine = CatalogMetricEngine(plan, _registry())
-    batch = engine.execute(_inputs(), metric_codes=("P1-SNS-005",))
+    batch = engine.execute(
+        _inputs(),
+        metric_codes=("P1-SNS-005",),
+        validate_runtime_contract=False,
+    )
 
     assert batch.metric_codes[-1] == "P1-SNS-005"
     assert "P1-QA-001" in batch.metric_codes
@@ -251,3 +256,158 @@ def test_governed_m2_operator_primitives_are_deterministic_and_fail_closed() -> 
     assert linear_interpolate(values, 500_000, max_gap_us=2_000_000) == 5.0
     with pytest.raises(ValueError, match="OUTSIDE_VALID_PIECE"):
         linear_interpolate(values, 3_000_000, max_gap_us=2_000_000)
+
+
+def _valid_runtime_instance(
+    *,
+    value_kind: str,
+    value_numeric: float | None = None,
+    value_structured: dict[str, object] | None = None,
+    status: str = "VALID",
+) -> dict[str, object]:
+    return {
+        "status": status,
+        "reason_codes": [],
+        "value_kind": value_kind,
+        "value_numeric": value_numeric,
+        "value_structured": value_structured,
+    }
+
+
+def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    numeric = plan.definition("P1-QA-003")
+    validate_m2_runtime_output(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [
+                _valid_runtime_instance(
+                    value_kind="NUMERIC",
+                    value_numeric=1.0,
+                )
+            ],
+        },
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            numeric,
+            {},
+            {
+                "metric_code": numeric.metric_code,
+                "instances": [
+                    _valid_runtime_instance(
+                        value_kind="NUMERIC",
+                        value_structured={"forbidden": True},
+                    )
+                ],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH"
+
+    structured = plan.definition("P1-QA-006")
+    valid_structured = {
+        "error_domain": "RANGE",
+        "residual_unit": "m",
+        "raw_residual": 5.0,
+        "reference_uncertainty": 3.0,
+        "alignment_uncertainty": 1.0,
+        "sensor_reported_uncertainty": 2.0,
+        "normalized_residual": 5.0 / math.sqrt(14.0),
+        "normalized_residual_status": "VALID",
+    }
+    validate_m2_runtime_output(
+        structured,
+        {},
+        {
+            "metric_code": structured.metric_code,
+            "instances": [
+                _valid_runtime_instance(
+                    value_kind="STRUCTURED",
+                    value_structured=valid_structured,
+                )
+            ],
+        },
+    )
+    assert structured.structured_output_schema_hash_sha256 is not None
+    assert len(structured.structured_output_schema_hash_sha256) == 64
+
+    invalid_structured = dict(valid_structured)
+    invalid_structured["unexpected"] = 1
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            structured,
+            {},
+            {
+                "metric_code": structured.metric_code,
+                "instances": [
+                    _valid_runtime_instance(
+                        value_kind="STRUCTURED",
+                        value_structured=invalid_structured,
+                    )
+                ],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
+
+
+def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    sns = plan.definition("P1-SNS-001")
+    validate_m2_runtime_output(
+        sns,
+        {"system_type": "EO"},
+        {
+            "metric_code": sns.metric_code,
+            "applicable": False,
+            "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
+            "instances": [],
+        },
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            sns,
+            {"system_type": "EO"},
+            {
+                "metric_code": sns.metric_code,
+                "instances": [
+                    _valid_runtime_instance(
+                        value_kind="NUMERIC",
+                        value_numeric=1.0,
+                    )
+                ],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID"
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            sns,
+            {"system_type": "RADAR"},
+            {
+                "metric_code": sns.metric_code,
+                "applicable": False,
+                "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
+                "instances": [],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
+
+
+def test_general_engine_runtime_gate_is_default_and_probe_opt_out_is_explicit() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    engine = CatalogMetricEngine(plan, _registry())
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        engine.execute(_inputs(), metric_codes=("P1-AIR-001",))
+    assert caught.value.code == "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID"
+
+    batch = engine.execute(
+        _inputs(),
+        metric_codes=("P1-AIR-001",),
+        validate_runtime_contract=False,
+    )
+    assert batch.metric_codes == ("P1-AIR-001",)

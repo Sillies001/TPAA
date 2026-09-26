@@ -82,8 +82,8 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
     }
     engine = CatalogMetricEngine(plan, registry)
-    first = engine.execute(inputs)
-    replayed = engine.execute(inputs)
+    first = engine.execute(inputs, validate_runtime_contract=False)
+    replayed = engine.execute(inputs, validate_runtime_contract=False)
 
     positions = {code: index for index, code in enumerate(plan.metric_codes)}
     dependency_order_exact = all(
