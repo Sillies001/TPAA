@@ -16,7 +16,7 @@ import json
 import math
 import subprocess
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
