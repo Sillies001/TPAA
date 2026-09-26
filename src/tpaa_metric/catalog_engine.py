@@ -80,6 +80,8 @@ class M2MetricDefinition:
     algorithm_version: str
     observation_lane: str
     publication_route: str
+    p1_longitudinal_trend_eligibility: bool
+    default_aggregation: str
     structured_output_schema_id: str | None
     structured_output_schema_json: str | None
     structured_output_schema_hash_sha256: str | None
@@ -1356,6 +1358,29 @@ def _metric_runtime_transport_authority(
         )
         or _text(
             common_rules,
+            "longitudinal_value_contract",
+            field="common_rules",
+        )
+        != (
+            "P1 longitudinal longitudinal_sample is numeric-only. "
+            "p1_longitudinal_trend_eligibility=true requires value_kind=NUMERIC and "
+            "default_aggregation=MEDIAN. STRUCTURED or quality-only metrics use "
+            "default_aggregation=NONE and never enter longitudinal_sample unless a future "
+            "separately versioned component metric/projection contract is introduced."
+        )
+        or _text(
+            common_rules,
+            "default_aggregation_contract",
+            field="common_rules",
+        )
+        != (
+            "default_aggregation is the baseline SESSION_CONFIG longitudinal aggregation, "
+            "not a free formula selector. Current values are MEDIAN for trend-eligible "
+            "NUMERIC metrics and NONE for metrics that do not enter P1 longitudinal. "
+            "Approved alternate sample profiles are governed separately and segment comparison keys."
+        )
+        or _text(
+            common_rules,
             "structured_schema_standard",
             field="common_rules",
         )
@@ -1406,6 +1431,7 @@ def _validate_generated_projection(
         "observation_lane",
         "publication_route",
         "structured_output_schema_id",
+        "p1_longitudinal_trend_eligibility",
     )
     for key in keys:
         if raw.get(key) != generated.get(key):
@@ -1611,6 +1637,36 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                 )
 
         value_kind = _text(raw, "value_kind", field=code)
+        trend_eligible = raw.get("p1_longitudinal_trend_eligibility")
+        if not isinstance(trend_eligible, bool):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_LONGITUDINAL_ELIGIBILITY_INVALID",
+                code,
+            )
+        default_aggregation = _text(raw, "default_aggregation", field=code)
+        observation_lane = _text(raw, "observation_lane", field=code)
+        if trend_eligible:
+            if value_kind != "NUMERIC" or default_aggregation != "MEDIAN":
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_LONGITUDINAL_CONTRACT_DRIFT",
+                    code,
+                )
+        elif default_aggregation != "NONE":
+            raise CatalogMetricEngineError(
+                "M2_METRIC_LONGITUDINAL_CONTRACT_DRIFT",
+                code,
+            )
+        if observation_lane == "QUALITY_EVIDENCE_ONLY" and trend_eligible:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_QUALITY_LONGITUDINAL_FORBIDDEN",
+                code,
+            )
+        if value_kind == "STRUCTURED" and trend_eligible:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_STRUCTURED_LONGITUDINAL_FORBIDDEN",
+                code,
+            )
+
         schema_id = _optional_text(raw, "structured_output_schema_id", field=code)
         schema_json: str | None = None
         schema_hash: str | None = None
@@ -1649,8 +1705,10 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             value_kind=value_kind,
             algorithm_id=_text(raw, "algorithm_id", field=code),
             algorithm_version=_text(raw, "algorithm_version", field=code),
-            observation_lane=_text(raw, "observation_lane", field=code),
+            observation_lane=observation_lane,
             publication_route=_text(raw, "publication_route", field=code),
+            p1_longitudinal_trend_eligibility=trend_eligible,
+            default_aggregation=default_aggregation,
             structured_output_schema_id=schema_id,
             structured_output_schema_json=schema_json,
             structured_output_schema_hash_sha256=schema_hash,

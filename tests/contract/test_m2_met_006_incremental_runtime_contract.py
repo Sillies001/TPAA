@@ -64,6 +64,11 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "SYSTEM_PERFORMANCE_OBSERVATION",
         "METRIC_INSTANCE_EVIDENCE_ONLY",
     }
+    assert len(product["longitudinal_trend_eligibility"]) == 32
+    assert sum(product["longitudinal_trend_eligibility"].values()) == 26
+    assert len(product["default_aggregations"]) == 32
+    assert list(product["default_aggregations"].values()).count("MEDIAN") == 26
+    assert list(product["default_aggregations"].values()).count("NONE") == 6
     assert product["negative_error_codes"]["observation_lane_mismatch"] == (
         "M2_METRIC_RUNTIME_OBSERVATION_LANE_MISMATCH"
     )
@@ -111,6 +116,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "business_status_selection_semantics_executed": False,
         "subject_metadata_binding_only": True,
         "publication_metadata_binding_only": True,
+        "longitudinal_metadata_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }

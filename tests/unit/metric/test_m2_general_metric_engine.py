@@ -136,6 +136,28 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         "MISSION_COMPUTER",
         "OTHER",
     )
+    assert sum(
+        definition.p1_longitudinal_trend_eligibility
+        for definition in plan.definitions
+    ) == 26
+    assert sum(
+        definition.default_aggregation == "MEDIAN"
+        for definition in plan.definitions
+    ) == 26
+    assert sum(
+        definition.default_aggregation == "NONE"
+        for definition in plan.definitions
+    ) == 6
+    assert all(
+        not definition.p1_longitudinal_trend_eligibility
+        for definition in plan.definitions
+        if definition.observation_lane == "QUALITY_EVIDENCE_ONLY"
+    )
+    assert all(
+        not definition.p1_longitudinal_trend_eligibility
+        for definition in plan.definitions
+        if definition.value_kind == "STRUCTURED"
+    )
     assert all(
         binding.metric_semantic_id == definition.semantic_id
         and binding.optional == binding.input_field.endswith("?")
@@ -159,6 +181,27 @@ def test_m2_input_authority_version_bridge_requires_frozen_provenance(
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_metric_execution_plan(authority)
     assert caught.value.code == "M2_METRIC_INPUT_AUTHORITY_PROVENANCE_DRIFT"
+
+
+def test_m2_longitudinal_metadata_drift_fails_closed(tmp_path: Path) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metric = next(
+        item
+        for item in payload["metrics"]
+        if item["metric_code"] == "P1-QA-005"
+    )
+    metric["p1_longitudinal_trend_eligibility"] = True
+    metric["default_aggregation"] = "MEDIAN"
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_QUALITY_LONGITUDINAL_FORBIDDEN"
 
 
 def test_m2_input_authority_optional_marker_drift_fails_closed(

@@ -465,6 +465,14 @@ def verify() -> dict[str, object]:
         definition.metric_code: definition.publication_route
         for definition in plan.definitions
     }
+    longitudinal_trend_eligibility = {
+        definition.metric_code: definition.p1_longitudinal_trend_eligibility
+        for definition in plan.definitions
+    }
+    default_aggregations = {
+        definition.metric_code: definition.default_aggregation
+        for definition in plan.definitions
+    }
     negative_error_codes = {
         "subject_type_mismatch": subject_type_mismatch,
         "observation_lane_mismatch": observation_lane_mismatch,
@@ -503,6 +511,27 @@ def verify() -> dict[str, object]:
         "publication_route_mismatch_fails_closed": (
             publication_route_mismatch
             == "M2_METRIC_RUNTIME_PUBLICATION_ROUTE_MISMATCH"
+        ),
+        "longitudinal_metadata_coverage_exact_32": (
+            len(longitudinal_trend_eligibility) == 32
+            and len(default_aggregations) == 32
+        ),
+        "trend_eligible_exact_26": (
+            sum(longitudinal_trend_eligibility.values()) == 26
+        ),
+        "default_aggregation_exact_26_median_6_none": (
+            tuple(default_aggregations.values()).count("MEDIAN") == 26
+            and tuple(default_aggregations.values()).count("NONE") == 6
+        ),
+        "quality_evidence_never_longitudinal": all(
+            not longitudinal_trend_eligibility[definition.metric_code]
+            for definition in plan.definitions
+            if definition.observation_lane == "QUALITY_EVIDENCE_ONLY"
+        ),
+        "structured_metrics_never_longitudinal": all(
+            not longitudinal_trend_eligibility[definition.metric_code]
+            for definition in plan.definitions
+            if definition.value_kind == "STRUCTURED"
         ),
         "numeric_value_kind_coverage_exact_29": len(numeric_definitions) == 29,
         "structured_value_kind_coverage_exact_3": (
@@ -615,6 +644,7 @@ def verify() -> dict[str, object]:
             "business_status_selection_semantics_executed": False,
             "subject_metadata_binding_only": True,
             "publication_metadata_binding_only": True,
+            "longitudinal_metadata_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -629,6 +659,8 @@ def verify() -> dict[str, object]:
             "subject_types": subject_types,
             "observation_lanes": observation_lanes,
             "publication_routes": publication_routes,
+            "longitudinal_trend_eligibility": longitudinal_trend_eligibility,
+            "default_aggregations": default_aggregations,
             "numeric_metric_codes": [
                 definition.metric_code for definition in numeric_definitions
             ],
