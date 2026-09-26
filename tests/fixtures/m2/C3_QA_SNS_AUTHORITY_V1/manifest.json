@@ -1,0 +1,24 @@
+{
+  "authority_refs": {
+    "core_baseline": "CB-1.4.0",
+    "c3_issue": 106,
+    "c3_authority_artifact": "M2_QA_SNS_AUTHORITY",
+    "c3_authority_version": "1.0.0",
+    "c3_authority_sha256": "1f0755836e7ea40b3b69c83dae1b2b636ff80e37d8630c5ce158d5dfccffd5d3"
+  },
+  "data_classification": "SYNTHETIC",
+  "files": {
+    "source": {
+      "path": "source/c3-authority-golden.json",
+      "sha256": "9428dc4893f4dd5158fbbdad1c411c7db444857b22ad8963dee9d7d9191384b5"
+    }
+  },
+  "fixture_id": "C3_QA_SNS_AUTHORITY_V1",
+  "fixture_version": "1.0.0",
+  "input_hash_algorithm": "SHA256_PATH_SHA256_V1",
+  "input_hash_basis": [
+    "source/c3-authority-golden.json"
+  ],
+  "input_sha256": "a900888bd74ed4c55e53cf8b1813c9402fc6a63a952e3acc3f38394bc4525394",
+  "schema": "TPAA_M2_C3_QA_SNS_AUTHORITY_FIXTURE_V1"
+}

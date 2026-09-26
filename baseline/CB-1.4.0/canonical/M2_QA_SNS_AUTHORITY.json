@@ -1,0 +1,477 @@
+{
+  "authority_id": "M2_QA_SNS_AUTHORITY",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_SEMANTIC_CONTRACT",
+  "status": "APPROVED_BY_DELEGATED_OWNER_AUTHORITY",
+  "effective_milestone": "M2",
+  "delivery_batch": "P1_FOUNDATION_32",
+  "decision_record": "https://github.com/Sillies001/TPAA/issues/106",
+  "approval": {
+    "authority_owner": "@Sillies001",
+    "delegation_mode": "EXPLICIT_TEMPORARY_CHAT_DELEGATION_2026-09-26",
+    "delegated_executor": "OpenAI ChatGPT",
+    "authority_roles": [
+      "BASELINE_WS_GOVERNANCE_OWNER",
+      "WS_DATA_WS_WORLD_CONTRACT_DECISION",
+      "WS_METRIC_GOLDEN_MATH_REVIEW"
+    ],
+    "scope": "M2 Batch 2 QA/SNS authority closure only"
+  },
+  "source_basis": {
+    "type": "NEW_DELEGATED_C3_AUTHORITY_DECISION",
+    "statement": "These semantic choices close gaps not specified by the imported R3.3 source authority; they are not represented as recovered source facts.",
+    "prior_baseline_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "metric_input_authority_matrix_sha256": "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc"
+  },
+  "qa_001_frame_convention": {
+    "quaternion_element_order": [
+      "w",
+      "x",
+      "y",
+      "z"
+    ],
+    "quaternion_equivalence": "Q_AND_NEGATIVE_Q_SAME_ROTATION",
+    "quaternion_normalization_rule": "FINITE_NONZERO_NORMALIZE_BEFORE_ROTATION",
+    "own_attitude_quaternion_semantics": {
+      "interpretation": "ACTIVE_ROTATION",
+      "source_frame": "OWN_BODY_FRD",
+      "destination_frame": "ECEF",
+      "symbol": "q_ecef_from_body"
+    },
+    "own_body_axes": {
+      "handedness": "RIGHT_HANDED",
+      "x_axis": "+X_FORWARD",
+      "y_axis": "+Y_RIGHT",
+      "z_axis": "+Z_DOWN"
+    },
+    "ecef_to_own_body_vector_rule": "r_body = R(q_ecef_from_body)^T * r_ecef",
+    "azimuth": {
+      "formula": "atan2(y_body,x_body)",
+      "zero_axis": "+X_FORWARD",
+      "positive_direction": "+X_TOWARD_+Y",
+      "wrap_interval_rad": "[-pi,pi)"
+    },
+    "elevation": {
+      "formula": "atan2(-z_body,hypot(x_body,y_body))",
+      "zero_plane": "OWN_BODY_XY",
+      "positive_direction": "UP_TOWARD_-Z",
+      "range_rad": "[-pi/2,pi/2]"
+    },
+    "sensor_boresight_quaternion_semantics": {
+      "interpretation": "ACTIVE_ROTATION",
+      "source_frame": "SENSOR_FRD",
+      "destination_frame": "OWN_BODY_FRD",
+      "symbol": "q_body_from_sensor"
+    },
+    "sensor_vector_rule": "r_sensor = R(q_body_from_sensor)^T * r_body",
+    "sensor_composition_rule": "R_sensor_from_ecef = R(q_body_from_sensor)^T * R(q_ecef_from_body)^T",
+    "missing_sensor_boresight_rule": "sensor_az_rad=null; sensor_el_rad=null; sensor_frame_status=NOT_CONFIGURED",
+    "valid_range_rule": "range_m > 0"
+  },
+  "qa_002_uncertainty_contract": {
+    "p_inputs_dimension": 6,
+    "p_inputs_order": [
+      "target_position_ecef_x_m",
+      "target_position_ecef_y_m",
+      "target_position_ecef_z_m",
+      "own_position_ecef_x_m",
+      "own_position_ecef_y_m",
+      "own_position_ecef_z_m"
+    ],
+    "p_inputs_units": "m",
+    "p_inputs_covariance_units": "m^2",
+    "p_inputs_frame": "ECEF",
+    "relative_state_jacobian": {
+      "shape": [
+        3,
+        6
+      ],
+      "row_semantics": [
+        "r_rel_ecef_x_m",
+        "r_rel_ecef_y_m",
+        "r_rel_ecef_z_m"
+      ],
+      "column_semantics": [
+        "target_position_ecef_x_m",
+        "target_position_ecef_y_m",
+        "target_position_ecef_z_m",
+        "own_position_ecef_x_m",
+        "own_position_ecef_y_m",
+        "own_position_ecef_z_m"
+      ],
+      "canonical_relative_position_rule": "r_rel_ecef = p_target_ecef - p_own_ecef",
+      "canonical_jacobian": "[I3|-I3]"
+    },
+    "position_uncertainty_mapping": {
+      "own_position_uncertainty_ref": "Require 3x3 ECEF covariance in m^2; populate P_inputs[3:6,3:6].",
+      "target_position_uncertainty_ref": "Require 3x3 ECEF covariance in m^2; populate P_inputs[0:3,0:3].",
+      "non_covariance_position_representation_rule": "FAIL_CLOSED_FOR_QA002_V1"
+    },
+    "time_alignment_uncertainty_mapping": {
+      "conversion": "Resolve sigma_t_seconds from CONTRACT_NAV_UNCERTAINTY_REPRESENTATION_V1; TWO_SIDED_HARD_BOUND +/-b uses sigma=b/sqrt(3). Convert us to s.",
+      "shared_error_vector": "g_time = [v_target_ecef_mps ; v_own_ecef_mps]",
+      "covariance_rule": "P_time = sigma_t_seconds^2 * g_time * g_time^T",
+      "merge_rule": "P_inputs = P_position + P_time",
+      "cross_covariance_effect": "Shared time error creates nonzero target-own cross covariance and MUST NOT be block-diagonalized."
+    },
+    "cross_covariance_rule": {
+      "source_position_cross_covariance": "ABSENT_MEANS_ZERO_BY_AUTHORITY_FOR_QA002_V1",
+      "shared_time_cross_covariance": "REQUIRED_AS_DEFINED_BY_P_TIME",
+      "other_hidden_cross_terms": "FORBIDDEN"
+    },
+    "attitude_uncertainty_mapping": {
+      "own_attitude_uncertainty_ref": {
+        "representation": "Resolve scalar small-angle sigma_rad; SIGMA_1D direct, 1x1 COVARIANCE sqrt(var), TWO_SIDED_HARD_BOUND b/sqrt(3).",
+        "p_inputs_contribution": "ZERO_TRANSLATIONAL_SENSITIVITY",
+        "angular_projection": "After P_rel is rotated to OWN_BODY_FRD, add sigma_att^2/cos(el)^2 to azimuth variance and sigma_att^2 to elevation variance.",
+        "singularity_rule": "horizontal_range_m > 0 required for VALID azimuth/elevation uncertainty"
+      },
+      "target_attitude_uncertainty_ref": {
+        "required_for_provenance": true,
+        "p_inputs_contribution": "ZERO_TRANSLATIONAL_SENSITIVITY",
+        "output_sensitivity": "ZERO_FOR_QA001_V1_RELATIVE_POSITION_AND_OWN_BODY_ANGLES"
+      }
+    },
+    "propagation": {
+      "p_rel_rule": "P_rel_ecef = J * P_inputs * J^T",
+      "body_covariance_rule": "P_rel_body = R(q_ecef_from_body)^T * P_rel_ecef * R(q_ecef_from_body)",
+      "sigma_range_rule": "sqrt(g_range * P_rel_body * g_range^T)",
+      "sigma_az_rule": "sqrt(g_az * P_rel_body * g_az^T + own_attitude_az_variance)",
+      "sigma_el_rule": "sqrt(g_el * P_rel_body * g_el^T + own_attitude_el_variance)",
+      "sigma_position_3d_rule": "sqrt(trace(P_rel_ecef))"
+    }
+  },
+  "reference_match_quality_profile": {
+    "profile_id": "M2_REFERENCE_MATCH_QUALITY_V1",
+    "profile_version": "1.1.0",
+    "max_gap_us": 50000,
+    "min_coverage": 0.8,
+    "max_interpolation_age_us": 50000,
+    "accepted_reference_quality_statuses": [
+      "ACCEPTED"
+    ],
+    "max_sigma_by_error_domain": {
+      "AZIMUTH": null,
+      "CROSS_RANGE": null,
+      "ELEVATION": null,
+      "POSITION_3D": null,
+      "RADIAL_POSITION": null,
+      "RADIAL_VELOCITY": null,
+      "RANGE": null,
+      "VERTICAL_POSITION": null
+    },
+    "required_uncertainty_components": [
+      "reference_truth_uncertainty",
+      "alignment_uncertainty",
+      "sensor_measurement_uncertainty"
+    ],
+    "na_reason_map": {
+      "ASSOCIATION_INVALID": "ASSOCIATION_INVALID",
+      "MATCH_STATUS_INVALID": "MATCH_STATUS_INVALID",
+      "INTERPOLATION_AGE_EXCEEDED": "INTERPOLATION_AGE_EXCEEDED",
+      "REFERENCE_QUALITY_REJECTED": "REFERENCE_QUALITY_REJECTED",
+      "UNCERTAINTY_COMPONENT_MISSING": "UNCERTAINTY_COMPONENT_MISSING",
+      "UNCERTAINTY_DOMAIN_CAP_EXCEEDED": "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
+      "NO_VALID_MATCHED_SAMPLES": "NO_VALID_MATCHED_SAMPLES"
+    },
+    "profile_hash": "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1",
+    "profile_hash_algorithm": "SHA256_CANONICAL_JSON_ASCII_SORTED_KEYS_EXCLUDING_PROFILE_HASH",
+    "relationship_to_existing_profile_fields": {
+      "mode": "GOVERNED_EXPANSION_OF_EXISTING_M2_REFERENCE_MATCH_QUALITY_V1",
+      "max_interpolation_age_us_relation": "For profile version 1.1.0 max_interpolation_age_us is explicitly 50000 and numerically equals max_gap_us; the names remain distinct and both are hash inputs.",
+      "min_coverage_relation": "min_coverage=0.8 remains the aggregate alignment coverage gate and is not an alias for per-sample interpolation age."
+    }
+  },
+  "comparability": {
+    "P1-QA-001": {
+      "semantic_identity_action": "RETAIN_SEMANTIC_ID_AND_VERSION",
+      "reason": "No formally completed M2 output exists before this authority; comparability begins at this authority hash and baseline lock."
+    },
+    "P1-QA-002": {
+      "semantic_identity_action": "RETAIN_SEMANTIC_ID_AND_VERSION",
+      "reason": "No formally completed M2 output exists before this authority; comparability begins at this authority hash and baseline lock."
+    },
+    "P1-QA-006": {
+      "semantic_identity_action": "RETAIN_SEMANTIC_ID_AND_VERSION",
+      "reason": "Formula is unchanged; upstream authority lineage must include this authority hash."
+    },
+    "P1-SNS-005..021": {
+      "semantic_identity_action": "RETAIN_METRIC_SEMANTIC_VERSIONS_AND_SEGMENT_BY_PROFILE_ID_VERSION_HASH",
+      "reason": "The formulas are unchanged; reference eligibility comparability is segmented by the exact profile identity."
+    }
+  },
+  "golden_vectors": {
+    "qa_001": {
+      "case_id": "QA001_NONIDENTITY_FRAME_AND_BORESIGHT_V1",
+      "input": {
+        "own_position_ecef_m": [
+          6378137,
+          0,
+          0
+        ],
+        "target_position_ecef_m": [
+          6378137,
+          1000,
+          0
+        ],
+        "own_velocity_ecef_mps": [
+          0,
+          0,
+          0
+        ],
+        "target_velocity_ecef_mps": [
+          0,
+          0,
+          0
+        ],
+        "own_attitude_quat": [
+          0.7071067811865476,
+          0,
+          0,
+          0.7071067811865475
+        ],
+        "sensor_boresight_quat": [
+          0.9238795325112867,
+          0,
+          0,
+          0.3826834323650898
+        ]
+      },
+      "expected": {
+        "r_rel_ecef_m": [
+          0,
+          1000,
+          0
+        ],
+        "v_rel_ecef_mps": [
+          0,
+          0,
+          0
+        ],
+        "range_m": 1000,
+        "range_rate_mps": 0,
+        "own_body_vector_m": [
+          1000,
+          0,
+          0
+        ],
+        "own_body_az_rad": 0,
+        "own_body_el_rad": 0,
+        "sensor_vector_m": [
+          707.1067811865476,
+          -707.1067811865476,
+          0
+        ],
+        "sensor_az_rad": -0.7853981633974483,
+        "sensor_el_rad": 0,
+        "sensor_frame_status": "AVAILABLE"
+      }
+    },
+    "qa_002": {
+      "case_id": "QA002_NONDEGENERATE_POSITION_TIME_ATTITUDE_V1",
+      "input": {
+        "target_position_covariance_ecef_m2": [
+          [
+            9,
+            0,
+            0
+          ],
+          [
+            0,
+            16,
+            0
+          ],
+          [
+            0,
+            0,
+            25
+          ]
+        ],
+        "own_position_covariance_ecef_m2": [
+          [
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            9,
+            0
+          ],
+          [
+            0,
+            0,
+            16
+          ]
+        ],
+        "target_velocity_ecef_mps": [
+          0,
+          180,
+          0
+        ],
+        "own_velocity_ecef_mps": [
+          0,
+          200,
+          0
+        ],
+        "own_attitude_sigma_rad": 0.01,
+        "target_attitude_sigma_rad": 0.02,
+        "time_alignment_two_sided_hard_bound_us": 3000,
+        "relative_state_jacobian": [
+          [
+            1,
+            0,
+            0,
+            -1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            -1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            -1
+          ]
+        ],
+        "own_attitude_quat": [
+          0.7071067811865476,
+          0,
+          0,
+          0.7071067811865475
+        ],
+        "r_rel_ecef_m": [
+          0,
+          1000,
+          0
+        ]
+      },
+      "expected": {
+        "time_alignment_sigma_s": 0.0017320508075688774,
+        "p_inputs_m2": [
+          [
+            9,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            16.0972,
+            0,
+            0,
+            0.10800000000000001,
+            0
+          ],
+          [
+            0,
+            0,
+            25,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            0.10800000000000001,
+            0,
+            0,
+            9.12,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            16
+          ]
+        ],
+        "p_rel_ecef_m2": [
+          [
+            13,
+            0,
+            0
+          ],
+          [
+            0,
+            25.001199999999997,
+            0
+          ],
+          [
+            0,
+            0,
+            41
+          ]
+        ],
+        "p_rel_own_body_m2": [
+          [
+            25.001199999999997,
+            0,
+            0
+          ],
+          [
+            0,
+            13,
+            0
+          ],
+          [
+            0,
+            0,
+            41
+          ]
+        ],
+        "sigma_range_m": 5.000119998560034,
+        "sigma_az_rad": 0.01063014581273465,
+        "sigma_el_rad": 0.011874342087037918,
+        "sigma_position_3d_m": 8.888261922333298,
+        "target_attitude_sensitivity": "ZERO_FOR_QA001_V1_RELATIVE_POSITION_AND_OWN_BODY_ANGLES"
+      }
+    }
+  },
+  "negative_discriminators": {
+    "qa_001_zero_norm_quaternion": {
+      "input_quaternion": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "expected_result": "FAIL_CLOSED_NONZERO_QUATERNION_REQUIRED"
+    },
+    "qa_002_wrong_jacobian_shape": {
+      "input_shape": [
+        3,
+        5
+      ],
+      "expected_result": "FAIL_CLOSED_EXPECTED_3X6"
+    },
+    "profile_missing_required_field": {
+      "removed_field": "accepted_reference_quality_statuses",
+      "expected_result": "FAIL_CLOSED_PROFILE_INCOMPLETE"
+    }
+  }
+}
