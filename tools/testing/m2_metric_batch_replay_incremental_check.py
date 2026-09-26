@@ -257,7 +257,7 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
     ]
     all_hashes_well_formed = all(
-        isinstance(item[key], str) and len(cast(str, item[key])) == 64
+        isinstance(item[key], str) and len(item[key]) == 64
         for item in per_metric_hashes
         for key in (
             "definition_hash",
