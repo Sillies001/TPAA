@@ -17,7 +17,7 @@ from .catalog_engine import (
     M2MetricPluginRequest,
     MetricPluginRegistry,
     build_m2_metric_execution_plan,
-    validate_m2_runtime_output as validate_m2_runtime_output,
+    validate_m2_runtime_output,
 )
 from .context import MetricAuthority, MetricContext, MetricContextError, build_metric_context
 from .engine import (
@@ -68,6 +68,7 @@ __all__ = [
     "SNS_DETECTION_CODES",
     "TasMachEnvelope",
     "build_m2_metric_execution_plan",
+    "validate_m2_runtime_output",
     "build_m2_air_formal_delivery",
     "build_metric_context",
     "build_m2_sns_detection_inputs",
