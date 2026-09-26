@@ -584,3 +584,24 @@ def test_m2_met_007_batch_replay_increment_is_cross_platform_compared() -> None:
         )
         >= 2
     )
+
+
+
+def test_m2_batch_2_authority_gap_sentinel_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M2 Batch 2 authority-gap sentinel evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-check" in text
+    assert (
+        text.count(
+            "evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json"
+        )
+        >= 2
+    )
+    assert (
+        "- name: Compare Windows and Linux M2 Batch 2 authority-gap sentinel"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-compare" in text
+    assert "downloaded/evidence/m2-authority-gap/windows/sentinel.json" in text
+    assert "downloaded/evidence/m2-authority-gap/linux/sentinel.json" in text
+    assert text.count("evidence/cross-platform/m2-authority-gap-sentinel.json") >= 2

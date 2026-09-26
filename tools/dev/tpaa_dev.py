@@ -84,6 +84,12 @@ M2_BATCH_REPLAY_INCREMENTAL_CHECK_MODULE = (
 M2_BATCH_REPLAY_INCREMENTAL_COMPARE_MODULE = (
     "tools.testing.m2_metric_batch_replay_incremental_compare"
 )
+M2_AUTHORITY_GAP_SENTINEL_CHECK_MODULE = (
+    "tools.testing.m2_authority_gap_sentinel_check"
+)
+M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE = (
+    "tools.testing.m2_authority_gap_sentinel_compare"
+)
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -170,6 +176,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-runtime-contract-incremental-compare", "M2-MET-006", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-006 runtime-contract evidence exactly."),
     CommandSpec("m2-batch-replay-incremental-check", "M2-MET-007", "IMPLEMENTED", "Verify exact 32-code deterministic batch/replay hashing substrate without claiming task completion."),
     CommandSpec("m2-batch-replay-incremental-compare", "M2-MET-007", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-007 batch/replay evidence exactly."),
+    CommandSpec("m2-authority-gap-sentinel-check", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Verify the audited Batch 2 C3 authority-gap state remains fail-closed and unchanged."),
+    CommandSpec("m2-authority-gap-sentinel-compare", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Compare Windows/Linux authority-gap sentinel evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -730,6 +738,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_batch_replay_compare.add_argument("--linux", type=Path, required=True)
     m2_batch_replay_compare.add_argument("--expected-revision", required=True)
     m2_batch_replay_compare.add_argument("--evidence", type=Path, required=True)
+    m2_authority_gap = sub.add_parser(
+        "m2-authority-gap-sentinel-check",
+        help="Verify the audited M2 Batch 2 C3 authority-gap state remains fail-closed",
+    )
+    m2_authority_gap.add_argument("--evidence", type=Path)
+    m2_authority_gap_compare = sub.add_parser(
+        "m2-authority-gap-sentinel-compare",
+        help="Compare Windows/Linux M2 Batch 2 authority-gap sentinel evidence",
+    )
+    m2_authority_gap_compare.add_argument("--windows", type=Path, required=True)
+    m2_authority_gap_compare.add_argument("--linux", type=Path, required=True)
+    m2_authority_gap_compare.add_argument("--expected-revision", required=True)
+    m2_authority_gap_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1314,6 +1335,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_BATCH_REPLAY_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-authority-gap-sentinel-check":
+        sentinel_args = [
+            sys.executable,
+            "-m",
+            M2_AUTHORITY_GAP_SENTINEL_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            sentinel_args.extend(["--evidence", str(args.evidence)])
+        return _run(sentinel_args)
+    if command == "m2-authority-gap-sentinel-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
