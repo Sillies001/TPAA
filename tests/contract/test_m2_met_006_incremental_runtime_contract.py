@@ -45,6 +45,12 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
 
     product = evidence["logical_product"]
     assert len(product["runtime_metric_codes"]) == 32
+    assert len(product["subject_types"]) == 32
+    assert set(product["subject_types"].values()) == {
+        "AIRCRAFT",
+        "MISSION_SYSTEM_INSTANCE",
+        "TARGET_PAIR",
+    }
     assert len(product["numeric_metric_codes"]) == 29
     assert set(product["structured_schema_hashes"]) == {
         "P1-QA-001",
@@ -63,6 +69,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["scope"] == {
         "business_metric_semantics_executed": False,
         "business_status_selection_semantics_executed": False,
+        "subject_metadata_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }
