@@ -244,6 +244,22 @@ def verify() -> dict[str, object]:
         for dependency in definition.metric_dependencies
     )
     record_by_code = {record.metric_code: record for record in first.records}
+    dependency_manifest_hash_binding_exact = all(
+        record_by_code[definition.metric_code].dependency_manifest_hash
+        == _canonical_hash(
+            {
+                "operator_bindings": definition.operator_bindings,
+                "constant_bindings": definition.constant_bindings,
+                "state_machine_bindings": definition.state_machine_bindings,
+                "metric_dependencies": definition.metric_dependencies,
+                "external_dependencies": definition.external_dependencies,
+                "formula_dependency_references": (
+                    definition.formula_dependency_references
+                ),
+            }
+        )
+        for definition in plan.definitions
+    )
     dependency_hash_binding_exact = all(
         record_by_code[definition.metric_code].upstream_result_hashes
         == tuple(
@@ -278,6 +294,9 @@ def verify() -> dict[str, object]:
             "input_payload_hash": record_by_code[
                 definition.metric_code
             ].input_payload_hash,
+            "dependency_manifest_hash": record_by_code[
+                definition.metric_code
+            ].dependency_manifest_hash,
             "probe_evidence_hash": evidence_hash(
                 definition,
                 inputs[definition.metric_code],
@@ -298,6 +317,7 @@ def verify() -> dict[str, object]:
             "definition_hash",
             "authority_lineage_hash",
             "input_payload_hash",
+            "dependency_manifest_hash",
             "probe_evidence_hash",
             "plugin_output_hash",
             "record_logical_hash",
@@ -333,6 +353,12 @@ def verify() -> dict[str, object]:
         ),
         "dependency_order_exact": dependency_order_exact,
         "dependency_hash_binding_exact": dependency_hash_binding_exact,
+        "dependency_manifest_hash_binding_exact_32": (
+            dependency_manifest_hash_binding_exact
+        ),
+        "dispatch_key_version_qualified": (
+            first.dispatch_key == "algorithm_id+algorithm_version"
+        ),
         "record_identity_binding_exact_32": record_identity_binding_exact,
         "plugin_manifest_hash_well_formed": _is_sha256(first.plugin_manifest_hash),
         "plugin_manifest_replay_exact": (
@@ -419,6 +445,7 @@ def verify() -> dict[str, object]:
             "per_metric_authority_lineage_binding_only": True,
             "input_payload_lineage_binding_only": True,
             "version_qualified_plugin_dispatch_only": True,
+            "governed_dependency_lineage_only": True,
             "formal_32_metric_replay_claimed": False,
             "authority_values_invented": False,
         },
@@ -438,6 +465,7 @@ def verify() -> dict[str, object]:
             "catalog_metric_codes": list(plan.catalog_metric_codes),
             "execution_metric_codes": list(first.metric_codes),
             "dependency_edges": dependency_edges,
+            "dispatch_key": first.dispatch_key,
             "batch_logical_hash": first.logical_hash,
             "tampered_batch_logical_hash": tampered.logical_hash,
             "plugin_manifest_hash": first.plugin_manifest_hash,

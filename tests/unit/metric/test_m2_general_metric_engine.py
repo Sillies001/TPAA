@@ -555,7 +555,7 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
     second = engine.execute(inputs, validate_runtime_contract=False)
 
     assert first == second
-    assert first.dispatch_key == "algorithm_id"
+    assert first.dispatch_key == "algorithm_id+algorithm_version"
     assert len(first.records) == 32
     assert first.metric_codes == plan.metric_codes
     assert len({record.plugin_id for record in first.records}) == 1
@@ -574,6 +574,26 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
         assert record.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
         assert len(record.input_payload_hash) == 64
         assert record.operator_bindings == definition.operator_bindings
+        assert len(record.dependency_manifest_hash) == 64
+        expected_dependency_manifest_hash = hashlib.sha256(
+            json.dumps(
+                {
+                    "constant_bindings": definition.constant_bindings,
+                    "external_dependencies": definition.external_dependencies,
+                    "formula_dependency_references": (
+                        definition.formula_dependency_references
+                    ),
+                    "metric_dependencies": definition.metric_dependencies,
+                    "operator_bindings": definition.operator_bindings,
+                    "state_machine_bindings": definition.state_machine_bindings,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+                allow_nan=False,
+            ).encode("ascii")
+        ).hexdigest()
+        assert record.dependency_manifest_hash == expected_dependency_manifest_hash
         assert record.upstream_result_hashes == tuple(
             (dependency, seen[dependency])
             for dependency in definition.metric_dependencies

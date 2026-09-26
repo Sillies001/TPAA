@@ -33,7 +33,7 @@ M2_EXPECTED_FAMILY_COUNTS = MappingProxyType(
         "SENSOR_ACCURACY": 17,
     }
 )
-M2_DISPATCH_KEY = "algorithm_id"
+M2_DISPATCH_KEY = "algorithm_id+algorithm_version"
 M2_INPUT_LINEAGE_ENCODING = "TPAA_M2_INPUT_LINEAGE_JSON_V1"
 M2_GENERATED_PROJECTION_FIELDS = (
     "metric_code",
@@ -198,6 +198,7 @@ class M2MetricExecutionRecord:
     input_payload_hash: str
     plugin_id: str
     operator_bindings: tuple[str, ...]
+    dependency_manifest_hash: str
     upstream_result_hashes: tuple[tuple[str, str], ...]
     plugin_output_hash: str
     logical_hash: str
@@ -217,7 +218,7 @@ class M2MetricExecutionBatch:
 
 
 class MetricPluginRegistry:
-    """Algorithm-id plugin registry shared by every Metric family."""
+    """Algorithm-id/version plugin registry shared by every Metric family."""
 
     def __init__(self) -> None:
         self._plugins: dict[tuple[str, str | None], tuple[str, M2MetricPlugin]] = {}
@@ -319,7 +320,7 @@ class MetricPluginRegistry:
 
 
 class CatalogMetricEngine:
-    """One Catalog-driven execution engine with algorithm-id plugin dispatch."""
+    """One Catalog-driven engine with algorithm-id/version plugin dispatch."""
 
     dispatch_key = M2_DISPATCH_KEY
 
@@ -395,6 +396,18 @@ class CatalogMetricEngine:
                 (definition.algorithm_id, definition.algorithm_version, plugin_id)
             )
             input_payload_hash = _sha256_input_payload(input_payload)
+            dependency_manifest_hash = _sha256_object(
+                {
+                    "operator_bindings": definition.operator_bindings,
+                    "constant_bindings": definition.constant_bindings,
+                    "state_machine_bindings": definition.state_machine_bindings,
+                    "metric_dependencies": definition.metric_dependencies,
+                    "external_dependencies": definition.external_dependencies,
+                    "formula_dependency_references": (
+                        definition.formula_dependency_references
+                    ),
+                }
+            )
             upstream_hashes = tuple(
                 (dependency, result_hashes[dependency])
                 for dependency in definition.metric_dependencies
@@ -439,6 +452,7 @@ class CatalogMetricEngine:
                     "algorithm_version": definition.algorithm_version,
                     "plugin_id": plugin_id,
                     "operator_bindings": definition.operator_bindings,
+                    "dependency_manifest_hash": dependency_manifest_hash,
                     "upstream_result_hashes": upstream_hashes,
                     "plugin_output_hash": output_hash,
                 }
@@ -455,6 +469,7 @@ class CatalogMetricEngine:
                 input_payload_hash=input_payload_hash,
                 plugin_id=plugin_id,
                 operator_bindings=definition.operator_bindings,
+                dependency_manifest_hash=dependency_manifest_hash,
                 upstream_result_hashes=upstream_hashes,
                 plugin_output_hash=output_hash,
                 logical_hash=logical_hash,

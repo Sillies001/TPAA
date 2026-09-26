@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import subprocess
@@ -26,6 +27,17 @@ def _git_revision() -> str:
     )
     value = completed.stdout.strip()
     return value if len(value) == 40 else "UNKNOWN"
+
+
+def _canonical_hash(value: object) -> str:
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("ascii")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def verify() -> dict[str, object]:
@@ -170,7 +182,9 @@ def verify() -> dict[str, object]:
         "single_general_plugin_mechanism": (
             set(registry.plugin_ids.values()) == {"m2-met-001-contract-probe-v1"}
         ),
-        "dispatch_key_algorithm_id": first.dispatch_key == "algorithm_id",
+        "dispatch_key_version_qualified": (
+            first.dispatch_key == "algorithm_id+algorithm_version"
+        ),
         "required_operator_registry_exact": (
             set(plan.required_operator_ids) == set(M2_OPERATOR_IMPLEMENTATIONS)
             and len(plan.required_operator_ids) == 8
@@ -222,7 +236,24 @@ def verify() -> dict[str, object]:
         "record_hashes_complete": all(
             len(record.logical_hash) == 64
             and len(record.plugin_output_hash) == 64
+            and len(record.dependency_manifest_hash) == 64
             for record in first.records
+        ),
+        "record_dependency_manifest_hashes_exact_32": all(
+            record.dependency_manifest_hash
+            == _canonical_hash(
+                {
+                    "operator_bindings": definition.operator_bindings,
+                    "constant_bindings": definition.constant_bindings,
+                    "state_machine_bindings": definition.state_machine_bindings,
+                    "metric_dependencies": definition.metric_dependencies,
+                    "external_dependencies": definition.external_dependencies,
+                    "formula_dependency_references": (
+                        definition.formula_dependency_references
+                    ),
+                }
+            )
+            for record, definition in zip(first.records, plan.definitions, strict=True)
         ),
     }
     failed_acceptance = sorted(

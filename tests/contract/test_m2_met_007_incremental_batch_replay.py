@@ -52,6 +52,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         "per_metric_authority_lineage_binding_only": True,
         "input_payload_lineage_binding_only": True,
         "version_qualified_plugin_dispatch_only": True,
+        "governed_dependency_lineage_only": True,
         "formal_32_metric_replay_claimed": False,
         "authority_values_invented": False,
     }
@@ -59,9 +60,12 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     product = evidence["logical_product"]
     assert len(product["catalog_metric_codes"]) == 32
     assert len(product["execution_metric_codes"]) == 32
+    assert product["dispatch_key"] == "algorithm_id+algorithm_version"
     assert len(product["batch_logical_hash"]) == 64
     assert len(product["tampered_batch_logical_hash"]) == 64
     assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
+    assert evidence["acceptance"]["dispatch_key_version_qualified"]
+    assert evidence["acceptance"]["dependency_manifest_hash_binding_exact_32"]
     assert evidence["acceptance"]["record_identity_binding_exact_32"]
     assert evidence["acceptance"]["plugin_manifest_hash_well_formed"]
     assert evidence["acceptance"]["plugin_manifest_replay_exact"]
@@ -88,6 +92,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         assert len(row["definition_hash"]) == 64
         assert len(row["authority_lineage_hash"]) == 64
         assert len(row["input_payload_hash"]) == 64
+        assert len(row["dependency_manifest_hash"]) == 64
         assert len(row["probe_evidence_hash"]) == 64
         assert len(row["plugin_output_hash"]) == 64
         assert len(row["record_logical_hash"]) == 64
