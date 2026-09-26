@@ -34,6 +34,12 @@ M2_EXPECTED_FAMILY_COUNTS = MappingProxyType(
     }
 )
 M2_DISPATCH_KEY = "algorithm_id"
+_REFERENCE_MATCH_QUALITY_PROFILE_CONTRACT = "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
+_REFERENCE_MATCH_QUALITY_PROFILE_IDENTITY_FIELDS = (
+    "reference_match_quality_profile_id",
+    "reference_match_quality_profile_version",
+    "reference_match_quality_profile_hash",
+)
 
 
 class CatalogMetricEngineError(RuntimeError):
@@ -1392,6 +1398,16 @@ def _metric_runtime_transport_authority(
         )
         or _text(
             common_rules,
+            "reference_match_eligibility",
+            field="common_rules",
+        )
+        != (
+            "Mission-system accuracy metrics that bind CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1 "
+            "use only the exact profile_id/version/hash supplied in MetricContext. Eligibility thresholds "
+            "are configuration data; missing profile fields are an error, not an implicit default."
+        )
+        or _text(
+            common_rules,
             "profile_input_exact_name_contract",
             field="common_rules",
         )
@@ -1641,6 +1657,40 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         ):
             raise CatalogMetricEngineError(
                 "M2_METRIC_INPUT_AUTHORITY_UPSTREAM_DRIFT",
+                code,
+            )
+
+        reference_match_identity_bindings = tuple(
+            binding
+            for binding in authority_bindings
+            if binding.authority_id == _REFERENCE_MATCH_QUALITY_PROFILE_CONTRACT
+        )
+        reference_match_identity_expected = {
+            (field, field, "UPSTREAM_CONTRACT", False)
+            for field in _REFERENCE_MATCH_QUALITY_PROFILE_IDENTITY_FIELDS
+        }
+        reference_match_identity_actual = {
+            (
+                binding.input_field,
+                binding.authority_field,
+                binding.binding_kind,
+                binding.optional,
+            )
+            for binding in reference_match_identity_bindings
+        }
+        if _REFERENCE_MATCH_QUALITY_PROFILE_CONTRACT in upstream:
+            if (
+                len(reference_match_identity_bindings)
+                != len(_REFERENCE_MATCH_QUALITY_PROFILE_IDENTITY_FIELDS)
+                or reference_match_identity_actual != reference_match_identity_expected
+            ):
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_REFERENCE_MATCH_PROFILE_IDENTITY_DRIFT",
+                    code,
+                )
+        elif reference_match_identity_bindings:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_REFERENCE_MATCH_PROFILE_IDENTITY_DRIFT",
                 code,
             )
 

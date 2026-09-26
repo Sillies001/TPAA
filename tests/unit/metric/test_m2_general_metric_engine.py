@@ -183,6 +183,70 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         for definition in plan.definitions
         for binding in definition.input_authority_bindings
     )
+    reference_match_definitions = tuple(
+        definition
+        for definition in plan.definitions
+        if "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
+        in definition.upstream_dependencies
+    )
+    assert tuple(item.metric_code for item in reference_match_definitions) == tuple(
+        f"P1-SNS-{index:03d}" for index in range(5, 22)
+    )
+    expected_reference_match_identity = {
+        (
+            "reference_match_quality_profile_id",
+            "reference_match_quality_profile_id",
+            "UPSTREAM_CONTRACT",
+            False,
+        ),
+        (
+            "reference_match_quality_profile_version",
+            "reference_match_quality_profile_version",
+            "UPSTREAM_CONTRACT",
+            False,
+        ),
+        (
+            "reference_match_quality_profile_hash",
+            "reference_match_quality_profile_hash",
+            "UPSTREAM_CONTRACT",
+            False,
+        ),
+    }
+    for definition in reference_match_definitions:
+        bindings = {
+            (
+                binding.input_field,
+                binding.authority_field,
+                binding.binding_kind,
+                binding.optional,
+            )
+            for binding in definition.input_authority_bindings
+            if binding.authority_id == "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
+        }
+        assert bindings == expected_reference_match_identity
+
+
+def test_m2_reference_match_profile_identity_binding_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "METRIC_INPUT_AUTHORITY_MATRIX.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    binding = next(
+        item
+        for item in payload["bindings"]
+        if item["metric_code"] == "P1-SNS-005"
+        and item["input_field"] == "reference_match_quality_profile_hash"
+    )
+    binding["authority_field"] = "profile_hash"
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_REFERENCE_MATCH_PROFILE_IDENTITY_DRIFT"
 
 
 def test_m2_profile_parameter_input_exact_name_contract_fails_closed(

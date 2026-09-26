@@ -478,6 +478,21 @@ def verify() -> dict[str, object]:
         for definition in plan.definitions
         if definition.profile_parameters
     }
+    reference_match_profile_identity_bindings = {
+        definition.metric_code: [
+            {
+                "input_field": binding.input_field,
+                "authority_field": binding.authority_field,
+                "binding_kind": binding.binding_kind,
+                "optional": binding.optional,
+            }
+            for binding in definition.input_authority_bindings
+            if binding.authority_id == "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
+        ]
+        for definition in plan.definitions
+        if "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
+        in definition.upstream_dependencies
+    }
     negative_error_codes = {
         "subject_type_mismatch": subject_type_mismatch,
         "observation_lane_mismatch": observation_lane_mismatch,
@@ -555,6 +570,42 @@ def verify() -> dict[str, object]:
                 "P1-AIR-001": ["max_gap_us", "min_coverage"],
                 "P1-AIR-003": ["derivative_window_s", "max_gap_us"],
             }
+        ),
+        "reference_match_profile_identity_binding_exact_17": (
+            set(reference_match_profile_identity_bindings)
+            == {f"P1-SNS-{index:03d}" for index in range(5, 22)}
+            and all(
+                {
+                    (
+                        item["input_field"],
+                        item["authority_field"],
+                        item["binding_kind"],
+                        item["optional"],
+                    )
+                    for item in bindings
+                }
+                == {
+                    (
+                        "reference_match_quality_profile_id",
+                        "reference_match_quality_profile_id",
+                        "UPSTREAM_CONTRACT",
+                        False,
+                    ),
+                    (
+                        "reference_match_quality_profile_version",
+                        "reference_match_quality_profile_version",
+                        "UPSTREAM_CONTRACT",
+                        False,
+                    ),
+                    (
+                        "reference_match_quality_profile_hash",
+                        "reference_match_quality_profile_hash",
+                        "UPSTREAM_CONTRACT",
+                        False,
+                    ),
+                }
+                for bindings in reference_match_profile_identity_bindings.values()
+            )
         ),
         "numeric_value_kind_coverage_exact_29": len(numeric_definitions) == 29,
         "structured_value_kind_coverage_exact_3": (
@@ -669,6 +720,7 @@ def verify() -> dict[str, object]:
             "publication_metadata_binding_only": True,
             "longitudinal_metadata_binding_only": True,
             "profile_parameter_name_binding_only": True,
+            "reference_match_profile_identity_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -686,6 +738,9 @@ def verify() -> dict[str, object]:
             "longitudinal_trend_eligibility": longitudinal_trend_eligibility,
             "default_aggregations": default_aggregations,
             "profile_parameter_bindings": profile_parameter_bindings,
+            "reference_match_profile_identity_bindings": (
+                reference_match_profile_identity_bindings
+            ),
             "numeric_metric_codes": [
                 definition.metric_code for definition in numeric_definitions
             ],
