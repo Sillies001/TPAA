@@ -135,6 +135,15 @@ def _payload() -> dict[str, object]:
     }
 
 
+def _finite_number(value: object, *, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"M2_SNS_ACCURACY_EVIDENCE_VALUE_INVALID:{field}")
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError(f"M2_SNS_ACCURACY_EVIDENCE_VALUE_NONFINITE:{field}")
+    return result
+
+
 def _discriminating_payload() -> dict[str, object]:
     payload = _payload()
     range_errors = (-10.0, 0.0, 30.0, 80.0, -20.0)
@@ -149,8 +158,14 @@ def _discriminating_payload() -> dict[str, object]:
         sample["reference_range_m"] = reference_range
         sample["sensor_measurement"] = {"range_m": measured_range}
         sample["reference_relative_state"] = {"range_m": reference_range}
-        sample["measured_az_rad"] = float(sample["reference_az_rad"]) + azimuth_errors[offset]
-        sample["measured_el_rad"] = float(sample["reference_el_rad"]) + elevation_errors[offset]
+        sample["measured_az_rad"] = _finite_number(
+            sample["reference_az_rad"],
+            field="reference_az_rad",
+        ) + azimuth_errors[offset]
+        sample["measured_el_rad"] = _finite_number(
+            sample["reference_el_rad"],
+            field="reference_el_rad",
+        ) + elevation_errors[offset]
         sample["measured_position_ecef_m"] = [float(index), 0.0, float(index)]
         sample["reference_target_position_ecef_m"] = [0.0, 0.0, float(index)]
         sample["measured_radial_velocity_mps"] = 10.0 + 2.0 * index
