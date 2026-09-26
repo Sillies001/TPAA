@@ -52,8 +52,17 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "P1-QA-006",
     }
     assert len(product["sns_applicability_metric_codes"]) == 21
+    assert len(product["core_logical_model_sha256"]) == 64
+    assert product["allowed_result_statuses"] == [
+        "VALID",
+        "N_A",
+        "INSUFFICIENT_DATA",
+        "INVALID",
+        "REVIEW_REQUIRED",
+    ]
     assert evidence["scope"] == {
         "business_metric_semantics_executed": False,
+        "business_status_selection_semantics_executed": False,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }

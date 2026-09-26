@@ -32,6 +32,7 @@ M2_AUTHORITY_FILES = (
     "METRIC_INPUT_AUTHORITY_MATRIX.json",
     "SOURCE_PROVENANCE.json",
     "WORLD_CAPABILITY_REGISTRY.json",
+    "CORE_LOGICAL_MODEL.json",
 )
 
 
@@ -110,6 +111,14 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
     assert len(plan.input_authority_matrix_sha256) == 64
     assert len(plan.source_provenance_sha256) == 64
     assert len(plan.world_capability_registry_sha256) == 64
+    assert len(plan.core_logical_model_sha256) == 64
+    assert plan.allowed_result_statuses == (
+        "VALID",
+        "N_A",
+        "INSUFFICIENT_DATA",
+        "INVALID",
+        "REVIEW_REQUIRED",
+    )
     assert all(
         binding.metric_semantic_id == definition.semantic_id
         and binding.optional == binding.input_field.endswith("?")
@@ -411,3 +420,71 @@ def test_general_engine_runtime_gate_is_default_and_probe_opt_out_is_explicit() 
         validate_runtime_contract=False,
     )
     assert batch.metric_codes == ("P1-AIR-001",)
+
+
+
+def test_runtime_contract_gate_binds_core_status_enum_and_missing_reason_rule() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    numeric = plan.definition("P1-QA-003")
+
+    for status, reasons in (
+        ("N_A", ["TEST_MISSING_PREREQUISITE"]),
+        ("INSUFFICIENT_DATA", ["TEST_INSUFFICIENT_DATA"]),
+        ("INVALID", []),
+        ("REVIEW_REQUIRED", []),
+    ):
+        validate_m2_runtime_output(
+            numeric,
+            {},
+            {
+                "metric_code": numeric.metric_code,
+                "instances": [
+                    {
+                        "status": status,
+                        "reason_codes": reasons,
+                        "value_kind": "NUMERIC",
+                        "value_numeric": None,
+                        "value_structured": None,
+                    }
+                ],
+            },
+        )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            numeric,
+            {},
+            {
+                "metric_code": numeric.metric_code,
+                "instances": [
+                    {
+                        "status": "TEST_ONLY_UNKNOWN_STATUS",
+                        "reason_codes": [],
+                        "value_kind": "NUMERIC",
+                        "value_numeric": None,
+                        "value_structured": None,
+                    }
+                ],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_RUNTIME_STATUS_INVALID"
+
+    for status in ("N_A", "INSUFFICIENT_DATA"):
+        with pytest.raises(CatalogMetricEngineError) as caught:
+            validate_m2_runtime_output(
+                numeric,
+                {},
+                {
+                    "metric_code": numeric.metric_code,
+                    "instances": [
+                        {
+                            "status": status,
+                            "reason_codes": [],
+                            "value_kind": "NUMERIC",
+                            "value_numeric": None,
+                            "value_structured": None,
+                        }
+                    ],
+                },
+            )
+        assert caught.value.code == "M2_METRIC_RUNTIME_REASON_CODE_REQUIRED"

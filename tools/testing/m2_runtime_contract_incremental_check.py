@@ -12,7 +12,7 @@ import argparse
 import json
 import subprocess
 import sys
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -66,12 +66,13 @@ def _instance(
     value_kind: str,
     *,
     status: str = "VALID",
+    reason_codes: Sequence[str] = (),
     value_numeric: float | None = None,
     value_structured: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     return {
         "status": status,
-        "reason_codes": [],
+        "reason_codes": list(reason_codes),
         "value_kind": value_kind,
         "value_numeric": value_numeric,
         "value_structured": (
@@ -126,22 +127,40 @@ def verify() -> dict[str, object]:
     structured_frame = plan.definition("P1-QA-001")
     sns = plan.definition("P1-SNS-001")
 
-    validate_m2_runtime_output(
-        numeric,
-        {},
-        {
-            "metric_code": numeric.metric_code,
-            "instances": [_instance("NUMERIC", status="N_A")],
-        },
-    )
-    validate_m2_runtime_output(
-        structured,
-        {},
-        {
-            "metric_code": structured.metric_code,
-            "instances": [_instance("STRUCTURED", status="N_A")],
-        },
-    )
+    for status, reason_codes in (
+        ("N_A", ("TEST_MISSING_PREREQUISITE",)),
+        ("INSUFFICIENT_DATA", ("TEST_INSUFFICIENT_DATA",)),
+        ("INVALID", ()),
+        ("REVIEW_REQUIRED", ()),
+    ):
+        validate_m2_runtime_output(
+            numeric,
+            {},
+            {
+                "metric_code": numeric.metric_code,
+                "instances": [
+                    _instance(
+                        "NUMERIC",
+                        status=status,
+                        reason_codes=reason_codes,
+                    )
+                ],
+            },
+        )
+        validate_m2_runtime_output(
+            structured,
+            {},
+            {
+                "metric_code": structured.metric_code,
+                "instances": [
+                    _instance(
+                        "STRUCTURED",
+                        status=status,
+                        reason_codes=reason_codes,
+                    )
+                ],
+            },
+        )
 
     sns_codes = tuple(
         definition.metric_code
@@ -274,6 +293,46 @@ def verify() -> dict[str, object]:
         },
     )
 
+    unknown_status = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [
+                _instance(
+                    "NUMERIC",
+                    status="TEST_ONLY_UNKNOWN_STATUS",
+                )
+            ],
+        },
+    )
+    missing_reason_codes_instance = _instance("NUMERIC", value_numeric=1.0)
+    del missing_reason_codes_instance["reason_codes"]
+    missing_reason_codes = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [missing_reason_codes_instance],
+        },
+    )
+    na_without_reason = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [_instance("NUMERIC", status="N_A")],
+        },
+    )
+    insufficient_without_reason = error_code(
+        structured,
+        {},
+        {
+            "metric_code": structured.metric_code,
+            "instances": [_instance("STRUCTURED", status="INSUFFICIENT_DATA")],
+        },
+    )
+
     non_radar_fake_observation = error_code(
         sns,
         {"system_type": "EO"},
@@ -316,6 +375,10 @@ def verify() -> dict[str, object]:
         "schema_extra_property": schema_extra_property,
         "schema_invalid_enum": schema_invalid_enum,
         "schema_array_cardinality": schema_array_cardinality,
+        "unknown_status": unknown_status,
+        "missing_reason_codes": missing_reason_codes,
+        "na_without_reason": na_without_reason,
+        "insufficient_without_reason": insufficient_without_reason,
         "non_radar_fake_observation": non_radar_fake_observation,
         "radar_false_not_applicable": radar_false_not_applicable,
     }
@@ -333,6 +396,21 @@ def verify() -> dict[str, object]:
         ),
         "valid_transport_samples_all_accept": True,
         "non_valid_null_value_slots_accept": True,
+        "core_result_status_authority_exact": (
+            plan.allowed_result_statuses
+            == ("VALID", "N_A", "INSUFFICIENT_DATA", "INVALID", "REVIEW_REQUIRED")
+        ),
+        "na_insufficient_invalid_transport_branches_accept": True,
+        "unknown_status_fails_closed": (
+            unknown_status == "M2_METRIC_RUNTIME_STATUS_INVALID"
+        ),
+        "reason_codes_shape_required": (
+            missing_reason_codes == "M2_METRIC_RUNTIME_REASON_CODES_INVALID"
+        ),
+        "missing_data_reason_code_required": (
+            na_without_reason == "M2_METRIC_RUNTIME_REASON_CODE_REQUIRED"
+            and insufficient_without_reason == "M2_METRIC_RUNTIME_REASON_CODE_REQUIRED"
+        ),
         "wrong_metric_code_fails_closed": (
             wrong_metric_code == "M2_METRIC_RUNTIME_METRIC_CODE_MISMATCH"
         ),
@@ -389,12 +467,15 @@ def verify() -> dict[str, object]:
         },
         "scope": {
             "business_metric_semantics_executed": False,
+            "business_status_selection_semantics_executed": False,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
         "logical_product": {
             "plan_logical_hash": plan.logical_hash,
             "catalog_sha256": plan.catalog_sha256,
+            "core_logical_model_sha256": plan.core_logical_model_sha256,
+            "allowed_result_statuses": list(plan.allowed_result_statuses),
             "runtime_metric_codes": list(plan.metric_codes),
             "numeric_metric_codes": [
                 definition.metric_code for definition in numeric_definitions

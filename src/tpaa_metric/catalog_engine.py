@@ -95,6 +95,7 @@ class M2MetricDefinition:
     external_dependencies: tuple[str, ...]
     state_machine_bindings: tuple[str, ...]
     input_authority_bindings: tuple[InputAuthorityBinding, ...]
+    allowed_result_statuses: tuple[str, ...]
     applicability: ApplicabilityContract
     definition_hash: str
 
@@ -107,6 +108,8 @@ class M2MetricExecutionPlan:
     input_authority_matrix_sha256: str
     source_provenance_sha256: str
     world_capability_registry_sha256: str
+    core_logical_model_sha256: str
+    allowed_result_statuses: tuple[str, ...]
     db_schema_version: str
     delivery_milestone: str
     delivery_batch: str
@@ -746,19 +749,27 @@ def validate_m2_runtime_output(
                 f"{definition.metric_code}:instances[{index}]",
             )
         status = instance.get("status")
-        if not isinstance(status, str) or not status:
+        if (
+            not isinstance(status, str)
+            or status not in definition.allowed_result_statuses
+        ):
             raise CatalogMetricEngineError(
                 "M2_METRIC_RUNTIME_STATUS_INVALID",
-                f"{definition.metric_code}:instances[{index}]",
+                f"{definition.metric_code}:instances[{index}]:{status!r}",
             )
         reason_codes = instance.get("reason_codes")
-        if reason_codes is not None and (
+        if (
             not isinstance(reason_codes, list)
             or not all(isinstance(item, str) and item for item in reason_codes)
         ):
             raise CatalogMetricEngineError(
                 "M2_METRIC_RUNTIME_REASON_CODES_INVALID",
                 f"{definition.metric_code}:instances[{index}]",
+            )
+        if status in {"N_A", "INSUFFICIENT_DATA"} and not reason_codes:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_REASON_CODE_REQUIRED",
+                f"{definition.metric_code}:instances[{index}]:{status}",
             )
         for other_slot in ("value_text", "value_boolean"):
             if instance.get(other_slot) is not None:
@@ -1114,6 +1125,59 @@ def _world_capability_registry_hash(authority_root: Path) -> str:
     return hashlib.sha256(raw_bytes).hexdigest()
 
 
+def _metric_result_status_authority(
+    authority_root: Path,
+) -> tuple[tuple[str, ...], str]:
+    path = authority_root / "CORE_LOGICAL_MODEL.json"
+    model, raw_bytes = _load_object(path)
+    if _text(model, "authority_id", field="core_logical_model") != "CORE_LOGICAL_MODEL":
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RESULT_STATUS_AUTHORITY_INVALID",
+            "authority_id",
+        )
+    tables = _object(model.get("tables"), field="core_logical_model.tables")
+    metric_instance = _object(
+        tables.get("metric.metric_instance"),
+        field="core_logical_model.tables.metric.metric_instance",
+    )
+    fields = _objects(
+        metric_instance.get("fields"),
+        field="core_logical_model.tables.metric.metric_instance.fields",
+    )
+    status_fields = [field for field in fields if field.get("name") == "status"]
+    if len(status_fields) != 1:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RESULT_STATUS_AUTHORITY_INVALID",
+            "metric.metric_instance.status cardinality",
+        )
+    status_field = status_fields[0]
+    if (
+        _text(status_field, "type", field="metric.metric_instance.status") != "text"
+        or status_field.get("nullable") is not False
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RESULT_STATUS_AUTHORITY_INVALID",
+            "metric.metric_instance.status type/nullability",
+        )
+    sql = _text(status_field, "sql", field="metric.metric_instance.status")
+    match = re.fullmatch(
+        r"status text NOT NULL CHECK \(status IN \((?P<values>(?:'[^']+'(?:,'[^']+')*)+)\)\)",
+        sql,
+    )
+    if match is None:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RESULT_STATUS_AUTHORITY_INVALID",
+            "metric.metric_instance.status SQL",
+        )
+    statuses = tuple(re.findall(r"'([^']+)'", match.group("values")))
+    if not statuses or len(set(statuses)) != len(statuses):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RESULT_STATUS_AUTHORITY_INVALID",
+            "metric.metric_instance.status values",
+        )
+    return statuses, hashlib.sha256(raw_bytes).hexdigest()
+
+
 def _generated_metadata_by_code() -> dict[str, Mapping[str, object]]:
     result: dict[str, Mapping[str, object]] = {}
     for raw in P1_METRICS:
@@ -1268,6 +1332,9 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         selected_semantic_ids=selected_semantic_ids,
     )
     world_capability_registry_sha256 = _world_capability_registry_hash(authority_root)
+    allowed_result_statuses, core_logical_model_sha256 = (
+        _metric_result_status_authority(authority_root)
+    )
     definitions: list[M2MetricDefinition] = []
 
     for index, raw in selected_with_index:
@@ -1398,6 +1465,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             external_dependencies=external_dependencies,
             state_machine_bindings=state_machines,
             input_authority_bindings=authority_bindings,
+            allowed_result_statuses=allowed_result_statuses,
             applicability=_applicability(raw, family_contracts),
             definition_hash=_sha256_object(raw),
         )
@@ -1415,6 +1483,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "input_authority_matrix_sha256": input_authority_matrix_sha256,
             "source_provenance_sha256": source_provenance_sha256,
             "world_capability_registry_sha256": world_capability_registry_sha256,
+            "core_logical_model_sha256": core_logical_model_sha256,
+            "allowed_result_statuses": allowed_result_statuses,
             "db_schema_version": db_schema_version,
             "delivery_milestone": M2_DELIVERY_MILESTONE,
             "delivery_batch": M2_DELIVERY_BATCH,
@@ -1434,6 +1504,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         input_authority_matrix_sha256=input_authority_matrix_sha256,
         source_provenance_sha256=source_provenance_sha256,
         world_capability_registry_sha256=world_capability_registry_sha256,
+        core_logical_model_sha256=core_logical_model_sha256,
+        allowed_result_statuses=allowed_result_statuses,
         db_schema_version=db_schema_version,
         delivery_milestone=M2_DELIVERY_MILESTONE,
         delivery_batch=M2_DELIVERY_BATCH,
