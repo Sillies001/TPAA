@@ -245,6 +245,9 @@ def verify() -> dict[str, object]:
     engine = CatalogMetricEngine(plan, registry)
     first = engine.execute(inputs, metric_codes=QA_FOUNDATION_CODES)
     replayed = engine.execute(inputs, metric_codes=QA_FOUNDATION_CODES)
+    expected_execution_codes = tuple(
+        code for code in plan.metric_codes if code in QA_FOUNDATION_CODES
+    )
     direct = {code: direct_output(code) for code in QA_FOUNDATION_CODES}
     record_by_code = {record.metric_code: record for record in first.records}
 
@@ -367,7 +370,8 @@ def verify() -> dict[str, object]:
             == qa_algorithm_identities
         ),
         "full_qa_set_executes_through_general_engine": (
-            first.metric_codes == QA_FOUNDATION_CODES
+            first.metric_codes == expected_execution_codes
+            and set(first.metric_codes) == set(QA_FOUNDATION_CODES)
             and first.dispatch_key == "algorithm_id+algorithm_version"
         ),
         "full_qa_set_replay_stable": first == replayed,

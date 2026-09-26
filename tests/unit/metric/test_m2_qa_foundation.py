@@ -207,8 +207,12 @@ def test_m2_qa_registry_is_catalog_driven_and_all_eight_replay() -> None:
 
     first = engine.execute(inputs, metric_codes=QA_FOUNDATION_CODES)
     replayed = engine.execute(inputs, metric_codes=QA_FOUNDATION_CODES)
+    expected_execution_codes = tuple(
+        code for code in plan.metric_codes if code in QA_FOUNDATION_CODES
+    )
     assert first == replayed
-    assert first.metric_codes == QA_FOUNDATION_CODES
+    assert first.metric_codes == expected_execution_codes
+    assert set(first.metric_codes) == set(QA_FOUNDATION_CODES)
 
     direct = {
         code: _direct(plan, registry, inputs[code], code)

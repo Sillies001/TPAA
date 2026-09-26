@@ -34,10 +34,15 @@ def test_m2_met_005_incremental_evidence_is_honest_and_complete_for_algorithms(
     assert evidence["status"] == "PASS"
     assert evidence["task_complete"] is False
     assert evidence["implementation_complete"] is True
-    assert evidence["formal_completion_blocked_by_authority"] is True
+    assert evidence["formal_completion_blocked_by_authority"] is False
+    assert evidence["formal_completion_blocked_by_profile_integration"] is True
     assert evidence["failed_acceptance"] == []
     assert all(evidence["acceptance"].values())
-    assert evidence["dependency_error_code"] == "M2_QA_AUTHORITY_GAP"
+    assert evidence["authority_gaps"] == {}
+    assert (
+        evidence["invalid_qa_payload_error_code"]
+        == "M2_METRIC_PLUGIN_OUTPUT_INVALID"
+    )
     assert evidence["logical_product"]["delivery_membership"] == SNS_CODES
     assert set(evidence["logical_product"]["definition_hashes"]) == set(SNS_CODES)
     assert evidence["acceptance"]["version_qualified_plugin_identity_exact"]
@@ -52,8 +57,9 @@ def test_m2_met_005_incremental_evidence_is_honest_and_complete_for_algorithms(
     assert evidence["acceptance"]["profile_provenance_persisted_exact_17"]
     assert evidence["acceptance"]["profile_identity_change_segments_evidence"]
     assert evidence["scope"]["authority_independent_algorithms_executed"] is True
+    assert evidence["scope"]["approved_c3_authority_available"] is True
     assert evidence["scope"]["approved_c3_profile_consumed"] is False
-    assert evidence["scope"]["blocked_qa_semantics_executed"] is False
+    assert evidence["scope"]["adopted_qa_semantics_executed_by_this_check"] is False
     assert evidence["scope"]["formal_task_completion_claimed"] is False
     manifest = evidence["logical_product"]["plugin_identity_manifest"]
     assert len(manifest) == 17
@@ -89,6 +95,7 @@ def test_m2_met_005_incremental_cross_platform_compare_is_revision_exact(
     assert evidence["status"] == "PASS"
     assert evidence["task_complete"] is False
     assert evidence["implementation_complete"] is True
-    assert evidence["formal_completion_blocked_by_authority"] is True
+    assert evidence["formal_completion_blocked_by_authority"] is False
+    assert evidence["formal_completion_blocked_by_profile_integration"] is True
     assert evidence["failed_acceptance"] == []
     assert all(evidence["checks"].values())

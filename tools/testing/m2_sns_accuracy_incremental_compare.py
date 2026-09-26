@@ -29,18 +29,26 @@ def compare(windows_path: Path, linux_path: Path, *, expected_revision: str) -> 
         and linux.get("task_complete") is False,
         "implementation_complete": windows.get("implementation_complete") is True
         and linux.get("implementation_complete") is True,
-        "formal_completion_blocked_by_authority": (
-            windows.get("formal_completion_blocked_by_authority") is True
-            and linux.get("formal_completion_blocked_by_authority") is True
+        "formal_completion_not_blocked_by_authority": (
+            windows.get("formal_completion_blocked_by_authority") is False
+            and linux.get("formal_completion_blocked_by_authority") is False
+        ),
+        "formal_completion_blocked_by_profile_integration": (
+            windows.get("formal_completion_blocked_by_profile_integration") is True
+            and linux.get("formal_completion_blocked_by_profile_integration") is True
         ),
         "revisions_exact": windows.get("source_revision")
         == linux.get("source_revision")
         == expected_revision,
         "logical_products_equal": windows.get("logical_product") == linux.get("logical_product"),
         "acceptance_equal": windows.get("acceptance") == linux.get("acceptance"),
-        "authority_gaps_equal": windows.get("authority_gaps") == linux.get("authority_gaps"),
-        "dependency_error_codes_equal": (
-            windows.get("dependency_error_code") == linux.get("dependency_error_code")
+        "authority_gaps_empty": (
+            windows.get("authority_gaps") == {}
+            and linux.get("authority_gaps") == {}
+        ),
+        "invalid_qa_payload_error_codes_equal": (
+            windows.get("invalid_qa_payload_error_code")
+            == linux.get("invalid_qa_payload_error_code")
         ),
         "fixture_profile_missing_fields_equal": (
             windows.get("fixture_profile_missing_fields")
@@ -58,10 +66,11 @@ def compare(windows_path: Path, linux_path: Path, *, expected_revision: str) -> 
         "status": "PASS" if not failed else "FAIL",
         "task_complete": False,
         "implementation_complete": not failed,
-        "formal_completion_blocked_by_authority": True,
+        "formal_completion_blocked_by_authority": False,
+        "formal_completion_blocked_by_profile_integration": True,
         "source_revision": expected_revision,
         "authority_gaps": windows.get("authority_gaps"),
-        "dependency_error_code": windows.get("dependency_error_code"),
+        "invalid_qa_payload_error_code": windows.get("invalid_qa_payload_error_code"),
         "fixture_profile_missing_fields": windows.get("fixture_profile_missing_fields"),
         "scope": windows.get("scope"),
         "logical_product": windows.get("logical_product"),
@@ -88,7 +97,8 @@ def main() -> int:
             "status": "FAIL",
             "task_complete": False,
             "implementation_complete": False,
-            "formal_completion_blocked_by_authority": True,
+            "formal_completion_blocked_by_authority": False,
+            "formal_completion_blocked_by_profile_integration": True,
             "source_revision": args.expected_revision,
             "error": f"{type(exc).__name__}: {exc}",
         }

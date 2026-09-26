@@ -391,7 +391,7 @@ def test_direct_outputs_pass_shared_runtime_transport_validation() -> None:
         )
 
 
-def test_shared_engine_dependency_closure_remains_blocked_by_qa_authority() -> None:
+def test_shared_engine_rejects_invalid_qa_payload_after_c3_adoption() -> None:
     plan, registry, inputs = _runtime()
     register_m2_qa_plugins(plan, registry)
     inputs.update(
@@ -403,7 +403,7 @@ def test_shared_engine_dependency_closure_remains_blocked_by_qa_authority() -> N
     )
     with pytest.raises(CatalogMetricEngineError) as caught:
         CatalogMetricEngine(plan, registry).execute(inputs, metric_codes=SNS_ACCURACY_CODES)
-    assert caught.value.code == "M2_QA_AUTHORITY_GAP"
+    assert caught.value.code == "M2_METRIC_PLUGIN_OUTPUT_INVALID"
 
 
 def test_world_adapter_requires_and_preserves_complete_external_contracts() -> None:

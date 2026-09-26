@@ -36,13 +36,13 @@ def test_m2_met_002_formal_golden_evidence(tmp_path: Path) -> None:
     assert evidence["failed_acceptance"] == []
     assert evidence["logical_product"]["engine_metric_codes"] == [
         "P1-QA-001",
-        "P1-QA-002",
         "P1-QA-003",
         "P1-QA-004",
         "P1-QA-005",
-        "P1-QA-006",
         "P1-QA-007",
         "P1-QA-008",
+        "P1-QA-002",
+        "P1-QA-006",
     ]
     assert evidence["acceptance"]["qa_001_c3_nonidentity_golden_exact"]
     assert evidence["acceptance"]["qa_002_c3_nondegenerate_golden_exact"]

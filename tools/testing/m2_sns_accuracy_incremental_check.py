@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Authority-safe incremental evidence for M2-MET-005 SNS accuracy.
+"""Post-C3 incremental evidence for M2-MET-005 SNS accuracy.
 
-All 17 frozen formulas and negative gates are executable.  The task is not
-declared complete while QA-001/002 and the repository's incomplete reference
-match-quality profile authority keep the shared-engine closure blocked.
+All 17 frozen formulas and negative gates are executable. The task remains
+formally incomplete while the approved C3 reference-match-quality profile has
+not yet been integrated into the M2 SNS consumer path.
 """
 
 from __future__ import annotations
@@ -557,7 +557,9 @@ def verify() -> dict[str, object]:
             output.get("applicable") is False and output.get("instances") == []
             for output in non_radar.values()
         ),
-        "shared_engine_qa_dependency_fails_closed": dependency_error == "M2_QA_AUTHORITY_GAP",
+        "invalid_qa_dependency_payload_fails_closed": (
+            dependency_error == "M2_METRIC_PLUGIN_OUTPUT_INVALID"
+        ),
         "frozen_fixture_profile_gap_detected": fixture_profile_missing
         == [
             "accepted_reference_quality_statuses",
@@ -578,22 +580,18 @@ def verify() -> dict[str, object]:
         "status": "PASS" if not failed else "FAIL",
         "task_complete": False,
         "implementation_complete": implementation_complete,
-        "formal_completion_blocked_by_authority": True,
+        "formal_completion_blocked_by_authority": False,
+        "formal_completion_blocked_by_profile_integration": True,
         "source_revision": _git_revision(),
-        "authority_gaps": {
-            "P1-QA-001": "frame convention authority unresolved",
-            "P1-QA-002": "six-dimensional uncertainty mapping authority unresolved",
-            "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1": (
-                "frozen M2 alignment fixture omits five required profile fields"
-            ),
-        },
-        "dependency_error_code": dependency_error,
+        "authority_gaps": {},
+        "invalid_qa_payload_error_code": dependency_error,
         "fixture_profile_missing_fields": fixture_profile_missing,
         "scope": {
             "authority_independent_algorithms_executed": True,
             "synthetic_complete_profile_only": True,
+            "approved_c3_authority_available": True,
             "approved_c3_profile_consumed": False,
-            "blocked_qa_semantics_executed": False,
+            "adopted_qa_semantics_executed_by_this_check": False,
             "formal_task_completion_claimed": False,
         },
         "logical_product": {
@@ -643,7 +641,8 @@ def main() -> int:
             "status": "FAIL",
             "task_complete": False,
             "implementation_complete": False,
-            "formal_completion_blocked_by_authority": True,
+            "formal_completion_blocked_by_authority": False,
+            "formal_completion_blocked_by_profile_integration": True,
             "source_revision": _git_revision(),
             "error": f"{type(exc).__name__}: {exc}",
         }
