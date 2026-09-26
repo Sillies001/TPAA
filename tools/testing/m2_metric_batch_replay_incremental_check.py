@@ -182,7 +182,7 @@ def verify() -> dict[str, object]:
             raise ValueError(
                 f"M2_MET_007_VALUE_KIND_UNSUPPORTED:{definition.value_kind}"
             )
-        return {
+        output: dict[str, object] = {
             "metric_code": definition.metric_code,
             "subject_type": definition.subject_type,
             "probe_evidence_hash": probe_hash,
@@ -197,6 +197,9 @@ def verify() -> dict[str, object]:
                 }
             ],
         }
+        if definition.applicability.applicability_mode == "SYSTEM_TYPE_EXACT":
+            output["applicable"] = True
+        return output
 
     registry = MetricPluginRegistry()
     for algorithm_id in dict.fromkeys(

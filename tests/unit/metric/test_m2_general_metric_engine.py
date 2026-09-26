@@ -33,6 +33,7 @@ M2_AUTHORITY_FILES = (
     "SOURCE_PROVENANCE.json",
     "WORLD_CAPABILITY_REGISTRY.json",
     "CORE_LOGICAL_MODEL.json",
+    "CORE_RULES.json",
 )
 
 
@@ -112,6 +113,7 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
     assert len(plan.source_provenance_sha256) == 64
     assert len(plan.world_capability_registry_sha256) == 64
     assert len(plan.core_logical_model_sha256) == 64
+    assert len(plan.core_rules_sha256) == 64
     assert plan.allowed_result_statuses == (
         "VALID",
         "N_A",
@@ -429,6 +431,23 @@ def test_runtime_contract_gate_enforces_sns_system_type_applicability() -> None:
                 "applicable": False,
                 "reason_codes": ["SYSTEM_TYPE_NOT_APPLICABLE"],
                 "instances": [],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            sns,
+            {"system_type": "RADAR"},
+            {
+                "metric_code": sns.metric_code,
+                "subject_type": sns.subject_type,
+                "instances": [
+                    _valid_runtime_instance(
+                        value_kind="NUMERIC",
+                        value_numeric=1.0,
+                    )
+                ],
             },
         )
     assert caught.value.code == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"

@@ -59,6 +59,10 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     }
     assert len(product["sns_applicability_metric_codes"]) == 21
     assert len(product["core_logical_model_sha256"]) == 64
+    assert len(product["core_rules_sha256"]) == 64
+    assert product["negative_error_codes"]["radar_missing_applicable"] == (
+        "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
+    )
     assert product["allowed_result_statuses"] == [
         "VALID",
         "N_A",

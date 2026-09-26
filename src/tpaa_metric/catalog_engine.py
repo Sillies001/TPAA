@@ -109,6 +109,7 @@ class M2MetricExecutionPlan:
     source_provenance_sha256: str
     world_capability_registry_sha256: str
     core_logical_model_sha256: str
+    core_rules_sha256: str
     allowed_result_statuses: tuple[str, ...]
     db_schema_version: str
     delivery_milestone: str
@@ -686,7 +687,7 @@ def validate_m2_runtime_output(
                     f"{definition.metric_code}:{system_type}",
                 )
             return
-        if output.get("applicable") is False:
+        if output.get("applicable") is not True:
             raise CatalogMetricEngineError(
                 "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
                 f"{definition.metric_code}:{system_type}",
@@ -1187,6 +1188,66 @@ def _metric_result_status_authority(
     return statuses, hashlib.sha256(raw_bytes).hexdigest()
 
 
+def _metric_runtime_transport_authority(
+    authority_root: Path,
+    catalog: Mapping[str, object],
+) -> str:
+    path = authority_root / "CORE_RULES.json"
+    rules_document, raw_bytes = _load_object(path)
+    if _text(rules_document, "authority_id", field="core_rules") != "CORE_RULES":
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_RULE_AUTHORITY_INVALID",
+            "authority_id",
+        )
+    rules = _objects(rules_document.get("rules"), field="core_rules.rules")
+    by_id = {
+        _text(rule, "id", field="core_rules.rule"): rule
+        for rule in rules
+    }
+    expected_core_rules = {
+        "CR-005": (
+            "Missing Is Not Zero",
+            "Missing prerequisite data yields N_A or INSUFFICIENT_DATA with reason code; never fabricate zero.",
+        ),
+        "CR-008": (
+            "Typed Metric Value",
+            "value_kind determines one legal value slot; STRUCTURED is object and binds exactly one executable structured schema.",
+        ),
+    }
+    for rule_id, (expected_name, expected_rule) in expected_core_rules.items():
+        rule = by_id.get(rule_id)
+        if rule is None or (
+            _text(rule, "name", field=rule_id) != expected_name
+            or _text(rule, "rule", field=rule_id) != expected_rule
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_RUNTIME_RULE_AUTHORITY_INVALID",
+                rule_id,
+            )
+
+    common_rules = _object(catalog.get("common_rules"), field="common_rules")
+    if (
+        _text(common_rules, "missing", field="common_rules")
+        != "Missing prerequisite data => N_A or INSUFFICIENT_DATA with reason code; never fabricate zero."
+        or _text(
+            common_rules,
+            "metric_value_transport_contract",
+            field="common_rules",
+        )
+        != (
+            "Catalog value_kind is authoritative. NUMERIC/TEXT/BOOLEAN/STRUCTURED map to typed result slots; "
+            "STRUCTURED uses value_structured/object and MUST NOT be JSON-serialized into value_text. "
+            "For VALID results exactly the value slot matching semantic value_kind is populated; "
+            "non-VALID results may have all value slots null."
+        )
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_RULE_AUTHORITY_INVALID",
+            "catalog.common_rules",
+        )
+    return hashlib.sha256(raw_bytes).hexdigest()
+
+
 def _generated_metadata_by_code() -> dict[str, Mapping[str, object]]:
     result: dict[str, Mapping[str, object]] = {}
     for raw in P1_METRICS:
@@ -1344,6 +1405,10 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
     allowed_result_statuses, core_logical_model_sha256 = (
         _metric_result_status_authority(authority_root)
     )
+    core_rules_sha256 = _metric_runtime_transport_authority(
+        authority_root,
+        catalog,
+    )
     definitions: list[M2MetricDefinition] = []
 
     for index, raw in selected_with_index:
@@ -1493,6 +1558,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "source_provenance_sha256": source_provenance_sha256,
             "world_capability_registry_sha256": world_capability_registry_sha256,
             "core_logical_model_sha256": core_logical_model_sha256,
+            "core_rules_sha256": core_rules_sha256,
             "allowed_result_statuses": allowed_result_statuses,
             "db_schema_version": db_schema_version,
             "delivery_milestone": M2_DELIVERY_MILESTONE,
@@ -1514,6 +1580,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         source_provenance_sha256=source_provenance_sha256,
         world_capability_registry_sha256=world_capability_registry_sha256,
         core_logical_model_sha256=core_logical_model_sha256,
+        core_rules_sha256=core_rules_sha256,
         allowed_result_statuses=allowed_result_statuses,
         db_schema_version=db_schema_version,
         delivery_milestone=M2_DELIVERY_MILESTONE,

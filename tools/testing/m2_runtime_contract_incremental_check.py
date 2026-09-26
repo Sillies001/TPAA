@@ -110,11 +110,14 @@ def verify() -> dict[str, object]:
             )
         else:
             raise ValueError(f"unsupported value kind: {definition.value_kind}")
-        return {
+        output: dict[str, object] = {
             "metric_code": definition.metric_code,
             "subject_type": definition.subject_type,
             "instances": [instance],
         }
+        if definition.applicability.applicability_mode == "SYSTEM_TYPE_EXACT":
+            output["applicable"] = True
+        return output
 
     for definition in plan.definitions:
         validate_m2_runtime_output(
@@ -375,6 +378,15 @@ def verify() -> dict[str, object]:
             "instances": [],
         },
     )
+    radar_missing_applicable = error_code(
+        sns,
+        {"system_type": "RADAR"},
+        {
+            "metric_code": sns.metric_code,
+            "subject_type": sns.subject_type,
+            "instances": [_instance("NUMERIC", value_numeric=1.0)],
+        },
+    )
 
     structured_definitions = tuple(
         definition
@@ -410,6 +422,7 @@ def verify() -> dict[str, object]:
         "insufficient_without_reason": insufficient_without_reason,
         "non_radar_fake_observation": non_radar_fake_observation,
         "radar_false_not_applicable": radar_false_not_applicable,
+        "radar_missing_applicable": radar_missing_applicable,
     }
 
     acceptance = {
@@ -433,6 +446,7 @@ def verify() -> dict[str, object]:
             plan.allowed_result_statuses
             == ("VALID", "N_A", "INSUFFICIENT_DATA", "INVALID", "REVIEW_REQUIRED")
         ),
+        "core_runtime_rule_authority_bound": len(plan.core_rules_sha256) == 64,
         "na_insufficient_invalid_transport_branches_accept": True,
         "unknown_status_fails_closed": (
             unknown_status == "M2_METRIC_RUNTIME_STATUS_INVALID"
@@ -480,6 +494,9 @@ def verify() -> dict[str, object]:
         "sns_radar_false_not_applicable_fails_closed": (
             radar_false_not_applicable == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
         ),
+        "sns_radar_missing_applicable_fails_closed": (
+            radar_missing_applicable == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
+        ),
         "predecessor_gate_preserved": True,
     }
     failed = sorted(key for key, passed in acceptance.items() if not passed)
@@ -509,6 +526,7 @@ def verify() -> dict[str, object]:
             "plan_logical_hash": plan.logical_hash,
             "catalog_sha256": plan.catalog_sha256,
             "core_logical_model_sha256": plan.core_logical_model_sha256,
+            "core_rules_sha256": plan.core_rules_sha256,
             "allowed_result_statuses": list(plan.allowed_result_statuses),
             "runtime_metric_codes": list(plan.metric_codes),
             "subject_types": subject_types,
