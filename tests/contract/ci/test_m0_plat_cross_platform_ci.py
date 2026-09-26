@@ -528,8 +528,10 @@ def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> N
     assert "- name: Emit incremental M2-MET-006 runtime-contract evidence" in text
     assert "python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check" in text
     assert (
-        "evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json"
-        in text
+        text.count(
+            "evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json"
+        )
+        >= 2
     )
     assert (
         "- name: Compare Windows and Linux incremental M2-MET-006 runtime contract"
@@ -545,6 +547,8 @@ def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> N
         in text
     )
     assert (
-        "evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json"
-        in text
+        text.count(
+            "evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json"
+        )
+        >= 2
     )

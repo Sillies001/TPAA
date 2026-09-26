@@ -285,6 +285,7 @@ jobs:
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
             evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json
             evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json
+            evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -461,6 +462,7 @@ jobs:
             evidence/cross-platform/m2-met-003-logical-equivalence.json
             evidence/cross-platform/m2-met-004-logical-equivalence.json
             evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json
+            evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
