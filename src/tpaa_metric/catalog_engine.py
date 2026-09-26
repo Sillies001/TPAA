@@ -194,6 +194,7 @@ class M2MetricExecutionRecord:
     algorithm_version: str
     definition_hash: str
     authority_lineage_hash: str
+    plan_hash: str
     input_lineage_encoding: str
     input_payload_hash: str
     plugin_id: str
@@ -446,6 +447,7 @@ class CatalogMetricEngine:
                     "semantic_version": definition.semantic_version,
                     "definition_hash": definition.definition_hash,
                     "authority_lineage_hash": definition.authority_lineage_hash,
+                    "plan_hash": self.plan.logical_hash,
                     "input_lineage_encoding": M2_INPUT_LINEAGE_ENCODING,
                     "input_payload_hash": input_payload_hash,
                     "algorithm_id": definition.algorithm_id,
@@ -465,6 +467,7 @@ class CatalogMetricEngine:
                 algorithm_version=definition.algorithm_version,
                 definition_hash=definition.definition_hash,
                 authority_lineage_hash=definition.authority_lineage_hash,
+                plan_hash=self.plan.logical_hash,
                 input_lineage_encoding=M2_INPUT_LINEAGE_ENCODING,
                 input_payload_hash=input_payload_hash,
                 plugin_id=plugin_id,

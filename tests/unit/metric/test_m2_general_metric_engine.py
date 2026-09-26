@@ -5,6 +5,7 @@ import json
 import math
 import shutil
 from collections import Counter
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -571,6 +572,7 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
         assert record.algorithm_version == definition.algorithm_version
         assert record.definition_hash == definition.definition_hash
         assert record.authority_lineage_hash == definition.authority_lineage_hash
+        assert record.plan_hash == plan.logical_hash
         assert record.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
         assert len(record.input_payload_hash) == 64
         assert record.operator_bindings == definition.operator_bindings
@@ -598,7 +600,62 @@ def test_one_engine_dispatches_all_families_by_algorithm_id_replay_stably() -> N
             (dependency, seen[dependency])
             for dependency in definition.metric_dependencies
         )
+        expected_record_hash = hashlib.sha256(
+            json.dumps(
+                {
+                    "algorithm_id": record.algorithm_id,
+                    "algorithm_version": record.algorithm_version,
+                    "authority_lineage_hash": record.authority_lineage_hash,
+                    "definition_hash": record.definition_hash,
+                    "dependency_manifest_hash": record.dependency_manifest_hash,
+                    "input_lineage_encoding": record.input_lineage_encoding,
+                    "input_payload_hash": record.input_payload_hash,
+                    "metric_code": record.metric_code,
+                    "operator_bindings": record.operator_bindings,
+                    "plan_hash": record.plan_hash,
+                    "plugin_id": record.plugin_id,
+                    "plugin_output_hash": record.plugin_output_hash,
+                    "semantic_id": record.semantic_id,
+                    "semantic_version": record.semantic_version,
+                    "upstream_result_hashes": record.upstream_result_hashes,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+                allow_nan=False,
+            ).encode("ascii")
+        ).hexdigest()
+        assert record.logical_hash == expected_record_hash
         seen[record.metric_code] = record.logical_hash
+
+    expected_plugin_manifest_hash = hashlib.sha256(
+        json.dumps(
+            [
+                (record.algorithm_id, record.algorithm_version, record.plugin_id)
+                for record in first.records
+            ],
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+    ).hexdigest()
+    assert first.plugin_manifest_hash == expected_plugin_manifest_hash
+    expected_batch_hash = hashlib.sha256(
+        json.dumps(
+            {
+                "dispatch_key": first.dispatch_key,
+                "plan_hash": plan.logical_hash,
+                "plugin_manifest_hash": first.plugin_manifest_hash,
+                "record_hashes": [record.logical_hash for record in first.records],
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+    ).hexdigest()
+    assert first.logical_hash == expected_batch_hash
 
 
 def test_input_payload_hash_changes_record_even_when_plugin_output_is_constant() -> None:
@@ -630,6 +687,60 @@ def test_input_payload_hash_changes_record_even_when_plugin_output_is_constant()
     assert first_record.input_payload_hash != second_record.input_payload_hash
     assert first_record.logical_hash != second_record.logical_hash
     assert first.logical_hash != second.logical_hash
+
+
+def test_plan_hash_is_bound_into_every_record_and_batch_hash() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    mutated_plan = replace(plan, logical_hash="0" * 64)
+
+    def constant_probe(request: M2MetricPluginRequest) -> dict[str, object]:
+        return {"metric_code": request.definition.metric_code, "constant": True}
+
+    registry = MetricPluginRegistry()
+    for definition in plan.definitions:
+        registry.register(
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
+            plugin_id="plan-lineage-probe-v1",
+            plugin=constant_probe,
+        )
+
+    inputs = _inputs()
+    first = CatalogMetricEngine(plan, registry).execute(
+        inputs,
+        validate_runtime_contract=False,
+    )
+    mutated = CatalogMetricEngine(mutated_plan, registry).execute(
+        inputs,
+        validate_runtime_contract=False,
+    )
+
+    assert first.logical_hash != mutated.logical_hash
+    assert first.plugin_manifest_hash == mutated.plugin_manifest_hash
+    first_by_code = {record.metric_code: record for record in first.records}
+    mutated_by_code = {record.metric_code: record for record in mutated.records}
+    assert all(
+        first_by_code[code].plan_hash == plan.logical_hash
+        for code in plan.metric_codes
+    )
+    assert all(
+        mutated_by_code[code].plan_hash == "0" * 64
+        for code in plan.metric_codes
+    )
+    assert all(
+        first_by_code[code].plugin_output_hash
+        == mutated_by_code[code].plugin_output_hash
+        for code in plan.metric_codes
+    )
+    assert all(
+        first_by_code[code].dependency_manifest_hash
+        == mutated_by_code[code].dependency_manifest_hash
+        for code in plan.metric_codes
+    )
+    assert all(
+        first_by_code[code].logical_hash != mutated_by_code[code].logical_hash
+        for code in plan.metric_codes
+    )
 
 
 def test_input_payload_lineage_rejects_opaque_runtime_objects() -> None:
@@ -708,6 +819,25 @@ def test_subset_execution_closes_metric_dependencies_and_missing_plugin_fails_cl
     assert "P1-QA-001" in batch.metric_codes
     assert "P1-QA-002" in batch.metric_codes
     assert "P1-QA-005" in batch.metric_codes
+
+    all_inputs = _inputs()
+    closure_inputs = {code: all_inputs[code] for code in batch.metric_codes}
+    scoped = engine.execute(
+        closure_inputs,
+        metric_codes=requested,
+        validate_runtime_contract=False,
+    )
+    assert scoped == batch
+
+    missing_code = batch.metric_codes[0]
+    del closure_inputs[missing_code]
+    with pytest.raises(CatalogMetricEngineError) as missing:
+        engine.execute(
+            closure_inputs,
+            metric_codes=requested,
+            validate_runtime_contract=False,
+        )
+    assert missing.value.code == "M2_METRIC_INPUT_PAYLOAD_MISSING"
 
     with pytest.raises(CatalogMetricEngineError) as duplicate:
         engine.execute(

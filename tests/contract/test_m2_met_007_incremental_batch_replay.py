@@ -50,6 +50,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         "execution_identity_lineage_only": True,
         "registry_lineage_binding_only": True,
         "per_metric_authority_lineage_binding_only": True,
+        "exact_plan_hash_lineage_only": True,
         "input_payload_lineage_binding_only": True,
         "version_qualified_plugin_dispatch_only": True,
         "governed_dependency_lineage_only": True,
@@ -66,12 +67,18 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
     assert evidence["acceptance"]["dispatch_key_version_qualified"]
     assert evidence["acceptance"]["dependency_manifest_hash_binding_exact_32"]
+    assert evidence["acceptance"]["record_plan_hash_binding_exact_32"]
+    assert evidence["acceptance"]["record_logical_hash_binding_exact_32"]
+    assert evidence["acceptance"]["plugin_manifest_hash_binding_exact"]
+    assert evidence["acceptance"]["batch_logical_hash_binding_exact"]
     assert evidence["acceptance"]["record_identity_binding_exact_32"]
     assert evidence["acceptance"]["plugin_manifest_hash_well_formed"]
     assert evidence["acceptance"]["plugin_manifest_replay_exact"]
     assert evidence["acceptance"]["dependency_manifest_replay_exact_32"]
     assert evidence["acceptance"]["record_logical_hash_replay_exact_32"]
     assert evidence["acceptance"]["subset_transitive_closure_exact"]
+    assert evidence["acceptance"]["subset_scoped_inputs_exact"]
+    assert evidence["acceptance"]["subset_missing_dependency_input_fails_closed"]
     assert evidence["acceptance"]["input_lineage_encoding_exact"]
     assert evidence["acceptance"]["input_payload_hash_binding_exact_32"]
     assert evidence["acceptance"]["authority_lineage_hash_binding_exact_32"]
@@ -82,6 +89,11 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["acceptance"]["plugin_identity_tamper_changes_batch_hash"]
     assert evidence["acceptance"]["plugin_identity_tamper_changes_record_hashes_exact_32"]
     assert evidence["acceptance"]["plugin_identity_tamper_preserves_output_hashes_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_changes_record_hashes_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_changes_batch_hash"]
+    assert evidence["acceptance"]["plan_hash_mutation_preserves_plugin_outputs_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_preserves_dependency_manifests_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_preserves_plugin_manifest"]
     assert evidence["acceptance"]["generated_metric_projection_hash_well_formed"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
@@ -92,6 +104,11 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert product["identity_tampered_plugin_manifest_hash"] != product["plugin_manifest_hash"]
     assert len(product["identity_tampered_batch_logical_hash"]) == 64
     assert product["identity_tampered_batch_logical_hash"] != product["batch_logical_hash"]
+    assert len(product["plan_tampered_batch_logical_hash"]) == 64
+    assert product["plan_tampered_batch_logical_hash"] != product["batch_logical_hash"]
+    assert product["plan_tampered_plan_hash"] == "0" * 64
+    assert product["subset_scoped_input_metric_codes"] == product["subset_execution_metric_codes"]
+    assert product["subset_missing_input_error_code"] == "M2_METRIC_INPUT_PAYLOAD_MISSING"
     assert product["input_mutation_actual_changed_metric_codes"] == (
         product["input_mutation_expected_changed_metric_codes"]
     )
@@ -108,6 +125,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         assert row["algorithm_version"]
         assert len(row["definition_hash"]) == 64
         assert len(row["authority_lineage_hash"]) == 64
+        assert row["plan_hash"] == product["plan_logical_hash"]
         assert len(row["input_payload_hash"]) == 64
         assert len(row["dependency_manifest_hash"]) == 64
         assert len(row["probe_evidence_hash"]) == 64

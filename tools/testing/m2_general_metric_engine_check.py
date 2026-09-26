@@ -141,6 +141,44 @@ def verify() -> dict[str, object]:
         "WRAP_PI_V1": wrap_pi(math.pi),
     }
 
+    record_logical_hash_binding_exact = all(
+        record.logical_hash
+        == _canonical_hash(
+            {
+                "metric_code": definition.metric_code,
+                "semantic_id": definition.semantic_id,
+                "semantic_version": definition.semantic_version,
+                "definition_hash": definition.definition_hash,
+                "authority_lineage_hash": definition.authority_lineage_hash,
+                "plan_hash": plan.logical_hash,
+                "input_lineage_encoding": plan.input_lineage_encoding,
+                "input_payload_hash": record.input_payload_hash,
+                "algorithm_id": definition.algorithm_id,
+                "algorithm_version": definition.algorithm_version,
+                "plugin_id": record.plugin_id,
+                "operator_bindings": definition.operator_bindings,
+                "dependency_manifest_hash": record.dependency_manifest_hash,
+                "upstream_result_hashes": record.upstream_result_hashes,
+                "plugin_output_hash": record.plugin_output_hash,
+            }
+        )
+        for record, definition in zip(first.records, plan.definitions, strict=True)
+    )
+    plugin_manifest_hash_binding_exact = first.plugin_manifest_hash == _canonical_hash(
+        [
+            (record.algorithm_id, record.algorithm_version, record.plugin_id)
+            for record in first.records
+        ]
+    )
+    batch_logical_hash_binding_exact = first.logical_hash == _canonical_hash(
+        {
+            "plan_hash": plan.logical_hash,
+            "dispatch_key": first.dispatch_key,
+            "plugin_manifest_hash": first.plugin_manifest_hash,
+            "record_hashes": [record.logical_hash for record in first.records],
+        }
+    )
+
     acceptance = {
         "catalog_foundation_exact_32": (
             len(plan.catalog_metric_codes) == 32
@@ -237,8 +275,15 @@ def verify() -> dict[str, object]:
             len(record.logical_hash) == 64
             and len(record.plugin_output_hash) == 64
             and len(record.dependency_manifest_hash) == 64
+            and len(record.plan_hash) == 64
             for record in first.records
         ),
+        "record_plan_hash_binding_exact_32": all(
+            record.plan_hash == plan.logical_hash for record in first.records
+        ),
+        "record_logical_hash_binding_exact_32": record_logical_hash_binding_exact,
+        "plugin_manifest_hash_binding_exact": plugin_manifest_hash_binding_exact,
+        "batch_logical_hash_binding_exact": batch_logical_hash_binding_exact,
         "record_dependency_manifest_hashes_exact_32": all(
             record.dependency_manifest_hash
             == _canonical_hash(
@@ -309,6 +354,7 @@ def verify() -> dict[str, object]:
         "required_operator_ids": list(plan.required_operator_ids),
         "operator_probe": operator_probe,
         "plan_logical_hash": plan.logical_hash,
+        "record_plan_hashes": sorted({record.plan_hash for record in first.records}),
         "execution_logical_hash": first.logical_hash,
         "plugin_manifest_hash": first.plugin_manifest_hash,
         "plugin_identity_manifest": [list(item) for item in registry.plugin_identity_manifest],

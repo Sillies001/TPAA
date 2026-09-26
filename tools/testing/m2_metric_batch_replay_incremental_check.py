@@ -17,6 +17,7 @@ import math
 import subprocess
 import sys
 from collections.abc import Mapping
+from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
@@ -132,6 +133,7 @@ def verify() -> dict[str, object]:
 
     from tpaa_metric import (
         CatalogMetricEngine,
+        CatalogMetricEngineError,
         M2MetricDefinition,
         M2MetricPluginRequest,
         MetricPluginRegistry,
@@ -266,6 +268,25 @@ def verify() -> dict[str, object]:
     expected_subset_order = tuple(
         code for code in plan.metric_codes if code in expected_subset_codes
     )
+    subset_inputs = {code: inputs[code] for code in expected_subset_order}
+    subset_scoped = engine.execute(
+        subset_inputs,
+        metric_codes=subset_requested,
+    )
+    missing_subset_input = dict(subset_inputs)
+    missing_subset_code = expected_subset_order[0]
+    del missing_subset_input[missing_subset_code]
+    missing_subset_error_code: str | None = None
+    try:
+        engine.execute(
+            missing_subset_input,
+            metric_codes=subset_requested,
+        )
+    except CatalogMetricEngineError as exc:
+        missing_subset_error_code = exc.code
+
+    plan_tampered = replace(plan, logical_hash="0" * 64)
+    plan_tampered_batch = CatalogMetricEngine(plan_tampered, registry).execute(inputs)
 
     positions = {code: index for index, code in enumerate(first.metric_codes)}
     dependency_order_exact = all(
@@ -298,6 +319,47 @@ def verify() -> dict[str, object]:
         )
         for definition in plan.definitions
     )
+    record_plan_hash_binding_exact = all(
+        record_by_code[definition.metric_code].plan_hash == plan.logical_hash
+        for definition in plan.definitions
+    )
+    record_logical_hash_binding_exact = all(
+        record.logical_hash
+        == _canonical_hash(
+            {
+                "metric_code": definition.metric_code,
+                "semantic_id": definition.semantic_id,
+                "semantic_version": definition.semantic_version,
+                "definition_hash": definition.definition_hash,
+                "authority_lineage_hash": definition.authority_lineage_hash,
+                "plan_hash": plan.logical_hash,
+                "input_lineage_encoding": plan.input_lineage_encoding,
+                "input_payload_hash": record.input_payload_hash,
+                "algorithm_id": definition.algorithm_id,
+                "algorithm_version": definition.algorithm_version,
+                "plugin_id": record.plugin_id,
+                "operator_bindings": definition.operator_bindings,
+                "dependency_manifest_hash": record.dependency_manifest_hash,
+                "upstream_result_hashes": record.upstream_result_hashes,
+                "plugin_output_hash": record.plugin_output_hash,
+            }
+        )
+        for record, definition in zip(first.records, plan.definitions, strict=True)
+    )
+    plugin_manifest_hash_binding_exact = first.plugin_manifest_hash == _canonical_hash(
+        [
+            (record.algorithm_id, record.algorithm_version, record.plugin_id)
+            for record in first.records
+        ]
+    )
+    batch_logical_hash_binding_exact = first.logical_hash == _canonical_hash(
+        {
+            "plan_hash": plan.logical_hash,
+            "dispatch_key": first.dispatch_key,
+            "plugin_manifest_hash": first.plugin_manifest_hash,
+            "record_hashes": [record.logical_hash for record in first.records],
+        }
+    )
     record_identity_binding_exact = all(
         record_by_code[definition.metric_code].semantic_id == definition.semantic_id
         and record_by_code[definition.metric_code].semantic_version
@@ -321,6 +383,7 @@ def verify() -> dict[str, object]:
             "authority_lineage_hash": record_by_code[
                 definition.metric_code
             ].authority_lineage_hash,
+            "plan_hash": record_by_code[definition.metric_code].plan_hash,
             "input_payload_hash": record_by_code[
                 definition.metric_code
             ].input_payload_hash,
@@ -346,6 +409,7 @@ def verify() -> dict[str, object]:
         for key in (
             "definition_hash",
             "authority_lineage_hash",
+            "plan_hash",
             "input_payload_hash",
             "dependency_manifest_hash",
             "probe_evidence_hash",
@@ -364,6 +428,9 @@ def verify() -> dict[str, object]:
     }
     identity_tampered_record_by_code = {
         record.metric_code: record for record in identity_tampered.records
+    }
+    plan_tampered_record_by_code = {
+        record.metric_code: record for record in plan_tampered_batch.records
     }
     expected_input_mutation_changed_codes = {"P1-QA-005"}
     changed = True
@@ -414,6 +481,10 @@ def verify() -> dict[str, object]:
         "dependency_manifest_hash_binding_exact_32": (
             dependency_manifest_hash_binding_exact
         ),
+        "record_plan_hash_binding_exact_32": record_plan_hash_binding_exact,
+        "record_logical_hash_binding_exact_32": record_logical_hash_binding_exact,
+        "plugin_manifest_hash_binding_exact": plugin_manifest_hash_binding_exact,
+        "batch_logical_hash_binding_exact": batch_logical_hash_binding_exact,
         "dispatch_key_version_qualified": (
             first.dispatch_key == "algorithm_id+algorithm_version"
         ),
@@ -439,6 +510,10 @@ def verify() -> dict[str, object]:
         ),
         "subset_transitive_closure_exact": (
             subset.metric_codes == expected_subset_order
+        ),
+        "subset_scoped_inputs_exact": subset_scoped == subset,
+        "subset_missing_dependency_input_fails_closed": (
+            missing_subset_error_code == "M2_METRIC_INPUT_PAYLOAD_MISSING"
         ),
         "input_lineage_encoding_exact": (
             plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
@@ -477,6 +552,27 @@ def verify() -> dict[str, object]:
             identity_tampered_record_by_code[code].plugin_output_hash
             == record_by_code[code].plugin_output_hash
             for code in plan.metric_codes
+        ),
+        "plan_hash_mutation_changes_record_hashes_exact_32": all(
+            plan_tampered_record_by_code[code].logical_hash
+            != record_by_code[code].logical_hash
+            for code in plan.metric_codes
+        ),
+        "plan_hash_mutation_changes_batch_hash": (
+            plan_tampered_batch.logical_hash != first.logical_hash
+        ),
+        "plan_hash_mutation_preserves_plugin_outputs_exact_32": all(
+            plan_tampered_record_by_code[code].plugin_output_hash
+            == record_by_code[code].plugin_output_hash
+            for code in plan.metric_codes
+        ),
+        "plan_hash_mutation_preserves_dependency_manifests_exact_32": all(
+            plan_tampered_record_by_code[code].dependency_manifest_hash
+            == record_by_code[code].dependency_manifest_hash
+            for code in plan.metric_codes
+        ),
+        "plan_hash_mutation_preserves_plugin_manifest": (
+            plan_tampered_batch.plugin_manifest_hash == first.plugin_manifest_hash
         ),
         "generated_metric_projection_hash_well_formed": _is_sha256(
             plan.generated_metric_projection_sha256
@@ -541,6 +637,7 @@ def verify() -> dict[str, object]:
             "execution_identity_lineage_only": True,
             "registry_lineage_binding_only": True,
             "per_metric_authority_lineage_binding_only": True,
+            "exact_plan_hash_lineage_only": True,
             "input_payload_lineage_binding_only": True,
             "version_qualified_plugin_dispatch_only": True,
             "governed_dependency_lineage_only": True,
@@ -567,11 +664,16 @@ def verify() -> dict[str, object]:
             "batch_logical_hash": first.logical_hash,
             "tampered_batch_logical_hash": tampered.logical_hash,
             "identity_tampered_batch_logical_hash": identity_tampered.logical_hash,
+            "plan_tampered_batch_logical_hash": plan_tampered_batch.logical_hash,
+            "plan_tampered_plan_hash": plan_tampered.logical_hash,
             "plugin_manifest_hash": first.plugin_manifest_hash,
             "identity_tampered_plugin_manifest_hash": (
                 identity_tampered.plugin_manifest_hash
             ),
             "subset_execution_metric_codes": list(subset.metric_codes),
+            "subset_scoped_input_metric_codes": list(subset_inputs),
+            "subset_missing_input_metric_code": missing_subset_code,
+            "subset_missing_input_error_code": missing_subset_error_code,
             "input_mutation_expected_changed_metric_codes": sorted(
                 expected_input_mutation_changed_codes
             ),
