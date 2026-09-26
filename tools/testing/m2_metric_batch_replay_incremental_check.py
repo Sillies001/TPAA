@@ -234,8 +234,38 @@ def verify() -> dict[str, object]:
     )
 
     tampered_inputs = {code: dict(payload) for code, payload in inputs.items()}
-    tampered_inputs["P1-AIR-001"]["input_token"] = "M2-MET-007::TAMPER"
+    tampered_inputs["P1-QA-005"]["input_token"] = "M2-MET-007::TAMPER"
     tampered = engine.execute(tampered_inputs)
+
+    identity_tampered_registry = MetricPluginRegistry()
+    for definition in plan.definitions:
+        identity_tampered_registry.register(
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
+            plugin_id="m2-met-007-runtime-replay-probe-v2",
+            plugin=probe,
+        )
+    identity_tampered = CatalogMetricEngine(
+        plan,
+        identity_tampered_registry,
+    ).execute(inputs)
+
+    subset_requested = ("P1-SNS-005",)
+    subset = engine.execute(inputs, metric_codes=subset_requested)
+    expected_subset_codes = set(subset_requested)
+    changed = True
+    while changed:
+        changed = False
+        for definition in plan.definitions:
+            if definition.metric_code not in expected_subset_codes:
+                continue
+            for dependency in definition.metric_dependencies:
+                if dependency not in expected_subset_codes:
+                    expected_subset_codes.add(dependency)
+                    changed = True
+    expected_subset_order = tuple(
+        code for code in plan.metric_codes if code in expected_subset_codes
+    )
 
     positions = {code: index for index, code in enumerate(first.metric_codes)}
     dependency_order_exact = all(
@@ -326,6 +356,34 @@ def verify() -> dict[str, object]:
     tampered_record_by_code = {
         record.metric_code: record for record in tampered.records
     }
+    replay_record_by_code = {
+        record.metric_code: record for record in replayed.records
+    }
+    reversed_record_by_code = {
+        record.metric_code: record for record in reversed_request.records
+    }
+    identity_tampered_record_by_code = {
+        record.metric_code: record for record in identity_tampered.records
+    }
+    expected_input_mutation_changed_codes = {"P1-QA-005"}
+    changed = True
+    while changed:
+        changed = False
+        for definition in plan.definitions:
+            if definition.metric_code in expected_input_mutation_changed_codes:
+                continue
+            if any(
+                dependency in expected_input_mutation_changed_codes
+                for dependency in definition.metric_dependencies
+            ):
+                expected_input_mutation_changed_codes.add(definition.metric_code)
+                changed = True
+    actual_input_mutation_changed_codes = {
+        code
+        for code in plan.metric_codes
+        if tampered_record_by_code[code].logical_hash
+        != record_by_code[code].logical_hash
+    }
     input_payload_hash_binding_exact = all(
         record_by_code[definition.metric_code].input_payload_hash
         == _canonical_hash(inputs[definition.metric_code])
@@ -367,6 +425,21 @@ def verify() -> dict[str, object]:
             == reversed_request.plugin_manifest_hash
             == tampered.plugin_manifest_hash
         ),
+        "dependency_manifest_replay_exact_32": all(
+            record_by_code[code].dependency_manifest_hash
+            == replay_record_by_code[code].dependency_manifest_hash
+            == reversed_record_by_code[code].dependency_manifest_hash
+            for code in plan.metric_codes
+        ),
+        "record_logical_hash_replay_exact_32": all(
+            record_by_code[code].logical_hash
+            == replay_record_by_code[code].logical_hash
+            == reversed_record_by_code[code].logical_hash
+            for code in plan.metric_codes
+        ),
+        "subset_transitive_closure_exact": (
+            subset.metric_codes == expected_subset_order
+        ),
         "input_lineage_encoding_exact": (
             plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
             and all(
@@ -377,8 +450,33 @@ def verify() -> dict[str, object]:
         "input_payload_hash_binding_exact_32": input_payload_hash_binding_exact,
         "authority_lineage_hash_binding_exact_32": authority_lineage_hash_binding_exact,
         "tampered_input_payload_hash_changes": (
-            tampered_record_by_code["P1-AIR-001"].input_payload_hash
-            != record_by_code["P1-AIR-001"].input_payload_hash
+            tampered_record_by_code["P1-QA-005"].input_payload_hash
+            != record_by_code["P1-QA-005"].input_payload_hash
+        ),
+        "input_mutation_propagates_exact_transitive_dependents": (
+            actual_input_mutation_changed_codes
+            == expected_input_mutation_changed_codes
+        ),
+        "input_mutation_preserves_dependency_manifests_exact_32": all(
+            tampered_record_by_code[code].dependency_manifest_hash
+            == record_by_code[code].dependency_manifest_hash
+            for code in plan.metric_codes
+        ),
+        "plugin_identity_tamper_changes_manifest_hash": (
+            identity_tampered.plugin_manifest_hash != first.plugin_manifest_hash
+        ),
+        "plugin_identity_tamper_changes_batch_hash": (
+            identity_tampered.logical_hash != first.logical_hash
+        ),
+        "plugin_identity_tamper_changes_record_hashes_exact_32": all(
+            identity_tampered_record_by_code[code].logical_hash
+            != record_by_code[code].logical_hash
+            for code in plan.metric_codes
+        ),
+        "plugin_identity_tamper_preserves_output_hashes_exact_32": all(
+            identity_tampered_record_by_code[code].plugin_output_hash
+            == record_by_code[code].plugin_output_hash
+            for code in plan.metric_codes
         ),
         "generated_metric_projection_hash_well_formed": _is_sha256(
             plan.generated_metric_projection_sha256
@@ -468,7 +566,18 @@ def verify() -> dict[str, object]:
             "dispatch_key": first.dispatch_key,
             "batch_logical_hash": first.logical_hash,
             "tampered_batch_logical_hash": tampered.logical_hash,
+            "identity_tampered_batch_logical_hash": identity_tampered.logical_hash,
             "plugin_manifest_hash": first.plugin_manifest_hash,
+            "identity_tampered_plugin_manifest_hash": (
+                identity_tampered.plugin_manifest_hash
+            ),
+            "subset_execution_metric_codes": list(subset.metric_codes),
+            "input_mutation_expected_changed_metric_codes": sorted(
+                expected_input_mutation_changed_codes
+            ),
+            "input_mutation_actual_changed_metric_codes": sorted(
+                actual_input_mutation_changed_codes
+            ),
             "plugin_identity_manifest": [
                 [record.algorithm_id, record.algorithm_version, record.plugin_id]
                 for record in first.records

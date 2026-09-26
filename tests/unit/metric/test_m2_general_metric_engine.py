@@ -683,21 +683,111 @@ def test_authority_lineage_hash_is_scoped_to_referenced_registry_entries(
 def test_subset_execution_closes_metric_dependencies_and_missing_plugin_fails_closed() -> None:
     plan = build_m2_metric_execution_plan(AUTHORITY)
     engine = CatalogMetricEngine(plan, _registry())
+    requested = ("P1-SNS-005",)
     batch = engine.execute(
         _inputs(),
-        metric_codes=("P1-SNS-005",),
+        metric_codes=requested,
         validate_runtime_contract=False,
     )
 
+    expected_codes = set(requested)
+    changed = True
+    while changed:
+        changed = False
+        for definition in plan.definitions:
+            if definition.metric_code not in expected_codes:
+                continue
+            for dependency in definition.metric_dependencies:
+                if dependency not in expected_codes:
+                    expected_codes.add(dependency)
+                    changed = True
+    assert batch.metric_codes == tuple(
+        code for code in plan.metric_codes if code in expected_codes
+    )
     assert batch.metric_codes[-1] == "P1-SNS-005"
     assert "P1-QA-001" in batch.metric_codes
     assert "P1-QA-002" in batch.metric_codes
     assert "P1-QA-005" in batch.metric_codes
 
+    with pytest.raises(CatalogMetricEngineError) as duplicate:
+        engine.execute(
+            _inputs(),
+            metric_codes=("P1-SNS-005", "P1-SNS-005"),
+            validate_runtime_contract=False,
+        )
+    assert duplicate.value.code == "M2_METRIC_REQUEST_DUPLICATE"
+
+    with pytest.raises(CatalogMetricEngineError) as unknown:
+        engine.execute(
+            _inputs(),
+            metric_codes=("P1-SNS-005", "P1-UNKNOWN-999"),
+            validate_runtime_contract=False,
+        )
+    assert unknown.value.code == "M2_METRIC_REQUEST_UNKNOWN"
+
     empty_engine = CatalogMetricEngine(plan, MetricPluginRegistry())
     with pytest.raises(CatalogMetricEngineError) as caught:
         empty_engine.execute(_inputs(), metric_codes=("P1-AIR-001",))
     assert caught.value.code == "M2_METRIC_PLUGIN_MISSING"
+
+
+def test_plugin_identity_manifest_changes_lineage_without_changing_constant_output() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+
+    def constant_probe(request: M2MetricPluginRequest) -> dict[str, object]:
+        return {"metric_code": request.definition.metric_code, "constant": True}
+
+    def registry(plugin_id: str) -> MetricPluginRegistry:
+        result = MetricPluginRegistry()
+        for definition in plan.definitions:
+            result.register(
+                definition.algorithm_id,
+                algorithm_version=definition.algorithm_version,
+                plugin_id=plugin_id,
+                plugin=constant_probe,
+            )
+        return result
+
+    first = CatalogMetricEngine(plan, registry("identity-probe-v1")).execute(
+        _inputs(),
+        validate_runtime_contract=False,
+    )
+    second = CatalogMetricEngine(plan, registry("identity-probe-v2")).execute(
+        _inputs(),
+        validate_runtime_contract=False,
+    )
+
+    expected_manifest_hash = hashlib.sha256(
+        json.dumps(
+            [
+                (
+                    definition.algorithm_id,
+                    definition.algorithm_version,
+                    "identity-probe-v1",
+                )
+                for definition in plan.definitions
+            ],
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+    ).hexdigest()
+    assert first.plugin_manifest_hash == expected_manifest_hash
+    assert second.plugin_manifest_hash != first.plugin_manifest_hash
+    assert second.logical_hash != first.logical_hash
+
+    first_by_code = {record.metric_code: record for record in first.records}
+    second_by_code = {record.metric_code: record for record in second.records}
+    assert all(
+        first_by_code[code].plugin_output_hash
+        == second_by_code[code].plugin_output_hash
+        for code in plan.metric_codes
+    )
+    assert all(
+        first_by_code[code].logical_hash != second_by_code[code].logical_hash
+        for code in plan.metric_codes
+    )
 
 
 def test_plugin_registry_is_version_qualified_and_fails_closed() -> None:

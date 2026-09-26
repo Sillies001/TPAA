@@ -69,16 +69,33 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["acceptance"]["record_identity_binding_exact_32"]
     assert evidence["acceptance"]["plugin_manifest_hash_well_formed"]
     assert evidence["acceptance"]["plugin_manifest_replay_exact"]
+    assert evidence["acceptance"]["dependency_manifest_replay_exact_32"]
+    assert evidence["acceptance"]["record_logical_hash_replay_exact_32"]
+    assert evidence["acceptance"]["subset_transitive_closure_exact"]
     assert evidence["acceptance"]["input_lineage_encoding_exact"]
     assert evidence["acceptance"]["input_payload_hash_binding_exact_32"]
     assert evidence["acceptance"]["authority_lineage_hash_binding_exact_32"]
     assert evidence["acceptance"]["tampered_input_payload_hash_changes"]
+    assert evidence["acceptance"]["input_mutation_propagates_exact_transitive_dependents"]
+    assert evidence["acceptance"]["input_mutation_preserves_dependency_manifests_exact_32"]
+    assert evidence["acceptance"]["plugin_identity_tamper_changes_manifest_hash"]
+    assert evidence["acceptance"]["plugin_identity_tamper_changes_batch_hash"]
+    assert evidence["acceptance"]["plugin_identity_tamper_changes_record_hashes_exact_32"]
+    assert evidence["acceptance"]["plugin_identity_tamper_preserves_output_hashes_exact_32"]
     assert evidence["acceptance"]["generated_metric_projection_hash_well_formed"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
     assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
     assert len(product["generated_metric_projection_sha256"]) == 64
     assert len(product["execution_identity_sha256"]) == 64
     assert len(product["plugin_manifest_hash"]) == 64
+    assert len(product["identity_tampered_plugin_manifest_hash"]) == 64
+    assert product["identity_tampered_plugin_manifest_hash"] != product["plugin_manifest_hash"]
+    assert len(product["identity_tampered_batch_logical_hash"]) == 64
+    assert product["identity_tampered_batch_logical_hash"] != product["batch_logical_hash"]
+    assert product["input_mutation_actual_changed_metric_codes"] == (
+        product["input_mutation_expected_changed_metric_codes"]
+    )
+    assert product["subset_execution_metric_codes"][-1] == "P1-SNS-005"
     assert len(product["plugin_identity_manifest"]) == 32
     assert all(item[1] != "UNVERSIONED" for item in product["plugin_identity_manifest"])
     assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
