@@ -490,6 +490,13 @@ def verify() -> dict[str, object]:
         definition.metric_code: definition.authority_lineage_hash
         for definition in plan.definitions
     }
+    formula_dependency_references = {
+        definition.metric_code: [
+            list(item) for item in definition.formula_dependency_references
+        ]
+        for definition in plan.definitions
+        if definition.formula_dependency_references
+    }
     metric_execution_identities = {
         definition.metric_code: {
             "semantic_id": definition.semantic_id,
@@ -613,6 +620,29 @@ def verify() -> dict[str, object]:
             )
         ),
         "execution_identity_hash_well_formed": len(plan.execution_identity_sha256) == 64,
+        "governed_formula_dependency_closure_exact_32": all(
+            len(definition.operator_bindings) == len(set(definition.operator_bindings))
+            and len(definition.constant_bindings) == len(set(definition.constant_bindings))
+            and len(definition.upstream_dependencies)
+            == len(set(definition.upstream_dependencies))
+            and len(definition.state_machine_bindings)
+            == len(set(definition.state_machine_bindings))
+            for definition in plan.definitions
+        ),
+        "canonical_detection_event_authority_bound": (
+            formula_dependency_references["P1-SNS-002"]
+            == [
+                ["UPSTREAM_CONTRACT", "CONTRACT_ASSOCIATION_RELATION_V1"],
+                ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"],
+                ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1"],
+            ]
+            and formula_dependency_references["P1-SNS-003"]
+            == [
+                ["UPSTREAM_CONTRACT", "CONTRACT_ASSOCIATION_RELATION_V1"],
+                ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"],
+                ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1"],
+            ]
+        ),
         "input_lineage_encoding_exact": (
             plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
         ),
@@ -786,6 +816,7 @@ def verify() -> dict[str, object]:
             "registry_lineage_binding_only": True,
             "per_metric_authority_lineage_binding_only": True,
             "input_payload_lineage_binding_only": True,
+            "governed_dependency_closure_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -805,6 +836,7 @@ def verify() -> dict[str, object]:
             "runtime_metric_codes": list(plan.metric_codes),
             "metric_execution_identities": metric_execution_identities,
             "authority_lineage_hashes": authority_lineage_hashes,
+            "formula_dependency_references": formula_dependency_references,
             "subject_types": subject_types,
             "observation_lanes": observation_lanes,
             "publication_routes": publication_routes,

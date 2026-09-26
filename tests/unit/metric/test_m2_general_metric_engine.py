@@ -300,6 +300,83 @@ def test_m2_profile_parameter_input_exact_name_contract_fails_closed(
     assert caught.value.code == "M2_METRIC_PROFILE_INPUT_CONTRACT_DRIFT"
 
 
+def test_m2_governed_formula_dependency_reference_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metric = next(
+        item for item in payload["metrics"] if item["metric_code"] == "P1-QA-003"
+    )
+    metric["operator_bindings"].remove("MEAN_V1")
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_FORMULA_DEPENDENCY_UNBOUND"
+
+
+def test_m2_canonical_event_contract_reference_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metric = next(
+        item for item in payload["metrics"] if item["metric_code"] == "P1-SNS-002"
+    )
+    metric["upstream_dependencies"].remove(
+        "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"
+    )
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_FORMULA_DEPENDENCY_UNBOUND"
+
+
+def test_m2_dependency_binding_duplicates_fail_closed(tmp_path: Path) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metric = next(
+        item for item in payload["metrics"] if item["metric_code"] == "P1-QA-003"
+    )
+    metric["operator_bindings"].append("MEAN_V1")
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_DEPENDENCY_BINDING_DUPLICATE"
+
+
+def test_m2_dependency_closure_common_rule_drift_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["common_rules"]["algorithm_dependency_closure"] = "TEST_ONLY_DRIFT"
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_RUNTIME_RULE_AUTHORITY_INVALID"
+
+
 def test_m2_versioned_registry_entry_shape_fails_closed(
     tmp_path: Path,
 ) -> None:

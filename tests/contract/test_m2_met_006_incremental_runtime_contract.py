@@ -63,6 +63,11 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert len(product["required_external_dependency_ids"]) == 7
     assert len(product["runtime_metric_codes"]) == 32
     assert len(product["authority_lineage_hashes"]) == 32
+    assert product["formula_dependency_references"]["P1-SNS-002"] == [
+        ["UPSTREAM_CONTRACT", "CONTRACT_ASSOCIATION_RELATION_V1"],
+        ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"],
+        ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1"],
+    ]
     assert all(len(value) == 64 for value in product["authority_lineage_hashes"].values())
     assert len(product["metric_execution_identities"]) == 32
     assert all(
@@ -103,6 +108,8 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["acceptance"]["required_state_machine_ids_exact"]
     assert evidence["acceptance"]["required_external_dependency_ids_exact"]
     assert evidence["acceptance"]["execution_identity_hash_well_formed"]
+    assert evidence["acceptance"]["governed_formula_dependency_closure_exact_32"]
+    assert evidence["acceptance"]["canonical_detection_event_authority_bound"]
     assert evidence["acceptance"]["input_lineage_encoding_exact"]
     assert evidence["acceptance"]["authority_lineage_hash_coverage_exact_32"]
     assert evidence["acceptance"]["execution_identity_metadata_coverage_exact_32"]
@@ -184,6 +191,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "registry_lineage_binding_only": True,
         "per_metric_authority_lineage_binding_only": True,
         "input_payload_lineage_binding_only": True,
+        "governed_dependency_closure_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }

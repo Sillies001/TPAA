@@ -107,6 +107,7 @@ class M2MetricDefinition:
     allowed_result_statuses: tuple[str, ...]
     allowed_mission_system_types: tuple[str, ...]
     applicability: ApplicabilityContract
+    formula_dependency_references: tuple[tuple[str, str], ...]
     definition_hash: str
     authority_lineage_hash: str
 
@@ -1101,6 +1102,78 @@ def _string_list(mapping: Mapping[str, object], name: str, *, field: str) -> tup
     return tuple(cast(list[str], value))
 
 
+def _formula_mentions_identifier(formula: str, identifier: str) -> bool:
+    return (
+        re.search(
+            rf"(?<![A-Za-z0-9_.-]){re.escape(identifier)}(?![A-Za-z0-9_.-])",
+            formula,
+        )
+        is not None
+    )
+
+
+def _validate_governed_formula_dependency_closure(
+    *,
+    metric_code: str,
+    formula: str,
+    operator_bindings: tuple[str, ...],
+    constant_bindings: tuple[str, ...],
+    upstream_dependencies: tuple[str, ...],
+    state_machine_bindings: tuple[str, ...],
+    operator_registry: Mapping[str, object],
+    constant_registry: Mapping[str, object],
+    upstream_registry: Mapping[str, object],
+    state_machine_registry: Mapping[str, object],
+    selected_metric_codes: set[str],
+) -> tuple[tuple[str, str], ...]:
+    declared = {
+        "OPERATOR": operator_bindings,
+        "CONSTANT": constant_bindings,
+        "UPSTREAM_CONTRACT": upstream_dependencies,
+        "STATE_MACHINE": state_machine_bindings,
+    }
+    for kind, identifiers in declared.items():
+        if len(identifiers) != len(set(identifiers)):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_DEPENDENCY_BINDING_DUPLICATE",
+                f"{metric_code}:{kind}:{identifiers!r}",
+            )
+
+    references: list[tuple[str, str]] = []
+    governed_namespaces = (
+        ("OPERATOR", operator_registry, set(operator_bindings)),
+        ("CONSTANT", constant_registry, set(constant_bindings)),
+        ("UPSTREAM_CONTRACT", upstream_registry, set(upstream_dependencies)),
+        ("STATE_MACHINE", state_machine_registry, set(state_machine_bindings)),
+    )
+    for kind, registry, bindings in governed_namespaces:
+        for identifier in registry:
+            if not _formula_mentions_identifier(formula, identifier):
+                continue
+            references.append((kind, identifier))
+            if identifier not in bindings:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_FORMULA_DEPENDENCY_UNBOUND",
+                    f"{metric_code}:{kind}:{identifier}",
+                )
+
+    upstream_binding_set = set(upstream_dependencies)
+    for dependency in selected_metric_codes:
+        if dependency == metric_code or not _formula_mentions_identifier(
+            formula,
+            dependency,
+        ):
+            continue
+        references.append(("METRIC", dependency))
+        if dependency not in upstream_binding_set:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_FORMULA_DEPENDENCY_UNBOUND",
+                f"{metric_code}:METRIC:{dependency}",
+            )
+
+    return tuple(sorted(references))
+
+
 def _validate_versioned_registry_entry(
     registry: Mapping[str, object],
     entry_id: str,
@@ -1590,6 +1663,69 @@ def _metric_runtime_transport_authority(
         )
         or _text(
             common_rules,
+            "algorithm_dependency_closure",
+            field="common_rules",
+        )
+        != (
+            "Every formula dependency that is not a raw/canonical input must be declared in "
+            "operator_bindings, constant_bindings, upstream_dependencies or state_machine_bindings. "
+            "Registry references are immutable/versioned. Unbound derivative/smoothing/filter/"
+            "sustained-window/epsilon/reset/stable/qualified/association/handover semantics are forbidden."
+        )
+        or _text(
+            common_rules,
+            "derived_operator_binding",
+            field="common_rules",
+        )
+        != (
+            "Derivative/filter/smoothing/rolling/statistical operators must bind to operator_registry IDs "
+            "when the implementation has nontrivial method choice. Sustained metrics must bind "
+            "ROLLING_MEDIAN_V1 and declare sustain_duration_s/min_coverage/max_gap_us."
+        )
+        or _text(
+            common_rules,
+            "constant_binding",
+            field="common_rules",
+        )
+        != (
+            "Algorithm constants that affect eligibility/numerical behavior must use constant_registry IDs "
+            "or literal values with units in formula. Bare epsilon is forbidden."
+        )
+        or _text(
+            common_rules,
+            "state_machine_binding",
+            field="common_rules",
+        )
+        != (
+            "Metrics using stable/qualified/reset/refuel/drop/reacquire/association/handover/opportunity "
+            "semantics must consume a frozen upstream state/event or bind a state_machine_registry ID; "
+            "the metric may not invent an unstated state machine. A metric that itself produces/qualifies "
+            "a state must declare that state machine's numeric parameters; a downstream consumer may instead "
+            "consume a pre-qualified upstream state/event whose producer/version is present in "
+            "upstream_dependencies/Evidence."
+        )
+        or _text(
+            common_rules,
+            "event_authority",
+            field="common_rules",
+        )
+        != (
+            "Opportunity/confirmation state machines execute only in the WRE canonical event builders. "
+            "Metrics consume CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1 / "
+            "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1 and never rebuild those events."
+        )
+        or _text(
+            common_rules,
+            "shared_event_authority_contract",
+            field="common_rules",
+        )
+        != (
+            "Canonical Opportunity, Confirmation and Fusion Handover events are built once by WRE. "
+            "Metric Plugins consume the versioned event contract and never rerun the owning state machine "
+            "or infer event authority from another Metric result."
+        )
+        or _text(
+            common_rules,
             "structured_schema_standard",
             field="common_rules",
         )
@@ -1793,6 +1929,20 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         constants = _string_list(raw, "constant_bindings", field=code)
         upstream = _string_list(raw, "upstream_dependencies", field=code)
         state_machines = _string_list(raw, "state_machine_bindings", field=code)
+        formula = _text(raw, "formula", field=code)
+        formula_dependency_references = _validate_governed_formula_dependency_closure(
+            metric_code=code,
+            formula=formula,
+            operator_bindings=operators,
+            constant_bindings=constants,
+            upstream_dependencies=upstream,
+            state_machine_bindings=state_machines,
+            operator_registry=operator_registry,
+            constant_registry=constant_registry,
+            upstream_registry=upstream_registry,
+            state_machine_registry=state_machine_registry,
+            selected_metric_codes=selected_codes,
+        )
         profile_parameters = _string_list(raw, "profile_parameters", field=code)
         input_fields = _string_list(raw, "input_fields", field=code)
         profile_input_parameters = tuple(
@@ -2027,6 +2177,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                 "structured_output_schema_id": schema_id,
                 "structured_output_schema_hash_sha256": schema_hash,
                 "family_applicability_contract": family_contracts[applicability.key],
+                "formula_dependency_references": formula_dependency_references,
                 "source_provenance_sha256": source_provenance_sha256,
                 "world_capability_registry_sha256": world_capability_registry_sha256,
                 "core_logical_model_sha256": core_logical_model_sha256,
@@ -2054,7 +2205,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             structured_output_schema_json=schema_json,
             structured_output_schema_hash_sha256=schema_hash,
             input_fields=input_fields,
-            formula=_text(raw, "formula", field=code),
+            formula=formula,
             validity_conditions=_text(raw, "validity_conditions", field=code),
             na_conditions=_text(raw, "na_conditions", field=code),
             profile_parameters=profile_parameters,
@@ -2068,6 +2219,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             allowed_result_statuses=allowed_result_statuses,
             allowed_mission_system_types=allowed_mission_system_types,
             applicability=applicability,
+            formula_dependency_references=formula_dependency_references,
             definition_hash=definition_hash,
             authority_lineage_hash=authority_lineage_hash,
         )

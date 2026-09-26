@@ -67,6 +67,14 @@ def test_m2_met_001_evidence_proves_general_engine_contract(tmp_path: Path) -> N
     assert len(product["required_operator_ids"]) == 8
     assert len(product["plan_logical_hash"]) == 64
     assert len(product["execution_logical_hash"]) == 64
+    assert evidence["acceptance"]["governed_formula_dependency_closure_exact_32"]
+    assert product["formula_dependency_references"]["P1-QA-003"] == [
+        ["OPERATOR", "MEAN_V1"],
+        ["OPERATOR", "QUANTILE_HF7_V1"],
+        ["OPERATOR", "RMS_V1"],
+        ["STATE_MACHINE", "SM_CLOCK_SEGMENT_V1"],
+        ["UPSTREAM_CONTRACT", "CONTRACT_TIME_TRANSFORM_V1"],
+    ]
     assert len(product["plugin_manifest_hash"]) == 64
     assert len(product["plugin_identity_manifest"]) == 32
     assert all(len(item) == 3 and item[1] != "UNVERSIONED" for item in product["plugin_identity_manifest"])

@@ -207,6 +207,15 @@ def verify() -> dict[str, object]:
         "definition_hashes_complete": all(
             len(definition.definition_hash) == 64 for definition in plan.definitions
         ),
+        "governed_formula_dependency_closure_exact_32": all(
+            len(definition.operator_bindings) == len(set(definition.operator_bindings))
+            and len(definition.constant_bindings) == len(set(definition.constant_bindings))
+            and len(definition.upstream_dependencies)
+            == len(set(definition.upstream_dependencies))
+            and len(definition.state_machine_bindings)
+            == len(set(definition.state_machine_bindings))
+            for definition in plan.definitions
+        ),
         "record_hashes_complete": all(
             len(record.logical_hash) == 64
             and len(record.plugin_output_hash) == 64
@@ -232,6 +241,13 @@ def verify() -> dict[str, object]:
             [definition.metric_code, definition.definition_hash]
             for definition in plan.definitions
         ],
+        "formula_dependency_references": {
+            definition.metric_code: [
+                list(item) for item in definition.formula_dependency_references
+            ]
+            for definition in plan.definitions
+            if definition.formula_dependency_references
+        },
         "input_authority_bindings": [
             [
                 definition.metric_code,
