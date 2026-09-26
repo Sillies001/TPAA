@@ -1392,6 +1392,17 @@ def _metric_runtime_transport_authority(
         )
         or _text(
             common_rules,
+            "profile_input_exact_name_contract",
+            field="common_rules",
+        )
+        != (
+            "For every Metric, the set of declared profile_parameters MUST equal exactly the suffix set "
+            "of input_fields entries named profile.<parameter>. Generic aliases such as "
+            "profile.band/profile.deadband/profile.event_window are forbidden; API/Profile editors consume "
+            "exact Catalog parameter names only."
+        )
+        or _text(
+            common_rules,
             "structured_schema_standard",
             field="common_rules",
         )
@@ -1591,6 +1602,25 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         state_machines = _string_list(raw, "state_machine_bindings", field=code)
         profile_parameters = _string_list(raw, "profile_parameters", field=code)
         input_fields = _string_list(raw, "input_fields", field=code)
+        profile_input_parameters = tuple(
+            field[len("profile.") : -1]
+            if field.startswith("profile.") and field.endswith("?")
+            else field[len("profile.") :]
+            for field in input_fields
+            if field.startswith("profile.")
+        )
+        if (
+            len(set(profile_parameters)) != len(profile_parameters)
+            or len(set(profile_input_parameters)) != len(profile_input_parameters)
+            or set(profile_parameters) != set(profile_input_parameters)
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_PROFILE_INPUT_CONTRACT_DRIFT",
+                (
+                    f"{code}:declared={sorted(profile_parameters)!r}:"
+                    f"inputs={sorted(profile_input_parameters)!r}"
+                ),
+            )
         raw_authority_bindings = input_authority_by_metric.get(code, ())
         binding_by_field = {
             binding.input_field: binding for binding in raw_authority_bindings

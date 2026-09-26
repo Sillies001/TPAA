@@ -473,6 +473,11 @@ def verify() -> dict[str, object]:
         definition.metric_code: definition.default_aggregation
         for definition in plan.definitions
     }
+    profile_parameter_bindings = {
+        definition.metric_code: sorted(definition.profile_parameters)
+        for definition in plan.definitions
+        if definition.profile_parameters
+    }
     negative_error_codes = {
         "subject_type_mismatch": subject_type_mismatch,
         "observation_lane_mismatch": observation_lane_mismatch,
@@ -542,6 +547,14 @@ def verify() -> dict[str, object]:
             definition.subject_type in {"AIRCRAFT", "MISSION_SYSTEM_INSTANCE"}
             for definition in plan.definitions
             if definition.p1_longitudinal_trend_eligibility
+        ),
+        "profile_input_exact_name_contract_enforced": (
+            profile_parameter_bindings
+            == {
+                "P1-QA-005": ["max_gap_us"],
+                "P1-AIR-001": ["max_gap_us", "min_coverage"],
+                "P1-AIR-003": ["derivative_window_s", "max_gap_us"],
+            }
         ),
         "numeric_value_kind_coverage_exact_29": len(numeric_definitions) == 29,
         "structured_value_kind_coverage_exact_3": (
@@ -655,6 +668,7 @@ def verify() -> dict[str, object]:
             "subject_metadata_binding_only": True,
             "publication_metadata_binding_only": True,
             "longitudinal_metadata_binding_only": True,
+            "profile_parameter_name_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
         },
@@ -671,6 +685,7 @@ def verify() -> dict[str, object]:
             "publication_routes": publication_routes,
             "longitudinal_trend_eligibility": longitudinal_trend_eligibility,
             "default_aggregations": default_aggregations,
+            "profile_parameter_bindings": profile_parameter_bindings,
             "numeric_metric_codes": [
                 definition.metric_code for definition in numeric_definitions
             ],

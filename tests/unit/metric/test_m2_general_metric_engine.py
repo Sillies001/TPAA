@@ -168,12 +168,43 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         for definition in plan.definitions
         if definition.p1_longitudinal_trend_eligibility
     )
+    assert {
+        definition.metric_code: tuple(sorted(definition.profile_parameters))
+        for definition in plan.definitions
+        if definition.profile_parameters
+    } == {
+        "P1-QA-005": ("max_gap_us",),
+        "P1-AIR-001": ("max_gap_us", "min_coverage"),
+        "P1-AIR-003": ("derivative_window_s", "max_gap_us"),
+    }
     assert all(
         binding.metric_semantic_id == definition.semantic_id
         and binding.optional == binding.input_field.endswith("?")
         for definition in plan.definitions
         for binding in definition.input_authority_bindings
     )
+
+
+def test_m2_profile_parameter_input_exact_name_contract_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = _copy_authority(tmp_path)
+    path = authority / "P1_METRIC_CATALOG.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metric = next(
+        item
+        for item in payload["metrics"]
+        if item["metric_code"] == "P1-AIR-001"
+    )
+    metric["profile_parameters"] = ["max_gap_us"]
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        build_m2_metric_execution_plan(authority)
+    assert caught.value.code == "M2_METRIC_PROFILE_INPUT_CONTRACT_DRIFT"
 
 
 def test_m2_input_authority_version_bridge_requires_frozen_provenance(

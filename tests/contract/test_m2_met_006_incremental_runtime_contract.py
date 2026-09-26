@@ -71,6 +71,12 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert list(product["default_aggregations"].values()).count("NONE") == 6
     assert evidence["acceptance"]["target_pair_never_longitudinal"]
     assert evidence["acceptance"]["trend_subject_types_exact"]
+    assert evidence["acceptance"]["profile_input_exact_name_contract_enforced"]
+    assert product["profile_parameter_bindings"] == {
+        "P1-QA-005": ["max_gap_us"],
+        "P1-AIR-001": ["max_gap_us", "min_coverage"],
+        "P1-AIR-003": ["derivative_window_s", "max_gap_us"],
+    }
     assert all(
         not product["longitudinal_trend_eligibility"][code]
         for code, subject_type in product["subject_types"].items()
@@ -124,6 +130,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "subject_metadata_binding_only": True,
         "publication_metadata_binding_only": True,
         "longitudinal_metadata_binding_only": True,
+        "profile_parameter_name_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
     }
