@@ -139,6 +139,7 @@ def verify() -> dict[str, object]:
             {},
             {
                 "metric_code": numeric.metric_code,
+                "subject_type": numeric.subject_type,
                 "instances": [
                     _instance(
                         "NUMERIC",
@@ -153,6 +154,7 @@ def verify() -> dict[str, object]:
             {},
             {
                 "metric_code": structured.metric_code,
+                "subject_type": structured.subject_type,
                 "instances": [
                     _instance(
                         "STRUCTURED",
