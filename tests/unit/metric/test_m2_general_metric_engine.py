@@ -1111,6 +1111,71 @@ def test_runtime_contract_gate_enforces_value_slots_and_structured_schema() -> N
     assert caught.value.code == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
 
 
+def test_runtime_contract_gate_rejects_nonfinite_boolean_and_shape_drift() -> None:
+    plan = build_m2_metric_execution_plan(AUTHORITY)
+    numeric = plan.definition("P1-QA-003")
+    base: dict[str, object] = {
+        "metric_code": numeric.metric_code,
+        "subject_type": numeric.subject_type,
+        "observation_lane": numeric.observation_lane,
+        "publication_route": numeric.publication_route,
+    }
+
+    for value in (float("nan"), float("inf"), True):
+        candidate = dict(base)
+        instance = _valid_runtime_instance(value_kind="NUMERIC")
+        instance["value_numeric"] = value
+        candidate["instances"] = [instance]
+        with pytest.raises(CatalogMetricEngineError) as caught:
+            validate_m2_runtime_output(numeric, {}, candidate)
+        assert caught.value.code == "M2_METRIC_RUNTIME_NUMERIC_INVALID"
+
+    for slot, value in (("value_text", "forbidden"), ("value_boolean", True)):
+        candidate = dict(base)
+        instance = _valid_runtime_instance(
+            value_kind="NUMERIC",
+            value_numeric=1.0,
+        )
+        instance[slot] = value
+        candidate["instances"] = [instance]
+        with pytest.raises(CatalogMetricEngineError) as caught:
+            validate_m2_runtime_output(numeric, {}, candidate)
+        assert caught.value.code == "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH"
+
+    for instances in ({"not": "a-list"}, [1]):
+        candidate = dict(base)
+        candidate["instances"] = instances
+        with pytest.raises(CatalogMetricEngineError) as caught:
+            validate_m2_runtime_output(numeric, {}, candidate)
+        assert caught.value.code == "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID"
+
+    structured = plan.definition("P1-QA-002")
+    structured_value: dict[str, object] = {
+        "sigma_range_m": float("nan"),
+        "sigma_az_rad": 0.01,
+        "sigma_el_rad": 0.01,
+        "sigma_position_3d_m": 1.5,
+    }
+    with pytest.raises(CatalogMetricEngineError) as caught:
+        validate_m2_runtime_output(
+            structured,
+            {},
+            {
+                "metric_code": structured.metric_code,
+                "subject_type": structured.subject_type,
+                "observation_lane": structured.observation_lane,
+                "publication_route": structured.publication_route,
+                "instances": [
+                    _valid_runtime_instance(
+                        value_kind="STRUCTURED",
+                        value_structured=structured_value,
+                    )
+                ],
+            },
+        )
+    assert caught.value.code == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
+
+
 def test_runtime_contract_gate_enforces_subject_type_metadata() -> None:
     plan = build_m2_metric_execution_plan(AUTHORITY)
     numeric = plan.definition("P1-QA-003")

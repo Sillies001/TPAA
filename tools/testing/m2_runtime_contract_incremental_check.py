@@ -9,6 +9,7 @@ does not claim M2-MET-006 completion while M2-MET-002/005 remain incomplete.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -17,6 +18,18 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
+
+
+def _canonical_hash(value: object) -> str:
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("ascii")
+    return hashlib.sha256(payload).hexdigest()
+
 
 STRUCTURED_SAMPLES: dict[str, dict[str, object]] = {
     "P1-QA-001": {
@@ -439,6 +452,116 @@ def verify() -> dict[str, object]:
         },
     )
 
+    numeric_nan = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [_instance("NUMERIC", value_numeric=float("nan"))],
+        },
+    )
+    numeric_infinity = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [_instance("NUMERIC", value_numeric=float("inf"))],
+        },
+    )
+    numeric_boolean_instance = _instance("NUMERIC")
+    numeric_boolean_instance["value_numeric"] = True
+    numeric_boolean = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [numeric_boolean_instance],
+        },
+    )
+    numeric_value_text_instance = _instance("NUMERIC", value_numeric=1.0)
+    numeric_value_text_instance["value_text"] = "forbidden"
+    numeric_value_text = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [numeric_value_text_instance],
+        },
+    )
+    numeric_value_boolean_instance = _instance("NUMERIC", value_numeric=1.0)
+    numeric_value_boolean_instance["value_boolean"] = True
+    numeric_value_boolean = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [numeric_value_boolean_instance],
+        },
+    )
+    instances_wrong_shape = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": {"not": "a-list"},
+        },
+    )
+    instance_wrong_shape = error_code(
+        numeric,
+        {},
+        {
+            "metric_code": numeric.metric_code,
+            "instances": [1],
+        },
+    )
+
+    qa002 = plan.definition("P1-QA-002")
+    structured_nonfinite_value = dict(STRUCTURED_SAMPLES["P1-QA-002"])
+    structured_nonfinite_value["sigma_range_m"] = float("nan")
+    structured_nonfinite = error_code(
+        qa002,
+        {},
+        {
+            "metric_code": qa002.metric_code,
+            "instances": [
+                _instance(
+                    "STRUCTURED",
+                    value_structured=structured_nonfinite_value,
+                )
+            ],
+        },
+    )
+    structured_boolean_value = dict(STRUCTURED_SAMPLES["P1-QA-006"])
+    structured_boolean_value["raw_residual"] = True
+    structured_boolean = error_code(
+        structured,
+        {},
+        {
+            "metric_code": structured.metric_code,
+            "instances": [
+                _instance(
+                    "STRUCTURED",
+                    value_structured=structured_boolean_value,
+                )
+            ],
+        },
+    )
+    structured_array_item_value = dict(STRUCTURED_SAMPLES["P1-QA-001"])
+    structured_array_item_value["r_rel_ecef_m"] = [1.0, "bad", 3.0]
+    structured_array_item_type = error_code(
+        structured_frame,
+        {},
+        {
+            "metric_code": structured_frame.metric_code,
+            "instances": [
+                _instance(
+                    "STRUCTURED",
+                    value_structured=structured_array_item_value,
+                )
+            ],
+        },
+    )
+
     structured_definitions = tuple(
         definition
         for definition in plan.definitions
@@ -522,6 +645,36 @@ def verify() -> dict[str, object]:
         if "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
         in definition.upstream_dependencies
     }
+    runtime_contract_projection = {
+        "plan_logical_hash": plan.logical_hash,
+        "core_logical_model_sha256": plan.core_logical_model_sha256,
+        "core_rules_sha256": plan.core_rules_sha256,
+        "allowed_result_statuses": list(plan.allowed_result_statuses),
+        "allowed_mission_system_types": list(plan.allowed_mission_system_types),
+        "metric_contracts": {
+            definition.metric_code: {
+                "subject_type": definition.subject_type,
+                "observation_lane": definition.observation_lane,
+                "publication_route": definition.publication_route,
+                "value_kind": definition.value_kind,
+                "structured_output_schema_id": definition.structured_output_schema_id,
+                "structured_output_schema_hash_sha256": (
+                    definition.structured_output_schema_hash_sha256
+                ),
+                "applicability_mode": definition.applicability.applicability_mode,
+                "allowed_system_types": list(
+                    definition.applicability.allowed_system_types
+                ),
+                "p1_longitudinal_trend_eligibility": (
+                    definition.p1_longitudinal_trend_eligibility
+                ),
+                "default_aggregation": definition.default_aggregation,
+            }
+            for definition in plan.definitions
+        },
+    }
+    runtime_contract_hash = _canonical_hash(runtime_contract_projection)
+
     negative_error_codes = {
         "subject_type_mismatch": subject_type_mismatch,
         "observation_lane_mismatch": observation_lane_mismatch,
@@ -543,6 +696,16 @@ def verify() -> dict[str, object]:
         "unknown_system_type": unknown_system_type,
         "radar_false_not_applicable": radar_false_not_applicable,
         "radar_missing_applicable": radar_missing_applicable,
+        "numeric_nan": numeric_nan,
+        "numeric_infinity": numeric_infinity,
+        "numeric_boolean": numeric_boolean,
+        "numeric_value_text": numeric_value_text,
+        "numeric_value_boolean": numeric_value_boolean,
+        "instances_wrong_shape": instances_wrong_shape,
+        "instance_wrong_shape": instance_wrong_shape,
+        "structured_nonfinite": structured_nonfinite,
+        "structured_boolean": structured_boolean,
+        "structured_array_item_type": structured_array_item_type,
     }
 
     acceptance = {
@@ -799,15 +962,48 @@ def verify() -> dict[str, object]:
         "sns_radar_missing_applicable_fails_closed": (
             radar_missing_applicable == "M2_METRIC_APPLICABLE_OUTPUT_REJECTED"
         ),
+        "numeric_nonfinite_fails_closed": (
+            numeric_nan == "M2_METRIC_RUNTIME_NUMERIC_INVALID"
+            and numeric_infinity == "M2_METRIC_RUNTIME_NUMERIC_INVALID"
+        ),
+        "numeric_boolean_fails_closed": (
+            numeric_boolean == "M2_METRIC_RUNTIME_NUMERIC_INVALID"
+        ),
+        "unsupported_scalar_slots_fail_closed": (
+            numeric_value_text == "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH"
+            and numeric_value_boolean == "M2_METRIC_RUNTIME_VALUE_SLOT_MISMATCH"
+        ),
+        "instance_container_shape_fails_closed": (
+            instances_wrong_shape == "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID"
+            and instance_wrong_shape == "M2_METRIC_RUNTIME_OUTPUT_SHAPE_INVALID"
+        ),
+        "structured_nonfinite_fails_closed": (
+            structured_nonfinite
+            == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
+        ),
+        "structured_boolean_number_fails_closed": (
+            structured_boolean
+            == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
+        ),
+        "structured_array_item_type_fails_closed": (
+            structured_array_item_type
+            == "M2_METRIC_STRUCTURED_OUTPUT_SCHEMA_VIOLATION"
+        ),
+        "runtime_contract_projection_hash_well_formed": (
+            len(runtime_contract_hash) == 64
+        ),
         "predecessor_gate_preserved": True,
     }
     failed = sorted(key for key, passed in acceptance.items() if not passed)
+    implementation_complete = not failed
     return {
         "schema": "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1",
         "task_id": "M2-MET-006",
         "tracking_issue": 97,
         "status": "PASS" if not failed else "FAIL",
         "task_complete": False,
+        "implementation_complete": implementation_complete,
+        "formal_completion_blocked_by_predecessors": True,
         "source_revision": _git_revision(),
         "blocked_predecessors": ["M2-MET-002", "M2-MET-005"],
         "external_authority_gaps": {
@@ -832,8 +1028,12 @@ def verify() -> dict[str, object]:
             "governed_dependency_closure_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
+            "implementation_side_runtime_contract_complete": True,
+            "formal_task_completion_claimed": False,
         },
         "logical_product": {
+            "runtime_contract_hash": runtime_contract_hash,
+            "runtime_contract_projection": runtime_contract_projection,
             "plan_logical_hash": plan.logical_hash,
             "generated_metric_projection_sha256": plan.generated_metric_projection_sha256,
             "execution_identity_sha256": plan.execution_identity_sha256,
@@ -886,6 +1086,8 @@ def main() -> int:
             "tracking_issue": 97,
             "status": "FAIL",
             "task_complete": False,
+            "implementation_complete": False,
+            "formal_completion_blocked_by_predecessors": True,
             "source_revision": _git_revision(),
             "error": f"{type(exc).__name__}: {exc}",
         }

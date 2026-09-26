@@ -39,12 +39,24 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["tracking_issue"] == 97
     assert evidence["status"] == "PASS"
     assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["formal_completion_blocked_by_predecessors"] is True
     assert evidence["blocked_predecessors"] == ["M2-MET-002", "M2-MET-005"]
     assert evidence["failed_acceptance"] == []
     assert all(evidence["acceptance"].values())
     assert evidence["acceptance"]["structured_schema_closed_world_authority_enforced"]
+    assert evidence["acceptance"]["numeric_nonfinite_fails_closed"]
+    assert evidence["acceptance"]["numeric_boolean_fails_closed"]
+    assert evidence["acceptance"]["unsupported_scalar_slots_fail_closed"]
+    assert evidence["acceptance"]["instance_container_shape_fails_closed"]
+    assert evidence["acceptance"]["structured_nonfinite_fails_closed"]
+    assert evidence["acceptance"]["structured_boolean_number_fails_closed"]
+    assert evidence["acceptance"]["structured_array_item_type_fails_closed"]
+    assert evidence["acceptance"]["runtime_contract_projection_hash_well_formed"]
 
     product = evidence["logical_product"]
+    assert len(product["runtime_contract_hash"]) == 64
+    assert len(product["runtime_contract_projection"]["metric_contracts"]) == 32
     assert len(product["generated_metric_projection_sha256"]) == 64
     assert len(product["execution_identity_sha256"]) == 64
     assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
@@ -198,6 +210,8 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "governed_dependency_closure_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
+        "implementation_side_runtime_contract_complete": True,
+        "formal_task_completion_claimed": False,
     }
 
 
@@ -235,5 +249,7 @@ def test_m2_met_006_incremental_cross_platform_compare_is_revision_exact(
     evidence = json.loads(compared.read_text(encoding="utf-8"))
     assert evidence["status"] == "PASS"
     assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["formal_completion_blocked_by_predecessors"] is True
     assert evidence["failed_acceptance"] == []
     assert all(evidence["checks"].values())
