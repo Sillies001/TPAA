@@ -78,7 +78,10 @@ def _direct(
     metric_code: str,
 ) -> dict[str, object]:
     definition = plan.definition(metric_code)
-    _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+    _plugin_id, plugin = registry.resolve(
+        definition.algorithm_id,
+        definition.algorithm_version,
+    )
     operators = MappingProxyType(
         {
             operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]

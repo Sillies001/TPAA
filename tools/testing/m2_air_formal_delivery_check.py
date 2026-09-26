@@ -112,7 +112,10 @@ def _direct_outputs(
     outputs: dict[str, dict[str, object]] = {}
     for code in AIR_M2_FORMAL_CODES:
         definition = plan.definition(code)
-        _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+        _plugin_id, plugin = registry.resolve(
+            definition.algorithm_id,
+            definition.algorithm_version,
+        )
         operators = MappingProxyType(
             {
                 operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
@@ -354,9 +357,21 @@ def verify() -> dict[str, object]:
         "catalog_definition_contract_exact": catalog_exact,
         "shared_engine_algorithm_dispatch_exact": (
             first.metric_codes == AIR_M2_FORMAL_CODES
-            and first.dispatch_key == "algorithm_id"
+            and first.dispatch_key == "algorithm_id+algorithm_version"
             and set(registry.plugin_ids)
             == {plan.definition(code).algorithm_id for code in AIR_M2_FORMAL_CODES}
+            and {
+                (algorithm_id, algorithm_version)
+                for algorithm_id, algorithm_version, _plugin_id
+                in registry.plugin_identity_manifest
+            }
+            == {
+                (
+                    plan.definition(code).algorithm_id,
+                    plan.definition(code).algorithm_version,
+                )
+                for code in AIR_M2_FORMAL_CODES
+            }
         ),
         "m1_implementation_reused_no_air_formula_copy": all(
             output.get("implementation_reuse") == AIR_M1_IMPLEMENTATION
@@ -439,12 +454,15 @@ def verify() -> dict[str, object]:
         "m1_batch_logical_hash": nominal.m1_batch_logical_hash,
         "m2_delivery_logical_hash": nominal.logical_hash,
         "engine_batch_logical_hash": first.logical_hash,
+        "dispatch_key": first.dispatch_key,
         "engine_records": [
             {
                 "metric_code": record.metric_code,
                 "algorithm_id": record.algorithm_id,
+                "algorithm_version": record.algorithm_version,
                 "plugin_id": record.plugin_id,
                 "operator_bindings": list(record.operator_bindings),
+                "dependency_manifest_hash": record.dependency_manifest_hash,
                 "plugin_output_hash": record.plugin_output_hash,
                 "logical_hash": record.logical_hash,
             }

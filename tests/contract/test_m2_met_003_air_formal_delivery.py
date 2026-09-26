@@ -42,7 +42,12 @@ def test_m2_met_003_requalifies_exact_air_delivery(tmp_path: Path) -> None:
     product = evidence["logical_product"]
     assert product["delivery_membership"] == AIR_CODES
     assert product["implementation_reuse"] == ("tpaa_metric.engine.compute_representative_metrics")
+    assert product["dispatch_key"] == "algorithm_id+algorithm_version"
     assert [record["metric_code"] for record in product["engine_records"]] == AIR_CODES
+    assert all(
+        record["algorithm_version"] and len(record["dependency_manifest_hash"]) == 64
+        for record in product["engine_records"]
+    )
     assert len(product["release_membership"]["definition_hashes"]) == 3
     assert len(product["release_membership"]["metric_instance_hashes"]) == 3
     assert len(product["release_membership"]["observation_ids"]) == 3

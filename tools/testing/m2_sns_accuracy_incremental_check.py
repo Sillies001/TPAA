@@ -141,7 +141,10 @@ def _direct(
     payload: Mapping[str, object],
 ) -> dict[str, object]:
     definition = plan.definition(code)  # type: ignore[attr-defined]
-    _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+    _plugin_id, plugin = registry.resolve(
+        definition.algorithm_id,
+        definition.algorithm_version,
+    )
     operators = MappingProxyType(
         {
             operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
@@ -288,6 +291,18 @@ def verify() -> dict[str, object]:
             and item.applicability.allowed_system_types == ("RADAR",)
             for item in definitions
         ),
+        "version_qualified_plugin_identity_exact": (
+            {
+                (algorithm_id, algorithm_version)
+                for algorithm_id, algorithm_version, _plugin_id
+                in registry.plugin_identity_manifest
+                if algorithm_id in {item.algorithm_id for item in definitions}
+            }
+            == {
+                (item.algorithm_id, item.algorithm_version)
+                for item in definitions
+            }
+        ),
         "constant_50m_and_vector_golden": all(
             math.isclose(_value(outputs[code]), value, rel_tol=0.0, abs_tol=1e-12)
             for code, value in expected.items()
@@ -340,6 +355,11 @@ def verify() -> dict[str, object]:
             "delivery_membership": list(SNS_ACCURACY_CODES),
             "plan_logical_hash": plan.logical_hash,
             "definition_hashes": {item.metric_code: item.definition_hash for item in definitions},
+            "plugin_identity_manifest": [
+                list(item)
+                for item in registry.plugin_identity_manifest
+                if item[0] in {definition.algorithm_id for definition in definitions}
+            ],
             "golden_outputs": outputs,
             "wrap_outputs": wrap_outputs,
             "rejected_outputs": rejected,

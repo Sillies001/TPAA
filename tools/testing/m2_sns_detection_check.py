@@ -162,7 +162,10 @@ def _direct(
     payload: Mapping[str, object],
 ) -> dict[str, object]:
     definition = plan.definition(code)  # type: ignore[attr-defined]
-    _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+    _plugin_id, plugin = registry.resolve(
+        definition.algorithm_id,
+        definition.algorithm_version,
+    )
     operators = MappingProxyType(
         {
             operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
@@ -287,6 +290,21 @@ def verify() -> dict[str, object]:
         ),
         "shared_engine_dependency_closure_exact": first.metric_codes
         == ("P1-QA-005", *SNS_DETECTION_CODES),
+        "shared_engine_dispatch_version_qualified": (
+            first.dispatch_key == "algorithm_id+algorithm_version"
+        ),
+        "version_qualified_plugin_identity_exact": (
+            {
+                (algorithm_id, algorithm_version)
+                for algorithm_id, algorithm_version, _plugin_id
+                in registry.plugin_identity_manifest
+                if algorithm_id in {item.algorithm_id for item in definitions}
+            }
+            == {
+                (item.algorithm_id, item.algorithm_version)
+                for item in definitions
+            }
+        ),
         "world_and_stage_lineage_bound": all(
             inputs[code]["world_logical_hash"] == radar_world.logical_hash
             and inputs[code]["stage_world_logical_hash"] == stage_world.logical_hash
@@ -327,11 +345,14 @@ def verify() -> dict[str, object]:
         "world_logical_hash": radar_world.logical_hash,
         "stage_world_logical_hash": stage_world.logical_hash,
         "definition_hashes": {item.metric_code: item.definition_hash for item in definitions},
+        "dispatch_key": first.dispatch_key,
         "engine_records": [
             {
                 "metric_code": item.metric_code,
                 "algorithm_id": item.algorithm_id,
+                "algorithm_version": item.algorithm_version,
                 "plugin_id": item.plugin_id,
+                "dependency_manifest_hash": item.dependency_manifest_hash,
                 "logical_hash": item.logical_hash,
             }
             for item in first.records

@@ -36,6 +36,13 @@ def test_m2_met_004_exact_sns_detection_evidence(tmp_path: Path) -> None:
     product = evidence["logical_product"]
     assert product["delivery_membership"] == SNS_CODES
     assert product["dependency_closure"] == ["P1-QA-005", *SNS_CODES]
+    assert product["dispatch_key"] == "algorithm_id+algorithm_version"
+    assert evidence["acceptance"]["shared_engine_dispatch_version_qualified"]
+    assert evidence["acceptance"]["version_qualified_plugin_identity_exact"]
+    assert all(
+        record["algorithm_version"] and len(record["dependency_manifest_hash"]) == 64
+        for record in product["engine_records"]
+    )
     assert set(product["definition_hashes"]) == set(SNS_CODES)
     assert all(output["instances"] == [] for output in product["non_radar"].values())
 

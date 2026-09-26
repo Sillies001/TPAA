@@ -141,7 +141,10 @@ def _direct_outputs(payload: Mapping[str, object] | None = None) -> dict[str, ob
     result: dict[str, object] = {}
     for code in SNS_DETECTION_CODES:
         definition = plan.definition(code)
-        _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+        _plugin_id, plugin = registry.resolve(
+            definition.algorithm_id,
+            definition.algorithm_version,
+        )
         result[code] = plugin(
             M2MetricPluginRequest(
                 definition=definition,
@@ -165,6 +168,14 @@ def test_sns_detection_exact_catalog_and_golden_outputs() -> None:
     assert {plan.definition(code).algorithm_id for code in SNS_DETECTION_CODES} <= set(
         registry.plugin_ids
     )
+    assert {
+        (algorithm_id, algorithm_version)
+        for algorithm_id, algorithm_version, _plugin_id in registry.plugin_identity_manifest
+        if algorithm_id in {plan.definition(code).algorithm_id for code in SNS_DETECTION_CODES}
+    } == {
+        (plan.definition(code).algorithm_id, plan.definition(code).algorithm_version)
+        for code in SNS_DETECTION_CODES
+    }
     assert outputs["P1-SNS-001"]["instances"][0]["value_numeric"] == 0.8
     assert outputs["P1-SNS-002"]["instances"][0]["value_numeric"] == 1.0
     assert [item["value_numeric"] for item in outputs["P1-SNS-003"]["instances"]] == [

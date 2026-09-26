@@ -38,6 +38,10 @@ def test_m2_met_005_incremental_evidence_is_honest_and_complete_for_algorithms(
     assert evidence["dependency_error_code"] == "M2_QA_AUTHORITY_GAP"
     assert evidence["logical_product"]["delivery_membership"] == SNS_CODES
     assert set(evidence["logical_product"]["definition_hashes"]) == set(SNS_CODES)
+    assert evidence["acceptance"]["version_qualified_plugin_identity_exact"]
+    manifest = evidence["logical_product"]["plugin_identity_manifest"]
+    assert len(manifest) == 17
+    assert all(item[1] != "UNVERSIONED" for item in manifest)
 
 
 def test_m2_met_005_incremental_cross_platform_compare_is_revision_exact(

@@ -53,7 +53,10 @@ def _engine_outputs(delivery, plan, registry):
     outputs = {}
     for code in AIR_M2_FORMAL_CODES:
         definition = plan.definition(code)
-        _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+        _plugin_id, plugin = registry.resolve(
+            definition.algorithm_id,
+            definition.algorithm_version,
+        )
         outputs[code] = dict(
             plugin(
                 M2MetricPluginRequest(

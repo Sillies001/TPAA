@@ -131,7 +131,10 @@ def verify() -> dict[str, object]:
 
     def direct_output(metric_code: str) -> dict[str, object]:
         definition = plan.definition(metric_code)
-        _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+        _plugin_id, plugin = registry.resolve(
+            definition.algorithm_id,
+            definition.algorithm_version,
+        )
         operators = MappingProxyType(
             {
                 operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
@@ -202,6 +205,13 @@ def verify() -> dict[str, object]:
         plan.definition(code).algorithm_id
         for code in QA_FOUNDATION_CODES
     }
+    qa_algorithm_identities = {
+        (
+            plan.definition(code).algorithm_id,
+            plan.definition(code).algorithm_version,
+        )
+        for code in QA_FOUNDATION_CODES
+    }
 
     acceptance = {
         "catalog_qa_set_exact_8": (
@@ -224,9 +234,17 @@ def verify() -> dict[str, object]:
         "registry_uses_catalog_algorithm_ids": (
             set(registry.plugin_ids) == qa_algorithms
         ),
+        "registry_uses_catalog_algorithm_identities_exact": (
+            {
+                (algorithm_id, algorithm_version)
+                for algorithm_id, algorithm_version, _plugin_id
+                in registry.plugin_identity_manifest
+            }
+            == qa_algorithm_identities
+        ),
         "safe_subset_executes_through_general_engine": (
             first.metric_codes == SAFE_ENGINE_CODES
-            and first.dispatch_key == "algorithm_id"
+            and first.dispatch_key == "algorithm_id+algorithm_version"
         ),
         "safe_subset_replay_stable": first == replayed,
         "safe_engine_outputs_match_direct_plugin_hashes": all(
@@ -299,11 +317,15 @@ def verify() -> dict[str, object]:
         "reference_time_world_logical_hash": reference_time_world.logical_hash,
         "radar_sensor_world_logical_hash": radar_sensor_world.logical_hash,
         "safe_engine_metric_codes": list(first.metric_codes),
+        "dispatch_key": first.dispatch_key,
         "safe_engine_batch_logical_hash": first.logical_hash,
         "safe_engine_records": [
             {
                 "metric_code": record.metric_code,
+                "algorithm_id": record.algorithm_id,
+                "algorithm_version": record.algorithm_version,
                 "plugin_id": record.plugin_id,
+                "dependency_manifest_hash": record.dependency_manifest_hash,
                 "plugin_output_hash": record.plugin_output_hash,
                 "logical_hash": record.logical_hash,
             }

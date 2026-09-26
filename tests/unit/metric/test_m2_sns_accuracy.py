@@ -120,7 +120,10 @@ def _direct_outputs(payload: Mapping[str, object] | None = None) -> dict[str, ob
     outputs: dict[str, object] = {}
     for code in SNS_ACCURACY_CODES:
         definition = plan.definition(code)
-        _plugin_id, plugin = registry.resolve(definition.algorithm_id)
+        _plugin_id, plugin = registry.resolve(
+            definition.algorithm_id,
+            definition.algorithm_version,
+        )
         outputs[code] = plugin(
             M2MetricPluginRequest(
                 definition=definition,
@@ -154,6 +157,13 @@ def test_sns_accuracy_exact_17_catalog_algorithms_and_golden_values() -> None:
     assert {plan.definition(code).algorithm_id for code in SNS_ACCURACY_CODES} == set(
         registry.plugin_ids
     )
+    assert {
+        (algorithm_id, algorithm_version)
+        for algorithm_id, algorithm_version, _plugin_id in registry.plugin_identity_manifest
+    } == {
+        (plan.definition(code).algorithm_id, plan.definition(code).algorithm_version)
+        for code in SNS_ACCURACY_CODES
+    }
     expected = {
         "P1-SNS-005": 50.0,
         "P1-SNS-006": 50.0,

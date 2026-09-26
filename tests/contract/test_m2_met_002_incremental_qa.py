@@ -38,6 +38,14 @@ def test_m2_met_002_incremental_contract_keeps_task_open(tmp_path: Path) -> None
     assert evidence["failed_acceptance"] == []
     assert set(evidence["authority_gaps"]) == {"P1-QA-001", "P1-QA-002"}
     assert set(evidence["dependency_effects"]) == {"P1-QA-006"}
+    assert evidence["acceptance"]["registry_uses_catalog_algorithm_identities_exact"]
+    assert evidence["acceptance"]["safe_subset_executes_through_general_engine"]
+    product = evidence["logical_product"]
+    assert product["dispatch_key"] == "algorithm_id+algorithm_version"
+    assert all(
+        record["algorithm_version"] and len(record["dependency_manifest_hash"]) == 64
+        for record in product["safe_engine_records"]
+    )
     assert evidence["blocked_error_codes"] == {
         "P1-QA-001": "M2_QA_AUTHORITY_GAP",
         "P1-QA-002": "M2_QA_AUTHORITY_GAP",
