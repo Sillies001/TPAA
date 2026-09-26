@@ -726,6 +726,15 @@ def validate_m2_runtime_output(
             normalized.append(cast(Mapping[str, object], item))
         instances = tuple(normalized)
 
+    if output.get("subject_type") != definition.subject_type:
+        raise CatalogMetricEngineError(
+            "M2_METRIC_RUNTIME_SUBJECT_TYPE_MISMATCH",
+            (
+                f"{definition.metric_code}:"
+                f"{output.get('subject_type')!r}->{definition.subject_type}"
+            ),
+        )
+
     schema: Mapping[str, object] | None = None
     if definition.value_kind == "STRUCTURED":
         if definition.structured_output_schema_json is None:
