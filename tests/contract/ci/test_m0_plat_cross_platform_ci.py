@@ -605,3 +605,15 @@ def test_m2_batch_2_authority_gap_sentinel_is_cross_platform_compared() -> None:
     assert "downloaded/evidence/m2-authority-gap/windows/sentinel.json" in text
     assert "downloaded/evidence/m2-authority-gap/linux/sentinel.json" in text
     assert text.count("evidence/cross-platform/m2-authority-gap-sentinel.json") >= 2
+
+
+
+def test_m2_batch_2_review_aggregates_exact_revision_without_unblocking() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Review M2 Batch 2 exact-revision gate" in text
+    assert "python tools/dev/tpaa_dev.py m2-batch-2-review" in text
+    assert "--platform-root downloaded/evidence" in text
+    assert "--logical-root evidence/cross-platform" in text
+    assert "--expected-revision ${{ github.event.pull_request.head.sha || github.sha }}" in text
+    assert "--output evidence/m2-batch-2/review.json" in text
+    assert "evidence/m2-batch-2/review.json" in text

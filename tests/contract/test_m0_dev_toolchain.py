@@ -92,6 +92,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m2-batch-replay-incremental-compare",
         "m2-authority-gap-sentinel-check",
         "m2-authority-gap-sentinel-compare",
+        "m2-batch-2-review",
         "m1-source-registry-check",
         "m1-session-time-check",
         "m1-aircraft-identity-check",

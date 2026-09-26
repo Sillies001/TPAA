@@ -443,6 +443,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-authority-gap-sentinel.json
 
+      - name: Review M2 Batch 2 exact-revision gate
+        run: >-
+          python tools/dev/tpaa_dev.py m2-batch-2-review
+          --platform-root downloaded/evidence
+          --logical-root evidence/cross-platform
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --output evidence/m2-batch-2/review.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -493,6 +501,7 @@ jobs:
             evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
             evidence/cross-platform/m2-authority-gap-sentinel.json
+            evidence/m2-batch-2/review.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
