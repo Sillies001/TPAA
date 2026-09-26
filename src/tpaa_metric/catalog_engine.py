@@ -1370,6 +1370,17 @@ def _metric_runtime_transport_authority(
         )
         or _text(
             common_rules,
+            "trend_subject_compatibility",
+            field="common_rules",
+        )
+        != (
+            "P1 longitudinal longitudinal subject types are AIRCRAFT and MISSION_SYSTEM_INSTANCE only. "
+            "Any metric with subject_type=TARGET_PAIR is reference/evaluation-quality evidence and MUST have "
+            "p1_longitudinal_trend_eligibility=false; its quality/uncertainty travels with the owning "
+            "mission-system observation/sample rather than creating a TARGET_PAIR trend lane."
+        )
+        or _text(
+            common_rules,
             "default_aggregation_contract",
             field="common_rules",
         )
@@ -1645,6 +1656,20 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             )
         default_aggregation = _text(raw, "default_aggregation", field=code)
         observation_lane = _text(raw, "observation_lane", field=code)
+        subject_type = _text(raw, "subject_type", field=code)
+        if subject_type == "TARGET_PAIR" and trend_eligible:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_TARGET_PAIR_LONGITUDINAL_FORBIDDEN",
+                code,
+            )
+        if trend_eligible and subject_type not in {
+            "AIRCRAFT",
+            "MISSION_SYSTEM_INSTANCE",
+        }:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_LONGITUDINAL_SUBJECT_INVALID",
+                f"{code}:{subject_type}",
+            )
         if trend_eligible:
             if value_kind != "NUMERIC" or default_aggregation != "MEDIAN":
                 raise CatalogMetricEngineError(

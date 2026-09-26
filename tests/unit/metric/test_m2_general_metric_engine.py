@@ -159,6 +159,16 @@ def test_m2_plan_is_exact_catalog_foundation_batch() -> None:
         if definition.value_kind == "STRUCTURED"
     )
     assert all(
+        not definition.p1_longitudinal_trend_eligibility
+        for definition in plan.definitions
+        if definition.subject_type == "TARGET_PAIR"
+    )
+    assert all(
+        definition.subject_type in {"AIRCRAFT", "MISSION_SYSTEM_INSTANCE"}
+        for definition in plan.definitions
+        if definition.p1_longitudinal_trend_eligibility
+    )
+    assert all(
         binding.metric_semantic_id == definition.semantic_id
         and binding.optional == binding.input_field.endswith("?")
         for definition in plan.definitions

@@ -69,6 +69,13 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert len(product["default_aggregations"]) == 32
     assert list(product["default_aggregations"].values()).count("MEDIAN") == 26
     assert list(product["default_aggregations"].values()).count("NONE") == 6
+    assert evidence["acceptance"]["target_pair_never_longitudinal"]
+    assert evidence["acceptance"]["trend_subject_types_exact"]
+    assert all(
+        not product["longitudinal_trend_eligibility"][code]
+        for code, subject_type in product["subject_types"].items()
+        if subject_type == "TARGET_PAIR"
+    )
     assert product["negative_error_codes"]["observation_lane_mismatch"] == (
         "M2_METRIC_RUNTIME_OBSERVATION_LANE_MISMATCH"
     )

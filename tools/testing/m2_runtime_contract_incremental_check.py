@@ -533,6 +533,16 @@ def verify() -> dict[str, object]:
             for definition in plan.definitions
             if definition.value_kind == "STRUCTURED"
         ),
+        "target_pair_never_longitudinal": all(
+            not longitudinal_trend_eligibility[definition.metric_code]
+            for definition in plan.definitions
+            if definition.subject_type == "TARGET_PAIR"
+        ),
+        "trend_subject_types_exact": all(
+            definition.subject_type in {"AIRCRAFT", "MISSION_SYSTEM_INSTANCE"}
+            for definition in plan.definitions
+            if definition.p1_longitudinal_trend_eligibility
+        ),
         "numeric_value_kind_coverage_exact_29": len(numeric_definitions) == 29,
         "structured_value_kind_coverage_exact_3": (
             tuple(item.metric_code for item in structured_definitions)
