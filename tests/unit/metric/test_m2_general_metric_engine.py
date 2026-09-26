@@ -192,7 +192,6 @@ def test_m2_longitudinal_metadata_drift_fails_closed(tmp_path: Path) -> None:
         for item in payload["metrics"]
         if item["metric_code"] == "P1-QA-005"
     )
-    metric["p1_longitudinal_trend_eligibility"] = True
     metric["default_aggregation"] = "MEDIAN"
     path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
@@ -201,7 +200,7 @@ def test_m2_longitudinal_metadata_drift_fails_closed(tmp_path: Path) -> None:
 
     with pytest.raises(CatalogMetricEngineError) as caught:
         build_m2_metric_execution_plan(authority)
-    assert caught.value.code == "M2_METRIC_QUALITY_LONGITUDINAL_FORBIDDEN"
+    assert caught.value.code == "M2_METRIC_LONGITUDINAL_CONTRACT_DRIFT"
 
 
 def test_m2_input_authority_optional_marker_drift_fails_closed(
