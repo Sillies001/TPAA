@@ -49,13 +49,9 @@ def test_m2_batch_2_authority_sentinel_reports_adopted_c3(tmp_path: Path) -> Non
     assert product["authority_version"] == "1.0.0"
     assert product["profile_id"] == "M2_REFERENCE_MATCH_QUALITY_V1"
     assert product["profile_version"] == "1.1.0"
-    assert product["legacy_profile_missing_fields"] == [
-        "accepted_reference_quality_statuses",
-        "max_interpolation_age_us",
-        "max_sigma_by_error_domain",
-        "na_reason_map",
-        "required_uncertainty_components",
-    ]
+    assert product["fixture_profile_missing_fields"] == []
+    assert product["fixture_profile_integrated"] is True
+    assert evidence["acceptance"]["fixture_profile_integrated_exact"] is True
 
 
 def test_m2_batch_2_authority_sentinel_compare_is_revision_exact(

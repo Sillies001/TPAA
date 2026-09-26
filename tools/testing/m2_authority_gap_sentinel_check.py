@@ -39,6 +39,14 @@ REQUIRED_PROFILE_FIELDS = (
     "na_reason_map",
     "required_uncertainty_components",
 )
+PROFILE_CONTRACT_FIELDS = (
+    "profile_id",
+    "profile_version",
+    "max_gap_us",
+    "min_coverage",
+    *REQUIRED_PROFILE_FIELDS,
+    "profile_hash",
+)
 
 
 def _git_revision() -> str:
@@ -109,10 +117,14 @@ def verify() -> dict[str, object]:
     hash_payload.pop("profile_hash_algorithm", None)
     hash_payload.pop("relationship_to_existing_profile_fields", None)
 
-    legacy_profile = alignment.get("quality_profile")
-    if not isinstance(legacy_profile, dict):
-        raise ValueError("legacy alignment quality_profile missing")
-    legacy_missing = sorted(set(REQUIRED_PROFILE_FIELDS) - set(legacy_profile))
+    fixture_profile = alignment.get("quality_profile")
+    if not isinstance(fixture_profile, dict):
+        raise ValueError("alignment quality_profile missing")
+    fixture_missing = sorted(set(PROFILE_CONTRACT_FIELDS) - set(fixture_profile))
+    adopted_profile_contract = {
+        field: profile[field]
+        for field in PROFILE_CONTRACT_FIELDS
+    }
 
     p_inputs_order = qa2.get("p_inputs_order")
     jacobian = qa2.get("relative_state_jacobian")
@@ -165,8 +177,10 @@ def verify() -> dict[str, object]:
             profile_hash == ADOPTED_PROFILE_SHA256
             and _canonical_hash(hash_payload) == ADOPTED_PROFILE_SHA256
         ),
-        "legacy_fixture_stays_non_authoritative": legacy_missing
-        == sorted(REQUIRED_PROFILE_FIELDS),
+        "fixture_profile_integrated_exact": (
+            fixture_missing == []
+            and fixture_profile == adopted_profile_contract
+        ),
         "authority_resolution_ready": True,
     }
     failed = sorted(key for key, passed in acceptance.items() if not passed)
@@ -193,7 +207,8 @@ def verify() -> dict[str, object]:
             "profile_id": profile.get("profile_id"),
             "profile_version": profile.get("profile_version"),
             "profile_hash": profile_hash,
-            "legacy_profile_missing_fields": legacy_missing,
+            "fixture_profile_missing_fields": fixture_missing,
+            "fixture_profile_integrated": fixture_profile == adopted_profile_contract,
             "qa1_golden_case_id": qa1_golden.get("case_id"),
             "qa2_golden_case_id": qa2_golden.get("case_id"),
         },
