@@ -64,9 +64,11 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert len(product["runtime_metric_codes"]) == 32
     assert len(product["authority_lineage_hashes"]) == 32
     assert product["formula_dependency_references"]["P1-SNS-002"] == [
-        ["UPSTREAM_CONTRACT", "CONTRACT_ASSOCIATION_RELATION_V1"],
         ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"],
         ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1"],
+    ]
+    assert "CONTRACT_ASSOCIATION_RELATION_V1" in product[
+        "required_external_dependency_ids"
     ]
     assert all(len(value) == 64 for value in product["authority_lineage_hashes"].values())
     assert len(product["metric_execution_identities"]) == 32

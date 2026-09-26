@@ -73,11 +73,13 @@ def test_m2_met_001_evidence_proves_general_engine_contract(tmp_path: Path) -> N
         ["OPERATOR", "QUANTILE_HF7_V1"],
         ["OPERATOR", "RMS_V1"],
         ["STATE_MACHINE", "SM_CLOCK_SEGMENT_V1"],
-        ["UPSTREAM_CONTRACT", "CONTRACT_TIME_TRANSFORM_V1"],
     ]
     assert len(product["plugin_manifest_hash"]) == 64
     assert len(product["plugin_identity_manifest"]) == 32
-    assert all(len(item) == 3 and item[1] != "UNVERSIONED" for item in product["plugin_identity_manifest"])
+    assert all(
+        len(item) == 3 and item[1] != "UNVERSIONED"
+        for item in product["plugin_identity_manifest"]
+    )
 
     scope = evidence["scope"]
     assert scope["business_metric_semantics_executed"] is False

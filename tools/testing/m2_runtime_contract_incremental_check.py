@@ -632,16 +632,26 @@ def verify() -> dict[str, object]:
         "canonical_detection_event_authority_bound": (
             formula_dependency_references["P1-SNS-002"]
             == [
-                ["UPSTREAM_CONTRACT", "CONTRACT_ASSOCIATION_RELATION_V1"],
                 ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"],
                 ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1"],
             ]
             and formula_dependency_references["P1-SNS-003"]
             == [
-                ["UPSTREAM_CONTRACT", "CONTRACT_ASSOCIATION_RELATION_V1"],
                 ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1"],
                 ["UPSTREAM_CONTRACT", "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1"],
             ]
+            and {
+                "CONTRACT_ASSOCIATION_RELATION_V1",
+                "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1",
+                "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1",
+            }
+            <= set(plan.definition("P1-SNS-002").upstream_dependencies)
+            and {
+                "CONTRACT_ASSOCIATION_RELATION_V1",
+                "CONTRACT_DETECTION_CONFIRMATION_EVENT_V1",
+                "CONTRACT_DETECTION_OPPORTUNITY_INTERVAL_V1",
+            }
+            <= set(plan.definition("P1-SNS-003").upstream_dependencies)
         ),
         "input_lineage_encoding_exact": (
             plan.input_lineage_encoding == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
