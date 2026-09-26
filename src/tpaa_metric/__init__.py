@@ -28,6 +28,12 @@ from .engine import (
     TasMachEnvelope,
     compute_representative_metrics,
 )
+from .sns_accuracy import (
+    M2_SNS_ACCURACY_PLUGINS,
+    SNS_ACCURACY_CODES,
+    build_m2_sns_accuracy_inputs,
+    register_m2_sns_accuracy_plugins,
+)
 from .sns_detection import (
     M2_SNS_DETECTION_PLUGINS,
     SNS_DETECTION_CODES,
@@ -56,13 +62,17 @@ __all__ = [
     "MetricResult",
     "MetricStagingArea",
     "M2_SNS_DETECTION_PLUGINS",
+    "M2_SNS_ACCURACY_PLUGINS",
+    "SNS_ACCURACY_CODES",
     "SNS_DETECTION_CODES",
     "TasMachEnvelope",
     "build_m2_metric_execution_plan",
     "build_m2_air_formal_delivery",
     "build_metric_context",
     "build_m2_sns_detection_inputs",
+    "build_m2_sns_accuracy_inputs",
     "compute_representative_metrics",
     "register_m2_air_plugins",
     "register_m2_sns_detection_plugins",
+    "register_m2_sns_accuracy_plugins",
 ]

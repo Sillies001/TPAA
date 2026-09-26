@@ -402,6 +402,21 @@ def test_m2_met_004_sns_detection_is_cross_platform_compared() -> None:
     assert "downloaded/evidence/m2-met-004/windows/sns-detection.json" in text
     assert "downloaded/evidence/m2-met-004/linux/sns-detection.json" in text
     assert "evidence/cross-platform/m2-met-004-logical-equivalence.json" in text
+    assert "python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-check" in text
+    assert (
+        "evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-compare" in text
+    assert (
+        "downloaded/evidence/m2-met-005/windows/sns-accuracy-incremental.json"
+        in text
+    )
+    assert (
+        "downloaded/evidence/m2-met-005/linux/sns-accuracy-incremental.json"
+        in text
+    )
+    assert "evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json" in text
 
 
 def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
