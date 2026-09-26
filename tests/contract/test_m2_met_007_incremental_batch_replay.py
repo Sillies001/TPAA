@@ -1,0 +1,198 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+DEV = ROOT / "tools" / "dev" / "tpaa_dev.py"
+
+
+def _run(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(DEV), *args],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+
+
+def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "batch-replay.json"
+    completed = _run(
+        "m2-batch-replay-incremental-check",
+        "--evidence",
+        str(path),
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    evidence = json.loads(path.read_text(encoding="utf-8"))
+
+    assert evidence["schema"] == "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_EVIDENCE_V1"
+    assert evidence["task_id"] == "M2-MET-007"
+    assert evidence["tracking_issue"] == 97
+    assert evidence["status"] == "PASS"
+    assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["formal_completion_blocked_by_predecessors"] is True
+    assert evidence["blocked_predecessors"] == [
+        "M2-MET-002",
+        "M2-MET-005",
+        "M2-MET-006",
+    ]
+    assert evidence["failed_acceptance"] == []
+    assert all(evidence["acceptance"].values())
+    assert evidence["scope"] == {
+        "business_metric_semantics_executed": False,
+        "synthetic_runtime_probe_only": True,
+        "execution_identity_lineage_only": True,
+        "registry_lineage_binding_only": True,
+        "per_metric_authority_lineage_binding_only": True,
+        "exact_plan_hash_lineage_only": True,
+        "input_payload_lineage_binding_only": True,
+        "version_qualified_plugin_dispatch_only": True,
+        "governed_dependency_lineage_only": True,
+        "formal_32_metric_replay_claimed": False,
+        "authority_values_invented": False,
+        "implementation_side_batch_replay_complete": True,
+        "formal_task_completion_claimed": False,
+    }
+
+    product = evidence["logical_product"]
+    assert len(product["replay_manifest_hash"]) == 64
+    assert product["replay_manifest"]["batch_logical_hash"] == product["batch_logical_hash"]
+    assert product["request_error_codes"] == {
+        "duplicate_request": "M2_METRIC_REQUEST_DUPLICATE",
+        "unknown_request": "M2_METRIC_REQUEST_UNKNOWN",
+        "missing_plugin": "M2_METRIC_PLUGIN_MISSING",
+        "version_mismatch": "M2_METRIC_PLUGIN_VERSION_MISMATCH",
+        "version_unbound": "M2_METRIC_PLUGIN_VERSION_UNBOUND",
+        "opaque_input_lineage": "M2_METRIC_INPUT_LINEAGE_UNSUPPORTED",
+        "nonfinite_input_lineage": "M2_METRIC_CANONICALIZATION_FAILED",
+    }
+    assert len(product["catalog_metric_codes"]) == 32
+    assert len(product["execution_metric_codes"]) == 32
+    assert product["dispatch_key"] == "algorithm_id+algorithm_version"
+    assert len(product["batch_logical_hash"]) == 64
+    assert len(product["tampered_batch_logical_hash"]) == 64
+    assert product["batch_logical_hash"] != product["tampered_batch_logical_hash"]
+    assert evidence["acceptance"]["dispatch_key_version_qualified"]
+    assert evidence["acceptance"]["dependency_manifest_hash_binding_exact_32"]
+    assert evidence["acceptance"]["record_plan_hash_binding_exact_32"]
+    assert evidence["acceptance"]["record_logical_hash_binding_exact_32"]
+    assert evidence["acceptance"]["plugin_manifest_hash_binding_exact"]
+    assert evidence["acceptance"]["batch_logical_hash_binding_exact"]
+    assert evidence["acceptance"]["record_identity_binding_exact_32"]
+    assert evidence["acceptance"]["plugin_manifest_hash_well_formed"]
+    assert evidence["acceptance"]["plugin_manifest_replay_exact"]
+    assert evidence["acceptance"]["dependency_manifest_replay_exact_32"]
+    assert evidence["acceptance"]["record_logical_hash_replay_exact_32"]
+    assert evidence["acceptance"]["subset_transitive_closure_exact"]
+    assert evidence["acceptance"]["subset_scoped_inputs_exact"]
+    assert evidence["acceptance"]["subset_missing_dependency_input_fails_closed"]
+    assert evidence["acceptance"]["input_lineage_encoding_exact"]
+    assert evidence["acceptance"]["input_payload_hash_binding_exact_32"]
+    assert evidence["acceptance"]["authority_lineage_hash_binding_exact_32"]
+    assert evidence["acceptance"]["tampered_input_payload_hash_changes"]
+    assert evidence["acceptance"]["input_mutation_propagates_exact_transitive_dependents"]
+    assert evidence["acceptance"]["input_mutation_preserves_dependency_manifests_exact_32"]
+    assert evidence["acceptance"]["plugin_identity_tamper_changes_manifest_hash"]
+    assert evidence["acceptance"]["plugin_identity_tamper_changes_batch_hash"]
+    assert evidence["acceptance"]["plugin_identity_tamper_changes_record_hashes_exact_32"]
+    assert evidence["acceptance"]["plugin_identity_tamper_preserves_output_hashes_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_changes_record_hashes_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_changes_batch_hash"]
+    assert evidence["acceptance"]["plan_hash_mutation_preserves_plugin_outputs_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_preserves_dependency_manifests_exact_32"]
+    assert evidence["acceptance"]["plan_hash_mutation_preserves_plugin_manifest"]
+    assert evidence["acceptance"]["generated_metric_projection_hash_well_formed"]
+    assert evidence["acceptance"]["execution_identity_hash_well_formed"]
+    assert evidence["acceptance"]["registry_lineage_hashes_well_formed"]
+    assert evidence["acceptance"]["duplicate_request_fails_closed"]
+    assert evidence["acceptance"]["unknown_request_fails_closed"]
+    assert evidence["acceptance"]["missing_plugin_fails_closed"]
+    assert evidence["acceptance"]["plugin_version_mismatch_fails_closed"]
+    assert evidence["acceptance"]["unversioned_plugin_fails_closed"]
+    assert evidence["acceptance"]["opaque_input_lineage_fails_closed"]
+    assert evidence["acceptance"]["nonfinite_input_lineage_fails_closed"]
+    assert evidence["acceptance"]["replay_manifest_hash_well_formed"]
+    assert len(product["generated_metric_projection_sha256"]) == 64
+    assert len(product["execution_identity_sha256"]) == 64
+    assert len(product["plugin_manifest_hash"]) == 64
+    assert len(product["identity_tampered_plugin_manifest_hash"]) == 64
+    assert product["identity_tampered_plugin_manifest_hash"] != product["plugin_manifest_hash"]
+    assert len(product["identity_tampered_batch_logical_hash"]) == 64
+    assert product["identity_tampered_batch_logical_hash"] != product["batch_logical_hash"]
+    assert len(product["plan_tampered_batch_logical_hash"]) == 64
+    assert product["plan_tampered_batch_logical_hash"] != product["batch_logical_hash"]
+    assert product["plan_tampered_plan_hash"] == "0" * 64
+    assert product["subset_scoped_input_metric_codes"] == product["subset_execution_metric_codes"]
+    assert product["subset_missing_input_error_code"] == "M2_METRIC_INPUT_PAYLOAD_MISSING"
+    assert product["input_mutation_actual_changed_metric_codes"] == (
+        product["input_mutation_expected_changed_metric_codes"]
+    )
+    assert product["subset_execution_metric_codes"][-1] == "P1-SNS-005"
+    assert len(product["plugin_identity_manifest"]) == 32
+    assert all(item[1] != "UNVERSIONED" for item in product["plugin_identity_manifest"])
+    assert product["input_lineage_encoding"] == "TPAA_M2_INPUT_LINEAGE_JSON_V1"
+    assert all(len(value) == 64 for value in product["registry_authority_hashes"].values())
+    assert len(product["per_metric_hashes"]) == 32
+    for row in product["per_metric_hashes"]:
+        assert row["semantic_id"]
+        assert isinstance(row["semantic_version"], int)
+        assert row["algorithm_id"]
+        assert row["algorithm_version"]
+        assert len(row["definition_hash"]) == 64
+        assert len(row["authority_lineage_hash"]) == 64
+        assert row["plan_hash"] == product["plan_logical_hash"]
+        assert len(row["input_payload_hash"]) == 64
+        assert len(row["dependency_manifest_hash"]) == 64
+        assert len(row["probe_evidence_hash"]) == 64
+        assert len(row["plugin_output_hash"]) == 64
+        assert len(row["record_logical_hash"]) == 64
+
+
+def test_m2_met_007_incremental_cross_platform_compare_is_revision_exact(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source.json"
+    checked = _run(
+        "m2-batch-replay-incremental-check",
+        "--evidence",
+        str(source),
+    )
+    assert checked.returncode == 0, checked.stdout + checked.stderr
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    revision = payload["source_revision"]
+
+    windows = tmp_path / "windows.json"
+    linux = tmp_path / "linux.json"
+    windows.write_text(json.dumps(payload), encoding="utf-8")
+    linux.write_text(json.dumps(payload), encoding="utf-8")
+    compared = tmp_path / "compared.json"
+    completed = _run(
+        "m2-batch-replay-incremental-compare",
+        "--windows",
+        str(windows),
+        "--linux",
+        str(linux),
+        "--expected-revision",
+        revision,
+        "--evidence",
+        str(compared),
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    evidence = json.loads(compared.read_text(encoding="utf-8"))
+    assert evidence["schema"] == (
+        "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_CROSS_PLATFORM_EVIDENCE_V1"
+    )
+    assert evidence["status"] == "PASS"
+    assert evidence["task_complete"] is False
+    assert evidence["implementation_complete"] is True
+    assert evidence["formal_completion_blocked_by_predecessors"] is True
+    assert evidence["failed_acceptance"] == []
+    assert all(evidence["checks"].values())

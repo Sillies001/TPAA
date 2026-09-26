@@ -128,6 +128,46 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-stage-world-lineage-check
           --evidence evidence/m2-world-003/${{ matrix.platform }}/stage-world-lineage.json
 
+      - name: Emit M2-MET-001 general Metric Engine evidence
+        run: >-
+          uv run --locked python tools/testing/m2_general_metric_engine_check.py
+          --evidence evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
+
+      - name: Emit M2-MET-002 incremental QA foundation evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-qa-foundation-incremental-check
+          --evidence evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
+
+      - name: Emit M2-MET-003 AIR formal-delivery evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-air-formal-delivery-check
+          --evidence evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
+
+      - name: Emit M2-MET-004 SNS detection evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-sns-detection-check
+          --evidence evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json
+
+      - name: Emit incremental M2-MET-005 SNS accuracy evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-check
+          --evidence evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json
+
+      - name: Emit incremental M2-MET-006 runtime-contract evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check
+          --evidence evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
+
+      - name: Emit incremental M2-MET-007 batch/replay evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-batch-replay-incremental-check
+          --evidence evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json
+
+      - name: Emit M2 Batch 2 authority-gap sentinel evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-check
+          --evidence evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -250,6 +290,14 @@ jobs:
             evidence/m2-world-001/${{ matrix.platform }}/reference-time-world.json
             evidence/m2-world-002/${{ matrix.platform }}/radar-sensor-world.json
             evidence/m2-world-003/${{ matrix.platform }}/stage-world-lineage.json
+            evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
+            evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
+            evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
+            evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json
+            evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json
+            evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
+            evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json
+            evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -331,6 +379,78 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-world-003-logical-equivalence.json
 
+      - name: Compare Windows and Linux M2-MET-001 general Metric Engine
+        run: >-
+          python tools/testing/m2_general_metric_engine_compare.py
+          --windows downloaded/evidence/m2-met-001/windows/general-engine.json
+          --linux downloaded/evidence/m2-met-001/linux/general-engine.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux incremental M2-MET-002 QA evidence
+        run: >-
+          python tools/dev/tpaa_dev.py m2-qa-foundation-incremental-compare
+          --windows downloaded/evidence/m2-met-002/windows/qa-incremental.json
+          --linux downloaded/evidence/m2-met-002/linux/qa-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
+
+      - name: Compare Windows and Linux M2-MET-003 AIR formal delivery
+        run: >-
+          python tools/dev/tpaa_dev.py m2-air-formal-delivery-compare
+          --windows downloaded/evidence/m2-met-003/windows/air-formal-delivery.json
+          --linux downloaded/evidence/m2-met-003/linux/air-formal-delivery.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-003-logical-equivalence.json
+
+      - name: Compare Windows and Linux M2-MET-004 SNS detection
+        run: >-
+          python tools/dev/tpaa_dev.py m2-sns-detection-compare
+          --windows downloaded/evidence/m2-met-004/windows/sns-detection.json
+          --linux downloaded/evidence/m2-met-004/linux/sns-detection.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-004-logical-equivalence.json
+
+      - name: Compare Windows and Linux incremental M2-MET-005 SNS accuracy
+        run: >-
+          python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-compare
+          --windows downloaded/evidence/m2-met-005/windows/sns-accuracy-incremental.json
+          --linux downloaded/evidence/m2-met-005/linux/sns-accuracy-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json
+
+      - name: Compare Windows and Linux incremental M2-MET-006 runtime contract
+        run: >-
+          python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-compare
+          --windows downloaded/evidence/m2-met-006/windows/runtime-contract-incremental.json
+          --linux downloaded/evidence/m2-met-006/linux/runtime-contract-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
+
+      - name: Compare Windows and Linux incremental M2-MET-007 batch/replay
+        run: >-
+          python tools/dev/tpaa_dev.py m2-batch-replay-incremental-compare
+          --windows downloaded/evidence/m2-met-007/windows/batch-replay-incremental.json
+          --linux downloaded/evidence/m2-met-007/linux/batch-replay-incremental.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
+
+      - name: Compare Windows and Linux M2 Batch 2 authority-gap sentinel
+        run: >-
+          python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-compare
+          --windows downloaded/evidence/m2-authority-gap/windows/sentinel.json
+          --linux downloaded/evidence/m2-authority-gap/linux/sentinel.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-authority-gap-sentinel.json
+
+      - name: Review M2 Batch 2 exact-revision gate
+        run: >-
+          python tools/dev/tpaa_dev.py m2-batch-2-review
+          --platform-root downloaded/evidence
+          --logical-root evidence/cross-platform
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --output evidence/m2-batch-2/review.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -373,10 +493,27 @@ jobs:
             evidence/cross-platform/m2-world-001-logical-equivalence.json
             evidence/cross-platform/m2-world-002-logical-equivalence.json
             evidence/cross-platform/m2-world-003-logical-equivalence.json
+            evidence/cross-platform/m2-met-001-logical-equivalence.json
+            evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
+            evidence/cross-platform/m2-met-003-logical-equivalence.json
+            evidence/cross-platform/m2-met-004-logical-equivalence.json
+            evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json
+            evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
+            evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
+            evidence/cross-platform/m2-authority-gap-sentinel.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
             evidence/cross-platform/m1-batch-4-logical-equivalence.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload M2 Batch 2 review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m2-batch-2-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m2-batch-2/review.json
           if-no-files-found: error
           retention-days: 14
 

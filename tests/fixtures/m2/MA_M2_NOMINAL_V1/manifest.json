@@ -32,7 +32,7 @@
   "files": {
     "source": {
       "path": "source/measurement-alignment.json",
-      "sha256": "e0050b071ef2922f2475698a9855fca31170282f5ce4f380f9c6535e29bba3af"
+      "sha256": "c597f7e49ccd2d89807d490fd9c1a21280819d8d94b50d0926d134d659c22ccb"
     }
   },
   "fixture_id": "MA_M2_NOMINAL_V1",
@@ -41,6 +41,6 @@
   "input_hash_basis": [
     "source/measurement-alignment.json"
   ],
-  "input_sha256": "901d2c26c15ea22200f45984eb3a5ba3fea038313fad232153e9444accdf8983",
+  "input_sha256": "345e69812a4fdf4706548681eb7047ce2d6b3121ca5e7258b1938dfef1a35ed7",
   "schema": "TPAA_M2_MEASUREMENT_ALIGNMENT_FIXTURE_V1"
 }
