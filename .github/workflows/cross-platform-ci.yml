@@ -208,6 +208,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-qa-air-golden-check
           --evidence evidence/m2-tst-002/${{ matrix.platform }}/qa-air-golden-negative.json
 
+      - name: Emit M2-TST-003 SNS Golden-applicability evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-sns-golden-check
+          --evidence evidence/m2-tst-003/${{ matrix.platform }}/sns-golden-applicability.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -346,6 +351,7 @@ jobs:
             evidence/m2-gui-003/${{ matrix.platform }}/state-ux.json
             evidence/m2-tst-001/${{ matrix.platform }}/catalog-coverage.json
             evidence/m2-tst-002/${{ matrix.platform }}/qa-air-golden-negative.json
+            evidence/m2-tst-003/${{ matrix.platform }}/sns-golden-applicability.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -563,6 +569,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-tst-002-logical-equivalence.json
 
+      - name: Compare Windows and Linux M2-TST-003 SNS Golden-applicability
+        run: >-
+          python tools/dev/tpaa_dev.py m2-sns-golden-compare
+          --windows downloaded/evidence/m2-tst-003/windows/sns-golden-applicability.json
+          --linux downloaded/evidence/m2-tst-003/linux/sns-golden-applicability.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-tst-003-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -621,6 +635,7 @@ jobs:
             evidence/cross-platform/m2-gui-003-logical-equivalence.json
             evidence/cross-platform/m2-tst-001-logical-equivalence.json
             evidence/cross-platform/m2-tst-002-logical-equivalence.json
+            evidence/cross-platform/m2-tst-003-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
