@@ -147,16 +147,42 @@ def _golden_inputs() -> dict[str, dict[str, object]]:
                 "z": math.sin(theta / 2.0),
             }
         )
-    attitude_roll = _series(
-        lambda t: math.sin(2.0 * math.pi * t),
-        count=201,
-        step_us=50_000,
+    sine_cycle = (
+        0.0,
+        0.30901699437494745,
+        0.5877852522924731,
+        0.8090169943749475,
+        0.9510565162951535,
+        1.0,
+        0.9510565162951535,
+        0.8090169943749475,
+        0.5877852522924731,
+        0.30901699437494745,
+        0.0,
+        -0.30901699437494745,
+        -0.5877852522924731,
+        -0.8090169943749475,
+        -0.9510565162951535,
+        -1.0,
+        -0.9510565162951535,
+        -0.8090169943749475,
+        -0.5877852522924731,
+        -0.30901699437494745,
     )
-    attitude_pitch = _series(
-        lambda t: 0.5 * math.sin(2.0 * math.pi * 1.2 * t),
-        count=201,
-        step_us=50_000,
-    )
+    attitude_roll = [
+        {
+            "session_time_us": index * 50_000,
+            "value": sine_cycle[index % len(sine_cycle)] + index / 10_000.0,
+        }
+        for index in range(201)
+    ]
+    attitude_pitch = [
+        {
+            "session_time_us": index * 50_000,
+            "value": 0.5 * sine_cycle[index % len(sine_cycle)] + index / 20_000.0,
+        }
+        for index in range(201)
+    ]
     accel_rows = [
         {
             "session_time_us": index * 500_000,

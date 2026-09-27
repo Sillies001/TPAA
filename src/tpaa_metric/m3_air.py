@@ -1178,7 +1178,11 @@ def _air030(request: M2MetricPluginRequest) -> Mapping[str, object]:
             raw = _operator(request, "BANDPASS_BUTTERWORTH4_ZP_V1")(source, **fields)
         filtered = cast(tuple[float, ...], raw)
         if filtered:
-            structured[axis] = {"status": "VALID", "rms_rad": _rms(request, filtered)}
+            rms_value = _rms(request, filtered)
+            structured[axis] = {
+                "status": "VALID",
+                "rms_rad": float(format(rms_value, ".15g")),
+            }
             valid_axes += 1
         else:
             structured[axis] = {"status": "INSUFFICIENT_DATA", "rms_rad": None}
