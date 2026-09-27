@@ -10,6 +10,7 @@ from tpaa_application import (
     M3MetricNotFound,
     M3PublicationError,
     M3ReleaseNotFound,
+    M3WorkspaceProjectionError,
 )
 
 from .app import create_app
@@ -24,6 +25,10 @@ def _m3_error(exc: M3PublicationError) -> JSONResponse:
         code = "METRIC_NOT_FOUND"
         detail = exc.metric_code
         http_status = 404
+    elif isinstance(exc, M3WorkspaceProjectionError):
+        code = exc.code
+        detail = exc.detail
+        http_status = 409
     else:
         code = "M3_QUERY_ERROR"
         detail = str(exc)
@@ -48,6 +53,16 @@ def register_m3_routes(app: FastAPI, application: ApplicationService) -> FastAPI
                 content=application.m3_release(release_id),
             )
         except M3PublicationError as exc:
+            return _m3_error(exc)
+
+    @app.get("/m3/releases/{release_id}/workspace")
+    def get_workspace(release_id: str) -> JSONResponse:
+        try:
+            return JSONResponse(
+                status_code=200,
+                content=application.m3_workspace(release_id),
+            )
+        except (M3PublicationError, M3WorkspaceProjectionError) as exc:
             return _m3_error(exc)
 
     @app.get("/m3/releases/{release_id}/metrics")

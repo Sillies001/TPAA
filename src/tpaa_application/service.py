@@ -11,6 +11,7 @@ from .m1_publication import (
     M1PublishSessionResult,
 )
 from .m3_publication import M3PublicationService
+from .m3_workspace import project_m3_workspace
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -186,3 +187,7 @@ class ApplicationService:
         metric_code: str,
     ) -> dict[str, object]:
         return self._m3().metric_evidence(release_id, metric_code)
+
+    def m3_workspace(self, release_id: str) -> dict[str, object]:
+        release = self._m3().historical_release(release_id).release
+        return project_m3_workspace(release)

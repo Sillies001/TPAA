@@ -49,6 +49,11 @@ from .m3_publication import (
     M3ReplayComparison,
     compare_m3_release_replay,
 )
+from .m3_workspace import (
+    M3_WORKSPACE_EVIDENCE_CONTRACT,
+    M3WorkspaceProjectionError,
+    project_m3_workspace,
+)
 from .models import StorageBaselineStatus
 from .runtime import (
     GetRuntimeBaselineStatus,
@@ -98,6 +103,9 @@ __all__ = [
     "M3ReleasePublicationRepository",
     "M3ReplayComparison",
     "compare_m3_release_replay",
+    "M3_WORKSPACE_EVIDENCE_CONTRACT",
+    "M3WorkspaceProjectionError",
+    "project_m3_workspace",
     "GetRuntimeBaselineStatus",
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",

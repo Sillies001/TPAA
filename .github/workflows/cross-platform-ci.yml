@@ -218,6 +218,11 @@ jobs:
           uv run --locked python tools/testing/m3_api_release_query_check.py check
           --evidence evidence/m3-api-001/${{ matrix.platform }}/release-query.json
 
+      - name: Emit M3-API-002 four-training workspace evidence
+        run: >-
+          uv run --locked python tools/testing/m3_api_workspace_check.py check
+          --evidence evidence/m3-api-002/${{ matrix.platform }}/workspace.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -448,6 +453,7 @@ jobs:
             evidence/m3-obs-002/${{ matrix.platform }}/immutable-release.json
             evidence/m3-obs-003/${{ matrix.platform }}/publication-replay.json
             evidence/m3-api-001/${{ matrix.platform }}/release-query.json
+            evidence/m3-api-002/${{ matrix.platform }}/workspace.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -691,6 +697,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-api-001-logical-equivalence.json
 
+      - name: Compare Windows and Linux M3-API-002 four-training workspace
+        run: >-
+          python tools/testing/m3_api_workspace_check.py compare
+          --windows downloaded/evidence/m3-api-002/windows/workspace.json
+          --linux downloaded/evidence/m3-api-002/linux/workspace.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-api-002-logical-equivalence.json
+
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
           python tools/testing/m2_general_metric_engine_compare.py
@@ -903,6 +917,7 @@ jobs:
             evidence/cross-platform/m3-obs-002-logical-equivalence.json
             evidence/cross-platform/m3-obs-003-logical-equivalence.json
             evidence/cross-platform/m3-api-001-logical-equivalence.json
+            evidence/cross-platform/m3-api-002-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
