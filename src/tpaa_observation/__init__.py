@@ -9,13 +9,6 @@ from .m2_publication import (
     build_m2_publication_routing_plan,
     route_m2_metric_definition,
 )
-from .m3_publication import (
-    M3_PUBLICATION_LANE_COUNTS,
-    M3_PUBLICATION_METRIC_COUNT,
-    M3_PUBLICATION_ROUTE_COUNTS,
-    M3PublicationRoutingPlan,
-    build_m3_publication_routing_plan,
-)
 from .m2_release import (
     M2ImmutableReleaseSnapshot,
     M2ReleaseBindingSnapshot,
@@ -24,6 +17,13 @@ from .m2_release import (
     M2ReleaseSnapshotError,
     allocate_m2_release_id,
     build_m2_release_snapshot,
+)
+from .m3_publication import (
+    M3_PUBLICATION_LANE_COUNTS,
+    M3_PUBLICATION_METRIC_COUNT,
+    M3_PUBLICATION_ROUTE_COUNTS,
+    M3PublicationRoutingPlan,
+    build_m3_publication_routing_plan,
 )
 from .publication import (
     AircraftPublicationIdentity,
