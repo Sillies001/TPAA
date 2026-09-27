@@ -1,0 +1,91 @@
+{
+  "schema": "TPAA_M3_WORLD_004_MISSION_SYSTEMS_V1",
+  "fixture_id": "M3_WORLD_004_MISSION_SYSTEMS_V1",
+  "fixture_version": "1.0.0",
+  "data_classification": "SYNTHETIC",
+  "mission_system_instances": [
+    {
+      "mission_system_instance_id": "61111111-1111-4111-8111-111111111111",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "MISSION_COMPUTER",
+      "system_code": "MC_TRACK_ID",
+      "status": "ACTIVE",
+      "configuration_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "product_semantics": [
+        "LOCAL_TRACK_PRODUCT",
+        "ASSOCIATION_IDENTIFICATION_PRODUCT"
+      ],
+      "source_identity_ref": "M3_SYNTHETIC:MISSION_COMPUTER:TRACK_ID"
+    },
+    {
+      "mission_system_instance_id": "62222222-2222-4222-8222-222222222222",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "IRST",
+      "system_code": "IRST_1",
+      "status": "ACTIVE",
+      "configuration_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:IRST:1"
+    },
+    {
+      "mission_system_instance_id": "63333333-3333-4333-8333-333333333333",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "EO",
+      "system_code": "EO_1",
+      "status": "ACTIVE",
+      "configuration_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:EO:1"
+    },
+    {
+      "mission_system_instance_id": "64444444-4444-4444-8444-444444444444",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "RWR",
+      "system_code": "RWR_1",
+      "status": "ACTIVE",
+      "configuration_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:RWR:1"
+    },
+    {
+      "mission_system_instance_id": "65555555-5555-4555-8555-555555555555",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "ESM",
+      "system_code": "ESM_1",
+      "status": "ACTIVE",
+      "configuration_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:ESM:1"
+    },
+    {
+      "mission_system_instance_id": "66666666-6666-4666-8666-666666666666",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "DATALINK",
+      "system_code": "DL_1",
+      "status": "ACTIVE",
+      "configuration_hash": "6666666666666666666666666666666666666666666666666666666666666666",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:DATALINK:1"
+    },
+    {
+      "mission_system_instance_id": "67777777-7777-4777-8777-777777777777",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "FUSION",
+      "system_code": "FUS_1",
+      "status": "ACTIVE",
+      "configuration_hash": "7777777777777777777777777777777777777777777777777777777777777777",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:FUSION:1"
+    },
+    {
+      "mission_system_instance_id": "68888888-8888-4888-8888-888888888888",
+      "aircraft_id": "60000000-0000-4000-8000-000000000001",
+      "system_type": "RADAR",
+      "system_code": "RADAR_NEGATIVE",
+      "status": "ACTIVE",
+      "configuration_hash": "8888888888888888888888888888888888888888888888888888888888888888",
+      "product_semantics": [],
+      "source_identity_ref": "M3_SYNTHETIC:RADAR:NEGATIVE"
+    }
+  ]
+}
