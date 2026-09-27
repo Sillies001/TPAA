@@ -9,6 +9,15 @@ from .m2_publication import (
     build_m2_publication_routing_plan,
     route_m2_metric_definition,
 )
+from .m2_release import (
+    M2ImmutableReleaseSnapshot,
+    M2ReleaseBindingSnapshot,
+    M2ReleaseDefinitionSnapshot,
+    M2ReleaseExecutionSnapshot,
+    M2ReleaseSnapshotError,
+    allocate_m2_release_id,
+    build_m2_release_snapshot,
+)
 from .publication import (
     AircraftPublicationIdentity,
     CapabilityObservationRecord,
@@ -31,7 +40,14 @@ __all__ = [
     "M2PublicationRoutingError",
     "M2PublicationRoutingPlan",
     "M2_PUBLICATION_ROUTE_CONTRACTS",
+    "M2ImmutableReleaseSnapshot",
+    "M2ReleaseBindingSnapshot",
+    "M2ReleaseDefinitionSnapshot",
+    "M2ReleaseExecutionSnapshot",
+    "M2ReleaseSnapshotError",
+    "allocate_m2_release_id",
     "build_m2_publication_routing_plan",
+    "build_m2_release_snapshot",
     "route_m2_metric_definition",
     "CapabilityObservationRecord",
     "EvidenceRefSnapshot",

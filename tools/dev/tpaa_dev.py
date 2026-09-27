@@ -93,6 +93,8 @@ M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE = (
 M2_BATCH_2_REVIEW_MODULE = "tools.testing.m2_batch_2_review"
 M2_PUBLICATION_ROUTING_CHECK_MODULE = "tools.testing.m2_publication_routing_check"
 M2_PUBLICATION_ROUTING_COMPARE_MODULE = "tools.testing.m2_publication_routing_compare"
+M2_IMMUTABLE_RELEASE_CHECK_MODULE = "tools.testing.m2_immutable_release_check"
+M2_IMMUTABLE_RELEASE_COMPARE_MODULE = "tools.testing.m2_immutable_release_compare"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -184,6 +186,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-batch-2-review", "M2 Batch 2 Issue #97", "IMPLEMENTED", "Aggregate exact-revision M2-MET-001..007 and C3 sentinel evidence into one fail-closed Batch 2 gate state."),
     CommandSpec("m2-publication-routing-check", "M2-OBS-001", "IMPLEMENTED", "Verify Catalog-owned publication lane/route for exact P1_FOUNDATION_32."),
     CommandSpec("m2-publication-routing-compare", "M2-OBS-001", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-001 publication routing exactly."),
+    CommandSpec("m2-immutable-release-check", "M2-OBS-002", "IMPLEMENTED", "Freeze exact release-bound M2 definition/execution/binding snapshots."),
+    CommandSpec("m2-immutable-release-compare", "M2-OBS-002", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-002 immutable Release snapshots exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -778,6 +782,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_publication_routing_compare.add_argument("--linux", type=Path, required=True)
     m2_publication_routing_compare.add_argument("--expected-revision", required=True)
     m2_publication_routing_compare.add_argument("--evidence", type=Path, required=True)
+    m2_immutable_release = sub.add_parser(
+        "m2-immutable-release-check",
+        help="Verify M2-OBS-002 immutable release-bound snapshots",
+    )
+    m2_immutable_release.add_argument("--evidence", type=Path)
+    m2_immutable_release_compare = sub.add_parser(
+        "m2-immutable-release-compare",
+        help="Compare Windows/Linux M2-OBS-002 immutable Release evidence",
+    )
+    m2_immutable_release_compare.add_argument("--windows", type=Path, required=True)
+    m2_immutable_release_compare.add_argument("--linux", type=Path, required=True)
+    m2_immutable_release_compare.add_argument("--expected-revision", required=True)
+    m2_immutable_release_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1428,6 +1445,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_PUBLICATION_ROUTING_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-immutable-release-check":
+        release_args = [
+            sys.executable,
+            "-m",
+            M2_IMMUTABLE_RELEASE_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            release_args.extend(["--evidence", str(args.evidence)])
+        return _run(release_args)
+    if command == "m2-immutable-release-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_IMMUTABLE_RELEASE_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
