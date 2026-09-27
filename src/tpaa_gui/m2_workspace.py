@@ -42,10 +42,56 @@ M2_OBSERVATION_LANE_PRESENTATION = {
         False,
     ),
 }
+M2_RESULT_STATUSES = frozenset(
+    {"VALID", "N_A", "INSUFFICIENT_DATA", "INVALID", "REVIEW_REQUIRED"}
+)
+M2_PRESENTATION_STATE_STYLES = {
+    "VALID": "QLabel { border: 1px solid; padding: 4px; }",
+    "N_A": "QLabel { border: 2px dashed; padding: 4px; }",
+    "INSUFFICIENT_DATA": "QLabel { border: 2px dotted; padding: 4px; }",
+    "INVALID": "QLabel { border: 3px solid; padding: 4px; font-weight: bold; }",
+    "REVIEW_REQUIRED": "QLabel { border: 3px double; padding: 4px; }",
+    "WRONG_SENSOR_NOT_APPLICABLE": (
+        "QLabel { border: 2px groove; padding: 4px; font-style: italic; }"
+    ),
+    "NOT_APPLICABLE": "QLabel { border: 2px groove; padding: 4px; }",
+    "SYSTEM_ERROR": (
+        "QLabel { border: 4px double; padding: 4px; font-weight: bold; }"
+    ),
+    "MIXED_RESULT_STATES": (
+        "QLabel { border: 2px solid; padding: 4px; font-style: italic; }"
+    ),
+}
 
 
 class M2FoundationNavigationError(RuntimeError):
     """Stable presentation-layer failure for invalid release projections."""
+
+
+@dataclass(frozen=True)
+class M2MetricPresentationState:
+    metric_code: str
+    kind: str
+    label: str
+    reason_codes: tuple[str, ...]
+    result_statuses: tuple[str, ...]
+    system_type: str | None
+    system_error_code: str | None
+    style_sheet: str
+    release_bound: bool = True
+
+    def projection(self) -> dict[str, object]:
+        return {
+            "metric_code": self.metric_code,
+            "kind": self.kind,
+            "label": self.label,
+            "reason_codes": list(self.reason_codes),
+            "result_statuses": list(self.result_statuses),
+            "system_type": self.system_type,
+            "system_error_code": self.system_error_code,
+            "style_sheet": self.style_sheet,
+            "release_bound": self.release_bound,
+        }
 
 
 @dataclass(frozen=True)
@@ -175,6 +221,145 @@ def _integer(value: object, *, field: str) -> int:
     return value
 
 
+def _reason_codes(
+    value: object,
+    *,
+    field: str,
+    required: bool = False,
+) -> tuple[str, ...]:
+    if value is None:
+        if required:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_STATE_REASON_CODES_REQUIRED:{field}"
+            )
+        return ()
+    if (
+        not isinstance(value, list)
+        or not all(isinstance(item, str) and item for item in value)
+    ):
+        raise M2FoundationNavigationError(
+            f"M2_GUI_STATE_REASON_CODES_INVALID:{field}"
+        )
+    result = tuple(value)
+    if required and not result:
+        raise M2FoundationNavigationError(
+            f"M2_GUI_STATE_REASON_CODES_REQUIRED:{field}"
+        )
+    return result
+
+
+def build_m2_metric_presentation_state(
+    payload: Mapping[str, object],
+) -> M2MetricPresentationState:
+    """Preserve precomputed result/applicability/system-error states for the GUI."""
+
+    metric_code = _string(payload.get("metric_code"), field="metric_code")
+    raw_instances = payload.get("instances")
+    system_error = payload.get("system_error_code")
+    applicable = payload.get("applicable")
+
+    if system_error is not None:
+        error_code = _string(system_error, field="system_error_code")
+        if applicable is not None or raw_instances not in (None, []):
+            raise M2FoundationNavigationError(
+                f"M2_GUI_STATE_SYSTEM_ERROR_AMBIGUOUS:{metric_code}"
+            )
+        kind = "SYSTEM_ERROR"
+        return M2MetricPresentationState(
+            metric_code=metric_code,
+            kind=kind,
+            label=f"System error · {error_code}",
+            reason_codes=(),
+            result_statuses=(),
+            system_type=None,
+            system_error_code=error_code,
+            style_sheet=M2_PRESENTATION_STATE_STYLES[kind],
+        )
+
+    if applicable is False:
+        if raw_instances != []:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_STATE_NOT_APPLICABLE_INSTANCES_PRESENT:{metric_code}"
+            )
+        system_type = _string(payload.get("system_type"), field="system_type")
+        reasons = _reason_codes(
+            payload.get("applicability_reason_codes"),
+            field=f"{metric_code}.applicability_reason_codes",
+            required=True,
+        )
+        kind = (
+            "WRONG_SENSOR_NOT_APPLICABLE"
+            if "WRONG_SENSOR_TYPE" in reasons
+            else "NOT_APPLICABLE"
+        )
+        label = (
+            f"Wrong sensor · {system_type}"
+            if kind == "WRONG_SENSOR_NOT_APPLICABLE"
+            else f"Not applicable · {system_type}"
+        )
+        return M2MetricPresentationState(
+            metric_code=metric_code,
+            kind=kind,
+            label=label,
+            reason_codes=reasons,
+            result_statuses=(),
+            system_type=system_type,
+            system_error_code=None,
+            style_sheet=M2_PRESENTATION_STATE_STYLES[kind],
+        )
+
+    if applicable is not True:
+        raise M2FoundationNavigationError(
+            f"M2_GUI_STATE_APPLICABILITY_INVALID:{metric_code}"
+        )
+    if not isinstance(raw_instances, list) or not raw_instances:
+        raise M2FoundationNavigationError(
+            f"M2_GUI_STATE_INSTANCES_REQUIRED:{metric_code}"
+        )
+
+    statuses: list[str] = []
+    reasons: set[str] = set()
+    for index, raw in enumerate(raw_instances):
+        if not isinstance(raw, Mapping):
+            raise M2FoundationNavigationError(
+                f"M2_GUI_STATE_INSTANCE_INVALID:{metric_code}:{index}"
+            )
+        status = raw.get("status")
+        if not isinstance(status, str) or status not in M2_RESULT_STATUSES:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_STATE_STATUS_INVALID:{metric_code}:{status!r}"
+            )
+        instance_reasons = _reason_codes(
+            raw.get("reason_codes"),
+            field=f"{metric_code}.instances[{index}].reason_codes",
+            required=status in {"N_A", "INSUFFICIENT_DATA"},
+        )
+        statuses.append(status)
+        reasons.update(instance_reasons)
+
+    unique_statuses = tuple(sorted(set(statuses)))
+    kind = (
+        unique_statuses[0]
+        if len(unique_statuses) == 1
+        else "MIXED_RESULT_STATES"
+    )
+    label = (
+        kind
+        if kind != "MIXED_RESULT_STATES"
+        else f"Mixed · {', '.join(unique_statuses)}"
+    )
+    return M2MetricPresentationState(
+        metric_code=metric_code,
+        kind=kind,
+        label=label,
+        reason_codes=tuple(sorted(reasons)),
+        result_statuses=unique_statuses,
+        system_type=None,
+        system_error_code=None,
+        style_sheet=M2_PRESENTATION_STATE_STYLES[kind],
+    )
+
+
 def build_m2_foundation_navigation_model(
     release_projection: Mapping[str, object],
 ) -> M2FoundationNavigationModel:
@@ -276,10 +461,27 @@ def create_m2_foundation_workspace(
     parent: Any,
     *,
     release_projection: Mapping[str, object],
+    presentation_states: Mapping[str, Mapping[str, object]] | None = None,
 ) -> Any:
     """Create the projection-only Basic Flight foundation navigator."""
 
     model = build_m2_foundation_navigation_model(release_projection)
+    state_by_code: dict[str, M2MetricPresentationState] = {}
+    if presentation_states is not None:
+        unknown_codes = set(presentation_states) - set(model.metric_codes)
+        if unknown_codes:
+            raise M2FoundationNavigationError(
+                "M2_GUI_STATE_METRIC_UNKNOWN:"
+                f"{','.join(sorted(unknown_codes))}"
+            )
+        for metric_code, payload in presentation_states.items():
+            state = build_m2_metric_presentation_state(payload)
+            if state.metric_code != metric_code:
+                raise M2FoundationNavigationError(
+                    "M2_GUI_STATE_METRIC_KEY_MISMATCH:"
+                    f"{metric_code}:{state.metric_code}"
+                )
+            state_by_code[metric_code] = state
 
     root = qt_widgets.QWidget(parent)
     root.setObjectName("tpaaM2FoundationWorkspace")
@@ -326,9 +528,15 @@ def create_m2_foundation_workspace(
     detail.setReadOnly(True)
     status = qt_widgets.QLabel("Navigation: READY", root)
     status.setObjectName("tpaaM2FoundationNavigationStatus")
+    state_badge = qt_widgets.QLabel("State: UNAVAILABLE", root)
+    state_badge.setObjectName("tpaaM2MetricState")
+    state_reasons = qt_widgets.QLabel("Reasons: unavailable", root)
+    state_reasons.setObjectName("tpaaM2MetricStateReasons")
     layout.addWidget(navigator)
     layout.addWidget(detail)
     layout.addWidget(status)
+    layout.addWidget(state_badge)
+    layout.addWidget(state_reasons)
 
     visible_items: list[M2FoundationNavigationItem] = []
 
@@ -337,6 +545,12 @@ def create_m2_foundation_workspace(
             detail.clear()
             return
         item = visible_items[row]
+        presentation_state = state_by_code.get(item.metric_code)
+        state_projection = (
+            None
+            if presentation_state is None
+            else presentation_state.projection()
+        )
         detail.setPlainText(
             json.dumps(
                 {
@@ -352,11 +566,28 @@ def create_m2_foundation_workspace(
                         ),
                         "release_bound": True,
                     },
+                    "metric_state": state_projection,
                 },
                 indent=2,
                 sort_keys=True,
             )
         )
+        if presentation_state is None:
+            state_badge.setText("State: UNAVAILABLE")
+            state_badge.setStyleSheet("")
+            state_reasons.setText("Reasons: unavailable")
+        else:
+            state_badge.setText(
+                f"State: {presentation_state.kind} · "
+                f"{presentation_state.label}"
+            )
+            state_badge.setStyleSheet(presentation_state.style_sheet)
+            reasons = (
+                ", ".join(presentation_state.reason_codes)
+                if presentation_state.reason_codes
+                else "none"
+            )
+            state_reasons.setText(f"Reasons: {reasons}")
         status.setText(f"Navigation: SELECTED {item.metric_code}")
 
     def render_filters(_value: str = "") -> None:
@@ -381,6 +612,9 @@ def create_m2_foundation_workspace(
         else:
             detail.clear()
             status.setText("Navigation: EMPTY")
+            state_badge.setText("State: UNAVAILABLE")
+            state_badge.setStyleSheet("")
+            state_reasons.setText("Reasons: unavailable")
 
     namespace.currentTextChanged.connect(render_filters)
     lane.currentTextChanged.connect(render_filters)
@@ -392,4 +626,7 @@ def create_m2_foundation_workspace(
     root._tpaa_m2_observation_lane_summary = lane_summary
     root._tpaa_m2_foundation_navigator = navigator
     root._tpaa_m2_foundation_detail = detail
+    root._tpaa_m2_metric_state = state_badge
+    root._tpaa_m2_metric_state_reasons = state_reasons
+    root._tpaa_m2_state_by_code = state_by_code
     return root
