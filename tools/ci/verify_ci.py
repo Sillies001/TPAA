@@ -116,10 +116,10 @@ def verify() -> dict[str, object]:
 
     checks.append(
         _pass("checkout_exact_candidate_revision", SOURCE_REVISION)
-        if text.count(f"ref: {SOURCE_REVISION}") == 8
+        if text.count(f"ref: {SOURCE_REVISION}") == 9
         else _fail(
             "checkout_exact_candidate_revision",
-            f"expected 8 exact-source checkouts using {SOURCE_REVISION}",
+            f"expected 9 exact-source checkouts using {SOURCE_REVISION}",
         )
     )
     checks.append(
@@ -352,6 +352,16 @@ def verify() -> dict[str, object]:
         "--storage-parity downloaded/postgres/storage-parity.json",
         "--output evidence/m2-tst-005/qualification.json",
         f"tpaa-m2-tst-005-{SOURCE_REVISION}",
+        "m2-exit-review:",
+        "name: M2 Exit Review",
+        "python tools/dev/tpaa_dev.py m2-exit-review",
+        "--artifact-root downloaded/platform/evidence",
+        "--tst005 downloaded/tst005/qualification.json",
+        "--postgres-cold-start downloaded/postgres/postgres-cold-start.json",
+        "--event-name ${{ github.event_name }}",
+        "--git-ref ${{ github.ref }}",
+        "--output evidence/m2-exit/review.json",
+        f"tpaa-m2-exit-review-{SOURCE_REVISION}",
         "m1-batch-2-review:",
         "name: M1 Batch 2 Review",
         "python tools/dev/tpaa_dev.py m1-batch-2-review",

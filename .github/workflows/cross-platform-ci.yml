@@ -817,6 +817,65 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  m2-exit-review:
+    name: M2 Exit Review
+    needs:
+      - m2-tst-005-review
+      - m0-cross-platform
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download Windows Linux M2 task evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/platform
+          merge-multiple: true
+
+      - name: Download M2-TST-005 qualification
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m2-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/tst005
+
+      - name: Download PostgreSQL cold-start evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m0-exit-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/postgres
+
+      - name: Review exact M2 task inventory and Exit gate
+        run: >-
+          python tools/dev/tpaa_dev.py m2-exit-review
+          --artifact-root downloaded/platform/evidence
+          --tst005 downloaded/tst005/qualification.json
+          --postgres-cold-start downloaded/postgres/postgres-cold-start.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --event-name ${{ github.event_name }}
+          --git-ref ${{ github.ref }}
+          --output evidence/m2-exit/review.json
+
+      - name: Upload M2 Exit review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m2-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m2-exit/review.json
+          if-no-files-found: error
+          retention-days: 30
+
   m1-batch-2-review:
     name: M1 Batch 2 Review
     needs:
