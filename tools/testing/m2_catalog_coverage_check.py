@@ -42,12 +42,12 @@ def verify() -> dict[str, object]:
     if src_root not in sys.path:
         sys.path.insert(0, src_root)
 
-    from tpaa_metric import (
+    from tpaa_metric import build_m2_metric_execution_plan
+    from tpaa_metric.catalog_engine import (
         M2_DELIVERY_BATCH,
         M2_DELIVERY_MILESTONE,
         M2_EXPECTED_FAMILY_COUNTS,
         M2_FOUNDATION_COUNT,
-        build_m2_metric_execution_plan,
     )
 
     catalog, catalog_bytes = _load_catalog()
