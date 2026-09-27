@@ -953,6 +953,32 @@ def validate_m2_runtime_output(
                 "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
                 f"{definition.metric_code}:{system_type}",
             )
+    elif applicability.applicability_mode == "PRODUCT_CAPABILITY":
+        required = applicability.required_product_semantics
+        raw_products = input_payload.get("product_semantics")
+        if (
+            required is None
+            or not isinstance(raw_products, (list, tuple))
+            or not all(isinstance(item, str) and item for item in raw_products)
+            or len(raw_products) != len(set(raw_products))
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABILITY_INPUT_INVALID",
+                f"{definition.metric_code}:{raw_products!r}",
+            )
+        runtime_applicable = required in raw_products
+        if not runtime_applicable:
+            if output.get("applicable") is not False or output.get("instances") != []:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID",
+                    f"{definition.metric_code}:{required}",
+                )
+            return
+        if output.get("applicable") is not True:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
+                f"{definition.metric_code}:{required}",
+            )
     elif applicability.applicability_mode not in {
         "SUBJECT_TYPE",
         "QUALITY_FOUNDATION",
