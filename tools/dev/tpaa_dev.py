@@ -113,6 +113,22 @@ M2_GUI_OBSERVATION_LANE_COMPARE_MODULE = (
 )
 M2_GUI_STATE_UX_CHECK_MODULE = "tools.testing.m2_gui_state_ux_check"
 M2_GUI_STATE_UX_COMPARE_MODULE = "tools.testing.m2_gui_state_ux_compare"
+M2_CATALOG_COVERAGE_CHECK_MODULE = "tools.testing.m2_catalog_coverage_check"
+M2_CATALOG_COVERAGE_COMPARE_MODULE = "tools.testing.m2_catalog_coverage_compare"
+M2_QA_AIR_GOLDEN_CHECK_MODULE = "tools.testing.m2_qa_air_golden_check"
+M2_QA_AIR_GOLDEN_COMPARE_MODULE = "tools.testing.m2_qa_air_golden_compare"
+M2_SNS_GOLDEN_CHECK_MODULE = "tools.testing.m2_sns_golden_check"
+M2_SNS_GOLDEN_COMPARE_MODULE = "tools.testing.m2_sns_golden_compare"
+M2_RELEASE_HISTORY_REPLAY_CHECK_MODULE = (
+    "tools.testing.m2_release_history_replay_check"
+)
+M2_RELEASE_HISTORY_REPLAY_COMPARE_MODULE = (
+    "tools.testing.m2_release_history_replay_compare"
+)
+M2_CROSS_PLATFORM_STORAGE_QUALIFICATION_MODULE = (
+    "tools.testing.m2_cross_platform_storage_qualification"
+)
+M2_EXIT_REVIEW_MODULE = "tools.testing.m2_exit_review"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -214,6 +230,16 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-gui-observation-lane-compare", "M2-GUI-002", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-002 lane-presentation evidence exactly."),
     CommandSpec("m2-gui-state-ux-check", "M2-GUI-003", "IMPLEMENTED", "Verify distinct applicability, quality, and system-error presentation states."),
     CommandSpec("m2-gui-state-ux-compare", "M2-GUI-003", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-003 state-UX evidence exactly."),
+    CommandSpec("m2-catalog-coverage-check", "M2-TST-001", "IMPLEMENTED", "Verify exact 32/84 M2/M3 Catalog partition and M2 execution membership."),
+    CommandSpec("m2-catalog-coverage-compare", "M2-TST-001", "IMPLEMENTED", "Compare Windows/Linux M2-TST-001 Catalog coverage evidence exactly."),
+    CommandSpec("m2-qa-air-golden-check", "M2-TST-002", "IMPLEMENTED", "Qualify exact QA/AIR Golden vectors and fail-closed negative cases."),
+    CommandSpec("m2-qa-air-golden-compare", "M2-TST-002", "IMPLEMENTED", "Compare Windows/Linux M2-TST-002 QA/AIR qualification evidence exactly."),
+    CommandSpec("m2-sns-golden-check", "M2-TST-003", "IMPLEMENTED", "Qualify SNS Golden values, quality rejection, and applicability semantics."),
+    CommandSpec("m2-sns-golden-compare", "M2-TST-003", "IMPLEMENTED", "Compare Windows/Linux M2-TST-003 SNS qualification evidence exactly."),
+    CommandSpec("m2-release-history-replay-check", "M2-TST-004", "IMPLEMENTED", "Qualify immutable Release history, replay, mutation detection, and publication idempotency."),
+    CommandSpec("m2-release-history-replay-compare", "M2-TST-004", "IMPLEMENTED", "Compare Windows/Linux M2-TST-004 Release/history/replay evidence exactly."),
+    CommandSpec("m2-cross-platform-storage-qualification", "M2-TST-005", "IMPLEMENTED", "Aggregate exact-sha M2 Windows/Linux logical equivalence with frozen-Core SQLite/PostgreSQL Release parity."),
+    CommandSpec("m2-exit-review", "M2-TST-006", "IMPLEMENTED", "Aggregate 27-task exact-revision evidence, clean reconstruction, and protected-main M2 Exit state."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -873,6 +899,77 @@ def build_parser() -> argparse.ArgumentParser:
     m2_gui_state_ux_compare.add_argument("--linux", type=Path, required=True)
     m2_gui_state_ux_compare.add_argument("--expected-revision", required=True)
     m2_gui_state_ux_compare.add_argument("--evidence", type=Path, required=True)
+    m2_catalog_coverage = sub.add_parser(
+        "m2-catalog-coverage-check",
+        help="Verify M2-TST-001 exact Catalog coverage",
+    )
+    m2_catalog_coverage.add_argument("--evidence", type=Path)
+    m2_catalog_coverage_compare = sub.add_parser(
+        "m2-catalog-coverage-compare",
+        help="Compare Windows/Linux M2-TST-001 Catalog coverage evidence",
+    )
+    m2_catalog_coverage_compare.add_argument("--windows", type=Path, required=True)
+    m2_catalog_coverage_compare.add_argument("--linux", type=Path, required=True)
+    m2_catalog_coverage_compare.add_argument("--expected-revision", required=True)
+    m2_catalog_coverage_compare.add_argument("--evidence", type=Path, required=True)
+    m2_qa_air_golden = sub.add_parser(
+        "m2-qa-air-golden-check",
+        help="Verify M2-TST-002 QA/AIR Golden and negative suite",
+    )
+    m2_qa_air_golden.add_argument("--evidence", type=Path)
+    m2_qa_air_golden_compare = sub.add_parser(
+        "m2-qa-air-golden-compare",
+        help="Compare Windows/Linux M2-TST-002 QA/AIR qualification evidence",
+    )
+    m2_qa_air_golden_compare.add_argument("--windows", type=Path, required=True)
+    m2_qa_air_golden_compare.add_argument("--linux", type=Path, required=True)
+    m2_qa_air_golden_compare.add_argument("--expected-revision", required=True)
+    m2_qa_air_golden_compare.add_argument("--evidence", type=Path, required=True)
+    m2_sns_golden = sub.add_parser(
+        "m2-sns-golden-check",
+        help="Verify M2-TST-003 SNS Golden and applicability suite",
+    )
+    m2_sns_golden.add_argument("--evidence", type=Path)
+    m2_sns_golden_compare = sub.add_parser(
+        "m2-sns-golden-compare",
+        help="Compare Windows/Linux M2-TST-003 SNS qualification evidence",
+    )
+    m2_sns_golden_compare.add_argument("--windows", type=Path, required=True)
+    m2_sns_golden_compare.add_argument("--linux", type=Path, required=True)
+    m2_sns_golden_compare.add_argument("--expected-revision", required=True)
+    m2_sns_golden_compare.add_argument("--evidence", type=Path, required=True)
+    m2_release_history_replay = sub.add_parser(
+        "m2-release-history-replay-check",
+        help="Verify M2-TST-004 Release/history/replay/idempotency suite",
+    )
+    m2_release_history_replay.add_argument("--evidence", type=Path)
+    m2_release_history_replay_compare = sub.add_parser(
+        "m2-release-history-replay-compare",
+        help="Compare Windows/Linux M2-TST-004 release/replay evidence",
+    )
+    m2_release_history_replay_compare.add_argument("--windows", type=Path, required=True)
+    m2_release_history_replay_compare.add_argument("--linux", type=Path, required=True)
+    m2_release_history_replay_compare.add_argument("--expected-revision", required=True)
+    m2_release_history_replay_compare.add_argument("--evidence", type=Path, required=True)
+    m2_cross_platform_storage = sub.add_parser(
+        "m2-cross-platform-storage-qualification",
+        help="Verify M2-TST-005 cross-platform/storage qualification",
+    )
+    m2_cross_platform_storage.add_argument("--logical-root", type=Path, required=True)
+    m2_cross_platform_storage.add_argument("--storage-parity", type=Path, required=True)
+    m2_cross_platform_storage.add_argument("--expected-revision", required=True)
+    m2_cross_platform_storage.add_argument("--output", type=Path, required=True)
+    m2_exit_review = sub.add_parser(
+        "m2-exit-review",
+        help="Verify M2-TST-006 cold-start and M2 Exit review",
+    )
+    m2_exit_review.add_argument("--artifact-root", type=Path, required=True)
+    m2_exit_review.add_argument("--tst005", type=Path, required=True)
+    m2_exit_review.add_argument("--postgres-cold-start", type=Path, required=True)
+    m2_exit_review.add_argument("--expected-revision", required=True)
+    m2_exit_review.add_argument("--event-name", required=True)
+    m2_exit_review.add_argument("--git-ref", required=True)
+    m2_exit_review.add_argument("--output", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1656,6 +1753,140 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.expected_revision,
                 "--evidence",
                 str(args.evidence),
+            ]
+        )
+    if command == "m2-catalog-coverage-check":
+        coverage_args = [
+            sys.executable,
+            "-m",
+            M2_CATALOG_COVERAGE_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            coverage_args.extend(["--evidence", str(args.evidence)])
+        return _run(coverage_args)
+    if command == "m2-catalog-coverage-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_CATALOG_COVERAGE_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-qa-air-golden-check":
+        qa_air_args = [
+            sys.executable,
+            "-m",
+            M2_QA_AIR_GOLDEN_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            qa_air_args.extend(["--evidence", str(args.evidence)])
+        return _run(qa_air_args)
+    if command == "m2-qa-air-golden-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_QA_AIR_GOLDEN_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-sns-golden-check":
+        sns_args = [sys.executable, "-m", M2_SNS_GOLDEN_CHECK_MODULE]
+        if args.evidence is not None:
+            sns_args.extend(["--evidence", str(args.evidence)])
+        return _run(sns_args)
+    if command == "m2-sns-golden-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_SNS_GOLDEN_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-release-history-replay-check":
+        release_args = [
+            sys.executable,
+            "-m",
+            M2_RELEASE_HISTORY_REPLAY_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            release_args.extend(["--evidence", str(args.evidence)])
+        return _run(release_args)
+    if command == "m2-release-history-replay-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_RELEASE_HISTORY_REPLAY_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-cross-platform-storage-qualification":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_CROSS_PLATFORM_STORAGE_QUALIFICATION_MODULE,
+                "--logical-root",
+                str(args.logical_root),
+                "--storage-parity",
+                str(args.storage_parity),
+                "--expected-revision",
+                args.expected_revision,
+                "--output",
+                str(args.output),
+            ]
+        )
+    if command == "m2-exit-review":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_EXIT_REVIEW_MODULE,
+                "--artifact-root",
+                str(args.artifact_root),
+                "--tst005",
+                str(args.tst005),
+                "--postgres-cold-start",
+                str(args.postgres_cold_start),
+                "--expected-revision",
+                args.expected_revision,
+                "--event-name",
+                args.event_name,
+                "--git-ref",
+                args.git_ref,
+                "--output",
+                str(args.output),
             ]
         )
     if command == "m1-source-registry-check":

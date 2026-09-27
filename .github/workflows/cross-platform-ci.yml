@@ -198,6 +198,26 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-gui-state-ux-check
           --evidence evidence/m2-gui-003/${{ matrix.platform }}/state-ux.json
 
+      - name: Emit M2-TST-001 Catalog coverage evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-catalog-coverage-check
+          --evidence evidence/m2-tst-001/${{ matrix.platform }}/catalog-coverage.json
+
+      - name: Emit M2-TST-002 QA/AIR Golden-negative evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-qa-air-golden-check
+          --evidence evidence/m2-tst-002/${{ matrix.platform }}/qa-air-golden-negative.json
+
+      - name: Emit M2-TST-003 SNS Golden-applicability evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-sns-golden-check
+          --evidence evidence/m2-tst-003/${{ matrix.platform }}/sns-golden-applicability.json
+
+      - name: Emit M2-TST-004 Release-history-replay evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-release-history-replay-check
+          --evidence evidence/m2-tst-004/${{ matrix.platform }}/release-history-replay.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -334,6 +354,10 @@ jobs:
             evidence/m2-gui-001/${{ matrix.platform }}/foundation-navigation.json
             evidence/m2-gui-002/${{ matrix.platform }}/observation-lane.json
             evidence/m2-gui-003/${{ matrix.platform }}/state-ux.json
+            evidence/m2-tst-001/${{ matrix.platform }}/catalog-coverage.json
+            evidence/m2-tst-002/${{ matrix.platform }}/qa-air-golden-negative.json
+            evidence/m2-tst-003/${{ matrix.platform }}/sns-golden-applicability.json
+            evidence/m2-tst-004/${{ matrix.platform }}/release-history-replay.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -535,6 +559,38 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-gui-003-logical-equivalence.json
 
+      - name: Compare Windows and Linux M2-TST-001 Catalog coverage
+        run: >-
+          python tools/dev/tpaa_dev.py m2-catalog-coverage-compare
+          --windows downloaded/evidence/m2-tst-001/windows/catalog-coverage.json
+          --linux downloaded/evidence/m2-tst-001/linux/catalog-coverage.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-tst-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux M2-TST-002 QA/AIR Golden-negative
+        run: >-
+          python tools/dev/tpaa_dev.py m2-qa-air-golden-compare
+          --windows downloaded/evidence/m2-tst-002/windows/qa-air-golden-negative.json
+          --linux downloaded/evidence/m2-tst-002/linux/qa-air-golden-negative.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-tst-002-logical-equivalence.json
+
+      - name: Compare Windows and Linux M2-TST-003 SNS Golden-applicability
+        run: >-
+          python tools/dev/tpaa_dev.py m2-sns-golden-compare
+          --windows downloaded/evidence/m2-tst-003/windows/sns-golden-applicability.json
+          --linux downloaded/evidence/m2-tst-003/linux/sns-golden-applicability.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-tst-003-logical-equivalence.json
+
+      - name: Compare Windows and Linux M2-TST-004 Release-history-replay
+        run: >-
+          python tools/dev/tpaa_dev.py m2-release-history-replay-compare
+          --windows downloaded/evidence/m2-tst-004/windows/release-history-replay.json
+          --linux downloaded/evidence/m2-tst-004/linux/release-history-replay.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-tst-004-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -591,6 +647,10 @@ jobs:
             evidence/cross-platform/m2-gui-001-logical-equivalence.json
             evidence/cross-platform/m2-gui-002-logical-equivalence.json
             evidence/cross-platform/m2-gui-003-logical-equivalence.json
+            evidence/cross-platform/m2-tst-001-logical-equivalence.json
+            evidence/cross-platform/m2-tst-002-logical-equivalence.json
+            evidence/cross-platform/m2-tst-003-logical-equivalence.json
+            evidence/cross-platform/m2-tst-004-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
@@ -708,6 +768,113 @@ jobs:
           path: evidence/m1-batch-2/postgres/storage-parity.json
           if-no-files-found: error
           retention-days: 14
+
+  m2-tst-005-review:
+    name: M2-TST-005 Cross-platform Storage Qualification
+    needs:
+      - m0-logical-equivalence
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download M2 logical-equivalence evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/logical
+
+      - name: Download frozen-Core SQLite PostgreSQL parity evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m1-batch-2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/postgres
+
+      - name: Qualify M2 cross-platform and storage parity
+        run: >-
+          python tools/dev/tpaa_dev.py m2-cross-platform-storage-qualification
+          --logical-root downloaded/logical
+          --storage-parity downloaded/postgres/storage-parity.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --output evidence/m2-tst-005/qualification.json
+
+      - name: Upload M2-TST-005 qualification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m2-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m2-tst-005/qualification.json
+          if-no-files-found: error
+          retention-days: 30
+
+  m2-exit-review:
+    name: M2 Exit Review
+    needs:
+      - m2-tst-005-review
+      - m0-cross-platform
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download Windows Linux M2 task evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/platform
+          merge-multiple: true
+
+      - name: Download M2-TST-005 qualification
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m2-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/tst005
+
+      - name: Download PostgreSQL cold-start evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m0-exit-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/postgres
+
+      - name: Review exact M2 task inventory and Exit gate
+        run: >-
+          python tools/dev/tpaa_dev.py m2-exit-review
+          --artifact-root downloaded/platform/evidence
+          --tst005 downloaded/tst005/qualification.json
+          --postgres-cold-start downloaded/postgres/postgres-cold-start.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --event-name ${{ github.event_name }}
+          --git-ref ${{ github.ref }}
+          --output evidence/m2-exit/review.json
+
+      - name: Upload M2 Exit review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m2-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m2-exit/review.json
+          if-no-files-found: error
+          retention-days: 30
 
   m1-batch-2-review:
     name: M1 Batch 2 Review
