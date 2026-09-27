@@ -23,7 +23,7 @@ from .m2_stage_lineage import (
     build_m2_stage_world_lineage,
     project_m2_stage_world_lineage,
 )
-from .minimal_p1 import (
+from .m3_wvr_training import (\n    M3WVREpisode,\n    M3WVRProjection,\n    M3WVRStage,\n    M3WVRStageEvent,\n    M3WVRWorldError,\n    project_m3_wvr_world,\n)\nfrom .minimal_p1 import (
     AircraftObservedWorld,
     WorldEvidenceRef,
     WorldProjectionError,
