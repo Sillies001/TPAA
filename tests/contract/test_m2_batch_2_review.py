@@ -42,8 +42,8 @@ PLATFORM = {
     ),
     "M2-MET-007": (
         "m2-met-007/{platform}/batch-replay-incremental.json",
-        "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_EVIDENCE_V1",
-        False,
+        "TPAA_M2_MET_007_BATCH_REPLAY_CLOSURE_EVIDENCE_V1",
+        True,
     ),
 }
 
@@ -80,8 +80,8 @@ LOGICAL = {
     ),
     "M2-MET-007": (
         "m2-met-007-incremental-logical-equivalence.json",
-        "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_CROSS_PLATFORM_EVIDENCE_V1",
-        False,
+        "TPAA_M2_MET_007_BATCH_REPLAY_CLOSURE_CROSS_PLATFORM_EVIDENCE_V1",
+        True,
     ),
 }
 
@@ -189,8 +189,8 @@ def test_m2_batch_2_review_reports_exact_post_c3_matrix(tmp_path: Path) -> None:
     assert evidence["tracking_issue"] == 97
     assert evidence["baseline_change_issue"] == 106
     assert evidence["status"] == "PASS"
-    assert evidence["gate_state"] == "INCOMPLETE_TASKS"
-    assert evidence["batch_complete"] is False
+    assert evidence["gate_state"] == "READY_FOR_FINAL_CANDIDATE"
+    assert evidence["batch_complete"] is True
     assert evidence["merge_authorized"] is False
     assert evidence["authority_resolution_ready"] is True
     assert evidence["completed_tasks"] == [
@@ -200,10 +200,9 @@ def test_m2_batch_2_review_reports_exact_post_c3_matrix(tmp_path: Path) -> None:
         "M2-MET-004",
         "M2-MET-005",
         "M2-MET-006",
-    ]
-    assert evidence["incomplete_tasks"] == [
         "M2-MET-007",
     ]
+    assert evidence["incomplete_tasks"] == []
     assert evidence["failed_evidence_checks"] == []
     assert evidence["scope"]["semantic_decision_made"] is False
     assert evidence["scope"]["authority_values_invented"] is False

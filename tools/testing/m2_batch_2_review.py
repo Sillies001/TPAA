@@ -48,7 +48,7 @@ PLATFORM_EVIDENCE = {
     ),
     "M2-MET-007": (
         "m2-met-007/{platform}/batch-replay-incremental.json",
-        "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_EVIDENCE_V1",
+        "TPAA_M2_MET_007_BATCH_REPLAY_CLOSURE_EVIDENCE_V1",
     ),
 }
 
@@ -79,7 +79,7 @@ LOGICAL_EVIDENCE = {
     ),
     "M2-MET-007": (
         "m2-met-007-incremental-logical-equivalence.json",
-        "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_CROSS_PLATFORM_EVIDENCE_V1",
+        "TPAA_M2_MET_007_BATCH_REPLAY_CLOSURE_CROSS_PLATFORM_EVIDENCE_V1",
     ),
 }
 

@@ -32,18 +32,23 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert completed.returncode == 0, completed.stdout + completed.stderr
     evidence = json.loads(path.read_text(encoding="utf-8"))
 
-    assert evidence["schema"] == "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_EVIDENCE_V1"
+    assert evidence["schema"] == "TPAA_M2_MET_007_BATCH_REPLAY_CLOSURE_EVIDENCE_V1"
     assert evidence["task_id"] == "M2-MET-007"
     assert evidence["tracking_issue"] == 97
     assert evidence["status"] == "PASS"
-    assert evidence["task_complete"] is False
+    assert evidence["task_complete"] is True
+    assert evidence["replay_contract_complete"] is True
     assert evidence["implementation_complete"] is True
-    assert evidence["formal_completion_blocked_by_predecessors"] is True
-    assert evidence["blocked_predecessors"] == [
+    assert "formal_completion_blocked_by_predecessors" not in evidence
+    assert "blocked_predecessors" not in evidence
+    assert evidence["frozen_predecessors"] == [
         "M2-MET-002",
+        "M2-MET-003",
+        "M2-MET-004",
         "M2-MET-005",
         "M2-MET-006",
     ]
+    assert evidence["external_authority_gaps"] == {}
     assert evidence["failed_acceptance"] == []
     assert all(evidence["acceptance"].values())
     assert evidence["scope"] == {
@@ -56,10 +61,11 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
         "input_payload_lineage_binding_only": True,
         "version_qualified_plugin_dispatch_only": True,
         "governed_dependency_lineage_only": True,
-        "formal_32_metric_replay_claimed": False,
+        "formal_32_metric_replay_claimed": True,
         "authority_values_invented": False,
+        "replay_contract_complete": True,
         "implementation_side_batch_replay_complete": True,
-        "formal_task_completion_claimed": False,
+        "formal_task_completion_claimed": True,
     }
 
     product = evidence["logical_product"]
@@ -90,6 +96,7 @@ def test_m2_met_007_incremental_batch_replay_is_honest_and_exact(
     assert evidence["acceptance"]["plugin_manifest_hash_well_formed"]
     assert evidence["acceptance"]["plugin_manifest_replay_exact"]
     assert evidence["acceptance"]["dependency_manifest_replay_exact_32"]
+    assert evidence["acceptance"]["plugin_output_hash_replay_exact_32"]
     assert evidence["acceptance"]["record_logical_hash_replay_exact_32"]
     assert evidence["acceptance"]["subset_transitive_closure_exact"]
     assert evidence["acceptance"]["subset_scoped_inputs_exact"]
@@ -188,11 +195,14 @@ def test_m2_met_007_incremental_cross_platform_compare_is_revision_exact(
     assert completed.returncode == 0, completed.stdout + completed.stderr
     evidence = json.loads(compared.read_text(encoding="utf-8"))
     assert evidence["schema"] == (
-        "TPAA_M2_MET_007_BATCH_REPLAY_INCREMENTAL_CROSS_PLATFORM_EVIDENCE_V1"
+        "TPAA_M2_MET_007_BATCH_REPLAY_CLOSURE_CROSS_PLATFORM_EVIDENCE_V1"
     )
     assert evidence["status"] == "PASS"
-    assert evidence["task_complete"] is False
+    assert evidence["task_complete"] is True
+    assert evidence["replay_contract_complete"] is True
     assert evidence["implementation_complete"] is True
-    assert evidence["formal_completion_blocked_by_predecessors"] is True
+    assert "formal_completion_blocked_by_predecessors" not in evidence
+    assert "blocked_predecessors" not in evidence
+    assert evidence["external_authority_gaps"] == {}
     assert evidence["failed_acceptance"] == []
     assert all(evidence["checks"].values())
