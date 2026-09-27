@@ -208,6 +208,11 @@ jobs:
           uv run --locked python tools/testing/m3_immutable_release_check.py check
           --evidence evidence/m3-obs-002/${{ matrix.platform }}/immutable-release.json
 
+      - name: Emit M3-OBS-003 idempotent publication/replay evidence
+        run: >-
+          uv run --locked python tools/testing/m3_idempotent_publication_check.py check
+          --evidence evidence/m3-obs-003/${{ matrix.platform }}/publication-replay.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -436,6 +441,7 @@ jobs:
             evidence/m3-met-009/${{ matrix.platform }}/runtime-closure.json
             evidence/m3-obs-001/${{ matrix.platform }}/publication-routing.json
             evidence/m3-obs-002/${{ matrix.platform }}/immutable-release.json
+            evidence/m3-obs-003/${{ matrix.platform }}/publication-replay.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -663,6 +669,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-obs-002-logical-equivalence.json
 
+      - name: Compare Windows and Linux M3-OBS-003 publication/replay
+        run: >-
+          python tools/testing/m3_idempotent_publication_check.py compare
+          --windows downloaded/evidence/m3-obs-003/windows/publication-replay.json
+          --linux downloaded/evidence/m3-obs-003/linux/publication-replay.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-obs-003-logical-equivalence.json
+
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
           python tools/testing/m2_general_metric_engine_compare.py
@@ -873,6 +887,7 @@ jobs:
             evidence/cross-platform/m3-met-009-logical-equivalence.json
             evidence/cross-platform/m3-obs-001-logical-equivalence.json
             evidence/cross-platform/m3-obs-002-logical-equivalence.json
+            evidence/cross-platform/m3-obs-003-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
