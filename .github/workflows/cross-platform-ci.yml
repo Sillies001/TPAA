@@ -143,6 +143,11 @@ jobs:
           uv run --locked python tools/testing/m3_strike_world_check.py
           --evidence evidence/m3-world-003/${{ matrix.platform }}/strike-stage-world-event.json
 
+      - name: Emit M3-WORLD-004 mission-product applicability evidence
+        run: >-
+          uv run --locked python tools/testing/m3_mission_product_applicability_check.py
+          --evidence evidence/m3-world-004/${{ matrix.platform }}/mission-product-applicability.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -358,6 +363,7 @@ jobs:
             evidence/m3-world-001/${{ matrix.platform }}/wvr-stage-world-event.json
             evidence/m3-world-002/${{ matrix.platform }}/bvr-stage-world-event.json
             evidence/m3-world-003/${{ matrix.platform }}/strike-stage-world-event.json
+            evidence/m3-world-004/${{ matrix.platform }}/mission-product-applicability.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -480,6 +486,14 @@ jobs:
           --linux downloaded/evidence/m3-world-003/linux/strike-stage-world-event.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-world-003-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-WORLD-004 applicability products
+        run: >-
+          python tools/testing/m3_mission_product_applicability_compare.py
+          --windows downloaded/evidence/m3-world-004/windows/mission-product-applicability.json
+          --linux downloaded/evidence/m3-world-004/linux/mission-product-applicability.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-world-004-logical-equivalence.json
 
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
@@ -678,6 +692,7 @@ jobs:
             evidence/cross-platform/m3-world-001-logical-equivalence.json
             evidence/cross-platform/m3-world-002-logical-equivalence.json
             evidence/cross-platform/m3-world-003-logical-equivalence.json
+            evidence/cross-platform/m3-world-004-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
