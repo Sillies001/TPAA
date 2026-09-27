@@ -37,8 +37,8 @@ PLATFORM = {
     ),
     "M2-MET-006": (
         "m2-met-006/{platform}/runtime-contract-incremental.json",
-        "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1",
-        False,
+        "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_EVIDENCE_V1",
+        True,
     ),
     "M2-MET-007": (
         "m2-met-007/{platform}/batch-replay-incremental.json",
@@ -75,8 +75,8 @@ LOGICAL = {
     ),
     "M2-MET-006": (
         "m2-met-006-incremental-logical-equivalence.json",
-        "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_CROSS_PLATFORM_EVIDENCE_V1",
-        False,
+        "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_CROSS_PLATFORM_EVIDENCE_V1",
+        True,
     ),
     "M2-MET-007": (
         "m2-met-007-incremental-logical-equivalence.json",
@@ -199,9 +199,9 @@ def test_m2_batch_2_review_reports_exact_post_c3_matrix(tmp_path: Path) -> None:
         "M2-MET-003",
         "M2-MET-004",
         "M2-MET-005",
+        "M2-MET-006",
     ]
     assert evidence["incomplete_tasks"] == [
-        "M2-MET-006",
         "M2-MET-007",
     ]
     assert evidence["failed_evidence_checks"] == []

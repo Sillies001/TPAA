@@ -44,7 +44,7 @@ PLATFORM_EVIDENCE = {
     ),
     "M2-MET-006": (
         "m2-met-006/{platform}/runtime-contract-incremental.json",
-        "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1",
+        "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_EVIDENCE_V1",
     ),
     "M2-MET-007": (
         "m2-met-007/{platform}/batch-replay-incremental.json",
@@ -75,7 +75,7 @@ LOGICAL_EVIDENCE = {
     ),
     "M2-MET-006": (
         "m2-met-006-incremental-logical-equivalence.json",
-        "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_CROSS_PLATFORM_EVIDENCE_V1",
+        "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_CROSS_PLATFORM_EVIDENCE_V1",
     ),
     "M2-MET-007": (
         "m2-met-007-incremental-logical-equivalence.json",

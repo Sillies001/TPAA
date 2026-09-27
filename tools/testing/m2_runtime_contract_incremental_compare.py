@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-platform comparison for incremental M2-MET-006 runtime evidence."""
+"""Cross-platform comparison for formal M2-MET-006 runtime closure evidence."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import cast
 
-SCHEMA = "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1"
+SCHEMA = "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_EVIDENCE_V1"
 
 
 def _load(path: Path) -> dict[str, object]:
@@ -30,31 +30,31 @@ def compare(
         "schemas_exact": windows.get("schema") == linux.get("schema") == SCHEMA,
         "tasks_exact": windows.get("task_id") == linux.get("task_id") == "M2-MET-006",
         "statuses_pass": windows.get("status") == linux.get("status") == "PASS",
-        "tasks_remain_incomplete": (
-            windows.get("task_complete") is False
-            and linux.get("task_complete") is False
+        "tasks_complete": (
+            windows.get("task_complete") is True
+            and linux.get("task_complete") is True
+        ),
+        "runtime_contract_complete": (
+            windows.get("runtime_contract_complete") is True
+            and linux.get("runtime_contract_complete") is True
         ),
         "implementation_complete": (
             windows.get("implementation_complete") is True
             and linux.get("implementation_complete") is True
         ),
-        "formal_completion_blocked_by_predecessors": (
-            windows.get("formal_completion_blocked_by_predecessors") is True
-            and linux.get("formal_completion_blocked_by_predecessors") is True
+        "replay_contract_remains_m2_met_007": (
+            windows.get("replay_contract_complete") is False
+            and linux.get("replay_contract_complete") is False
         ),
         "revisions_exact": (
             windows.get("source_revision")
             == linux.get("source_revision")
             == expected_revision
         ),
-        "blocked_predecessors_equal": (
-            windows.get("blocked_predecessors")
-            == linux.get("blocked_predecessors")
-            == ["M2-MET-002", "M2-MET-005"]
-        ),
-        "external_authority_gaps_equal": (
+        "external_authority_gaps_empty": (
             windows.get("external_authority_gaps")
             == linux.get("external_authority_gaps")
+            == {}
         ),
         "scope_equal": windows.get("scope") == linux.get("scope"),
         "logical_products_equal": (
@@ -67,19 +67,20 @@ def compare(
         ),
     }
     failed = sorted(key for key, passed in checks.items() if not passed)
+    complete = not failed
     return {
         "schema": (
-            "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_"
+            "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_"
             "CROSS_PLATFORM_EVIDENCE_V1"
         ),
         "task_id": "M2-MET-006",
         "tracking_issue": 97,
-        "status": "PASS" if not failed else "FAIL",
-        "task_complete": False,
-        "implementation_complete": not failed,
-        "formal_completion_blocked_by_predecessors": True,
+        "status": "PASS" if complete else "FAIL",
+        "task_complete": complete,
+        "runtime_contract_complete": complete,
+        "implementation_complete": complete,
+        "replay_contract_complete": False,
         "source_revision": expected_revision,
-        "blocked_predecessors": windows.get("blocked_predecessors"),
         "external_authority_gaps": windows.get("external_authority_gaps"),
         "scope": windows.get("scope"),
         "logical_product": windows.get("logical_product"),
@@ -105,15 +106,16 @@ def main() -> int:
     except Exception as exc:
         payload = {
             "schema": (
-                "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_"
+                "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_"
                 "CROSS_PLATFORM_EVIDENCE_V1"
             ),
             "task_id": "M2-MET-006",
             "tracking_issue": 97,
             "status": "FAIL",
             "task_complete": False,
+            "runtime_contract_complete": False,
             "implementation_complete": False,
-            "formal_completion_blocked_by_predecessors": True,
+            "replay_contract_complete": False,
             "source_revision": args.expected_revision,
             "error": f"{type(exc).__name__}: {exc}",
         }

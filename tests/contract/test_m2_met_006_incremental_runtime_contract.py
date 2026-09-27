@@ -33,15 +33,18 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     evidence = json.loads(path.read_text(encoding="utf-8"))
 
     assert evidence["schema"] == (
-        "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1"
+        "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_EVIDENCE_V1"
     )
     assert evidence["task_id"] == "M2-MET-006"
     assert evidence["tracking_issue"] == 97
     assert evidence["status"] == "PASS"
-    assert evidence["task_complete"] is False
+    assert evidence["task_complete"] is True
+    assert evidence["runtime_contract_complete"] is True
     assert evidence["implementation_complete"] is True
-    assert evidence["formal_completion_blocked_by_predecessors"] is True
-    assert evidence["blocked_predecessors"] == ["M2-MET-002", "M2-MET-005"]
+    assert evidence["replay_contract_complete"] is False
+    assert "formal_completion_blocked_by_predecessors" not in evidence
+    assert "blocked_predecessors" not in evidence
+    assert evidence["external_authority_gaps"] == {}
     assert evidence["failed_acceptance"] == []
     assert all(evidence["acceptance"].values())
     assert evidence["acceptance"]["structured_schema_closed_world_authority_enforced"]
@@ -198,6 +201,7 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["scope"] == {
         "business_metric_semantics_executed": False,
         "business_status_selection_semantics_executed": False,
+        "replay_contract_complete": False,
         "subject_metadata_binding_only": True,
         "publication_metadata_binding_only": True,
         "longitudinal_metadata_binding_only": True,
@@ -210,8 +214,10 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
         "governed_dependency_closure_binding_only": True,
         "authority_values_invented": False,
         "runtime_transport_contract_only": True,
+        "runtime_contract_complete": True,
+        "replay_contract_complete": False,
         "implementation_side_runtime_contract_complete": True,
-        "formal_task_completion_claimed": False,
+        "formal_task_completion_claimed": True,
     }
 
 
@@ -247,9 +253,17 @@ def test_m2_met_006_incremental_cross_platform_compare_is_revision_exact(
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
     evidence = json.loads(compared.read_text(encoding="utf-8"))
+    assert evidence["schema"] == (
+        "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_"
+        "CROSS_PLATFORM_EVIDENCE_V1"
+    )
     assert evidence["status"] == "PASS"
-    assert evidence["task_complete"] is False
+    assert evidence["task_complete"] is True
+    assert evidence["runtime_contract_complete"] is True
     assert evidence["implementation_complete"] is True
-    assert evidence["formal_completion_blocked_by_predecessors"] is True
+    assert evidence["replay_contract_complete"] is False
+    assert "formal_completion_blocked_by_predecessors" not in evidence
+    assert "blocked_predecessors" not in evidence
+    assert evidence["external_authority_gaps"] == {}
     assert evidence["failed_acceptance"] == []
     assert all(evidence["checks"].values())

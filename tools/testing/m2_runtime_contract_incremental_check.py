@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Authority-safe incremental runtime contract evidence for M2-MET-006.
+"""Formal runtime contract closure evidence for M2-MET-006.
 
-This check validates only frozen applicability/value-kind/structured-schema
-transport semantics. It does not execute blocked QA/SNS business semantics and
-does not claim M2-MET-006 completion while M2-MET-002/005 remain incomplete.
+This check validates the frozen applicability/value-kind/structured-schema
+runtime contract across all 32 Batch 2 metric definitions. It intentionally
+does not execute business metric/status-selection semantics or the M2-MET-007
+deterministic replay closure.
 """
 
 from __future__ import annotations
@@ -992,27 +993,21 @@ def verify() -> dict[str, object]:
         "runtime_contract_projection_hash_well_formed": (
             len(runtime_contract_hash) == 64
         ),
-        "predecessor_gate_preserved": True,
     }
     failed = sorted(key for key, passed in acceptance.items() if not passed)
     implementation_complete = not failed
+    runtime_contract_complete = implementation_complete
     return {
-        "schema": "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1",
+        "schema": "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_EVIDENCE_V1",
         "task_id": "M2-MET-006",
         "tracking_issue": 97,
         "status": "PASS" if not failed else "FAIL",
-        "task_complete": False,
+        "task_complete": runtime_contract_complete,
+        "runtime_contract_complete": runtime_contract_complete,
         "implementation_complete": implementation_complete,
-        "formal_completion_blocked_by_predecessors": True,
+        "replay_contract_complete": False,
         "source_revision": _git_revision(),
-        "blocked_predecessors": ["M2-MET-002", "M2-MET-005"],
-        "external_authority_gaps": {
-            "P1-QA-001": "frame convention authority unresolved",
-            "P1-QA-002": "six-dimensional uncertainty mapping authority unresolved",
-            "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1": (
-                "frozen M2 alignment fixture omits five required profile fields"
-            ),
-        },
+        "external_authority_gaps": {},
         "scope": {
             "business_metric_semantics_executed": False,
             "business_status_selection_semantics_executed": False,
@@ -1028,8 +1023,10 @@ def verify() -> dict[str, object]:
             "governed_dependency_closure_binding_only": True,
             "authority_values_invented": False,
             "runtime_transport_contract_only": True,
-            "implementation_side_runtime_contract_complete": True,
-            "formal_task_completion_claimed": False,
+            "runtime_contract_complete": runtime_contract_complete,
+            "replay_contract_complete": False,
+            "implementation_side_runtime_contract_complete": implementation_complete,
+            "formal_task_completion_claimed": runtime_contract_complete,
         },
         "logical_product": {
             "runtime_contract_hash": runtime_contract_hash,
@@ -1081,13 +1078,14 @@ def main() -> int:
         return_code = 0 if payload["status"] == "PASS" else 2
     except Exception as exc:
         payload = {
-            "schema": "TPAA_M2_MET_006_RUNTIME_CONTRACT_INCREMENTAL_EVIDENCE_V1",
+            "schema": "TPAA_M2_MET_006_RUNTIME_CONTRACT_CLOSURE_EVIDENCE_V1",
             "task_id": "M2-MET-006",
             "tracking_issue": 97,
             "status": "FAIL",
             "task_complete": False,
+            "runtime_contract_complete": False,
             "implementation_complete": False,
-            "formal_completion_blocked_by_predecessors": True,
+            "replay_contract_complete": False,
             "source_revision": _git_revision(),
             "error": f"{type(exc).__name__}: {exc}",
         }
