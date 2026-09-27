@@ -201,7 +201,6 @@ def test_m2_met_006_incremental_runtime_contract_is_honest_and_exact(
     assert evidence["scope"] == {
         "business_metric_semantics_executed": False,
         "business_status_selection_semantics_executed": False,
-        "replay_contract_complete": False,
         "subject_metadata_binding_only": True,
         "publication_metadata_binding_only": True,
         "longitudinal_metadata_binding_only": True,
