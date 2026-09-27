@@ -769,6 +769,54 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  m2-tst-005-review:
+    name: M2-TST-005 Cross-platform Storage Qualification
+    needs:
+      - m0-logical-equivalence
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download M2 logical-equivalence evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/logical
+
+      - name: Download frozen-Core SQLite PostgreSQL parity evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m1-batch-2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/postgres
+
+      - name: Qualify M2 cross-platform and storage parity
+        run: >-
+          python tools/dev/tpaa_dev.py m2-cross-platform-storage-qualification
+          --logical-root downloaded/logical
+          --storage-parity downloaded/postgres/storage-parity.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --output evidence/m2-tst-005/qualification.json
+
+      - name: Upload M2-TST-005 qualification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m2-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m2-tst-005/qualification.json
+          if-no-files-found: error
+          retention-days: 30
+
   m1-batch-2-review:
     name: M1 Batch 2 Review
     needs:

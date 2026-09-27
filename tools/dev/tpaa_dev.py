@@ -125,6 +125,9 @@ M2_RELEASE_HISTORY_REPLAY_CHECK_MODULE = (
 M2_RELEASE_HISTORY_REPLAY_COMPARE_MODULE = (
     "tools.testing.m2_release_history_replay_compare"
 )
+M2_CROSS_PLATFORM_STORAGE_QUALIFICATION_MODULE = (
+    "tools.testing.m2_cross_platform_storage_qualification"
+)
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -234,6 +237,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-sns-golden-compare", "M2-TST-003", "IMPLEMENTED", "Compare Windows/Linux M2-TST-003 SNS qualification evidence exactly."),
     CommandSpec("m2-release-history-replay-check", "M2-TST-004", "IMPLEMENTED", "Qualify immutable Release history, replay, mutation detection, and publication idempotency."),
     CommandSpec("m2-release-history-replay-compare", "M2-TST-004", "IMPLEMENTED", "Compare Windows/Linux M2-TST-004 Release/history/replay evidence exactly."),
+    CommandSpec("m2-cross-platform-storage-qualification", "M2-TST-005", "IMPLEMENTED", "Aggregate exact-sha M2 Windows/Linux logical equivalence with frozen-Core SQLite/PostgreSQL Release parity."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -945,6 +949,14 @@ def build_parser() -> argparse.ArgumentParser:
     m2_release_history_replay_compare.add_argument("--linux", type=Path, required=True)
     m2_release_history_replay_compare.add_argument("--expected-revision", required=True)
     m2_release_history_replay_compare.add_argument("--evidence", type=Path, required=True)
+    m2_cross_platform_storage = sub.add_parser(
+        "m2-cross-platform-storage-qualification",
+        help="Verify M2-TST-005 cross-platform/storage qualification",
+    )
+    m2_cross_platform_storage.add_argument("--logical-root", type=Path, required=True)
+    m2_cross_platform_storage.add_argument("--storage-parity", type=Path, required=True)
+    m2_cross_platform_storage.add_argument("--expected-revision", required=True)
+    m2_cross_platform_storage.add_argument("--output", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1824,6 +1836,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.expected_revision,
                 "--evidence",
                 str(args.evidence),
+            ]
+        )
+    if command == "m2-cross-platform-storage-qualification":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_CROSS_PLATFORM_STORAGE_QUALIFICATION_MODULE,
+                "--logical-root",
+                str(args.logical_root),
+                "--storage-parity",
+                str(args.storage_parity),
+                "--expected-revision",
+                args.expected_revision,
+                "--output",
+                str(args.output),
             ]
         )
     if command == "m1-source-registry-check":
