@@ -169,16 +169,18 @@ def verify() -> dict[str, object]:
         "selected_definition_hash_bound": (
             len(selected_detail["definition"]["definition_hash"]) == 64
         ),
-        "stable_workspace_objects_present": all(
-            root.findChild(QtCore.QObject, object_name) is not None
-            for object_name in (
-                "tpaaM2FoundationWorkspace",
-                "tpaaM2FoundationHeader",
-                "tpaaM2FoundationCount",
-                "tpaaM2FoundationNamespace",
-                "tpaaM2FoundationNavigator",
-                "tpaaM2FoundationDetail",
-                "tpaaM2FoundationNavigationStatus",
+        "stable_workspace_objects_present": (
+            root.objectName() == "tpaaM2FoundationWorkspace"
+            and all(
+                root.findChild(QtCore.QObject, object_name) is not None
+                for object_name in (
+                    "tpaaM2FoundationHeader",
+                    "tpaaM2FoundationCount",
+                    "tpaaM2FoundationNamespace",
+                    "tpaaM2FoundationNavigator",
+                    "tpaaM2FoundationDetail",
+                    "tpaaM2FoundationNavigationStatus",
+                )
             )
         ),
         "navigation_status_selected": (
