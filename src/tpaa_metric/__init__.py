@@ -16,8 +16,19 @@ from .catalog_engine import (
     M2MetricExecutionRecord,
     M2MetricPluginRequest,
     MetricPluginRegistry,
+    build_catalog_metric_execution_plan,
     build_m2_metric_execution_plan,
     validate_m2_runtime_output,
+)
+from .m3_general_engine import (
+    M3_CONTRACT_OPERATOR_IMPLEMENTATIONS,
+    M3_DEFERRED_OPERATOR_IDS,
+    M3_DELIVERY_BATCH,
+    M3_DELIVERY_MILESTONE,
+    M3_EXPECTED_FAMILY_COUNTS,
+    M3_INTEGRATED_COUNT,
+    M3_REMAINDER_COUNT,
+    build_m3_metric_execution_plan,
 )
 from .context import MetricAuthority, MetricContext, MetricContextError, build_metric_context
 from .engine import (
@@ -54,6 +65,13 @@ __all__ = [
     "M2MetricPluginRequest",
     "M2AirFormalDelivery",
     "MetricPluginRegistry",
+    "M3_CONTRACT_OPERATOR_IMPLEMENTATIONS",
+    "M3_DEFERRED_OPERATOR_IDS",
+    "M3_DELIVERY_BATCH",
+    "M3_DELIVERY_MILESTONE",
+    "M3_EXPECTED_FAMILY_COUNTS",
+    "M3_INTEGRATED_COUNT",
+    "M3_REMAINDER_COUNT",
     "MetricAuthority",
     "MetricBatch",
     "MetricComputationError",
@@ -67,7 +85,9 @@ __all__ = [
     "SNS_ACCURACY_CODES",
     "SNS_DETECTION_CODES",
     "TasMachEnvelope",
+    "build_catalog_metric_execution_plan",
     "build_m2_metric_execution_plan",
+    "build_m3_metric_execution_plan",
     "validate_m2_runtime_output",
     "build_m2_air_formal_delivery",
     "build_metric_context",

@@ -153,6 +153,11 @@ jobs:
           uv run --locked python tools/testing/m3_fixture_family_check.py check
           --evidence evidence/m3-world-005/${{ matrix.platform }}/fixture-family.json
 
+      - name: Emit M3-MET-001 integrated general Metric Engine evidence
+        run: >-
+          uv run --locked python tools/testing/m3_general_metric_engine_check.py check
+          --evidence evidence/m3-met-001/${{ matrix.platform }}/general-engine.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -370,6 +375,7 @@ jobs:
             evidence/m3-world-003/${{ matrix.platform }}/strike-stage-world-event.json
             evidence/m3-world-004/${{ matrix.platform }}/mission-product-applicability.json
             evidence/m3-world-005/${{ matrix.platform }}/fixture-family.json
+            evidence/m3-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -508,6 +514,14 @@ jobs:
           --linux downloaded/evidence/m3-world-005/linux/fixture-family.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-world-005-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-001 general Metric Engine
+        run: >-
+          python tools/testing/m3_general_metric_engine_check.py compare
+          --windows downloaded/evidence/m3-met-001/windows/general-engine.json
+          --linux downloaded/evidence/m3-met-001/linux/general-engine.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-001-logical-equivalence.json
 
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
@@ -708,6 +722,7 @@ jobs:
             evidence/cross-platform/m3-world-003-logical-equivalence.json
             evidence/cross-platform/m3-world-004-logical-equivalence.json
             evidence/cross-platform/m3-world-005-logical-equivalence.json
+            evidence/cross-platform/m3-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
