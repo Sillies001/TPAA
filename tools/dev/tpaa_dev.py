@@ -113,6 +113,8 @@ M2_GUI_OBSERVATION_LANE_COMPARE_MODULE = (
 )
 M2_GUI_STATE_UX_CHECK_MODULE = "tools.testing.m2_gui_state_ux_check"
 M2_GUI_STATE_UX_COMPARE_MODULE = "tools.testing.m2_gui_state_ux_compare"
+M2_CATALOG_COVERAGE_CHECK_MODULE = "tools.testing.m2_catalog_coverage_check"
+M2_CATALOG_COVERAGE_COMPARE_MODULE = "tools.testing.m2_catalog_coverage_compare"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -214,6 +216,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-gui-observation-lane-compare", "M2-GUI-002", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-002 lane-presentation evidence exactly."),
     CommandSpec("m2-gui-state-ux-check", "M2-GUI-003", "IMPLEMENTED", "Verify distinct applicability, quality, and system-error presentation states."),
     CommandSpec("m2-gui-state-ux-compare", "M2-GUI-003", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-003 state-UX evidence exactly."),
+    CommandSpec("m2-catalog-coverage-check", "M2-TST-001", "IMPLEMENTED", "Verify exact 32/84 M2/M3 Catalog partition and M2 execution membership."),
+    CommandSpec("m2-catalog-coverage-compare", "M2-TST-001", "IMPLEMENTED", "Compare Windows/Linux M2-TST-001 Catalog coverage evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -873,6 +877,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_gui_state_ux_compare.add_argument("--linux", type=Path, required=True)
     m2_gui_state_ux_compare.add_argument("--expected-revision", required=True)
     m2_gui_state_ux_compare.add_argument("--evidence", type=Path, required=True)
+    m2_catalog_coverage = sub.add_parser(
+        "m2-catalog-coverage-check",
+        help="Verify M2-TST-001 exact Catalog coverage",
+    )
+    m2_catalog_coverage.add_argument("--evidence", type=Path)
+    m2_catalog_coverage_compare = sub.add_parser(
+        "m2-catalog-coverage-compare",
+        help="Compare Windows/Linux M2-TST-001 Catalog coverage evidence",
+    )
+    m2_catalog_coverage_compare.add_argument("--windows", type=Path, required=True)
+    m2_catalog_coverage_compare.add_argument("--linux", type=Path, required=True)
+    m2_catalog_coverage_compare.add_argument("--expected-revision", required=True)
+    m2_catalog_coverage_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1648,6 +1665,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_GUI_STATE_UX_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-catalog-coverage-check":
+        coverage_args = [
+            sys.executable,
+            "-m",
+            M2_CATALOG_COVERAGE_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            coverage_args.extend(["--evidence", str(args.evidence)])
+        return _run(coverage_args)
+    if command == "m2-catalog-coverage-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_CATALOG_COVERAGE_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
