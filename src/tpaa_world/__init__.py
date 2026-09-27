@@ -23,7 +23,15 @@ from .m2_stage_lineage import (
     build_m2_stage_world_lineage,
     project_m2_stage_world_lineage,
 )
-from .m3_wvr_training import (\n    M3WVREpisode,\n    M3WVRProjection,\n    M3WVRStage,\n    M3WVRStageEvent,\n    M3WVRWorldError,\n    project_m3_wvr_world,\n)\nfrom .minimal_p1 import (
+from .m3_wvr_training import (
+    M3WVREpisode,
+    M3WVRProjection,
+    M3WVRStage,
+    M3WVRStageEvent,
+    M3WVRWorldError,
+    project_m3_wvr_world,
+)
+from .minimal_p1 import (
     AircraftObservedWorld,
     WorldEvidenceRef,
     WorldProjectionError,
@@ -43,6 +51,11 @@ __all__ = [
     "M2StageWorldLineageSummary",
     "M2ReferenceTimeWorld",
     "M2ReferenceTimeWorldError",
+    "M3WVREpisode",
+    "M3WVRProjection",
+    "M3WVRStage",
+    "M3WVRStageEvent",
+    "M3WVRWorldError",
     "WorldEvidenceRef",
     "WorldProjectionError",
     "build_m2_radar_sensor_world",
@@ -51,5 +64,6 @@ __all__ = [
     "project_m2_radar_sensor_world",
     "project_m2_stage_world_lineage",
     "project_m2_reference_time_world",
+    "project_m3_wvr_world",
     "project_minimal_p1_world",
 ]
