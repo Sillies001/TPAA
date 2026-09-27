@@ -8,11 +8,12 @@ identity or provenance authority.
 
 from __future__ import annotations
 
+import json
 import threading
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
+from typing import Protocol, cast, runtime_checkable
 
-from tpaa_observation import M3ImmutableReleaseSnapshot
+from tpaa_observation import M3ImmutableReleaseSnapshot, M3ReleaseSnapshotError
 
 
 class M3PublicationError(RuntimeError):
@@ -44,6 +45,12 @@ class M3ReleaseNotFound(M3PublicationError):
     def __init__(self, release_id: str) -> None:
         self.release_id = release_id
         super().__init__(f"M3_RELEASE_NOT_FOUND release_id={release_id}")
+
+
+class M3MetricNotFound(M3PublicationError):
+    def __init__(self, metric_code: str) -> None:
+        self.metric_code = metric_code
+        super().__init__(f"M3_METRIC_NOT_FOUND metric_code={metric_code}")
 
 
 @dataclass(frozen=True)
@@ -353,3 +360,142 @@ class M3PublicationService:
     ) -> M3ReplayComparison:
         historical = self._repository.get_release(release_id)
         return compare_m3_release_replay(historical.release, candidate)
+
+
+    def release_summary(self, release_id: str) -> dict[str, object]:
+        """Project one explicit historical Release without current/latest lookup."""
+
+        published = self.historical_release(release_id)
+        release = published.release
+        return {
+            "release_id": release.release_id,
+            "release_no": release.release_no,
+            "parent_release_id": release.parent_release_id,
+            "session_id": release.session_id,
+            "request_hash": release.request_hash,
+            "catalog_id": release.catalog_id,
+            "catalog_version": release.catalog_version,
+            "catalog_hash": release.catalog_hash,
+            "metric_execution_plan_hash": release.metric_execution_plan_hash,
+            "publication_routing_plan_hash": release.publication_routing_plan_hash,
+            "execution_batch_hash": release.execution_batch_hash,
+            "plugin_manifest_hash": release.plugin_manifest_hash,
+            "manifest_hash": release.manifest_hash,
+            "status": published.status,
+            "version_token": published.version_token,
+            "metric_count": len(release.definitions),
+            "binding_hashes": {
+                "context_hash": release.bindings.context_hash,
+                "world_hash": release.bindings.world_hash,
+                "identity_hash": release.bindings.identity_hash,
+                "provenance_hash": release.bindings.provenance_hash,
+            },
+        }
+
+    def metric_list(self, release_id: str) -> list[dict[str, object]]:
+        """Project all frozen Metric products from one explicit Release."""
+
+        release = self.historical_release(release_id).release
+        records = {item.metric_code: item for item in release.execution_records}
+        evidence = {item.metric_code: item for item in release.evidence_bindings}
+        return [
+            {
+                "release_id": release.release_id,
+                "metric_code": definition.metric_code,
+                "semantic_id": definition.semantic_id,
+                "semantic_version": definition.semantic_version,
+                "definition_hash": definition.definition_hash,
+                "authority_lineage_hash": definition.authority_lineage_hash,
+                "subject_type": definition.subject_type,
+                "observation_lane": definition.observation_lane,
+                "publication_route": definition.publication_route,
+                "value_kind": definition.value_kind,
+                "structured_output_schema_id": (
+                    definition.structured_output_schema_id
+                ),
+                "execution_record_hash": (
+                    records[definition.metric_code].record_logical_hash
+                ),
+                "evidence_hash": evidence[definition.metric_code].evidence_hash,
+            }
+            for definition in release.definitions
+        ]
+
+    def metric_detail(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]:
+        """Project frozen Definition/execution/Evidence for one Metric."""
+
+        release = self.historical_release(release_id).release
+        try:
+            definition = release.definition(metric_code)
+            evidence = release.evidence(metric_code)
+        except M3ReleaseSnapshotError as exc:
+            raise M3MetricNotFound(metric_code) from exc
+        record = next(
+            (
+                item
+                for item in release.execution_records
+                if item.metric_code == metric_code
+            ),
+            None,
+        )
+        if record is None:
+            raise M3MetricNotFound(metric_code)
+        evidence_payload = cast(
+            dict[str, object],
+            json.loads(evidence.evidence_json),
+        )
+        return {
+            "release_id": release.release_id,
+            "metric_code": metric_code,
+            "definition": definition.projection(),
+            "execution": record.projection(),
+            "evidence": {
+                "definition_hash": evidence.definition_hash,
+                "execution_record_hash": evidence.execution_record_hash,
+                "evidence_hash": evidence.evidence_hash,
+                "payload": evidence_payload,
+            },
+            "release_provenance": {
+                "manifest_hash": release.manifest_hash,
+                "context_hash": release.bindings.context_hash,
+                "world_hash": release.bindings.world_hash,
+                "identity_hash": release.bindings.identity_hash,
+                "provenance_hash": release.bindings.provenance_hash,
+            },
+        }
+
+    def metric_evidence(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]:
+        """Project one frozen Evidence binding from an explicit historical Release."""
+
+        release = self.historical_release(release_id).release
+        try:
+            definition = release.definition(metric_code)
+            evidence = release.evidence(metric_code)
+        except M3ReleaseSnapshotError as exc:
+            raise M3MetricNotFound(metric_code) from exc
+        payload = cast(
+            dict[str, object],
+            json.loads(evidence.evidence_json),
+        )
+        return {
+            "release_id": release.release_id,
+            "metric_code": metric_code,
+            "semantic_id": definition.semantic_id,
+            "semantic_version": definition.semantic_version,
+            "definition_hash": evidence.definition_hash,
+            "execution_record_hash": evidence.execution_record_hash,
+            "evidence_hash": evidence.evidence_hash,
+            "payload": payload,
+            "release_provenance": {
+                "manifest_hash": release.manifest_hash,
+                "provenance_hash": release.bindings.provenance_hash,
+            },
+        }

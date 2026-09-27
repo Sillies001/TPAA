@@ -36,6 +36,7 @@ from .m2_publication import (
 )
 from .m3_publication import (
     InMemoryM3ReleasePublicationRepository,
+    M3MetricNotFound,
     M3PublicationError,
     M3PublicationService,
     M3PublishCASConflict,
@@ -85,6 +86,7 @@ __all__ = [
     "M2ReplayComparison",
     "compare_m2_release_replay",
     "InMemoryM3ReleasePublicationRepository",
+    "M3MetricNotFound",
     "M3PublicationError",
     "M3PublicationService",
     "M3PublishedRelease",
