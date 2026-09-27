@@ -20,7 +20,14 @@ from tpaa_metric.catalog_engine import (
     M2MetricPluginRequest,
     MetricPluginRegistry,
 )
-from tpaa_metric.operators import TimedValue, split_validity_pieces, unwrap_angles
+from tpaa_metric.operators import (
+    TimedValue,
+    median as governed_median,
+    quantile_hf7,
+    rms as governed_rms,
+    split_validity_pieces,
+    unwrap_angles,
+)
 
 M3_AIR_CODES = tuple(f"P1-AIR-{index:03d}" for index in range(4, 40))
 M3_AIR_STRUCTURED_CODES = (
@@ -188,7 +195,9 @@ def _scalar_operator(
 
 
 def _median(request: M2MetricPluginRequest, values: Sequence[float]) -> float:
-    return _scalar_operator(request, "MEDIAN_V1", values)
+    if "MEDIAN_V1" in request.operators:
+        return _scalar_operator(request, "MEDIAN_V1", values)
+    return governed_median(values)
 
 
 def _quantile(
@@ -196,11 +205,15 @@ def _quantile(
     values: Sequence[float],
     probability: float,
 ) -> float:
-    return _scalar_operator(request, "QUANTILE_HF7_V1", values, probability)
+    if "QUANTILE_HF7_V1" in request.operators:
+        return _scalar_operator(request, "QUANTILE_HF7_V1", values, probability)
+    return quantile_hf7(values, probability)
 
 
 def _rms(request: M2MetricPluginRequest, values: Sequence[float]) -> float:
-    return _scalar_operator(request, "RMS_V1", values)
+    if "RMS_V1" in request.operators:
+        return _scalar_operator(request, "RMS_V1", values)
+    return governed_rms(values)
 
 
 def _instance(
