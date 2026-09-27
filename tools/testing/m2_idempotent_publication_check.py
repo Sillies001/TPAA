@@ -58,6 +58,7 @@ def verify() -> dict[str, object]:
         build_m2_metric_execution_plan,
     )
     from tpaa_observation import (
+        M2ImmutableReleaseSnapshot,
         build_m2_publication_routing_plan,
         build_m2_release_snapshot,
     )
@@ -96,7 +97,7 @@ def verify() -> dict[str, object]:
         release_no: int,
         parent_release_id: str | None,
         context_version: str,
-    ) -> object:
+    ) -> M2ImmutableReleaseSnapshot:
         return build_m2_release_snapshot(
             session_id=SESSION_ID,
             request_hash=_hash(
@@ -149,12 +150,12 @@ def verify() -> dict[str, object]:
     repository = InMemoryM2ReleasePublicationRepository()
     service = M2PublicationService(repository)
     first_result = service.publish(
-        first,  # type: ignore[arg-type]
+        first,
         idempotency_key="m2-obs-003-first",
         expected_version_token=0,
     )
     retry_result = service.publish(
-        exact_replay,  # type: ignore[arg-type]
+        exact_replay,
         idempotency_key="m2-obs-003-first",
         expected_version_token=0,
     )
@@ -163,12 +164,12 @@ def verify() -> dict[str, object]:
     different_same_key = snapshot(
         request_label="different",
         release_no=2,
-        parent_release_id=first.release_id,  # type: ignore[union-attr]
+        parent_release_id=first.release_id,
         context_version="M2_CONTEXT_V2",
     )
     try:
         service.publish(
-            different_same_key,  # type: ignore[arg-type]
+            different_same_key,
             idempotency_key="m2-obs-003-first",
             expected_version_token=1,
         )
@@ -178,13 +179,13 @@ def verify() -> dict[str, object]:
     second = snapshot(
         request_label="second",
         release_no=2,
-        parent_release_id=first.release_id,  # type: ignore[union-attr]
+        parent_release_id=first.release_id,
         context_version="M2_CONTEXT_V2",
     )
     stale_cas_conflict = False
     try:
         service.publish(
-            second,  # type: ignore[arg-type]
+            second,
             idempotency_key="m2-obs-003-second-stale",
             expected_version_token=0,
         )
@@ -192,18 +193,18 @@ def verify() -> dict[str, object]:
         stale_cas_conflict = True
 
     second_result = service.publish(
-        second,  # type: ignore[arg-type]
+        second,
         idempotency_key="m2-obs-003-second",
         expected_version_token=1,
     )
 
     historical_first = service.historical_release(
-        first.release_id  # type: ignore[union-attr]
+        first.release_id
     )
     current = service.current(SESSION_ID)
     replay_exact = service.replay(
-        first.release_id,  # type: ignore[union-attr]
-        exact_replay,  # type: ignore[arg-type]
+        first.release_id,
+        exact_replay,
     )
     mutated_replay = snapshot(
         request_label="first",
@@ -212,8 +213,8 @@ def verify() -> dict[str, object]:
         context_version="M2_CONTEXT_MUTATED",
     )
     replay_mutated = service.replay(
-        first.release_id,  # type: ignore[union-attr]
-        mutated_replay,  # type: ignore[arg-type]
+        first.release_id,
+        mutated_replay,
     )
 
     acceptance = {
