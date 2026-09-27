@@ -290,21 +290,19 @@ def verify() -> dict[str, object]:
         service = M3PublicationService(repository)
         idempotency_key = f"m3-obs-003-{case.key.lower()}-first"
 
-        def publish_first() -> object:
-            return service.publish(
-                first,
-                idempotency_key=idempotency_key,
-                expected_version_token=0,
-            )
-
         with ThreadPoolExecutor(max_workers=4) as executor:
-            concurrent_results = list(
-                executor.map(lambda _: publish_first(), range(4))
-            )
+            futures = [
+                executor.submit(
+                    service.publish,
+                    first,
+                    idempotency_key=idempotency_key,
+                    expected_version_token=0,
+                )
+                for _ in range(4)
+            ]
+            concurrent_results = [future.result() for future in futures]
         reused_count = sum(
-            1
-            for result in concurrent_results
-            if cast(object, result).reused  # type: ignore[attr-defined]
+            1 for result in concurrent_results if result.reused
         )
         fresh_count = len(concurrent_results) - reused_count
 
