@@ -133,6 +133,11 @@ jobs:
           uv run --locked python tools/testing/m3_wvr_world_check.py
           --evidence evidence/m3-world-001/${{ matrix.platform }}/wvr-stage-world-event.json
 
+      - name: Emit M3-WORLD-002 BVR Stage/World/Event evidence
+        run: >-
+          uv run --locked python tools/testing/m3_bvr_world_check.py
+          --evidence evidence/m3-world-002/${{ matrix.platform }}/bvr-stage-world-event.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -346,6 +351,7 @@ jobs:
             evidence/m2-world-002/${{ matrix.platform }}/radar-sensor-world.json
             evidence/m2-world-003/${{ matrix.platform }}/stage-world-lineage.json
             evidence/m3-world-001/${{ matrix.platform }}/wvr-stage-world-event.json
+            evidence/m3-world-002/${{ matrix.platform }}/bvr-stage-world-event.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -452,6 +458,14 @@ jobs:
           --linux downloaded/evidence/m3-world-001/linux/wvr-stage-world-event.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-world-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-WORLD-002 BVR products
+        run: >-
+          python tools/testing/m3_bvr_world_compare.py
+          --windows downloaded/evidence/m3-world-002/windows/bvr-stage-world-event.json
+          --linux downloaded/evidence/m3-world-002/linux/bvr-stage-world-event.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-world-002-logical-equivalence.json
 
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
@@ -648,6 +662,7 @@ jobs:
             evidence/cross-platform/m2-world-002-logical-equivalence.json
             evidence/cross-platform/m2-world-003-logical-equivalence.json
             evidence/cross-platform/m3-world-001-logical-equivalence.json
+            evidence/cross-platform/m3-world-002-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
