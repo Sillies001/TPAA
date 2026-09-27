@@ -12,7 +12,6 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
-
 M2_FOUNDATION_CODES = frozenset(
     [
         *(f"P1-QA-{index:03d}" for index in range(1, 9)),
