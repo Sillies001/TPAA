@@ -23,6 +23,14 @@ from .m2_stage_lineage import (
     build_m2_stage_world_lineage,
     project_m2_stage_world_lineage,
 )
+from .m3_profile_training import (
+    M3ProfileEpisode,
+    M3ProfileProjection,
+    M3ProfileStage,
+    M3ProfileStageEvent,
+    M3ProfileWorldError,
+    project_m3_training_profile,
+)
 from .m3_wvr_training import (
     M3WVREpisode,
     M3WVRProjection,
@@ -51,6 +59,11 @@ __all__ = [
     "M2StageWorldLineageSummary",
     "M2ReferenceTimeWorld",
     "M2ReferenceTimeWorldError",
+    "M3ProfileEpisode",
+    "M3ProfileProjection",
+    "M3ProfileStage",
+    "M3ProfileStageEvent",
+    "M3ProfileWorldError",
     "M3WVREpisode",
     "M3WVRProjection",
     "M3WVRStage",
@@ -64,6 +77,7 @@ __all__ = [
     "project_m2_radar_sensor_world",
     "project_m2_stage_world_lineage",
     "project_m2_reference_time_world",
+    "project_m3_training_profile",
     "project_m3_wvr_world",
     "project_minimal_p1_world",
 ]
