@@ -31,13 +31,18 @@ def test_m2_tst_005_aggregates_cross_platform_and_storage_parity(
     logical_root = tmp_path / "logical"
     logical_root.mkdir()
     for name in REQUIRED_LOGICAL_EVIDENCE:
+        revision_field = (
+            {"expected_revision": REVISION}
+            if name == "m2-data-005-logical-equivalence.json"
+            else {"source_revision": REVISION}
+        )
         (logical_root / name).write_text(
             json.dumps(
                 {
                     "schema": f"TEST::{name}",
                     "status": "PASS",
                     "task_complete": True,
-                    "source_revision": REVISION,
+                    **revision_field,
                     "failed_acceptance": [],
                 }
             ),

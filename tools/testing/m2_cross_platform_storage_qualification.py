@@ -56,6 +56,13 @@ def _hash(value: object) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _evidence_revision(payload: dict[str, object]) -> object:
+    revision = payload.get("source_revision")
+    if revision is not None:
+        return revision
+    return payload.get("expected_revision")
+
+
 def qualify(
     logical_root: Path,
     storage_parity_path: Path,
@@ -74,7 +81,7 @@ def qualify(
         complete = payload.get("task_complete")
         logical_checks[name] = (
             payload.get("status") == "PASS"
-            and payload.get("source_revision") == expected_revision
+            and _evidence_revision(payload) == expected_revision
             and payload.get("failed_acceptance") == []
             and (complete is None or complete is True)
         )
@@ -94,7 +101,7 @@ def qualify(
         ),
         "windows_linux_logical_equivalence_pass": all(logical_checks.values()),
         "logical_products_exact_candidate_revision": all(
-            payload.get("source_revision") == expected_revision
+            _evidence_revision(payload) == expected_revision
             for payload in logical_products.values()
         ),
         "upstream_tst_001_004_equivalence_present": all(
