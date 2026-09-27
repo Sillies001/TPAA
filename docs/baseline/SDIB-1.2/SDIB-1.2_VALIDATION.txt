@@ -1,0 +1,39 @@
+TPAA SDIB-1.2 STRUCTURAL VALIDATION
+Date: 2026-09-27
+Document SHA-256: 97676e0c5d8eb6ce6ad3a0de4a347fd3023cf23069674c60bd11cea941fffd71
+M3 Task Baseline SHA-256: ba4d810d06466aaf394c5260fca123eb117645789d107112be4e89620fa35934
+Result: 28/28 STRUCTURAL PASS
+Hosted adoption CI: PENDING PR / protected-main validation
+
+01. [PASS] Version header SDIB-1.2
+02. [PASS] Parent baseline SDIB-1.1 retained as historical source
+03. [PASS] M2 protected-main Exit GO is the M3 refinement prerequisite
+04. [PASS] M2 Exit exact SHA/run bound: 9ed7754... / Run #338
+05. [PASS] R3.3 retained
+06. [PASS] CB-1.4.0 retained
+07. [PASS] DB schema 1.6.0 retained
+08. [PASS] M3 task backlog exact 28 unique tasks
+09. [PASS] M3 Primary WS set exact: WORLD/METRIC/OBSERVATION/API/GUI/TEST
+10. [PASS] Four coarse M3 execution batches defined
+11. [PASS] Four batches cover 28/28 tasks exactly once
+12. [PASS] Frozen Catalog M3 delivery set exact 84 metrics
+13. [PASS] Delivery metadata exact: M3 / P1_REMAINDER_84
+14. [PASS] Foundation 32 + remainder 84 = 116 unique P1 metrics
+15. [PASS] AIR remainder count exact 36
+16. [PASS] TRK count exact 7
+17. [PASS] ID count exact 12
+18. [PASS] PSV count exact 7
+19. [PASS] ESM count exact 6
+20. [PASS] DL count exact 8
+21. [PASS] FUS count exact 8
+22. [PASS] M3 structured Metric count exact 6; total P1 structured count exact 9
+23. [PASS] Stage profiles exact: BASIC_FLIGHT/WVR/BVR/STRIKE
+24. [PASS] AIR/TRK/ID/PSV/ESM/DL/FUS applicability contracts remain Catalog-owned
+25. [PASS] No second Metric Engine permitted
+26. [PASS] Windows/Linux and SQLite/PostgreSQL M3 Exit evidence required
+27. [PASS] Cold-start and exact protected-main M3 Exit GO required
+28. [PASS] M4 remains gated; Markdown task table is mirrored by M3_TASK_BASELINE.json and contract-tested
+
+Scope note: this validation covers the SDIB-1.2 implementation-contract refinement only.
+It does not claim any M3 implementation Task is complete. PR Hosted CI and post-merge
+protected-main validation are still required before M3 execution batches may start.
