@@ -1,0 +1,573 @@
+{
+  "schema": "TPAA_SDIB_M3_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.2",
+  "milestone": "M3",
+  "milestone_name": "P1 Four-Training-Type Complete",
+  "entry_evidence": {
+    "predecessor_milestone": "M2",
+    "protected_main_sha": "9ed7754fdc5362cd3ea3896a65fc0f5a597c6381",
+    "protected_main_run_number": 338,
+    "protected_main_run_id": 36302102143,
+    "exit_review_schema": "TPAA_M2_EXIT_REVIEW_V1",
+    "exit_decision": "GO"
+  },
+  "task_count": 28,
+  "required_workstreams": [
+    "WS-WORLD",
+    "WS-METRIC",
+    "WS-OBSERVATION",
+    "WS-API",
+    "WS-GUI",
+    "WS-TEST"
+  ],
+  "catalog_delivery": {
+    "delivery_milestone": "M3",
+    "delivery_batch": "P1_REMAINDER_84",
+    "count": 84,
+    "metric_codes": [
+      "P1-AIR-004",
+      "P1-AIR-005",
+      "P1-AIR-006",
+      "P1-AIR-007",
+      "P1-AIR-008",
+      "P1-AIR-009",
+      "P1-AIR-010",
+      "P1-AIR-011",
+      "P1-AIR-012",
+      "P1-AIR-013",
+      "P1-AIR-014",
+      "P1-AIR-015",
+      "P1-AIR-022",
+      "P1-AIR-023",
+      "P1-AIR-024",
+      "P1-AIR-025",
+      "P1-AIR-026",
+      "P1-AIR-016",
+      "P1-AIR-017",
+      "P1-AIR-018",
+      "P1-AIR-019",
+      "P1-AIR-020",
+      "P1-AIR-021",
+      "P1-AIR-038",
+      "P1-AIR-039",
+      "P1-AIR-027",
+      "P1-AIR-035",
+      "P1-AIR-036",
+      "P1-AIR-037",
+      "P1-AIR-028",
+      "P1-AIR-029",
+      "P1-AIR-030",
+      "P1-AIR-031",
+      "P1-AIR-032",
+      "P1-AIR-033",
+      "P1-AIR-034",
+      "P1-TRK-001",
+      "P1-TRK-002",
+      "P1-TRK-003",
+      "P1-TRK-004",
+      "P1-TRK-005",
+      "P1-TRK-006",
+      "P1-TRK-007",
+      "P1-ID-001",
+      "P1-ID-002",
+      "P1-ID-003",
+      "P1-ID-004",
+      "P1-ID-005",
+      "P1-ID-006",
+      "P1-ID-007",
+      "P1-ID-008",
+      "P1-ID-009",
+      "P1-ID-010",
+      "P1-ID-011",
+      "P1-ID-012",
+      "P1-PSV-001",
+      "P1-PSV-002",
+      "P1-PSV-003",
+      "P1-PSV-004",
+      "P1-PSV-005",
+      "P1-PSV-006",
+      "P1-PSV-007",
+      "P1-ESM-001",
+      "P1-ESM-002",
+      "P1-ESM-003",
+      "P1-ESM-004",
+      "P1-ESM-005",
+      "P1-ESM-006",
+      "P1-DL-001",
+      "P1-DL-002",
+      "P1-DL-003",
+      "P1-DL-004",
+      "P1-DL-005",
+      "P1-DL-006",
+      "P1-DL-007",
+      "P1-DL-008",
+      "P1-FUS-001",
+      "P1-FUS-002",
+      "P1-FUS-003",
+      "P1-FUS-004",
+      "P1-FUS-005",
+      "P1-FUS-006",
+      "P1-FUS-007",
+      "P1-FUS-008"
+    ]
+  },
+  "integrated_p1_delivery": {
+    "foundation_batch": "P1_FOUNDATION_32",
+    "foundation_count": 32,
+    "remainder_batch": "P1_REMAINDER_84",
+    "remainder_count": 84,
+    "total_count": 116
+  },
+  "family_counts": {
+    "AIRCRAFT_FLIGHT": 17,
+    "AIRCRAFT_ENERGY": 8,
+    "AIRCRAFT_CONTROL_RESPONSE": 4,
+    "AIRCRAFT_HANDLING": 4,
+    "AIRCRAFT_PERSISTENCE": 3,
+    "TRACK_PERFORMANCE": 7,
+    "ASSOCIATION_IDENTIFICATION": 12,
+    "PASSIVE_SENSOR": 7,
+    "RWR_ESM": 6,
+    "DATALINK": 8,
+    "SENSOR_FUSION": 8
+  },
+  "structured_output_contract": {
+    "m3_structured_count": 6,
+    "total_p1_structured_count": 9,
+    "m3_metric_codes": [
+      "P1-AIR-007",
+      "P1-AIR-025",
+      "P1-AIR-019",
+      "P1-AIR-039",
+      "P1-AIR-035",
+      "P1-AIR-030"
+    ]
+  },
+  "training_stage_profiles": [
+    "BASIC_FLIGHT_V1",
+    "WVR_ENGAGEMENT_V1",
+    "BVR_KILL_CHAIN_V1",
+    "STRIKE_MISSION_V1"
+  ],
+  "family_applicability": {
+    "P1-AIR-*": {
+      "subject_type": "AIRCRAFT",
+      "applicability_mode": "SUBJECT_TYPE",
+      "family_meaning": "aircraft observed flight/energy/control/handling/persistence performance"
+    },
+    "P1-TRK-*": {
+      "subject_type": "MISSION_SYSTEM_INSTANCE",
+      "applicability_mode": "PRODUCT_CAPABILITY",
+      "required_product_semantics": "LOCAL_TRACK_PRODUCT",
+      "family_meaning": "local track-processing product layer; applicability is by product capability, not by one physical sensor type"
+    },
+    "P1-ID-*": {
+      "subject_type": "MISSION_SYSTEM_INSTANCE",
+      "applicability_mode": "PRODUCT_CAPABILITY",
+      "required_product_semantics": "ASSOCIATION_IDENTIFICATION_PRODUCT",
+      "family_meaning": "association/identity processing layer; applicability is by product capability"
+    },
+    "P1-PSV-*": {
+      "subject_type": "MISSION_SYSTEM_INSTANCE",
+      "applicability_mode": "SYSTEM_TYPE_SET",
+      "allowed_system_types": [
+        "IRST",
+        "EO"
+      ],
+      "family_meaning": "passive electro-optical/infrared sensing layer"
+    },
+    "P1-ESM-*": {
+      "subject_type": "MISSION_SYSTEM_INSTANCE",
+      "applicability_mode": "SYSTEM_TYPE_SET",
+      "allowed_system_types": [
+        "RWR",
+        "ESM"
+      ],
+      "family_meaning": "emitter sensing / warning / ESM layer"
+    },
+    "P1-DL-*": {
+      "subject_type": "MISSION_SYSTEM_INSTANCE",
+      "applicability_mode": "SYSTEM_TYPE_EXACT",
+      "allowed_system_types": [
+        "DATALINK"
+      ],
+      "family_meaning": "datalink transport and remote-track delivery layer"
+    },
+    "P1-FUS-*": {
+      "subject_type": "MISSION_SYSTEM_INSTANCE",
+      "applicability_mode": "SYSTEM_TYPE_EXACT",
+      "allowed_system_types": [
+        "FUSION"
+      ],
+      "family_meaning": "multi-source fused-track product layer"
+    }
+  },
+  "authority_boundaries": {
+    "canonical_business_authority": "CB-1.4.0 machine-readable Canonical artifacts",
+    "db_schema_version": "1.6.0",
+    "no_second_metric_engine": true,
+    "m2_foundation_reused_not_recomputed_by_refinement": true,
+    "p2_p6_remain_dormant": true,
+    "m4_not_admitted": true
+  },
+  "batches": [
+    {
+      "batch_id": "M3-BATCH-1",
+      "name": "Four-training World/Event + fixture foundations",
+      "task_ids": [
+        "M3-WORLD-001",
+        "M3-WORLD-002",
+        "M3-WORLD-003",
+        "M3-WORLD-004",
+        "M3-WORLD-005"
+      ]
+    },
+    {
+      "batch_id": "M3-BATCH-2",
+      "name": "General Metric expansion + P1_REMAINDER_84",
+      "task_ids": [
+        "M3-MET-001",
+        "M3-MET-002",
+        "M3-MET-003",
+        "M3-MET-004",
+        "M3-MET-005",
+        "M3-MET-006",
+        "M3-MET-007",
+        "M3-MET-008",
+        "M3-MET-009"
+      ]
+    },
+    {
+      "batch_id": "M3-BATCH-3",
+      "name": "Publication + API + GUI product closure",
+      "task_ids": [
+        "M3-OBS-001",
+        "M3-OBS-002",
+        "M3-OBS-003",
+        "M3-API-001",
+        "M3-API-002",
+        "M3-GUI-001",
+        "M3-GUI-002",
+        "M3-GUI-003"
+      ]
+    },
+    {
+      "batch_id": "M3-BATCH-4",
+      "name": "Golden / parity / cold-start / Exit",
+      "task_ids": [
+        "M3-TST-001",
+        "M3-TST-002",
+        "M3-TST-003",
+        "M3-TST-004",
+        "M3-TST-005",
+        "M3-TST-006"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M3-WORLD-001",
+      "workstream": "WS-WORLD",
+      "deliverable": "WVR Stage/World/Event closure",
+      "dependencies": [
+        "M2 Exit GO",
+        "STAGE_REGISTRY WVR_ENGAGEMENT_V1",
+        "frozen World/input authority"
+      ],
+      "minimum_acceptance": "WVR Episode/Stage/Event products use exact WVR_ENGAGEMENT_V1 ordered stages and frozen authority; replay is stable and no shadow Stage schema is introduced"
+    },
+    {
+      "task_id": "M3-WORLD-002",
+      "workstream": "WS-WORLD",
+      "deliverable": "BVR Stage/World/Event closure",
+      "dependencies": [
+        "M2 Exit GO",
+        "STAGE_REGISTRY BVR_KILL_CHAIN_V1",
+        "frozen World/input authority"
+      ],
+      "minimum_acceptance": "BVR Episode/Stage/Event products use exact BVR_KILL_CHAIN_V1 ordered stages and frozen authority; replay is stable and no shadow Stage schema is introduced"
+    },
+    {
+      "task_id": "M3-WORLD-003",
+      "workstream": "WS-WORLD",
+      "deliverable": "Strike Stage/World/Event closure",
+      "dependencies": [
+        "M2 Exit GO",
+        "STAGE_REGISTRY STRIKE_MISSION_V1",
+        "frozen World/input authority"
+      ],
+      "minimum_acceptance": "Strike Episode/Stage/Event products use exact STRIKE_MISSION_V1 ordered stages and frozen authority; replay is stable and no shadow Stage schema is introduced"
+    },
+    {
+      "task_id": "M3-WORLD-004",
+      "workstream": "WS-WORLD",
+      "deliverable": "Mission-system product semantics and applicability inputs",
+      "dependencies": [
+        "M3-WORLD-001",
+        "M3-WORLD-002",
+        "M3-WORLD-003",
+        "P1 family applicability contracts"
+      ],
+      "minimum_acceptance": "TRK/ID product-capability semantics and PSV/ESM/DL/FUS system-type applicability are supplied from frozen authority with explicit MISSION_SYSTEM_INSTANCE identity and fail-closed non-applicable paths"
+    },
+    {
+      "task_id": "M3-WORLD-005",
+      "workstream": "WS-WORLD",
+      "deliverable": "M3 four-training frozen fixture family",
+      "dependencies": [
+        "M3-WORLD-001",
+        "M3-WORLD-002",
+        "M3-WORLD-003",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "Basic/WVR/BVR/Strike nominal, boundary, gap, insufficient, invalid and applicability fixtures have manifest/hash provenance and identical logical source products on Windows/Linux"
+    },
+    {
+      "task_id": "M3-MET-001",
+      "workstream": "WS-METRIC",
+      "deliverable": "Catalog-driven M3 expansion to exact P1_REMAINDER_84 and 116 total",
+      "dependencies": [
+        "M2 CatalogMetricEngine",
+        "M3-WORLD-001..005",
+        "P1_METRIC_CATALOG.json"
+      ],
+      "minimum_acceptance": "The existing Catalog-driven Metric Engine executes exact M3 remainder membership and integrates with the qualified foundation set for exactly 116 metrics; no second per-family engine"
+    },
+    {
+      "task_id": "M3-MET-002",
+      "workstream": "WS-METRIC",
+      "deliverable": "AIR remainder 36 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-001..005"
+      ],
+      "minimum_acceptance": "P1-AIR-004..039 exact Catalog semantics, operators, units, six new structured schemas, evidence and Golden/negative cases PASS"
+    },
+    {
+      "task_id": "M3-MET-003",
+      "workstream": "WS-METRIC",
+      "deliverable": "TRK 7 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "P1-TRK-001..007 execute only for LOCAL_TRACK_PRODUCT capability with exact Catalog semantics, evidence and Golden/negative cases"
+    },
+    {
+      "task_id": "M3-MET-004",
+      "workstream": "WS-METRIC",
+      "deliverable": "ID 12 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "P1-ID-001..012 execute only for ASSOCIATION_IDENTIFICATION_PRODUCT capability with exact Catalog semantics, evidence and Golden/negative cases"
+    },
+    {
+      "task_id": "M3-MET-005",
+      "workstream": "WS-METRIC",
+      "deliverable": "PSV 7 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "P1-PSV-001..007 exact Catalog semantics PASS for IRST/EO and fail closed for non-applicable mission-system types"
+    },
+    {
+      "task_id": "M3-MET-006",
+      "workstream": "WS-METRIC",
+      "deliverable": "ESM 6 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "P1-ESM-001..006 exact Catalog semantics PASS for RWR/ESM and fail closed for non-applicable mission-system types"
+    },
+    {
+      "task_id": "M3-MET-007",
+      "workstream": "WS-METRIC",
+      "deliverable": "DL 8 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "P1-DL-001..008 exact Catalog semantics PASS for DATALINK and fail closed for non-applicable mission-system types"
+    },
+    {
+      "task_id": "M3-MET-008",
+      "workstream": "WS-METRIC",
+      "deliverable": "FUS 8 metrics",
+      "dependencies": [
+        "M3-MET-001",
+        "M3-WORLD-004"
+      ],
+      "minimum_acceptance": "P1-FUS-001..008 exact Catalog semantics PASS for FUSION and fail closed for non-applicable mission-system types"
+    },
+    {
+      "task_id": "M3-MET-009",
+      "workstream": "WS-METRIC",
+      "deliverable": "116-metric runtime applicability, schema and deterministic replay closure",
+      "dependencies": [
+        "M3-MET-002",
+        "M3-MET-003",
+        "M3-MET-004",
+        "M3-MET-005",
+        "M3-MET-006",
+        "M3-MET-007",
+        "M3-MET-008"
+      ],
+      "minimum_acceptance": "All 116 definitions obey subject/family applicability, NUMERIC/STRUCTURED slots and all nine structured schemas; exact dependency/output hashes and deterministic replay match cross-platform"
+    },
+    {
+      "task_id": "M3-OBS-001",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Exact publication lane/route for all 116 P1 metrics",
+      "dependencies": [
+        "M3-MET-009"
+      ],
+      "minimum_acceptance": "Every P1 metric follows frozen publication_route and observation_lane with no family/lane drift and with existing M2 foundation routes preserved"
+    },
+    {
+      "task_id": "M3-OBS-002",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Immutable 116-metric Release snapshots",
+      "dependencies": [
+        "M3-OBS-001"
+      ],
+      "minimum_acceptance": "All 116 Definition/Evidence/Context/World/identity/provenance bindings are release-bound; historical reads never consult current/latest authority"
+    },
+    {
+      "task_id": "M3-OBS-003",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Idempotent publication and cross-training replay",
+      "dependencies": [
+        "M3-OBS-002"
+      ],
+      "minimum_acceptance": "Basic/WVR/BVR/Strike Release publication is idempotent under retry/concurrency and replay remains bound to exact historical release provenance"
+    },
+    {
+      "task_id": "M3-API-001",
+      "workstream": "WS-API",
+      "deliverable": "Release-bound 116-metric and Evidence query contract",
+      "dependencies": [
+        "M3-OBS-001",
+        "M3-OBS-002",
+        "M3-OBS-003"
+      ],
+      "minimum_acceptance": "API exposes release-bound Metric/Evidence products for all 116 without DB leakage, latest fallback or business recomputation in transport/controller layers"
+    },
+    {
+      "task_id": "M3-API-002",
+      "workstream": "WS-API",
+      "deliverable": "Four-training workspace projection contract",
+      "dependencies": [
+        "M3-API-001",
+        "M3-WORLD-001",
+        "M3-WORLD-002",
+        "M3-WORLD-003"
+      ],
+      "minimum_acceptance": "Basic/WVR/BVR/Strike workspace projections preserve exact Episode/Stage identities, family applicability, status/reason semantics and release provenance"
+    },
+    {
+      "task_id": "M3-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "Basic/WVR/BVR/Strike specialized workspace navigation",
+      "dependencies": [
+        "M3-API-002"
+      ],
+      "minimum_acceptance": "Desktop can navigate all four training types from release-bound Application/API projections and never accesses persistence or recomputes business metrics"
+    },
+    {
+      "task_id": "M3-GUI-002",
+      "workstream": "WS-GUI",
+      "deliverable": "Product-family and applicability-aware presentation",
+      "dependencies": [
+        "M3-GUI-001",
+        "M3-MET-003..008"
+      ],
+      "minimum_acceptance": "AIR/TRK/ID/PSV/ESM/DL/FUS product meanings and applicability boundaries are visibly distinct; non-applicable products do not render fake observations"
+    },
+    {
+      "task_id": "M3-GUI-003",
+      "workstream": "WS-GUI",
+      "deliverable": "M3 status, Evidence and historical replay UX",
+      "dependencies": [
+        "M3-GUI-001",
+        "M3-GUI-002",
+        "M3-OBS-003"
+      ],
+      "minimum_acceptance": "VALID/N_A/INSUFFICIENT_DATA/INVALID/REVIEW_REQUIRED/system-error states stay distinct with Evidence drill-down and explicit historical Release identity"
+    },
+    {
+      "task_id": "M3-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "Exact M3 Catalog coverage contract",
+      "dependencies": [
+        "P1_METRIC_CATALOG.json",
+        "M3-MET-001"
+      ],
+      "minimum_acceptance": "Exact 84 M3/P1_REMAINDER_84 codes plus exact 32 foundation codes equal the unique 116 P1 Catalog set; family counts and applicability contracts are exact"
+    },
+    {
+      "task_id": "M3-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "Four-training Stage/World/Event Golden suite",
+      "dependencies": [
+        "M3-WORLD-001",
+        "M3-WORLD-002",
+        "M3-WORLD-003",
+        "M3-WORLD-005"
+      ],
+      "minimum_acceptance": "Basic regression plus WVR/BVR/Strike Stage order, boundary, event/world lineage, gap/insufficient/invalid and replay Goldens PASS on Windows/Linux"
+    },
+    {
+      "task_id": "M3-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "AIR remainder 36 Golden and negative suite",
+      "dependencies": [
+        "M3-MET-002",
+        "M3-WORLD-005"
+      ],
+      "minimum_acceptance": "P1-AIR-004..039 numeric/structured/quality/insufficient/invalid Goldens PASS with six M3 structured schemas independently checked"
+    },
+    {
+      "task_id": "M3-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "TRK/ID/PSV/ESM/DL/FUS 48 Golden and applicability suite",
+      "dependencies": [
+        "M3-MET-003",
+        "M3-MET-004",
+        "M3-MET-005",
+        "M3-MET-006",
+        "M3-MET-007",
+        "M3-MET-008",
+        "M3-WORLD-005"
+      ],
+      "minimum_acceptance": "All 48 product-layer metrics pass Golden/negative cases and exact product/system applicability; wrong product/system paths fail closed with no fake observation"
+    },
+    {
+      "task_id": "M3-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "116-metric Release/API/GUI/cross-platform/storage qualification",
+      "dependencies": [
+        "M3-TST-001",
+        "M3-TST-002",
+        "M3-TST-003",
+        "M3-TST-004",
+        "M3-OBS-003",
+        "M3-API-002",
+        "M3-GUI-003"
+      ],
+      "minimum_acceptance": "Windows/Linux logical equivalence, SQLite/PostgreSQL logical Release membership parity, API/GUI E2E, replay/history/idempotency and exact 116 membership PASS on one candidate SHA"
+    },
+    {
+      "task_id": "M3-TST-006",
+      "workstream": "WS-TEST",
+      "deliverable": "Cold-start and M3 Exit review",
+      "dependencies": [
+        "ALL_M3_TASKS"
+      ],
+      "minimum_acceptance": "Clean source+baseline reconstructs; 28/28 M3 task evidence exact; all 116 executable P1 metrics qualified; failed_acceptance=[]; protected-main M3 Exit GO"
+    }
+  ]
+}
