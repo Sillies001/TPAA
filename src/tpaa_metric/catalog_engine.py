@@ -953,6 +953,29 @@ def validate_m2_runtime_output(
                 "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
                 f"{definition.metric_code}:{system_type}",
             )
+    elif applicability.applicability_mode == "SYSTEM_TYPE_SET":
+        system_type = input_payload.get("system_type")
+        if (
+            not isinstance(system_type, str)
+            or system_type not in definition.allowed_mission_system_types
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABILITY_INPUT_INVALID",
+                f"{definition.metric_code}:{system_type!r}",
+            )
+        runtime_applicable = system_type in applicability.allowed_system_types
+        if not runtime_applicable:
+            if output.get("applicable") is not False or output.get("instances") != []:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID",
+                    f"{definition.metric_code}:{system_type}",
+                )
+            return
+        if output.get("applicable") is not True:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
+                f"{definition.metric_code}:{system_type}",
+            )
     elif applicability.applicability_mode == "PRODUCT_CAPABILITY":
         required = applicability.required_product_semantics
         raw_products = input_payload.get("product_semantics")
