@@ -91,6 +91,8 @@ M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE = (
     "tools.testing.m2_authority_gap_sentinel_compare"
 )
 M2_BATCH_2_REVIEW_MODULE = "tools.testing.m2_batch_2_review"
+M2_PUBLICATION_ROUTING_CHECK_MODULE = "tools.testing.m2_publication_routing_check"
+M2_PUBLICATION_ROUTING_COMPARE_MODULE = "tools.testing.m2_publication_routing_compare"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -180,6 +182,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-authority-gap-sentinel-check", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Verify adopted C3 authority identity, discriminators and profile closure."),
     CommandSpec("m2-authority-gap-sentinel-compare", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Compare Windows/Linux adopted-authority sentinel evidence exactly."),
     CommandSpec("m2-batch-2-review", "M2 Batch 2 Issue #97", "IMPLEMENTED", "Aggregate exact-revision M2-MET-001..007 and C3 sentinel evidence into one fail-closed Batch 2 gate state."),
+    CommandSpec("m2-publication-routing-check", "M2-OBS-001", "IMPLEMENTED", "Verify Catalog-owned publication lane/route for exact P1_FOUNDATION_32."),
+    CommandSpec("m2-publication-routing-compare", "M2-OBS-001", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-001 publication routing exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -761,6 +765,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_batch_2_review.add_argument("--logical-root", type=Path, required=True)
     m2_batch_2_review.add_argument("--expected-revision", required=True)
     m2_batch_2_review.add_argument("--output", type=Path, required=True)
+    m2_publication_routing = sub.add_parser(
+        "m2-publication-routing-check",
+        help="Verify exact M2-OBS-001 Catalog-owned publication routing",
+    )
+    m2_publication_routing.add_argument("--evidence", type=Path)
+    m2_publication_routing_compare = sub.add_parser(
+        "m2-publication-routing-compare",
+        help="Compare Windows/Linux M2-OBS-001 publication routing",
+    )
+    m2_publication_routing_compare.add_argument("--windows", type=Path, required=True)
+    m2_publication_routing_compare.add_argument("--linux", type=Path, required=True)
+    m2_publication_routing_compare.add_argument("--expected-revision", required=True)
+    m2_publication_routing_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1394,6 +1411,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.expected_revision,
                 "--output",
                 str(args.output),
+            ]
+        )
+    if command == "m2-publication-routing-check":
+        routing_args = [
+            sys.executable,
+            "-m",
+            M2_PUBLICATION_ROUTING_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            routing_args.extend(["--evidence", str(args.evidence)])
+        return _run(routing_args)
+    if command == "m2-publication-routing-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_PUBLICATION_ROUTING_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
             ]
         )
     if command == "m1-source-registry-check":

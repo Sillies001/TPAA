@@ -168,6 +168,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-check
           --evidence evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json
 
+      - name: Emit M2-OBS-001 publication-routing evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-publication-routing-check
+          --evidence evidence/m2-obs-001/${{ matrix.platform }}/publication-routing.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -298,6 +303,7 @@ jobs:
             evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
             evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json
             evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json
+            evidence/m2-obs-001/${{ matrix.platform }}/publication-routing.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -451,6 +457,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --output evidence/m2-batch-2/review.json
 
+      - name: Compare Windows and Linux M2-OBS-001 publication routing
+        run: >-
+          python tools/dev/tpaa_dev.py m2-publication-routing-compare
+          --windows downloaded/evidence/m2-obs-001/windows/publication-routing.json
+          --linux downloaded/evidence/m2-obs-001/linux/publication-routing.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-obs-001-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -501,6 +515,7 @@ jobs:
             evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json
             evidence/cross-platform/m2-authority-gap-sentinel.json
+            evidence/cross-platform/m2-obs-001-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json
