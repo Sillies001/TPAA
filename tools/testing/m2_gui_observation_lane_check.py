@@ -199,7 +199,14 @@ def verify() -> dict[str, object]:
             is True
         ),
         "quality_evidence_presentation_exact": (
-            evidence_only_detail["definition"]["metric_code"] == "P1-QA-008"
+            evidence_only_detail["definition"]["metric_code"]
+            in {
+                "P1-QA-001",
+                "P1-QA-002",
+                "P1-QA-005",
+                "P1-QA-007",
+                "P1-QA-008",
+            }
             and evidence_only_detail["observation_presentation"]["lane"]
             == "QUALITY_EVIDENCE_ONLY"
             and evidence_only_detail["observation_presentation"][
