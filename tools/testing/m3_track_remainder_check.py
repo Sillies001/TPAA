@@ -283,7 +283,7 @@ def verify() -> dict[str, object]:
     register_m3_track_plugins(plan, registry)
 
     positive_inputs = _golden_inputs(list(positive_subject.product_semantics))
-    qa_input = {
+    qa_input: dict[str, object] = {
         "samples": [
             {
                 "measurement_time_us": 500_000,
@@ -308,8 +308,10 @@ def verify() -> dict[str, object]:
     direct = _direct_outputs(plan, registry, positive_inputs)
     direct_replay = _direct_outputs(plan, registry, positive_inputs)
 
-    negative_inputs = {
-        code: {"product_semantics": list(negative_subject.product_semantics)}
+    negative_inputs: dict[str, dict[str, object]] = {
+        code: {
+            "product_semantics": list(negative_subject.product_semantics),
+        }
         for code in M3_TRK_CODES
     }
     negative_engine_inputs: dict[str, dict[str, object]] = {
