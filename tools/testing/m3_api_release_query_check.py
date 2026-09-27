@@ -11,8 +11,6 @@ import sys
 from pathlib import Path
 from typing import cast
 
-from fastapi.testclient import TestClient
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
 TRACKING_ISSUE = 116
@@ -86,6 +84,8 @@ def verify() -> dict[str, object]:
     src_root = str(REPO_ROOT / "src")
     if src_root not in sys.path:
         sys.path.insert(0, src_root)
+
+    from fastapi.testclient import TestClient
 
     from tpaa_api import create_m3_app
     from tpaa_application import (
