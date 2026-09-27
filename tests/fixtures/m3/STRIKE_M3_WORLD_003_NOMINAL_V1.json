@@ -1,0 +1,33 @@
+{
+  "schema": "TPAA_M3_PROFILE_WORLD_FIXTURE_V1",
+  "fixture_id": "STRIKE_M3_WORLD_003_NOMINAL_V1",
+  "training_type": "STRIKE",
+  "episode_type": "STRIKE_MISSION",
+  "stage_profile_id": "STRIKE_MISSION_V1",
+  "world_capability_code": "STRIKE_CORE",
+  "session_id": "51111111-1111-4111-8111-111111111111",
+  "context_id": "52222222-2222-4222-8222-222222222222",
+  "primary_aircraft_id": "53333333-3333-4333-8333-333333333333",
+  "release_id": "54444444-4444-4444-8444-444444444444",
+  "start_session_time_us": "0",
+  "end_session_time_us": "9000000",
+  "official_stage_markers": [
+    {"session_time_us": "0", "stage": "MISSION_SETUP"},
+    {"session_time_us": "1000000", "stage": "ROUTE_TASK_EXECUTION"},
+    {"session_time_us": "2000000", "stage": "TARGET_INFORMATION_AVAILABLE"},
+    {"session_time_us": "3000000", "stage": "TARGET_ASSOCIATION"},
+    {"session_time_us": "4000000", "stage": "DESIGNATION_TRACK"},
+    {"session_time_us": "5000000", "stage": "TRAINING_ATTACK_EVENT"},
+    {"session_time_us": "6000000", "stage": "RANGE_SIM_ADJUDICATION"},
+    {"session_time_us": "7000000", "stage": "POST_EVENT_TASK_TRANSITION"},
+    {"session_time_us": "8000000", "stage": "RECOVERY"},
+    {"session_time_us": "9000000", "stage": "END"}
+  ],
+  "world_sources": [
+    {"world_code": "C", "source_authority_signature": "M3_SYNTHETIC_STRIKE:CONTEXT:1.0.0"},
+    {"world_code": "W", "source_authority_signature": "M3_SYNTHETIC_STRIKE:TRUTH:1.0.0"},
+    {"world_code": "A", "source_authority_signature": "M3_SYNTHETIC_STRIKE:ACTION:1.0.0"},
+    {"world_code": "M", "source_authority_signature": "M3_SYNTHETIC_STRIKE:MACHINE:1.0.0"}
+  ],
+  "data_classification": "SYNTHETIC"
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "TPAA_M3_FIXTURE_FAMILY_V1",
+  "task_id": "M3-WORLD-005",
+  "tracking_issue": 112,
+  "family_id": "M3_FOUR_TRAINING_WORLD_FIXTURES",
+  "family_version": "1.0.0",
+  "data_classification": "SYNTHETIC",
+  "hash_policy": "SHA256_FROZEN_BASE_AND_CANONICAL_CASE_V1",
+  "required_training_types": [
+    "BASIC_FLIGHT",
+    "WVR",
+    "BVR",
+    "STRIKE"
+  ],
+  "required_categories": [
+    "NOMINAL",
+    "BOUNDARY",
+    "GAP",
+    "INSUFFICIENT",
+    "INVALID",
+    "APPLICABILITY"
+  ],
+  "platform_policy": {
+    "host_path_in_logical_product": false,
+    "source_bytes": "REPOSITORY_CONTROLLED_IDENTICAL_BYTES",
+    "windows_linux_constraint": "SAME_MANIFEST_TRANSFORM_AND_INPUT_SHA256"
+  },
+  "training_contracts": {
+    "BASIC_FLIGHT": {
+      "base_fixture": "BASIC_M3_WORLD_005_BASE_V1.json",
+      "episode_type": "BASIC_FLIGHT",
+      "stage_profile_id": "BASIC_FLIGHT_V1",
+      "world_capability_code": "BASIC_CORE"
+    },
+    "WVR": {
+      "base_fixture": "WVR_M3_WORLD_005_BASE_V1.json",
+      "episode_type": "WVR_ENGAGEMENT",
+      "stage_profile_id": "WVR_ENGAGEMENT_V1",
+      "world_capability_code": "WVR_CORE"
+    },
+    "BVR": {
+      "base_fixture": "BVR_M3_WORLD_002_NOMINAL_V1.json",
+      "episode_type": "BVR_KILL_CHAIN",
+      "stage_profile_id": "BVR_KILL_CHAIN_V1",
+      "world_capability_code": "BVR_PROCESS"
+    },
+    "STRIKE": {
+      "base_fixture": "STRIKE_M3_WORLD_003_NOMINAL_V1.json",
+      "episode_type": "STRIKE_MISSION",
+      "stage_profile_id": "STRIKE_MISSION_V1",
+      "world_capability_code": "STRIKE_CORE"
+    }
+  },
+  "applicability_fixture": "M3_WORLD_004_MISSION_SYSTEMS_V1.json",
+  "case_transforms": {
+    "NOMINAL": "IDENTITY_V1",
+    "BOUNDARY": "NON_UNIFORM_BOUNDARY_V1",
+    "GAP": "DECLARED_SOURCE_GAP_V1",
+    "INSUFFICIENT": "DROP_REQUIRED_WORLD_V1",
+    "INVALID": "CORRUPT_STAGE_ORDER_V1",
+    "APPLICABILITY": "CATALOG_APPLICABILITY_MATRIX_V1"
+  }
+}

@@ -23,6 +23,31 @@ from .m2_stage_lineage import (
     build_m2_stage_world_lineage,
     project_m2_stage_world_lineage,
 )
+from .m3_mission_product_applicability import (
+    M3FamilyApplicabilityContract,
+    M3MissionProductApplicability,
+    M3MissionProductApplicabilityError,
+    M3MissionProductInputSet,
+    M3MissionSystemSubject,
+    load_m3_mission_product_inputs,
+    project_m3_family_applicability,
+)
+from .m3_profile_training import (
+    M3ProfileEpisode,
+    M3ProfileProjection,
+    M3ProfileStage,
+    M3ProfileStageEvent,
+    M3ProfileWorldError,
+    project_m3_training_profile,
+)
+from .m3_wvr_training import (
+    M3WVREpisode,
+    M3WVRProjection,
+    M3WVRStage,
+    M3WVRStageEvent,
+    M3WVRWorldError,
+    project_m3_wvr_world,
+)
 from .minimal_p1 import (
     AircraftObservedWorld,
     WorldEvidenceRef,
@@ -43,6 +68,21 @@ __all__ = [
     "M2StageWorldLineageSummary",
     "M2ReferenceTimeWorld",
     "M2ReferenceTimeWorldError",
+    "M3FamilyApplicabilityContract",
+    "M3MissionProductApplicability",
+    "M3MissionProductApplicabilityError",
+    "M3MissionProductInputSet",
+    "M3MissionSystemSubject",
+    "M3ProfileEpisode",
+    "M3ProfileProjection",
+    "M3ProfileStage",
+    "M3ProfileStageEvent",
+    "M3ProfileWorldError",
+    "M3WVREpisode",
+    "M3WVRProjection",
+    "M3WVRStage",
+    "M3WVRStageEvent",
+    "M3WVRWorldError",
     "WorldEvidenceRef",
     "WorldProjectionError",
     "build_m2_radar_sensor_world",
@@ -51,5 +91,9 @@ __all__ = [
     "project_m2_radar_sensor_world",
     "project_m2_stage_world_lineage",
     "project_m2_reference_time_world",
+    "load_m3_mission_product_inputs",
+    "project_m3_family_applicability",
+    "project_m3_training_profile",
+    "project_m3_wvr_world",
     "project_minimal_p1_world",
 ]
