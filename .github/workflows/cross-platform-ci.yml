@@ -153,6 +153,51 @@ jobs:
           uv run --locked python tools/testing/m3_fixture_family_check.py check
           --evidence evidence/m3-world-005/${{ matrix.platform }}/fixture-family.json
 
+      - name: Emit M3-MET-001 integrated general Metric Engine evidence
+        run: >-
+          uv run --locked python tools/testing/m3_general_metric_engine_check.py check
+          --evidence evidence/m3-met-001/${{ matrix.platform }}/general-engine.json
+
+      - name: Emit M3-MET-002 AIR remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_air_remainder_check.py check
+          --evidence evidence/m3-met-002/${{ matrix.platform }}/air-remainder.json
+
+      - name: Emit M3-MET-003 TRK remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_track_remainder_check.py check
+          --evidence evidence/m3-met-003/${{ matrix.platform }}/track-remainder.json
+
+      - name: Emit M3-MET-004 ID remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_identification_remainder_check.py check
+          --evidence evidence/m3-met-004/${{ matrix.platform }}/identification-remainder.json
+
+      - name: Emit M3-MET-005 passive remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_passive_remainder_check.py check
+          --evidence evidence/m3-met-005/${{ matrix.platform }}/passive-remainder.json
+
+      - name: Emit M3-MET-006 ESM remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_esm_remainder_check.py check
+          --evidence evidence/m3-met-006/${{ matrix.platform }}/esm-remainder.json
+
+      - name: Emit M3-MET-007 datalink remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_datalink_remainder_check.py check
+          --evidence evidence/m3-met-007/${{ matrix.platform }}/datalink-remainder.json
+
+      - name: Emit M3-MET-008 fusion remainder evidence
+        run: >-
+          uv run --locked python tools/testing/m3_fusion_remainder_check.py check
+          --evidence evidence/m3-met-008/${{ matrix.platform }}/fusion-remainder.json
+
+      - name: Emit M3-MET-009 runtime closure evidence
+        run: >-
+          uv run --locked python tools/testing/m3_runtime_closure_check.py check
+          --evidence evidence/m3-met-009/${{ matrix.platform }}/runtime-closure.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -370,6 +415,15 @@ jobs:
             evidence/m3-world-003/${{ matrix.platform }}/strike-stage-world-event.json
             evidence/m3-world-004/${{ matrix.platform }}/mission-product-applicability.json
             evidence/m3-world-005/${{ matrix.platform }}/fixture-family.json
+            evidence/m3-met-001/${{ matrix.platform }}/general-engine.json
+            evidence/m3-met-002/${{ matrix.platform }}/air-remainder.json
+            evidence/m3-met-003/${{ matrix.platform }}/track-remainder.json
+            evidence/m3-met-004/${{ matrix.platform }}/identification-remainder.json
+            evidence/m3-met-005/${{ matrix.platform }}/passive-remainder.json
+            evidence/m3-met-006/${{ matrix.platform }}/esm-remainder.json
+            evidence/m3-met-007/${{ matrix.platform }}/datalink-remainder.json
+            evidence/m3-met-008/${{ matrix.platform }}/fusion-remainder.json
+            evidence/m3-met-009/${{ matrix.platform }}/runtime-closure.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -508,6 +562,78 @@ jobs:
           --linux downloaded/evidence/m3-world-005/linux/fixture-family.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-world-005-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-001 general Metric Engine
+        run: >-
+          python tools/testing/m3_general_metric_engine_check.py compare
+          --windows downloaded/evidence/m3-met-001/windows/general-engine.json
+          --linux downloaded/evidence/m3-met-001/linux/general-engine.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-002 AIR remainder
+        run: >-
+          python tools/testing/m3_air_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-002/windows/air-remainder.json
+          --linux downloaded/evidence/m3-met-002/linux/air-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-002-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-003 TRK remainder
+        run: >-
+          python tools/testing/m3_track_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-003/windows/track-remainder.json
+          --linux downloaded/evidence/m3-met-003/linux/track-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-003-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-004 ID remainder
+        run: >-
+          python tools/testing/m3_identification_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-004/windows/identification-remainder.json
+          --linux downloaded/evidence/m3-met-004/linux/identification-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-004-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-005 passive remainder
+        run: >-
+          python tools/testing/m3_passive_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-005/windows/passive-remainder.json
+          --linux downloaded/evidence/m3-met-005/linux/passive-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-005-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-006 ESM remainder
+        run: >-
+          python tools/testing/m3_esm_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-006/windows/esm-remainder.json
+          --linux downloaded/evidence/m3-met-006/linux/esm-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-006-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-007 datalink remainder
+        run: >-
+          python tools/testing/m3_datalink_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-007/windows/datalink-remainder.json
+          --linux downloaded/evidence/m3-met-007/linux/datalink-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-007-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-008 fusion remainder
+        run: >-
+          python tools/testing/m3_fusion_remainder_check.py compare
+          --windows downloaded/evidence/m3-met-008/windows/fusion-remainder.json
+          --linux downloaded/evidence/m3-met-008/linux/fusion-remainder.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-008-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-MET-009 runtime closure
+        run: >-
+          python tools/testing/m3_runtime_closure_check.py compare
+          --windows downloaded/evidence/m3-met-009/windows/runtime-closure.json
+          --linux downloaded/evidence/m3-met-009/linux/runtime-closure.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-met-009-logical-equivalence.json
 
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
@@ -708,6 +834,15 @@ jobs:
             evidence/cross-platform/m3-world-003-logical-equivalence.json
             evidence/cross-platform/m3-world-004-logical-equivalence.json
             evidence/cross-platform/m3-world-005-logical-equivalence.json
+            evidence/cross-platform/m3-met-001-logical-equivalence.json
+            evidence/cross-platform/m3-met-002-logical-equivalence.json
+            evidence/cross-platform/m3-met-003-logical-equivalence.json
+            evidence/cross-platform/m3-met-004-logical-equivalence.json
+            evidence/cross-platform/m3-met-005-logical-equivalence.json
+            evidence/cross-platform/m3-met-006-logical-equivalence.json
+            evidence/cross-platform/m3-met-007-logical-equivalence.json
+            evidence/cross-platform/m3-met-008-logical-equivalence.json
+            evidence/cross-platform/m3-met-009-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json

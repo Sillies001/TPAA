@@ -329,9 +329,25 @@ class CatalogMetricEngine:
         self,
         plan: M2MetricExecutionPlan,
         plugins: MetricPluginRegistry,
+        *,
+        operator_implementations: Mapping[
+            str,
+            Callable[..., object],
+        ] = M2_OPERATOR_IMPLEMENTATIONS,
     ) -> None:
+        missing_operators = (
+            set(plan.required_operator_ids) - set(operator_implementations)
+        )
+        if missing_operators:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_OPERATOR_IMPLEMENTATION_MISSING",
+                repr(sorted(missing_operators)),
+            )
         self.plan = plan
         self.plugins = plugins
+        self.operator_implementations = MappingProxyType(
+            dict(operator_implementations)
+        )
 
     def _execution_definitions(
         self,
@@ -415,7 +431,7 @@ class CatalogMetricEngine:
             )
             operators = MappingProxyType(
                 {
-                    operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
+                    operator_id: self.operator_implementations[operator_id]
                     for operator_id in definition.operator_bindings
                 }
             )
@@ -936,6 +952,55 @@ def validate_m2_runtime_output(
             raise CatalogMetricEngineError(
                 "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
                 f"{definition.metric_code}:{system_type}",
+            )
+    elif applicability.applicability_mode == "SYSTEM_TYPE_SET":
+        system_type = input_payload.get("system_type")
+        if (
+            not isinstance(system_type, str)
+            or system_type not in definition.allowed_mission_system_types
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABILITY_INPUT_INVALID",
+                f"{definition.metric_code}:{system_type!r}",
+            )
+        runtime_applicable = system_type in applicability.allowed_system_types
+        if not runtime_applicable:
+            if output.get("applicable") is not False or output.get("instances") != []:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID",
+                    f"{definition.metric_code}:{system_type}",
+                )
+            return
+        if output.get("applicable") is not True:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
+                f"{definition.metric_code}:{system_type}",
+            )
+    elif applicability.applicability_mode == "PRODUCT_CAPABILITY":
+        required = applicability.required_product_semantics
+        raw_products = input_payload.get("product_semantics")
+        if (
+            required is None
+            or not isinstance(raw_products, (list, tuple))
+            or not all(isinstance(item, str) and item for item in raw_products)
+            or len(raw_products) != len(set(raw_products))
+        ):
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABILITY_INPUT_INVALID",
+                f"{definition.metric_code}:{raw_products!r}",
+            )
+        runtime_applicable = required in raw_products
+        if not runtime_applicable:
+            if output.get("applicable") is not False or output.get("instances") != []:
+                raise CatalogMetricEngineError(
+                    "M2_METRIC_NOT_APPLICABLE_OUTPUT_INVALID",
+                    f"{definition.metric_code}:{required}",
+                )
+            return
+        if output.get("applicable") is not True:
+            raise CatalogMetricEngineError(
+                "M2_METRIC_APPLICABLE_OUTPUT_REJECTED",
+                f"{definition.metric_code}:{required}",
             )
     elif applicability.applicability_mode not in {
         "SUBJECT_TYPE",
@@ -1840,8 +1905,34 @@ def _topological_order(
     return tuple(ordered)
 
 
-def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPlan:
-    """Compile the exact frozen M2 Catalog batch into one deterministic plan."""
+def build_catalog_metric_execution_plan(
+    authority_root: Path,
+    *,
+    delivery_scope: Sequence[tuple[str, str]],
+    expected_count: int,
+    expected_family_counts: Mapping[str, int],
+    plan_delivery_milestone: str,
+    plan_delivery_batch: str,
+    operator_implementations: Mapping[
+        str,
+        Callable[..., object],
+    ] = M2_OPERATOR_IMPLEMENTATIONS,
+) -> M2MetricExecutionPlan:
+    """Compile an exact frozen Catalog delivery scope into one deterministic plan."""
+
+    normalized_scope = tuple(delivery_scope)
+    if (
+        not normalized_scope
+        or len(set(normalized_scope)) != len(normalized_scope)
+        or any(not milestone or not batch for milestone, batch in normalized_scope)
+        or expected_count <= 0
+        or not plan_delivery_milestone
+        or not plan_delivery_batch
+    ):
+        raise CatalogMetricEngineError(
+            "M2_METRIC_DELIVERY_SCOPE_INVALID",
+            repr(normalized_scope),
+        )
 
     catalog_path = authority_root / "P1_METRIC_CATALOG.json"
     catalog, catalog_bytes = _load_object(catalog_path)
@@ -1857,10 +1948,13 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
     selected_with_index = [
         (index, metric)
         for index, metric in enumerate(metrics)
-        if metric.get("delivery_milestone") == M2_DELIVERY_MILESTONE
-        and metric.get("delivery_batch") == M2_DELIVERY_BATCH
+        if (
+            metric.get("delivery_milestone"),
+            metric.get("delivery_batch"),
+        )
+        in normalized_scope
     ]
-    if len(selected_with_index) != M2_FOUNDATION_COUNT:
+    if len(selected_with_index) != expected_count:
         raise CatalogMetricEngineError(
             "M2_METRIC_FOUNDATION_COUNT_DRIFT",
             str(len(selected_with_index)),
@@ -1869,7 +1963,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         _text(metric, "metric_code", field=f"metrics[{index}]")
         for index, metric in selected_with_index
     )
-    if len(set(catalog_codes)) != M2_FOUNDATION_COUNT:
+    if len(set(catalog_codes)) != expected_count:
         raise CatalogMetricEngineError(
             "M2_METRIC_FOUNDATION_CODE_DUPLICATE",
             repr(catalog_codes),
@@ -1879,7 +1973,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         _text(metric, "family", field=f"metrics[{index}]")
         for index, metric in selected_with_index
     )
-    if dict(family_counts) != dict(M2_EXPECTED_FAMILY_COUNTS):
+    if dict(family_counts) != dict(expected_family_counts):
         raise CatalogMetricEngineError(
             "M2_METRIC_FAMILY_COUNT_DRIFT",
             repr(dict(family_counts)),
@@ -2064,7 +2158,7 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
                 operator_id,
                 field="operator_registry",
             )
-            if operator_id not in M2_OPERATOR_IMPLEMENTATIONS:
+            if operator_id not in operator_implementations:
                 raise CatalogMetricEngineError(
                     "M2_METRIC_OPERATOR_IMPLEMENTATION_MISSING",
                     f"{code}:{operator_id}",
@@ -2315,8 +2409,8 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
             "allowed_result_statuses": allowed_result_statuses,
             "allowed_mission_system_types": allowed_mission_system_types,
             "db_schema_version": db_schema_version,
-            "delivery_milestone": M2_DELIVERY_MILESTONE,
-            "delivery_batch": M2_DELIVERY_BATCH,
+            "delivery_milestone": plan_delivery_milestone,
+            "delivery_batch": plan_delivery_batch,
             "catalog_metric_codes": catalog_codes,
             "execution_metric_codes": [definition.metric_code for definition in ordered],
             "definition_hashes": [
@@ -2353,12 +2447,26 @@ def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPla
         allowed_result_statuses=allowed_result_statuses,
         allowed_mission_system_types=allowed_mission_system_types,
         db_schema_version=db_schema_version,
-        delivery_milestone=M2_DELIVERY_MILESTONE,
-        delivery_batch=M2_DELIVERY_BATCH,
+        delivery_milestone=plan_delivery_milestone,
+        delivery_batch=plan_delivery_batch,
         catalog_metric_codes=catalog_codes,
         definitions=ordered,
         required_operator_ids=required_operator_ids,
         required_state_machine_ids=required_state_machine_ids,
         required_external_dependency_ids=required_external_dependency_ids,
         logical_hash=logical_hash,
+    )
+
+
+def build_m2_metric_execution_plan(authority_root: Path) -> M2MetricExecutionPlan:
+    """Compile the exact frozen M2 foundation Catalog batch."""
+
+    return build_catalog_metric_execution_plan(
+        authority_root,
+        delivery_scope=((M2_DELIVERY_MILESTONE, M2_DELIVERY_BATCH),),
+        expected_count=M2_FOUNDATION_COUNT,
+        expected_family_counts=M2_EXPECTED_FAMILY_COUNTS,
+        plan_delivery_milestone=M2_DELIVERY_MILESTONE,
+        plan_delivery_batch=M2_DELIVERY_BATCH,
+        operator_implementations=M2_OPERATOR_IMPLEMENTATIONS,
     )
