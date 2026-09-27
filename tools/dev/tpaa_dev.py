@@ -99,6 +99,12 @@ M2_IDEMPOTENT_PUBLICATION_CHECK_MODULE = "tools.testing.m2_idempotent_publicatio
 M2_IDEMPOTENT_PUBLICATION_COMPARE_MODULE = (
     "tools.testing.m2_idempotent_publication_compare"
 )
+M2_GUI_FOUNDATION_NAVIGATION_CHECK_MODULE = (
+    "tools.testing.m2_gui_foundation_navigation_check"
+)
+M2_GUI_FOUNDATION_NAVIGATION_COMPARE_MODULE = (
+    "tools.testing.m2_gui_foundation_navigation_compare"
+)
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -194,6 +200,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-immutable-release-compare", "M2-OBS-002", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-002 immutable Release snapshots exactly."),
     CommandSpec("m2-idempotent-publication-check", "M2-OBS-003", "IMPLEMENTED", "Verify M2 Release idempotency, CAS history, and explicit replay."),
     CommandSpec("m2-idempotent-publication-compare", "M2-OBS-003", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-003 publication/replay evidence exactly."),
+    CommandSpec("m2-gui-foundation-navigation-check", "M2-GUI-001", "IMPLEMENTED", "Verify release-bound Basic Flight foundation navigation over exact 32 metrics."),
+    CommandSpec("m2-gui-foundation-navigation-compare", "M2-GUI-001", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-001 navigation evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -814,6 +822,19 @@ def build_parser() -> argparse.ArgumentParser:
     m2_idempotent_publication_compare.add_argument("--linux", type=Path, required=True)
     m2_idempotent_publication_compare.add_argument("--expected-revision", required=True)
     m2_idempotent_publication_compare.add_argument("--evidence", type=Path, required=True)
+    m2_gui_foundation_navigation = sub.add_parser(
+        "m2-gui-foundation-navigation-check",
+        help="Verify M2-GUI-001 Basic Flight foundation navigation",
+    )
+    m2_gui_foundation_navigation.add_argument("--evidence", type=Path)
+    m2_gui_foundation_navigation_compare = sub.add_parser(
+        "m2-gui-foundation-navigation-compare",
+        help="Compare Windows/Linux M2-GUI-001 navigation evidence",
+    )
+    m2_gui_foundation_navigation_compare.add_argument("--windows", type=Path, required=True)
+    m2_gui_foundation_navigation_compare.add_argument("--linux", type=Path, required=True)
+    m2_gui_foundation_navigation_compare.add_argument("--expected-revision", required=True)
+    m2_gui_foundation_navigation_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1514,6 +1535,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.executable,
                 "-m",
                 M2_IDEMPOTENT_PUBLICATION_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-gui-foundation-navigation-check":
+        navigation_args = [
+            sys.executable,
+            "-m",
+            M2_GUI_FOUNDATION_NAVIGATION_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            navigation_args.extend(["--evidence", str(args.evidence)])
+        return _run(navigation_args)
+    if command == "m2-gui-foundation-navigation-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_GUI_FOUNDATION_NAVIGATION_COMPARE_MODULE,
                 "--windows",
                 str(args.windows),
                 "--linux",
