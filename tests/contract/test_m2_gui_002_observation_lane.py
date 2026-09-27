@@ -4,12 +4,11 @@ from copy import deepcopy
 
 import pytest
 
+from tests.contract.test_m2_gui_001_foundation_navigation import _projection
 from tpaa_gui.m2_workspace import (
     M2FoundationNavigationError,
     build_m2_foundation_navigation_model,
 )
-
-from tests.contract.test_m2_gui_001_foundation_navigation import _projection
 
 
 def test_m2_gui_002_model_projects_exact_observation_lanes() -> None:
