@@ -6,12 +6,12 @@ from pathlib import Path
 import pytest
 
 from tpaa_metric import (
+    M3_CONTRACT_OPERATOR_IMPLEMENTATIONS,
+    M3_DEFERRED_OPERATOR_IDS,
     CatalogMetricEngine,
     CatalogMetricEngineError,
     M2MetricPluginRequest,
     MetricPluginRegistry,
-    M3_CONTRACT_OPERATOR_IMPLEMENTATIONS,
-    M3_DEFERRED_OPERATOR_IDS,
     build_m2_metric_execution_plan,
     build_m3_metric_execution_plan,
 )

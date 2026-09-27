@@ -20,16 +20,6 @@ from .catalog_engine import (
     build_m2_metric_execution_plan,
     validate_m2_runtime_output,
 )
-from .m3_general_engine import (
-    M3_CONTRACT_OPERATOR_IMPLEMENTATIONS,
-    M3_DEFERRED_OPERATOR_IDS,
-    M3_DELIVERY_BATCH,
-    M3_DELIVERY_MILESTONE,
-    M3_EXPECTED_FAMILY_COUNTS,
-    M3_INTEGRATED_COUNT,
-    M3_REMAINDER_COUNT,
-    build_m3_metric_execution_plan,
-)
 from .context import MetricAuthority, MetricContext, MetricContextError, build_metric_context
 from .engine import (
     MetricBatch,
@@ -39,6 +29,16 @@ from .engine import (
     MetricStagingArea,
     TasMachEnvelope,
     compute_representative_metrics,
+)
+from .m3_general_engine import (
+    M3_CONTRACT_OPERATOR_IMPLEMENTATIONS,
+    M3_DEFERRED_OPERATOR_IDS,
+    M3_DELIVERY_BATCH,
+    M3_DELIVERY_MILESTONE,
+    M3_EXPECTED_FAMILY_COUNTS,
+    M3_INTEGRATED_COUNT,
+    M3_REMAINDER_COUNT,
+    build_m3_metric_execution_plan,
 )
 from .sns_accuracy import (
     M2_SNS_ACCURACY_PLUGINS,

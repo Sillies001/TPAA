@@ -83,12 +83,12 @@ def verify() -> dict[str, object]:
         sys.path.insert(0, src_root)
 
     from tpaa_metric import (
-        CatalogMetricEngine,
-        M2MetricPluginRequest,
-        MetricPluginRegistry,
         M3_CONTRACT_OPERATOR_IMPLEMENTATIONS,
         M3_DEFERRED_OPERATOR_IDS,
         M3_EXPECTED_FAMILY_COUNTS,
+        CatalogMetricEngine,
+        M2MetricPluginRequest,
+        MetricPluginRegistry,
         build_m2_metric_execution_plan,
         build_m3_metric_execution_plan,
     )

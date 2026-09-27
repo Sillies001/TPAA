@@ -16,9 +16,9 @@ from pathlib import Path
 from types import MappingProxyType
 
 from tpaa_metric.catalog_engine import (
-    CatalogMetricEngineError,
     M2_DELIVERY_BATCH,
     M2_DELIVERY_MILESTONE,
+    CatalogMetricEngineError,
     M2MetricExecutionPlan,
     build_catalog_metric_execution_plan,
 )
