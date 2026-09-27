@@ -36,9 +36,10 @@ def cv_propagation_v1(
     if any(not math.isfinite(item) for item in values):
         raise ValueError("M3_FUS_CV_VECTOR_NONFINITE")
     dt_s = age_us / 1_000_000.0
-    return tuple(
-        float(position[index]) + float(velocity[index]) * dt_s
-        for index in range(3)
+    return (
+        float(position[0]) + float(velocity[0]) * dt_s,
+        float(position[1]) + float(velocity[1]) * dt_s,
+        float(position[2]) + float(velocity[2]) * dt_s,
     )
 
 
