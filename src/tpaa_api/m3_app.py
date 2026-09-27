@@ -16,7 +16,7 @@ from tpaa_application import (
 from .app import create_app
 
 
-def _m3_error(exc: M3PublicationError) -> JSONResponse:
+def _m3_error(\n    exc: M3PublicationError | M3WorkspaceProjectionError,\n) -> JSONResponse:
     if isinstance(exc, M3ReleaseNotFound):
         code = "RELEASE_NOT_FOUND"
         detail = exc.release_id
