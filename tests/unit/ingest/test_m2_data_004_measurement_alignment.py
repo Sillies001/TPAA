@@ -24,6 +24,34 @@ def test_nominal_measurement_alignment_is_replay_stable_and_complete() -> None:
     assert first.coverage == 1.0
     assert first.max_observed_gap_us == 5000
     assert first.metric_codes == EXPECTED_METRIC_CODES
+    assert first.quality_profile.profile_id == "M2_REFERENCE_MATCH_QUALITY_V1"
+    assert first.quality_profile.profile_version == "1.1.0"
+    assert (
+        first.quality_profile.profile_hash
+        == "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+    )
+    assert first.quality_profile.max_gap_us == 50000
+    assert first.quality_profile.max_interpolation_age_us == 50000
+    assert first.quality_profile.accepted_reference_quality_statuses == ("ACCEPTED",)
+    assert first.quality_profile.required_uncertainty_components == (
+        "reference_truth_uncertainty",
+        "alignment_uncertainty",
+        "sensor_measurement_uncertainty",
+    )
+    assert set(first.quality_profile.max_sigma_by_error_domain) == {
+        "AZIMUTH",
+        "CROSS_RANGE",
+        "ELEVATION",
+        "POSITION_3D",
+        "RADIAL_POSITION",
+        "RADIAL_VELOCITY",
+        "RANGE",
+        "VERTICAL_POSITION",
+    }
+    assert all(
+        value is None
+        for value in first.quality_profile.max_sigma_by_error_domain.values()
+    )
     assert len(first.rows) == 3
     assert {row.match_status for row in first.rows} == {"MATCHED"}
     assert all(row.measurement_error == 5.0 for row in first.rows)

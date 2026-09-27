@@ -368,6 +368,57 @@ def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() 
     assert '_dispatcher("m1-batch-1-core-check")' in gate
 
 
+def test_m2_met_003_air_formal_delivery_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M2-MET-003 AIR formal-delivery evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-air-formal-delivery-check" in text
+    assert (
+        "--evidence evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json"
+        in text
+    )
+    assert "- name: Compare Windows and Linux M2-MET-003 AIR formal delivery" in text
+    assert "python tools/dev/tpaa_dev.py m2-air-formal-delivery-compare" in text
+    assert (
+        "--windows downloaded/evidence/m2-met-003/windows/air-formal-delivery.json"
+        in text
+    )
+    assert (
+        "--linux downloaded/evidence/m2-met-003/linux/air-formal-delivery.json"
+        in text
+    )
+    assert (
+        "--evidence evidence/cross-platform/m2-met-003-logical-equivalence.json"
+        in text
+    )
+
+
+def test_m2_met_004_sns_detection_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M2-MET-004 SNS detection evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-sns-detection-check" in text
+    assert "evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json" in text
+    assert "- name: Compare Windows and Linux M2-MET-004 SNS detection" in text
+    assert "python tools/dev/tpaa_dev.py m2-sns-detection-compare" in text
+    assert "downloaded/evidence/m2-met-004/windows/sns-detection.json" in text
+    assert "downloaded/evidence/m2-met-004/linux/sns-detection.json" in text
+    assert "evidence/cross-platform/m2-met-004-logical-equivalence.json" in text
+    assert "python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-check" in text
+    assert (
+        "evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-compare" in text
+    assert (
+        "downloaded/evidence/m2-met-005/windows/sns-accuracy-incremental.json"
+        in text
+    )
+    assert (
+        "downloaded/evidence/m2-met-005/linux/sns-accuracy-incremental.json"
+        in text
+    )
+    assert "evidence/cross-platform/m2-met-005-incremental-logical-equivalence.json" in text
+
+
 def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "- name: Emit M1 Batch 2 service smoke evidence" in text
@@ -469,3 +520,111 @@ def test_m1_batch_3_desktop_e2e_is_cross_platform_compared_and_reviewed() -> Non
     assert "--logical downloaded/logical/m1-batch-3-desktop-logical-equivalence.json" in text
     assert "--output evidence/m1-batch-3/review.json" in text
     assert f"tpaa-m1-batch-3-review-{SOURCE_REVISION}" in text
+
+
+
+def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit incremental M2-MET-006 runtime-contract evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check" in text
+    assert (
+        text.count(
+            "evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json"
+        )
+        >= 2
+    )
+    assert (
+        "- name: Compare Windows and Linux incremental M2-MET-006 runtime contract"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-compare" in text
+    assert (
+        "downloaded/evidence/m2-met-006/windows/runtime-contract-incremental.json"
+        in text
+    )
+    assert (
+        "downloaded/evidence/m2-met-006/linux/runtime-contract-incremental.json"
+        in text
+    )
+    assert (
+        text.count(
+            "evidence/cross-platform/m2-met-006-incremental-logical-equivalence.json"
+        )
+        >= 2
+    )
+
+
+
+def test_m2_met_007_batch_replay_increment_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit incremental M2-MET-007 batch/replay evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-batch-replay-incremental-check" in text
+    assert (
+        text.count(
+            "evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json"
+        )
+        >= 2
+    )
+    assert (
+        "- name: Compare Windows and Linux incremental M2-MET-007 batch/replay"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-batch-replay-incremental-compare" in text
+    assert (
+        "downloaded/evidence/m2-met-007/windows/batch-replay-incremental.json"
+        in text
+    )
+    assert (
+        "downloaded/evidence/m2-met-007/linux/batch-replay-incremental.json"
+        in text
+    )
+    assert (
+        text.count(
+            "evidence/cross-platform/m2-met-007-incremental-logical-equivalence.json"
+        )
+        >= 2
+    )
+
+
+
+def test_m2_batch_2_authority_gap_sentinel_is_cross_platform_compared() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Emit M2 Batch 2 authority-gap sentinel evidence" in text
+    assert "python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-check" in text
+    assert (
+        text.count(
+            "evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json"
+        )
+        >= 2
+    )
+    assert (
+        "- name: Compare Windows and Linux M2 Batch 2 authority-gap sentinel"
+        in text
+    )
+    assert "python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-compare" in text
+    assert "downloaded/evidence/m2-authority-gap/windows/sentinel.json" in text
+    assert "downloaded/evidence/m2-authority-gap/linux/sentinel.json" in text
+    assert text.count("evidence/cross-platform/m2-authority-gap-sentinel.json") >= 2
+
+
+
+def test_m2_batch_2_review_aggregates_exact_revision_without_unblocking() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "- name: Review M2 Batch 2 exact-revision gate" in text
+    assert "python tools/dev/tpaa_dev.py m2-batch-2-review" in text
+    assert "--platform-root downloaded/evidence" in text
+    assert "--logical-root evidence/cross-platform" in text
+    assert "--expected-revision ${{ github.event.pull_request.head.sha || github.sha }}" in text
+    assert "--output evidence/m2-batch-2/review.json" in text
+
+    logical_upload = text.split(
+        "- name: Upload logical-equivalence evidence", 1
+    )[1].split("- name: Upload M2 Batch 2 review evidence", 1)[0]
+    assert "evidence/m2-batch-2/review.json" not in logical_upload
+
+    review_upload = text.split("- name: Upload M2 Batch 2 review evidence", 1)[1]
+    assert (
+        "name: tpaa-m2-batch-2-review-${{ github.event.pull_request.head.sha || github.sha }}"
+        in review_upload
+    )
+    assert "path: evidence/m2-batch-2/review.json" in review_upload

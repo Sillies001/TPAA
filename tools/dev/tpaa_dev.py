@@ -58,6 +58,39 @@ M2_RADAR_SENSOR_WORLD_CHECK_MODULE = "tools.testing.m2_radar_sensor_world_check"
 M2_RADAR_SENSOR_WORLD_COMPARE_MODULE = "tools.testing.m2_radar_sensor_world_compare"
 M2_STAGE_WORLD_LINEAGE_CHECK_MODULE = "tools.testing.m2_stage_world_lineage_check"
 M2_STAGE_WORLD_LINEAGE_COMPARE_MODULE = "tools.testing.m2_stage_world_lineage_compare"
+M2_GENERAL_METRIC_ENGINE_CHECK_MODULE = "tools.testing.m2_general_metric_engine_check"
+M2_GENERAL_METRIC_ENGINE_COMPARE_MODULE = "tools.testing.m2_general_metric_engine_compare"
+M2_QA_FOUNDATION_INCREMENTAL_CHECK_MODULE = "tools.testing.m2_qa_foundation_incremental_check"
+M2_QA_FOUNDATION_INCREMENTAL_COMPARE_MODULE = "tools.testing.m2_qa_foundation_incremental_compare"
+M2_AIR_FORMAL_DELIVERY_CHECK_MODULE = "tools.testing.m2_air_formal_delivery_check"
+M2_AIR_FORMAL_DELIVERY_COMPARE_MODULE = "tools.testing.m2_air_formal_delivery_compare"
+M2_SNS_DETECTION_CHECK_MODULE = "tools.testing.m2_sns_detection_check"
+M2_SNS_DETECTION_COMPARE_MODULE = "tools.testing.m2_sns_detection_compare"
+M2_SNS_ACCURACY_INCREMENTAL_CHECK_MODULE = (
+    "tools.testing.m2_sns_accuracy_incremental_check"
+)
+M2_SNS_ACCURACY_INCREMENTAL_COMPARE_MODULE = (
+    "tools.testing.m2_sns_accuracy_incremental_compare"
+)
+M2_RUNTIME_CONTRACT_INCREMENTAL_CHECK_MODULE = (
+    "tools.testing.m2_runtime_contract_incremental_check"
+)
+M2_RUNTIME_CONTRACT_INCREMENTAL_COMPARE_MODULE = (
+    "tools.testing.m2_runtime_contract_incremental_compare"
+)
+M2_BATCH_REPLAY_INCREMENTAL_CHECK_MODULE = (
+    "tools.testing.m2_metric_batch_replay_incremental_check"
+)
+M2_BATCH_REPLAY_INCREMENTAL_COMPARE_MODULE = (
+    "tools.testing.m2_metric_batch_replay_incremental_compare"
+)
+M2_AUTHORITY_GAP_SENTINEL_CHECK_MODULE = (
+    "tools.testing.m2_authority_gap_sentinel_check"
+)
+M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE = (
+    "tools.testing.m2_authority_gap_sentinel_compare"
+)
+M2_BATCH_2_REVIEW_MODULE = "tools.testing.m2_batch_2_review"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -130,6 +163,23 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-radar-sensor-world-compare", "M2-WORLD-002", "IMPLEMENTED", "Compare Windows/Linux M2 RADAR sensor World logical evidence exactly."),
     CommandSpec("m2-stage-world-lineage-check", "M2-WORLD-003", "IMPLEMENTED", "Verify replay-stable M2 Basic Flight Stage/World lineage, quality and status."),
     CommandSpec("m2-stage-world-lineage-compare", "M2-WORLD-003", "IMPLEMENTED", "Compare Windows/Linux M2 Stage/World lineage logical evidence exactly."),
+    CommandSpec("m2-general-metric-engine-check", "M2-MET-001", "IMPLEMENTED", "Verify the frozen Catalog-driven general Metric Engine substrate and evidence."),
+    CommandSpec("m2-general-metric-engine-compare", "M2-MET-001", "IMPLEMENTED", "Compare Windows/Linux M2-MET-001 logical evidence exactly."),
+    CommandSpec("m2-qa-foundation-incremental-check", "M2-MET-002", "IMPLEMENTED", "Verify formal eight-metric QA foundation closure against adopted C3 authority."),
+    CommandSpec("m2-qa-foundation-incremental-compare", "M2-MET-002", "IMPLEMENTED", "Compare Windows/Linux formal M2-MET-002 QA evidence exactly."),
+    CommandSpec("m2-air-formal-delivery-check", "M2-MET-003", "IMPLEMENTED", "Requalify the exact M2 AIR metric set through Catalog, Golden, Evidence, and immutable Release."),
+    CommandSpec("m2-air-formal-delivery-compare", "M2-MET-003", "IMPLEMENTED", "Compare Windows/Linux M2-MET-003 AIR formal-delivery evidence exactly."),
+    CommandSpec("m2-sns-detection-check", "M2-MET-004", "IMPLEMENTED", "Verify exact SNS detection semantics, Golden cases, and RADAR applicability."),
+    CommandSpec("m2-sns-detection-compare", "M2-MET-004", "IMPLEMENTED", "Compare Windows/Linux M2-MET-004 SNS detection evidence exactly."),
+    CommandSpec("m2-sns-accuracy-incremental-check", "M2-MET-005", "IMPLEMENTED", "Verify all 17 SNS accuracy formulas and fail-closed authority blockers without claiming task completion."),
+    CommandSpec("m2-sns-accuracy-incremental-compare", "M2-MET-005", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-005 SNS accuracy evidence exactly."),
+    CommandSpec("m2-runtime-contract-incremental-check", "M2-MET-006", "IMPLEMENTED", "Verify frozen runtime applicability/value-kind/schema gates without claiming task completion."),
+    CommandSpec("m2-runtime-contract-incremental-compare", "M2-MET-006", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-006 runtime-contract evidence exactly."),
+    CommandSpec("m2-batch-replay-incremental-check", "M2-MET-007", "IMPLEMENTED", "Verify exact 32-code deterministic batch/replay hashing substrate without claiming task completion."),
+    CommandSpec("m2-batch-replay-incremental-compare", "M2-MET-007", "IMPLEMENTED", "Compare Windows/Linux incremental M2-MET-007 batch/replay evidence exactly."),
+    CommandSpec("m2-authority-gap-sentinel-check", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Verify adopted C3 authority identity, discriminators and profile closure."),
+    CommandSpec("m2-authority-gap-sentinel-compare", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Compare Windows/Linux adopted-authority sentinel evidence exactly."),
+    CommandSpec("m2-batch-2-review", "M2 Batch 2 Issue #97", "IMPLEMENTED", "Aggregate exact-revision M2-MET-001..007 and C3 sentinel evidence into one fail-closed Batch 2 gate state."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -599,6 +649,118 @@ def build_parser() -> argparse.ArgumentParser:
     m2_stage_world_lineage_compare.add_argument("--linux", type=Path, required=True)
     m2_stage_world_lineage_compare.add_argument("--expected-revision", required=True)
     m2_stage_world_lineage_compare.add_argument("--evidence", type=Path, required=True)
+    m2_general_metric_engine = sub.add_parser(
+        "m2-general-metric-engine-check",
+        help="Verify M2-MET-001 Catalog-driven general Metric Engine",
+    )
+    m2_general_metric_engine.add_argument("--evidence", type=Path)
+    m2_general_metric_engine_compare = sub.add_parser(
+        "m2-general-metric-engine-compare",
+        help="Compare Windows/Linux M2-MET-001 logical evidence",
+    )
+    m2_general_metric_engine_compare.add_argument("--windows", type=Path, required=True)
+    m2_general_metric_engine_compare.add_argument("--linux", type=Path, required=True)
+    m2_general_metric_engine_compare.add_argument("--expected-revision", required=True)
+    m2_general_metric_engine_compare.add_argument("--evidence", type=Path, required=True)
+    m2_qa_incremental = sub.add_parser(
+        "m2-qa-foundation-incremental-check",
+        help="Verify the authority-safe M2-MET-002 subset without task completion",
+    )
+    m2_qa_incremental.add_argument("--evidence", type=Path)
+    m2_qa_incremental_compare = sub.add_parser(
+        "m2-qa-foundation-incremental-compare",
+        help="Compare Windows/Linux incremental M2-MET-002 QA evidence",
+    )
+    m2_qa_incremental_compare.add_argument("--windows", type=Path, required=True)
+    m2_qa_incremental_compare.add_argument("--linux", type=Path, required=True)
+    m2_qa_incremental_compare.add_argument("--expected-revision", required=True)
+    m2_qa_incremental_compare.add_argument("--evidence", type=Path, required=True)
+    m2_air_delivery = sub.add_parser(
+        "m2-air-formal-delivery-check",
+        help="Verify exact M2-MET-003 AIR formal delivery",
+    )
+    m2_air_delivery.add_argument("--evidence", type=Path)
+    m2_air_delivery_compare = sub.add_parser(
+        "m2-air-formal-delivery-compare",
+        help="Compare Windows/Linux M2-MET-003 AIR formal-delivery evidence",
+    )
+    m2_air_delivery_compare.add_argument("--windows", type=Path, required=True)
+    m2_air_delivery_compare.add_argument("--linux", type=Path, required=True)
+    m2_air_delivery_compare.add_argument("--expected-revision", required=True)
+    m2_air_delivery_compare.add_argument("--evidence", type=Path, required=True)
+    m2_sns_detection = sub.add_parser(
+        "m2-sns-detection-check",
+        help="Verify exact M2-MET-004 SNS detection delivery",
+    )
+    m2_sns_detection.add_argument("--evidence", type=Path)
+    m2_sns_detection_compare = sub.add_parser(
+        "m2-sns-detection-compare",
+        help="Compare Windows/Linux M2-MET-004 SNS detection evidence",
+    )
+    m2_sns_detection_compare.add_argument("--windows", type=Path, required=True)
+    m2_sns_detection_compare.add_argument("--linux", type=Path, required=True)
+    m2_sns_detection_compare.add_argument("--expected-revision", required=True)
+    m2_sns_detection_compare.add_argument("--evidence", type=Path, required=True)
+    m2_sns_accuracy = sub.add_parser(
+        "m2-sns-accuracy-incremental-check",
+        help="Verify authority-safe incremental M2-MET-005 SNS accuracy delivery",
+    )
+    m2_sns_accuracy.add_argument("--evidence", type=Path)
+    m2_sns_accuracy_compare = sub.add_parser(
+        "m2-sns-accuracy-incremental-compare",
+        help="Compare Windows/Linux incremental M2-MET-005 evidence",
+    )
+    m2_sns_accuracy_compare.add_argument("--windows", type=Path, required=True)
+    m2_sns_accuracy_compare.add_argument("--linux", type=Path, required=True)
+    m2_sns_accuracy_compare.add_argument("--expected-revision", required=True)
+    m2_sns_accuracy_compare.add_argument("--evidence", type=Path, required=True)
+    m2_runtime_contract = sub.add_parser(
+        "m2-runtime-contract-incremental-check",
+        help="Verify authority-safe incremental M2-MET-006 runtime gates",
+    )
+    m2_runtime_contract.add_argument("--evidence", type=Path)
+    m2_runtime_contract_compare = sub.add_parser(
+        "m2-runtime-contract-incremental-compare",
+        help="Compare Windows/Linux incremental M2-MET-006 evidence",
+    )
+    m2_runtime_contract_compare.add_argument("--windows", type=Path, required=True)
+    m2_runtime_contract_compare.add_argument("--linux", type=Path, required=True)
+    m2_runtime_contract_compare.add_argument("--expected-revision", required=True)
+    m2_runtime_contract_compare.add_argument("--evidence", type=Path, required=True)
+    m2_batch_replay = sub.add_parser(
+        "m2-batch-replay-incremental-check",
+        help="Verify authority-safe incremental M2-MET-007 32-metric batch/replay substrate",
+    )
+    m2_batch_replay.add_argument("--evidence", type=Path)
+    m2_batch_replay_compare = sub.add_parser(
+        "m2-batch-replay-incremental-compare",
+        help="Compare Windows/Linux incremental M2-MET-007 evidence",
+    )
+    m2_batch_replay_compare.add_argument("--windows", type=Path, required=True)
+    m2_batch_replay_compare.add_argument("--linux", type=Path, required=True)
+    m2_batch_replay_compare.add_argument("--expected-revision", required=True)
+    m2_batch_replay_compare.add_argument("--evidence", type=Path, required=True)
+    m2_authority_gap = sub.add_parser(
+        "m2-authority-gap-sentinel-check",
+        help="Verify the audited M2 Batch 2 C3 authority-gap state remains fail-closed",
+    )
+    m2_authority_gap.add_argument("--evidence", type=Path)
+    m2_authority_gap_compare = sub.add_parser(
+        "m2-authority-gap-sentinel-compare",
+        help="Compare Windows/Linux M2 Batch 2 authority-gap sentinel evidence",
+    )
+    m2_authority_gap_compare.add_argument("--windows", type=Path, required=True)
+    m2_authority_gap_compare.add_argument("--linux", type=Path, required=True)
+    m2_authority_gap_compare.add_argument("--expected-revision", required=True)
+    m2_authority_gap_compare.add_argument("--evidence", type=Path, required=True)
+    m2_batch_2_review = sub.add_parser(
+        "m2-batch-2-review",
+        help="Aggregate exact-revision M2 Batch 2 evidence without weakening blocked gates",
+    )
+    m2_batch_2_review.add_argument("--platform-root", type=Path, required=True)
+    m2_batch_2_review.add_argument("--logical-root", type=Path, required=True)
+    m2_batch_2_review.add_argument("--expected-revision", required=True)
+    m2_batch_2_review.add_argument("--output", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1032,6 +1194,206 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.expected_revision,
                 "--evidence",
                 str(args.evidence),
+            ]
+        )
+    if command == "m2-general-metric-engine-check":
+        metric_args = [sys.executable, "-m", M2_GENERAL_METRIC_ENGINE_CHECK_MODULE]
+        if args.evidence is not None:
+            metric_args.extend(["--evidence", str(args.evidence)])
+        return _run(metric_args)
+    if command == "m2-general-metric-engine-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_GENERAL_METRIC_ENGINE_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-qa-foundation-incremental-check":
+        qa_args = [sys.executable, "-m", M2_QA_FOUNDATION_INCREMENTAL_CHECK_MODULE]
+        if args.evidence is not None:
+            qa_args.extend(["--evidence", str(args.evidence)])
+        return _run(qa_args)
+    if command == "m2-qa-foundation-incremental-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_QA_FOUNDATION_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-air-formal-delivery-check":
+        air_args = [sys.executable, "-m", M2_AIR_FORMAL_DELIVERY_CHECK_MODULE]
+        if args.evidence is not None:
+            air_args.extend(["--evidence", str(args.evidence)])
+        return _run(air_args)
+    if command == "m2-air-formal-delivery-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_AIR_FORMAL_DELIVERY_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-sns-detection-check":
+        sns_args = [sys.executable, "-m", M2_SNS_DETECTION_CHECK_MODULE]
+        if args.evidence is not None:
+            sns_args.extend(["--evidence", str(args.evidence)])
+        return _run(sns_args)
+    if command == "m2-sns-detection-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_SNS_DETECTION_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-sns-accuracy-incremental-check":
+        accuracy_args = [
+            sys.executable,
+            "-m",
+            M2_SNS_ACCURACY_INCREMENTAL_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            accuracy_args.extend(["--evidence", str(args.evidence)])
+        return _run(accuracy_args)
+    if command == "m2-sns-accuracy-incremental-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_SNS_ACCURACY_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-runtime-contract-incremental-check":
+        runtime_args = [
+            sys.executable,
+            "-m",
+            M2_RUNTIME_CONTRACT_INCREMENTAL_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            runtime_args.extend(["--evidence", str(args.evidence)])
+        return _run(runtime_args)
+    if command == "m2-runtime-contract-incremental-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_RUNTIME_CONTRACT_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-batch-replay-incremental-check":
+        replay_args = [
+            sys.executable,
+            "-m",
+            M2_BATCH_REPLAY_INCREMENTAL_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            replay_args.extend(["--evidence", str(args.evidence)])
+        return _run(replay_args)
+    if command == "m2-batch-replay-incremental-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_BATCH_REPLAY_INCREMENTAL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-authority-gap-sentinel-check":
+        sentinel_args = [
+            sys.executable,
+            "-m",
+            M2_AUTHORITY_GAP_SENTINEL_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            sentinel_args.extend(["--evidence", str(args.evidence)])
+        return _run(sentinel_args)
+    if command == "m2-authority-gap-sentinel-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-batch-2-review":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_BATCH_2_REVIEW_MODULE,
+                "--platform-root",
+                str(args.platform_root),
+                "--logical-root",
+                str(args.logical_root),
+                "--expected-revision",
+                args.expected_revision,
+                "--output",
+                str(args.output),
             ]
         )
     if command == "m1-source-registry-check":

@@ -50,5 +50,24 @@ def test_data_004_fixture_provenance_and_subject_links_are_exact() -> None:
     assert len(projection.mission_system_logical_hash) == 64
     assert len(projection.logical_hash) == 64
     assert projection.quality_profile.profile_id == "M2_REFERENCE_MATCH_QUALITY_V1"
-    assert projection.quality_profile.profile_version == "1.0.0"
-    assert len(projection.quality_profile.profile_hash) == 64
+    assert projection.quality_profile.profile_version == "1.1.0"
+    assert (
+        projection.quality_profile.profile_hash
+        == "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+    )
+    assert projection.quality_profile.max_interpolation_age_us == 50000
+    assert projection.quality_profile.accepted_reference_quality_statuses == ("ACCEPTED",)
+    assert projection.quality_profile.required_uncertainty_components == (
+        "reference_truth_uncertainty",
+        "alignment_uncertainty",
+        "sensor_measurement_uncertainty",
+    )
+    assert projection.quality_profile.as_contract()["na_reason_map"] == {
+        "ASSOCIATION_INVALID": "ASSOCIATION_INVALID",
+        "INTERPOLATION_AGE_EXCEEDED": "INTERPOLATION_AGE_EXCEEDED",
+        "MATCH_STATUS_INVALID": "MATCH_STATUS_INVALID",
+        "NO_VALID_MATCHED_SAMPLES": "NO_VALID_MATCHED_SAMPLES",
+        "REFERENCE_QUALITY_REJECTED": "REFERENCE_QUALITY_REJECTED",
+        "UNCERTAINTY_COMPONENT_MISSING": "UNCERTAINTY_COMPONENT_MISSING",
+        "UNCERTAINTY_DOMAIN_CAP_EXCEEDED": "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
+    }

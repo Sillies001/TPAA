@@ -40,6 +40,11 @@ EXPECTED_MEASUREMENT_AUTHORITY = "CANONICAL_MISSION_SYSTEM_MEASUREMENT_V1"
 EXPECTED_REFERENCE_AUTHORITY = "CANONICAL_REFERENCE_NAVIGATION_V1"
 EXPECTED_REFERENCE_RELATIVE_STATE_CONTRACT = "CONTRACT_REFERENCE_RELATIVE_STATE_V1"
 EXPECTED_REFERENCE_MATCH_QUALITY_CONTRACT = "CONTRACT_REFERENCE_MATCH_QUALITY_PROFILE_V1"
+EXPECTED_REFERENCE_MATCH_QUALITY_PROFILE_ID = "M2_REFERENCE_MATCH_QUALITY_V1"
+EXPECTED_REFERENCE_MATCH_QUALITY_PROFILE_VERSION = "1.1.0"
+EXPECTED_REFERENCE_MATCH_QUALITY_PROFILE_SHA256 = (
+    "904100e467f10e89aca1f06b1e9eeff86923121063ec9a41a2d73f84cc2400f1"
+)
 EXPECTED_METRIC_INPUT_AUTHORITY_MATRIX_SHA256 = (
     "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc"
 )
@@ -49,11 +54,35 @@ EXPECTED_P1_METRIC_CATALOG_SHA256 = (
 EXPECTED_METRIC_CODES = ("P1-QA-006",) + tuple(
     f"P1-SNS-{index:03d}" for index in range(5, 22)
 )
+EXPECTED_PROFILE_ERROR_DOMAINS = (
+    "AZIMUTH",
+    "CROSS_RANGE",
+    "ELEVATION",
+    "POSITION_3D",
+    "RADIAL_POSITION",
+    "RADIAL_VELOCITY",
+    "RANGE",
+    "VERTICAL_POSITION",
+)
+EXPECTED_PROFILE_REASON_KEYS = (
+    "ASSOCIATION_INVALID",
+    "MATCH_STATUS_INVALID",
+    "INTERPOLATION_AGE_EXCEEDED",
+    "REFERENCE_QUALITY_REJECTED",
+    "UNCERTAINTY_COMPONENT_MISSING",
+    "UNCERTAINTY_DOMAIN_CAP_EXCEEDED",
+    "NO_VALID_MATCHED_SAMPLES",
+)
 PROFILE_HASH_FIELDS = (
     "profile_id",
     "profile_version",
     "max_gap_us",
     "min_coverage",
+    "max_interpolation_age_us",
+    "accepted_reference_quality_statuses",
+    "max_sigma_by_error_domain",
+    "required_uncertainty_components",
+    "na_reason_map",
 )
 
 
@@ -73,6 +102,33 @@ class ReferenceMatchQualityProfile:
     profile_hash: str
     max_gap_us: int
     min_coverage: float
+    max_interpolation_age_us: int
+    accepted_reference_quality_statuses: tuple[str, ...]
+    max_sigma_by_error_domain: MappingProxyType[str, float | None]
+    required_uncertainty_components: tuple[str, ...]
+    na_reason_map: MappingProxyType[str, str]
+
+    def as_contract(self) -> MappingProxyType[str, object]:
+        """Return the exact governed SNS match-quality contract payload."""
+
+        return MappingProxyType(
+            {
+                "profile_id": self.profile_id,
+                "profile_version": self.profile_version,
+                "profile_hash": self.profile_hash,
+                "max_gap_us": self.max_gap_us,
+                "min_coverage": self.min_coverage,
+                "max_interpolation_age_us": self.max_interpolation_age_us,
+                "accepted_reference_quality_statuses": list(
+                    self.accepted_reference_quality_statuses
+                ),
+                "max_sigma_by_error_domain": dict(self.max_sigma_by_error_domain),
+                "required_uncertainty_components": list(
+                    self.required_uncertainty_components
+                ),
+                "na_reason_map": dict(self.na_reason_map),
+            }
+        )
 
 
 @dataclass(frozen=True)
@@ -279,19 +335,102 @@ def _profile(raw: dict[str, object]) -> ReferenceMatchQualityProfile:
     profile_hash = _required_str(raw, "profile_hash")
     max_gap_us = _required_int(raw, "max_gap_us")
     min_coverage = _required_number(raw, "min_coverage")
-    if max_gap_us < 0 or not 0.0 <= min_coverage <= 1.0:
+    max_interpolation_age_us = _required_int(raw, "max_interpolation_age_us")
+
+    accepted_raw = raw.get("accepted_reference_quality_statuses")
+    if (
+        not isinstance(accepted_raw, list)
+        or not accepted_raw
+        or not all(isinstance(item, str) and item for item in accepted_raw)
+        or len(set(accepted_raw)) != len(accepted_raw)
+    ):
         raise M2MeasurementAlignmentError(
             "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_INVALID",
-            f"max_gap_us={max_gap_us} min_coverage={min_coverage}",
+            "accepted_reference_quality_statuses must be unique non-empty strings",
         )
-    expected_hash = _canonical_hash(
-        {
-            key: raw[key]
-            for key in PROFILE_HASH_FIELDS
-            if key in raw
-        }
+    accepted_reference_quality_statuses = cast(tuple[str, ...], tuple(accepted_raw))
+
+    required_raw = raw.get("required_uncertainty_components")
+    if (
+        not isinstance(required_raw, list)
+        or not required_raw
+        or not all(isinstance(item, str) and item for item in required_raw)
+        or len(set(required_raw)) != len(required_raw)
+    ):
+        raise M2MeasurementAlignmentError(
+            "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_INVALID",
+            "required_uncertainty_components must be unique non-empty strings",
+        )
+    required_uncertainty_components = cast(tuple[str, ...], tuple(required_raw))
+
+    caps_raw = _object(
+        raw.get("max_sigma_by_error_domain"),
+        field="quality_profile.max_sigma_by_error_domain",
     )
-    if profile_hash != expected_hash:
+    if set(caps_raw) != set(EXPECTED_PROFILE_ERROR_DOMAINS):
+        raise M2MeasurementAlignmentError(
+            "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_INVALID",
+            "max_sigma_by_error_domain keys do not match adopted authority",
+        )
+    max_sigma_by_error_domain: dict[str, float | None] = {}
+    for domain in EXPECTED_PROFILE_ERROR_DOMAINS:
+        value = caps_raw[domain]
+        if value is None:
+            max_sigma_by_error_domain[domain] = None
+            continue
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(float(value))
+            or float(value) < 0.0
+        ):
+            raise M2MeasurementAlignmentError(
+                "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_INVALID",
+                f"max_sigma_by_error_domain.{domain} must be null or non-negative finite number",
+            )
+        max_sigma_by_error_domain[domain] = float(value)
+
+    reasons_raw = _object(
+        raw.get("na_reason_map"),
+        field="quality_profile.na_reason_map",
+    )
+    if set(reasons_raw) != set(EXPECTED_PROFILE_REASON_KEYS):
+        raise M2MeasurementAlignmentError(
+            "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_INVALID",
+            "na_reason_map keys do not match adopted authority",
+        )
+    na_reason_map = {
+        key: _required_str(reasons_raw, key)
+        for key in EXPECTED_PROFILE_REASON_KEYS
+    }
+
+    if (
+        max_gap_us < 0
+        or max_interpolation_age_us < 0
+        or not 0.0 <= min_coverage <= 1.0
+    ):
+        raise M2MeasurementAlignmentError(
+            "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_INVALID",
+            (
+                f"max_gap_us={max_gap_us} "
+                f"max_interpolation_age_us={max_interpolation_age_us} "
+                f"min_coverage={min_coverage}"
+            ),
+        )
+    if (
+        profile_id != EXPECTED_REFERENCE_MATCH_QUALITY_PROFILE_ID
+        or profile_version != EXPECTED_REFERENCE_MATCH_QUALITY_PROFILE_VERSION
+    ):
+        raise M2MeasurementAlignmentError(
+            "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_AUTHORITY_MISMATCH",
+            f"profile={profile_id}@{profile_version}",
+        )
+
+    expected_hash = _canonical_hash({key: raw[key] for key in PROFILE_HASH_FIELDS})
+    if (
+        profile_hash != expected_hash
+        or profile_hash != EXPECTED_REFERENCE_MATCH_QUALITY_PROFILE_SHA256
+    ):
         raise M2MeasurementAlignmentError(
             "M2_MEASUREMENT_ALIGNMENT_QUALITY_PROFILE_HASH_MISMATCH",
             f"expected={profile_hash} actual={expected_hash}",
@@ -302,6 +441,13 @@ def _profile(raw: dict[str, object]) -> ReferenceMatchQualityProfile:
         profile_hash=profile_hash,
         max_gap_us=max_gap_us,
         min_coverage=min_coverage,
+        max_interpolation_age_us=max_interpolation_age_us,
+        accepted_reference_quality_statuses=accepted_reference_quality_statuses,
+        max_sigma_by_error_domain=MappingProxyType(
+            dict(sorted(max_sigma_by_error_domain.items()))
+        ),
+        required_uncertainty_components=required_uncertainty_components,
+        na_reason_map=MappingProxyType(dict(sorted(na_reason_map.items()))),
     )
 
 
@@ -328,13 +474,7 @@ def _logical_hash(
             "target_pair_id": target_pair_id,
             "reference_truth_logical_hash": reference_truth_logical_hash,
             "mission_system_logical_hash": mission_system_logical_hash,
-            "quality_profile": {
-                "profile_id": quality_profile.profile_id,
-                "profile_version": quality_profile.profile_version,
-                "profile_hash": quality_profile.profile_hash,
-                "max_gap_us": quality_profile.max_gap_us,
-                "min_coverage": quality_profile.min_coverage,
-            },
+            "quality_profile": dict(quality_profile.as_contract()),
             "coverage": coverage,
             "max_observed_gap_us": max_observed_gap_us,
             "status": status,

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -184,3 +185,92 @@ def quantile_hf7(values: Sequence[float], probability: float) -> float:
     upper = math.ceil(index)
     fraction = index - lower
     return ordered[lower] + fraction * (ordered[upper] - ordered[lower])
+
+
+def arithmetic_mean(values: Sequence[float]) -> float:
+    """Apply governed MEAN_V1 over already validity-filtered finite samples."""
+
+    if not values:
+        raise ValueError("M2_METRIC_MEAN_EMPTY")
+    if any(not math.isfinite(value) for value in values):
+        raise ValueError("M2_METRIC_MEAN_NONFINITE")
+    return sum(values) / len(values)
+
+
+def rms(values: Sequence[float]) -> float:
+    """Apply governed RMS_V1 over already validity-filtered finite samples."""
+
+    if not values:
+        raise ValueError("M2_METRIC_RMS_EMPTY")
+    if any(not math.isfinite(value) for value in values):
+        raise ValueError("M2_METRIC_RMS_NONFINITE")
+    return math.sqrt(arithmetic_mean(tuple(value * value for value in values)))
+
+
+def linear_interpolate(
+    values: Sequence[TimedValue],
+    session_time_us: int,
+    *,
+    max_gap_us: int,
+) -> float:
+    """Apply LINEAR_INTERPOLATION_V1 without extrapolation or gap bridging."""
+
+    if not values:
+        raise ValueError("M2_METRIC_INTERPOLATION_EMPTY")
+    if max_gap_us <= 0:
+        raise ValueError("M2_METRIC_INTERPOLATION_GAP_INVALID")
+    if any(not math.isfinite(item.value) for item in values):
+        raise ValueError("M2_METRIC_INTERPOLATION_NONFINITE")
+
+    for piece in split_validity_pieces(values, max_gap_us=max_gap_us):
+        if not piece or session_time_us < piece[0].session_time_us:
+            continue
+        if session_time_us > piece[-1].session_time_us:
+            continue
+        for item in piece:
+            if item.session_time_us == session_time_us:
+                return item.value
+        for left, right in zip(piece, piece[1:], strict=False):
+            if left.session_time_us < session_time_us < right.session_time_us:
+                fraction = (
+                    (session_time_us - left.session_time_us)
+                    / (right.session_time_us - left.session_time_us)
+                )
+                return left.value + fraction * (right.value - left.value)
+    raise ValueError("M2_METRIC_INTERPOLATION_OUTSIDE_VALID_PIECE")
+
+
+def wrap_pi(value: float) -> float:
+    """Apply WRAP_PI_V1 and map deterministically to [-pi, pi)."""
+
+    if not math.isfinite(value):
+        raise ValueError("M2_METRIC_WRAP_PI_NONFINITE")
+    return (value + math.pi) % (2.0 * math.pi) - math.pi
+
+
+def circular_mean(values: Sequence[float]) -> float:
+    """Apply CIRCULAR_MEAN_V1 over finite wrapped angles."""
+
+    if not values:
+        raise ValueError("M2_METRIC_CIRCULAR_MEAN_EMPTY")
+    if any(not math.isfinite(value) for value in values):
+        raise ValueError("M2_METRIC_CIRCULAR_MEAN_NONFINITE")
+    sin_mean = arithmetic_mean(tuple(math.sin(value) for value in values))
+    cos_mean = arithmetic_mean(tuple(math.cos(value) for value in values))
+    if sin_mean == 0.0 and cos_mean == 0.0:
+        raise ValueError("M2_METRIC_CIRCULAR_MEAN_UNDEFINED")
+    return wrap_pi(math.atan2(sin_mean, cos_mean))
+
+
+M2_OPERATOR_IMPLEMENTATIONS: Mapping[str, Callable[..., object]] = MappingProxyType(
+    {
+        "CIRCULAR_MEAN_V1": circular_mean,
+        "DERIVATIVE_LLS_V1": derivative_lls,
+        "LINEAR_INTERPOLATION_V1": linear_interpolate,
+        "MEAN_V1": arithmetic_mean,
+        "MEDIAN_V1": median,
+        "QUANTILE_HF7_V1": quantile_hf7,
+        "RMS_V1": rms,
+        "WRAP_PI_V1": wrap_pi,
+    }
+)

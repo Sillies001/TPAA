@@ -32,7 +32,7 @@
   "files": {
     "source": {
       "path": "source/measurement-alignment.json",
-      "sha256": "b66e8b8322b798391182dc337ab9088286421f6aff65dc8dc4773b01aec3e325"
+      "sha256": "1c9560af05fd7503e2383ab393d8399eec733e104d62c179cdc8e0dbe29f0c24"
     }
   },
   "fixture_id": "MA_M2_GAP_V1",
@@ -41,6 +41,6 @@
   "input_hash_basis": [
     "source/measurement-alignment.json"
   ],
-  "input_sha256": "77bc5b34485687e7bca83f174fb90728f12c1f8a3bd1352bb6f852560542e452",
+  "input_sha256": "6c03d80272608b431a99f6de58deec6ea32131d3923255d724c6e855e28026a9",
   "schema": "TPAA_M2_MEASUREMENT_ALIGNMENT_FIXTURE_V1"
 }

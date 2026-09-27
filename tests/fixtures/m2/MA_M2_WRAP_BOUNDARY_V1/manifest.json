@@ -32,7 +32,7 @@
   "files": {
     "source": {
       "path": "source/measurement-alignment.json",
-      "sha256": "1ade2d73acb0159ae2949a4b1b53502124820e2a11028e87056d7a4716ec2198"
+      "sha256": "d3f471c875f5163a856023cae04d9a18d34742e9a16b3410bccae521ba176742"
     }
   },
   "fixture_id": "MA_M2_WRAP_BOUNDARY_V1",
@@ -41,6 +41,6 @@
   "input_hash_basis": [
     "source/measurement-alignment.json"
   ],
-  "input_sha256": "f7880bfbd3007e425c9f8ad89c4e91566577d76ab0e8aeadf3206a46240c6e88",
+  "input_sha256": "21c02c7dc7e199395390e4bd1ae1d2ee9adcdae00668c360b22c92b9c6fdc366",
   "schema": "TPAA_M2_MEASUREMENT_ALIGNMENT_FIXTURE_V1"
 }
