@@ -9,8 +9,12 @@ import math
 import subprocess
 import sys
 from collections import Counter
+from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from tpaa_metric.catalog_engine import M2MetricExecutionPlan, MetricPluginRegistry
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY_ROOT = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
@@ -39,7 +43,12 @@ def _load(path: Path) -> dict[str, object]:
     return cast(dict[str, object], raw)
 
 
-def _series(function, *, count: int = 21, step_us: int = 500_000) -> list[dict[str, object]]:
+def _series(
+    function: Callable[[float], float],
+    *,
+    count: int = 21,
+    step_us: int = 500_000,
+) -> list[dict[str, object]]:
     return [
         {
             "session_time_us": index * step_us,
@@ -447,7 +456,11 @@ def _golden_inputs() -> dict[str, dict[str, object]]:
     }
 
 
-def _direct_outputs(plan, registry, inputs):
+def _direct_outputs(
+    plan: M2MetricExecutionPlan,
+    registry: MetricPluginRegistry,
+    inputs: Mapping[str, Mapping[str, object]],
+) -> dict[str, dict[str, object]]:
     from tpaa_metric.catalog_engine import M2MetricPluginRequest, validate_m2_runtime_output
     from tpaa_metric.m3_air import M3_AIR_CODES
     from tpaa_metric.m3_air_operators import M3_AIR_OPERATOR_IMPLEMENTATIONS
@@ -505,7 +518,14 @@ def verify() -> dict[str, object]:
 
     plan = build_m3_metric_execution_plan(AUTHORITY_ROOT)
     air_definitions = tuple(
-        item for item in plan.definitions if item.metric_code in M3_AIR_CODES
+        sorted(
+            (
+                item
+                for item in plan.definitions
+                if item.metric_code in M3_AIR_CODES
+            ),
+            key=lambda item: item.metric_code,
+        )
     )
     inputs = _golden_inputs()
 

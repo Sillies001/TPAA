@@ -48,7 +48,14 @@ def _request(code: str, payload: dict[str, object]) -> tuple[M2MetricPluginReque
 def test_m3_air_catalog_membership_families_and_structured_schemas_are_exact() -> None:
     plan = build_m3_metric_execution_plan(AUTHORITY)
     definitions = tuple(
-        definition for definition in plan.definitions if definition.metric_code in M3_AIR_CODES
+        sorted(
+            (
+                definition
+                for definition in plan.definitions
+                if definition.metric_code in M3_AIR_CODES
+            ),
+            key=lambda definition: definition.metric_code,
+        )
     )
 
     assert len(definitions) == 36

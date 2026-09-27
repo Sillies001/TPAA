@@ -133,7 +133,7 @@ def _operator(request: M2MetricPluginRequest, operator_id: str) -> Callable[...,
     value = request.operators.get(operator_id)
     if value is None:
         raise ValueError(f"M3_AIR_OPERATOR_MISSING:{operator_id}")
-    return cast(Callable[..., object], value)
+    return value
 
 
 def _derivative(
