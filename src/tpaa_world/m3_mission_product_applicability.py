@@ -246,11 +246,13 @@ def _validate_authority(
             "M3_WORLD_004_CORE_TABLE_INVALID",
             "fields must be list",
         )
-    fields = {
-        item.get("name"): item
-        for item in raw_fields
-        if isinstance(item, dict) and isinstance(item.get("name"), str)
-    }
+    fields: dict[str, dict[str, object]] = {}
+    for item in raw_fields:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        if isinstance(name, str):
+            fields[name] = cast(dict[str, object], item)
     required_fields = {
         "mission_system_instance_id",
         "aircraft_id",
@@ -380,7 +382,7 @@ def _validate_authority(
                 subject_type=subject_type,
                 applicability_mode=mode,
                 allowed_system_types=allowed,
-                required_product_semantics=cast(str | None, required_product),
+                required_product_semantics=required_product,
                 family_meaning=family_meaning,
                 metric_codes=family_metrics,
             )
