@@ -91,6 +91,28 @@ M2_AUTHORITY_GAP_SENTINEL_COMPARE_MODULE = (
     "tools.testing.m2_authority_gap_sentinel_compare"
 )
 M2_BATCH_2_REVIEW_MODULE = "tools.testing.m2_batch_2_review"
+M2_PUBLICATION_ROUTING_CHECK_MODULE = "tools.testing.m2_publication_routing_check"
+M2_PUBLICATION_ROUTING_COMPARE_MODULE = "tools.testing.m2_publication_routing_compare"
+M2_IMMUTABLE_RELEASE_CHECK_MODULE = "tools.testing.m2_immutable_release_check"
+M2_IMMUTABLE_RELEASE_COMPARE_MODULE = "tools.testing.m2_immutable_release_compare"
+M2_IDEMPOTENT_PUBLICATION_CHECK_MODULE = "tools.testing.m2_idempotent_publication_check"
+M2_IDEMPOTENT_PUBLICATION_COMPARE_MODULE = (
+    "tools.testing.m2_idempotent_publication_compare"
+)
+M2_GUI_FOUNDATION_NAVIGATION_CHECK_MODULE = (
+    "tools.testing.m2_gui_foundation_navigation_check"
+)
+M2_GUI_FOUNDATION_NAVIGATION_COMPARE_MODULE = (
+    "tools.testing.m2_gui_foundation_navigation_compare"
+)
+M2_GUI_OBSERVATION_LANE_CHECK_MODULE = (
+    "tools.testing.m2_gui_observation_lane_check"
+)
+M2_GUI_OBSERVATION_LANE_COMPARE_MODULE = (
+    "tools.testing.m2_gui_observation_lane_compare"
+)
+M2_GUI_STATE_UX_CHECK_MODULE = "tools.testing.m2_gui_state_ux_check"
+M2_GUI_STATE_UX_COMPARE_MODULE = "tools.testing.m2_gui_state_ux_compare"
 M2_TIME_ALIGNMENT_CHECK_MODULE = "tools.testing.m2_time_alignment_check"
 M1_SOURCE_REGISTRY_CHECK_MODULE = "tools.testing.m1_source_registry_check"
 M1_SESSION_TIME_CHECK_MODULE = "tools.testing.m1_session_time_check"
@@ -180,6 +202,18 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("m2-authority-gap-sentinel-check", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Verify adopted C3 authority identity, discriminators and profile closure."),
     CommandSpec("m2-authority-gap-sentinel-compare", "M2 Batch 2 / C3 #106", "IMPLEMENTED", "Compare Windows/Linux adopted-authority sentinel evidence exactly."),
     CommandSpec("m2-batch-2-review", "M2 Batch 2 Issue #97", "IMPLEMENTED", "Aggregate exact-revision M2-MET-001..007 and C3 sentinel evidence into one fail-closed Batch 2 gate state."),
+    CommandSpec("m2-publication-routing-check", "M2-OBS-001", "IMPLEMENTED", "Verify Catalog-owned publication lane/route for exact P1_FOUNDATION_32."),
+    CommandSpec("m2-publication-routing-compare", "M2-OBS-001", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-001 publication routing exactly."),
+    CommandSpec("m2-immutable-release-check", "M2-OBS-002", "IMPLEMENTED", "Freeze exact release-bound M2 definition/execution/binding snapshots."),
+    CommandSpec("m2-immutable-release-compare", "M2-OBS-002", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-002 immutable Release snapshots exactly."),
+    CommandSpec("m2-idempotent-publication-check", "M2-OBS-003", "IMPLEMENTED", "Verify M2 Release idempotency, CAS history, and explicit replay."),
+    CommandSpec("m2-idempotent-publication-compare", "M2-OBS-003", "IMPLEMENTED", "Compare Windows/Linux M2-OBS-003 publication/replay evidence exactly."),
+    CommandSpec("m2-gui-foundation-navigation-check", "M2-GUI-001", "IMPLEMENTED", "Verify release-bound Basic Flight foundation navigation over exact 32 metrics."),
+    CommandSpec("m2-gui-foundation-navigation-compare", "M2-GUI-001", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-001 navigation evidence exactly."),
+    CommandSpec("m2-gui-observation-lane-check", "M2-GUI-002", "IMPLEMENTED", "Verify release-bound observation-lane-aware foundation presentation."),
+    CommandSpec("m2-gui-observation-lane-compare", "M2-GUI-002", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-002 lane-presentation evidence exactly."),
+    CommandSpec("m2-gui-state-ux-check", "M2-GUI-003", "IMPLEMENTED", "Verify distinct applicability, quality, and system-error presentation states."),
+    CommandSpec("m2-gui-state-ux-compare", "M2-GUI-003", "IMPLEMENTED", "Compare Windows/Linux M2-GUI-003 state-UX evidence exactly."),
     CommandSpec("m1-source-registry-check", "M1-DATA-002", "IMPLEMENTED", "Verify immutable source-bundle and context-artifact registration refs/hashes."),
     CommandSpec("m1-session-time-check", "M1-DATA-003", "IMPLEMENTED", "Verify explicit Source Time to Session Time transforms over all governed M1 bundles."),
     CommandSpec("m1-aircraft-identity-check", "M1-DATA-004", "IMPLEMENTED", "Verify replay-stable governed aircraft identity resolution over all M1 bundles."),
@@ -761,6 +795,84 @@ def build_parser() -> argparse.ArgumentParser:
     m2_batch_2_review.add_argument("--logical-root", type=Path, required=True)
     m2_batch_2_review.add_argument("--expected-revision", required=True)
     m2_batch_2_review.add_argument("--output", type=Path, required=True)
+    m2_publication_routing = sub.add_parser(
+        "m2-publication-routing-check",
+        help="Verify exact M2-OBS-001 Catalog-owned publication routing",
+    )
+    m2_publication_routing.add_argument("--evidence", type=Path)
+    m2_publication_routing_compare = sub.add_parser(
+        "m2-publication-routing-compare",
+        help="Compare Windows/Linux M2-OBS-001 publication routing",
+    )
+    m2_publication_routing_compare.add_argument("--windows", type=Path, required=True)
+    m2_publication_routing_compare.add_argument("--linux", type=Path, required=True)
+    m2_publication_routing_compare.add_argument("--expected-revision", required=True)
+    m2_publication_routing_compare.add_argument("--evidence", type=Path, required=True)
+    m2_immutable_release = sub.add_parser(
+        "m2-immutable-release-check",
+        help="Verify M2-OBS-002 immutable release-bound snapshots",
+    )
+    m2_immutable_release.add_argument("--evidence", type=Path)
+    m2_immutable_release_compare = sub.add_parser(
+        "m2-immutable-release-compare",
+        help="Compare Windows/Linux M2-OBS-002 immutable Release evidence",
+    )
+    m2_immutable_release_compare.add_argument("--windows", type=Path, required=True)
+    m2_immutable_release_compare.add_argument("--linux", type=Path, required=True)
+    m2_immutable_release_compare.add_argument("--expected-revision", required=True)
+    m2_immutable_release_compare.add_argument("--evidence", type=Path, required=True)
+    m2_idempotent_publication = sub.add_parser(
+        "m2-idempotent-publication-check",
+        help="Verify M2-OBS-003 idempotent publication and replay",
+    )
+    m2_idempotent_publication.add_argument("--evidence", type=Path)
+    m2_idempotent_publication_compare = sub.add_parser(
+        "m2-idempotent-publication-compare",
+        help="Compare Windows/Linux M2-OBS-003 publication/replay evidence",
+    )
+    m2_idempotent_publication_compare.add_argument("--windows", type=Path, required=True)
+    m2_idempotent_publication_compare.add_argument("--linux", type=Path, required=True)
+    m2_idempotent_publication_compare.add_argument("--expected-revision", required=True)
+    m2_idempotent_publication_compare.add_argument("--evidence", type=Path, required=True)
+    m2_gui_foundation_navigation = sub.add_parser(
+        "m2-gui-foundation-navigation-check",
+        help="Verify M2-GUI-001 Basic Flight foundation navigation",
+    )
+    m2_gui_foundation_navigation.add_argument("--evidence", type=Path)
+    m2_gui_foundation_navigation_compare = sub.add_parser(
+        "m2-gui-foundation-navigation-compare",
+        help="Compare Windows/Linux M2-GUI-001 navigation evidence",
+    )
+    m2_gui_foundation_navigation_compare.add_argument("--windows", type=Path, required=True)
+    m2_gui_foundation_navigation_compare.add_argument("--linux", type=Path, required=True)
+    m2_gui_foundation_navigation_compare.add_argument("--expected-revision", required=True)
+    m2_gui_foundation_navigation_compare.add_argument("--evidence", type=Path, required=True)
+    m2_gui_observation_lane = sub.add_parser(
+        "m2-gui-observation-lane-check",
+        help="Verify M2-GUI-002 observation-lane-aware presentation",
+    )
+    m2_gui_observation_lane.add_argument("--evidence", type=Path)
+    m2_gui_observation_lane_compare = sub.add_parser(
+        "m2-gui-observation-lane-compare",
+        help="Compare Windows/Linux M2-GUI-002 lane-presentation evidence",
+    )
+    m2_gui_observation_lane_compare.add_argument("--windows", type=Path, required=True)
+    m2_gui_observation_lane_compare.add_argument("--linux", type=Path, required=True)
+    m2_gui_observation_lane_compare.add_argument("--expected-revision", required=True)
+    m2_gui_observation_lane_compare.add_argument("--evidence", type=Path, required=True)
+    m2_gui_state_ux = sub.add_parser(
+        "m2-gui-state-ux-check",
+        help="Verify M2-GUI-003 applicability/quality/error-state UX",
+    )
+    m2_gui_state_ux.add_argument("--evidence", type=Path)
+    m2_gui_state_ux_compare = sub.add_parser(
+        "m2-gui-state-ux-compare",
+        help="Compare Windows/Linux M2-GUI-003 state UX evidence",
+    )
+    m2_gui_state_ux_compare.add_argument("--windows", type=Path, required=True)
+    m2_gui_state_ux_compare.add_argument("--linux", type=Path, required=True)
+    m2_gui_state_ux_compare.add_argument("--expected-revision", required=True)
+    m2_gui_state_ux_compare.add_argument("--evidence", type=Path, required=True)
     m1_registry = sub.add_parser(
         "m1-source-registry-check",
         help="Verify M1-DATA-002 immutable source registry refs/hashes",
@@ -1394,6 +1506,156 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.expected_revision,
                 "--output",
                 str(args.output),
+            ]
+        )
+    if command == "m2-publication-routing-check":
+        routing_args = [
+            sys.executable,
+            "-m",
+            M2_PUBLICATION_ROUTING_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            routing_args.extend(["--evidence", str(args.evidence)])
+        return _run(routing_args)
+    if command == "m2-publication-routing-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_PUBLICATION_ROUTING_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-immutable-release-check":
+        release_args = [
+            sys.executable,
+            "-m",
+            M2_IMMUTABLE_RELEASE_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            release_args.extend(["--evidence", str(args.evidence)])
+        return _run(release_args)
+    if command == "m2-immutable-release-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_IMMUTABLE_RELEASE_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-idempotent-publication-check":
+        publication_args = [
+            sys.executable,
+            "-m",
+            M2_IDEMPOTENT_PUBLICATION_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            publication_args.extend(["--evidence", str(args.evidence)])
+        return _run(publication_args)
+    if command == "m2-idempotent-publication-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_IDEMPOTENT_PUBLICATION_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-gui-foundation-navigation-check":
+        navigation_args = [
+            sys.executable,
+            "-m",
+            M2_GUI_FOUNDATION_NAVIGATION_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            navigation_args.extend(["--evidence", str(args.evidence)])
+        return _run(navigation_args)
+    if command == "m2-gui-foundation-navigation-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_GUI_FOUNDATION_NAVIGATION_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-gui-observation-lane-check":
+        lane_args = [
+            sys.executable,
+            "-m",
+            M2_GUI_OBSERVATION_LANE_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            lane_args.extend(["--evidence", str(args.evidence)])
+        return _run(lane_args)
+    if command == "m2-gui-observation-lane-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_GUI_OBSERVATION_LANE_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
+            ]
+        )
+    if command == "m2-gui-state-ux-check":
+        state_args = [
+            sys.executable,
+            "-m",
+            M2_GUI_STATE_UX_CHECK_MODULE,
+        ]
+        if args.evidence is not None:
+            state_args.extend(["--evidence", str(args.evidence)])
+        return _run(state_args)
+    if command == "m2-gui-state-ux-compare":
+        return _run(
+            [
+                sys.executable,
+                "-m",
+                M2_GUI_STATE_UX_COMPARE_MODULE,
+                "--windows",
+                str(args.windows),
+                "--linux",
+                str(args.linux),
+                "--expected-revision",
+                args.expected_revision,
+                "--evidence",
+                str(args.evidence),
             ]
         )
     if command == "m1-source-registry-check":

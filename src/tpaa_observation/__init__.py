@@ -1,5 +1,23 @@
-"""M1 Observation/Release publication domain."""
+"""M1/M2 Observation and Release publication domain."""
 
+from .m2_publication import (
+    M2_PUBLICATION_ROUTE_CONTRACTS,
+    M2MetricPublicationTarget,
+    M2PublicationRouteContract,
+    M2PublicationRoutingError,
+    M2PublicationRoutingPlan,
+    build_m2_publication_routing_plan,
+    route_m2_metric_definition,
+)
+from .m2_release import (
+    M2ImmutableReleaseSnapshot,
+    M2ReleaseBindingSnapshot,
+    M2ReleaseDefinitionSnapshot,
+    M2ReleaseExecutionSnapshot,
+    M2ReleaseSnapshotError,
+    allocate_m2_release_id,
+    build_m2_release_snapshot,
+)
 from .publication import (
     AircraftPublicationIdentity,
     CapabilityObservationRecord,
@@ -17,6 +35,20 @@ from .publication import (
 
 __all__ = [
     "AircraftPublicationIdentity",
+    "M2MetricPublicationTarget",
+    "M2PublicationRouteContract",
+    "M2PublicationRoutingError",
+    "M2PublicationRoutingPlan",
+    "M2_PUBLICATION_ROUTE_CONTRACTS",
+    "M2ImmutableReleaseSnapshot",
+    "M2ReleaseBindingSnapshot",
+    "M2ReleaseDefinitionSnapshot",
+    "M2ReleaseExecutionSnapshot",
+    "M2ReleaseSnapshotError",
+    "allocate_m2_release_id",
+    "build_m2_publication_routing_plan",
+    "build_m2_release_snapshot",
+    "route_m2_metric_definition",
     "CapabilityObservationRecord",
     "EvidenceRefSnapshot",
     "ImmutableEvidenceSet",
