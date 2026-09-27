@@ -22,11 +22,15 @@ from tpaa_metric.catalog_engine import (
 )
 from tpaa_metric.operators import (
     TimedValue,
-    median as governed_median,
     quantile_hf7,
-    rms as governed_rms,
     split_validity_pieces,
     unwrap_angles,
+)
+from tpaa_metric.operators import (
+    median as governed_median,
+)
+from tpaa_metric.operators import (
+    rms as governed_rms,
 )
 
 M3_AIR_CODES = tuple(f"P1-AIR-{index:03d}" for index in range(4, 40))
