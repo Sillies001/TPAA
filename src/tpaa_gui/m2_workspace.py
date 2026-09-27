@@ -282,14 +282,14 @@ def build_m2_metric_presentation_state(
                 f"M2_GUI_STATE_NOT_APPLICABLE_INSTANCES_PRESENT:{metric_code}"
             )
         system_type = _string(payload.get("system_type"), field="system_type")
-        reasons = _reason_codes(
+        applicability_reasons = _reason_codes(
             payload.get("applicability_reason_codes"),
             field=f"{metric_code}.applicability_reason_codes",
             required=True,
         )
         kind = (
             "WRONG_SENSOR_NOT_APPLICABLE"
-            if "WRONG_SENSOR_TYPE" in reasons
+            if "WRONG_SENSOR_TYPE" in applicability_reasons
             else "NOT_APPLICABLE"
         )
         label = (
@@ -301,7 +301,7 @@ def build_m2_metric_presentation_state(
             metric_code=metric_code,
             kind=kind,
             label=label,
-            reason_codes=reasons,
+            reason_codes=applicability_reasons,
             result_statuses=(),
             system_type=system_type,
             system_error_code=None,
@@ -318,7 +318,7 @@ def build_m2_metric_presentation_state(
         )
 
     statuses: list[str] = []
-    reasons: set[str] = set()
+    aggregate_reasons: set[str] = set()
     for index, raw in enumerate(raw_instances):
         if not isinstance(raw, Mapping):
             raise M2FoundationNavigationError(
@@ -335,7 +335,7 @@ def build_m2_metric_presentation_state(
             required=status in {"N_A", "INSUFFICIENT_DATA"},
         )
         statuses.append(status)
-        reasons.update(instance_reasons)
+        aggregate_reasons.update(instance_reasons)
 
     unique_statuses = tuple(sorted(set(statuses)))
     kind = (
@@ -352,7 +352,7 @@ def build_m2_metric_presentation_state(
         metric_code=metric_code,
         kind=kind,
         label=label,
-        reason_codes=tuple(sorted(reasons)),
+        reason_codes=tuple(sorted(aggregate_reasons)),
         result_statuses=unique_statuses,
         system_type=None,
         system_error_code=None,

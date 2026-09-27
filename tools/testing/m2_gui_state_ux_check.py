@@ -218,6 +218,14 @@ def verify() -> dict[str, object]:
         "build_m2_metric_execution_plan",
     )
 
+    def release_bound_state_projection_is_exact(code: str) -> bool:
+        detail_value = rendered[code]["detail"]
+        return (
+            isinstance(detail_value, dict)
+            and detail_value.get("metric_code") == code
+            and detail_value.get("release_bound") is True
+        )
+
     acceptance = {
         "wrong_sensor_applicability_distinct_from_na": (
             wrong_sensor.kind == "WRONG_SENSOR_NOT_APPLICABLE"
@@ -246,9 +254,7 @@ def verify() -> dict[str, object]:
             for code, state in classified.items()
         ),
         "release_bound_state_projection_exact": all(
-            isinstance(rendered[code]["detail"], dict)
-            and rendered[code]["detail"]["metric_code"] == code
-            and rendered[code]["detail"]["release_bound"] is True
+            release_bound_state_projection_is_exact(code)
             for code in classified
         ),
         "reason_codes_remain_visible": (
