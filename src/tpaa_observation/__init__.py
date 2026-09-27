@@ -25,6 +25,14 @@ from .m3_publication import (
     M3PublicationRoutingPlan,
     build_m3_publication_routing_plan,
 )
+from .m3_release import (
+    M3_RELEASE_METRIC_COUNT,
+    M3ImmutableReleaseSnapshot,
+    M3ReleaseEvidenceSnapshot,
+    M3ReleaseSnapshotError,
+    allocate_m3_release_id,
+    build_m3_release_snapshot,
+)
 from .publication import (
     AircraftPublicationIdentity,
     CapabilityObservationRecord,
@@ -55,11 +63,17 @@ __all__ = [
     "M3_PUBLICATION_LANE_COUNTS",
     "M3_PUBLICATION_METRIC_COUNT",
     "M3_PUBLICATION_ROUTE_COUNTS",
+    "M3_RELEASE_METRIC_COUNT",
+    "M3ImmutableReleaseSnapshot",
     "M3PublicationRoutingPlan",
+    "M3ReleaseEvidenceSnapshot",
+    "M3ReleaseSnapshotError",
     "allocate_m2_release_id",
     "build_m2_publication_routing_plan",
     "build_m2_release_snapshot",
     "build_m3_publication_routing_plan",
+    "build_m3_release_snapshot",
+    "allocate_m3_release_id",
     "route_m2_metric_definition",
     "CapabilityObservationRecord",
     "EvidenceRefSnapshot",
