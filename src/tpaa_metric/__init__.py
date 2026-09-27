@@ -40,6 +40,11 @@ from .m3_general_engine import (
     M3_REMAINDER_COUNT,
     build_m3_metric_execution_plan,
 )
+from .m3_runtime_closure import (
+    M3_RUNTIME_METRIC_COUNT,
+    M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
+    build_m3_runtime_plugin_registry,
+)
 from .sns_accuracy import (
     M2_SNS_ACCURACY_PLUGINS,
     SNS_ACCURACY_CODES,
@@ -72,6 +77,8 @@ __all__ = [
     "M3_EXPECTED_FAMILY_COUNTS",
     "M3_INTEGRATED_COUNT",
     "M3_REMAINDER_COUNT",
+    "M3_RUNTIME_METRIC_COUNT",
+    "M3_RUNTIME_OPERATOR_IMPLEMENTATIONS",
     "MetricAuthority",
     "MetricBatch",
     "MetricComputationError",
@@ -88,6 +95,7 @@ __all__ = [
     "build_catalog_metric_execution_plan",
     "build_m2_metric_execution_plan",
     "build_m3_metric_execution_plan",
+    "build_m3_runtime_plugin_registry",
     "validate_m2_runtime_output",
     "build_m2_air_formal_delivery",
     "build_metric_context",
