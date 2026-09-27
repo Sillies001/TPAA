@@ -10,9 +10,9 @@ from pathlib import Path
 import pytest
 
 from tpaa_metric import (
+    M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
     CatalogMetricEngine,
     M2MetricPluginRequest,
-    M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
     MetricPluginRegistry,
     build_m3_metric_execution_plan,
 )
