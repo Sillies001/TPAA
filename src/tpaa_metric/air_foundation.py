@@ -157,7 +157,11 @@ def register_m2_air_plugins(
 ) -> None:
     """Register AIR algorithms in the one shared Catalog plugin registry."""
 
-    if plan.delivery_milestone != "M2" or plan.delivery_batch != "P1_FOUNDATION_32":
+    allowed_delivery_identities = {
+        ("M2", "P1_FOUNDATION_32"),
+        ("M2+M3", "P1_FOUNDATION_32+P1_REMAINDER_84"),
+    }
+    if (plan.delivery_milestone, plan.delivery_batch) not in allowed_delivery_identities:
         raise CatalogMetricEngineError(
             "M2_AIR_DELIVERY_AUTHORITY_DRIFT",
             f"{plan.delivery_milestone}/{plan.delivery_batch}",
