@@ -10,6 +10,8 @@ from .local_backend import (
 )
 from .m1_workspace import M1DesktopTransport, M1WorkspaceError, create_m1_workspace
 from .m2_workspace import (
+    M2_OBSERVATION_LANE_COUNTS,
+    M2_OBSERVATION_LANE_PRESENTATION,
     M2FoundationNavigationError,
     M2FoundationNavigationItem,
     M2FoundationNavigationModel,
@@ -30,6 +32,8 @@ __all__ = [
     "LocalBackendStatus",
     "M1DesktopTransport",
     "M1WorkspaceError",
+    "M2_OBSERVATION_LANE_COUNTS",
+    "M2_OBSERVATION_LANE_PRESENTATION",
     "M2FoundationNavigationError",
     "M2FoundationNavigationItem",
     "M2FoundationNavigationModel",

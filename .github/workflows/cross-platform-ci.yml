@@ -188,6 +188,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py m2-gui-foundation-navigation-check
           --evidence evidence/m2-gui-001/${{ matrix.platform }}/foundation-navigation.json
 
+      - name: Emit M2-GUI-002 observation-lane presentation evidence
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m2-gui-observation-lane-check
+          --evidence evidence/m2-gui-002/${{ matrix.platform }}/observation-lane.json
+
       - name: Emit M1-DATA-002 source-registry evidence
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
@@ -322,6 +327,7 @@ jobs:
             evidence/m2-obs-002/${{ matrix.platform }}/immutable-release.json
             evidence/m2-obs-003/${{ matrix.platform }}/publication-replay.json
             evidence/m2-gui-001/${{ matrix.platform }}/foundation-navigation.json
+            evidence/m2-gui-002/${{ matrix.platform }}/observation-lane.json
             evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
             evidence/m1-data-003/${{ matrix.platform }}/session-time.json
             evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
@@ -507,6 +513,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m2-gui-001-logical-equivalence.json
 
+      - name: Compare Windows and Linux M2-GUI-002 observation-lane presentation
+        run: >-
+          python tools/dev/tpaa_dev.py m2-gui-observation-lane-compare
+          --windows downloaded/evidence/m2-gui-002/windows/observation-lane.json
+          --linux downloaded/evidence/m2-gui-002/linux/observation-lane.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m2-gui-002-logical-equivalence.json
+
       - name: Compare Windows and Linux M1 Batch 1 products
         run: >-
           python tools/dev/tpaa_dev.py m1-batch-1-compare
@@ -561,6 +575,7 @@ jobs:
             evidence/cross-platform/m2-obs-002-logical-equivalence.json
             evidence/cross-platform/m2-obs-003-logical-equivalence.json
             evidence/cross-platform/m2-gui-001-logical-equivalence.json
+            evidence/cross-platform/m2-gui-002-logical-equivalence.json
             evidence/cross-platform/m1-batch-1-logical-equivalence.json
             evidence/cross-platform/m1-batch-2-service-logical-equivalence.json
             evidence/cross-platform/m1-batch-3-desktop-logical-equivalence.json

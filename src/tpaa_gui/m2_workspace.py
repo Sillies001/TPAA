@@ -20,6 +20,28 @@ M2_FOUNDATION_CODES = frozenset(
     ]
 )
 M2_NAMESPACE_COUNTS = {"QA": 8, "AIR": 3, "SNS": 21}
+M2_OBSERVATION_LANE_COUNTS = {
+    "AIRCRAFT_CAP_L1_OBSERVATION": 3,
+    "SYSTEM_PERFORMANCE_OBSERVATION": 24,
+    "QUALITY_EVIDENCE_ONLY": 5,
+}
+M2_OBSERVATION_LANE_PRESENTATION = {
+    "AIRCRAFT_CAP_L1_OBSERVATION": (
+        "CAPABILITY_OBSERVATION",
+        "Aircraft capability observation",
+        True,
+    ),
+    "SYSTEM_PERFORMANCE_OBSERVATION": (
+        "SYSTEM_PERFORMANCE_OBSERVATION",
+        "Mission-system performance observation",
+        True,
+    ),
+    "QUALITY_EVIDENCE_ONLY": (
+        "METRIC_INSTANCE_EVIDENCE_ONLY",
+        "Quality evidence only",
+        False,
+    ),
+}
 
 
 class M2FoundationNavigationError(RuntimeError):
@@ -41,6 +63,24 @@ class M2FoundationNavigationItem:
     def namespace(self) -> str:
         return self.metric_code.split("-", 2)[1]
 
+    @property
+    def lane_presentation_label(self) -> str:
+        contract = M2_OBSERVATION_LANE_PRESENTATION.get(self.observation_lane)
+        if contract is None:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_OBSERVATION_LANE_UNKNOWN:{self.observation_lane}"
+            )
+        return contract[1]
+
+    @property
+    def observation_record_expected(self) -> bool:
+        contract = M2_OBSERVATION_LANE_PRESENTATION.get(self.observation_lane)
+        if contract is None:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_OBSERVATION_LANE_UNKNOWN:{self.observation_lane}"
+            )
+        return contract[2]
+
     def projection(self) -> dict[str, object]:
         return {
             "metric_code": self.metric_code,
@@ -51,6 +91,8 @@ class M2FoundationNavigationItem:
             "value_kind": self.value_kind,
             "observation_lane": self.observation_lane,
             "publication_route": self.publication_route,
+            "lane_presentation_label": self.lane_presentation_label,
+            "observation_record_expected": self.observation_record_expected,
         }
 
 
@@ -72,6 +114,41 @@ class M2FoundationNavigationModel:
                 f"M2_GUI_FOUNDATION_NAMESPACE_UNKNOWN:{namespace}"
             )
         return tuple(item for item in self.items if item.namespace == namespace)
+
+    def by_observation_lane(
+        self,
+        observation_lane: str,
+    ) -> tuple[M2FoundationNavigationItem, ...]:
+        if observation_lane == "ALL":
+            return self.items
+        if observation_lane not in M2_OBSERVATION_LANE_COUNTS:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_OBSERVATION_LANE_UNKNOWN:{observation_lane}"
+            )
+        return tuple(
+            item
+            for item in self.items
+            if item.observation_lane == observation_lane
+        )
+
+    def filtered(
+        self,
+        *,
+        namespace: str,
+        observation_lane: str,
+    ) -> tuple[M2FoundationNavigationItem, ...]:
+        namespace_items = self.by_namespace(namespace)
+        if observation_lane == "ALL":
+            return namespace_items
+        if observation_lane not in M2_OBSERVATION_LANE_COUNTS:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_OBSERVATION_LANE_UNKNOWN:{observation_lane}"
+            )
+        return tuple(
+            item
+            for item in namespace_items
+            if item.observation_lane == observation_lane
+        )
 
     def item(self, metric_code: str) -> M2FoundationNavigationItem:
         for item in self.items:
@@ -154,6 +231,19 @@ def build_m2_foundation_navigation_model(
             raise M2FoundationNavigationError(
                 f"M2_GUI_FOUNDATION_DEFINITION_HASH_INVALID:{item.metric_code}"
             )
+        lane_contract = M2_OBSERVATION_LANE_PRESENTATION.get(
+            item.observation_lane
+        )
+        if lane_contract is None:
+            raise M2FoundationNavigationError(
+                f"M2_GUI_OBSERVATION_LANE_UNKNOWN:{item.observation_lane}"
+            )
+        if item.publication_route != lane_contract[0]:
+            raise M2FoundationNavigationError(
+                "M2_GUI_OBSERVATION_ROUTE_LANE_MISMATCH:"
+                f"{item.metric_code}:{item.publication_route}:"
+                f"{item.observation_lane}"
+            )
         items.append(item)
 
     codes = tuple(item.metric_code for item in items)
@@ -170,6 +260,12 @@ def build_m2_foundation_navigation_model(
         if len(model.by_namespace(namespace)) != expected_count:
             raise M2FoundationNavigationError(
                 f"M2_GUI_FOUNDATION_NAMESPACE_COUNT_INVALID:{namespace}"
+            )
+    for observation_lane, expected_count in M2_OBSERVATION_LANE_COUNTS.items():
+        if len(model.by_observation_lane(observation_lane)) != expected_count:
+            raise M2FoundationNavigationError(
+                "M2_GUI_OBSERVATION_LANE_COUNT_INVALID:"
+                f"{observation_lane}"
             )
     return model
 
@@ -199,10 +295,29 @@ def create_m2_foundation_workspace(
     layout.addWidget(header)
     layout.addWidget(count)
 
-    namespace = qt_widgets.QComboBox(root)
+    filters = qt_widgets.QWidget(root)
+    filters.setObjectName("tpaaM2FoundationFilters")
+    filter_layout = qt_widgets.QHBoxLayout(filters)
+
+    namespace = qt_widgets.QComboBox(filters)
     namespace.setObjectName("tpaaM2FoundationNamespace")
     namespace.addItems(["ALL", "QA", "AIR", "SNS"])
-    layout.addWidget(namespace)
+    filter_layout.addWidget(qt_widgets.QLabel("Metric family", filters))
+    filter_layout.addWidget(namespace)
+
+    lane = qt_widgets.QComboBox(filters)
+    lane.setObjectName("tpaaM2ObservationLane")
+    lane.addItems(["ALL", *M2_OBSERVATION_LANE_COUNTS])
+    filter_layout.addWidget(qt_widgets.QLabel("Observation lane", filters))
+    filter_layout.addWidget(lane)
+    layout.addWidget(filters)
+
+    lane_summary = qt_widgets.QLabel(
+        "Observation lane: ALL · visible=32",
+        root,
+    )
+    lane_summary.setObjectName("tpaaM2ObservationLaneSummary")
+    layout.addWidget(lane_summary)
 
     navigator = qt_widgets.QListWidget(root)
     navigator.setObjectName("tpaaM2FoundationNavigator")
@@ -228,6 +343,15 @@ def create_m2_foundation_workspace(
                     "release_id": model.release_id,
                     "manifest_hash": model.manifest_hash,
                     "definition": item.projection(),
+                    "observation_presentation": {
+                        "lane": item.observation_lane,
+                        "lane_label": item.lane_presentation_label,
+                        "publication_route": item.publication_route,
+                        "observation_record_expected": (
+                            item.observation_record_expected
+                        ),
+                        "release_bound": True,
+                    },
                 },
                 indent=2,
                 sort_keys=True,
@@ -235,24 +359,37 @@ def create_m2_foundation_workspace(
         )
         status.setText(f"Navigation: SELECTED {item.metric_code}")
 
-    def render_namespace(_value: str = "") -> None:
-        selected = str(namespace.currentText())
+    def render_filters(_value: str = "") -> None:
+        selected_namespace = str(namespace.currentText())
+        selected_lane = str(lane.currentText())
         visible_items.clear()
-        visible_items.extend(model.by_namespace(selected))
+        visible_items.extend(
+            model.filtered(
+                namespace=selected_namespace,
+                observation_lane=selected_lane,
+            )
+        )
         navigator.clear()
         for item in visible_items:
             navigator.addItem(item.metric_code)
+        lane_summary.setText(
+            f"Observation lane: {selected_lane} · visible={len(visible_items)}"
+        )
         if visible_items:
             navigator.setCurrentRow(0)
             render_detail(0)
         else:
             detail.clear()
+            status.setText("Navigation: EMPTY")
 
-    namespace.currentTextChanged.connect(render_namespace)
+    namespace.currentTextChanged.connect(render_filters)
+    lane.currentTextChanged.connect(render_filters)
     navigator.currentRowChanged.connect(render_detail)
-    render_namespace()
+    render_filters()
     root._tpaa_m2_foundation_model = model
     root._tpaa_m2_foundation_namespace = namespace
+    root._tpaa_m2_observation_lane = lane
+    root._tpaa_m2_observation_lane_summary = lane_summary
     root._tpaa_m2_foundation_navigator = navigator
     root._tpaa_m2_foundation_detail = detail
     return root
