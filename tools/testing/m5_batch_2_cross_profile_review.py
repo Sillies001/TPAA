@@ -85,7 +85,10 @@ def verify(
     }
     authority_hashes = {str(report["authority_sha256"]) for report in ordered}
     acceptance = {
-        "exact_four_profiles": tuple(by_profile) == authority.mandatory_profile_ids,
+        "exact_four_profiles": (
+            len(by_profile) == len(authority.mandatory_profile_ids)
+            and set(by_profile) == set(authority.mandatory_profile_ids)
+        ),
         "same_candidate_source_revision": len(
             {report["source_revision"] for report in ordered}
         )

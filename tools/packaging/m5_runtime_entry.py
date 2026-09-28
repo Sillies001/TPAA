@@ -297,11 +297,9 @@ def _workload(profile_id: str) -> dict[str, object]:
             observations: list[dict[str, object]] = []
             for metric_index, metric_code in enumerate(metric_codes):
                 status = "VALID"
-                value: float | None = round(
-                    50.0
-                    + math.sin((session_index + 1) * (metric_index + 1) / 19.0) * 20.0,
-                    9,
-                )
+                value: float | None = (
+                    ((session_index + 1) * (metric_index + 3) * 7919) % 100000
+                ) / 1000.0
                 if scenario == "GAP_AND_INSUFFICIENT" and metric_index % 17 == 0:
                     status = "INSUFFICIENT_DATA"
                     value = None
