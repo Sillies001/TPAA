@@ -1,0 +1,20 @@
+{
+  "schema": "TPAA_GOLDEN_FIXTURE_MANIFEST_V1",
+  "fixture_id": "C3_FORMAL_QUALIFICATION_AUTHORITY_V1",
+  "fixture_version": "1.0.0",
+  "task_ids": [
+    "M5-GOV-001",
+    "M5-TST-001"
+  ],
+  "authority_id": "M5_FORMAL_QUALIFICATION_AUTHORITY",
+  "authority_version": "1.0.0",
+  "authority_sha256": "e3dd1fafa9c65d6c9a85dfb7172d60adef3e9c17893e3b546b962275c42c01b1",
+  "source_files": [
+    {
+      "path": "source/c3-authority-golden.json",
+      "sha256": "c7e48ccde69a7bddc53be2aba07fd8f91a3d45d87a935c180ba6d9120a2729ec",
+      "bytes": 3438
+    }
+  ],
+  "expected_status": "PASS"
+}

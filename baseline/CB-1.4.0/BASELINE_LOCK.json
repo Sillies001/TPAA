@@ -6,8 +6,9 @@
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
     "date": "2026-09-28",
-    "rebaseline": "R3.5_M4_LONGITUDINAL_DEBRIEF_AUTHORITY",
+    "rebaseline": "R3.6_M5_FORMAL_QUALIFICATION_AUTHORITY",
     "lock_lineage_sha256": [
+      "8bc1834502561992e9aef64d73186c7854ef293e4ec57f658b4e9f72828e0cab",
       "d6ebab2b5402cf81a0b5f73a2da4ed2aaa2d530bc7445c7f6132dcf7fa72224d"
     ]
   },
@@ -66,6 +67,11 @@
       "file": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json",
       "sha256": "c1c073bce8870feceb90bdb6c28172c4c726de6b15fc70208e169336baa59dfa",
       "bytes": 51519
+    },
+    {
+      "file": "M5_FORMAL_QUALIFICATION_AUTHORITY.json",
+      "sha256": "e3dd1fafa9c65d6c9a85dfb7172d60adef3e9c17893e3b546b962275c42c01b1",
+      "bytes": 17376
     },
     {
       "file": "METRIC_INPUT_AUTHORITY_MATRIX.json",

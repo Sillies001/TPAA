@@ -18,6 +18,10 @@ SDIB-1.4 freezes 23 M5 Tasks: GOVERNANCE 3, PLATFORM 5, PERFORMANCE 2, SECURITY 
 SDIB-1.4 intentionally does not invent target hardware/workload identities, performance/resource thresholds, security/vulnerability acceptance, package/install rules, upgrade/rollback, backup/restore or formal release acceptance/signoff. C3 #136 is fail-closed until dedicated machine authority is adopted on protected main.
 
 ## Protected-main adoption
-PENDING exact-head Hosted CI, expected-head guarded merge and actual merge-SHA protected-main requalification.
+ADOPTED by PR #137.
+- exact candidate head: `a8a9a342a0b1a347e575169234553ec97d8078e9`
+- exact-head Run #436 / `36433513907`: PASS, 14/14 jobs
+- actual protected-main merge SHA: `de5dfb528156428eee93ce4d022350382cbf4127`
+- protected-main Run #437 / `36435473663`: PASS, 14/14 jobs
 
-**Candidate decision: READY_FOR_HOSTED_QUALIFICATION.**
+**Decision: ADOPTED.** M5 implementation remains fail-closed where task dependencies require C3 #136 until its protected-main adoption.

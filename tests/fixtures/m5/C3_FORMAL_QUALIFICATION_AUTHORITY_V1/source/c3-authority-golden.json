@@ -1,0 +1,95 @@
+{
+  "schema": "TPAA_M5_C3_AUTHORITY_GOLDEN_V1",
+  "authority_sha256": "e3dd1fafa9c65d6c9a85dfb7172d60adef3e9c17893e3b546b962275c42c01b1",
+  "profile_hashes": {
+    "target_hardware_profile_sha256": "236e1e1d5c74ce68717f6808346b997f58df6c6c5bccbd37323fe82fa8339d92",
+    "workload_profile_sha256": "1cb0b2d6b241262f2af6c7dd05abe300da724b4508a98c57c184a0cfcb70970f",
+    "performance_profile_sha256": "4de0aa56f961994b2063e503e0f3128d37a8e743980f33dea900fab6af53ab1e",
+    "security_profile_sha256": "ea999324ebc576c26fc905cf117f086eecc1389e9e3588cb303a4b3d3dd4c7b2",
+    "package_profile_sha256": "698f918307cd68ae16be2224a3b82853c805d98744343722b3d23a02fee0bc2b",
+    "recovery_profile_sha256": "c35c59fd29491c98e09c4ff3001adcd102003d8d735ba9727f35065900348350",
+    "release_acceptance_profile_sha256": "5bbeb9e02d8426ad8983c027123c4f9f8ff364beeb38af1efb4998a75b566a3f"
+  },
+  "exact_profiles": [
+    "WINDOWS_DESKTOP_X64",
+    "LINUX_DESKTOP_X64",
+    "WINDOWS_SERVICE_X64",
+    "LINUX_SERVICE_X64"
+  ],
+  "workload_identity": {
+    "id": "M5_P1_QUALIFICATION_WORKLOAD_V1",
+    "version": "1.0.0",
+    "spec_hash": "1cb0b2d6b241262f2af6c7dd05abe300da724b4508a98c57c184a0cfcb70970f"
+  },
+  "golden_vectors": {
+    "performance_boundary_pass": {
+      "profile_id": "WINDOWS_SERVICE_X64",
+      "api_query_latency_p95_ms": 1000,
+      "api_query_throughput_per_second": 8,
+      "peak_rss_mib": 8192,
+      "full_workload_wall_seconds": 900,
+      "expected_status": "PASS"
+    },
+    "performance_over_limit_fail": {
+      "profile_id": "WINDOWS_SERVICE_X64",
+      "api_query_latency_p95_ms": 1000.001,
+      "expected_error": "FAIL_CLOSED_M5_PERFORMANCE_THRESHOLD"
+    },
+    "security_critical_fail": {
+      "critical_unwaived_count": 1,
+      "high_unwaived_count": 0,
+      "medium_unwaived_count": 0,
+      "expected_error": "FAIL_CLOSED_M5_SECURITY_ACCEPTANCE"
+    },
+    "security_medium_with_valid_waiver_pass": {
+      "medium_unwaived_count": 0,
+      "approved_waiver_count": 1,
+      "waiver_days": 30,
+      "expected_status": "PASS"
+    },
+    "package_network_dependency_fail": {
+      "target_network_access_required": true,
+      "expected_error": "FAIL_CLOSED_M5_OFFLINE_PACKAGE_REQUIRED"
+    },
+    "first_release_upgrade_na_pass": {
+      "prior_accepted_m5_release_exists": false,
+      "upgrade_result": "NOT_APPLICABLE_FIRST_M5_RELEASE",
+      "failed_install_rollback_verified": true,
+      "expected_status": "PASS"
+    },
+    "backup_corruption_fail": {
+      "one_byte_corruption_detected": true,
+      "target_mutated_before_detection": false,
+      "expected_error": "FAIL_CLOSED_M5_BACKUP_RESTORE_REQUIRED"
+    },
+    "release_missing_profile_fail": {
+      "passed_profiles": [
+        "WINDOWS_DESKTOP_X64",
+        "LINUX_DESKTOP_X64",
+        "WINDOWS_SERVICE_X64"
+      ],
+      "expected_error": "FAIL_CLOSED_M5_RELEASE_EVIDENCE_INCOMPLETE"
+    },
+    "release_duplicate_signoff_actor_fail": {
+      "signoffs": [
+        {
+          "role": "RELEASE_MANAGER",
+          "actor_id": "actor-a"
+        },
+        {
+          "role": "INDEPENDENT_QA",
+          "actor_id": "actor-a"
+        },
+        {
+          "role": "SECURITY_APPROVER",
+          "actor_id": "actor-c"
+        }
+      ],
+      "expected_error": "FAIL_CLOSED_M5_SIGNOFF_REQUIRED"
+    },
+    "release_exit_not_go_fail": {
+      "m5_exit_decision": "PENDING",
+      "expected_error": "FAIL_CLOSED_M5_EXIT_GO_REQUIRED"
+    }
+  }
+}
