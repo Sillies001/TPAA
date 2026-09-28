@@ -543,13 +543,13 @@ def create_m3_workspace_navigation(
 
         family_table.setRowCount(len(model.families))
         for row, family in enumerate(model.families):
-            values = (
+            family_values = (
                 family.family_code,
                 family.metric_count,
                 family.applicable_count,
                 family.not_applicable_count,
             )
-            for column, value in enumerate(values):
+            for column, value in enumerate(family_values):
                 family_table.setItem(
                     row,
                     column,
@@ -564,14 +564,14 @@ def create_m3_workspace_navigation(
         product_table.setRowCount(len(product_families))
         for row, family in enumerate(product_families):
             product_label, meaning = M3_GUI_FAMILY_PRESENTATION[family.family_code]
-            values = (
+            product_values = (
                 family.family_code,
                 product_label,
                 meaning,
                 family.applicable_count,
                 family.not_applicable_count,
             )
-            for column, value in enumerate(values):
+            for column, value in enumerate(product_values):
                 product_table.setItem(
                     row,
                     column,
@@ -595,7 +595,7 @@ def create_m3_workspace_navigation(
                 if metric.applicable
                 else "0 · no observation"
             )
-            values = (
+            metric_values = (
                 metric.metric_code,
                 metric.family_code,
                 product_label,
@@ -604,7 +604,7 @@ def create_m3_workspace_navigation(
                 system_type_text,
                 instance_text,
             )
-            for column, value in enumerate(values):
+            for column, value in enumerate(metric_values):
                 applicability_table.setItem(
                     row,
                     column,

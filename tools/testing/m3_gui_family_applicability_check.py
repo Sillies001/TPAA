@@ -205,15 +205,15 @@ def verify() -> dict[str, object]:
         expected_product_rows: list[list[str]] = []
         for raw_family in families_raw:
             family = _mapping(raw_family, field=f"{training_key}.family")
-            family_code = family.get("family_code")
-            if family_code not in M3_GUI_PRODUCT_FAMILY_CODES:
+            family_row_code = family.get("family_code")
+            if family_row_code not in M3_GUI_PRODUCT_FAMILY_CODES:
                 continue
-            if not isinstance(family_code, str):
+            if not isinstance(family_row_code, str):
                 raise RuntimeError(f"{training_key} family code invalid")
-            label, meaning = M3_GUI_FAMILY_PRESENTATION[family_code]
+            label, meaning = M3_GUI_FAMILY_PRESENTATION[family_row_code]
             expected_product_rows.append(
                 [
-                    family_code,
+                    family_row_code,
                     label,
                     meaning,
                     str(family.get("applicable_count")),
@@ -225,10 +225,10 @@ def verify() -> dict[str, object]:
         projected_non_applicable: list[str] = []
         for raw_metric in metrics_raw:
             metric = _mapping(raw_metric, field=f"{training_key}.metric")
-            family_code = metric.get("family_code")
-            if family_code not in M3_GUI_PRODUCT_FAMILY_CODES:
+            metric_family_code = metric.get("family_code")
+            if metric_family_code not in M3_GUI_PRODUCT_FAMILY_CODES:
                 continue
-            if not isinstance(family_code, str):
+            if not isinstance(metric_family_code, str):
                 raise RuntimeError(f"{training_key} metric family invalid")
             applicability = _mapping(
                 metric.get("applicability"),
@@ -253,15 +253,15 @@ def verify() -> dict[str, object]:
                 raise RuntimeError(f"{training_key} metric code invalid")
             if not applicable:
                 projected_non_applicable.append(metric_code)
-            label, _ = M3_GUI_FAMILY_PRESENTATION[family_code]
+            label, _ = M3_GUI_FAMILY_PRESENTATION[metric_family_code]
             expected_metric_rows.append(
                 [
                     metric_code,
-                    family_code,
+                    metric_family_code,
                     label,
                     "YES" if applicable else "NO",
                     ", ".join(cast(list[str], reasons)) if reasons else "—",
-                    cast(str, system_type) if system_type is not None else "—",
+                    system_type if system_type is not None else "—",
                     str(len(instances)) if applicable else "0 · no observation",
                 ]
             )
