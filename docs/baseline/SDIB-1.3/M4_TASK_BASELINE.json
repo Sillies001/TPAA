@@ -1,0 +1,569 @@
+{
+  "schema": "TPAA_SDIB_M4_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.3",
+  "milestone": "M4",
+  "milestone_name": "P1 Longitudinal & Debrief Closure",
+  "entry_evidence": {
+    "predecessor_milestone": "M3",
+    "protected_main_sha": "53c591adbab1dea0618d0d3a727b0bf4638e00de",
+    "protected_main_run_number": 414,
+    "protected_main_actions_run_id": 36380613937,
+    "exit_review_schema": "TPAA_M3_EXIT_REVIEW_V1",
+    "exit_decision": "GO",
+    "task_complete": true,
+    "failed_acceptance": []
+  },
+  "task_count": 21,
+  "required_workstreams": [
+    "WS-LONGITUDINAL",
+    "WS-OBSERVATION",
+    "WS-GUI",
+    "WS-API",
+    "WS-TEST",
+    "WS-GOVERNANCE"
+  ],
+  "capability_boundary": {
+    "admitted_phases": [
+      "P1"
+    ],
+    "explicitly_not_admitted": [
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "p4_human_assessment_active": false,
+    "m5_product_qualification_active": false
+  },
+  "longitudinal_eligibility": {
+    "eligible_count": 104,
+    "eligible_value_kind": "NUMERIC",
+    "eligible_default_aggregation": "MEDIAN",
+    "eligible_metric_codes": [
+      "P1-QA-003",
+      "P1-QA-004",
+      "P1-AIR-001",
+      "P1-AIR-002",
+      "P1-AIR-003",
+      "P1-AIR-004",
+      "P1-AIR-005",
+      "P1-AIR-006",
+      "P1-AIR-008",
+      "P1-AIR-009",
+      "P1-AIR-010",
+      "P1-AIR-011",
+      "P1-AIR-012",
+      "P1-AIR-013",
+      "P1-AIR-014",
+      "P1-AIR-015",
+      "P1-AIR-022",
+      "P1-AIR-023",
+      "P1-AIR-024",
+      "P1-AIR-026",
+      "P1-AIR-016",
+      "P1-AIR-017",
+      "P1-AIR-018",
+      "P1-AIR-020",
+      "P1-AIR-021",
+      "P1-AIR-038",
+      "P1-AIR-027",
+      "P1-AIR-036",
+      "P1-AIR-037",
+      "P1-AIR-028",
+      "P1-AIR-029",
+      "P1-AIR-031",
+      "P1-AIR-032",
+      "P1-AIR-033",
+      "P1-AIR-034",
+      "P1-SNS-001",
+      "P1-SNS-002",
+      "P1-SNS-003",
+      "P1-SNS-004",
+      "P1-SNS-005",
+      "P1-SNS-006",
+      "P1-SNS-007",
+      "P1-SNS-008",
+      "P1-SNS-009",
+      "P1-SNS-010",
+      "P1-SNS-011",
+      "P1-SNS-012",
+      "P1-SNS-013",
+      "P1-SNS-014",
+      "P1-SNS-015",
+      "P1-SNS-016",
+      "P1-SNS-017",
+      "P1-SNS-018",
+      "P1-SNS-019",
+      "P1-SNS-020",
+      "P1-SNS-021",
+      "P1-TRK-001",
+      "P1-TRK-002",
+      "P1-TRK-003",
+      "P1-TRK-004",
+      "P1-TRK-005",
+      "P1-TRK-006",
+      "P1-TRK-007",
+      "P1-ID-001",
+      "P1-ID-002",
+      "P1-ID-003",
+      "P1-ID-004",
+      "P1-ID-005",
+      "P1-ID-006",
+      "P1-ID-007",
+      "P1-ID-008",
+      "P1-ID-009",
+      "P1-ID-010",
+      "P1-ID-011",
+      "P1-ID-012",
+      "P1-PSV-001",
+      "P1-PSV-002",
+      "P1-PSV-003",
+      "P1-PSV-004",
+      "P1-PSV-005",
+      "P1-PSV-006",
+      "P1-PSV-007",
+      "P1-ESM-001",
+      "P1-ESM-002",
+      "P1-ESM-003",
+      "P1-ESM-004",
+      "P1-ESM-005",
+      "P1-ESM-006",
+      "P1-DL-001",
+      "P1-DL-002",
+      "P1-DL-003",
+      "P1-DL-004",
+      "P1-DL-005",
+      "P1-DL-006",
+      "P1-DL-007",
+      "P1-DL-008",
+      "P1-FUS-001",
+      "P1-FUS-002",
+      "P1-FUS-003",
+      "P1-FUS-004",
+      "P1-FUS-005",
+      "P1-FUS-006",
+      "P1-FUS-007",
+      "P1-FUS-008"
+    ],
+    "excluded_count": 12,
+    "excluded_metrics": [
+      {
+        "metric_code": "P1-QA-001",
+        "subject_type": "TARGET_PAIR",
+        "observation_lane": "QUALITY_EVIDENCE_ONLY",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_QA_001_V1"
+      },
+      {
+        "metric_code": "P1-QA-002",
+        "subject_type": "TARGET_PAIR",
+        "observation_lane": "QUALITY_EVIDENCE_ONLY",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_QA_002_V1"
+      },
+      {
+        "metric_code": "P1-QA-006",
+        "subject_type": "MISSION_SYSTEM_INSTANCE",
+        "observation_lane": "SYSTEM_PERFORMANCE_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_QA_006_V1"
+      },
+      {
+        "metric_code": "P1-QA-005",
+        "subject_type": "TARGET_PAIR",
+        "observation_lane": "QUALITY_EVIDENCE_ONLY",
+        "value_kind": "NUMERIC",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": null
+      },
+      {
+        "metric_code": "P1-QA-007",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "QUALITY_EVIDENCE_ONLY",
+        "value_kind": "NUMERIC",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": null
+      },
+      {
+        "metric_code": "P1-QA-008",
+        "subject_type": "TARGET_PAIR",
+        "observation_lane": "QUALITY_EVIDENCE_ONLY",
+        "value_kind": "NUMERIC",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": null
+      },
+      {
+        "metric_code": "P1-AIR-007",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "AIRCRAFT_CAP_L1_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_AIR_007_V1"
+      },
+      {
+        "metric_code": "P1-AIR-025",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "AIRCRAFT_CAP_L1_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_AIR_025_V1"
+      },
+      {
+        "metric_code": "P1-AIR-019",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "AIRCRAFT_CAP_L1_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_AIR_019_V1"
+      },
+      {
+        "metric_code": "P1-AIR-039",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "AIRCRAFT_CAP_L1_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_AIR_039_V1"
+      },
+      {
+        "metric_code": "P1-AIR-035",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "AIRCRAFT_CAP_L1_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_AIR_035_V1"
+      },
+      {
+        "metric_code": "P1-AIR-030",
+        "subject_type": "AIRCRAFT",
+        "observation_lane": "AIRCRAFT_CAP_L1_OBSERVATION",
+        "value_kind": "STRUCTURED",
+        "default_aggregation": "NONE",
+        "structured_output_schema_id": "STRUCT_P1_AIR_030_V1"
+      }
+    ]
+  },
+  "core_storage_authority": {
+    "db_schema_version": "1.6.0",
+    "tables": [
+      "registry.longitudinal_scope",
+      "registry.analysis_release",
+      "registry.release_scope_pointer",
+      "registry.longitudinal_release_input",
+      "metric.longitudinal_sample",
+      "metric.performance_trend_series",
+      "metric.performance_trend_point",
+      "metric.trend_bridge",
+      "metric.trend_input_bridge",
+      "debrief.annotation"
+    ],
+    "shadow_schema_permitted": false
+  },
+  "authority_blockers": {
+    "c3_issue": 122,
+    "reason": "Exact longitudinal trend-profile algorithm/canonicalization and required longitudinal/debrief cross-layer DTO contracts are not fully frozen by current CB-1.4.0.",
+    "fail_closed": true,
+    "blocker_task_id": "M4-GOV-001",
+    "dependent_task_ids": [
+      "M4-LONG-002",
+      "M4-LONG-003",
+      "M4-LONG-004",
+      "M4-LONG-005",
+      "M4-OBS-001",
+      "M4-OBS-002",
+      "M4-OBS-003",
+      "M4-API-001",
+      "M4-API-002",
+      "M4-GUI-001",
+      "M4-GUI-002",
+      "M4-GUI-003"
+    ]
+  },
+  "authority_boundaries": {
+    "canonical_business_authority": "CB-1.4.0",
+    "catalog": "P1_METRIC_CATALOG.json",
+    "milestone_registry": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+    "workstream_registry": "ENGINEERING_WORKSTREAM_REGISTRY.json",
+    "core_rules": [
+      "CR-006",
+      "CR-007",
+      "CR-009",
+      "CR-011",
+      "CR-021",
+      "CR-022",
+      "CR-027"
+    ],
+    "historical_current_latest_fallback_forbidden": true,
+    "gui_persistence_access_forbidden": true,
+    "api_gui_business_recomputation_forbidden": true,
+    "p4_assessment_forbidden": true
+  },
+  "batches": [
+    {
+      "batch_id": "M4-BATCH-1",
+      "name": "Authority closure + longitudinal sample substrate",
+      "task_ids": [
+        "M4-GOV-001",
+        "M4-GOV-002",
+        "M4-LONG-001",
+        "M4-LONG-002",
+        "M4-LONG-003",
+        "M4-TST-001"
+      ]
+    },
+    {
+      "batch_id": "M4-BATCH-2",
+      "name": "Trend engine + longitudinal Release/replay",
+      "task_ids": [
+        "M4-LONG-004",
+        "M4-LONG-005",
+        "M4-OBS-001",
+        "M4-OBS-002",
+        "M4-OBS-003",
+        "M4-TST-002"
+      ]
+    },
+    {
+      "batch_id": "M4-BATCH-3",
+      "name": "Longitudinal API + GUI + Evidence-first Debrief",
+      "task_ids": [
+        "M4-API-001",
+        "M4-API-002",
+        "M4-GUI-001",
+        "M4-GUI-002",
+        "M4-GUI-003",
+        "M4-TST-003"
+      ]
+    },
+    {
+      "batch_id": "M4-BATCH-4",
+      "name": "Coverage / parity / cold-start / Exit",
+      "task_ids": [
+        "M4-TST-004",
+        "M4-TST-005",
+        "M4-TST-006"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M4-GOV-001",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "Longitudinal profile and DTO semantic authority closure",
+      "dependencies": [
+        "M3 Exit GO",
+        "C3 issue #122"
+      ],
+      "minimum_acceptance": "Versioned M4 longitudinal profile/comparison-key semantics and cross-layer DTO authority are adopted on protected main; no implementation-selected EWMA/slope/window/hash/DTO semantics remain."
+    },
+    {
+      "task_id": "M4-GOV-002",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "P1-only scope and pre-M5 artifact labeling guard",
+      "dependencies": [
+        "M3 Exit GO"
+      ],
+      "minimum_acceptance": "M4 admits only P1 Aircraft/Mission-System longitudinal/debrief products; P4/P5 assessment remains inactive; M4 artifacts are development/pre-release and cannot claim M5 qualification."
+    },
+    {
+      "task_id": "M4-LONG-001",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Exact P1 longitudinal eligibility projection",
+      "dependencies": [
+        "M3 Exit GO",
+        "P1_METRIC_CATALOG.json"
+      ],
+      "minimum_acceptance": "Exact 104 eligible NUMERIC MEDIAN metrics and exact 12 excluded metrics are projected from Catalog authority; no STRUCTURED, quality-only or TARGET_PAIR lane enters longitudinal_sample."
+    },
+    {
+      "task_id": "M4-LONG-002",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Release-bound SESSION_CONFIG longitudinal_sample builder",
+      "dependencies": [
+        "M4-GOV-001",
+        "M4-LONG-001",
+        "M3-OBS-003"
+      ],
+      "minimum_acceptance": "Build deterministic metric.longitudinal_sample only from exact immutable session Release observations/evidence; Catalog default aggregation applies; excluded/not-applicable inputs fail closed without fabricated samples."
+    },
+    {
+      "task_id": "M4-LONG-003",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Longitudinal scope and comparison-key segmentation",
+      "dependencies": [
+        "M4-GOV-001",
+        "M4-LONG-002"
+      ],
+      "minimum_acceptance": "AIRCRAFT/MISSION_SYSTEM_INSTANCE subjects only; deterministic governed comparison-key and scope identity; materially incompatible semantic/config/profile/scenario/world inputs segment instead of joining."
+    },
+    {
+      "task_id": "M4-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "Longitudinal eligibility/sample Golden-negative suite",
+      "dependencies": [
+        "M4-LONG-001",
+        "M4-LONG-002",
+        "M4-LONG-003"
+      ],
+      "minimum_acceptance": "Golden and negative fixtures prove 104/12 membership, MEDIAN sample behavior, N/A/fail-closed exclusions, comparison-key segmentation, deterministic replay and exact Release lineage on Windows/Linux."
+    },
+    {
+      "task_id": "M4-LONG-004",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Approved P1 observed trend profile engine",
+      "dependencies": [
+        "M4-GOV-001",
+        "M4-LONG-002",
+        "M4-LONG-003"
+      ],
+      "minimum_acceptance": "Compute only governed current/EWMA/slope/stability/status semantics from the adopted versioned profile; deterministic replay; no P2/P3/P4 interpretation or implementation-local formula authority."
+    },
+    {
+      "task_id": "M4-LONG-005",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Performance trend series/point projection",
+      "dependencies": [
+        "M4-LONG-004"
+      ],
+      "minimum_acceptance": "Populate frozen metric.performance_trend_series/point contracts with exact profile/version/input hashes and status/reason lineage; no shadow schema; incompatible series remain segmented."
+    },
+    {
+      "task_id": "M4-OBS-001",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Immutable longitudinal Release publication",
+      "dependencies": [
+        "M4-LONG-002",
+        "M4-LONG-005"
+      ],
+      "minimum_acceptance": "Publish LONGITUDINAL analysis_release with exact longitudinal_scope, session Release/sample input membership, manifest/provenance and idempotency; immutable Release semantics preserved."
+    },
+    {
+      "task_id": "M4-OBS-002",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Exact historical longitudinal replay",
+      "dependencies": [
+        "M4-OBS-001"
+      ],
+      "minimum_acceptance": "Historical read/replay binds explicit longitudinal release_id and exact input session Releases/profiles/bridges; never resolves current/latest as fallback."
+    },
+    {
+      "task_id": "M4-OBS-003",
+      "workstream": "WS-OBSERVATION",
+      "deliverable": "Trend bridge and semantic-version compatibility",
+      "dependencies": [
+        "M4-GOV-001",
+        "M4-LONG-005"
+      ],
+      "minimum_acceptance": "Only approved trend_bridge contracts may bridge semantic versions; absent/unapproved bridge segments or fails closed; retrospective revision never masquerades as contemporaneous knowledge."
+    },
+    {
+      "task_id": "M4-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "Trend/Release/history/replay Golden suite",
+      "dependencies": [
+        "M4-LONG-004",
+        "M4-LONG-005",
+        "M4-OBS-001",
+        "M4-OBS-002",
+        "M4-OBS-003"
+      ],
+      "minimum_acceptance": "Golden/negative/replay tests cover governed trend profile, immutable longitudinal Release, bridge/no-bridge behavior and original-as-known versus retrospective history on Windows/Linux."
+    },
+    {
+      "task_id": "M4-API-001",
+      "workstream": "WS-API",
+      "deliverable": "Release-bound longitudinal trend query contract",
+      "dependencies": [
+        "M4-GOV-001",
+        "M4-OBS-002"
+      ],
+      "minimum_acceptance": "API/DTO consumes adopted authority and exact longitudinal release_id; returns scope/series/points/status/evidence without recomputing trend business semantics or falling back to latest."
+    },
+    {
+      "task_id": "M4-API-002",
+      "workstream": "WS-API",
+      "deliverable": "Evidence-first Debrief and annotation query contract",
+      "dependencies": [
+        "M4-GOV-001",
+        "M4-OBS-002"
+      ],
+      "minimum_acceptance": "Debrief API binds immutable base Release/Evidence/timeline and revisioned annotation identity; annotation does not mutate Metric/World/Release facts; transport does not bypass application ports."
+    },
+    {
+      "task_id": "M4-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "P1 longitudinal analytics workspace",
+      "dependencies": [
+        "M4-API-001"
+      ],
+      "minimum_acceptance": "GUI renders governed Aircraft/Mission-System trend products with comparison/scope/profile/status/evidence context; no GUI metric/trend recomputation and no persistence access."
+    },
+    {
+      "task_id": "M4-GUI-002",
+      "workstream": "WS-GUI",
+      "deliverable": "Evidence-first Debrief and historical replay workspace",
+      "dependencies": [
+        "M4-API-001",
+        "M4-API-002"
+      ],
+      "minimum_acceptance": "Debrief timeline/replay is explicit-release-bound, exposes Evidence provenance and original-as-known/retrospective distinction, and never substitutes current/latest historical data."
+    },
+    {
+      "task_id": "M4-GUI-003",
+      "workstream": "WS-GUI",
+      "deliverable": "Revisioned annotation UX",
+      "dependencies": [
+        "M4-API-002"
+      ],
+      "minimum_acceptance": "Create/supersede/delete annotation revisions through application/API authority while preserving original facts, reviewer identity, reason/visibility/version and auditability; no P4 assessment claim."
+    },
+    {
+      "task_id": "M4-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "Longitudinal API/GUI/Debrief E2E qualification",
+      "dependencies": [
+        "M4-API-001",
+        "M4-API-002",
+        "M4-GUI-001",
+        "M4-GUI-002",
+        "M4-GUI-003"
+      ],
+      "minimum_acceptance": "E2E proves exact-release trend/debrief/annotation flows, no recomputation/persistence leaks, historical replay integrity and Windows/Linux logical equivalence."
+    },
+    {
+      "task_id": "M4-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "Exact 104/12 longitudinal coverage qualification",
+      "dependencies": [
+        "M4-TST-001",
+        "M4-TST-002",
+        "M4-TST-003"
+      ],
+      "minimum_acceptance": "Exact 104 eligible metrics execute longitudinal qualification; exact 12 excluded metrics never create samples/trends; subject/lane/value-kind/default-aggregation membership matches Catalog authority."
+    },
+    {
+      "task_id": "M4-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "Longitudinal Release/API/GUI/cross-platform/storage qualification",
+      "dependencies": [
+        "M4-TST-004",
+        "M4-OBS-002",
+        "M4-API-002",
+        "M4-GUI-003"
+      ],
+      "minimum_acceptance": "One candidate SHA passes Windows/Linux logical equivalence, SQLite/PostgreSQL logical longitudinal Release membership parity, history/replay/idempotency/API/GUI/debrief and annotation qualification."
+    },
+    {
+      "task_id": "M4-TST-006",
+      "workstream": "WS-TEST",
+      "deliverable": "Cold-start and M4 Exit review",
+      "dependencies": [
+        "ALL_M4_TASKS"
+      ],
+      "minimum_acceptance": "Clean source+baseline reconstructs; 21/21 M4 task evidence exact; C3 authority blocker closed; 104/12 membership exact; P4/P5 inactive; failed_acceptance=[]; protected-main M4 Exit GO."
+    }
+  ]
+}
