@@ -257,6 +257,14 @@ jobs:
           uv run --locked python tools/testing/m3_product_layer_golden_check.py check
           --evidence evidence/m3-tst-004/${{ matrix.platform }}/product-layer-golden.json
 
+      - name: Emit M3-TST-005 Release/API/GUI platform qualification
+        run: >-
+          uv run --locked python tools/testing/m3_release_api_gui_storage_qualification.py check
+          --evidence-root evidence
+          --platform ${{ matrix.platform }}
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m3-tst-005/${{ matrix.platform }}/release-api-gui.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -495,6 +503,7 @@ jobs:
             evidence/m3-tst-002/${{ matrix.platform }}/four-training-golden.json
             evidence/m3-tst-003/${{ matrix.platform }}/air-golden.json
             evidence/m3-tst-004/${{ matrix.platform }}/product-layer-golden.json
+            evidence/m3-tst-005/${{ matrix.platform }}/release-api-gui.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -801,6 +810,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-tst-004-logical-equivalence.json
 
+      - name: Compare Windows and Linux M3-TST-005 Release/API/GUI qualification
+        run: >-
+          python tools/testing/m3_release_api_gui_storage_qualification.py compare
+          --windows downloaded/evidence/m3-tst-005/windows/release-api-gui.json
+          --linux downloaded/evidence/m3-tst-005/linux/release-api-gui.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-tst-005-logical-equivalence.json
+
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
           python tools/testing/m2_general_metric_engine_compare.py
@@ -1021,6 +1038,7 @@ jobs:
             evidence/cross-platform/m3-tst-002-logical-equivalence.json
             evidence/cross-platform/m3-tst-003-logical-equivalence.json
             evidence/cross-platform/m3-tst-004-logical-equivalence.json
+            evidence/cross-platform/m3-tst-005-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
@@ -1128,6 +1146,18 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m1-batch-2/postgres/storage-parity.json
 
+      - name: Emit M3-TST-005 SQLite PostgreSQL exact-116 Release parity
+        run: >-
+          uv run --locked python tools/testing/m3_release_storage_parity.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_m3_tst_005_storage_parity
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m3-tst-005/postgres/storage-parity.json
+
       - name: Cold-start full M0 with live PostgreSQL
         run: >-
           uv run --locked python tools/ci/cold_start.py
@@ -1156,6 +1186,15 @@ jobs:
           path: evidence/m1-batch-2/postgres/storage-parity.json
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload M3-TST-005 storage parity evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m3-tst-005-storage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m3-tst-005/postgres/storage-parity.json
+          if-no-files-found: error
+          retention-days: 30
 
   m2-tst-005-review:
     name: M2-TST-005 Cross-platform Storage Qualification
@@ -1202,6 +1241,55 @@ jobs:
         with:
           name: tpaa-m2-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m2-tst-005/qualification.json
+          if-no-files-found: error
+          retention-days: 30
+
+  m3-tst-005-review:
+    name: M3-TST-005 Release API GUI Storage Qualification
+    needs:
+      - m0-logical-equivalence
+      - m0-exit-postgres
+      - m2-tst-005-review
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download M3-TST-005 cross-platform qualification
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/logical
+
+      - name: Download M3-TST-005 storage parity
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m3-tst-005-storage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/storage
+
+      - name: Qualify M3 Release API GUI cross-platform storage
+        run: >-
+          python tools/testing/m3_release_api_gui_storage_qualification.py qualify
+          --cross-platform downloaded/logical/evidence/cross-platform/m3-tst-005-logical-equivalence.json
+          --storage downloaded/storage/storage-parity.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m3-tst-005/qualification.json
+
+      - name: Upload M3-TST-005 qualification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m3-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m3-tst-005/qualification.json
           if-no-files-found: error
           retention-days: 30
 
