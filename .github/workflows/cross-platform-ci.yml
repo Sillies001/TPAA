@@ -1279,7 +1279,7 @@ jobs:
       - name: Qualify M3 Release API GUI cross-platform storage
         run: >-
           python tools/testing/m3_release_api_gui_storage_qualification.py qualify
-          --cross-platform downloaded/logical/evidence/cross-platform/m3-tst-005-logical-equivalence.json
+          --cross-platform downloaded/logical/m3-tst-005-logical-equivalence.json
           --storage downloaded/storage/storage-parity.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m3-tst-005/qualification.json
