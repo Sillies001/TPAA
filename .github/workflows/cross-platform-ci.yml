@@ -617,8 +617,8 @@ jobs:
       - name: Compare Windows and Linux M4-TST-005 platform evidence
         run: >-
           python tools/testing/m4_release_api_gui_storage_qualification.py compare
-          --windows downloaded/m4/evidence/m4-tst-005/windows/platform.json
-          --linux downloaded/m4/evidence/m4-tst-005/linux/platform.json
+          --windows downloaded/m4/m4-tst-005/windows/platform.json
+          --linux downloaded/m4/m4-tst-005/linux/platform.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m4-tst-005/logical-equivalence.json
 
