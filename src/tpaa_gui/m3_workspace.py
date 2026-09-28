@@ -7,9 +7,17 @@ Application implementation layers.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
+
+from .m3_status import (
+    M3_GUI_STATUS_STYLES,
+    M3MetricStatusPresentation,
+    build_m3_evidence_drilldown,
+    build_m3_metric_status_presentations,
+)
 
 M3_GUI_TRAINING_KEYS = ("BASIC", "WVR", "BVR", "STRIKE")
 M3_GUI_METRIC_COUNT = 116
@@ -498,15 +506,66 @@ def create_m3_workspace_navigation(
     )
     layout.addWidget(applicability_table)
 
+    replay_row = qt_widgets.QWidget(root)
+    replay_layout = qt_widgets.QHBoxLayout(replay_row)
+    replay_input = qt_widgets.QLineEdit(replay_row)
+    replay_input.setObjectName("tpaaM3HistoricalReleaseInput")
+    replay_button = qt_widgets.QPushButton("Load historical Release", replay_row)
+    replay_button.setObjectName("tpaaM3HistoricalReplayLoad")
+    replay_layout.addWidget(qt_widgets.QLabel("Historical Release ID", replay_row))
+    replay_layout.addWidget(replay_input)
+    replay_layout.addWidget(replay_button)
+    layout.addWidget(replay_row)
+
+    replay_identity = qt_widgets.QLabel("Historical replay: unavailable", root)
+    replay_identity.setObjectName("tpaaM3HistoricalReplayIdentity")
+    layout.addWidget(replay_identity)
+
+    result_table = qt_widgets.QTableWidget(root)
+    result_table.setObjectName("tpaaM3MetricStatus")
+    result_table.setColumnCount(7)
+    result_table.setHorizontalHeaderLabels(
+        [
+            "Metric",
+            "Family",
+            "Applicable",
+            "Result state",
+            "Reasons",
+            "System type",
+            "Release",
+        ]
+    )
+    result_table.setEditTriggers(
+        qt_widgets.QAbstractItemView.EditTrigger.NoEditTriggers
+    )
+    layout.addWidget(result_table)
+
+    selected_status = qt_widgets.QLabel("Metric status: unavailable", root)
+    selected_status.setObjectName("tpaaM3SelectedMetricStatus")
+    layout.addWidget(selected_status)
+
+    evidence_button = qt_widgets.QPushButton("Open Evidence", root)
+    evidence_button.setObjectName("tpaaM3EvidenceDrilldown")
+    layout.addWidget(evidence_button)
+
+    evidence_status = qt_widgets.QLabel("Evidence: IDLE", root)
+    evidence_status.setObjectName("tpaaM3EvidenceStatus")
+    layout.addWidget(evidence_status)
+
+    evidence_detail = qt_widgets.QPlainTextEdit(root)
+    evidence_detail.setObjectName("tpaaM3EvidenceDetail")
+    evidence_detail.setReadOnly(True)
+    layout.addWidget(evidence_detail)
+
     status_label = qt_widgets.QLabel("Navigation: IDLE", root)
     status_label.setObjectName("tpaaM3NavigationStatus")
     layout.addWidget(status_label)
 
-    def render(training_key: str) -> None:
-        release_id = release_ids.get(training_key)
-        if release_id is None:
-            status_label.setText("Navigation: SYSTEM_ERROR UNKNOWN_TRAINING")
-            return
+    active_model: M3WorkspaceNavigationModel | None = None
+    active_statuses: dict[str, M3MetricStatusPresentation] = {}
+
+    def render_release(training_key: str, release_id: str) -> None:
+        nonlocal active_model, active_statuses
         try:
             status, payload = transport.m3_request_json(
                 "GET",
@@ -518,12 +577,23 @@ def create_m3_workspace_navigation(
                 expected_training_key=training_key,
                 expected_release_id=release_id,
             )
+            presentations = build_m3_metric_status_presentations(
+                projection,
+                expected_release_id=release_id,
+            )
         except Exception as exc:
             status_label.setText(
                 f"Navigation: SYSTEM_ERROR {type(exc).__name__}:{exc}"
             )
+            status_label.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            replay_identity.setText(
+                f"Historical replay: SYSTEM_ERROR · Release: {release_id}"
+            )
+            replay_identity.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
             return
 
+        active_model = model
+        active_statuses = {item.metric_code: item for item in presentations}
         identity = model.training
         training_header.setText(
             f"{identity.label} · {identity.episode_type} · "
@@ -611,13 +681,143 @@ def create_m3_workspace_navigation(
                     qt_widgets.QTableWidgetItem(str(value)),
                 )
 
+        result_table.setRowCount(len(presentations))
+        for row, presentation in enumerate(presentations):
+            reason_text = (
+                ", ".join(presentation.reason_codes)
+                if presentation.reason_codes
+                else "—"
+            )
+            result_values = (
+                presentation.metric_code,
+                presentation.family_code,
+                "YES" if presentation.applicable else "NO",
+                presentation.label,
+                reason_text,
+                presentation.system_type or "—",
+                presentation.release_id,
+            )
+            for column, value in enumerate(result_values):
+                result_table.setItem(
+                    row,
+                    column,
+                    qt_widgets.QTableWidgetItem(str(value)),
+                )
+
+        replay_identity.setText(
+            f"Historical replay: RELEASE_BOUND · Release: {model.release_id} · "
+            f"Manifest: {model.manifest_hash}"
+        )
+        replay_identity.setStyleSheet("")
+        evidence_status.setText(f"Evidence: IDLE · Release: {model.release_id}")
+        evidence_status.setStyleSheet("")
+        evidence_detail.clear()
+        if presentations:
+            result_table.setCurrentCell(0, 0)
         status_label.setText(
             f"Navigation: READY · {identity.training_key} · "
             f"{len(model.metric_codes)} metrics"
         )
+        status_label.setStyleSheet("")
+
+    def render(training_key: str) -> None:
+        release_id = release_ids.get(training_key)
+        if release_id is None:
+            status_label.setText("Navigation: SYSTEM_ERROR UNKNOWN_TRAINING")
+            status_label.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            return
+        replay_input.setText(release_id)
+        render_release(training_key, release_id)
+
+    def load_historical_release() -> None:
+        release_id = replay_input.text().strip()
+        if not release_id:
+            status_label.setText("Navigation: SYSTEM_ERROR EMPTY_RELEASE_ID")
+            status_label.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            replay_identity.setText("Historical replay: SYSTEM_ERROR · empty Release ID")
+            replay_identity.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            return
+        render_release(selector.currentText(), release_id)
+
+    def select_status(row: int, _column: int) -> None:
+        if row < 0:
+            selected_status.setText("Metric status: unavailable")
+            selected_status.setStyleSheet("")
+            return
+        metric_item = result_table.item(row, 0)
+        if metric_item is None:
+            selected_status.setText("Metric status: unavailable")
+            selected_status.setStyleSheet("")
+            return
+        presentation = active_statuses.get(metric_item.text())
+        if presentation is None:
+            selected_status.setText("Metric status: SYSTEM_ERROR UNKNOWN_METRIC")
+            selected_status.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            return
+        selected_status.setText(
+            f"Metric status: {presentation.kind} · {presentation.metric_code}"
+        )
+        selected_status.setStyleSheet(presentation.style_sheet)
+
+    def load_evidence() -> None:
+        model = active_model
+        row = result_table.currentRow()
+        if model is None or row < 0:
+            evidence_status.setText("Evidence: SYSTEM_ERROR NO_METRIC_SELECTED")
+            evidence_status.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            return
+        metric_item = result_table.item(row, 0)
+        if metric_item is None:
+            evidence_status.setText("Evidence: SYSTEM_ERROR NO_METRIC_SELECTED")
+            evidence_status.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            return
+        metric_code = metric_item.text()
+        try:
+            status, payload = transport.m3_request_json(
+                "GET",
+                (
+                    f"/m3/releases/{model.release_id}/metrics/"
+                    f"{metric_code}/evidence"
+                ),
+            )
+            projection = _require_success(status, payload)
+            drilldown = build_m3_evidence_drilldown(
+                projection,
+                expected_release_id=model.release_id,
+                expected_metric_code=metric_code,
+            )
+        except Exception as exc:
+            evidence_status.setText(
+                f"Evidence: SYSTEM_ERROR {type(exc).__name__}:{exc} · "
+                f"Release: {model.release_id}"
+            )
+            evidence_status.setStyleSheet(M3_GUI_STATUS_STYLES["SYSTEM_ERROR"])
+            evidence_detail.clear()
+            return
+
+        evidence_status.setText(
+            f"Evidence: READY · {metric_code} · Release: {drilldown.release_id}"
+        )
+        evidence_status.setStyleSheet("")
+        evidence_detail.setPlainText(
+            json.dumps(
+                drilldown.projection(),
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=True,
+                allow_nan=False,
+            )
+        )
 
     selector.currentTextChanged.connect(render)
+    replay_button.clicked.connect(load_historical_release)
+    result_table.currentCellChanged.connect(
+        lambda row, column, _old_row, _old_column: select_status(row, column)
+    )
+    evidence_button.clicked.connect(load_evidence)
     render(selector.currentText())
     root.setProperty("tpaaM3NavigationMode", "RELEASE_BOUND")
     root.setProperty("tpaaM3ApplicabilityMode", "PROJECTED")
+    root.setProperty("tpaaM3StatusMode", "PROJECTED")
+    root.setProperty("tpaaM3HistoricalReplayMode", "EXPLICIT_RELEASE_ID")
     return root
