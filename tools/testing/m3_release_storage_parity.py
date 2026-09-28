@@ -177,10 +177,10 @@ def _to_storage_bundle(products: Any, plan: Any, release: Any) -> CorePublicatio
     base_metric = base.metric_instances[0]
     base_observation = base.observations[0]
 
-    definitions = []
-    evidence_sets = []
-    metric_instances = []
-    first_observation = None
+    definitions: list[Any] = []
+    evidence_sets: list[Any] = []
+    metric_instances: list[Any] = []
+    first_observation: Any | None = None
 
     release_definitions = {item.metric_code: item for item in release.definitions}
     release_records = {item.metric_code: item for item in release.execution_records}
@@ -526,6 +526,22 @@ def _publish_postgres(
     ), codes
 
 
+def _mapping(value: object, *, field: str) -> dict[str, object]:
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
+        raise ValueError(f"{field} must be a string-keyed object")
+    return {str(key): item for key, item in value.items()}
+
+
+def _rows(payload: dict[str, object], key: str) -> list[dict[str, object]]:
+    value = payload.get(key)
+    if not isinstance(value, list):
+        raise ValueError(f"{key} must be a list")
+    return [
+        _mapping(item, field=f"{key}[{index}]")
+        for index, item in enumerate(value)
+    ]
+
+
 def _exact_list_size(payload: dict[str, object], key: str, size: int) -> bool:
     value = payload.get(key)
     return isinstance(value, list) and len(value) == size
@@ -616,13 +632,21 @@ def run(
         for metric_code in plan.metric_codes
     }
     sqlite_definition_ids = {
-        str(item["metric_definition_id"])
-        for item in sqlite_membership["metric_instances"]
+        str(item.get("metric_definition_id"))
+        for item in _rows(sqlite_membership, "metric_instances")
     }
     postgres_definition_ids = {
-        str(item["metric_definition_id"])
-        for item in postgres_membership["metric_instances"]
+        str(item.get("metric_definition_id"))
+        for item in _rows(postgres_membership, "metric_instances")
     }
+    sqlite_release = _mapping(
+        sqlite_membership.get("release"),
+        field="sqlite.release",
+    )
+    postgres_release = _mapping(
+        postgres_membership.get("release"),
+        field="postgres.release",
+    )
 
     acceptance = {
         "core_schema_is_frozen_1_6_0": (
@@ -686,10 +710,10 @@ def run(
             and _exact_list_size(postgres_membership, "observations", 1)
         ),
         "stored_release_identity_matches_m3_snapshot": (
-            sqlite_membership["release"]["release_id"] == release.release_id
-            and postgres_membership["release"]["release_id"] == release.release_id
-            and sqlite_membership["release"]["manifest_hash"] == release.manifest_hash
-            and postgres_membership["release"]["manifest_hash"] == release.manifest_hash
+            sqlite_release.get("release_id") == release.release_id
+            and postgres_release.get("release_id") == release.release_id
+            and sqlite_release.get("manifest_hash") == release.manifest_hash
+            and postgres_release.get("manifest_hash") == release.manifest_hash
         ),
     }
     failed = sorted(name for name, passed in acceptance.items() if not passed)
