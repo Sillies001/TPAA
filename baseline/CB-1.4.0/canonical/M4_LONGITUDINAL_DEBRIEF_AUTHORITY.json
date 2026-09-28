@@ -1,0 +1,1390 @@
+{
+  "authority_id": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_SEMANTIC_CONTRACT",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "effective_milestone": "M4",
+  "decision_record": "https://github.com/Sillies001/TPAA/issues/122",
+  "activation_rule": "This artifact becomes active machine authority only through an approved BASELINE_LOCK on protected main with exact merge-SHA Hosted CI PASS.",
+  "source_basis": {
+    "type": "NEW_C3_AUTHORITY_DECISION",
+    "statement": "These values close semantic gaps identified after M3 Exit. They are not represented as recovered R3.4 source facts and must not be inferred from Issue prose.",
+    "protected_main_parent_sha": "bf8d7e8a2dae94ea78f3a7f6f859ccb391dd70d8",
+    "prior_baseline_lock_sha256": "d6ebab2b5402cf81a0b5f73a2da4ed2aaa2d530bc7445c7f6132dcf7fa72224d",
+    "prior_controlled_artifact_count": 22,
+    "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+    "core_rules_sha256": "16d804c2561c986541cc70f69123f2992e4e5e1ce1f2b6f0c7fb44ea0446107f",
+    "prior_cross_layer_dto_sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c",
+    "m4_task_baseline_sha256": "31b9450bb3fc9950146e798ad7b4dcbc18ef9332c86327212cca81bacd9e9ef5"
+  },
+  "scope": {
+    "admitted_capability_phase": [
+      "P1"
+    ],
+    "admitted_subject_types": [
+      "AIRCRAFT",
+      "MISSION_SYSTEM_INSTANCE"
+    ],
+    "excluded_capability_phases": [
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "p4_p5_human_team_assessment_active": false,
+    "m5_formal_product_qualification_claimed": false,
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "gui_direct_persistence_access_permitted": false,
+    "api_gui_business_recomputation_permitted": false
+  },
+  "catalog_binding": {
+    "catalog_version": "1.14.0",
+    "catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+    "p1_total": 116,
+    "longitudinal_eligible_count": 104,
+    "excluded_count": 12,
+    "eligible_value_kind": "NUMERIC",
+    "eligible_default_aggregation": "MEDIAN",
+    "excluded_rules": [
+      "STRUCTURED",
+      "QUALITY_EVIDENCE_ONLY",
+      "TARGET_PAIR_OR_REFERENCE_QUALITY",
+      "DEFAULT_AGGREGATION_NONE"
+    ]
+  },
+  "sample_profile": {
+    "profile_id": "M4_P1_LONGITUDINAL_SAMPLE_V1",
+    "profile_version": "1.0.0",
+    "release_scope_type": "SESSION",
+    "sample_unit": "SESSION_CONFIG",
+    "eligible_subject_types": [
+      "AIRCRAFT",
+      "MISSION_SYSTEM_INSTANCE"
+    ],
+    "source_selection": "Only exact immutable metric instances/observations belonging to the explicitly selected SESSION analysis_release may contribute; no current/latest release pointer is consulted.",
+    "m4_comparison_key_rule": "M4 comparison_key_hash is recomputed from this authority's comparison-key contract using immutable release-bound facts. Existing source observation comparison_key_hash is lineage only and is not silently reinterpreted.",
+    "configuration_key": {
+      "AIRCRAFT": "AIRCRAFT_CONFIG_SHA256:<master.aircraft_configuration_snapshot.snapshot_hash>",
+      "MISSION_SYSTEM_INSTANCE": "MISSION_SYSTEM_CONFIG_SHA256:<master.mission_system_instance.configuration_hash>",
+      "missing_rule": "FAIL_CLOSED"
+    },
+    "aggregation_method": "MEDIAN",
+    "median_rule": "Sort finite VALID numeric contributor values ascending; odd count selects the middle value; even count is arithmetic mean of the two middle values.",
+    "valid_contributor_rule": "status=VALID and finite value_numeric; source observation eligibility must be ELIGIBLE.",
+    "nonvalid_value_rule": "N_A/INSUFFICIENT_DATA/INVALID/REVIEW_REQUIRED never contribute numeric values.",
+    "status_when_valid_exists": "VALID",
+    "status_precedence_when_no_valid": [
+      "REVIEW_REQUIRED",
+      "INVALID",
+      "INSUFFICIENT_DATA",
+      "N_A"
+    ],
+    "reason_codes_rule": "For VALID sample use []; otherwise sorted unique union of selected source reason codes plus M4_LONGITUDINAL_NO_VALID_VALUE.",
+    "coverage_rule": "Minimum coverage across VALID contributors; if no VALID contributor, minimum coverage across selected sources.",
+    "confidence_rule": "Minimum confidence across VALID contributors; if no VALID contributor, minimum confidence across selected sources.",
+    "source_episode_count_rule": "Count distinct non-null episode_id values among VALID contributors.",
+    "source_observation_refs_rule": "Sorted unique typed source observation references; exact source release_id is retained.",
+    "logical_content_hash_algorithm": "SHA256_CANONICAL_JSON_UTF8_SORTED_KEYS_COMPACT; numeric value is represented in hash material as IEEE754_BINARY64_BIG_ENDIAN_HEX or null."
+  },
+  "comparison_key_contract": {
+    "schema": "TPAA_M4_COMPARISON_KEY_V1",
+    "required_fields": [
+      "schema",
+      "subject_type",
+      "subject_id",
+      "configuration_key",
+      "metric_semantic_id",
+      "metric_semantic_version",
+      "catalog_version",
+      "catalog_hash",
+      "scenario_id",
+      "scenario_version",
+      "syllabus_id",
+      "syllabus_version",
+      "training_type_set",
+      "location_or_range_id",
+      "unit_id",
+      "role_model_version",
+      "context_version",
+      "rule_set_version",
+      "reference_set_version",
+      "metric_profile_version",
+      "world_product_versions",
+      "metric_definition_hash",
+      "plugin_name",
+      "plugin_version",
+      "longitudinal_profile_id",
+      "longitudinal_profile_version",
+      "longitudinal_profile_hash"
+    ],
+    "canonicalization": {
+      "object_keys": "LEXICOGRAPHIC_CODE_POINT_ASCENDING",
+      "json_encoding": "UTF-8",
+      "whitespace": "NONE",
+      "strings": "UNICODE_NFC; no case folding; persisted semantic strings otherwise exact",
+      "uuids": "canonical lowercase 8-4-4-4-12 form",
+      "nulls": "Required nullable fields are emitted explicitly as null; omission is invalid.",
+      "set_like_arrays": {
+        "training_type_set": "sorted unique ascending; duplicates invalid"
+      },
+      "objects": {
+        "world_product_versions": "string-keyed object; keys canonicalized by object-key rule"
+      },
+      "numbers": "metric_semantic_version is canonical JSON integer; floating-point values are forbidden in comparison-key material"
+    },
+    "material_dimensions": {
+      "subject": [
+        "subject_type",
+        "subject_id"
+      ],
+      "configuration": [
+        "configuration_key"
+      ],
+      "metric_semantics": [
+        "metric_semantic_id",
+        "metric_semantic_version",
+        "metric_definition_hash",
+        "plugin_name",
+        "plugin_version",
+        "catalog_version",
+        "catalog_hash"
+      ],
+      "scenario": [
+        "scenario_id",
+        "scenario_version",
+        "syllabus_id",
+        "syllabus_version",
+        "training_type_set",
+        "location_or_range_id"
+      ],
+      "role_team": [
+        "unit_id",
+        "role_model_version"
+      ],
+      "context_profile": [
+        "context_version",
+        "rule_set_version",
+        "reference_set_version",
+        "metric_profile_version"
+      ],
+      "world": [
+        "world_product_versions"
+      ],
+      "longitudinal_profile": [
+        "longitudinal_profile_id",
+        "longitudinal_profile_version",
+        "longitudinal_profile_hash"
+      ]
+    },
+    "explicit_exclusions": {
+      "session_id": "Excluded so repeated sessions with otherwise compatible semantics can form one longitudinal series.",
+      "context_id": "Excluded; material context semantics are projected through version/profile fields instead of unique row identity.",
+      "pilot_id": "Excluded from P1 aircraft/mission-system observed trend to avoid activating P4 human assessment."
+    },
+    "hash_algorithm": "SHA-256 over canonical JSON bytes",
+    "incompatible_rule": "Any material-field difference changes comparison_key_hash and segments rather than joins."
+  },
+  "longitudinal_scope_contract": {
+    "descriptor_schema": "TPAA_M4_LONGITUDINAL_SCOPE_DESCRIPTOR_V1",
+    "descriptor_fields": [
+      "subject_type",
+      "subject_id",
+      "metric_semantic_id",
+      "metric_semantic_version",
+      "comparison_key_hash",
+      "session_order_scope_id",
+      "x_axis_semantics",
+      "trend_profile_id",
+      "trend_profile_version",
+      "trend_profile_hash"
+    ],
+    "descriptor_hash_algorithm": "SHA-256 over canonical JSON bytes",
+    "longitudinal_scope_key_rule": "longitudinal_scope_key equals descriptor_hash",
+    "x_axis_semantics_v1": "SESSION_ORDER",
+    "session_order_scope_required": true
+  },
+  "trend_profile": {
+    "profile_id": "M4_P1_OBSERVED_TREND_V1",
+    "profile_version": "1.0.0",
+    "scope": "P1_AIRCRAFT_AND_MISSION_SYSTEM_OBSERVED_PERFORMANCE_ONLY",
+    "x_axis_semantics": "SESSION_ORDER",
+    "session_order_scope_rule": "ALL_TREND_INPUTS_REQUIRE_NON_NULL_IDENTICAL_SESSION_ORDER_SCOPE_ID",
+    "duplicate_session_order_rule": "FAIL_CLOSED",
+    "valid_sample_status": "VALID",
+    "finite_numeric_required": true,
+    "current_value_rule": "LAST_VALID_SAMPLE_BY_SESSION_ORDER",
+    "ewma": {
+      "initialization": "FIRST_VALID_SAMPLE",
+      "alpha_numerator": 1,
+      "alpha_denominator": 3,
+      "alpha": 0.3333333333333333,
+      "input_domain": "ALL_VALID_SAMPLES_IN_ASCENDING_SESSION_ORDER"
+    },
+    "slope": {
+      "estimator": "ORDINARY_LEAST_SQUARES",
+      "max_valid_points": 5,
+      "min_valid_points": 3,
+      "x_rule": "x_i=session_order_i-first_session_order_in_window",
+      "y_rule": "value_numeric",
+      "slope_unit_rule": "metric_unit/session_order"
+    },
+    "stability": {
+      "statistic": "UNSCALED_MEDIAN_ABSOLUTE_DEVIATION",
+      "max_valid_points": 5,
+      "min_valid_points": 3,
+      "center": "MEDIAN",
+      "scaling_factor": 1
+    },
+    "trend_status": {
+      "values": [
+        "INCREASING",
+        "DECREASING",
+        "STABLE",
+        "INSUFFICIENT_DATA"
+      ],
+      "decision_rule": "For >=3 valid points, projected_change=slope*(x_last-x_first). If MAD=0, sign(slope) selects INCREASING/DECREASING and zero selects STABLE; otherwise abs(projected_change)<=MAD selects STABLE and larger signed change selects INCREASING/DECREASING.",
+      "direction_semantics": "OBSERVED_NUMERIC_DIRECTION_ONLY_NOT_GOOD_BAD_ASSESSMENT"
+    },
+    "series_status": {
+      "no_valid_samples": "INSUFFICIENT_DATA",
+      "one_or_more_valid_samples": "VALID",
+      "insufficient_trend_reason": "TREND_MIN_VALID_POINTS_NOT_MET",
+      "no_valid_reason": "NO_VALID_LONGITUDINAL_SAMPLES"
+    },
+    "point_rule": "All selected samples are emitted as points in SESSION_ORDER; non-VALID samples carry null value and preserve sample_status.",
+    "numeric_rule": "Finite IEEE-754 binary64 inputs/outputs; no NaN/Infinity; Golden comparisons use absolute tolerance 1e-12. Hash manifests use source logical hashes rather than reserialized computed floats.",
+    "bridge_rule": "Only explicit APPROVED metric.trend_bridge rows may bridge semantic versions; bridge_hash is part of input lineage. Without an approved bridge, semantic versions segment.",
+    "profile_hash_algorithm": "SHA256_CANONICAL_JSON_ASCII_SORTED_KEYS_EXCLUDING_PROFILE_HASH_AND_ALGORITHM",
+    "profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+  },
+  "trend_input_hash_contract": {
+    "schema": "TPAA_M4_TREND_INPUT_MANIFEST_V1",
+    "ordered_fields": [
+      "comparison_key_hash",
+      "longitudinal_scope_key",
+      "x_axis_semantics",
+      "trend_profile_id",
+      "trend_profile_version",
+      "trend_profile_hash",
+      "samples",
+      "bridge_hashes"
+    ],
+    "samples_rule": "All selected trend points ordered by session_order; each item carries exact sample_id and metric.longitudinal_sample.logical_content_hash.",
+    "bridge_hashes_rule": "Sorted exact approved bridge_hash values actually applied; empty when no bridge is used.",
+    "hash_algorithm": "SHA-256 over canonical JSON bytes"
+  },
+  "release_replay_contract": {
+    "longitudinal_release_scope_type": "LONGITUDINAL",
+    "exact_input_membership": "registry.longitudinal_release_input contains exact input SESSION release_id + sample_id membership.",
+    "immutable_publication": true,
+    "historical_query_rule": "Historical longitudinal/debrief queries require explicit release_id. current/latest fallback is forbidden.",
+    "release_scope_pointer_rule": "registry.release_scope_pointer may support an explicitly requested current-view discovery operation only; its result must be materialized as an exact release_id before trend/debrief query/replay.",
+    "original_as_known": "Use only the exact base release and its immutable bound definitions/catalog/context/world/evidence.",
+    "retrospective": "Requires an explicit retrospective_release_id; later interpretation never mutates or masquerades as the base release.",
+    "trend_bridge_rule": "Only APPROVED metric.trend_bridge identities explicitly included in lineage may bridge metric semantic versions.",
+    "annotation_rule": "debrief.annotation is append/revision oriented; annotation mutations never update immutable Metric/World/Release facts; mutation reason is persisted in audit.audit_log.reason."
+  },
+  "dto_transport_rules": {
+    "uuid": "canonical lowercase UUID string",
+    "bigint": "decimal-string for JS-visible transport",
+    "timestamp": "RFC3339 UTC string",
+    "numeric": "finite JSON number only; nullable only where contract marks ?",
+    "structured": "JSON object/array, never embedded JSON string",
+    "exact_release": "Every historical trend/debrief read contract carries explicit release identity before application execution.",
+    "application_boundary": "API and GUI consume application ports/projections; GUI persistence access and API/GUI business recomputation are forbidden."
+  },
+  "dto_contracts": {
+    "LongitudinalScopeDTO": {
+      "fields": [
+        {
+          "field": "longitudinal_scope_id",
+          "source": "registry.longitudinal_scope.longitudinal_scope_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "longitudinal_scope_key",
+          "source": "registry.longitudinal_scope.longitudinal_scope_key",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "subject_type",
+          "source": "registry.longitudinal_scope.subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "registry.longitudinal_scope.subject_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "registry.longitudinal_scope.metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "registry.longitudinal_scope.metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "registry.longitudinal_scope.comparison_key_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "session_order_scope_id",
+          "source": "registry.longitudinal_scope.session_order_scope_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "trend_profile_version",
+          "source": "registry.longitudinal_scope.trend_profile_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "descriptor_hash",
+          "source": "registry.longitudinal_scope.descriptor_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        }
+      ]
+    },
+    "LongitudinalTrendQueryDTO": {
+      "fields": [
+        {
+          "field": "release_id",
+          "source": "request.exact_longitudinal_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "trend_id",
+          "source": "request.optional_trend_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "subject_type",
+          "source": "request.optional_subject_type",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "subject_id",
+          "source": "request.optional_subject_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "metric_code",
+          "source": "request.optional_metric_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "request.optional_comparison_key_hash",
+          "required": false,
+          "transport_type": "sha256-hex?"
+        }
+      ],
+      "rules": [
+        "release_id is mandatory; current/latest pointer resolution is forbidden inside this query contract."
+      ]
+    },
+    "LongitudinalTrendSeriesDTO": {
+      "fields": [
+        {
+          "field": "release_id",
+          "source": "metric.performance_trend_series.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "trend_id",
+          "source": "metric.performance_trend_series.trend_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "longitudinal_scope_id",
+          "source": "metric.performance_trend_series.longitudinal_scope_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "subject_type",
+          "source": "metric.performance_trend_series.subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "metric.performance_trend_series.subject_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "metric_code",
+          "source": "trend metric_definition immutable metric_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "metric.performance_trend_series.metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "metric.performance_trend_series.metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "metric.performance_trend_series.comparison_key_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "x_axis_semantics",
+          "source": "metric.performance_trend_series.x_axis_semantics",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "sample_count_total",
+          "source": "metric.performance_trend_series.sample_count_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "sample_count_valid",
+          "source": "metric.performance_trend_series.sample_count_valid",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "current_value",
+          "source": "metric.performance_trend_series.current_value",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "ewma_value",
+          "source": "metric.performance_trend_series.ewma_value",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "slope",
+          "source": "metric.performance_trend_series.slope",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "slope_unit",
+          "source": "metric.performance_trend_series.slope_unit",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "stability_mad",
+          "source": "metric.performance_trend_series.stability_mad",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "trend_status",
+          "source": "metric.performance_trend_series.trend_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "metric.performance_trend_series.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "metric.performance_trend_series.reason_codes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "trend_profile_id",
+          "source": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.trend_profile.profile_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "trend_profile_version",
+          "source": "metric.performance_trend_series.trend_profile_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "trend_profile_hash",
+          "source": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.trend_profile.profile_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "input_hash",
+          "source": "metric.performance_trend_series.input_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        }
+      ]
+    },
+    "LongitudinalTrendPointDTO": {
+      "fields": [
+        {
+          "field": "trend_id",
+          "source": "metric.performance_trend_point.trend_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "point_order",
+          "source": "metric.performance_trend_point.point_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "sample_id",
+          "source": "metric.performance_trend_point.sample_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "metric.longitudinal_sample.release_id via sample_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "metric.longitudinal_sample.session_id via sample_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_order",
+          "source": "metric.performance_trend_point.session_order",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "occurred_at_utc",
+          "source": "metric.performance_trend_point.occurred_at_utc",
+          "required": false,
+          "transport_type": "rfc3339-utc?"
+        },
+        {
+          "field": "value",
+          "source": "metric.performance_trend_point.value",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "sample_status",
+          "source": "metric.performance_trend_point.sample_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "configuration_key",
+          "source": "metric.performance_trend_point.configuration_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "lifecycle_marker_refs",
+          "source": "metric.performance_trend_point.lifecycle_marker_refs",
+          "required": true,
+          "transport_type": "array[object]"
+        }
+      ]
+    },
+    "LongitudinalReleaseDTO": {
+      "fields": [
+        {
+          "field": "release_id",
+          "source": "registry.analysis_release.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "longitudinal_scope_id",
+          "source": "registry.analysis_release.longitudinal_scope_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "scope_key",
+          "source": "registry.analysis_release.scope_key",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "release_no",
+          "source": "registry.analysis_release.release_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "catalog_version",
+          "source": "registry.analysis_release.catalog_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "catalog_hash",
+          "source": "registry.analysis_release.catalog_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "context_binding_hash",
+          "source": "registry.analysis_release.context_binding_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "status",
+          "source": "registry.analysis_release.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "parent_release_id",
+          "source": "registry.analysis_release.parent_release_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "manifest_hash",
+          "source": "registry.analysis_release.manifest_hash",
+          "required": true,
+          "transport_type": "sha256-hex"
+        },
+        {
+          "field": "input_session_release_ids",
+          "source": "registry.longitudinal_release_input exact membership",
+          "required": true,
+          "transport_type": "array[uuid-string]"
+        },
+        {
+          "field": "input_sample_ids",
+          "source": "registry.longitudinal_release_input exact membership",
+          "required": true,
+          "transport_type": "array[uuid-string]"
+        },
+        {
+          "field": "created_at",
+          "source": "registry.analysis_release.created_at",
+          "required": true,
+          "transport_type": "rfc3339-utc"
+        },
+        {
+          "field": "published_at",
+          "source": "registry.analysis_release.published_at",
+          "required": false,
+          "transport_type": "rfc3339-utc?"
+        }
+      ]
+    },
+    "DebriefQueryDTO": {
+      "fields": [
+        {
+          "field": "base_release_id",
+          "source": "request.exact_base_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "view_mode",
+          "source": "request.view_mode",
+          "required": true,
+          "transport_type": "enum[ORIGINAL_AS_KNOWN,RETROSPECTIVE]"
+        },
+        {
+          "field": "retrospective_release_id",
+          "source": "request.explicit_retrospective_release_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "annotation_view",
+          "source": "request.annotation_view",
+          "required": true,
+          "transport_type": "enum[NONE,AS_OF_UTC,EXACT_REVISION_SET]"
+        },
+        {
+          "field": "annotation_as_of_utc",
+          "source": "request.annotation_as_of_utc",
+          "required": false,
+          "transport_type": "rfc3339-utc?"
+        },
+        {
+          "field": "annotation_ids",
+          "source": "request.annotation_ids",
+          "required": false,
+          "transport_type": "array[uuid-string]"
+        }
+      ],
+      "rules": [
+        "ORIGINAL_AS_KNOWN forbids retrospective_release_id.",
+        "RETROSPECTIVE requires an explicit retrospective_release_id and never resolves current/latest.",
+        "AS_OF_UTC requires explicit annotation_as_of_utc.",
+        "EXACT_REVISION_SET requires non-empty explicit annotation_ids."
+      ]
+    },
+    "DebriefTimelineItemDTO": {
+      "fields": [
+        {
+          "field": "base_release_id",
+          "source": "query.base_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "item_id",
+          "source": "governed source object identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "item_type",
+          "source": "projection kind",
+          "required": true,
+          "transport_type": "enum[STAGE,EVENT,METRIC,EVIDENCE,ANNOTATION]"
+        },
+        {
+          "field": "session_id",
+          "source": "source.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "source.episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "source.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "source start session time",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "source end session time",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "source evidence_set_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "source_release_id",
+          "source": "exact immutable release supplying the item",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "knowledge_time_mode",
+          "source": "query.view_mode",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "DebriefAnnotationDTO": {
+      "fields": [
+        {
+          "field": "annotation_id",
+          "source": "debrief.annotation.annotation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "base_release_id",
+          "source": "debrief.annotation.base_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "debrief.annotation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "debrief.annotation.episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "debrief.annotation.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "author_id",
+          "source": "debrief.annotation.author_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "annotation_type",
+          "source": "debrief.annotation.annotation_type",
+          "required": true,
+          "transport_type": "enum[BOOKMARK,COMMENT,EVIDENCE_NOTE,DEBRIEF_POINT,CORRECTION_NOTE]"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "debrief.annotation.start_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "debrief.annotation.end_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "body_text",
+          "source": "debrief.annotation.body_text",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "visibility",
+          "source": "debrief.annotation.visibility",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "debrief.annotation.status",
+          "required": true,
+          "transport_type": "enum[ACTIVE,SUPERSEDED,DELETED]"
+        },
+        {
+          "field": "revision_no",
+          "source": "debrief.annotation.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "supersedes_annotation_id",
+          "source": "debrief.annotation.supersedes_annotation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "debrief.annotation.evidence_set_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "reason",
+          "source": "audit.audit_log.reason for annotation mutation",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "audit_id",
+          "source": "audit.audit_log.audit_id",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "request_id",
+          "source": "audit.audit_log.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "debrief.annotation.created_at",
+          "required": true,
+          "transport_type": "rfc3339-utc"
+        }
+      ]
+    },
+    "DebriefAnnotationCommandDTO": {
+      "fields": [
+        {
+          "field": "request_id",
+          "source": "command.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "operation",
+          "source": "command.operation",
+          "required": true,
+          "transport_type": "enum[CREATE,SUPERSEDE,DELETE]"
+        },
+        {
+          "field": "base_release_id",
+          "source": "command.exact_base_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "target_annotation_id",
+          "source": "command.target_annotation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "session_id",
+          "source": "command.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "command.episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "command.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "author_id",
+          "source": "command.author_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "annotation_type",
+          "source": "command.annotation_type",
+          "required": true,
+          "transport_type": "enum[BOOKMARK,COMMENT,EVIDENCE_NOTE,DEBRIEF_POINT,CORRECTION_NOTE]"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "command.start_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "command.end_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "body_text",
+          "source": "command.body_text",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "visibility",
+          "source": "command.visibility",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason",
+          "source": "command.reason persisted to audit.audit_log.reason",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "command.evidence_set_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "CREATE forbids target_annotation_id.",
+        "SUPERSEDE and DELETE require exact target_annotation_id.",
+        "Every mutation appends a new debrief.annotation revision where applicable and an audit.audit_log row; immutable Metric/World/Release facts are never updated.",
+        "No M4 annotation_type carries score, rubric, human capability or team assessment semantics."
+      ]
+    },
+    "DebriefBundleDTO": {
+      "fields": [
+        {
+          "field": "query",
+          "source": "DebriefQueryDTO",
+          "required": true,
+          "transport_type": "DebriefQueryDTO"
+        },
+        {
+          "field": "base_release",
+          "source": "exact release projection",
+          "required": true,
+          "transport_type": "LongitudinalReleaseDTO|SessionReleaseDTO"
+        },
+        {
+          "field": "timeline",
+          "source": "release-bound projection",
+          "required": true,
+          "transport_type": "array[DebriefTimelineItemDTO]"
+        },
+        {
+          "field": "annotations",
+          "source": "explicit annotation_view projection",
+          "required": true,
+          "transport_type": "array[DebriefAnnotationDTO]"
+        }
+      ]
+    }
+  },
+  "golden_vectors": {
+    "sample_aggregation": {
+      "case_id": "M4_SAMPLE_MEDIAN_VALID_WITH_NONVALID_SOURCE_V1",
+      "sources": [
+        {
+          "metric_instance_id": "00000000-0000-4000-8000-000000002001",
+          "status": "VALID",
+          "value_numeric": 8,
+          "coverage": 0.95,
+          "confidence": 0.9,
+          "episode_id": "00000000-0000-4000-8000-000000002101",
+          "reason_codes": []
+        },
+        {
+          "metric_instance_id": "00000000-0000-4000-8000-000000002002",
+          "status": "INSUFFICIENT_DATA",
+          "value_numeric": null,
+          "coverage": 0.5,
+          "confidence": 0.4,
+          "episode_id": "00000000-0000-4000-8000-000000002102",
+          "reason_codes": [
+            "SOURCE_GAP"
+          ]
+        },
+        {
+          "metric_instance_id": "00000000-0000-4000-8000-000000002003",
+          "status": "VALID",
+          "value_numeric": 2,
+          "coverage": 0.8,
+          "confidence": 0.7,
+          "episode_id": "00000000-0000-4000-8000-000000002103",
+          "reason_codes": []
+        },
+        {
+          "metric_instance_id": "00000000-0000-4000-8000-000000002004",
+          "status": "VALID",
+          "value_numeric": 5,
+          "coverage": 1,
+          "confidence": 0.85,
+          "episode_id": "00000000-0000-4000-8000-000000002104",
+          "reason_codes": []
+        }
+      ],
+      "expected": {
+        "value_numeric": 5,
+        "status": "VALID",
+        "reason_codes": [],
+        "coverage": 0.8,
+        "confidence": 0.7,
+        "source_episode_count": 3
+      }
+    },
+    "comparison_key": {
+      "canonical_input": {
+        "schema": "TPAA_M4_COMPARISON_KEY_V1",
+        "subject_type": "AIRCRAFT",
+        "subject_id": "00000000-0000-4000-8000-000000000101",
+        "configuration_key": "AIRCRAFT_CONFIG_SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric_semantic_id": "P1-AIR-001",
+        "metric_semantic_version": 1,
+        "catalog_version": "1.14.0",
+        "catalog_hash": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+        "scenario_id": "00000000-0000-4000-8000-000000000201",
+        "scenario_version": "SCENARIO-V1",
+        "syllabus_id": "SYLLABUS-A",
+        "syllabus_version": "1.0",
+        "training_type_set": [
+          "BASIC_FLIGHT",
+          "BVR",
+          "WVR"
+        ],
+        "location_or_range_id": "RANGE-A",
+        "unit_id": "00000000-0000-4000-8000-000000000301",
+        "role_model_version": "ROLE-V1",
+        "context_version": "CTX-V1",
+        "rule_set_version": "RULE-V1",
+        "reference_set_version": "REF-V1",
+        "metric_profile_version": "METRIC-PROFILE-V1",
+        "world_product_versions": {
+          "FLIGHT_KINEMATICS": "1.0.0",
+          "MISSION_CONTEXT": "1.0.0"
+        },
+        "metric_definition_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "plugin_name": "tpaa_metric.p1_air_001",
+        "plugin_version": "1.0.0",
+        "longitudinal_profile_id": "M4_P1_OBSERVED_TREND_V1",
+        "longitudinal_profile_version": "1.0.0",
+        "longitudinal_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+      },
+      "expected_hash": "afed31d1e75464cdb0dd08743ee8605744dc61621df7c4e588997cdf26eb0612",
+      "permutation_input": {
+        "schema": "TPAA_M4_COMPARISON_KEY_V1",
+        "subject_type": "AIRCRAFT",
+        "subject_id": "00000000-0000-4000-8000-000000000101",
+        "configuration_key": "AIRCRAFT_CONFIG_SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric_semantic_id": "P1-AIR-001",
+        "metric_semantic_version": 1,
+        "catalog_version": "1.14.0",
+        "catalog_hash": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+        "scenario_id": "00000000-0000-4000-8000-000000000201",
+        "scenario_version": "SCENARIO-V1",
+        "syllabus_id": "SYLLABUS-A",
+        "syllabus_version": "1.0",
+        "training_type_set": [
+          "WVR",
+          "BASIC_FLIGHT",
+          "BVR"
+        ],
+        "location_or_range_id": "RANGE-A",
+        "unit_id": "00000000-0000-4000-8000-000000000301",
+        "role_model_version": "ROLE-V1",
+        "context_version": "CTX-V1",
+        "rule_set_version": "RULE-V1",
+        "reference_set_version": "REF-V1",
+        "metric_profile_version": "METRIC-PROFILE-V1",
+        "world_product_versions": {
+          "FLIGHT_KINEMATICS": "1.0.0",
+          "MISSION_CONTEXT": "1.0.0"
+        },
+        "metric_definition_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "plugin_name": "tpaa_metric.p1_air_001",
+        "plugin_version": "1.0.0",
+        "longitudinal_profile_id": "M4_P1_OBSERVED_TREND_V1",
+        "longitudinal_profile_version": "1.0.0",
+        "longitudinal_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+      },
+      "material_change_input": {
+        "schema": "TPAA_M4_COMPARISON_KEY_V1",
+        "subject_type": "AIRCRAFT",
+        "subject_id": "00000000-0000-4000-8000-000000000101",
+        "configuration_key": "AIRCRAFT_CONFIG_SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metric_semantic_id": "P1-AIR-001",
+        "metric_semantic_version": 1,
+        "catalog_version": "1.14.0",
+        "catalog_hash": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+        "scenario_id": "00000000-0000-4000-8000-000000000201",
+        "scenario_version": "SCENARIO-V2",
+        "syllabus_id": "SYLLABUS-A",
+        "syllabus_version": "1.0",
+        "training_type_set": [
+          "BASIC_FLIGHT",
+          "BVR",
+          "WVR"
+        ],
+        "location_or_range_id": "RANGE-A",
+        "unit_id": "00000000-0000-4000-8000-000000000301",
+        "role_model_version": "ROLE-V1",
+        "context_version": "CTX-V1",
+        "rule_set_version": "RULE-V1",
+        "reference_set_version": "REF-V1",
+        "metric_profile_version": "METRIC-PROFILE-V1",
+        "world_product_versions": {
+          "FLIGHT_KINEMATICS": "1.0.0",
+          "MISSION_CONTEXT": "1.0.0"
+        },
+        "metric_definition_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "plugin_name": "tpaa_metric.p1_air_001",
+        "plugin_version": "1.0.0",
+        "longitudinal_profile_id": "M4_P1_OBSERVED_TREND_V1",
+        "longitudinal_profile_version": "1.0.0",
+        "longitudinal_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+      },
+      "expected_material_change_hash": "c2dfa62aca57d5866bcd571f2035218b2ca4ae1991baafbcf899d8464aff3e2b"
+    },
+    "longitudinal_scope": {
+      "descriptor": {
+        "schema": "TPAA_M4_LONGITUDINAL_SCOPE_DESCRIPTOR_V1",
+        "subject_type": "AIRCRAFT",
+        "subject_id": "00000000-0000-4000-8000-000000000101",
+        "metric_semantic_id": "P1-AIR-001",
+        "metric_semantic_version": 1,
+        "comparison_key_hash": "afed31d1e75464cdb0dd08743ee8605744dc61621df7c4e588997cdf26eb0612",
+        "session_order_scope_id": "00000000-0000-4000-8000-000000000401",
+        "x_axis_semantics": "SESSION_ORDER",
+        "trend_profile_id": "M4_P1_OBSERVED_TREND_V1",
+        "trend_profile_version": "1.0.0",
+        "trend_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+      },
+      "expected_descriptor_hash": "efe460211d9fb37d19a35f6ee9311fd92c4d4222c901920eeecebfdb7889d3d4",
+      "expected_longitudinal_scope_key": "efe460211d9fb37d19a35f6ee9311fd92c4d4222c901920eeecebfdb7889d3d4"
+    },
+    "trend": {
+      "case_id": "M4_TREND_EWMA_OLS_MAD_V1",
+      "points": [
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001001",
+          "logical_content_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "session_order": 10,
+          "value": 100,
+          "status": "VALID"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001002",
+          "logical_content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+          "session_order": 15,
+          "value": null,
+          "status": "INSUFFICIENT_DATA"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001003",
+          "logical_content_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+          "session_order": 20,
+          "value": 104,
+          "status": "VALID"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001004",
+          "logical_content_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+          "session_order": 30,
+          "value": 103,
+          "status": "VALID"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001005",
+          "logical_content_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+          "session_order": 40,
+          "value": 109,
+          "status": "VALID"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001006",
+          "logical_content_hash": "6666666666666666666666666666666666666666666666666666666666666666",
+          "session_order": 50,
+          "value": 112,
+          "status": "VALID"
+        }
+      ],
+      "expected": {
+        "sample_count_total": 6,
+        "sample_count_valid": 5,
+        "current_value": 112,
+        "ewma_value": 106.83950617283952,
+        "slope": 0.29,
+        "slope_unit": "metric_unit/session_order",
+        "stability_mad": 4,
+        "trend_status": "INCREASING",
+        "status": "VALID",
+        "reason_codes": []
+      },
+      "input_manifest": {
+        "schema": "TPAA_M4_TREND_INPUT_MANIFEST_V1",
+        "comparison_key_hash": "afed31d1e75464cdb0dd08743ee8605744dc61621df7c4e588997cdf26eb0612",
+        "longitudinal_scope_key": "efe460211d9fb37d19a35f6ee9311fd92c4d4222c901920eeecebfdb7889d3d4",
+        "x_axis_semantics": "SESSION_ORDER",
+        "trend_profile_id": "M4_P1_OBSERVED_TREND_V1",
+        "trend_profile_version": "1.0.0",
+        "trend_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729",
+        "samples": [
+          {
+            "sample_id": "00000000-0000-4000-8000-000000001001",
+            "logical_content_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "sample_id": "00000000-0000-4000-8000-000000001002",
+            "logical_content_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "sample_id": "00000000-0000-4000-8000-000000001003",
+            "logical_content_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "sample_id": "00000000-0000-4000-8000-000000001004",
+            "logical_content_hash": "4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "sample_id": "00000000-0000-4000-8000-000000001005",
+            "logical_content_hash": "5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "sample_id": "00000000-0000-4000-8000-000000001006",
+            "logical_content_hash": "6666666666666666666666666666666666666666666666666666666666666666"
+          }
+        ],
+        "bridge_hashes": []
+      },
+      "expected_input_hash": "163d5f0c04bd298392a3936d5d334b162deb50668804ca228ec1cdd19b4f0de7"
+    },
+    "replay": {
+      "original_as_known": {
+        "base_release_id": "00000000-0000-4000-8000-000000003001",
+        "view_mode": "ORIGINAL_AS_KNOWN",
+        "retrospective_release_id": null,
+        "expected_release_ids": [
+          "00000000-0000-4000-8000-000000003001"
+        ]
+      },
+      "retrospective": {
+        "base_release_id": "00000000-0000-4000-8000-000000003001",
+        "view_mode": "RETROSPECTIVE",
+        "retrospective_release_id": "00000000-0000-4000-8000-000000003002",
+        "expected_release_ids": [
+          "00000000-0000-4000-8000-000000003001",
+          "00000000-0000-4000-8000-000000003002"
+        ]
+      }
+    }
+  },
+  "negative_discriminators": {
+    "structured_metric_to_longitudinal": "FAIL_CLOSED_NOT_LONGITUDINAL_ELIGIBLE",
+    "quality_evidence_only_to_longitudinal": "FAIL_CLOSED_NOT_LONGITUDINAL_ELIGIBLE",
+    "target_pair_subject": "FAIL_CLOSED_LONGITUDINAL_SUBJECT_FORBIDDEN",
+    "missing_configuration_key": "FAIL_CLOSED_CONFIGURATION_IDENTITY_REQUIRED",
+    "comparison_key_missing_field": "FAIL_CLOSED_COMPARISON_KEY_INCOMPLETE",
+    "comparison_key_duplicate_training_type": "FAIL_CLOSED_SET_ARRAY_DUPLICATE",
+    "duplicate_session_order": "FAIL_CLOSED_DUPLICATE_SESSION_ORDER",
+    "calendar_time_axis_v1": "FAIL_CLOSED_PROFILE_V1_SESSION_ORDER_ONLY",
+    "historical_query_missing_release_id": "FAIL_CLOSED_EXACT_RELEASE_REQUIRED",
+    "retrospective_missing_release_id": "FAIL_CLOSED_RETROSPECTIVE_RELEASE_REQUIRED",
+    "annotation_mutation_missing_reason": "FAIL_CLOSED_AUDIT_REASON_REQUIRED",
+    "p4_p5_annotation_type": "FAIL_CLOSED_ASSESSMENT_NOT_ADMITTED"
+  }
+}
