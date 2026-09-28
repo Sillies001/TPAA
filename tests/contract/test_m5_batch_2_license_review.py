@@ -8,6 +8,7 @@ EXPECTED_REVIEWED = {
     ("markdown-it-py", "4.2.0", "MIT"),
     ("mdurl", "0.1.2", "MIT"),
     ("tzdata", "2026.4", "Apache-2.0"),
+    ("uvloop", "0.22.1", "MIT OR Apache-2.0"),
 }
 
 
