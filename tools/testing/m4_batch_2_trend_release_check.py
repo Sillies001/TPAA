@@ -200,6 +200,7 @@ def _series(
         release_id=release_id,
         longitudinal_scope_id=LONGITUDINAL_SCOPE_ID,
         metric_definition_id=METRIC_DEFINITION_ID,
+        metric_code="P1-AIR-001",
         metric_unit="metric_unit",
         scope=actual_scope,
         samples=actual_samples,

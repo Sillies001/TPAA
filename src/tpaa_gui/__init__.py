@@ -34,6 +34,19 @@ from .m3_workspace import (
     build_m3_workspace_navigation_model,
     create_m3_workspace_navigation,
 )
+from .m4_workspace import (
+    M4AnnotationPresentation,
+    M4DebriefTimelinePresentation,
+    M4DebriefWorkspaceModel,
+    M4DesktopTransport,
+    M4TrendPointPresentation,
+    M4TrendWorkspaceModel,
+    M4WorkspacePresentationError,
+    build_annotation_command_payload,
+    build_m4_debrief_workspace_model,
+    build_m4_trend_workspace_model,
+    create_m4_workspace,
+)
 from .shell import PYSIDE6_DEPENDENCY_MISSING, GuiShellConfig, GuiShellError, run_gui
 
 __all__ = [
@@ -64,6 +77,17 @@ __all__ = [
     "M3TrainingNavigation",
     "M3WorkspaceNavigationError",
     "M3WorkspaceNavigationModel",
+    "M4AnnotationPresentation",
+    "M4DebriefTimelinePresentation",
+    "M4DebriefWorkspaceModel",
+    "M4DesktopTransport",
+    "M4TrendPointPresentation",
+    "M4TrendWorkspaceModel",
+    "M4WorkspacePresentationError",
+    "build_annotation_command_payload",
+    "build_m4_debrief_workspace_model",
+    "build_m4_trend_workspace_model",
+    "create_m4_workspace",
     "build_m2_foundation_navigation_model",
     "build_m2_metric_presentation_state",
     "build_m3_workspace_navigation_model",
