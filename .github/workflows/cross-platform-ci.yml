@@ -237,6 +237,11 @@ jobs:
           uv run --locked python tools/testing/m3_gui_status_evidence_replay_check.py check
           --evidence evidence/m3-gui-003/${{ matrix.platform }}/status-evidence-replay.json
 
+      - name: Emit M3-TST-001 Catalog coverage evidence
+        run: >-
+          uv run --locked python tools/testing/m3_catalog_coverage_check.py check
+          --evidence evidence/m3-tst-001/${{ matrix.platform }}/catalog-coverage.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -471,6 +476,7 @@ jobs:
             evidence/m3-gui-001/${{ matrix.platform }}/workspace-navigation.json
             evidence/m3-gui-002/${{ matrix.platform }}/family-applicability.json
             evidence/m3-gui-003/${{ matrix.platform }}/status-evidence-replay.json
+            evidence/m3-tst-001/${{ matrix.platform }}/catalog-coverage.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -745,6 +751,14 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-gui-003-logical-equivalence.json
 
+      - name: Compare Windows and Linux M3-TST-001 Catalog coverage
+        run: >-
+          python tools/testing/m3_catalog_coverage_check.py compare
+          --windows downloaded/evidence/m3-tst-001/windows/catalog-coverage.json
+          --linux downloaded/evidence/m3-tst-001/linux/catalog-coverage.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-tst-001-logical-equivalence.json
+
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
           python tools/testing/m2_general_metric_engine_compare.py
@@ -961,6 +975,7 @@ jobs:
             evidence/cross-platform/m3-gui-001-logical-equivalence.json
             evidence/cross-platform/m3-gui-002-logical-equivalence.json
             evidence/cross-platform/m3-gui-003-logical-equivalence.json
+            evidence/cross-platform/m3-tst-001-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
