@@ -1,0 +1,37 @@
+{
+  "schema": "TPAA_M5_LICENSE_REVIEW_V1",
+  "status": "REVIEWED",
+  "scope": "Exact-version license resolution fallback for uv.lock packages whose distribution metadata is not installed on the current qualification OS. This is engineering license identification evidence, not legal approval.",
+  "packages": [
+    {
+      "name": "colorama",
+      "version": "0.4.6",
+      "spdx_license": "BSD-3-Clause",
+      "source": "https://pypi.org/project/colorama/0.4.6/"
+    },
+    {
+      "name": "jinja2",
+      "version": "3.1.6",
+      "spdx_license": "BSD-3-Clause",
+      "source": "https://pypi.org/project/Jinja2/3.1.6/"
+    },
+    {
+      "name": "markdown-it-py",
+      "version": "4.2.0",
+      "spdx_license": "MIT",
+      "source": "https://pypi.org/project/markdown-it-py/4.2.0/"
+    },
+    {
+      "name": "mdurl",
+      "version": "0.1.2",
+      "spdx_license": "MIT",
+      "source": "https://pypi.org/project/mdurl/0.1.2/"
+    },
+    {
+      "name": "tzdata",
+      "version": "2026.4",
+      "spdx_license": "Apache-2.0",
+      "source": "https://pypi.org/project/tzdata/2026.4/"
+    }
+  ]
+}

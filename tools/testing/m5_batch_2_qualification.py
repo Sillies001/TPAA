@@ -228,15 +228,20 @@ def _memory_gib() -> float:
 
         status = MemoryStatusEx()
         status.dwLength = ctypes.sizeof(status)
-        if not ctypes.windll.kernel32.GlobalMemoryStatusEx(  # type: ignore[attr-defined]
-            ctypes.byref(status)
-        ):
+        if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
             raise RuntimeError("GlobalMemoryStatusEx failed")
         return float(status.ullTotalPhys) / (1024.0**3)
 
-    pages = os.sysconf("SC_PHYS_PAGES")
-    page_size = os.sysconf("SC_PAGE_SIZE")
-    return float(pages * page_size) / (1024.0**3)
+    meminfo = Path("/proc/meminfo")
+    if not meminfo.is_file():
+        raise RuntimeError("Linux /proc/meminfo is required for M5 hardware identity")
+    for line in meminfo.read_text(encoding="utf-8").splitlines():
+        if line.startswith("MemTotal:"):
+            parts = line.split()
+            if len(parts) < 2:
+                break
+            return float(parts[1]) / (1024.0**2)
+    raise RuntimeError("MemTotal missing from /proc/meminfo")
 
 
 def _hardware_identity(

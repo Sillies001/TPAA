@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_LOCK = REPO_ROOT / "baseline" / "CB-1.4.0" / "BASELINE_LOCK.json"
 UV_LOCK = REPO_ROOT / "uv.lock"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
+M5_LICENSE_REVIEW = REPO_ROOT / "tools" / "security" / "M5_LICENSE_REVIEW.json"
 
 VALID_PROFILES = {
     "WINDOWS_DESKTOP_X64",
@@ -77,15 +78,55 @@ def _locked_packages() -> list[dict[str, object]]:
     return sorted(result, key=lambda item: str(item["name"]))
 
 
-def _license_for(name: str) -> str:
+def _m5_license_reviews() -> dict[tuple[str, str], dict[str, str]]:
+    raw = json.loads(M5_LICENSE_REVIEW.read_text(encoding="utf-8"))
+    if raw.get("schema") != "TPAA_M5_LICENSE_REVIEW_V1" or raw.get("status") != "REVIEWED":
+        raise RuntimeError("M5 license review registry shape invalid")
+    packages = raw.get("packages")
+    if not isinstance(packages, list):
+        raise RuntimeError("M5 license review package list missing")
+    result: dict[tuple[str, str], dict[str, str]] = {}
+    for item in packages:
+        if not isinstance(item, dict):
+            raise RuntimeError("M5 license review row must be object")
+        name = item.get("name")
+        version = item.get("version")
+        spdx = item.get("spdx_license")
+        source = item.get("source")
+        if not all(isinstance(value, str) and value for value in (name, version, spdx, source)):
+            raise RuntimeError("M5 license review row incomplete")
+        key = (name.casefold(), version)
+        if key in result:
+            raise RuntimeError(f"duplicate M5 license review row: {name}=={version}")
+        result[key] = {"spdx_license": spdx, "source": source}
+    return result
+
+
+def _license_record(name: str, version: str) -> dict[str, object]:
     try:
         metadata = importlib.metadata.metadata(name)
     except importlib.metadata.PackageNotFoundError:
-        return "UNKNOWN_REQUIRES_REVIEW"
-    value = metadata.get("License-Expression") or metadata.get("License")
-    if value is None or not value.strip() or value.strip().upper() == "UNKNOWN":
-        return "UNKNOWN_REQUIRES_REVIEW"
-    return value.strip()
+        metadata = None
+
+    if metadata is not None:
+        value = metadata.get("License-Expression") or metadata.get("License")
+        if value is not None and value.strip() and value.strip().upper() != "UNKNOWN":
+            return {
+                "declared_license": value.strip(),
+                "license_resolution": "INSTALLED_PACKAGE_METADATA",
+            }
+
+    reviewed = _m5_license_reviews().get((name.casefold(), version))
+    if reviewed is not None:
+        return {
+            "declared_license": reviewed["spdx_license"],
+            "license_resolution": "M5_EXACT_VERSION_REVIEW",
+            "license_review_source": reviewed["source"],
+        }
+    return {
+        "declared_license": "UNKNOWN_REQUIRES_REVIEW",
+        "license_resolution": "UNRESOLVED",
+    }
 
 
 def _component(item: dict[str, object]) -> dict[str, object]:
@@ -177,7 +218,7 @@ def build_evidence(profile: str) -> dict[str, dict[str, object]]:
             {
                 "name": str(item["name"]),
                 "version": str(item["version"]),
-                "declared_license": _license_for(str(item["name"])),
+                **_license_record(str(item["name"]), str(item["version"])),
             }
             for item in packages
         ],

@@ -244,16 +244,22 @@ def _rss_mib() -> float:
 
         counters = ProcessMemoryCounters()
         counters.cb = ctypes.sizeof(counters)
-        get_process = ctypes.windll.kernel32.GetCurrentProcess  # type: ignore[attr-defined]
-        get_info = ctypes.windll.psapi.GetProcessMemoryInfo  # type: ignore[attr-defined]
+        get_process = ctypes.windll.kernel32.GetCurrentProcess
+        get_info = ctypes.windll.psapi.GetProcessMemoryInfo
         if not get_info(get_process(), ctypes.byref(counters), counters.cb):
             raise RuntimeError("GetProcessMemoryInfo failed")
         return float(counters.PeakWorkingSetSize) / (1024.0 * 1024.0)
 
-    import resource
-
-    value = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    return value / 1024.0
+    status = Path("/proc/self/status")
+    if not status.is_file():
+        raise RuntimeError("Linux /proc/self/status is required for M5 RSS measurement")
+    for line in status.read_text(encoding="utf-8").splitlines():
+        if line.startswith("VmHWM:"):
+            parts = line.split()
+            if len(parts) < 2:
+                break
+            return float(parts[1]) / 1024.0
+    raise RuntimeError("VmHWM missing from /proc/self/status")
 
 
 def _workload(profile_id: str) -> dict[str, object]:
