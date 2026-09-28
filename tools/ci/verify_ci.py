@@ -116,10 +116,10 @@ def verify() -> dict[str, object]:
 
     checks.append(
         _pass("checkout_exact_candidate_revision", SOURCE_REVISION)
-        if text.count(f"ref: {SOURCE_REVISION}") == 11
+        if text.count(f"ref: {SOURCE_REVISION}") == 13
         else _fail(
             "checkout_exact_candidate_revision",
-            f"expected 11 exact-source checkouts using {SOURCE_REVISION}",
+            f"expected 13 exact-source checkouts using {SOURCE_REVISION}",
         )
     )
     checks.append(
