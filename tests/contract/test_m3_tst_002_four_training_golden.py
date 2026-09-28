@@ -88,7 +88,7 @@ def test_m3_tst_002_four_training_golden_contract() -> None:
         "NOMINAL": 4,
     }
     assert logical["fixture_training_counts"] == {
-        "BASIC": 6,
+        "BASIC_FLIGHT": 6,
         "BVR": 6,
         "STRIKE": 6,
         "WVR": 6,

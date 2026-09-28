@@ -63,6 +63,12 @@ EXPECTED_FIXTURE_CATEGORIES = (
     "INVALID",
     "APPLICABILITY",
 )
+EXPECTED_FIXTURE_TRAINING_TYPES = (
+    "BASIC_FLIGHT",
+    "WVR",
+    "BVR",
+    "STRIKE",
+)
 
 
 def _git_revision() -> str:
@@ -276,10 +282,10 @@ def verify() -> dict[str, object]:
                 category_counts[category] == 4
                 for category in EXPECTED_FIXTURE_CATEGORIES
             )
-            and set(training_counts) == set(EXPECTED_STAGE_ORDERS)
+            and set(training_counts) == set(EXPECTED_FIXTURE_TRAINING_TYPES)
             and all(
                 training_counts[training] == 6
-                for training in EXPECTED_STAGE_ORDERS
+                for training in EXPECTED_FIXTURE_TRAINING_TYPES
             )
         ),
         "boundary_goldens_replay_stable": (
