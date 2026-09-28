@@ -1,0 +1,31 @@
+TPAA SDIB-1.4 STRUCTURAL VALIDATION
+Date: 2026-09-28
+Document SHA-256: 00ab4ac1ef9c3fa3c0a85bd0466dcc2f6174cc7e921af5759bd5c42d22aaa5e6
+M5 Task Baseline SHA-256: 89eb4b69cb5af94476983b957584807fb62eb48ffa435a1fc79f00c8b9a348cc
+Result: 24/24 STRUCTURAL PASS
+Hosted adoption CI: PENDING PR / protected-main validation
+
+01. [PASS] Version header SDIB-1.4
+02. [PASS] Parent SDIB-1.3 retained
+03. [PASS] M4 protected-main Exit GO prerequisite
+04. [PASS] M4 Exit exact SHA/run: de42de88... / Run #435
+05. [PASS] R3.3 retained
+06. [PASS] CB-1.4.0 retained
+07. [PASS] DB schema 1.6.0 retained
+08. [PASS] M5 backlog exact 23 unique tasks
+09. [PASS] Required WS exact: PLATFORM/PERFORMANCE/SECURITY/DEVOPS/TEST/GOVERNANCE
+10. [PASS] Four M5 batches
+11. [PASS] Batches cover 23/23 exactly once
+12. [PASS] Mandatory certification profile count exact 4
+13. [PASS] WINDOWS_DESKTOP_X64 bound
+14. [PASS] LINUX_DESKTOP_X64 bound
+15. [PASS] WINDOWS_SERVICE_X64 bound
+16. [PASS] LINUX_SERVICE_X64 bound
+17. [PASS] Platform inventory sourced from PLATFORM_COMPATIBILITY_REGISTRY
+18. [PASS] P1-only qualification; P2-P6 inactive
+19. [PASS] Existing Core/Release semantics retained; no shadow schema
+20. [PASS] C3 #136 explicit fail-closed authority blocker
+21. [PASS] Implementation-selected performance/security/release acceptance forbidden
+22. [PASS] Package lifecycle + upgrade/rollback + backup/restore evidence required
+23. [PASS] Same-candidate Windows/Linux + cold-start formal RC evidence required
+24. [PASS] M6 remains gated and Markdown mirrors machine manifest

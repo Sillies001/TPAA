@@ -1,0 +1,403 @@
+{
+  "schema": "TPAA_SDIB_M5_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.4",
+  "milestone": "M5",
+  "milestone_name": "P1 Product Qualification & Release",
+  "entry_evidence": {
+    "predecessor_milestone": "M4",
+    "protected_main_sha": "de42de880e25102b9dfb5b06ffff18a37ca1fdc1",
+    "protected_main_run_number": 435,
+    "protected_main_actions_run_id": 36430788368,
+    "exit_review_schema": "TPAA_M4_EXIT_REVIEW_V1",
+    "exit_decision": "GO",
+    "protected_main_exact": true,
+    "task_complete": true,
+    "implementation_complete": true,
+    "failed_acceptance": []
+  },
+  "task_count": 23,
+  "required_workstreams": [
+    "WS-PLATFORM",
+    "WS-PERFORMANCE",
+    "WS-SECURITY",
+    "WS-DEVOPS",
+    "WS-TEST",
+    "WS-GOVERNANCE"
+  ],
+  "capability_boundary": {
+    "admitted_phases": [
+      "P1"
+    ],
+    "explicitly_not_admitted": [
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "m5_formal_product_qualification_target": true,
+    "formal_qualification_claim_before_m5_exit_forbidden": true,
+    "p2_p6_activation_forbidden": true
+  },
+  "certification_profiles": {
+    "authority": "PLATFORM_COMPATIBILITY_REGISTRY.json",
+    "required_profile_count": 4,
+    "required_profile_ids": [
+      "WINDOWS_DESKTOP_X64",
+      "LINUX_DESKTOP_X64",
+      "WINDOWS_SERVICE_X64",
+      "LINUX_SERVICE_X64"
+    ],
+    "additional_implicit_profiles_forbidden": true,
+    "logical_equivalence_required": true
+  },
+  "core_storage_authority": {
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "release_replay_semantics_must_remain_immutable": true
+  },
+  "authority_blockers": {
+    "c3_issue": 136,
+    "reason": "Exact formal M5 qualification parameters are not fully frozen: target hardware/workload identities and thresholds, security/vulnerability acceptance, package/install policy, upgrade/rollback, backup/restore and final release acceptance/signoff.",
+    "fail_closed": true,
+    "blocker_task_id": "M5-GOV-001",
+    "dependent_task_ids": [
+      "M5-GOV-001",
+      "M5-PERF-001",
+      "M5-SEC-001",
+      "M5-TST-001",
+      "M5-DEV-001",
+      "M5-DEV-002",
+      "M5-PLAT-002",
+      "M5-PLAT-003",
+      "M5-PLAT-004",
+      "M5-PLAT-005",
+      "M5-PERF-002",
+      "M5-SEC-002",
+      "M5-TST-002",
+      "M5-DEV-003",
+      "M5-DEV-004",
+      "M5-GOV-003",
+      "M5-TST-003",
+      "M5-TST-004",
+      "M5-TST-005",
+      "M5-TST-006",
+      "M5-TST-007"
+    ]
+  },
+  "authority_boundaries": {
+    "canonical_business_authority": "CB-1.4.0",
+    "milestone_registry": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+    "platform_registry": "PLATFORM_COMPATIBILITY_REGISTRY.json",
+    "implementation_selected_performance_thresholds_forbidden": true,
+    "implementation_selected_security_waivers_forbidden": true,
+    "implementation_selected_release_acceptance_forbidden": true,
+    "p2_p6_activation_forbidden": true,
+    "db_shadow_schema_forbidden": true,
+    "historical_current_latest_fallback_forbidden": true,
+    "formal_release_claim_requires_protected_main_m5_exit_go": true
+  },
+  "batches": [
+    {
+      "batch_id": "M5-BATCH-1",
+      "name": "Qualification authority + profile substrate",
+      "task_ids": [
+        "M5-GOV-001",
+        "M5-GOV-002",
+        "M5-PLAT-001",
+        "M5-PERF-001",
+        "M5-SEC-001",
+        "M5-TST-001"
+      ]
+    },
+    {
+      "batch_id": "M5-BATCH-2",
+      "name": "Packages + four mandatory profiles + performance/security",
+      "task_ids": [
+        "M5-DEV-001",
+        "M5-DEV-002",
+        "M5-PLAT-002",
+        "M5-PLAT-003",
+        "M5-PLAT-004",
+        "M5-PLAT-005",
+        "M5-PERF-002",
+        "M5-SEC-002",
+        "M5-TST-002"
+      ]
+    },
+    {
+      "batch_id": "M5-BATCH-3",
+      "name": "Upgrade / rollback / recovery + formal release candidate",
+      "task_ids": [
+        "M5-DEV-003",
+        "M5-DEV-004",
+        "M5-GOV-003",
+        "M5-TST-003",
+        "M5-TST-004"
+      ]
+    },
+    {
+      "batch_id": "M5-BATCH-4",
+      "name": "Same-candidate parity / cold-start / Exit",
+      "task_ids": [
+        "M5-TST-005",
+        "M5-TST-006",
+        "M5-TST-007"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M5-GOV-001",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "Formal qualification authority closure",
+      "dependencies": [
+        "M4 Exit GO",
+        "C3 issue #136"
+      ],
+      "minimum_acceptance": "Versioned machine authority freezes exact target hardware/workload identities, performance/resource thresholds, security/vulnerability acceptance, package/install rules, upgrade/rollback, backup/restore and formal Release acceptance criteria on protected main; implementation-local qualification constants are forbidden."
+    },
+    {
+      "task_id": "M5-GOV-002",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "P1-only formal qualification scope and claim guard",
+      "dependencies": [
+        "M4 Exit GO"
+      ],
+      "minimum_acceptance": "M5 qualifies only existing P1 products; P2-P6 remain inactive; no artifact may claim formal M5 qualification before protected-main M5 Exit GO and exact evidence-manifest acceptance."
+    },
+    {
+      "task_id": "M5-PLAT-001",
+      "workstream": "WS-PLATFORM",
+      "deliverable": "Exact mandatory certification-profile projection",
+      "dependencies": [
+        "M4 Exit GO",
+        "PLATFORM_COMPATIBILITY_REGISTRY.json"
+      ],
+      "minimum_acceptance": "Project exactly WINDOWS_DESKTOP_X64, LINUX_DESKTOP_X64, WINDOWS_SERVICE_X64 and LINUX_SERVICE_X64 with their governed component inventories and fail-closed unsupported/degraded rules; no fifth implicit certification profile."
+    },
+    {
+      "task_id": "M5-PERF-001",
+      "workstream": "WS-PERFORMANCE",
+      "deliverable": "Governed target hardware and workload-envelope projection",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-PLAT-001"
+      ],
+      "minimum_acceptance": "Consume only approved target hardware/workload identities and workload-envelope schema/fixture hashes; every performance result binds exact build, profile, workload, baseline and dependency lock; missing authority fails closed."
+    },
+    {
+      "task_id": "M5-SEC-001",
+      "workstream": "WS-SECURITY",
+      "deliverable": "Formal security/readiness qualification profile",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-PLAT-001"
+      ],
+      "minimum_acceptance": "Consume adopted security readiness, vulnerability acceptance, credential/config and artifact-integrity authority for all mandatory profiles; no local severity waiver or silent degraded security state."
+    },
+    {
+      "task_id": "M5-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "Qualification authority/profile Golden-negative suite",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-GOV-002",
+        "M5-PLAT-001",
+        "M5-PERF-001",
+        "M5-SEC-001"
+      ],
+      "minimum_acceptance": "Golden/negative tests prove exact four-profile inventory, authority hashes, workload/security binding, P1-only claims and fail-closed behavior when formal qualification authority is missing, mismatched or stale."
+    },
+    {
+      "task_id": "M5-DEV-001",
+      "workstream": "WS-DEVOPS",
+      "deliverable": "Deterministic package/build provenance, SBOM and native-manifest production",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-PLAT-001",
+        "M5-SEC-001"
+      ],
+      "minimum_acceptance": "One semantic build version produces profile-bound package manifest, dependency lock, SBOM, native dependency manifest, source/Core/Catalog/schema hashes and artifact integrity/signing evidence exactly as adopted authority requires."
+    },
+    {
+      "task_id": "M5-DEV-002",
+      "workstream": "WS-DEVOPS",
+      "deliverable": "Clean install/start/stop/uninstall lifecycle automation",
+      "dependencies": [
+        "M5-DEV-001",
+        "M5-PLAT-001"
+      ],
+      "minimum_acceptance": "Each mandatory profile has governed clean install, READY/start, stop and uninstall evidence without developer-environment prerequisites; failure is atomic/fail-closed and preserves diagnostic evidence."
+    },
+    {
+      "task_id": "M5-PLAT-002",
+      "workstream": "WS-PLATFORM",
+      "deliverable": "WINDOWS_DESKTOP_X64 formal qualification",
+      "dependencies": [
+        "M5-TST-001",
+        "M5-DEV-002"
+      ],
+      "minimum_acceptance": "Required Windows Desktop components, GUI/local API/Worker/CLI/SQLite/Parquet-object access and governed filesystem/process behavior pass the adopted formal profile on approved environment and exact candidate build."
+    },
+    {
+      "task_id": "M5-PLAT-003",
+      "workstream": "WS-PLATFORM",
+      "deliverable": "LINUX_DESKTOP_X64 formal qualification",
+      "dependencies": [
+        "M5-TST-001",
+        "M5-DEV-002"
+      ],
+      "minimum_acceptance": "Required Linux Desktop components, GUI/local API/Worker/CLI/SQLite/Parquet-object access and governed filesystem/process behavior pass the adopted formal profile on approved environment and exact candidate build."
+    },
+    {
+      "task_id": "M5-PLAT-004",
+      "workstream": "WS-PLATFORM",
+      "deliverable": "WINDOWS_SERVICE_X64 formal qualification",
+      "dependencies": [
+        "M5-TST-001",
+        "M5-DEV-002"
+      ],
+      "minimum_acceptance": "Required Windows Service API/Application, Worker, CLI/admin, PostgreSQL client and Parquet/object access pass the adopted formal profile on approved environment and exact candidate build."
+    },
+    {
+      "task_id": "M5-PLAT-005",
+      "workstream": "WS-PLATFORM",
+      "deliverable": "LINUX_SERVICE_X64 formal qualification",
+      "dependencies": [
+        "M5-TST-001",
+        "M5-DEV-002"
+      ],
+      "minimum_acceptance": "Required Linux Service API/Application, Worker, CLI/admin, PostgreSQL client and Parquet/object access pass the adopted formal profile on approved environment and exact candidate build."
+    },
+    {
+      "task_id": "M5-PERF-002",
+      "workstream": "WS-PERFORMANCE",
+      "deliverable": "Target-workload performance and resource qualification",
+      "dependencies": [
+        "M5-PERF-001",
+        "M5-PLAT-002",
+        "M5-PLAT-003",
+        "M5-PLAT-004",
+        "M5-PLAT-005"
+      ],
+      "minimum_acceptance": "Approved workloads on required profiles meet adopted P50/P95/throughput/CPU/RSS/storage/concurrency limits; reports bind exact workload/profile/build hashes and may not widen thresholds on failure."
+    },
+    {
+      "task_id": "M5-SEC-002",
+      "workstream": "WS-SECURITY",
+      "deliverable": "Dependency, vulnerability and artifact-integrity qualification",
+      "dependencies": [
+        "M5-SEC-001",
+        "M5-DEV-001",
+        "M5-PLAT-002",
+        "M5-PLAT-003",
+        "M5-PLAT-004",
+        "M5-PLAT-005"
+      ],
+      "minimum_acceptance": "SBOM/dependency/native-manifest/vulnerability/integrity/signing checks meet adopted rules on every mandatory artifact; exceptions require governed authority and remain explicit in evidence."
+    },
+    {
+      "task_id": "M5-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "Four-profile package/performance/security qualification",
+      "dependencies": [
+        "M5-DEV-002",
+        "M5-PLAT-002",
+        "M5-PLAT-003",
+        "M5-PLAT-004",
+        "M5-PLAT-005",
+        "M5-PERF-002",
+        "M5-SEC-002"
+      ],
+      "minimum_acceptance": "One exact candidate SHA passes clean lifecycle, component smoke, full Golden/Replay subsets, workload performance/resource and security/artifact qualification for all four mandatory profiles."
+    },
+    {
+      "task_id": "M5-DEV-003",
+      "workstream": "WS-DEVOPS",
+      "deliverable": "Governed upgrade and rollback compatibility",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-TST-002"
+      ],
+      "minimum_acceptance": "Approved upgrade paths preserve DB schema compatibility, immutable Release/replay semantics and governed manifests; injected upgrade failure rolls back to a usable prior version without pointer/history corruption."
+    },
+    {
+      "task_id": "M5-DEV-004",
+      "workstream": "WS-DEVOPS",
+      "deliverable": "Backup/restore and recovery qualification orchestration",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-TST-002"
+      ],
+      "minimum_acceptance": "Approved backup/restore procedure meets adopted scope/target/evidence rules across applicable stores and profiles; restored state preserves release membership/provenance and fails closed on incomplete/corrupt backup."
+    },
+    {
+      "task_id": "M5-GOV-003",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "Formal release-candidate evidence manifest and signoff contract",
+      "dependencies": [
+        "M5-GOV-001",
+        "M5-TST-002"
+      ],
+      "minimum_acceptance": "A versioned RC evidence manifest binds exact source revision, packages/hashes, authorities, schema/catalog/profile/workload/security evidence, replay lineage, upgrade/recovery results and required signoff identities; incomplete manifest cannot be accepted."
+    },
+    {
+      "task_id": "M5-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "Upgrade/rollback/backup/restore failure-recovery E2E",
+      "dependencies": [
+        "M5-DEV-003",
+        "M5-DEV-004"
+      ],
+      "minimum_acceptance": "E2E and injected-failure fixtures prove governed upgrade, rollback, backup, restore, atomic failure behavior, exact historical Release/replay preservation and recovery evidence on applicable mandatory profiles."
+    },
+    {
+      "task_id": "M5-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "Formal release-candidate provenance and acceptance E2E",
+      "dependencies": [
+        "M5-GOV-003",
+        "M5-TST-002",
+        "M5-TST-003"
+      ],
+      "minimum_acceptance": "The formal RC is reproducibly tied to exact source/baseline/dependencies/packages/SBOM/profile/workload/security/recovery evidence and satisfies adopted release-acceptance criteria without current/latest or environment-local substitutions."
+    },
+    {
+      "task_id": "M5-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "Same-candidate four-profile logical equivalence and qualification parity",
+      "dependencies": [
+        "M5-TST-004",
+        "M5-PLAT-002",
+        "M5-PLAT-003",
+        "M5-PLAT-004",
+        "M5-PLAT-005",
+        "M5-PERF-002",
+        "M5-SEC-002"
+      ],
+      "minimum_acceptance": "One candidate SHA proves Windows/Linux logical equivalence, exact Release/Replay semantics, all four mandatory profile results, governed numeric tolerances, performance/resource/security qualification and package evidence with only allowed physical differences."
+    },
+    {
+      "task_id": "M5-TST-006",
+      "workstream": "WS-TEST",
+      "deliverable": "Cold-start formal release package reconstruction",
+      "dependencies": [
+        "M5-TST-005",
+        "M5-DEV-003",
+        "M5-DEV-004",
+        "M5-GOV-003"
+      ],
+      "minimum_acceptance": "Clean source+baseline+locked dependencies reconstruct formal artifacts and evidence manifest; clean install/readiness/replay/upgrade/recovery smoke passes without developer-local state on required profiles."
+    },
+    {
+      "task_id": "M5-TST-007",
+      "workstream": "WS-TEST",
+      "deliverable": "M5 Exit review and formal P1 release decision",
+      "dependencies": [
+        "ALL_M5_TASKS"
+      ],
+      "minimum_acceptance": "Exact 23/23 M5 task evidence, four-profile qualification, governed workload/performance/security/package/upgrade/recovery/cold-start evidence and formal RC manifest all pass; failed_acceptance=[]; protected-main exact M5 Exit GO is required before any formal P1 release claim."
+    }
+  ]
+}
