@@ -1,5 +1,18 @@
-"""M4 P1 longitudinal sample and scope domain."""
+"""M4 P1 longitudinal domain."""
 
+from .m4_release import (
+    InMemoryM4LongitudinalReleaseRepository,
+    M4LongitudinalPublicationService,
+    M4LongitudinalReleaseInput,
+    M4LongitudinalReleaseSnapshot,
+    M4PublishedLongitudinalRelease,
+    M4PublishResult,
+    M4ReplayComparison,
+    M4ReplayView,
+    allocate_m4_longitudinal_release_id,
+    build_m4_longitudinal_release,
+    compare_m4_longitudinal_replay,
+)
 from .m4_sample import (
     M4LongitudinalAuthority,
     M4LongitudinalEligibility,
@@ -14,18 +27,43 @@ from .m4_sample import (
     load_m4_longitudinal_authority,
     validate_m4_product_scope,
 )
+from .m4_trend import (
+    M4PerformanceTrendPoint,
+    M4PerformanceTrendSeries,
+    M4TrendAuthority,
+    M4TrendBridge,
+    build_performance_trend_series,
+    load_m4_trend_authority,
+)
 
 __all__ = [
+    "InMemoryM4LongitudinalReleaseRepository",
     "M4LongitudinalAuthority",
     "M4LongitudinalEligibility",
     "M4LongitudinalError",
+    "M4LongitudinalPublicationService",
+    "M4LongitudinalReleaseInput",
+    "M4LongitudinalReleaseSnapshot",
     "M4LongitudinalSample",
     "M4LongitudinalScope",
+    "M4PerformanceTrendPoint",
+    "M4PerformanceTrendSeries",
+    "M4PublishedLongitudinalRelease",
+    "M4PublishResult",
+    "M4ReplayComparison",
+    "M4ReplayView",
     "M4SourceObservation",
+    "M4TrendAuthority",
+    "M4TrendBridge",
+    "allocate_m4_longitudinal_release_id",
     "build_comparison_key",
     "build_longitudinal_sample",
     "build_longitudinal_scope",
     "build_m4_longitudinal_eligibility",
+    "build_m4_longitudinal_release",
+    "build_performance_trend_series",
+    "compare_m4_longitudinal_replay",
     "load_m4_longitudinal_authority",
+    "load_m4_trend_authority",
     "validate_m4_product_scope",
 ]
