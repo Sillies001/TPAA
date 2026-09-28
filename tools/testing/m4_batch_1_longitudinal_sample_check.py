@@ -277,7 +277,12 @@ def verify() -> dict[str, object]:
         comparison_golden["permutation_input"],
     )
 
-    excluded_code = eligibility.excluded[0].metric_code
+    excluded = next(
+        item
+        for item in eligibility.excluded
+        if item.subject_type in authority.admitted_subject_types
+    )
+    excluded_code = excluded.metric_code
     excluded_error = _error_code(
         lambda: build_longitudinal_sample(
             authority=authority,
@@ -286,7 +291,7 @@ def verify() -> dict[str, object]:
             sample_id=SAMPLE_ID,
             metric_definition_id=METRIC_DEFINITION_ID,
             metric_code=excluded_code,
-            subject_type=eligibility.excluded[0].subject_type,
+            subject_type=excluded.subject_type,
             subject_id=SUBJECT_ID,
             configuration_key=CONFIGURATION_KEY,
             comparison_context=_context(),

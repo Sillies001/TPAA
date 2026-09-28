@@ -68,29 +68,60 @@ class M4LongitudinalError(RuntimeError):
 
 
 class _ReleaseDefinition(Protocol):
-    metric_code: str
-    semantic_id: str
-    semantic_version: int
-    definition_hash: str
-    subject_type: str
-    value_kind: str
-    p1_longitudinal_trend_eligibility: bool
+    @property
+    def metric_code(self) -> str: ...
+
+    @property
+    def semantic_id(self) -> str: ...
+
+    @property
+    def semantic_version(self) -> int: ...
+
+    @property
+    def definition_hash(self) -> str: ...
+
+    @property
+    def subject_type(self) -> str: ...
+
+    @property
+    def value_kind(self) -> str: ...
+
+    @property
+    def p1_longitudinal_trend_eligibility(self) -> bool: ...
 
 
 class _ReleaseExecution(Protocol):
-    metric_code: str
-    algorithm_version: str
-    definition_hash: str
-    plugin_id: str
+    @property
+    def metric_code(self) -> str: ...
+
+    @property
+    def algorithm_version(self) -> str: ...
+
+    @property
+    def definition_hash(self) -> str: ...
+
+    @property
+    def plugin_id(self) -> str: ...
 
 
 class SessionReleaseSnapshot(Protocol):
-    release_id: str
-    session_id: str
-    catalog_version: str
-    catalog_hash: str
-    status: str
-    execution_records: Sequence[_ReleaseExecution]
+    @property
+    def release_id(self) -> str: ...
+
+    @property
+    def session_id(self) -> str: ...
+
+    @property
+    def catalog_version(self) -> str: ...
+
+    @property
+    def catalog_hash(self) -> str: ...
+
+    @property
+    def status(self) -> str: ...
+
+    @property
+    def execution_records(self) -> Sequence[_ReleaseExecution]: ...
 
     def definition(self, metric_code: str) -> _ReleaseDefinition: ...
 

@@ -234,7 +234,11 @@ def test_m4_sample_median_release_lineage_and_replay_are_deterministic() -> None
 
 def test_m4_sample_excluded_and_not_applicable_inputs_fail_closed() -> None:
     authority, eligibility, release, definition = _setup()
-    excluded = eligibility.excluded[0]
+    excluded = next(
+        item
+        for item in eligibility.excluded
+        if item.subject_type in authority.admitted_subject_types
+    )
     with pytest.raises(M4LongitudinalError) as excinfo:
         build_longitudinal_sample(
             authority=authority,
