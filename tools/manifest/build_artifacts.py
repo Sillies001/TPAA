@@ -93,8 +93,14 @@ def _m5_license_reviews() -> dict[tuple[str, str], dict[str, str]]:
         version = item.get("version")
         spdx = item.get("spdx_license")
         source = item.get("source")
-        if not all(isinstance(value, str) and value for value in (name, version, spdx, source)):
-            raise RuntimeError("M5 license review row incomplete")
+        if not isinstance(name, str) or not name:
+            raise RuntimeError("M5 license review name missing")
+        if not isinstance(version, str) or not version:
+            raise RuntimeError("M5 license review version missing")
+        if not isinstance(spdx, str) or not spdx:
+            raise RuntimeError("M5 license review SPDX license missing")
+        if not isinstance(source, str) or not source:
+            raise RuntimeError("M5 license review source missing")
         key = (name.casefold(), version)
         if key in result:
             raise RuntimeError(f"duplicate M5 license review row: {name}=={version}")

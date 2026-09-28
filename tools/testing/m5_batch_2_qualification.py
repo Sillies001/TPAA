@@ -228,7 +228,10 @@ def _memory_gib() -> float:
 
         status = MemoryStatusEx()
         status.dwLength = ctypes.sizeof(status)
-        if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+        windll = getattr(ctypes, "windll", None)
+        if windll is None:
+            raise RuntimeError("Windows ctypes windll unavailable")
+        if not windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
             raise RuntimeError("GlobalMemoryStatusEx failed")
         return float(status.ullTotalPhys) / (1024.0**3)
 
