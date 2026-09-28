@@ -20,6 +20,47 @@ M3_GUI_TRAINING_PRESENTATION = {
     "STRIKE": "Strike Mission",
 }
 
+M3_GUI_PRODUCT_FAMILY_CODES = (
+    "P1-AIR-*",
+    "P1-TRK-*",
+    "P1-ID-*",
+    "P1-PSV-*",
+    "P1-ESM-*",
+    "P1-DL-*",
+    "P1-FUS-*",
+)
+M3_GUI_FAMILY_PRESENTATION: dict[str, tuple[str, str]] = {
+    "P1-AIR-*": (
+        "Aircraft performance",
+        "aircraft observed flight/energy/control/handling/persistence performance",
+    ),
+    "P1-TRK-*": (
+        "Local track product",
+        "local track-processing product layer; applicability is by product capability, "
+        "not by one physical sensor type",
+    ),
+    "P1-ID-*": (
+        "Association / identification",
+        "association/identity processing layer; applicability is by product capability",
+    ),
+    "P1-PSV-*": (
+        "Passive sensor",
+        "passive electro-optical/infrared sensing layer",
+    ),
+    "P1-ESM-*": (
+        "RWR / ESM",
+        "emitter sensing / warning / ESM layer",
+    ),
+    "P1-DL-*": (
+        "Datalink",
+        "datalink transport and remote-track delivery layer",
+    ),
+    "P1-FUS-*": (
+        "Sensor fusion",
+        "multi-source fused-track product layer",
+    ),
+}
+
 
 class M3DesktopTransport(Protocol):
     """Narrow GUI-side M3 transport contract."""
@@ -78,6 +119,26 @@ class M3FamilyNavigation:
 
 
 @dataclass(frozen=True)
+class M3MetricApplicabilityNavigation:
+    metric_code: str
+    family_code: str
+    applicable: bool
+    reason_codes: tuple[str, ...]
+    system_type: str | None
+    instance_count: int
+
+    def projection(self) -> dict[str, object]:
+        return {
+            "metric_code": self.metric_code,
+            "family_code": self.family_code,
+            "applicable": self.applicable,
+            "reason_codes": list(self.reason_codes),
+            "system_type": self.system_type,
+            "instance_count": self.instance_count,
+        }
+
+
+@dataclass(frozen=True)
 class M3WorkspaceNavigationModel:
     release_id: str
     manifest_hash: str
@@ -85,6 +146,7 @@ class M3WorkspaceNavigationModel:
     training: M3TrainingNavigation
     families: tuple[M3FamilyNavigation, ...]
     metric_codes: tuple[str, ...]
+    metric_applicability: tuple[M3MetricApplicabilityNavigation, ...]
 
     def projection(self) -> dict[str, object]:
         return {
@@ -119,6 +181,22 @@ def _sequence(value: object, *, field: str) -> list[object]:
     if not isinstance(value, list):
         raise M3WorkspaceNavigationError(f"M3_GUI_LIST_INVALID:{field}")
     return value
+
+
+def _string_tuple(
+    value: object,
+    *,
+    field: str,
+    required: bool = False,
+) -> tuple[str, ...]:
+    if not isinstance(value, list) or not all(
+        isinstance(item, str) and item for item in value
+    ):
+        raise M3WorkspaceNavigationError(f"M3_GUI_STRING_LIST_INVALID:{field}")
+    result = tuple(cast(list[str], value))
+    if required and not result:
+        raise M3WorkspaceNavigationError(f"M3_GUI_STRING_LIST_REQUIRED:{field}")
+    return result
 
 
 def _require_hash(value: object, *, field: str) -> str:
@@ -187,6 +265,7 @@ def build_m3_workspace_navigation_model(
     if len(raw_metrics) != M3_GUI_METRIC_COUNT:
         raise M3WorkspaceNavigationError("M3_GUI_METRIC_MEMBERSHIP_INVALID")
     metric_codes: list[str] = []
+    metric_applicability: list[M3MetricApplicabilityNavigation] = []
     for index, raw_metric in enumerate(raw_metrics):
         metric = _mapping(raw_metric, field=f"metrics[{index}]")
         metric_release_id = _text(
@@ -197,8 +276,59 @@ def build_m3_workspace_navigation_model(
             raise M3WorkspaceNavigationError(
                 f"M3_GUI_METRIC_RELEASE_DRIFT:{index}"
             )
-        metric_codes.append(
-            _text(metric.get("metric_code"), field=f"metrics[{index}].metric_code")
+        metric_code = _text(
+            metric.get("metric_code"),
+            field=f"metrics[{index}].metric_code",
+        )
+        family_code = _text(
+            metric.get("family_code"),
+            field=f"metrics[{index}].family_code",
+        )
+        applicability = _mapping(
+            metric.get("applicability"),
+            field=f"metrics[{index}].applicability",
+        )
+        applicable = applicability.get("applicable")
+        if not isinstance(applicable, bool):
+            raise M3WorkspaceNavigationError(
+                f"M3_GUI_APPLICABILITY_INVALID:{metric_code}"
+            )
+        reason_codes = _string_tuple(
+            applicability.get("reason_codes"),
+            field=f"metrics[{index}].applicability.reason_codes",
+            required=not applicable,
+        )
+        system_type_value = applicability.get("system_type")
+        system_type = (
+            None
+            if system_type_value is None
+            else _text(
+                system_type_value,
+                field=f"metrics[{index}].applicability.system_type",
+            )
+        )
+        instances = _sequence(
+            metric.get("instances"),
+            field=f"metrics[{index}].instances",
+        )
+        if not applicable and instances:
+            raise M3WorkspaceNavigationError(
+                f"M3_GUI_NOT_APPLICABLE_INSTANCE_FORBIDDEN:{metric_code}"
+            )
+        if applicable and not instances:
+            raise M3WorkspaceNavigationError(
+                f"M3_GUI_APPLICABLE_INSTANCE_REQUIRED:{metric_code}"
+            )
+        metric_codes.append(metric_code)
+        metric_applicability.append(
+            M3MetricApplicabilityNavigation(
+                metric_code=metric_code,
+                family_code=family_code,
+                applicable=applicable,
+                reason_codes=reason_codes,
+                system_type=system_type,
+                instance_count=len(instances),
+            )
         )
     if len(set(metric_codes)) != M3_GUI_METRIC_COUNT:
         raise M3WorkspaceNavigationError("M3_GUI_METRIC_MEMBERSHIP_INVALID")
@@ -246,6 +376,11 @@ def build_m3_workspace_navigation_model(
     if not families or family_metric_count != M3_GUI_METRIC_COUNT:
         raise M3WorkspaceNavigationError("M3_GUI_FAMILY_MEMBERSHIP_INVALID")
 
+    if any(
+        metric.family_code not in family_codes for metric in metric_applicability
+    ):
+        raise M3WorkspaceNavigationError("M3_GUI_METRIC_FAMILY_UNKNOWN")
+
     provenance = _mapping(
         workspace_projection.get("release_provenance"),
         field="release_provenance",
@@ -262,6 +397,7 @@ def build_m3_workspace_navigation_model(
         training=training,
         families=tuple(families),
         metric_codes=tuple(metric_codes),
+        metric_applicability=tuple(metric_applicability),
     )
 
 
@@ -332,6 +468,36 @@ def create_m3_workspace_navigation(
     )
     layout.addWidget(family_table)
 
+    product_table = qt_widgets.QTableWidget(root)
+    product_table.setObjectName("tpaaM3ProductFamilyPresentation")
+    product_table.setColumnCount(5)
+    product_table.setHorizontalHeaderLabels(
+        ["Family", "Product", "Meaning", "Applicable", "Not applicable"]
+    )
+    product_table.setEditTriggers(
+        qt_widgets.QAbstractItemView.EditTrigger.NoEditTriggers
+    )
+    layout.addWidget(product_table)
+
+    applicability_table = qt_widgets.QTableWidget(root)
+    applicability_table.setObjectName("tpaaM3MetricApplicability")
+    applicability_table.setColumnCount(7)
+    applicability_table.setHorizontalHeaderLabels(
+        [
+            "Metric",
+            "Family",
+            "Product",
+            "Applicable",
+            "Applicability reasons",
+            "System type",
+            "Instances",
+        ]
+    )
+    applicability_table.setEditTriggers(
+        qt_widgets.QAbstractItemView.EditTrigger.NoEditTriggers
+    )
+    layout.addWidget(applicability_table)
+
     status_label = qt_widgets.QLabel("Navigation: IDLE", root)
     status_label.setObjectName("tpaaM3NavigationStatus")
     layout.addWidget(status_label)
@@ -389,6 +555,62 @@ def create_m3_workspace_navigation(
                     column,
                     qt_widgets.QTableWidgetItem(str(value)),
                 )
+
+        product_families = [
+            family
+            for family in model.families
+            if family.family_code in M3_GUI_FAMILY_PRESENTATION
+        ]
+        product_table.setRowCount(len(product_families))
+        for row, family in enumerate(product_families):
+            product_label, meaning = M3_GUI_FAMILY_PRESENTATION[family.family_code]
+            values = (
+                family.family_code,
+                product_label,
+                meaning,
+                family.applicable_count,
+                family.not_applicable_count,
+            )
+            for column, value in enumerate(values):
+                product_table.setItem(
+                    row,
+                    column,
+                    qt_widgets.QTableWidgetItem(str(value)),
+                )
+
+        product_metrics = [
+            metric
+            for metric in model.metric_applicability
+            if metric.family_code in M3_GUI_FAMILY_PRESENTATION
+        ]
+        applicability_table.setRowCount(len(product_metrics))
+        for row, metric in enumerate(product_metrics):
+            product_label, _ = M3_GUI_FAMILY_PRESENTATION[metric.family_code]
+            reason_text = (
+                ", ".join(metric.reason_codes) if metric.reason_codes else "—"
+            )
+            system_type_text = metric.system_type or "—"
+            instance_text = (
+                str(metric.instance_count)
+                if metric.applicable
+                else "0 · no observation"
+            )
+            values = (
+                metric.metric_code,
+                metric.family_code,
+                product_label,
+                "YES" if metric.applicable else "NO",
+                reason_text,
+                system_type_text,
+                instance_text,
+            )
+            for column, value in enumerate(values):
+                applicability_table.setItem(
+                    row,
+                    column,
+                    qt_widgets.QTableWidgetItem(str(value)),
+                )
+
         status_label.setText(
             f"Navigation: READY · {identity.training_key} · "
             f"{len(model.metric_codes)} metrics"
@@ -397,4 +619,5 @@ def create_m3_workspace_navigation(
     selector.currentTextChanged.connect(render)
     render(selector.currentText())
     root.setProperty("tpaaM3NavigationMode", "RELEASE_BOUND")
+    root.setProperty("tpaaM3ApplicabilityMode", "PROJECTED")
     return root

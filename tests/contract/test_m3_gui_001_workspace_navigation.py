@@ -27,6 +27,13 @@ def _workspace(training_key: str) -> dict[str, object]:
         {
             "release_id": release_id,
             "metric_code": f"P1-TEST-{index:03d}",
+            "family_code": "P1-TEST-*",
+            "applicability": {
+                "applicable": True,
+                "reason_codes": [],
+                "system_type": "TEST_SYSTEM",
+            },
+            "instances": [{"status": "VALID", "reason_codes": []}],
         }
         for index in range(1, 117)
     ]
