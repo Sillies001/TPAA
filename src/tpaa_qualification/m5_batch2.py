@@ -215,6 +215,17 @@ def validate_security_qualification(
         field="security.artifact_integrity",
     )
 
+    if report.get("severity_model") != vulnerability.get("severity_model"):
+        raise M5QualificationError(
+            authority.error_code("security_acceptance"),
+            f"{profile_id}:severity model",
+        )
+    if report.get("unscored_advisory_count") != 0:
+        raise M5QualificationError(
+            authority.error_code("security_acceptance"),
+            f"{profile_id}:unscored advisory",
+        )
+
     exact_fields = {
         "sbom_format": sbom.get("format"),
         "sbom_spec_version": sbom.get("spec_version"),
