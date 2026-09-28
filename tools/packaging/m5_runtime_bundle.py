@@ -52,7 +52,8 @@ def _clean_tree_ignore(
     ignored = {
         name
         for name in names
-        if name == "__pycache__" or name.endswith((".pyc", ".pyo"))
+        if name == "__pycache__"
+        or name.endswith((".pyc", ".pyo", ".pth", ".egg-link"))
     }
     if skip_site_packages and Path(directory).name.startswith("python"):
         ignored.add("site-packages")

@@ -336,7 +336,10 @@ def validate_security_qualification(
                 )
         expires = _parse_utc(waiver.get("expires_at_utc"), field="expires_at_utc")
         issued = _parse_utc(waiver.get("issued_at_utc"), field="issued_at_utc")
-        if expires <= now or (expires - issued).days > max_days:
+        if (
+            expires <= now
+            or (expires - issued).total_seconds() > max_days * 86400
+        ):
             raise M5QualificationError(
                 authority.error_code("security_acceptance"),
                 f"{profile_id}:waiver expiry/duration",
