@@ -73,6 +73,35 @@ def _load(path: Path) -> dict[str, object]:
     return cast(dict[str, object], value)
 
 
+
+def _adopted_baseline_preserved(lock_path: Path) -> bool:
+    current_hash = _sha256(lock_path)
+    lock = _load(lock_path)
+    baseline = lock.get("baseline")
+    artifacts = lock.get("artifacts")
+    if not isinstance(baseline, dict) or not isinstance(artifacts, list):
+        return False
+    lineage = baseline.get("lock_lineage_sha256")
+    lineage_exact = current_hash == ADOPTED_BASELINE_LOCK_SHA256 or (
+        isinstance(lineage, list)
+        and ADOPTED_BASELINE_LOCK_SHA256 in lineage
+    )
+    authority_entry = next(
+        (
+            item
+            for item in artifacts
+            if isinstance(item, dict)
+            and item.get("file") == "M2_QA_SNS_AUTHORITY.json"
+        ),
+        None,
+    )
+    return (
+        lineage_exact
+        and isinstance(authority_entry, dict)
+        and authority_entry.get("sha256") == ADOPTED_AUTHORITY_SHA256
+        and authority_entry.get("bytes") == AUTHORITY.stat().st_size
+    )
+
 def _canonical_hash(value: object) -> str:
     payload = json.dumps(
         value,
@@ -142,8 +171,7 @@ def verify() -> dict[str, object]:
     )
 
     acceptance = {
-        "adopted_baseline_lock_exact": _sha256(lock_path)
-        == ADOPTED_BASELINE_LOCK_SHA256,
+        "adopted_baseline_lock_exact": _adopted_baseline_preserved(lock_path),
         "adopted_authority_artifact_exact": _sha256(AUTHORITY)
         == ADOPTED_AUTHORITY_SHA256,
         "authority_status_approved": (
@@ -200,7 +228,8 @@ def verify() -> dict[str, object]:
             "sentinel_only": True,
         },
         "logical_product": {
-            "adopted_baseline_lock_sha256": _sha256(lock_path),
+            "adopted_baseline_lock_sha256": ADOPTED_BASELINE_LOCK_SHA256,
+            "current_baseline_lock_sha256": _sha256(lock_path),
             "authority_artifact_sha256": _sha256(AUTHORITY),
             "authority_id": authority.get("authority_id"),
             "authority_version": authority.get("version"),

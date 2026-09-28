@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import hashlib
 import json
 import math
@@ -19,9 +20,49 @@ def _hash(value: object) -> str:
     return hashlib.sha256(_canonical_bytes(value)).hexdigest()
 
 def _authority() -> dict[str, Any]:
-    loader = CanonicalArtifactLoader(BASELINE)
-    artifact = loader.load("M4_LONGITUDINAL_DEBRIEF_AUTHORITY", expectation=ArtifactExpectation(version="1.0.0", schema_version="1.6.0", required_top_level_keys=("sample_profile","comparison_key_contract","trend_profile","release_replay_contract","dto_contracts","golden_vectors")))
-    return dict(artifact.payload)
+    authority_path = BASELINE / "canonical" / "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json"
+    lock_raw: object = json.loads(
+        (BASELINE / "BASELINE_LOCK.json").read_text(encoding="utf-8")
+    )
+    if not isinstance(lock_raw, dict):
+        raise ValueError("BASELINE_LOCK root invalid")
+    artifacts = lock_raw.get("artifacts")
+    if not isinstance(artifacts, list):
+        raise ValueError("BASELINE_LOCK artifacts invalid")
+    entry = next(
+        (
+            item
+            for item in artifacts
+            if isinstance(item, dict)
+            and item.get("file") == "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json"
+        ),
+        None,
+    )
+    if not isinstance(entry, dict):
+        raise ValueError("M4 authority missing from BASELINE_LOCK")
+    data = authority_path.read_bytes()
+    if hashlib.sha256(data).hexdigest() != entry.get("sha256"):
+        raise ValueError("M4 authority hash drift")
+    if len(data) != entry.get("bytes"):
+        raise ValueError("M4 authority byte-size drift")
+    payload: object = json.loads(data.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("M4 authority root invalid")
+    required = {
+        "sample_profile",
+        "comparison_key_contract",
+        "trend_profile",
+        "release_replay_contract",
+        "dto_contracts",
+        "golden_vectors",
+    }
+    if payload.get("version") != "1.0.0":
+        raise ValueError("M4 authority version drift")
+    if payload.get("db_schema_version") != "1.6.0":
+        raise ValueError("M4 authority schema drift")
+    if not required.issubset(payload):
+        raise ValueError("M4 authority required sections missing")
+    return payload
 
 def _normalized_comparison(value: dict[str, Any], authority: dict[str, Any]) -> dict[str, Any]:
     required = list(authority["comparison_key_contract"]["required_fields"])

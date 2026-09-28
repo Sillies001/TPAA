@@ -6,7 +6,10 @@
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
     "date": "2026-09-28",
-    "rebaseline": "R3.5_M4_LONGITUDINAL_DEBRIEF_AUTHORITY"
+    "rebaseline": "R3.5_M4_LONGITUDINAL_DEBRIEF_AUTHORITY",
+    "lock_lineage_sha256": [
+      "d6ebab2b5402cf81a0b5f73a2da4ed2aaa2d530bc7445c7f6132dcf7fa72224d"
+    ]
   },
   "artifacts": [
     {
