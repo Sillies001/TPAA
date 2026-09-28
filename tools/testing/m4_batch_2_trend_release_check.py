@@ -8,9 +8,9 @@ import json
 import math
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
-from typing import Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = str(REPO_ROOT / "src")
@@ -21,8 +21,10 @@ from tpaa_longitudinal import (  # noqa: E402
     InMemoryM4LongitudinalReleaseRepository,
     M4LongitudinalError,
     M4LongitudinalPublicationService,
+    M4LongitudinalReleaseSnapshot,
     M4LongitudinalSample,
     M4LongitudinalScope,
+    M4PerformanceTrendSeries,
     M4TrendBridge,
     allocate_m4_longitudinal_release_id,
     build_m4_longitudinal_release,
@@ -186,7 +188,7 @@ def _series(
     scope: M4LongitudinalScope | None = None,
     samples: tuple[M4LongitudinalSample, ...] | None = None,
     bridges: tuple[M4TrendBridge, ...] = (),
-):
+) -> M4PerformanceTrendSeries:
     actual_scope = scope or _scope()
     actual_samples = samples or _samples()
     release_id = allocate_m4_longitudinal_release_id(
@@ -211,7 +213,7 @@ def _release(
     request_hash: str,
     release_no: int = 1,
     parent_release_id: str | None = None,
-):
+) -> M4LongitudinalReleaseSnapshot:
     scope = _scope()
     series = _series(
         request_hash=request_hash,
