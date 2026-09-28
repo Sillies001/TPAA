@@ -54,6 +54,16 @@ from .m3_workspace import (
     M3WorkspaceProjectionError,
     project_m3_workspace,
 )
+from .m4_workspace import (
+    InMemoryM4DebriefRepository,
+    M4AnnotationCommand,
+    M4ApplicationError,
+    M4DebriefAnnotation,
+    M4DebriefQuery,
+    M4DebriefTimelineItem,
+    M4TrendQuery,
+    M4WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import (
     GetRuntimeBaselineStatus,
@@ -106,6 +116,14 @@ __all__ = [
     "M3_WORKSPACE_EVIDENCE_CONTRACT",
     "M3WorkspaceProjectionError",
     "project_m3_workspace",
+    "InMemoryM4DebriefRepository",
+    "M4AnnotationCommand",
+    "M4ApplicationError",
+    "M4DebriefAnnotation",
+    "M4DebriefQuery",
+    "M4DebriefTimelineItem",
+    "M4TrendQuery",
+    "M4WorkspaceService",
     "GetRuntimeBaselineStatus",
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",

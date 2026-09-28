@@ -12,6 +12,12 @@ from .m1_publication import (
 )
 from .m3_publication import M3PublicationService
 from .m3_workspace import project_m3_workspace
+from .m4_workspace import (
+    M4AnnotationCommand,
+    M4DebriefQuery,
+    M4TrendQuery,
+    M4WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -35,12 +41,14 @@ class ApplicationService:
         job_control: M0JobControl | None = None,
         m1_publication: M1PublicationService | None = None,
         m3_publication: M3PublicationService | None = None,
+        m4_workspace: M4WorkspaceService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
         self._job_control = job_control or M0JobControl()
         self._m1_publication = m1_publication
         self._m3_publication = m3_publication
+        self._m4_workspace = m4_workspace
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -191,3 +199,20 @@ class ApplicationService:
     def m3_workspace(self, release_id: str) -> dict[str, object]:
         release = self._m3().historical_release(release_id).release
         return project_m3_workspace(release)
+
+    def _m4(self) -> M4WorkspaceService:
+        if self._m4_workspace is None:
+            raise RuntimeError("M4 workspace service is not configured")
+        return self._m4_workspace
+
+    def m4_trend(self, query: M4TrendQuery) -> dict[str, object]:
+        return self._m4().trend(query)
+
+    def m4_debrief(self, query: M4DebriefQuery) -> dict[str, object]:
+        return self._m4().debrief(query)
+
+    def m4_annotation(
+        self,
+        command: M4AnnotationCommand,
+    ) -> dict[str, object]:
+        return self._m4().annotation(command)

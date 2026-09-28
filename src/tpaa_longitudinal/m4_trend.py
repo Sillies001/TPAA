@@ -118,6 +118,8 @@ class M4PerformanceTrendPoint:
     trend_id: str
     point_order: int
     sample_id: str
+    source_release_id: str
+    session_id: str
     subject_type: str
     subject_id: str
     session_order: int
@@ -132,6 +134,8 @@ class M4PerformanceTrendPoint:
             "trend_id": self.trend_id,
             "point_order": self.point_order,
             "sample_id": self.sample_id,
+            "release_id": self.source_release_id,
+            "session_id": self.session_id,
             "subject_type": self.subject_type,
             "subject_id": self.subject_id,
             "session_order": self.session_order,
@@ -152,6 +156,7 @@ class M4PerformanceTrendSeries:
     subject_type: str
     subject_id: str
     metric_definition_id: str
+    metric_code: str
     metric_semantic_id: str
     metric_semantic_version: int
     comparison_key_hash: str
@@ -196,6 +201,7 @@ class M4PerformanceTrendSeries:
                 else None
             ),
             "metric_definition_id": self.metric_definition_id,
+            "metric_code": self.metric_code,
             "metric_semantic_id": self.metric_semantic_id,
             "metric_semantic_version": self.metric_semantic_version,
             "comparison_key_hash": self.comparison_key_hash,
@@ -214,7 +220,9 @@ class M4PerformanceTrendSeries:
             "trend_status": self.trend_status,
             "status": self.status,
             "reason_codes": list(self.reason_codes),
+            "trend_profile_id": self.trend_profile_id,
             "trend_profile_version": self.trend_profile_version,
+            "trend_profile_hash": self.trend_profile_hash,
             "input_hash": self.input_hash,
             "created_at": self.created_at_utc,
             "supersedes_trend_id": self.supersedes_trend_id,
@@ -595,6 +603,7 @@ def build_performance_trend_series(
     release_id: str,
     longitudinal_scope_id: str,
     metric_definition_id: str,
+    metric_code: str,
     metric_unit: str,
     scope: M4LongitudinalScope,
     samples: Sequence[M4LongitudinalSample],
@@ -605,6 +614,11 @@ def build_performance_trend_series(
     _uuid(release_id, field="release_id")
     _uuid(longitudinal_scope_id, field="longitudinal_scope_id")
     _uuid(metric_definition_id, field="metric_definition_id")
+    if not metric_code.strip():
+        raise M4LongitudinalError(
+            "M4_TREND_METRIC_CODE_REQUIRED",
+            metric_definition_id,
+        )
     _utc(created_at_utc, field="created_at_utc")
     if supersedes_trend_id is not None:
         _uuid(supersedes_trend_id, field="supersedes_trend_id")
@@ -745,6 +759,8 @@ def build_performance_trend_series(
             trend_id=trend_id,
             point_order=index,
             sample_id=item.sample_id,
+            source_release_id=item.release_id,
+            session_id=item.session_id,
             subject_type=item.subject_type,
             subject_id=item.subject_id,
             session_order=cast(int, item.session_order),
@@ -773,6 +789,7 @@ def build_performance_trend_series(
         subject_type=scope.subject_type,
         subject_id=scope.subject_id,
         metric_definition_id=metric_definition_id,
+        metric_code=metric_code,
         metric_semantic_id=scope.metric_semantic_id,
         metric_semantic_version=scope.metric_semantic_version,
         comparison_key_hash=scope.comparison_key_hash,
