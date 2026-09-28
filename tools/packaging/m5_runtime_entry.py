@@ -149,7 +149,9 @@ def _component_smoke(profile_id: str) -> dict[str, object]:
     finally:
         sqlite.close()
 
-    releases = {"runtime-probe": {"release_id": "runtime-probe", "status": "PASS"}}
+    releases: dict[str, dict[str, object]] = {
+        "runtime-probe": {"release_id": "runtime-probe", "status": "PASS"}
+    }
     app, headers = _app(profile_id, releases)
     with TestClient(app) as client:
         health = client.get("/health", headers=headers)

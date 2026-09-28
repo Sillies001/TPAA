@@ -365,7 +365,6 @@ def _profile_qualification(
         ready_seconds = max(ready_seconds, hold_ready_seconds)
 
         evidence_root = install / "build-evidence"
-        package_manifest = evidence_root / "package-manifest.json"
         build_manifest = _json(evidence_root / "build-manifest.json")
         required_names = cast(
             tuple[str, ...],

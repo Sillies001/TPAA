@@ -119,6 +119,8 @@ def _security(profile_id: str, *, service: bool) -> dict[str, object]:
         "sbom_spec_version": "1.6",
         "dependency_authority": "uv.lock",
         "native_dependency_manifest_present": True,
+        "severity_model": "CVSS_V3_1",
+        "unscored_advisory_count": 0,
         "unknown_unreviewed_license_count": 0,
         "critical_unwaived_count": 0,
         "high_unwaived_count": 0,
