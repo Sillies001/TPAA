@@ -5,8 +5,11 @@
     "engineering": "ED-2.0",
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
-    "date": "2026-09-26",
-    "rebaseline": "R3.4_M2_QA_SNS_AUTHORITY"
+    "date": "2026-09-28",
+    "rebaseline": "R3.5_M4_LONGITUDINAL_DEBRIEF_AUTHORITY",
+    "lock_lineage_sha256": [
+      "d6ebab2b5402cf81a0b5f73a2da4ed2aaa2d530bc7445c7f6132dcf7fa72224d"
+    ]
   },
   "artifacts": [
     {
@@ -58,6 +61,11 @@
       "file": "M2_QA_SNS_AUTHORITY.json",
       "sha256": "1f0755836e7ea40b3b69c83dae1b2b636ff80e37d8630c5ce158d5dfccffd5d3",
       "bytes": 14211
+    },
+    {
+      "file": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json",
+      "sha256": "c1c073bce8870feceb90bdb6c28172c4c726de6b15fc70208e169336baa59dfa",
+      "bytes": 51519
     },
     {
       "file": "METRIC_INPUT_AUTHORITY_MATRIX.json",

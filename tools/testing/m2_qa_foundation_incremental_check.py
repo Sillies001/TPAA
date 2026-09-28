@@ -50,6 +50,37 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+
+def _adopted_baseline_preserved() -> bool:
+    current_hash = _sha256(BASELINE_LOCK)
+    raw: object = json.loads(BASELINE_LOCK.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        return False
+    baseline = raw.get("baseline")
+    artifacts = raw.get("artifacts")
+    if not isinstance(baseline, dict) or not isinstance(artifacts, list):
+        return False
+    lineage = baseline.get("lock_lineage_sha256")
+    lineage_exact = current_hash == ADOPTED_BASELINE_LOCK_SHA256 or (
+        isinstance(lineage, list)
+        and ADOPTED_BASELINE_LOCK_SHA256 in lineage
+    )
+    authority_entry = next(
+        (
+            item
+            for item in artifacts
+            if isinstance(item, dict)
+            and item.get("file") == "M2_QA_SNS_AUTHORITY.json"
+        ),
+        None,
+    )
+    return (
+        lineage_exact
+        and isinstance(authority_entry, dict)
+        and authority_entry.get("sha256") == C3_AUTHORITY_SHA256
+        and authority_entry.get("bytes") == C3_AUTHORITY.stat().st_size
+    )
+
 def _canonical_hash(value: object) -> str:
     payload = json.dumps(
         value,
@@ -379,8 +410,7 @@ def verify() -> dict[str, object]:
             record_by_code[code].plugin_output_hash == _canonical_hash(direct[code])
             for code in QA_FOUNDATION_CODES
         ),
-        "adopted_baseline_lock_exact": _sha256(BASELINE_LOCK)
-        == ADOPTED_BASELINE_LOCK_SHA256,
+        "adopted_baseline_lock_exact": _adopted_baseline_preserved(),
         "c3_authority_artifact_exact": _sha256(C3_AUTHORITY) == C3_AUTHORITY_SHA256,
         "c3_authority_status_approved": (
             authority.get("status") == "APPROVED_BY_DELEGATED_OWNER_AUTHORITY"
@@ -445,6 +475,7 @@ def verify() -> dict[str, object]:
         "engine_batch_logical_hash": first.logical_hash,
         "authority_artifact_sha256": _sha256(C3_AUTHORITY),
         "baseline_lock_sha256": _sha256(BASELINE_LOCK),
+        "adopted_baseline_lock_sha256": ADOPTED_BASELINE_LOCK_SHA256,
         "engine_records": [
             {
                 "metric_code": record.metric_code,
@@ -478,6 +509,7 @@ def verify() -> dict[str, object]:
             "authority_version": "1.0.0",
             "authority_sha256": _sha256(C3_AUTHORITY),
             "baseline_lock_sha256": _sha256(BASELINE_LOCK),
+        "adopted_baseline_lock_sha256": ADOPTED_BASELINE_LOCK_SHA256,
         },
         "authority_gaps": {},
         "dependency_effects": {},

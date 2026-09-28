@@ -1,0 +1,314 @@
+{
+  "schema": "TPAA_M4_C3_LONGITUDINAL_DEBRIEF_GOLDEN_V1",
+  "authority_id": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY",
+  "authority_version": "1.0.0",
+  "authority_sha256": "c1c073bce8870feceb90bdb6c28172c4c726de6b15fc70208e169336baa59dfa",
+  "trend_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729",
+  "sample_aggregation": {
+    "case_id": "M4_SAMPLE_MEDIAN_VALID_WITH_NONVALID_SOURCE_V1",
+    "sources": [
+      {
+        "metric_instance_id": "00000000-0000-4000-8000-000000002001",
+        "status": "VALID",
+        "value_numeric": 8,
+        "coverage": 0.95,
+        "confidence": 0.9,
+        "episode_id": "00000000-0000-4000-8000-000000002101",
+        "reason_codes": []
+      },
+      {
+        "metric_instance_id": "00000000-0000-4000-8000-000000002002",
+        "status": "INSUFFICIENT_DATA",
+        "value_numeric": null,
+        "coverage": 0.5,
+        "confidence": 0.4,
+        "episode_id": "00000000-0000-4000-8000-000000002102",
+        "reason_codes": [
+          "SOURCE_GAP"
+        ]
+      },
+      {
+        "metric_instance_id": "00000000-0000-4000-8000-000000002003",
+        "status": "VALID",
+        "value_numeric": 2,
+        "coverage": 0.8,
+        "confidence": 0.7,
+        "episode_id": "00000000-0000-4000-8000-000000002103",
+        "reason_codes": []
+      },
+      {
+        "metric_instance_id": "00000000-0000-4000-8000-000000002004",
+        "status": "VALID",
+        "value_numeric": 5,
+        "coverage": 1,
+        "confidence": 0.85,
+        "episode_id": "00000000-0000-4000-8000-000000002104",
+        "reason_codes": []
+      }
+    ],
+    "expected": {
+      "value_numeric": 5,
+      "status": "VALID",
+      "reason_codes": [],
+      "coverage": 0.8,
+      "confidence": 0.7,
+      "source_episode_count": 3
+    }
+  },
+  "comparison_key": {
+    "canonical_input": {
+      "schema": "TPAA_M4_COMPARISON_KEY_V1",
+      "subject_type": "AIRCRAFT",
+      "subject_id": "00000000-0000-4000-8000-000000000101",
+      "configuration_key": "AIRCRAFT_CONFIG_SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "metric_semantic_id": "P1-AIR-001",
+      "metric_semantic_version": 1,
+      "catalog_version": "1.14.0",
+      "catalog_hash": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+      "scenario_id": "00000000-0000-4000-8000-000000000201",
+      "scenario_version": "SCENARIO-V1",
+      "syllabus_id": "SYLLABUS-A",
+      "syllabus_version": "1.0",
+      "training_type_set": [
+        "BASIC_FLIGHT",
+        "BVR",
+        "WVR"
+      ],
+      "location_or_range_id": "RANGE-A",
+      "unit_id": "00000000-0000-4000-8000-000000000301",
+      "role_model_version": "ROLE-V1",
+      "context_version": "CTX-V1",
+      "rule_set_version": "RULE-V1",
+      "reference_set_version": "REF-V1",
+      "metric_profile_version": "METRIC-PROFILE-V1",
+      "world_product_versions": {
+        "FLIGHT_KINEMATICS": "1.0.0",
+        "MISSION_CONTEXT": "1.0.0"
+      },
+      "metric_definition_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "plugin_name": "tpaa_metric.p1_air_001",
+      "plugin_version": "1.0.0",
+      "longitudinal_profile_id": "M4_P1_OBSERVED_TREND_V1",
+      "longitudinal_profile_version": "1.0.0",
+      "longitudinal_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+    },
+    "expected_hash": "afed31d1e75464cdb0dd08743ee8605744dc61621df7c4e588997cdf26eb0612",
+    "permutation_input": {
+      "schema": "TPAA_M4_COMPARISON_KEY_V1",
+      "subject_type": "AIRCRAFT",
+      "subject_id": "00000000-0000-4000-8000-000000000101",
+      "configuration_key": "AIRCRAFT_CONFIG_SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "metric_semantic_id": "P1-AIR-001",
+      "metric_semantic_version": 1,
+      "catalog_version": "1.14.0",
+      "catalog_hash": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+      "scenario_id": "00000000-0000-4000-8000-000000000201",
+      "scenario_version": "SCENARIO-V1",
+      "syllabus_id": "SYLLABUS-A",
+      "syllabus_version": "1.0",
+      "training_type_set": [
+        "WVR",
+        "BASIC_FLIGHT",
+        "BVR"
+      ],
+      "location_or_range_id": "RANGE-A",
+      "unit_id": "00000000-0000-4000-8000-000000000301",
+      "role_model_version": "ROLE-V1",
+      "context_version": "CTX-V1",
+      "rule_set_version": "RULE-V1",
+      "reference_set_version": "REF-V1",
+      "metric_profile_version": "METRIC-PROFILE-V1",
+      "world_product_versions": {
+        "FLIGHT_KINEMATICS": "1.0.0",
+        "MISSION_CONTEXT": "1.0.0"
+      },
+      "metric_definition_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "plugin_name": "tpaa_metric.p1_air_001",
+      "plugin_version": "1.0.0",
+      "longitudinal_profile_id": "M4_P1_OBSERVED_TREND_V1",
+      "longitudinal_profile_version": "1.0.0",
+      "longitudinal_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+    },
+    "material_change_input": {
+      "schema": "TPAA_M4_COMPARISON_KEY_V1",
+      "subject_type": "AIRCRAFT",
+      "subject_id": "00000000-0000-4000-8000-000000000101",
+      "configuration_key": "AIRCRAFT_CONFIG_SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "metric_semantic_id": "P1-AIR-001",
+      "metric_semantic_version": 1,
+      "catalog_version": "1.14.0",
+      "catalog_hash": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+      "scenario_id": "00000000-0000-4000-8000-000000000201",
+      "scenario_version": "SCENARIO-V2",
+      "syllabus_id": "SYLLABUS-A",
+      "syllabus_version": "1.0",
+      "training_type_set": [
+        "BASIC_FLIGHT",
+        "BVR",
+        "WVR"
+      ],
+      "location_or_range_id": "RANGE-A",
+      "unit_id": "00000000-0000-4000-8000-000000000301",
+      "role_model_version": "ROLE-V1",
+      "context_version": "CTX-V1",
+      "rule_set_version": "RULE-V1",
+      "reference_set_version": "REF-V1",
+      "metric_profile_version": "METRIC-PROFILE-V1",
+      "world_product_versions": {
+        "FLIGHT_KINEMATICS": "1.0.0",
+        "MISSION_CONTEXT": "1.0.0"
+      },
+      "metric_definition_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "plugin_name": "tpaa_metric.p1_air_001",
+      "plugin_version": "1.0.0",
+      "longitudinal_profile_id": "M4_P1_OBSERVED_TREND_V1",
+      "longitudinal_profile_version": "1.0.0",
+      "longitudinal_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+    },
+    "expected_material_change_hash": "c2dfa62aca57d5866bcd571f2035218b2ca4ae1991baafbcf899d8464aff3e2b"
+  },
+  "longitudinal_scope": {
+    "descriptor": {
+      "schema": "TPAA_M4_LONGITUDINAL_SCOPE_DESCRIPTOR_V1",
+      "subject_type": "AIRCRAFT",
+      "subject_id": "00000000-0000-4000-8000-000000000101",
+      "metric_semantic_id": "P1-AIR-001",
+      "metric_semantic_version": 1,
+      "comparison_key_hash": "afed31d1e75464cdb0dd08743ee8605744dc61621df7c4e588997cdf26eb0612",
+      "session_order_scope_id": "00000000-0000-4000-8000-000000000401",
+      "x_axis_semantics": "SESSION_ORDER",
+      "trend_profile_id": "M4_P1_OBSERVED_TREND_V1",
+      "trend_profile_version": "1.0.0",
+      "trend_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
+    },
+    "expected_descriptor_hash": "efe460211d9fb37d19a35f6ee9311fd92c4d4222c901920eeecebfdb7889d3d4",
+    "expected_longitudinal_scope_key": "efe460211d9fb37d19a35f6ee9311fd92c4d4222c901920eeecebfdb7889d3d4"
+  },
+  "trend": {
+    "case_id": "M4_TREND_EWMA_OLS_MAD_V1",
+    "points": [
+      {
+        "sample_id": "00000000-0000-4000-8000-000000001001",
+        "logical_content_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "session_order": 10,
+        "value": 100,
+        "status": "VALID"
+      },
+      {
+        "sample_id": "00000000-0000-4000-8000-000000001002",
+        "logical_content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "session_order": 15,
+        "value": null,
+        "status": "INSUFFICIENT_DATA"
+      },
+      {
+        "sample_id": "00000000-0000-4000-8000-000000001003",
+        "logical_content_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "session_order": 20,
+        "value": 104,
+        "status": "VALID"
+      },
+      {
+        "sample_id": "00000000-0000-4000-8000-000000001004",
+        "logical_content_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+        "session_order": 30,
+        "value": 103,
+        "status": "VALID"
+      },
+      {
+        "sample_id": "00000000-0000-4000-8000-000000001005",
+        "logical_content_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+        "session_order": 40,
+        "value": 109,
+        "status": "VALID"
+      },
+      {
+        "sample_id": "00000000-0000-4000-8000-000000001006",
+        "logical_content_hash": "6666666666666666666666666666666666666666666666666666666666666666",
+        "session_order": 50,
+        "value": 112,
+        "status": "VALID"
+      }
+    ],
+    "expected": {
+      "sample_count_total": 6,
+      "sample_count_valid": 5,
+      "current_value": 112,
+      "ewma_value": 106.83950617283952,
+      "slope": 0.29,
+      "slope_unit": "metric_unit/session_order",
+      "stability_mad": 4,
+      "trend_status": "INCREASING",
+      "status": "VALID",
+      "reason_codes": []
+    },
+    "input_manifest": {
+      "schema": "TPAA_M4_TREND_INPUT_MANIFEST_V1",
+      "comparison_key_hash": "afed31d1e75464cdb0dd08743ee8605744dc61621df7c4e588997cdf26eb0612",
+      "longitudinal_scope_key": "efe460211d9fb37d19a35f6ee9311fd92c4d4222c901920eeecebfdb7889d3d4",
+      "x_axis_semantics": "SESSION_ORDER",
+      "trend_profile_id": "M4_P1_OBSERVED_TREND_V1",
+      "trend_profile_version": "1.0.0",
+      "trend_profile_hash": "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729",
+      "samples": [
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001001",
+          "logical_content_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001002",
+          "logical_content_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001003",
+          "logical_content_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001004",
+          "logical_content_hash": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001005",
+          "logical_content_hash": "5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        {
+          "sample_id": "00000000-0000-4000-8000-000000001006",
+          "logical_content_hash": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
+      ],
+      "bridge_hashes": []
+    },
+    "expected_input_hash": "163d5f0c04bd298392a3936d5d334b162deb50668804ca228ec1cdd19b4f0de7"
+  },
+  "replay": {
+    "original_as_known": {
+      "base_release_id": "00000000-0000-4000-8000-000000003001",
+      "view_mode": "ORIGINAL_AS_KNOWN",
+      "retrospective_release_id": null,
+      "expected_release_ids": [
+        "00000000-0000-4000-8000-000000003001"
+      ]
+    },
+    "retrospective": {
+      "base_release_id": "00000000-0000-4000-8000-000000003001",
+      "view_mode": "RETROSPECTIVE",
+      "retrospective_release_id": "00000000-0000-4000-8000-000000003002",
+      "expected_release_ids": [
+        "00000000-0000-4000-8000-000000003001",
+        "00000000-0000-4000-8000-000000003002"
+      ]
+    }
+  },
+  "dto_contract_names": [
+    "DebriefAnnotationCommandDTO",
+    "DebriefAnnotationDTO",
+    "DebriefBundleDTO",
+    "DebriefQueryDTO",
+    "DebriefTimelineItemDTO",
+    "LongitudinalReleaseDTO",
+    "LongitudinalScopeDTO",
+    "LongitudinalTrendPointDTO",
+    "LongitudinalTrendQueryDTO",
+    "LongitudinalTrendSeriesDTO"
+  ]
+}
