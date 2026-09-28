@@ -209,7 +209,7 @@ def _fixture(source_revision: str) -> dict[str, object]:
             "published_at": "2026-09-28T12:10:30Z",
         }
     )
-    samples = [
+    samples: list[dict[str, object]] = [
         {
             "sample_id": sample_ids[i],
             "release_id": session_release_ids[i],
@@ -252,7 +252,7 @@ def _fixture(source_revision: str) -> dict[str, object]:
         }
         for i in range(3)
     ]
-    trend = {
+    trend: dict[str, object] = {
         "trend_id": trend_id,
         "release_id": longitudinal_release_id,
         "longitudinal_scope_id": scope_id,
@@ -284,7 +284,7 @@ def _fixture(source_revision: str) -> dict[str, object]:
         "created_at": "2026-09-28T12:10:15Z",
         "supersedes_trend_id": None,
     }
-    points = [
+    points: list[dict[str, object]] = [
         {
             "trend_id": trend_id,
             "point_order": i + 1,
@@ -479,13 +479,20 @@ def run(
     with tempfile.TemporaryDirectory(prefix="tpaa-m4-tst005-sqlite-") as tmp:
         sqlite_db = Path(tmp) / "tpaa.sqlite3"
         sqlite_bootstrap = bootstrap_sqlite(sqlite_db)
-        connection = sqlite3.connect(sqlite_db)
+        sqlite_connection = sqlite3.connect(sqlite_db)
         try:
-            connection.execute("PRAGMA foreign_keys = ON")
-            _seed(lambda table, row: _sqlite_insert(connection, table, row), fixture)
-            connection.commit()
+            sqlite_connection.execute("PRAGMA foreign_keys = ON")
+            _seed(
+                lambda table, row: _sqlite_insert(
+                    sqlite_connection,
+                    table,
+                    row,
+                ),
+                fixture,
+            )
+            sqlite_connection.commit()
         finally:
-            connection.close()
+            sqlite_connection.close()
         sqlite_membership = _stable_membership(_sqlite_membership(sqlite_db, release_id))
 
     client = PsqlClient(user=user, host=host, port=port, psql_executable=psql)
@@ -494,9 +501,19 @@ def run(
         postgres_bootstrap = bootstrap_postgres(client, database)
         conninfo = conninfo_template.format(database=database)
         import psycopg
-        with psycopg.connect(conninfo, autocommit=False) as connection:
-            _seed(lambda table, row: _postgres_insert(connection, table, row), fixture)
-            connection.commit()
+        with psycopg.connect(
+            conninfo,
+            autocommit=False,
+        ) as postgres_connection:
+            _seed(
+                lambda table, row: _postgres_insert(
+                    postgres_connection,
+                    table,
+                    row,
+                ),
+                fixture,
+            )
+            postgres_connection.commit()
         postgres_membership = _stable_membership(_postgres_membership(conninfo, release_id))
     finally:
         if _database_exists(client, admin_database, database):
@@ -514,7 +531,11 @@ def run(
         "postgres_frozen_core_1_6_0": postgres_bootstrap.schema_version == "1.6.0" and postgres_bootstrap.table_count == 77,
         "logical_membership_equal": sqlite_membership == postgres_membership,
         "logical_membership_hash_equal": sqlite_hash == postgres_hash,
-        "longitudinal_release_scope_exact": sqlite_membership["release"]["scope_type"] == "LONGITUDINAL",
+        "longitudinal_release_scope_exact": cast(
+            dict[str, object],
+            sqlite_membership["release"],
+        )["scope_type"]
+        == "LONGITUDINAL",
         "input_membership_exact_3": len(cast(list[object], sqlite_membership["inputs"])) == 3,
         "sample_membership_exact_3": len(cast(list[object], sqlite_membership["samples"])) == 3,
         "trend_series_exact_1": len(cast(list[object], sqlite_membership["trends"])) == 1,

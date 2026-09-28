@@ -277,7 +277,7 @@ def verify() -> dict[str, object]:
             else "FAIL_CLOSED_NOT_LONGITUDINAL_ELIGIBLE"
         )
         actual = _error_code(
-            lambda definition=definition, release=release, subject_id=subject_id: (
+            lambda definition=definition, release=release, subject_id=subject_id, configuration_key=configuration_key: (
                 build_longitudinal_sample(
                     authority=authority,
                     eligibility=eligibility,

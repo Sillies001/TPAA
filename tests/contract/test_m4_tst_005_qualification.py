@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 
 from tools.testing.m4_release_api_gui_storage_qualification import (
-    PRE_TST005_TASKS,
     PLATFORM_SCHEMA,
+    PRE_TST005_TASKS,
     check_platform,
     compare_platform,
 )
@@ -72,7 +72,8 @@ def test_m4_tst_005_platform_aggregation_and_compare(tmp_path: Path) -> None:
     assert windows["schema"] == PLATFORM_SCHEMA
     assert windows["status"] == "PASS"
     assert tuple(windows["logical_product"]["source_task_ids"]) == PRE_TST005_TASKS
-    wp=tmp_path/"windows.json"; lp=tmp_path/"linux.json"
+    wp = tmp_path / "windows.json"
+    lp = tmp_path / "linux.json"
     wp.write_text(json.dumps(windows),encoding="utf-8")
     lp.write_text(json.dumps(linux),encoding="utf-8")
     cross=compare_platform(wp,lp,expected_revision=revision)

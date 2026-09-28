@@ -172,18 +172,28 @@ def compare_platform(
     *,
     expected_revision: str,
 ) -> dict[str, object]:
-    w=_load(windows_path); l=_load(linux_path)
-    wp=cast(dict[str,object],w.get("logical_product",{}))
-    lp=cast(dict[str,object],l.get("logical_product",{}))
-    ws=dict(wp); ls=dict(lp); ws.pop("platform",None); ls.pop("platform",None)
+    windows = _load(windows_path)
+    linux = _load(linux_path)
+    windows_product = cast(
+        dict[str, object],
+        windows.get("logical_product", {}),
+    )
+    linux_product = cast(
+        dict[str, object],
+        linux.get("logical_product", {}),
+    )
+    windows_stable = dict(windows_product)
+    linux_stable = dict(linux_product)
+    windows_stable.pop("platform", None)
+    linux_stable.pop("platform", None)
     checks={
-        "schemas_exact":w.get("schema")==l.get("schema")==PLATFORM_SCHEMA,
-        "statuses_pass":w.get("status")==l.get("status")=="PASS",
-        "implementation_complete":w.get("implementation_complete") is True and l.get("implementation_complete") is True,
-        "revisions_exact":w.get("source_revision")==l.get("source_revision")==expected_revision,
-        "logical_product_equal":ws==ls,
-        "acceptance_equal":w.get("acceptance")==l.get("acceptance"),
-        "failed_acceptance_empty":w.get("failed_acceptance")==[] and l.get("failed_acceptance")==[],
+        "schemas_exact":windows.get("schema")==linux.get("schema")==PLATFORM_SCHEMA,
+        "statuses_pass":windows.get("status")==linux.get("status")=="PASS",
+        "implementation_complete":windows.get("implementation_complete") is True and linux.get("implementation_complete") is True,
+        "revisions_exact":windows.get("source_revision")==linux.get("source_revision")==expected_revision,
+        "logical_product_equal":windows_stable == linux_stable,
+        "acceptance_equal":windows.get("acceptance")==linux.get("acceptance"),
+        "failed_acceptance_empty":windows.get("failed_acceptance")==[] and linux.get("failed_acceptance")==[],
     }
     failed=sorted(k for k,v in checks.items() if v is not True)
     return {
@@ -194,7 +204,7 @@ def compare_platform(
         "implementation_complete":not failed,
         "task_complete":False,
         "source_revision":expected_revision,
-        "logical_product":ws,
+        "logical_product": windows_stable,
         "checks":checks,
         "failed_acceptance":failed,
     }
@@ -206,8 +216,9 @@ def qualify(
     storage_path: Path,
     expected_revision: str,
 ) -> dict[str, object]:
-    cross=_load(cross_path); storage=_load(storage_path)
-    cp=cast(dict[str,object],cross.get("logical_product",{}))
+    cross = _load(cross_path)
+    storage = _load(storage_path)
+    cp = cast(dict[str, object], cross.get("logical_product", {}))
     source_tasks=tuple(str(x) for x in cast(list[object],cp.get("source_task_ids",[])))
     storage_accept=cast(dict[str,object],storage.get("acceptance",{}))
     eligible=tuple(str(x) for x in cast(list[object],cp.get("eligible_codes",[])))
