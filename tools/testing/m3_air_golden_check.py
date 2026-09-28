@@ -35,6 +35,12 @@ def _mapping(value: object, *, field: str) -> dict[str, object]:
     return cast(dict[str, object], value)
 
 
+def _strings(value: object, *, field: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError(f"{field} must be a string list")
+    return tuple(cast(list[str], value))
+
+
 def _rows(value: object, *, field: str) -> list[dict[str, object]]:
     if not isinstance(value, list) or not all(
         isinstance(item, dict) and all(isinstance(key, str) for key in item)
@@ -194,7 +200,11 @@ def verify() -> dict[str, object]:
             and all(value is True for value in source_acceptance.values())
         ),
         "air_remainder_membership_exact_36": (
-            tuple(source_product.get("metric_codes", ())) == M3_AIR_CODES
+            _strings(
+                source_product.get("metric_codes"),
+                field="source.logical_product.metric_codes",
+            )
+            == M3_AIR_CODES
             and len(golden_outputs) == 36
         ),
         "numeric_goldens_exact_30_valid": (
