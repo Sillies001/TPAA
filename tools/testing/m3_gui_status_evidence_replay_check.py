@@ -58,7 +58,7 @@ def _table_rows(table: Any, columns: int) -> list[list[str]]:
 
 def _execution_hash(release_id: str, metric_code: str) -> str:
     return hashlib.sha256(
-        f"{release_id}:{metric_code}:execution".encode("utf-8")
+        f"{release_id}:{metric_code}:execution".encode()
     ).hexdigest()
 
 
@@ -337,7 +337,6 @@ def verify() -> dict[str, object]:
         acceptance[f"{key}_not_applicable_not_conflated_with_n_a"] = (
             "NOT_APPLICABLE" in row_kinds
             and "N_A" in row_kinds
-            and "NOT_APPLICABLE" != "N_A"
         )
         acceptance[f"{key}_historical_release_identity_exact"] = (
             replay_identity.text()
