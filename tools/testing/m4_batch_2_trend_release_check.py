@@ -407,6 +407,12 @@ def verify() -> dict[str, object]:
         )
     )
 
+    golden_ewma = golden_series.ewma_value
+    golden_slope = golden_series.slope
+    golden_mad = golden_series.stability_mad
+    if golden_ewma is None or golden_slope is None or golden_mad is None:
+        raise ValueError("golden trend numeric outputs missing")
+
     acceptance = {
         "trend_profile_authority_exact": (
             golden_series.trend_profile_id
@@ -426,19 +432,19 @@ def verify() -> dict[str, object]:
             golden_series.current_value == expected["current_value"]
         ),
         "golden_ewma_exact": math.isclose(
-            float(golden_series.ewma_value),
+            golden_ewma,
             float(expected["ewma_value"]),
             rel_tol=0.0,
             abs_tol=1e-12,
         ),
         "golden_slope_exact": math.isclose(
-            float(golden_series.slope),
+            golden_slope,
             float(expected["slope"]),
             rel_tol=0.0,
             abs_tol=1e-12,
         ),
         "golden_mad_exact": math.isclose(
-            float(golden_series.stability_mad),
+            golden_mad,
             float(expected["stability_mad"]),
             rel_tol=0.0,
             abs_tol=1e-12,
