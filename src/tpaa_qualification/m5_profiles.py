@@ -92,6 +92,7 @@ class M5QualificationAuthority:
     workload_profile: Mapping[str, Any]
     performance_resource_profile: Mapping[str, Any]
     security_release_readiness_profile: Mapping[str, Any]
+    package_lifecycle_profile: Mapping[str, Any]
     formal_release_acceptance_profile: Mapping[str, Any]
     profile_hashes: Mapping[str, str]
     fail_closed_error_codes: Mapping[str, str]
@@ -194,6 +195,9 @@ def _error_codes(value: object) -> Mapping[str, str]:
         "unsupported_profile",
         "hardware_below_minimum",
         "workload_mismatch",
+        "performance_threshold",
+        "security_acceptance",
+        "package_online_dependency",
         "release_evidence_incomplete",
         "m5_exit_not_go",
     }
@@ -250,6 +254,7 @@ def load_m5_qualification_authority(
                     "workload_profile",
                     "performance_resource_profile",
                     "security_release_readiness_profile",
+                    "package_lifecycle_profile",
                     "formal_release_acceptance_profile",
                     "profile_hashes",
                     "fail_closed_error_codes",
@@ -291,6 +296,7 @@ def load_m5_qualification_authority(
         payload["security_release_readiness_profile"],
         field="security_release_readiness_profile",
     )
+    package = _mapping(payload["package_lifecycle_profile"], field="package_lifecycle_profile")
     release = _mapping(
         payload["formal_release_acceptance_profile"],
         field="formal_release_acceptance_profile",
@@ -303,6 +309,7 @@ def load_m5_qualification_authority(
         "workload_profile_sha256": workload,
         "performance_profile_sha256": performance,
         "security_profile_sha256": security,
+        "package_profile_sha256": package,
         "release_acceptance_profile_sha256": release,
     }
     for hash_key, profile in expected_hashes.items():
@@ -460,6 +467,7 @@ def load_m5_qualification_authority(
         workload_profile=_frozen_mapping(workload),
         performance_resource_profile=_frozen_mapping(performance),
         security_release_readiness_profile=_frozen_mapping(security),
+        package_lifecycle_profile=_frozen_mapping(package),
         formal_release_acceptance_profile=_frozen_mapping(release),
         profile_hashes=hashes,
         fail_closed_error_codes=error_codes,
