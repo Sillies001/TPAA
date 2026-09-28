@@ -10,6 +10,8 @@ from .m1_publication import (
     M1PublishSessionCommand,
     M1PublishSessionResult,
 )
+from .m3_publication import M3PublicationService
+from .m3_workspace import project_m3_workspace
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -32,11 +34,13 @@ class ApplicationService:
         get_runtime_baseline_status: GetRuntimeBaselineStatus | None = None,
         job_control: M0JobControl | None = None,
         m1_publication: M1PublicationService | None = None,
+        m3_publication: M3PublicationService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
         self._job_control = job_control or M0JobControl()
         self._m1_publication = m1_publication
+        self._m3_publication = m3_publication
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -161,3 +165,29 @@ class ApplicationService:
             end_session_time_us=end_session_time_us,
             limit=limit,
         )
+
+
+    def _m3(self) -> M3PublicationService:
+        if self._m3_publication is None:
+            raise RuntimeError("M3 publication service is not configured")
+        return self._m3_publication
+
+    def m3_release(self, release_id: str) -> dict[str, object]:
+        return self._m3().release_summary(release_id)
+
+    def m3_metrics(self, release_id: str) -> list[dict[str, object]]:
+        return self._m3().metric_list(release_id)
+
+    def m3_metric(self, release_id: str, metric_code: str) -> dict[str, object]:
+        return self._m3().metric_detail(release_id, metric_code)
+
+    def m3_metric_evidence(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]:
+        return self._m3().metric_evidence(release_id, metric_code)
+
+    def m3_workspace(self, release_id: str) -> dict[str, object]:
+        release = self._m3().historical_release(release_id).release
+        return project_m3_workspace(release)

@@ -22,6 +22,18 @@ from .m2_workspace import (
     build_m2_metric_presentation_state,
     create_m2_foundation_workspace,
 )
+from .m3_workspace import (
+    M3_GUI_METRIC_COUNT,
+    M3_GUI_TRAINING_KEYS,
+    M3_GUI_TRAINING_PRESENTATION,
+    M3DesktopTransport,
+    M3FamilyNavigation,
+    M3TrainingNavigation,
+    M3WorkspaceNavigationError,
+    M3WorkspaceNavigationModel,
+    build_m3_workspace_navigation_model,
+    create_m3_workspace_navigation,
+)
 from .shell import PYSIDE6_DEPENDENCY_MISSING, GuiShellConfig, GuiShellError, run_gui
 
 __all__ = [
@@ -44,10 +56,20 @@ __all__ = [
     "M2FoundationNavigationItem",
     "M2FoundationNavigationModel",
     "M2MetricPresentationState",
+    "M3_GUI_METRIC_COUNT",
+    "M3_GUI_TRAINING_KEYS",
+    "M3_GUI_TRAINING_PRESENTATION",
+    "M3DesktopTransport",
+    "M3FamilyNavigation",
+    "M3TrainingNavigation",
+    "M3WorkspaceNavigationError",
+    "M3WorkspaceNavigationModel",
     "build_m2_foundation_navigation_model",
     "build_m2_metric_presentation_state",
+    "build_m3_workspace_navigation_model",
     "create_m1_workspace",
     "create_m2_foundation_workspace",
+    "create_m3_workspace_navigation",
     "diagnostics_lines",
     "run_desktop",
     "run_gui",

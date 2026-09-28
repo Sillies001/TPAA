@@ -198,6 +198,45 @@ jobs:
           uv run --locked python tools/testing/m3_runtime_closure_check.py check
           --evidence evidence/m3-met-009/${{ matrix.platform }}/runtime-closure.json
 
+      - name: Emit M3-OBS-001 publication routing evidence
+        run: >-
+          uv run --locked python tools/testing/m3_publication_routing_check.py check
+          --evidence evidence/m3-obs-001/${{ matrix.platform }}/publication-routing.json
+
+      - name: Emit M3-OBS-002 immutable Release evidence
+        run: >-
+          uv run --locked python tools/testing/m3_immutable_release_check.py check
+          --evidence evidence/m3-obs-002/${{ matrix.platform }}/immutable-release.json
+
+      - name: Emit M3-OBS-003 idempotent publication/replay evidence
+        run: >-
+          uv run --locked python tools/testing/m3_idempotent_publication_check.py check
+          --evidence evidence/m3-obs-003/${{ matrix.platform }}/publication-replay.json
+
+      - name: Emit M3-API-001 release-bound Metric/Evidence evidence
+        run: >-
+          uv run --locked python tools/testing/m3_api_release_query_check.py check
+          --evidence evidence/m3-api-001/${{ matrix.platform }}/release-query.json
+
+      - name: Emit M3-API-002 four-training workspace evidence
+        run: >-
+          uv run --locked python tools/testing/m3_api_workspace_check.py check
+          --evidence evidence/m3-api-002/${{ matrix.platform }}/workspace.json
+      - name: Emit M3-GUI-001 four-training Desktop navigation evidence
+        run: >-
+          uv run --locked python tools/testing/m3_gui_workspace_navigation_check.py check
+          --evidence evidence/m3-gui-001/${{ matrix.platform }}/workspace-navigation.json
+
+      - name: Emit M3-GUI-002 family/applicability presentation evidence
+        run: >-
+          uv run --locked python tools/testing/m3_gui_family_applicability_check.py check
+          --evidence evidence/m3-gui-002/${{ matrix.platform }}/family-applicability.json
+
+      - name: Emit M3-GUI-003 status/Evidence/historical replay evidence
+        run: >-
+          uv run --locked python tools/testing/m3_gui_status_evidence_replay_check.py check
+          --evidence evidence/m3-gui-003/${{ matrix.platform }}/status-evidence-replay.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -424,6 +463,14 @@ jobs:
             evidence/m3-met-007/${{ matrix.platform }}/datalink-remainder.json
             evidence/m3-met-008/${{ matrix.platform }}/fusion-remainder.json
             evidence/m3-met-009/${{ matrix.platform }}/runtime-closure.json
+            evidence/m3-obs-001/${{ matrix.platform }}/publication-routing.json
+            evidence/m3-obs-002/${{ matrix.platform }}/immutable-release.json
+            evidence/m3-obs-003/${{ matrix.platform }}/publication-replay.json
+            evidence/m3-api-001/${{ matrix.platform }}/release-query.json
+            evidence/m3-api-002/${{ matrix.platform }}/workspace.json
+            evidence/m3-gui-001/${{ matrix.platform }}/workspace-navigation.json
+            evidence/m3-gui-002/${{ matrix.platform }}/family-applicability.json
+            evidence/m3-gui-003/${{ matrix.platform }}/status-evidence-replay.json
             evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
             evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
             evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
@@ -635,6 +682,69 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m3-met-009-logical-equivalence.json
 
+      - name: Compare Windows and Linux M3-OBS-001 publication routing
+        run: >-
+          python tools/testing/m3_publication_routing_check.py compare
+          --windows downloaded/evidence/m3-obs-001/windows/publication-routing.json
+          --linux downloaded/evidence/m3-obs-001/linux/publication-routing.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-obs-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-OBS-002 immutable Release
+        run: >-
+          python tools/testing/m3_immutable_release_check.py compare
+          --windows downloaded/evidence/m3-obs-002/windows/immutable-release.json
+          --linux downloaded/evidence/m3-obs-002/linux/immutable-release.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-obs-002-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-OBS-003 publication/replay
+        run: >-
+          python tools/testing/m3_idempotent_publication_check.py compare
+          --windows downloaded/evidence/m3-obs-003/windows/publication-replay.json
+          --linux downloaded/evidence/m3-obs-003/linux/publication-replay.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-obs-003-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-API-001 release-bound Metric/Evidence
+        run: >-
+          python tools/testing/m3_api_release_query_check.py compare
+          --windows downloaded/evidence/m3-api-001/windows/release-query.json
+          --linux downloaded/evidence/m3-api-001/linux/release-query.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-api-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-API-002 four-training workspace
+        run: >-
+          python tools/testing/m3_api_workspace_check.py compare
+          --windows downloaded/evidence/m3-api-002/windows/workspace.json
+          --linux downloaded/evidence/m3-api-002/linux/workspace.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-api-002-logical-equivalence.json
+      - name: Compare Windows and Linux M3-GUI-001 Desktop navigation
+        run: >-
+          python tools/testing/m3_gui_workspace_navigation_check.py compare
+          --windows downloaded/evidence/m3-gui-001/windows/workspace-navigation.json
+          --linux downloaded/evidence/m3-gui-001/linux/workspace-navigation.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-gui-001-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-GUI-002 family/applicability presentation
+        run: >-
+          python tools/testing/m3_gui_family_applicability_check.py compare
+          --windows downloaded/evidence/m3-gui-002/windows/family-applicability.json
+          --linux downloaded/evidence/m3-gui-002/linux/family-applicability.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-gui-002-logical-equivalence.json
+
+      - name: Compare Windows and Linux M3-GUI-003 status/Evidence/historical replay
+        run: >-
+          python tools/testing/m3_gui_status_evidence_replay_check.py compare
+          --windows downloaded/evidence/m3-gui-003/windows/status-evidence-replay.json
+          --linux downloaded/evidence/m3-gui-003/linux/status-evidence-replay.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/cross-platform/m3-gui-003-logical-equivalence.json
+
       - name: Compare Windows and Linux M2-MET-001 general Metric Engine
         run: >-
           python tools/testing/m2_general_metric_engine_compare.py
@@ -843,6 +953,14 @@ jobs:
             evidence/cross-platform/m3-met-007-logical-equivalence.json
             evidence/cross-platform/m3-met-008-logical-equivalence.json
             evidence/cross-platform/m3-met-009-logical-equivalence.json
+            evidence/cross-platform/m3-obs-001-logical-equivalence.json
+            evidence/cross-platform/m3-obs-002-logical-equivalence.json
+            evidence/cross-platform/m3-obs-003-logical-equivalence.json
+            evidence/cross-platform/m3-api-001-logical-equivalence.json
+            evidence/cross-platform/m3-api-002-logical-equivalence.json
+            evidence/cross-platform/m3-gui-001-logical-equivalence.json
+            evidence/cross-platform/m3-gui-002-logical-equivalence.json
+            evidence/cross-platform/m3-gui-003-logical-equivalence.json
             evidence/cross-platform/m2-met-001-logical-equivalence.json
             evidence/cross-platform/m2-met-002-incremental-logical-equivalence.json
             evidence/cross-platform/m2-met-003-logical-equivalence.json
