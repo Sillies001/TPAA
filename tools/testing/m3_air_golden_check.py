@@ -62,6 +62,8 @@ def verify() -> dict[str, object]:
         _direct_outputs,
         _golden_inputs,
         _instance,
+    )
+    from tools.testing.m3_air_remainder_check import (
         verify as verify_air,
     )
     from tpaa_metric import (
