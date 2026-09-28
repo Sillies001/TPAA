@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
   m0-cross-platform:
@@ -264,6 +265,34 @@ jobs:
           --platform ${{ matrix.platform }}
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m3-tst-005/${{ matrix.platform }}/release-api-gui.json
+
+      - name: Emit M4 Batch 1 longitudinal sample evidence
+        run: >-
+          uv run --locked python tools/testing/m4_batch_1_longitudinal_sample_check.py
+          --evidence evidence/m4-batch-1/${{ matrix.platform }}/longitudinal-sample.json
+
+      - name: Emit M4 Batch 2 trend Release replay evidence
+        run: >-
+          uv run --locked python tools/testing/m4_batch_2_trend_release_check.py
+          --evidence evidence/m4-batch-2/${{ matrix.platform }}/trend-release.json
+
+      - name: Emit M4 Batch 3 API GUI Debrief evidence
+        run: >-
+          uv run --locked python tools/testing/m4_batch_3_api_gui_debrief_check.py
+          --evidence evidence/m4-batch-3/${{ matrix.platform }}/api-gui-debrief.json
+
+      - name: Emit M4-TST-004 exact 104/12 longitudinal coverage
+        run: >-
+          uv run --locked python tools/testing/m4_longitudinal_coverage_check.py
+          --evidence evidence/m4-tst-004/${{ matrix.platform }}/coverage.json
+
+      - name: Emit M4-TST-005 platform qualification
+        run: >-
+          uv run --locked python tools/testing/m4_release_api_gui_storage_qualification.py check
+          --evidence-root evidence
+          --platform ${{ matrix.platform }}
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m4-tst-005/${{ matrix.platform }}/platform.json
 
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
@@ -540,6 +569,20 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Upload M4 platform evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m4-platform-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/m4-batch-1/${{ matrix.platform }}/longitudinal-sample.json
+            evidence/m4-batch-2/${{ matrix.platform }}/trend-release.json
+            evidence/m4-batch-3/${{ matrix.platform }}/api-gui-debrief.json
+            evidence/m4-tst-004/${{ matrix.platform }}/coverage.json
+            evidence/m4-tst-005/${{ matrix.platform }}/platform.json
+          if-no-files-found: error
+          retention-days: 30
+
   m0-logical-equivalence:
     name: M0 logical equivalence
     needs: m0-cross-platform
@@ -563,6 +606,21 @@ jobs:
           pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded
           merge-multiple: true
+
+      - name: Download M4 platform evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-m4-platform-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/m4
+          merge-multiple: true
+
+      - name: Compare Windows and Linux M4-TST-005 platform evidence
+        run: >-
+          python tools/testing/m4_release_api_gui_storage_qualification.py compare
+          --windows downloaded/m4/m4-tst-005/windows/platform.json
+          --linux downloaded/m4/m4-tst-005/linux/platform.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m4-tst-005/logical-equivalence.json
 
       - name: Compare Windows and Linux logical products
         run: >-
@@ -1074,6 +1132,15 @@ jobs:
           retention-days: 14
 
 
+      - name: Upload M4 logical-equivalence evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m4-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m4-tst-005/logical-equivalence.json
+          if-no-files-found: error
+          retention-days: 30
+
   m0-exit-postgres:
     name: M0 Exit PostgreSQL
     runs-on: ubuntu-24.04
@@ -1158,6 +1225,18 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m3-tst-005/postgres/storage-parity.json
 
+      - name: Emit M4-TST-005 SQLite PostgreSQL longitudinal Release parity
+        run: >-
+          uv run --locked python tools/testing/m4_longitudinal_storage_parity.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_m4_tst_005_storage_parity
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m4-tst-005/postgres/storage-parity.json
+
       - name: Cold-start full M0 with live PostgreSQL
         run: >-
           uv run --locked python tools/ci/cold_start.py
@@ -1193,6 +1272,15 @@ jobs:
         with:
           name: tpaa-m3-tst-005-storage-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m3-tst-005/postgres/storage-parity.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload M4-TST-005 storage parity evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m4-tst-005-storage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m4-tst-005/postgres/storage-parity.json
           if-no-files-found: error
           retention-days: 30
 
@@ -1290,6 +1378,139 @@ jobs:
         with:
           name: tpaa-m3-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m3-tst-005/qualification.json
+          if-no-files-found: error
+          retention-days: 30
+
+  m4-tst-005-review:
+    name: M4-TST-005 Longitudinal Cross-platform Storage Qualification
+    needs:
+      - m0-logical-equivalence
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download M4 cross-platform qualification
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m4-logical-equivalence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/logical
+
+      - name: Download M4 longitudinal storage parity
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m4-tst-005-storage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/storage
+
+      - name: Qualify M4 exact-release cross-platform storage
+        run: >-
+          python tools/testing/m4_release_api_gui_storage_qualification.py qualify
+          --cross-platform downloaded/logical/logical-equivalence.json
+          --storage downloaded/storage/storage-parity.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/m4-tst-005/qualification.json
+
+      - name: Upload M4-TST-005 qualification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m4-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m4-tst-005/qualification.json
+          if-no-files-found: error
+          retention-days: 30
+
+  m4-exit-review:
+    name: M4 Exit Review
+    needs:
+      - m4-tst-005-review
+      - m0-cross-platform
+      - m0-logical-equivalence
+      - m0-exit-postgres
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Download Windows Linux cold-start evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-ci-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/platform
+          merge-multiple: true
+
+      - name: Download M4-TST-005 qualification
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m4-tst-005-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/tst005
+
+      - name: Download PostgreSQL cold-start evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m0-exit-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/postgres
+
+      - name: Fetch C3 issue 122 state
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          url = f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/issues/122"
+          request = urllib.request.Request(
+              url,
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              payload = json.load(response)
+          os.makedirs("evidence/m4-exit", exist_ok=True)
+          with open("evidence/m4-exit/c3-issue.json", "w", encoding="utf-8") as handle:
+              json.dump(payload, handle, indent=2, sort_keys=True)
+              handle.write("\n")
+          PY
+
+      - name: Review exact M4 task inventory and Exit gate
+        run: >-
+          python tools/testing/m4_exit_review.py
+          --platform-artifact-root downloaded/platform/evidence
+          --qualification downloaded/tst005/qualification.json
+          --postgres-cold-start downloaded/postgres/postgres-cold-start.json
+          --c3-issue evidence/m4-exit/c3-issue.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --event-name ${{ github.event_name }}
+          --git-ref ${{ github.ref }}
+          --output evidence/m4-exit/review.json
+
+      - name: Upload M4 Exit review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m4-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m4-exit/
           if-no-files-found: error
           retention-days: 30
 
