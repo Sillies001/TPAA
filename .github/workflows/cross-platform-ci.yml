@@ -294,6 +294,12 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m4-tst-005/${{ matrix.platform }}/platform.json
 
+      - name: Emit M5 Batch 1 qualification profile substrate
+        run: >-
+          uv run --locked python tools/testing/m5_batch_1_qualification_profile_check.py
+          --platform ${{ matrix.platform }}
+          --evidence evidence/m5-batch-1/${{ matrix.platform }}/qualification-profile.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -580,6 +586,15 @@ jobs:
             evidence/m4-batch-3/${{ matrix.platform }}/api-gui-debrief.json
             evidence/m4-tst-004/${{ matrix.platform }}/coverage.json
             evidence/m4-tst-005/${{ matrix.platform }}/platform.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload M5 Batch 1 platform evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m5-batch-1-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m5-batch-1/${{ matrix.platform }}/qualification-profile.json
           if-no-files-found: error
           retention-days: 30
 
