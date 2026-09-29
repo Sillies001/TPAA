@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from tools.testing.m5_batch_3_release_candidate_review import _profiles
-
 from tpaa_qualification import (
     M5QualificationError,
     load_m5_qualification_authority,
