@@ -1,5 +1,11 @@
 """M5 P1 formal qualification substrate."""
 
+from .m5_batch2 import (
+    validate_four_profile_candidate,
+    validate_package_qualification,
+    validate_performance_measurements,
+    validate_security_qualification,
+)
 from .m5_profiles import (
     M5CertificationProfile,
     M5QualificationAuthority,
@@ -26,4 +32,8 @@ __all__ = [
     "validate_m5_formal_claim_prerequisites",
     "validate_result_binding",
     "validate_target_hardware",
+    "validate_four_profile_candidate",
+    "validate_package_qualification",
+    "validate_performance_measurements",
+    "validate_security_qualification",
 ]

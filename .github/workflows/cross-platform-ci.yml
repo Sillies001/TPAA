@@ -300,6 +300,15 @@ jobs:
           --platform ${{ matrix.platform }}
           --evidence evidence/m5-batch-1/${{ matrix.platform }}/qualification-profile.json
 
+      - name: Execute M5 Batch 2 offline package performance security qualification
+        env:
+          TPAA_M5_STORAGE_CLASS: SSD
+        run: >-
+          uv run --locked python tools/testing/m5_batch_2_qualification.py
+          --platform ${{ matrix.platform }}
+          --package-output dist/m5/${{ matrix.platform }}
+          --evidence evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -598,6 +607,17 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Upload M5 Batch 2 qualification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m5-batch-2-evidence-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
+            dist/m5/${{ matrix.platform }}/*.summary.json
+          if-no-files-found: error
+          retention-days: 30
+
   m0-logical-equivalence:
     name: M0 logical equivalence
     needs: m0-cross-platform
@@ -627,6 +647,13 @@ jobs:
         with:
           pattern: tpaa-m4-platform-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/m4
+          merge-multiple: true
+
+      - name: Download M5 Batch 2 platform evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: tpaa-m5-batch-2-evidence-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/m5-batch-2
           merge-multiple: true
 
       - name: Compare Windows and Linux M4-TST-005 platform evidence
@@ -1073,6 +1100,23 @@ jobs:
           --linux downloaded/evidence/m1-batch-4/linux/platform.json
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/cross-platform/m1-batch-4-logical-equivalence.json
+
+      - name: Review M5 Batch 2 exact four-profile same-candidate qualification
+        run: >-
+          python tools/testing/m5_batch_2_cross_profile_review.py
+          --windows downloaded/m5-batch-2/evidence/m5-batch-2/windows/qualification.json
+          --linux downloaded/m5-batch-2/evidence/m5-batch-2/linux/qualification.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --output evidence/m5-batch-2/four-profile-review.json
+
+      - name: Upload M5 Batch 2 four-profile review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m5-batch-2-four-profile-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m5-batch-2/four-profile-review.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
