@@ -141,7 +141,7 @@ def review(
     }
     failed = sorted(key for key, value in acceptance.items() if value is not True)
 
-    completed_manifest = {
+    completed_manifest: dict[str, Any] = {
         "schema": "TPAA_M5_COMPLETED_RC_MANIFEST_V1",
         "source_revision": expected_revision,
         "semantic_build_version": rc.get("semantic_build_version"),
