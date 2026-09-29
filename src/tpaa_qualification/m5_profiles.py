@@ -93,6 +93,7 @@ class M5QualificationAuthority:
     performance_resource_profile: Mapping[str, Any]
     security_release_readiness_profile: Mapping[str, Any]
     package_lifecycle_profile: Mapping[str, Any]
+    upgrade_backup_restore_profile: Mapping[str, Any]
     formal_release_acceptance_profile: Mapping[str, Any]
     profile_hashes: Mapping[str, str]
     fail_closed_error_codes: Mapping[str, str]
@@ -198,7 +199,10 @@ def _error_codes(value: object) -> Mapping[str, str]:
         "performance_threshold",
         "security_acceptance",
         "package_online_dependency",
+        "upgrade_rollback",
+        "backup_restore",
         "release_evidence_incomplete",
+        "signoff_missing_or_not_distinct",
         "m5_exit_not_go",
     }
     missing = sorted(required - set(result))
@@ -255,6 +259,7 @@ def load_m5_qualification_authority(
                     "performance_resource_profile",
                     "security_release_readiness_profile",
                     "package_lifecycle_profile",
+                    "upgrade_backup_restore_profile",
                     "formal_release_acceptance_profile",
                     "profile_hashes",
                     "fail_closed_error_codes",
@@ -297,6 +302,10 @@ def load_m5_qualification_authority(
         field="security_release_readiness_profile",
     )
     package = _mapping(payload["package_lifecycle_profile"], field="package_lifecycle_profile")
+    recovery = _mapping(
+        payload["upgrade_backup_restore_profile"],
+        field="upgrade_backup_restore_profile",
+    )
     release = _mapping(
         payload["formal_release_acceptance_profile"],
         field="formal_release_acceptance_profile",
@@ -310,6 +319,7 @@ def load_m5_qualification_authority(
         "performance_profile_sha256": performance,
         "security_profile_sha256": security,
         "package_profile_sha256": package,
+        "recovery_profile_sha256": recovery,
         "release_acceptance_profile_sha256": release,
     }
     for hash_key, profile in expected_hashes.items():
@@ -468,6 +478,7 @@ def load_m5_qualification_authority(
         performance_resource_profile=_frozen_mapping(performance),
         security_release_readiness_profile=_frozen_mapping(security),
         package_lifecycle_profile=_frozen_mapping(package),
+        upgrade_backup_restore_profile=_frozen_mapping(recovery),
         formal_release_acceptance_profile=_frozen_mapping(release),
         profile_hashes=hashes,
         fail_closed_error_codes=error_codes,

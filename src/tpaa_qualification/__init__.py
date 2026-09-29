@@ -6,6 +6,13 @@ from .m5_batch2 import (
     validate_performance_measurements,
     validate_security_qualification,
 )
+from .m5_batch3 import (
+    validate_backup_restore_qualification,
+    validate_formal_rc_candidate,
+    validate_release_signoffs,
+    validate_signoff_contract,
+    validate_upgrade_rollback_qualification,
+)
 from .m5_profiles import (
     M5CertificationProfile,
     M5QualificationAuthority,
@@ -36,4 +43,9 @@ __all__ = [
     "validate_package_qualification",
     "validate_performance_measurements",
     "validate_security_qualification",
+    "validate_backup_restore_qualification",
+    "validate_formal_rc_candidate",
+    "validate_release_signoffs",
+    "validate_signoff_contract",
+    "validate_upgrade_rollback_qualification",
 ]
