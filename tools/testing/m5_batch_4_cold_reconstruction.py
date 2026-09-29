@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -234,20 +235,59 @@ def reconstruct(
             package = output_dir / package_name
             if not package.is_file():
                 raise RuntimeError(f"{profile_id}: reconstructed package missing")
-            exact_package = (
-                summary.get("source_revision") == expected_revision
-                and summary.get("semantic_build_version")
-                == expected.get("semantic_build_version")
-                and summary.get("package_sha256")
-                == package_expected.get("package_sha256")
-                and summary.get("package_manifest_sha256")
-                == package_expected.get("package_manifest_sha256")
-            )
-            if not exact_package:
-                raise RuntimeError(f"{profile_id}: deterministic package mismatch")
+            if (
+                summary.get("source_revision") != expected_revision
+                or summary.get("semantic_build_version")
+                != expected.get("semantic_build_version")
+                or summary.get("profile_id") != profile_id
+                or summary.get("package_form") != package_expected.get("package_form")
+            ):
+                raise RuntimeError(f"{profile_id}: reconstructed package summary identity mismatch")
 
             install = temp / "install" / profile_id
             _extract(package, install)
+            package_manifest = _json(
+                install / "build-evidence" / "package-manifest.json"
+            )
+            expected_security = cast(dict[str, Any], expected["security"])
+            dependency_lock_sha256 = hashlib.sha256(
+                (clone / "uv.lock").read_bytes()
+            ).hexdigest()
+            manifest_files = package_manifest.get("files")
+            if not isinstance(manifest_files, list) or not manifest_files:
+                raise RuntimeError(f"{profile_id}: reconstructed package inventory missing")
+            manifest_paths = [
+                str(cast(dict[str, Any], row).get("path"))
+                for row in manifest_files
+                if isinstance(row, dict)
+            ]
+            manifest_identity_exact = (
+                package_manifest.get("schema") == "TPAA_M5_PACKAGE_MANIFEST_V1"
+                and package_manifest.get("qualification")
+                == "M5_CANDIDATE_NOT_FORMALLY_QUALIFIED"
+                and package_manifest.get("formal_release_claimed") is False
+                and package_manifest.get("source_revision") == expected_revision
+                and package_manifest.get("semantic_build_version")
+                == expected.get("semantic_build_version")
+                and package_manifest.get("profile_id") == profile_id
+                and package_manifest.get("package_form")
+                == package_expected.get("package_form")
+                and package_manifest.get("m5_authority_sha256")
+                == authority.authority_sha256
+                and package_manifest.get("baseline_lock_sha256")
+                == authority.baseline_lock_sha256
+                and package_manifest.get("dependency_lock_sha256")
+                == dependency_lock_sha256
+                and package_manifest.get("dependency_lock_sha256")
+                == expected_security.get("dependency_lock_sha256")
+                and len(manifest_paths) == len(manifest_files)
+                and len(set(manifest_paths)) == len(manifest_paths)
+            )
+            if not manifest_identity_exact:
+                raise RuntimeError(
+                    f"{profile_id}: reconstructed package manifest logical identity mismatch"
+                )
+
             ready = _run_bundle(
                 install,
                 platform_name=platform_name,
@@ -301,7 +341,20 @@ def reconstruct(
 
             reconstructed[profile_id] = {
                 "package_sha256": summary["package_sha256"],
+                "batch2_package_sha256": package_expected["package_sha256"],
+                "archive_bytes_match_batch2": (
+                    summary["package_sha256"] == package_expected["package_sha256"]
+                ),
                 "package_manifest_sha256": summary["package_manifest_sha256"],
+                "batch2_package_manifest_sha256": package_expected[
+                    "package_manifest_sha256"
+                ],
+                "package_manifest_bytes_match_batch2": (
+                    summary["package_manifest_sha256"]
+                    == package_expected["package_manifest_sha256"]
+                ),
+                "package_manifest_logical_identity_exact": manifest_identity_exact,
+                "archive_rule": authority.package_lifecycle_profile["archive_rule"],
                 "ready": "PASS",
                 "component_smoke": "PASS",
                 "replay_workload_smoke": "PASS",
@@ -318,12 +371,14 @@ def reconstruct(
                 clone / "baseline" / "CB-1.4.0" / "BASELINE_LOCK.json"
             ).is_file(),
             "exact_two_platform_profiles": tuple(reconstructed) == expected_profiles,
-            "deterministic_packages_exact": all(
-                row["package_sha256"]
-                == cast(dict[str, Any], profiles[profile_id]["package"])[
-                    "package_sha256"
-                ]
-                for profile_id, row in reconstructed.items()
+            "c3_archive_rule_exact": authority.package_lifecycle_profile["archive_rule"]
+            == (
+                "Archive bytes may differ by OS/profile; package manifest logical identities "
+                "and governed source/dependency/baseline hashes must remain exact."
+            ),
+            "package_manifest_logical_identity_exact": all(
+                row["package_manifest_logical_identity_exact"] is True
+                for row in reconstructed.values()
             ),
             "clean_install_readiness_component_replay_pass": all(
                 row["ready"] == row["component_smoke"] == row["replay_workload_smoke"]
@@ -355,6 +410,8 @@ def reconstruct(
             "scope": {
                 "clean_source_baseline_locked_dependency_reconstruction": True,
                 "network_used_for_dependency_sync": False,
+                "archive_byte_identity_used_as_release_gate": False,
+                "package_manifest_logical_identity_gate": True,
                 "p1_only": True,
                 "p2_p6_inactive": True,
                 "db_schema_version": authority.db_schema_version,

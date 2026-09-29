@@ -56,3 +56,17 @@ def test_m5_batch_4_workflow_preserves_fourteen_job_topology() -> None:
     assert text.count("\n  m0-cross-platform:") == 1
     assert text.count("\n  m0-logical-equivalence:") == 1
     assert text.count("\n  m4-exit-review:") == 1
+
+
+def test_m5_batch_4_cold_reconstruction_follows_c3_archive_rule() -> None:
+    authority = load_m5_qualification_authority(BASELINE)
+    assert authority.package_lifecycle_profile["archive_rule"] == (
+        "Archive bytes may differ by OS/profile; package manifest logical identities "
+        "and governed source/dependency/baseline hashes must remain exact."
+    )
+    source = (
+        ROOT / "tools" / "testing" / "m5_batch_4_cold_reconstruction.py"
+    ).read_text(encoding="utf-8")
+    assert '"deterministic_packages_exact"' not in source
+    assert '"package_manifest_logical_identity_exact"' in source
+    assert '"archive_byte_identity_used_as_release_gate": False' in source
