@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -8,10 +9,24 @@ ROOT = Path(__file__).resolve().parents[2]
 SDIB_DIR = ROOT / "docs" / "baseline" / "SDIB-1.5"
 SDIB = SDIB_DIR / "TPAA_软件开发实施基线_SDIB-1.5.md"
 M6_TASKS = SDIB_DIR / "M6_TASK_BASELINE.json"
+SOURCE_HASHES = SDIB_DIR / "SDIB-1.5_SOURCE_BASELINE.sha256"
 MILESTONES = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "DEVELOPMENT_MILESTONE_REGISTRY.json"
 CAPABILITY = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "CAPABILITY_PHASE_REGISTRY.json"
 EXTENSION = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "EXTENSION_CONTRACT_REGISTRY.json"
 CORE = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "CORE_LOGICAL_MODEL.json"
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _source_hashes() -> dict[str, str]:
+    result: dict[str, str] = {}
+    for line in SOURCE_HASHES.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            digest, filename = line.split(maxsplit=1)
+            result[filename] = digest
+    return result
+
 
 EXPECTED_WORKSTREAMS = {
     "WS-CAPABILITY",
@@ -28,6 +43,9 @@ def test_sdib_1_5_version_and_scope() -> None:
     assert "**Software Development Implementation Baseline — SDIB-1.5**" in text
     assert "M6 — P2 Attribution Activation" in text
     assert "one-milestone-ahead rolling design" in text
+    hashes = _source_hashes()
+    assert hashes[SDIB.name] == _sha256(SDIB)
+    assert hashes[M6_TASKS.name] == _sha256(M6_TASKS)
 
 
 def test_m6_task_manifest_is_exact_and_batched_once() -> None:
