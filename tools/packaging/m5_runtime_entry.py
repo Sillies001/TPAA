@@ -248,7 +248,15 @@ def _rss_mib() -> float:
         if windll is None:
             raise RuntimeError("Windows ctypes windll unavailable")
         get_process = windll.kernel32.GetCurrentProcess
+        get_process.argtypes = []
+        get_process.restype = wintypes.HANDLE
         get_info = windll.psapi.GetProcessMemoryInfo
+        get_info.argtypes = [
+            wintypes.HANDLE,
+            ctypes.POINTER(ProcessMemoryCounters),
+            wintypes.DWORD,
+        ]
+        get_info.restype = wintypes.BOOL
         if not get_info(get_process(), ctypes.byref(counters), counters.cb):
             raise RuntimeError("GetProcessMemoryInfo failed")
         return float(counters.PeakWorkingSetSize) / (1024.0 * 1024.0)
