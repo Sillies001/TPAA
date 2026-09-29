@@ -83,6 +83,7 @@ def _binding(
     version: str,
     artifact: str,
     obj: str,
+    schema_version: str,
 ) -> P2ArtifactBinding:
     return P2ArtifactBinding(
         context_artifact_id=artifact,
@@ -90,6 +91,7 @@ def _binding(
         artifact_kind=kind,
         logical_key=key,
         artifact_version=version,
+        schema_version=schema_version,
         artifact_sha256=H,
         status="ACTIVE",
         sealed=True,
@@ -106,17 +108,19 @@ def _inputs(
 ]:
     feature = _binding(
         policy.feature_artifact_kind,
-        key="P2_FEATURE_SPEC_TEST",
+        key="P2_FACTOR_FEATURE_SPEC:TEST",
         version="1.0.0",
         artifact=U["feature_artifact"],
         obj=U["feature_object"],
+        schema_version=policy.feature_schema_version,
     )
     reference_binding = _binding(
         policy.reference_artifact_kind,
-        key="P2_REFERENCE_TEST",
+        key="P2_REFERENCE_CONDITION:TEST",
         version="1.0.0",
         artifact=U["reference"],
         obj=U["reference_object"],
+        schema_version=policy.reference_schema_version,
     )
     reference = P2ReferenceCondition(
         reference_condition_id=U["reference"],
@@ -149,13 +153,14 @@ def _inputs(
     )
     attribution_binding = _binding(
         policy.attribution_artifact_kind,
-        key="P2_ATTRIBUTION_TEST",
+        key="P2_ATTRIBUTION_SPEC:TEST",
         version="1.0.0",
         artifact=U["attribution_artifact"],
         obj=U["attribution_object"],
+        schema_version=policy.attribution_schema_version,
     )
     spec = P2AttributionSpec(
-        attribution_spec_id="P2_ATTRIBUTION_TEST",
+        attribution_spec_id="P2_ATTRIBUTION_SPEC:TEST",
         attribution_spec_version="1.0.0",
         model_plugin="test-model",
         model_plugin_version="1.0.0",
@@ -257,6 +262,18 @@ def test_m6_batch1_rejects_stale_or_default_spec(
             policy=policy,
         )
     assert stale.value.code == "FAIL_CLOSED_P2_CURRENT_LATEST_FORBIDDEN"
+
+    with pytest.raises(P2GovernanceError) as wrong_schema:
+        build_p2_input_bundle(
+            target=_target(),
+            feature_spec=replace(feature, schema_version="WRONG_SCHEMA"),
+            reference_condition=reference,
+            cohort=cohort,
+            attribution_spec=spec,
+            as_of_utc="2026-09-03T00:00:00Z",
+            policy=policy,
+        )
+    assert wrong_schema.value.code == "FAIL_CLOSED_P2_FEATURE_SPEC_REQUIRED"
 
 
 def test_m6_batch1_p1_no_overwrite_and_causal_boundary(

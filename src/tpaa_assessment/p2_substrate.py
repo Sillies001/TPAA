@@ -51,9 +51,15 @@ class P2AuthorityPolicy:
     required_release_status: str
     required_eligibility_status: str
     feature_artifact_kind: str
+    feature_logical_key_prefix: str
+    feature_schema_version: str
     reference_artifact_kind: str
+    reference_logical_key_prefix: str
+    reference_schema_version: str
     cohort_snapshot_type: str
     attribution_artifact_kind: str
+    attribution_logical_key_prefix: str
+    attribution_schema_version: str
     minimum_comparability_dimensions: tuple[str, ...]
     identifiability_statuses: tuple[str, ...]
     not_identifiable_reason_codes: frozenset[str]
@@ -132,9 +138,25 @@ class P2AuthorityPolicy:
                 feature.get("artifact_kind"),
                 field="feature_spec_contract.artifact_kind",
             ),
+            feature_logical_key_prefix=_text(
+                feature.get("logical_key_prefix"),
+                field="feature_spec_contract.logical_key_prefix",
+            ),
+            feature_schema_version=_text(
+                feature.get("artifact_schema_version"),
+                field="feature_spec_contract.artifact_schema_version",
+            ),
             reference_artifact_kind=_text(
                 reference.get("artifact_kind"),
                 field="reference_condition_contract.artifact_kind",
+            ),
+            reference_logical_key_prefix=_text(
+                reference.get("logical_key_prefix"),
+                field="reference_condition_contract.logical_key_prefix",
+            ),
+            reference_schema_version=_text(
+                reference.get("artifact_schema_version"),
+                field="reference_condition_contract.artifact_schema_version",
             ),
             cohort_snapshot_type=_text(
                 cohort.get("snapshot_type"),
@@ -143,6 +165,14 @@ class P2AuthorityPolicy:
             attribution_artifact_kind=_text(
                 attribution.get("artifact_kind"),
                 field="attribution_spec_contract.artifact_kind",
+            ),
+            attribution_logical_key_prefix=_text(
+                attribution.get("logical_key_prefix"),
+                field="attribution_spec_contract.logical_key_prefix",
+            ),
+            attribution_schema_version=_text(
+                attribution.get("artifact_schema_version"),
+                field="attribution_spec_contract.artifact_schema_version",
             ),
             minimum_comparability_dimensions=_strings(
                 cohort.get("minimum_comparability_dimensions"),
@@ -285,6 +315,7 @@ class P2ArtifactBinding:
     artifact_kind: str
     logical_key: str
     artifact_version: str
+    schema_version: str
     artifact_sha256: str
     status: str
     sealed: bool
@@ -417,6 +448,8 @@ def _validate_binding(
     binding: P2ArtifactBinding,
     *,
     expected_kind: str,
+    expected_prefix: str,
+    expected_schema: str,
     error_code: str,
     policy: P2AuthorityPolicy,
 ) -> P2ArtifactBinding:
@@ -424,9 +457,12 @@ def _validate_binding(
     _uuid(binding.object_ref_id, field="object_ref_id", policy=policy)
     _exact(binding.logical_key, field="logical_key", policy=policy)
     _exact(binding.artifact_version, field="artifact_version", policy=policy)
+    _exact(binding.schema_version, field="schema_version", policy=policy)
     _hash64(binding.artifact_sha256, field="artifact_sha256")
     if (
         binding.artifact_kind != expected_kind
+        or not binding.logical_key.startswith(expected_prefix)
+        or binding.schema_version != expected_schema
         or binding.status != "ACTIVE"
         or not binding.sealed
     ):
@@ -448,6 +484,8 @@ def validate_reference_condition(
     _validate_binding(
         value.binding,
         expected_kind=p.reference_artifact_kind,
+        expected_prefix=p.reference_logical_key_prefix,
+        expected_schema=p.reference_schema_version,
         error_code="FAIL_CLOSED_P2_REFERENCE_CONDITION_REQUIRED",
         policy=p,
     )
@@ -468,6 +506,8 @@ def validate_attribution_spec(
     _validate_binding(
         value.binding,
         expected_kind=p.attribution_artifact_kind,
+        expected_prefix=p.attribution_logical_key_prefix,
+        expected_schema=p.attribution_schema_version,
         error_code="FAIL_CLOSED_P2_ATTRIBUTION_SPEC_REQUIRED",
         policy=p,
     )
@@ -566,6 +606,8 @@ def build_p2_input_bundle(
     feature_spec = _validate_binding(
         feature_spec,
         expected_kind=p.feature_artifact_kind,
+        expected_prefix=p.feature_logical_key_prefix,
+        expected_schema=p.feature_schema_version,
         error_code="FAIL_CLOSED_P2_FEATURE_SPEC_REQUIRED",
         policy=p,
     )

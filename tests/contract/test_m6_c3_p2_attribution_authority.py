@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
 AUTHORITY = BASELINE / "canonical" / "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY.json"
 VALIDATOR_PATH = ROOT / "tools" / "baseline" / "validate_p2_attribution_authority.py"
-EXPECTED_SHA256 = "a2bc9d4e68366214002a3b391e1b9764db520bfff123c095967043a8d9990f01"
+CORE = BASELINE / "canonical" / "CORE_LOGICAL_MODEL.json"
+EXPECTED_SHA256 = "1bfc6c9eb8e2142249c327af5698bc6a8925f983fd8363b1d2bd835966eea5fa"
 
 SPEC = importlib.util.spec_from_file_location("p2_c3_validator", VALIDATOR_PATH)
 assert SPEC is not None and SPEC.loader is not None
@@ -91,3 +92,21 @@ def test_m6_c3_uses_existing_1_6_0_carriers() -> None:
     assert p["release_replay_contract"]["p2_release_binding"].startswith(
         "adjusted estimate evidence_set_id"
     )
+
+
+def test_m6_c3_p2_subtypes_use_existing_core_artifact_kinds() -> None:
+    p = _payload()
+    core = json.loads(CORE.read_text(encoding="utf-8"))
+    table = core["tables"]["registry.context_artifact"]
+    artifact_kind = next(
+        field for field in table["fields"] if field["name"] == "artifact_kind"
+    )
+    sql = artifact_kind["sql"]
+    for contract in (
+        p["feature_spec_contract"],
+        p["reference_condition_contract"],
+        p["attribution_spec_contract"],
+    ):
+        assert f"'{contract['artifact_kind']}'" in sql
+        assert contract["logical_key_prefix"].startswith("P2_")
+        assert contract["artifact_schema_version"].startswith("TPAA_P2_")
