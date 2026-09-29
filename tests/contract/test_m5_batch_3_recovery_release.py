@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from tools.testing.m5_batch_3_release_candidate_review import _profiles
+
 from tpaa_qualification import (
     M5QualificationError,
     load_m5_qualification_authority,
@@ -18,7 +20,6 @@ from tpaa_qualification.m5_recovery import (
     create_consistent_file_backup,
     restore_consistent_file_backup,
 )
-from tools.testing.m5_batch_3_release_candidate_review import _profiles
 
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
