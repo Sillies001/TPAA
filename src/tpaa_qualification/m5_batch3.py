@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, NoReturn
 
 from .m5_profiles import M5QualificationAuthority, M5QualificationError
 
@@ -12,7 +12,7 @@ _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
-def _fail(authority: M5QualificationAuthority, code_key: str, detail: str) -> None:
+def _fail(authority: M5QualificationAuthority, code_key: str, detail: str) -> NoReturn:
     raise M5QualificationError(authority.error_code(code_key), detail)
 
 
@@ -117,6 +117,16 @@ def validate_upgrade_rollback_qualification(
             field="prior_release.package_manifest_sha256",
             code_key="upgrade_rollback",
         )
+        supported_count = report.get("supported_prior_release_count")
+        governed_minimum = upgrade.get("minimum_supported_prior_release_count")
+        if (
+            not isinstance(supported_count, int)
+            or isinstance(supported_count, bool)
+            or not isinstance(governed_minimum, int)
+            or isinstance(governed_minimum, bool)
+            or supported_count < governed_minimum
+        ):
+            _fail(authority, "upgrade_rollback", f"{profile_id}: prior-release support")
         if report.get("rollback_target") != upgrade.get("rollback_target"):
             _fail(authority, "upgrade_rollback", f"{profile_id}: rollback target drift")
     else:
@@ -167,6 +177,8 @@ def validate_backup_restore_qualification(
     """Validate the governed cross-store backup/restore qualification envelope."""
 
     authority.certification_profile(profile_id)
+    if report.get("profile_id") != profile_id:
+        _fail(authority, "backup_restore", f"{profile_id}: profile binding mismatch")
     governed = _mapping(
         authority,
         authority.upgrade_backup_restore_profile.get("backup_restore"),
@@ -199,6 +211,10 @@ def validate_backup_restore_qualification(
             code_key="backup_restore",
         )
 
+    if report.get("consistency_rule") != governed.get("consistency_rule"):
+        _fail(authority, "backup_restore", f"{profile_id}: consistency rule")
+    if report.get("in_flight_uncommitted_state_excluded_and_reported") is not True:
+        _fail(authority, "backup_restore", f"{profile_id}: in-flight state reporting")
     if report.get("integrity_hash") != governed.get("integrity_hash"):
         _fail(authority, "backup_restore", f"{profile_id}: integrity hash")
     if report.get("committed_published_release_rpo_seconds") != governed.get(
@@ -333,6 +349,41 @@ def validate_formal_rc_candidate(
         _fail(authority, "release_evidence_incomplete", "mandatory profile status")
 
     release = authority.formal_release_acceptance_profile
+    candidate_refs = _mapping(
+        authority,
+        manifest.get("candidate_package_refs"),
+        field="candidate_package_refs",
+        code_key="release_evidence_incomplete",
+    )
+    if tuple(candidate_refs) != authority.mandatory_profile_ids:
+        _fail(authority, "release_evidence_incomplete", "candidate package inventory")
+    for profile_id in authority.mandatory_profile_ids:
+        ref = _mapping(
+            authority,
+            candidate_refs[profile_id],
+            field=f"candidate_package_refs.{profile_id}",
+            code_key="release_evidence_incomplete",
+        )
+        if (
+            ref.get("source_revision") != revision
+            or ref.get("semantic_build_version") != semantic
+        ):
+            _fail(authority, "release_evidence_incomplete", "candidate package identity")
+        _sha256(
+            authority,
+            ref.get("package_sha256"),
+            field=f"candidate_package_refs.{profile_id}.package_sha256",
+            code_key="release_evidence_incomplete",
+        )
+        _sha256(
+            authority,
+            ref.get("package_manifest_sha256"),
+            field=f"candidate_package_refs.{profile_id}.package_manifest_sha256",
+            code_key="release_evidence_incomplete",
+        )
+    if release.get("exact_release_references_required") is not True:
+        _fail(authority, "release_evidence_incomplete", "exact release reference authority")
+
     categories = _mapping(
         authority,
         manifest.get("evidence_categories"),
@@ -390,6 +441,8 @@ def validate_formal_rc_candidate(
     )
     if signoffs:
         _fail(authority, "release_evidence_incomplete", "Batch 3 final signoffs")
+    if manifest.get("all_waivers_unexpired_at_rc_time") is not True:
+        _fail(authority, "release_evidence_incomplete", "RC waiver state")
     if (
         manifest.get("formal_release_claimed") is not False
         or manifest.get("m5_exit_go_claimed") is not False

@@ -49,6 +49,10 @@ def _backup(authority, profile_id: str) -> dict[str, object]:
         "profile_id": profile_id,
         "covered_state": covered,
         "cross_store_member_hashes": {name: H for name in covered},
+        "consistency_rule": authority.upgrade_backup_restore_profile["backup_restore"][
+            "consistency_rule"
+        ],
+        "in_flight_uncommitted_state_excluded_and_reported": True,
         "integrity_hash": "SHA-256",
         "committed_published_release_rpo_seconds": 0,
         "restore_rto_seconds": 1.0,
@@ -91,10 +95,20 @@ def _rc(authority) -> dict[str, object]:
         "profile_status": {
             profile_id: "PASS" for profile_id in authority.mandatory_profile_ids
         },
+        "candidate_package_refs": {
+            profile_id: {
+                "source_revision": REVISION,
+                "semantic_build_version": BUILD,
+                "package_sha256": H,
+                "package_manifest_sha256": H,
+            }
+            for profile_id in authority.mandatory_profile_ids
+        },
         "evidence_categories": categories,
         "signoff_contract": _signoff_contract(authority),
         "signoffs": [],
         "signoff_status": "PENDING_FINAL_RELEASE",
+        "all_waivers_unexpired_at_rc_time": True,
         "formal_release_claimed": False,
         "m5_exit_go_claimed": False,
     }
@@ -109,6 +123,27 @@ def test_m5_batch_3_authority_projection_and_first_release_upgrade() -> None:
     profile_id = authority.mandatory_profile_ids[0]
     report = _upgrade(profile_id)
     validate_upgrade_rollback_qualification(authority, profile_id, report)
+    subsequent = dict(report)
+    subsequent.update(
+        {
+            "prior_accepted_m5_release_exists": True,
+            "upgrade_result": "PASS",
+            "prior_release": {
+                "profile_id": profile_id,
+                "source_kind": authority.upgrade_backup_restore_profile["upgrade"][
+                    "subsequent_supported_source"
+                ],
+                "package_sha256": H,
+                "package_manifest_sha256": H,
+            },
+            "supported_prior_release_count": 1,
+            "rollback_target": authority.upgrade_backup_restore_profile["upgrade"][
+                "rollback_target"
+            ],
+        }
+    )
+    validate_upgrade_rollback_qualification(authority, profile_id, subsequent)
+
     bad = dict(report)
     bad["failed_install_rollback_verified"] = False
     with pytest.raises(M5QualificationError) as exc:
