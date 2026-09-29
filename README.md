@@ -1,37 +1,40 @@
 # TPAA Software Repository
 
-TPAA V8.0 / ED-2.0 implementation monorepo governed by **SDIB-1.0.1**. The already-published M0 engineering baseline remains a historical SDIB-1.0 acceptance result; SDIB-1.0.1 is a C1 implementation-organization patch and does not change CB-1.4.0 / R3.3 Canonical business authority.
+TPAA V8.0 / ED-2.0 implementation monorepo governed by the frozen Canonical business baseline and the adopted SDIB implementation baseline. Machine-readable Canonical artifacts remain the business authority; implementation documents and code may consume that authority but do not redefine it.
 
 ## Current implementation state
 
 - Overall design input: **TPAA V8.0 / ED-2.0 Rebaseline R3.3**.
-- Machine business authority: **CB-1.4.0** with the frozen R3.3 Canonical snapshot under `baseline/CB-1.4.0/`.
-- Implementation baseline: **SDIB-1.0.1**.
-- Historical M0 Exit: **GO**, accepted merged-main revision `ee54e8500381e62a53e1f2352d485ed11892c9d6`.
-- Published engineering tag: `M0_IMPLEMENTATION_BASELINE`, verified to peel exactly to the accepted M0 revision above.
-- SDIB-1.0.1 adoption audit: the patch adds `M0-DEV-000 Formal Repository Bootstrap` and raises the normative M0 backlog to **48 work packages**.
-- Current delta status: strict **48/48 completion is not yet claimed** because the current GitHub `main` is not protected and the repository root does not yet contain `.editorconfig`, both required by `M0-DEV-000`.
-- Consequently, under SDIB-1.0.1 §19.1 the current transition state is **M1_NOT_ADMITTED** until the new M0 delta is closed (or a formal M0 Review grants an allowed non-blocking exception) and the M1 Entry Gate is re-reviewed.
-- Capability claim: **none beyond the historical M0 engineering substrate**. P1/M1 capability has not started or been admitted.
-
-See `docs/reviews/SDIB-1.0.1_ADOPTION_REVIEW.md` for the adoption/delta review.
+- Machine business authority: **CB-1.4.0** under `baseline/CB-1.4.0/`.
+- Adopted implementation baseline: **SDIB-1.4**. See `docs/reviews/SDIB-1.4_ADOPTION_REVIEW.md`.
+- Database schema authority remains exactly **1.6.0**; no shadow schema is admitted.
+- M5 contains exactly **23 tasks** and remains **P1-only**; P2-P6 are inactive.
+- M5 formal qualification authority is `M5_FORMAL_QUALIFICATION_AUTHORITY` v1.0.0, SHA-256 `e3dd1fafa9c65d6c9a85dfb7172d60adef3e9c17893e3b546b962275c42c01b1`. See `docs/reviews/M5_C3_FORMAL_QUALIFICATION_AUTHORITY_REVIEW.md`.
+- Protected-main M5 Exit is **GO** at `68767397c028f7aa6ad3a22a49302710481951c6`; Cross-platform CI Run #470 / `36549239360` passed all 14 required jobs.
+- Formal qualification at that protected-main revision is **P1_M5_QUALIFIED**. The four mandatory certification profiles, package/performance/security gates, recovery/rollback evidence, cold reconstruction, and exact-release signoff contract are all part of the M5 qualification boundary.
+- No M6 scope and no P2-P6 capability is implied by the M5 qualification state.
 
 ## Machine authority rule
 
-Business schemas, DTO contracts, Stage definitions, Metric definitions, P/M/WS vocabularies, and related governed semantics are consumed from the frozen machine-readable Canonical snapshot under `baseline/CB-1.4.0/`. Markdown files are explanatory/implementation references and are not a second schema authority.
+Business schemas, DTO contracts, Stage definitions, Metric definitions, P/M/WS vocabularies, and related governed semantics are consumed from the frozen machine-readable Canonical snapshot under `baseline/CB-1.4.0/`. Markdown files are explanatory or implementation references and are not a second schema authority.
 
 ## Toolchain baseline
 
-TPAA currently requires **CPython 3.13.x**. The project dependency resolver is **uv** and `uv.lock` is the only project dependency lock. Separate Windows/Linux Python lockfiles are forbidden.
+TPAA requires **CPython 3.13.x**. The project dependency resolver is **uv**, and `uv.lock` is the project dependency lock; separate Windows/Linux Python lockfiles are forbidden.
 
-The current project lock deliberately contains no third-party runtime package yet: the completed bootstrap and baseline verifier are standard-library-only. Runtime libraries enter `pyproject.toml` and `uv.lock` only when an admitted implementation task actually uses them.
-
-For airborne-data processing and metric calculation, **Polars is the default DataFrame/query engine**. Pandas is not a default dependency. See `docs/developer/DATAFRAME_POLICY.md`.
+The current runtime dependency set includes the governed FastAPI, Psycopg, and PySide6 packages declared in `pyproject.toml`. For airborne-data processing and metric calculation, **Polars is the preferred DataFrame/query engine** when an admitted implementation task requires that class of dependency; Pandas is not the default dependency. See `docs/developer/DATAFRAME_POLICY.md`.
 
 ## Unified developer commands
 
+The developer dispatcher is the authoritative command index:
+
 ```bash
 python tools/dev/tpaa_dev.py list
+```
+
+Common baseline and development checks include:
+
+```bash
 python tools/dev/tpaa_dev.py bootstrap --check-only
 python tools/dev/tpaa_dev.py verify-baseline
 python tools/dev/tpaa_dev.py verify-canonical
@@ -44,7 +47,7 @@ python tools/dev/tpaa_dev.py test-contract
 python tools/dev/tpaa_dev.py doctor
 ```
 
-The command dispatcher implements `generate` for M0-CORE-003, `verify-generated` / `regenerate-diff` for M0-CORE-004, and `verify-architecture` for M0-CORE-005. Future command names such as `run-api`, `run-gui`, `package`, `manifest`, and `cold-start` remain reserved and fail closed with `NOT_IMPLEMENTED` until their controlling SDIB work items exist.
+The dispatcher has expanded with admitted M1-M5 verification and qualification commands. Use `python tools/dev/tpaa_dev.py list` rather than relying on an older reserved-command list.
 
 ## Verify the frozen baseline
 
@@ -52,8 +55,7 @@ The command dispatcher implements `generate` for M0-CORE-003, `verify-generated`
 python tools/baseline/verify_baseline.py
 ```
 
-A successful run verifies the pinned `BASELINE_LOCK.json` hash, all 21 controlled artifact byte sizes and SHA-256 digests, and rejects missing or unlisted Canonical JSON artifacts.
-
+A successful run verifies the pinned `BASELINE_LOCK.json`, all controlled artifact byte sizes and SHA-256 digests, and rejects missing or unlisted Canonical JSON artifacts.
 
 ## Verify the Canonical artifact loader
 
@@ -70,9 +72,9 @@ python tools/dev/verify_toolchain.py \
   --evidence evidence/generated/M0-DEV-001-002_ADR-M0-001-003.json
 ```
 
-This checks the Python minor, resolver/lock authority, frozen static-tool pins, developer command discovery, Polars-first policy and ADR closure evidence.
+This checks the Python minor, resolver/lock authority, frozen static-tool pins, developer command discovery, Polars-first policy, and ADR closure evidence.
 
 ## Repository sequencing
 
-SDIB-1.0.1 §17.1/§17.2 are now the normative M0 construction order, and §19.1–§19.4 are the normative M1 transition/startup order. Do not begin M1 work until the SDIB-1.0.1 M0 delta review is closed and all §19.1 M1 Entry Gate conditions are evidenced PASS.
+M0-M5 implementation sequencing has completed through the protected-main M5 Exit GO revision above. Any subsequent implementation work must come from an explicitly adopted authority/baseline or tracked corrective scope; do not infer a new milestone, activate P2-P6, change DB schema 1.6.0, or redefine frozen Canonical/M5 qualification semantics from this README.
 
