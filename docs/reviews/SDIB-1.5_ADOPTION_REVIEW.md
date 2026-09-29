@@ -5,7 +5,7 @@
 - **Candidate baseline:** SDIB-1.5; parent SDIB-1.4.
 - **Tracking issue:** #150; program policy #149; P2 authority closure #151.
 - **Core baseline / DB schema:** CB-1.4.0 / 1.6.0.
-- **Document SHA-256:** `dc070548abe6b0a7a2fd3decfe0e4e7e2a8f420877d4d68b5d4dee4e7606a9b4`.
+- **Document SHA-256:** `6e5ea15a6d2217837ea9ecac34a297e0880f1305a6aba77ef5e44275879fa646`.
 - **M6 manifest SHA-256:** `026b5718c8c603c1126b079ac5070283284ac6f291827b749dcdad0d779e7918`.
 
 ## Entry evidence
