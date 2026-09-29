@@ -7,10 +7,10 @@
 - Change class: C3 - P2 implementation semantic contract
 - Candidate authority: `P2_ATTRIBUTION_NORMALIZATION_AUTHORITY` v1.0.0
 - Candidate authority SHA-256: `1bfc6c9eb8e2142249c327af5698bc6a8925f983fd8363b1d2bd835966eea5fa`
-- Parent protected-main SHA: `b6afa0a21388dea38c58ff1ac8f091d3be5c60a7`
-- Parent protected-main Run: #478 / `36588646293` / 14 of 14 PASS
-- Parent baseline lock SHA-256: `e4f6c2bb97c169cc8db9eecfa09c67201510b5fad85e6e59fc2b96532b011db9`
-- Candidate baseline lock SHA-256: `64116b8b18ecbfdddab3ea045ed40504e28c3431ebe0082fe9c99f56a7ef8067`
+- Parent protected-main SHA: `8d23ef2e82e8d6dfe241e66fb4e630cc1f25f4f6`
+- Parent protected-main Run: #480 / `36640903256` / 14 of 14 PASS
+- Parent baseline lock SHA-256: `be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8`
+- Candidate baseline lock SHA-256: `7eafadbb1d47297688595a8a0c48d4836dad13e040f76340ce2c0fa38a5547fa`
 - DB schema: 1.6.0 unchanged
 - Controlled artifacts: 24 -> 25
 

@@ -110,3 +110,10 @@ def test_m6_c3_p2_subtypes_use_existing_core_artifact_kinds() -> None:
         assert f"'{contract['artifact_kind']}'" in sql
         assert contract["logical_key_prefix"].startswith("P2_")
         assert contract["artifact_schema_version"].startswith("TPAA_P2_")
+
+
+def test_m6_c3_lock_lineage_preserves_protected_main_parent() -> None:
+    lock = json.loads((BASELINE / "BASELINE_LOCK.json").read_text(encoding="utf-8"))
+    assert lock["baseline"]["lock_lineage_sha256"][0] == (
+        "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8"
+    )
