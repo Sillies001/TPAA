@@ -1,5 +1,5 @@
 {
-  "baseline_lock_sha256": "e4f6c2bb97c169cc8db9eecfa09c67201510b5fad85e6e59fc2b96532b011db9",
+  "baseline_lock_sha256": "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8",
   "core_baseline": "CB-1.4.0",
   "generator_version": "0.2.0",
   "generators": [
@@ -12,13 +12,13 @@
         {
           "bytes": 441,
           "path": "src/tpaa_generated/baseline.py",
-          "sha256": "50a1bebffccaeff23e78c2b75146778eec23bb64864d915b2967b3c4e3e0c0e6"
+          "sha256": "572f4673d86e4ad678770d77fb3aaad1ed482dfc48bdf259e242774b35f646c3"
         }
       ],
       "sources": [
         {
           "artifact_id": "BASELINE_LOCK",
-          "sha256": "e4f6c2bb97c169cc8db9eecfa09c67201510b5fad85e6e59fc2b96532b011db9",
+          "sha256": "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8",
           "version": "CB-1.4.0"
         }
       ]
@@ -53,13 +53,13 @@
         {
           "bytes": 312,
           "path": "src/tpaa_generated/__init__.py",
-          "sha256": "8eb11d4f7d0389e852c8e5701b54e148e24d84b9d1fac08bca2604dedc0a07c7"
+          "sha256": "5916608c281a423b2f438a37a4a1040a4e1419698999e3e6f213dcd3a266ad53"
         }
       ],
       "sources": [
         {
           "artifact_id": "BASELINE_LOCK",
-          "sha256": "e4f6c2bb97c169cc8db9eecfa09c67201510b5fad85e6e59fc2b96532b011db9",
+          "sha256": "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8",
           "version": "CB-1.4.0"
         }
       ]
