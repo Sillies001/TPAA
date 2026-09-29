@@ -123,7 +123,12 @@ def test_step9_fixture_and_logical_equivalence_are_fail_closed_in_ci() -> None:
     assert "python tools/dev/tpaa_dev.py platform-logical-product" in text
     assert "--output evidence/cross-platform/${{ matrix.platform }}.json" in text
     assert "m0-logical-equivalence:" in text
-    assert "needs: m0-cross-platform" in text
+    logical_job = text.split("  m0-logical-equivalence:", 1)[1].split(
+        "    steps:", 1
+    )[0]
+    assert "needs:" in logical_job
+    assert "- m0-cross-platform" in logical_job
+    assert "- m0-exit-postgres" in logical_job
     assert "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in text
     assert "python tools/dev/tpaa_dev.py compare-platform-logical" in text
     assert "--windows downloaded/evidence/cross-platform/windows.json" in text
