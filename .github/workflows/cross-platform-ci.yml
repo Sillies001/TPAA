@@ -309,6 +309,13 @@ jobs:
           --package-output dist/m5/${{ matrix.platform }}
           --evidence evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
 
+      - name: Execute M5 Batch 3 platform upgrade rollback recovery qualification
+        run: >-
+          uv run --locked python tools/testing/m5_batch_3_platform_qualification.py
+          --platform ${{ matrix.platform }}
+          --batch2 evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
+          --evidence evidence/m5-batch-3/${{ matrix.platform }}/platform-recovery.json
+
       - name: Emit M2-MET-001 general Metric Engine evidence
         run: >-
           uv run --locked python tools/testing/m2_general_metric_engine_check.py
@@ -618,9 +625,20 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Upload M5 Batch 3 platform recovery evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m5-batch-3-platform-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m5-batch-3/${{ matrix.platform }}/platform-recovery.json
+          if-no-files-found: error
+          retention-days: 30
+
   m0-logical-equivalence:
     name: M0 logical equivalence
-    needs: m0-cross-platform
+    needs:
+      - m0-cross-platform
+      - m0-exit-postgres
     runs-on: ubuntu-24.04
 
     steps:
@@ -655,6 +673,24 @@ jobs:
           pattern: tpaa-m5-batch-2-evidence-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/m5-batch-2
           merge-multiple: true
+
+      - name: Download M5 Batch 3 Windows recovery evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m5-batch-3-platform-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/m5-batch-3/windows
+
+      - name: Download M5 Batch 3 Linux recovery evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m5-batch-3-platform-linux-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/m5-batch-3/linux
+
+      - name: Download M5 Batch 3 PostgreSQL recovery evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-m5-batch-3-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/m5-batch-3/postgres
 
       - name: Compare Windows and Linux M4-TST-005 platform evidence
         run: >-
@@ -1109,12 +1145,33 @@ jobs:
           --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --output evidence/m5-batch-2/four-profile-review.json
 
+      - name: Review M5 Batch 3 exact-candidate recovery and formal RC contract
+        run: >-
+          python tools/testing/m5_batch_3_release_candidate_review.py
+          --batch2-windows downloaded/m5-batch-2/evidence/m5-batch-2/windows/qualification.json
+          --batch2-linux downloaded/m5-batch-2/evidence/m5-batch-2/linux/qualification.json
+          --batch2-four-profile evidence/m5-batch-2/four-profile-review.json
+          --batch3-windows downloaded/m5-batch-3/windows/platform-recovery.json
+          --batch3-linux downloaded/m5-batch-3/linux/platform-recovery.json
+          --postgres downloaded/m5-batch-3/postgres/postgres-recovery.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --output evidence/m5-batch-3/formal-rc.json
+
       - name: Upload M5 Batch 2 four-profile review evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: tpaa-m5-batch-2-four-profile-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m5-batch-2/four-profile-review.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload M5 Batch 3 formal RC evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m5-batch-3-formal-rc-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m5-batch-3/formal-rc.json
           if-no-files-found: error
           retention-days: 30
 
@@ -1296,6 +1353,15 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/m4-tst-005/postgres/storage-parity.json
 
+      - name: Execute M5 Batch 3 PostgreSQL recovery qualification
+        run: >-
+          uv run --locked python tools/testing/m5_batch_3_postgres_recovery.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --evidence evidence/m5-batch-3/postgres/postgres-recovery.json
+
       - name: Cold-start full M0 with live PostgreSQL
         run: >-
           uv run --locked python tools/ci/cold_start.py
@@ -1340,6 +1406,15 @@ jobs:
         with:
           name: tpaa-m4-tst-005-storage-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/m4-tst-005/postgres/storage-parity.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload M5 Batch 3 PostgreSQL recovery evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-m5-batch-3-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/m5-batch-3/postgres/postgres-recovery.json
           if-no-files-found: error
           retention-days: 30
 
