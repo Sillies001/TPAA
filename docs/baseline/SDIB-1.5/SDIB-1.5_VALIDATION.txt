@@ -1,0 +1,32 @@
+TPAA SDIB-1.5 STRUCTURAL VALIDATION
+Date: 2026-09-29
+Document SHA-256: 6e5ea15a6d2217837ea9ecac34a297e0880f1305a6aba77ef5e44275879fa646
+M6 Task Baseline SHA-256: 026b5718c8c603c1126b079ac5070283284ac6f291827b749dcdad0d779e7918
+Result: 25/25 STRUCTURAL PASS
+Hosted adoption CI: PENDING PR / protected-main validation
+
+01. [PASS] Version header SDIB-1.5
+02. [PASS] Parent SDIB-1.4 retained
+03. [PASS] Protected-main entry exact SHA aae1e692774f7c10114d66fd79acb254c2aabfef
+04. [PASS] Entry Run #472 / 36556569965 is 14/14 PASS
+05. [PASS] CB-1.4.0 retained
+06. [PASS] DB schema 1.6.0 retained
+07. [PASS] M6 milestone maps to P2 Attribution Activation
+08. [PASS] M6 backlog exact 17 unique tasks
+09. [PASS] Required WS exact: CAPABILITY/DATA/TEST/GUI/GOVERNANCE
+10. [PASS] Four M6 batches
+11. [PASS] Batches cover 17/17 exactly once
+12. [PASS] P1 remains admitted and immutable
+13. [PASS] P2 candidate claim blocked until protected-main M6 Exit GO
+14. [PASS] P3-P6 remain inactive
+15. [PASS] P1 overwrite by adjusted result forbidden
+16. [PASS] Future-information leakage forbidden
+17. [PASS] Same-episode leakage forbidden
+18. [PASS] NOT_IDENTIFIABLE valid-state requirement explicit
+19. [PASS] Unsupported causal claim forbidden
+20. [PASS] Historical current/latest fallback forbidden
+21. [PASS] C3 #151 explicit fail-closed authority blocker
+22. [PASS] No shadow schema
+23. [PASS] M5 product/security/performance/recovery guarantees retained as regression gates
+24. [PASS] M7/P3 one-milestone-ahead detailed-design runway required during active M6 implementation
+25. [PASS] M7 implementation/admission forbidden before M6 Exit GO

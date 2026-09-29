@@ -1,0 +1,304 @@
+{
+  "schema": "TPAA_SDIB_M6_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.5",
+  "milestone": "M6",
+  "milestone_name": "P2 Attribution Activation",
+  "entry_evidence": {
+    "predecessor_milestone": "M5",
+    "protected_main_sha": "aae1e692774f7c10114d66fd79acb254c2aabfef",
+    "protected_main_run_number": 472,
+    "protected_main_actions_run_id": 36556569965,
+    "p1_qualification": "P1_M5_QUALIFIED",
+    "protected_main_exact": true,
+    "hosted_ci_required_jobs": 14,
+    "hosted_ci_result": "PASS"
+  },
+  "task_count": 17,
+  "required_workstreams": [
+    "WS-CAPABILITY",
+    "WS-DATA",
+    "WS-TEST",
+    "WS-GUI",
+    "WS-GOVERNANCE"
+  ],
+  "capability_boundary": {
+    "currently_admitted_phases": [
+      "P1"
+    ],
+    "candidate_phase": "P2",
+    "explicitly_not_admitted": [
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "p2_claim_before_m6_exit_forbidden": true,
+    "p1_observed_evidence_immutable": true,
+    "p2_may_consume_but_never_overwrite_p1": true
+  },
+  "rolling_design": {
+    "policy_issue": 149,
+    "current_implementation_milestone": "M6",
+    "next_detailed_design_milestone": "M7",
+    "m7_implementation_forbidden_before_m6_exit_go": true,
+    "m7_design_runway_starts_after_m6_implementation_starts": true,
+    "distant_algorithm_precommitment_forbidden": true
+  },
+  "core_storage_authority": {
+    "canonical_business_authority": "CB-1.4.0",
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "historical_release_replay_semantics_must_remain_immutable": true
+  },
+  "authority_blockers": {
+    "c3_issue": 151,
+    "reason": "P2 high-level semantics and Core tables are frozen, but exact factor/reference/cohort representation, identifiability/reason codes, uncertainty object, model/spec identities, cross-layer DTO projection and Release/evidence binding require machine-authority closure before dependent implementation may claim completion.",
+    "fail_closed": true,
+    "blocker_task_id": "M6-GOV-001",
+    "dependent_task_ids": [
+      "M6-DATA-002",
+      "M6-DATA-003",
+      "M6-CAP-001",
+      "M6-CAP-002",
+      "M6-CAP-003",
+      "M6-CAP-004",
+      "M6-GUI-001",
+      "M6-GUI-002",
+      "M6-TST-001",
+      "M6-TST-002",
+      "M6-TST-003",
+      "M6-TST-004",
+      "M6-TST-005"
+    ]
+  },
+  "authority_boundaries": {
+    "capability_registry": "CAPABILITY_PHASE_REGISTRY.json",
+    "milestone_registry": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+    "extension_contract_registry": "EXTENSION_CONTRACT_REGISTRY.json",
+    "extension_metric_family_registry": "EXTENSION_METRIC_FAMILY_REGISTRY.json",
+    "core_logical_model": "CORE_LOGICAL_MODEL.json",
+    "cross_layer_dto_contracts": "CROSS_LAYER_DTO_CONTRACTS.json",
+    "implementation_invented_factor_semantics_forbidden": true,
+    "implementation_invented_identifiability_thresholds_forbidden": true,
+    "same_episode_or_future_information_leakage_forbidden": true,
+    "adjusted_value_overwrite_of_p1_forbidden": true,
+    "causal_claim_without_independent_causal_evidence_forbidden": true,
+    "current_latest_fallback_for_historical_products_forbidden": true,
+    "p3_p6_activation_forbidden": true
+  },
+  "batches": [
+    {
+      "batch_id": "M6-BATCH-1",
+      "name": "P2 authority + immutable input / factor-reference-cohort substrate",
+      "task_ids": [
+        "M6-GOV-001",
+        "M6-GOV-002",
+        "M6-DATA-001",
+        "M6-DATA-002",
+        "M6-DATA-003",
+        "M6-TST-001"
+      ]
+    },
+    {
+      "batch_id": "M6-BATCH-2",
+      "name": "Attribution engine + identifiability + adjusted estimate",
+      "task_ids": [
+        "M6-CAP-001",
+        "M6-CAP-002",
+        "M6-CAP-003",
+        "M6-CAP-004",
+        "M6-TST-002",
+        "M6-TST-003"
+      ]
+    },
+    {
+      "batch_id": "M6-BATCH-3",
+      "name": "Product presentation + parity + M7 rolling-design runway",
+      "task_ids": [
+        "M6-GOV-003",
+        "M6-GUI-001",
+        "M6-GUI-002",
+        "M6-TST-004"
+      ]
+    },
+    {
+      "batch_id": "M6-BATCH-4",
+      "name": "M6 Exit / P2 admission",
+      "task_ids": [
+        "M6-TST-005"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M6-GOV-001",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "P2 implementation authority closure",
+      "dependencies": [
+        "P1_M5_QUALIFIED",
+        "C3 issue #151"
+      ],
+      "minimum_acceptance": "Versioned machine authority freezes exact factor feature-spec identity/version, reference-condition and cohort/specification representation, attribution/model-plugin identity, identifiability statuses/reason codes including NOT_IDENTIFIABLE, uncertainty semantics, knowledge-time/leakage rules, P2 DTO/application projection and immutable Release/evidence binding; implementation-local substitutes are forbidden."
+    },
+    {
+      "task_id": "M6-GOV-002",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "C4 P2 admission / feature-gate claim guard",
+      "dependencies": [
+        "P1_M5_QUALIFIED",
+        "CAPABILITY_PHASE_REGISTRY.json"
+      ],
+      "minimum_acceptance": "P2 remains dormant and externally unclaimable until protected-main M6 Exit GO; P1 remains the immutable observed-fact layer; P3-P6 remain inactive and unavailable behind fail-closed feature gates."
+    },
+    {
+      "task_id": "M6-DATA-001",
+      "workstream": "WS-DATA",
+      "deliverable": "Immutable P1 observation eligibility projection for P2",
+      "dependencies": [
+        "M6-GOV-002",
+        "metric.capability_observation"
+      ],
+      "minimum_acceptance": "Select only published immutable P1 observations with exact Release, metric semantic/version, subject/configuration, context, quality, evidence and comparison identity; historical interpretation uses frozen refs and never current/latest fallback."
+    },
+    {
+      "task_id": "M6-DATA-002",
+      "workstream": "WS-DATA",
+      "deliverable": "Governed factor / reference-condition / cohort snapshot",
+      "dependencies": [
+        "M6-GOV-001",
+        "M6-DATA-001"
+      ],
+      "minimum_acceptance": "Materialize versioned factor/context feature view, exact reference condition and comparable cohort/specification from governed authority; cohort minimum dimensions and evidence-independence accounting are explicit; missing governed inputs fail closed."
+    },
+    {
+      "task_id": "M6-DATA-003",
+      "workstream": "WS-DATA",
+      "deliverable": "Knowledge-time, leakage and evidence-independence guard",
+      "dependencies": [
+        "M6-GOV-001",
+        "M6-DATA-002"
+      ],
+      "minimum_acceptance": "Every P2 input is checked against information-available/as-of time; future information and same-episode leakage are rejected; raw record count, observation count, independent subject count and effective evidence volume remain distinct."
+    },
+    {
+      "task_id": "M6-CAP-001",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Factor feature-set materialization",
+      "dependencies": [
+        "M6-DATA-002",
+        "M6-DATA-003",
+        "assessment.factor_feature_set"
+      ],
+      "minimum_acceptance": "Create deterministic assessment.factor_feature_set products bound to source P1 observation, feature spec/version, governed factor values, missing mask, World refs, coverage/confidence and exact input hash; no P1 mutation."
+    },
+    {
+      "task_id": "M6-CAP-002",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Attribution execution and provenance contract",
+      "dependencies": [
+        "M6-GOV-001",
+        "M6-CAP-001",
+        "assessment.attribution_run"
+      ],
+      "minimum_acceptance": "Execute only adopted attribution spec/model-plugin versions against exact governed dataset snapshot/reference condition; persist diagnostics/artifact identity and provenance sufficient for replay; association/model-conditioned contributions are not labeled causal without independent causal evidence."
+    },
+    {
+      "task_id": "M6-CAP-003",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Identifiability and NOT_IDENTIFIABLE result semantics",
+      "dependencies": [
+        "M6-CAP-002"
+      ],
+      "minimum_acceptance": "Identifiability gate emits governed status/reason evidence and treats NOT_IDENTIFIABLE as a valid non-error product state; insufficient independence/coverage/conditioning fails closed without fabricating an adjusted value."
+    },
+    {
+      "task_id": "M6-CAP-004",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Context-adjusted estimate + uncertainty / residual / factor effects",
+      "dependencies": [
+        "M6-CAP-003",
+        "capability.adjusted_capability_estimate"
+      ],
+      "minimum_acceptance": "Publish exact P2 adjusted estimate or governed status with reference condition, factor effects/candidate contributions, unexplained component/residual, uncertainty, claim level, evidence and version; adjusted output is a separate immutable product and never overwrites source P1 observation."
+    },
+    {
+      "task_id": "M6-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "Observed-vs-adjusted product separation",
+      "dependencies": [
+        "M6-CAP-004"
+      ],
+      "minimum_acceptance": "UI presents P1 observed fact and P2 adjusted/attributed estimate as visibly distinct products with exact Release/version/reference condition; status such as NOT_IDENTIFIABLE is distinct from zero, failure, N/A or insufficient data."
+    },
+    {
+      "task_id": "M6-GUI-002",
+      "workstream": "WS-GUI",
+      "deliverable": "P2 attribution evidence / uncertainty / diagnostics drill-down",
+      "dependencies": [
+        "M6-GUI-001"
+      ],
+      "minimum_acceptance": "Evidence view exposes factor/reference/cohort identity, contribution labeling, uncertainty, residual/unexplained component, identifiability reasons, knowledge-time and exact provenance without implying unsupported causality."
+    },
+    {
+      "task_id": "M6-GOV-003",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "M7/P3 one-milestone-ahead detailed-design runway",
+      "dependencies": [
+        "M6-BATCH-1 accepted",
+        "program issue #149"
+      ],
+      "minimum_acceptance": "During active M6 implementation, open/refine the M7/P3 design runway using actual P2 implementation evidence: Model Registry, applicability/OOD, independent validation, lifecycle/as-of semantics and Twin revision/release gaps are enumerated to task/interface/test level; no P3 implementation or claim is activated."
+    },
+    {
+      "task_id": "M6-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "P2 authority / admission / leakage Golden-negative suite",
+      "dependencies": [
+        "M6-GOV-001",
+        "M6-GOV-002",
+        "M6-DATA-003"
+      ],
+      "minimum_acceptance": "Contract/negative tests fail closed on missing/mismatched P2 authority, stale spec/version, current/latest fallback, P2 pre-Exit claim, future information, same-episode leakage, P1 mutation and premature P3-P6 activation."
+    },
+    {
+      "task_id": "M6-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "Factor / reference / cohort fixture family",
+      "dependencies": [
+        "M6-CAP-001"
+      ],
+      "minimum_acceptance": "Synthetic fixtures cover nominal, missing-factor, low-coverage, non-comparable cohort, insufficient independent evidence and retrospective-knowledge cases with exact governed expected feature/reference/cohort identities."
+    },
+    {
+      "task_id": "M6-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "P2 attribution Golden / identifiability qualification",
+      "dependencies": [
+        "M6-CAP-002",
+        "M6-CAP-003",
+        "M6-CAP-004",
+        "M6-TST-002"
+      ],
+      "minimum_acceptance": "Golden vectors verify adjusted value/status, factor effects/candidate contributions, residual, uncertainty and exact NOT_IDENTIFIABLE behavior; negative cases prove leakage rejection, unsupported causal labeling rejection and no adjusted-value fabrication."
+    },
+    {
+      "task_id": "M6-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "P2 cross-platform logical equivalence / replay / P1 non-regression",
+      "dependencies": [
+        "M6-GUI-002",
+        "M6-TST-003"
+      ],
+      "minimum_acceptance": "One exact candidate proves Windows/Linux logical equivalence of P2 products, deterministic replay from frozen refs, immutable P1 hashes/Release membership, DB 1.6.0 compatibility and retained M5 security/performance/package/recovery gates."
+    },
+    {
+      "task_id": "M6-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "M6 Exit review and C4 P2 admission decision",
+      "dependencies": [
+        "ALL_M6_TASKS"
+      ],
+      "minimum_acceptance": "Exact 17/17 M6 evidence, C3 authority closure, factor/reference/cohort and leakage/identifiability/uncertainty gates, Golden/negative coverage, UI separation, cross-platform/replay/P1 non-regression and M7 design-runway evidence all pass with failed_acceptance=[]; only protected-main exact M6 Exit GO admits P2."
+    }
+  ]
+}
