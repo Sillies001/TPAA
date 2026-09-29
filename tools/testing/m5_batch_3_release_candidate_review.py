@@ -97,9 +97,12 @@ def verify(
 
     batch2_profiles = _profiles(b2w, b2l)
     batch3_profiles = _profiles(b3w, b3l)
+    mandatory_profiles = set(authority.mandatory_profile_ids)
     if (
-        tuple(batch2_profiles) != authority.mandatory_profile_ids
-        or tuple(batch3_profiles) != authority.mandatory_profile_ids
+        len(batch2_profiles) != len(authority.mandatory_profile_ids)
+        or set(batch2_profiles) != mandatory_profiles
+        or len(batch3_profiles) != len(authority.mandatory_profile_ids)
+        or set(batch3_profiles) != mandatory_profiles
     ):
         raise RuntimeError("exact four-profile recovery inventory required")
 

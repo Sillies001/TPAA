@@ -18,6 +18,7 @@ from tpaa_qualification.m5_recovery import (
     create_consistent_file_backup,
     restore_consistent_file_backup,
 )
+from tools.testing.m5_batch_3_release_candidate_review import _profiles
 
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
@@ -201,3 +202,32 @@ def test_m5_batch_3_rc_contract_and_distinct_signoff_guard() -> None:
     with pytest.raises(M5QualificationError) as exc:
         validate_formal_rc_candidate(authority, missing_profile)
     assert exc.value.code == authority.error_code("release_evidence_incomplete")
+
+
+def test_m5_batch_3_rc_profile_inventory_is_order_independent_but_exact() -> None:
+    authority = load_m5_qualification_authority(BASELINE)
+    windows = {
+        "profiles": [
+            {"profile_id": "WINDOWS_DESKTOP_X64"},
+            {"profile_id": "WINDOWS_SERVICE_X64"},
+        ]
+    }
+    linux = {
+        "profiles": [
+            {"profile_id": "LINUX_DESKTOP_X64"},
+            {"profile_id": "LINUX_SERVICE_X64"},
+        ]
+    }
+    profiles = _profiles(windows, linux)
+    assert len(profiles) == len(authority.mandatory_profile_ids)
+    assert set(profiles) == set(authority.mandatory_profile_ids)
+    assert tuple(profiles) != authority.mandatory_profile_ids
+
+    duplicate = {
+        "profiles": [
+            {"profile_id": "WINDOWS_DESKTOP_X64"},
+            {"profile_id": "WINDOWS_DESKTOP_X64"},
+        ]
+    }
+    with pytest.raises(RuntimeError, match="invalid/duplicate"):
+        _profiles(duplicate)
