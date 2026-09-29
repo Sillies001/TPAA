@@ -22,8 +22,8 @@ def test_machine_readable_loader_acceptance_verifier_passes() -> None:
     evidence = json.loads(result.stdout)
     assert evidence["status"] == "PASS"
     assert evidence["task_id"] == "M0-CORE-002"
-    assert evidence["controlled_artifact_count"] == 24
-    assert len(evidence["artifacts"]) == 24
+    assert evidence["controlled_artifact_count"] == 25
+    assert len(evidence["artifacts"]) == 25
     assert all(check["status"] == "PASS" for check in evidence["checks"])
 
 
