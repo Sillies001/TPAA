@@ -399,11 +399,12 @@ def _workload(profile_id: str) -> dict[str, object]:
 
         replay_hash = _hash(session_membership)
         replay_count = 0
+        replay_started = time.monotonic()
         for _ in range(int(workload["replay_repetitions"])):
             if _hash(session_membership) != replay_hash:
                 raise RuntimeError("replay logical product drift")
             replay_count += len(session_membership)
-        replay_elapsed = max(time.monotonic() - phase_wall, 1e-9)
+        replay_elapsed = max(time.monotonic() - replay_started, 1e-9)
         replay_throughput = replay_count / replay_elapsed
         app, headers = _app(profile_id, releases)
         release_ids = tuple(releases)
