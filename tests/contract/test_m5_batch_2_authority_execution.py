@@ -27,6 +27,7 @@ from tpaa_qualification import (
 
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
+RUNTIME_ENTRY = ROOT / "tools" / "packaging" / "m5_runtime_entry.py"
 REVISION = "a" * 40
 BUILD = "0.0.0+m5.test"
 H = "b" * 64
@@ -232,3 +233,13 @@ def test_m5_batch_2_exact_four_profile_same_candidate_guard() -> None:
     with pytest.raises(M5QualificationError) as exc:
         validate_four_profile_candidate(authority, stale)
     assert exc.value.code == authority.error_code("release_evidence_incomplete")
+
+
+def test_m5_cpu_p95_uses_fixed_interval_sampling_not_tiny_phase_ratios() -> None:
+    source = RUNTIME_ENTRY.read_text(encoding="utf-8")
+    assert "_CPU_SAMPLE_INTERVAL_SECONDS = 0.1" in source
+    assert "target=_sample_normalized_cpu_utilization" in source
+    assert '"normalized_cpu_sample_count": len(cpu_samples)' in source
+    assert '"normalized_cpu_sample_interval_seconds": _CPU_SAMPLE_INTERVAL_SECONDS' in source
+    assert "phase_cpu = time.process_time()" not in source
+    assert "phase_wall = time.monotonic()" not in source
