@@ -126,7 +126,7 @@ def _target_env(install: Path, *, service_token: str) -> dict[str, str]:
     mutable.mkdir(parents=True, exist_ok=True)
     env.update(
         {
-            "PATH": "",
+            "PATH": str(install / "runtime") if os.name == "nt" else "",
             "HOME": str(mutable),
             "USERPROFILE": str(mutable),
             "TEMP": str(mutable),
