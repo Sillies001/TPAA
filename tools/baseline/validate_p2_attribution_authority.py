@@ -95,9 +95,12 @@ def _context_artifact_kind_sql() -> str:
         ),
         None,
     )
-    if not isinstance(field, dict) or not isinstance(field.get("sql"), str):
+    if not isinstance(field, dict):
         raise ValueError("registry.context_artifact.artifact_kind SQL missing")
-    return field["sql"]
+    sql = field.get("sql")
+    if not isinstance(sql, str):
+        raise ValueError("registry.context_artifact.artifact_kind SQL missing")
+    return sql
 
 
 def verify() -> dict[str, object]:
