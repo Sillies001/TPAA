@@ -13,6 +13,8 @@ Candidate entry evidence:
 - M6 tracking: #150
 - P2 C3 authority closure: #151
 - baseline directory: `docs/baseline/SDIB-1.5/`
+- candidate main document SHA-256: `dc070548abe6b0a7a2fd3decfe0e4e7e2a8f420877d4d68b5d4dee4e7606a9b4`
+- candidate M6 task baseline SHA-256: `026b5718c8c603c1126b079ac5070283284ac6f291827b749dcdad0d779e7918`
 
 SDIB-1.5 refines M6 `P2 Attribution Activation` into 17 Tasks / four coarse batches. P2 remains dormant until protected-main M6 Exit GO. P1 observations/releases remain immutable; P3-P6 remain inactive.
 
