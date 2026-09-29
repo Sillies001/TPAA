@@ -16,6 +16,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Event, Thread
 from typing import cast
 from uuid import NAMESPACE_URL, uuid5
 
@@ -223,6 +224,27 @@ def _nearest_rank(values: list[float], percentile: float) -> float:
     return ordered[index]
 
 
+_CPU_SAMPLE_INTERVAL_SECONDS = 0.1
+
+
+def _sample_normalized_cpu_utilization(
+    stop: Event,
+    samples: list[float],
+) -> None:
+    logical_cpu_count = max(os.cpu_count() or 1, 1)
+    previous_wall = time.monotonic()
+    previous_cpu = time.process_time()
+    while not stop.wait(_CPU_SAMPLE_INTERVAL_SECONDS):
+        current_wall = time.monotonic()
+        current_cpu = time.process_time()
+        wall_delta = current_wall - previous_wall
+        cpu_delta = max(current_cpu - previous_cpu, 0.0)
+        if wall_delta > 0.0:
+            samples.append(cpu_delta / wall_delta / logical_cpu_count * 100.0)
+        previous_wall = current_wall
+        previous_cpu = current_cpu
+
+
 def _rss_mib() -> float:
     if os.name == "nt":
         import ctypes
@@ -292,11 +314,18 @@ def _workload(profile_id: str) -> dict[str, object]:
         raise RuntimeError("longitudinal metric count drift")
 
     cpu_samples: list[float] = []
+    cpu_stop = Event()
+    cpu_sampler = Thread(
+        target=_sample_normalized_cpu_utilization,
+        args=(cpu_stop, cpu_samples),
+        name="m5-normalized-cpu-sampler",
+        daemon=True,
+    )
     wall_started = time.monotonic()
+    cpu_started = time.process_time()
+    cpu_sampler.start()
     workspace_before = 0
 
-    phase_wall = time.monotonic()
-    phase_cpu = time.process_time()
     scenarios = tuple(str(item["scenario_id"]) for item in workload["scenario_mix"])
     weights = tuple(float(item["weight"]) for item in workload["scenario_mix"])
     releases: dict[str, dict[str, object]] = {}
@@ -368,14 +397,6 @@ def _workload(profile_id: str) -> dict[str, object]:
         )
         workspace_after = manifest_path.stat().st_size
 
-        elapsed = max(time.monotonic() - phase_wall, 1e-9)
-        cpu_delta = max(time.process_time() - phase_cpu, 0.0)
-        cpu_samples.append(
-            cpu_delta / elapsed / max(os.cpu_count() or 1, 1) * 100.0
-        )
-
-        phase_wall = time.monotonic()
-        phase_cpu = time.process_time()
         replay_hash = _hash(session_membership)
         replay_count = 0
         for _ in range(int(workload["replay_repetitions"])):
@@ -384,13 +405,6 @@ def _workload(profile_id: str) -> dict[str, object]:
             replay_count += len(session_membership)
         replay_elapsed = max(time.monotonic() - phase_wall, 1e-9)
         replay_throughput = replay_count / replay_elapsed
-        cpu_samples.append(
-            max(time.process_time() - phase_cpu, 0.0)
-            / replay_elapsed
-            / max(os.cpu_count() or 1, 1)
-            * 100.0
-        )
-
         app, headers = _app(profile_id, releases)
         release_ids = tuple(releases)
         warmup = int(workload["query_measurement_warmup_count"])
@@ -404,8 +418,6 @@ def _workload(profile_id: str) -> dict[str, object]:
         )
         latencies: list[float] = []
         errors = 0
-        phase_wall = time.monotonic()
-        phase_cpu = time.process_time()
         with TestClient(app) as client:
             for index in range(warmup):
                 response = client.get(
@@ -437,16 +449,6 @@ def _workload(profile_id: str) -> dict[str, object]:
                         errors += 1
             query_elapsed = max(time.monotonic() - query_started, 1e-9)
 
-        phase_elapsed = max(time.monotonic() - phase_wall, 1e-9)
-        cpu_samples.append(
-            max(time.process_time() - phase_cpu, 0.0)
-            / phase_elapsed
-            / max(os.cpu_count() or 1, 1)
-            * 100.0
-        )
-
-        phase_wall = time.monotonic()
-        phase_cpu = time.process_time()
         longitudinal_latencies: list[float] = []
         for session_index in range(len(session_membership)):
             started = time.monotonic()
@@ -456,20 +458,25 @@ def _workload(profile_id: str) -> dict[str, object]:
             ]
             _ = sum(values) / len(values)
             longitudinal_latencies.append((time.monotonic() - started) * 1000.0)
-        phase_elapsed = max(time.monotonic() - phase_wall, 1e-9)
-        cpu_samples.append(
-            max(time.process_time() - phase_cpu, 0.0)
-            / phase_elapsed
-            / max(os.cpu_count() or 1, 1)
-            * 100.0
-        )
-
-        full_wall = time.monotonic() - wall_started
+        full_wall = max(time.monotonic() - wall_started, 1e-9)
+        cpu_stop.set()
+        cpu_sampler.join(timeout=1.0)
+        if cpu_sampler.is_alive():
+            raise RuntimeError("normalized CPU sampler failed to stop")
+        if not cpu_samples:
+            cpu_samples.append(
+                max(time.process_time() - cpu_started, 0.0)
+                / full_wall
+                / max(os.cpu_count() or 1, 1)
+                * 100.0
+            )
         measurements = {
             "full_workload_wall_seconds": full_wall,
             "replay_session_throughput_per_second": replay_throughput,
             "peak_rss_mib": _rss_mib(),
             "normalized_cpu_utilization_p95_pct": _nearest_rank(cpu_samples, 0.95),
+            "normalized_cpu_sample_count": len(cpu_samples),
+            "normalized_cpu_sample_interval_seconds": _CPU_SAMPLE_INTERVAL_SECONDS,
             "workspace_disk_growth_mib": max(workspace_after - workspace_before, 0)
             / (1024.0 * 1024.0),
             "request_error_count": errors,
