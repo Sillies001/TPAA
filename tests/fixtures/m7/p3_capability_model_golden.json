@@ -1,0 +1,61 @@
+{
+  "schema": "TPAA_M7_P3_CAPABILITY_MODEL_GOLDEN_V1",
+  "case_id": "LINEAR_FOUR_POINT_REFERENCE_CONDITION",
+  "segment_hash": "9b091609a8f8f11b269dab062093b34407610d938647ce30e9b779ca1d66f42f",
+  "validation_snapshot_hash": "c5df36dcc20275cb61e8b9f8e76cd41ed6a2b8fc891bff13eb176e329972f92f",
+  "training_dataset_hash": "94e7551b7afa7834fcf0025d6082f9f47255a3e10113d41b2f873714cdb7f14e",
+  "validation": {
+    "status": "VALIDATED",
+    "predicted_value": 13,
+    "observed_value": 13,
+    "absolute_error": 0,
+    "training_mad": 1,
+    "heldout_p2_half_width": 0.5,
+    "acceptance_limit": 1.5
+  },
+  "final_refit": {
+    "intercept": 10,
+    "slope": 1,
+    "current_value": 13,
+    "ewma_value": 11.592592592592592,
+    "stability_mad": 1,
+    "p2_uncertainty_half_width_max": 0.5,
+    "p3_uncertainty_half_width": 1
+  },
+  "model_artifact_hash": "a6ded33b35721a45edfccd76d1e8acb52c236b7f88700c3575c5f8698b738d88",
+  "capability_model_id": "831c659a-45d9-5801-aebc-9767fd7e6fb9",
+  "model_artifact_uri": "tpaa-object://p3-capability/models/831c659a-45d9-5801-aebc-9767fd7e6fb9.json",
+  "surface_dataset_hash": "c2d6f0b5344c420bb04775b403bd096aa2e5d9b415d8dde26a8965be06b16ecc",
+  "surface_id": "0d4ff10e-4978-5b54-9d97-69753e273dd1",
+  "surface_dataset_uri": "tpaa-object://p3-capability/surfaces/0d4ff10e-4978-5b54-9d97-69753e273dd1.json",
+  "validity_domain": {
+    "session_order_min": 1,
+    "session_order_max": 4
+  },
+  "surface_points": [
+    {
+      "session_order": 1,
+      "value": 10,
+      "uncertainty_lower": 9,
+      "uncertainty_upper": 11
+    },
+    {
+      "session_order": 2,
+      "value": 11,
+      "uncertainty_lower": 10,
+      "uncertainty_upper": 12
+    },
+    {
+      "session_order": 3,
+      "value": 12,
+      "uncertainty_lower": 11,
+      "uncertainty_upper": 13
+    },
+    {
+      "session_order": 4,
+      "value": 13,
+      "uncertainty_lower": 12,
+      "uncertainty_upper": 14
+    }
+  ]
+}
