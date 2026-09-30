@@ -6,9 +6,9 @@ Entry protected-main: 892e4a64a321be9c7252b66207a7d1d90a6ce98d
 Entry Run: #494 / 36697493917 / 14/14 PASS
 Entry qualification: P2_M6_QUALIFIED / M6 Exit GO
 Result: 28/28 CANDIDATE STRUCTURAL PASS
-Hosted adoption CI: PENDING
-Protected-main adoption: PENDING
-Adoption decision: PENDING; P3 NOT ADMITTED
+Hosted adoption CI: PASS — PR #171 exact head 5b1d758df75b14dfccbf4e715e1d8baaf9e63117 / Run #496 / 36706668280 / 14/14
+Protected-main adoption: PASS — d590a3a9a05db1a8b566b2dafec05e93028436e5 / Run #497 / 36709415054 / 14/14
+Adoption decision: SDIB-1.6 ADOPTED as M7 implementation baseline; P3 NOT ADMITTED
 
 01. [PASS] Version header SDIB-1.6
 02. [PASS] Parent SDIB-1.5 retained

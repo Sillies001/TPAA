@@ -143,6 +143,106 @@
         ],
         "type": "object"
       },
+      "AircraftTwinRevisionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aircraft_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "as_of_data_time": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "component_model_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "config_snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "published_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "revision_no": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_twin_revision_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "twin_revision_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "uncertainty_summary": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "valid_from": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "twin_revision_id",
+          "aircraft_id",
+          "revision_no",
+          "component_model_refs",
+          "valid_from",
+          "as_of_data_time",
+          "published_at",
+          "status",
+          "uncertainty_summary",
+          "evidence_snapshot_id"
+        ],
+        "type": "object"
+      },
       "AttributionRunDTO": {
         "additionalProperties": false,
         "properties": {
@@ -246,6 +346,129 @@
           "status",
           "diagnostics",
           "started_at"
+        ],
+        "type": "object"
+      },
+      "CapabilityModelDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "capability_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "capability_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_artifact_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_artifact_uri": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_object_ref_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "model_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "plugin_name": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "plugin_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_model_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trained_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "training_dataset_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "validation_metrics": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "validity_domain": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "capability_model_id",
+          "model_spec_id",
+          "model_spec_version",
+          "subject_type",
+          "capability_type",
+          "training_dataset_snapshot_id",
+          "plugin_name",
+          "plugin_version",
+          "model_artifact_uri",
+          "model_artifact_hash",
+          "model_object_ref_id",
+          "validity_domain",
+          "validation_metrics",
+          "status",
+          "trained_at"
         ],
         "type": "object"
       },
@@ -525,6 +748,87 @@
           "subject_entity_id",
           "unit",
           "value_kind"
+        ],
+        "type": "object"
+      },
+      "CapabilitySurfaceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "axes": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "capability_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "dataset_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "dataset_object_ref_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "dataset_uri": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "surface_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "surface_semantics": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "uncertainty_dataset_object_ref_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uncertainty_dataset_uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "validity_domain": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "surface_id",
+          "capability_model_id",
+          "surface_semantics",
+          "axes",
+          "dataset_uri",
+          "dataset_hash",
+          "dataset_object_ref_id",
+          "validity_domain",
+          "created_at"
         ],
         "type": "object"
       },
@@ -937,6 +1241,80 @@
           "coverage",
           "confidence",
           "input_hash",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "IntrinsicCapabilityEstimateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_time": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "claim_level": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "condition_point": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "estimate_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "twin_revision_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "unit": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "validity_domain_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "x-tpaa-transport-type": "number?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "estimate_id",
+          "twin_revision_id",
+          "capability_type",
+          "condition_point",
+          "value",
+          "unit",
+          "uncertainty",
+          "validity_domain_status",
+          "claim_level",
+          "as_of_time",
           "created_at"
         ],
         "type": "object"
@@ -1422,6 +1800,449 @@
         ],
         "type": "object"
       },
+      "P3AdmissionStateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "git_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "m7_exit_decision": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "p4_p6_inactive": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "protected_main": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "required_jobs_success": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "required_jobs_total": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "run_conclusion": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "source_revision": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "source_revision",
+          "event_name",
+          "git_ref",
+          "protected_main",
+          "m7_exit_decision",
+          "run_conclusion",
+          "required_jobs_success",
+          "required_jobs_total",
+          "p4_p6_inactive"
+        ],
+        "type": "object"
+      },
+      "P3EligibleAdjustedEstimateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "adjusted_value": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "aircraft_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "aircraft_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "attribution_run_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "capability_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "claim_level": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "comparison_key_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "configuration_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "configuration_snapshot_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "configuration_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "estimate_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "estimate_time": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "factor_effects": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "knowledge_time_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "metric_semantic_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "metric_semantic_version": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "p2_release_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "reference_condition_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "session_occurred_at_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "session_order": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "session_order_scope_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "source_observation_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "source_release_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "unit": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "estimate_id",
+          "p2_release_id",
+          "source_observation_id",
+          "source_release_id",
+          "attribution_run_id",
+          "aircraft_id",
+          "aircraft_model_id",
+          "configuration_snapshot_id",
+          "configuration_snapshot_hash",
+          "configuration_key",
+          "session_id",
+          "episode_id",
+          "session_occurred_at_utc",
+          "session_order_scope_id",
+          "session_order",
+          "capability_type",
+          "metric_semantic_id",
+          "metric_semantic_version",
+          "comparison_key_hash",
+          "reference_condition_id",
+          "adjusted_value",
+          "unit",
+          "uncertainty",
+          "factor_effects",
+          "claim_level",
+          "status",
+          "evidence_set_id",
+          "knowledge_time_utc",
+          "estimate_time",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "P3LifecycleSegmentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aircraft_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "aircraft_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "as_of_session_order": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "capability_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "configuration_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "configuration_snapshot_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "effective_evidence_count": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "episode_count": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "first_session_order": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "independent_aircraft_count": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "knowledge_cutoff_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "last_session_order": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "lifecycle_event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "metric_semantic_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "metric_semantic_version": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "observation_count": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "reference_condition_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "segment_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "segment_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "session_order_scope_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "unit": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "segment_snapshot_id",
+          "aircraft_id",
+          "aircraft_model_id",
+          "configuration_key",
+          "configuration_snapshot_ids",
+          "lifecycle_event_ids",
+          "session_order_scope_id",
+          "first_session_order",
+          "last_session_order",
+          "as_of_session_order",
+          "capability_type",
+          "metric_semantic_id",
+          "metric_semantic_version",
+          "reference_condition_id",
+          "unit",
+          "observation_count",
+          "episode_count",
+          "independent_aircraft_count",
+          "effective_evidence_count",
+          "knowledge_cutoff_utc",
+          "segment_hash"
+        ],
+        "type": "object"
+      },
+      "P3ModelValidationSnapshotDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aircraft_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "claim_evidence_tier": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "data_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "effective_evidence_count": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "independent_aircraft_count": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "observation_count": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "profile_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "profile_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "segment_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "training_dataset_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "training_estimate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "validation_estimate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "validation_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          }
+        },
+        "required": [
+          "validation_snapshot_id",
+          "training_dataset_snapshot_id",
+          "profile_id",
+          "profile_version",
+          "aircraft_id",
+          "capability_type",
+          "segment_snapshot_id",
+          "training_estimate_ids",
+          "validation_estimate_ids",
+          "independent_aircraft_count",
+          "observation_count",
+          "effective_evidence_count",
+          "claim_evidence_tier",
+          "as_of_utc",
+          "data_hash"
+        ],
+        "type": "object"
+      },
       "TPAAChainDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1521,7 +2342,7 @@
     "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
     "artifact_version": "UNVERSIONED_BY_AUTHORITY",
     "core_baseline": "CB-1.4.0",
-    "sha256": "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4"
+    "sha256": "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
   },
   "x-tpaa-transport-rules": {
     "session_time_us": "decimal-string for JS-visible API",

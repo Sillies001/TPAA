@@ -23,5 +23,13 @@ P1/P2 remain admitted immutable layers. P3 remains NOT ADMITTED until protected-
 ## Rolling design
 #170 is the M8/P4-P5 design-only runway required by #149 while M7 is active. It does not authorize P4/P5 implementation.
 
-## Candidate decision
-**PENDING ADOPTION** — exact-head Hosted CI 14/14, guarded merge, exact merge-parent verification and actual protected-main merge-SHA 14/14 are required. P3 remains NOT ADMITTED.
+## Protected-main adoption
+- qualified candidate head: `5b1d758df75b14dfccbf4e715e1d8baaf9e63117`
+- exact-head Run #496 / `36706668280`: 14/14 PASS
+- pre-merge protected main: `892e4a64a321be9c7252b66207a7d1d90a6ce98d`
+- actual merge SHA: `d590a3a9a05db1a8b566b2dafec05e93028436e5`
+- merge parents: `892e4a64a321be9c7252b66207a7d1d90a6ce98d` + `5b1d758df75b14dfccbf4e715e1d8baaf9e63117`
+- protected-main Run #497 / `36709415054`: 14/14 PASS
+
+## Adoption decision
+**ADOPTED** — SDIB-1.6 is the active M7 implementation baseline. P3 remains NOT ADMITTED until M7 Exit GO.

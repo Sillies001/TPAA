@@ -1322,6 +1322,868 @@
       ],
       "source": "M6 P2 authority #151 / #161 exact projection",
       "authority": "cross-layer exact contract"
+    },
+    "P3EligibleAdjustedEstimateDTO": {
+      "fields": [
+        {
+          "field": "estimate_id",
+          "source": "capability.adjusted_capability_estimate.estimate_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "p2_release_id",
+          "source": "capability.adjusted_capability_estimate.evidence_set_id -> metric.evidence_set.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_observation_id",
+          "source": "capability.adjusted_capability_estimate.source_observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_release_id",
+          "source": "source_observation_id -> metric.capability_observation.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "attribution_run_id",
+          "source": "capability.adjusted_capability_estimate.attribution_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "capability.adjusted_capability_estimate.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "source_observation_id -> metric.capability_observation.aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "configuration_snapshot_id",
+          "source": "source_observation_id -> metric.capability_observation.aircraft_configuration_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "configuration_snapshot_hash",
+          "source": "configuration_snapshot_id -> master.aircraft_configuration_snapshot.snapshot_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "configuration_key",
+          "source": "AIRCRAFT_CONFIG_SHA256:<configuration_snapshot_hash>",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "source_observation_id -> metric.capability_observation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "source_observation_id -> metric.capability_observation.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_occurred_at_utc",
+          "source": "session_id -> registry.training_session.start_occurred_at_utc",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_order_scope_id",
+          "source": "exact ACTIVE registry.session_order_scope",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_order",
+          "source": "exact current registry.session_order_assignment.order_value",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.adjusted_capability_estimate.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "source_observation_id -> metric definition semantic id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "source_observation_id -> metric definition semantic version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "source_observation_id -> metric.capability_observation.comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "capability.adjusted_capability_estimate.reference_condition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "adjusted_value",
+          "source": "capability.adjusted_capability_estimate.adjusted_value",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "unit",
+          "source": "capability.adjusted_capability_estimate.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "adjusted estimate bounds + attribution diagnostics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "factor_effects",
+          "source": "capability.adjusted_capability_estimate.factor_effects",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "claim_level",
+          "source": "capability.adjusted_capability_estimate.claim_level",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.adjusted_capability_estimate.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "capability.adjusted_capability_estimate.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "knowledge_time_utc",
+          "source": "max exact published source P1/P2 release time available to P3",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "estimate_time",
+          "source": "capability.adjusted_capability_estimate.estimate_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.adjusted_capability_estimate.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Numeric P3 eligibility requires exact published immutable P2 product status IDENTIFIABLE.",
+        "NOT_IDENTIFIABLE remains valid P2 evidence but is excluded from numeric P3 input.",
+        "configuration_snapshot_id is exact provenance; longitudinal segmentation uses configuration_key derived from snapshot_hash.",
+        "session_order_scope must be ACTIVE and assignment current.",
+        "source_release_id and p2_release_id remain distinct immutable identities.",
+        "Historical resolution never falls back to current/latest/default."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3LifecycleSegmentDTO": {
+      "fields": [
+        {
+          "field": "segment_snapshot_id",
+          "source": "registry.dataset_snapshot.dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "segment manifest aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "segment manifest aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "configuration_key",
+          "source": "segment manifest AIRCRAFT_CONFIG_SHA256 key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "configuration_snapshot_ids",
+          "source": "ordered exact input configuration snapshot ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "lifecycle_event_ids",
+          "source": "sorted exact lifecycle event ids bound at segment start",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "session_order_scope_id",
+          "source": "registry.session_order_scope.session_order_scope_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "first_session_order",
+          "source": "segment manifest first_session_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "last_session_order",
+          "source": "segment manifest last_session_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "as_of_session_order",
+          "source": "segment manifest as_of_session_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "capability_type",
+          "source": "segment manifest capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "segment manifest metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "segment manifest metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "segment manifest reference_condition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "unit",
+          "source": "segment manifest unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_count",
+          "source": "segment manifest observation_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "episode_count",
+          "source": "segment manifest episode_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "independent_aircraft_count",
+          "source": "segment manifest independent_aircraft_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "effective_evidence_count",
+          "source": "segment manifest effective_evidence_count",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "knowledge_cutoff_utc",
+          "source": "segment manifest knowledge_cutoff_utc",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "segment_hash",
+          "source": "registry.dataset_snapshot.data_hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "snapshot_type is P3_LONGITUDINAL_SEGMENT and frozen=true.",
+        "Profile v1 segments on exact aircraft/configuration_key/reference-condition/capability/semantic/unit/session-order-scope identity.",
+        "Exact per-session configuration snapshot ids remain provenance and are not themselves the cross-session segment key.",
+        "Any lifecycle event occurring after the first selected session and on/before the last selected session forces a new segment in profile v1.",
+        "Observation, episode, independent-aircraft and effective-evidence counts remain distinct."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3ModelValidationSnapshotDTO": {
+      "fields": [
+        {
+          "field": "validation_snapshot_id",
+          "source": "registry.dataset_snapshot.dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "exact P3 training dataset snapshot id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "profile_id",
+          "source": "adopted P3 execution profile id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "profile_version",
+          "source": "adopted P3 execution profile version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "validation manifest aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_type",
+          "source": "validation manifest capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "segment_snapshot_id",
+          "source": "exact P3 lifecycle segment snapshot",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "training_estimate_ids",
+          "source": "ordered exact P2 training estimate ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "validation_estimate_ids",
+          "source": "ordered exact P2 validation estimate ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "independent_aircraft_count",
+          "source": "validation manifest independent_aircraft_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "observation_count",
+          "source": "validation manifest observation_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "effective_evidence_count",
+          "source": "validation manifest effective_evidence_count",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "claim_evidence_tier",
+          "source": "governed P3 claim evidence tier",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "validation knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "data_hash",
+          "source": "registry.dataset_snapshot.data_hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "snapshot_type is P3_MODEL_VALIDATION and frozen=true.",
+        "Training and validation estimate identities and episode identities are disjoint.",
+        "Profile v1 uses temporal last-point holdout and supports AIRCRAFT subject only.",
+        "Stronger intrinsic claim is not supported by profile v1."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "CapabilityModelDTO": {
+      "fields": [
+        {
+          "field": "capability_model_id",
+          "source": "capability.capability_model.capability_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "model_spec_id",
+          "source": "capability.capability_model.model_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_spec_version",
+          "source": "capability.capability_model.model_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_type",
+          "source": "capability.capability_model.subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "capability.capability_model.subject_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.capability_model.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "capability.capability_model.training_dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "plugin_name",
+          "source": "capability.capability_model.plugin_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "plugin_version",
+          "source": "capability.capability_model.plugin_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_uri",
+          "source": "capability.capability_model.model_artifact_uri",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_hash",
+          "source": "capability.capability_model.model_artifact_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_object_ref_id",
+          "source": "registry.object_reference resolved by exact managed_uri",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "validity_domain",
+          "source": "capability.capability_model.validity_domain",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "validation_metrics",
+          "source": "capability.capability_model.validation_metrics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "capability.capability_model.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "trained_at",
+          "source": "capability.capability_model.trained_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "published_at",
+          "source": "capability.capability_model.published_at",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "supersedes_model_id",
+          "source": "capability.capability_model.supersedes_model_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "model_artifact_uri must resolve to one sealed ACTIVE non-deleted registry.object_reference.",
+        "model_artifact_hash must exactly match registry.object_reference.artifact_sha256.",
+        "Historical model resolution never uses current/latest/default aliases."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "CapabilitySurfaceDTO": {
+      "fields": [
+        {
+          "field": "surface_id",
+          "source": "capability.capability_surface.surface_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_model_id",
+          "source": "capability.capability_surface.capability_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "surface_semantics",
+          "source": "capability.capability_surface.surface_semantics",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "axes",
+          "source": "capability.capability_surface.axes",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "dataset_uri",
+          "source": "capability.capability_surface.dataset_uri",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "dataset_hash",
+          "source": "capability.capability_surface.dataset_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "dataset_object_ref_id",
+          "source": "registry.object_reference resolved by dataset_uri",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "uncertainty_dataset_uri",
+          "source": "capability.capability_surface.uncertainty_dataset_uri",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "uncertainty_dataset_object_ref_id",
+          "source": "resolved registry.object_reference when uncertainty dataset exists",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "validity_domain",
+          "source": "capability.capability_surface.validity_domain",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.capability_surface.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "dataset_uri and optional uncertainty_dataset_uri require sealed ACTIVE non-deleted object references.",
+        "dataset_hash must match exact object artifact_sha256.",
+        "Profile v1 surface axis is observed SESSION_ORDER within the exact lifecycle segment; extrapolation is forbidden."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "AircraftTwinRevisionDTO": {
+      "fields": [
+        {
+          "field": "twin_revision_id",
+          "source": "capability.aircraft_twin_revision.twin_revision_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "capability.aircraft_twin_revision.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "revision_no",
+          "source": "capability.aircraft_twin_revision.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "component_model_refs",
+          "source": "capability.aircraft_twin_revision.component_model_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "config_snapshot_id",
+          "source": "capability.aircraft_twin_revision.config_snapshot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "valid_from",
+          "source": "capability.aircraft_twin_revision.valid_from",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "valid_to",
+          "source": "capability.aircraft_twin_revision.valid_to",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "as_of_data_time",
+          "source": "capability.aircraft_twin_revision.as_of_data_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "published_at",
+          "source": "capability.aircraft_twin_revision.published_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.aircraft_twin_revision.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty_summary",
+          "source": "capability.aircraft_twin_revision.uncertainty_summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "evidence_snapshot_id",
+          "source": "capability.aircraft_twin_revision.evidence_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "supersedes_twin_revision_id",
+          "source": "capability.aircraft_twin_revision.supersedes_twin_revision_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "component_model_refs preserve governed stable order and exact model identities.",
+        "as_of_data_time is the knowledge/data cutoff; published_at is not a substitute.",
+        "Twin is a published capability read model, not same-episode World state."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "IntrinsicCapabilityEstimateDTO": {
+      "fields": [
+        {
+          "field": "estimate_id",
+          "source": "capability.intrinsic_capability_estimate.estimate_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "twin_revision_id",
+          "source": "capability.intrinsic_capability_estimate.twin_revision_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.intrinsic_capability_estimate.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "condition_point",
+          "source": "capability.intrinsic_capability_estimate.condition_point",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "value",
+          "source": "capability.intrinsic_capability_estimate.value",
+          "required": true,
+          "transport_type": "number?"
+        },
+        {
+          "field": "unit",
+          "source": "capability.intrinsic_capability_estimate.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "capability.intrinsic_capability_estimate.uncertainty",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "validity_domain_status",
+          "source": "capability.intrinsic_capability_estimate.validity_domain_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "claim_level",
+          "source": "governed P3 authority/profile interpretation",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_time",
+          "source": "capability.intrinsic_capability_estimate.as_of_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.intrinsic_capability_estimate.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Profile v1 claim_level is REFERENCE_CONDITION_LONGITUDINAL_ESTIMATE.",
+        "Out-of-domain/unsupported estimates carry null value; zero is never a substitute.",
+        "P1 observed and P2 adjusted products remain separately addressable."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M7 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M7 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M7 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M7 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m7_exit_decision",
+          "source": "M7 protected-main Exit evidence.m7_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M7 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M7 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M7 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p4_p6_inactive",
+          "source": "M7 protected-main Exit evidence.p4_p6_inactive",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; not persisted as a P3 product.",
+        "P3 external claims require protected-main M7 Exit GO and all required jobs success.",
+        "P4-P6 remain inactive."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
     }
   },
   "transport_rules": {

@@ -19,6 +19,8 @@ CORE = CANONICAL / "CORE_LOGICAL_MODEL.json"
 LOCK = BASELINE / "BASELINE_LOCK.json"
 
 EXPECTED_DTO_SHA256 = "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4"
+EXPECTED_P2_DTO_SUBSET_SHA256 = "d79d97eb41354ad61654372310bb1a92b37914a858213f5dfc4a1287e14c6706"
+EXPECTED_M6_LOCK_SHA256 = "f95167aca59dc993ced607e55f21f01080c4e24cc0759bf97482d49654ea182b"
 EXPECTED_PROFILE_SHA256 = (
     "202e255bd09349407e0e7cc4d77d8b848df99d84dc00e50e46871eb4f82f0d68"
 )
@@ -115,6 +117,32 @@ def _canonical_hash(value: object) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def _p2_dto_subset_hash(dto_contracts: dict[str, object]) -> str:
+    subset = {
+        name: _obj(dto_contracts.get(name), f"dto.{name}")
+        for name in P2_DTO_NAMES
+    }
+    return _canonical_hash(subset)
+
+
+def _lineage_preserves_m6(
+    *,
+    current_lock_sha256: str,
+    lineage: list[object],
+) -> bool:
+    values = [_text(value, "lock.lineage") for value in lineage]
+    if current_lock_sha256 == EXPECTED_M6_LOCK_SHA256:
+        return bool(values) and values[0] == EXPECTED_PARENT_LOCK_SHA256
+    try:
+        index = values.index(EXPECTED_M6_LOCK_SHA256)
+    except ValueError:
+        return False
+    return (
+        index + 1 < len(values)
+        and values[index + 1] == EXPECTED_PARENT_LOCK_SHA256
+    )
+
+
 def _lock_entry(lock: dict[str, object], filename: str) -> dict[str, object]:
     for raw in _list(lock.get("artifacts"), "lock.artifacts"):
         entry = _obj(raw, "lock artifact")
@@ -176,20 +204,27 @@ def verify() -> dict[str, object]:
     authority_dtos = _obj(authority.get("dto_contracts"), "authority.dto_contracts")
     core_tables = _obj(core.get("tables"), "core.tables")
 
+    current_dto_sha256 = _sha256(DTO)
+    current_lock_sha256 = _sha256(LOCK)
     checks: dict[str, bool] = {
-        "dto_hash": _sha256(DTO) == EXPECTED_DTO_SHA256,
+        "dto_hash": (
+            _p2_dto_subset_hash(dto_contracts) == EXPECTED_P2_DTO_SUBSET_SHA256
+        ),
         "profile_hash": _sha256(PROFILE) == EXPECTED_PROFILE_SHA256,
         "dto_lock_binding": (
-            dto_entry.get("sha256") == EXPECTED_DTO_SHA256
+            dto_entry.get("sha256") == current_dto_sha256
             and dto_entry.get("bytes") == len(DTO.read_bytes())
         ),
         "profile_lock_binding": (
             profile_entry.get("sha256") == EXPECTED_PROFILE_SHA256
             and profile_entry.get("bytes") == len(PROFILE.read_bytes())
         ),
-        "controlled_count": len(_list(lock.get("artifacts"), "lock.artifacts")) == 26,
+        "controlled_count": len(_list(lock.get("artifacts"), "lock.artifacts")) >= 26,
         "schema_unchanged": baseline.get("db_schema") == "1.6.0",
-        "lineage_parent": bool(lineage) and lineage[0] == EXPECTED_PARENT_LOCK_SHA256,
+        "lineage_parent": _lineage_preserves_m6(
+            current_lock_sha256=current_lock_sha256,
+            lineage=lineage,
+        ),
         "profile_identity": (
             profile.get("profile_id") == "P2_LINEAR_REFERENCE_ADJUSTMENT"
             and profile.get("version") == "1.0.0"
@@ -355,6 +390,8 @@ def verify() -> dict[str, object]:
         "tracking_issue": 161,
         "status": "PASS" if not failed else "FAIL",
         "dto_sha256": EXPECTED_DTO_SHA256,
+        "current_dto_sha256": current_dto_sha256,
+        "p2_dto_subset_sha256": EXPECTED_P2_DTO_SUBSET_SHA256,
         "profile_sha256": EXPECTED_PROFILE_SHA256,
         "checks": checks,
         "failed_checks": failed,

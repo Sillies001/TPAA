@@ -150,6 +150,22 @@ def test_m6_batch_4_closed_exit_tracker_with_exact_go_evidence_remains_valid(
     assert result["failed_acceptance"] == []
 
 
+def test_m6_batch_4_closed_m7_design_runway_remains_valid_historical_evidence(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    entry = issues["155"]
+    assert isinstance(entry, dict)
+    issue = entry["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    result = _review(tmp_path, issues=bundle)
+    assert result["status"] == "PASS"
+    assert result["failed_acceptance"] == []
+
+
 def test_m6_batch_4_closed_exit_tracker_without_go_evidence_is_no_go(
     tmp_path: Path,
 ) -> None:

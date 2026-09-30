@@ -1,0 +1,465 @@
+{
+  "authority_id": "P3_CAPABILITY_TWIN_AUTHORITY",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_SEMANTIC_CONTRACT",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "effective_milestone": "M7",
+  "tracking_issue": 169,
+  "activation_rule": {
+    "authority_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "authority_adoption_does_not_admit_p3": true,
+    "p3_admission_requires_protected_main_m7_exit_go": true
+  },
+  "source_basis": {
+    "extension_contract": "EXTENSION_CONTRACT_REGISTRY.json:P3",
+    "capability_phase": "CAPABILITY_PHASE_REGISTRY.json:P3",
+    "reused_longitudinal_authority": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json:1.0.0",
+    "core_products": [
+      "capability.capability_model",
+      "capability.capability_surface",
+      "capability.aircraft_twin_revision",
+      "capability.intrinsic_capability_estimate"
+    ],
+    "decision_scope": "new P3 authority; profile v1 reuses governed M4 SESSION_ORDER OLS/MAD semantics on exact P2 reference-condition inputs"
+  },
+  "scope": {
+    "p1_observed_layer_immutable": true,
+    "p2_adjusted_layer_immutable": true,
+    "p3_authority_frozen_not_admitted": true,
+    "p4_p6_active": false,
+    "profile_v1_subject_type": "AIRCRAFT",
+    "aircraft_model_level_profile_v1_supported": false,
+    "stronger_intrinsic_claim_profile_v1_supported": false,
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "gui_direct_persistence_access_permitted": false,
+    "api_gui_business_recomputation_permitted": false
+  },
+  "table_bindings": {
+    "p2_adjusted_estimate": "capability.adjusted_capability_estimate",
+    "p2_attribution_run": "assessment.attribution_run",
+    "source_p1_observation": "metric.capability_observation",
+    "analysis_release": "registry.analysis_release",
+    "evidence_set": "metric.evidence_set",
+    "configuration_snapshot": "master.aircraft_configuration_snapshot",
+    "lifecycle_event": "master.aircraft_lifecycle_event",
+    "training_session": "registry.training_session",
+    "session_order_scope": "registry.session_order_scope",
+    "session_order_assignment": "registry.session_order_assignment",
+    "dataset_snapshot": "registry.dataset_snapshot",
+    "object_reference": "registry.object_reference",
+    "capability_model": "capability.capability_model",
+    "capability_surface": "capability.capability_surface",
+    "aircraft_twin_revision": "capability.aircraft_twin_revision",
+    "intrinsic_estimate": "capability.intrinsic_capability_estimate"
+  },
+  "exact_identity_rules": {
+    "forbidden_pointer_tokens": [
+      "CURRENT",
+      "LATEST",
+      "DEFAULT"
+    ],
+    "version_and_identity_resolution": "EXACT_ONLY",
+    "historical_fallback_to_current_latest_default": false
+  },
+  "p2_eligibility_contract": {
+    "required_p2_release_status": "PUBLISHED",
+    "required_source_p1_release_status": "PUBLISHED",
+    "required_p2_status": "IDENTIFIABLE",
+    "not_identifiable_numeric_use_forbidden": true,
+    "not_identifiable_remains_evidence_only": true,
+    "adjusted_value_finite_non_null_required": true,
+    "uncertainty_bounds_finite_non_null_required": true,
+    "uncertainty_lower_must_not_exceed_upper": true,
+    "exact_attribution_run_identity_required": true,
+    "exact_reference_condition_required": true,
+    "exact_source_p1_identity_required": true,
+    "configuration_snapshot_required_for_profile_v1": true,
+    "configuration_key_rule": "AIRCRAFT_CONFIG_SHA256:<master.aircraft_configuration_snapshot.snapshot_hash>",
+    "active_session_order_scope_and_current_assignment_required": true,
+    "session_occurred_at_utc_required": true,
+    "required_projection_fields": [
+      "estimate_id",
+      "p2_release_id",
+      "source_observation_id",
+      "source_release_id",
+      "attribution_run_id",
+      "aircraft_id",
+      "aircraft_model_id",
+      "configuration_snapshot_id",
+      "configuration_snapshot_hash",
+      "configuration_key",
+      "session_id",
+      "episode_id",
+      "session_occurred_at_utc",
+      "session_order_scope_id",
+      "session_order",
+      "capability_type",
+      "metric_semantic_id",
+      "metric_semantic_version",
+      "comparison_key_hash",
+      "reference_condition_id",
+      "adjusted_value",
+      "unit",
+      "uncertainty",
+      "factor_effects",
+      "claim_level",
+      "status",
+      "evidence_set_id",
+      "knowledge_time_utc",
+      "estimate_time",
+      "created_at"
+    ],
+    "p1_p2_overwrite_forbidden": true
+  },
+  "lifecycle_segment_contract": {
+    "carrier_table": "registry.dataset_snapshot",
+    "snapshot_type": "P3_LONGITUDINAL_SEGMENT",
+    "schema_version": "TPAA_P3_LONGITUDINAL_SEGMENT_V1",
+    "frozen_required": true,
+    "profile_v1_segment_dimensions": [
+      "aircraft_id",
+      "aircraft_model_id",
+      "configuration_key",
+      "capability_type",
+      "metric_semantic_id",
+      "metric_semantic_version",
+      "reference_condition_id",
+      "unit",
+      "session_order_scope_id"
+    ],
+    "configuration_snapshot_ids_preserved_as_provenance": true,
+    "configuration_key_change_creates_segment_boundary": true,
+    "lifecycle_event_inside_selected_session_interval_forces_new_segment": true,
+    "lifecycle_markers_explicit_sorted_identity_required": true,
+    "duplicate_session_order_forbidden": true,
+    "future_lifecycle_event_forbidden": true,
+    "count_dimensions": [
+      "observation_count",
+      "episode_count",
+      "independent_aircraft_count",
+      "effective_evidence_count"
+    ],
+    "count_dimensions_must_remain_distinct": true,
+    "profile_v1_independent_aircraft_count": 1
+  },
+  "validation_snapshot_contract": {
+    "carrier_table": "registry.dataset_snapshot",
+    "snapshot_type": "P3_MODEL_VALIDATION",
+    "schema_version": "TPAA_P3_MODEL_VALIDATION_V1",
+    "frozen_required": true,
+    "training_snapshot_type": "P3_MODEL_TRAINING",
+    "training_validation_identity_overlap_forbidden": true,
+    "training_validation_episode_overlap_forbidden": true,
+    "validation_strategy": "TEMPORAL_LAST_POINT_HOLDOUT_THEN_FINAL_REFIT",
+    "minimum_total_eligible_points": 4,
+    "holdout_points": 1,
+    "training_prefix_min_points": 3,
+    "training_prefix_max_points": 5,
+    "heldout_prediction_rule": "OLS_TRAINING_PREFIX_AT_HELDOUT_SESSION_ORDER",
+    "heldout_acceptance_rule": "ABS_ERROR_LE_MAX_TRAINING_MAD_PLUS_HELDOUT_P2_HALF_WIDTH",
+    "final_refit_rule": "AFTER_VALIDATION_PASS_REFIT_LAST_UP_TO_5_ELIGIBLE_POINTS_INCLUDING_HELDOUT",
+    "validation_failure_blocks_model_publication": true,
+    "implementation_selected_threshold_forbidden": true
+  },
+  "managed_object_contract": {
+    "required_gc_state": "ACTIVE",
+    "required_sealed": true,
+    "required_deleted_at": null,
+    "model_uri_field": "capability.capability_model.model_artifact_uri",
+    "model_hash_field": "capability.capability_model.model_artifact_hash",
+    "surface_uri_field": "capability.capability_surface.dataset_uri",
+    "surface_hash_field": "capability.capability_surface.dataset_hash",
+    "uncertainty_surface_uri_field": "capability.capability_surface.uncertainty_dataset_uri",
+    "uri_must_equal_exact_managed_uri": true,
+    "hash_must_equal_artifact_sha256": true,
+    "forbidden_uri_prefixes": [
+      "file://"
+    ],
+    "forbidden_alias_tokens": [
+      "CURRENT",
+      "LATEST",
+      "DEFAULT"
+    ],
+    "implementation_private_uri_scheme_forbidden": true
+  },
+  "execution_profile_contract": {
+    "required_profile_id": "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL",
+    "required_profile_version": "1.0.0",
+    "model_spec_logical_key": "P3_MODEL_SPEC:P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL",
+    "model_spec_schema_version": "TPAA_P3_MODEL_SPEC_V1",
+    "model_spec_artifact_kind": "ASSESSMENT_PROFILE",
+    "model_spec_object_must_be_sealed_active": true,
+    "implementation_default_profile_forbidden": true
+  },
+  "claim_contract": {
+    "default_claim_level": "REFERENCE_CONDITION_LONGITUDINAL_ESTIMATE",
+    "stronger_claim_level": "INTRINSIC_CAPABILITY_ESTIMATE",
+    "stronger_claim_requires_independent_evidence": true,
+    "profile_v1_allowed_claim_levels": [
+      "REFERENCE_CONDITION_LONGITUDINAL_ESTIMATE"
+    ],
+    "ui_may_not_upgrade_claim_level": true
+  },
+  "knowledge_time_contract": {
+    "explicit_as_of_utc_required": true,
+    "all_inputs_must_be_available_by_as_of": true,
+    "future_information_forbidden": true,
+    "same_episode_training_validation_overlap_forbidden": true,
+    "historical_current_latest_default_fallback_forbidden": true,
+    "published_at_not_substitute_for_as_of_data_time": true
+  },
+  "release_replay_contract": {
+    "p2_release_binding": "adjusted estimate evidence_set_id -> metric.evidence_set.release_id -> registry.analysis_release",
+    "p1_source_release_binding": "source_observation_id -> metric.capability_observation.release_id",
+    "exact_training_validation_dataset_snapshots_required": true,
+    "exact_model_profile_and_artifact_hash_required": true,
+    "twin_revision_replay_requires_ordered_component_model_refs": true,
+    "historical_p1_p2_mutation_forbidden": true,
+    "retrospective_recompute_creates_new_model_twin_estimate_identity": true
+  },
+  "admission_guard": {
+    "required_event": "push",
+    "required_git_ref": "refs/heads/main",
+    "required_m7_exit_decision": "GO",
+    "required_run_conclusion": "success",
+    "required_job_count": 14,
+    "p3_external_claim_before_gate_forbidden": true,
+    "p4_p6_claim_before_later_admission_forbidden": true
+  },
+  "dto_transport_rules": {
+    "uuid": "canonical lowercase UUID string",
+    "sha256": "lowercase 64-character hex",
+    "utc": "RFC3339 UTC ending in Z",
+    "number": "finite JSON number",
+    "arrays": "stable governed logical order",
+    "nullable": "null only where explicitly permitted"
+  },
+  "dto_contracts": {
+    "P3EligibleAdjustedEstimateDTO": {
+      "fields": [
+        "estimate_id",
+        "p2_release_id",
+        "source_observation_id",
+        "source_release_id",
+        "attribution_run_id",
+        "aircraft_id",
+        "aircraft_model_id",
+        "configuration_snapshot_id",
+        "configuration_snapshot_hash",
+        "configuration_key",
+        "session_id",
+        "episode_id",
+        "session_occurred_at_utc",
+        "session_order_scope_id",
+        "session_order",
+        "capability_type",
+        "metric_semantic_id",
+        "metric_semantic_version",
+        "comparison_key_hash",
+        "reference_condition_id",
+        "adjusted_value",
+        "unit",
+        "uncertainty",
+        "factor_effects",
+        "claim_level",
+        "status",
+        "evidence_set_id",
+        "knowledge_time_utc",
+        "estimate_time",
+        "created_at"
+      ]
+    },
+    "P3LifecycleSegmentDTO": {
+      "fields": [
+        "segment_snapshot_id",
+        "aircraft_id",
+        "aircraft_model_id",
+        "configuration_key",
+        "configuration_snapshot_ids",
+        "lifecycle_event_ids",
+        "session_order_scope_id",
+        "first_session_order",
+        "last_session_order",
+        "as_of_session_order",
+        "capability_type",
+        "metric_semantic_id",
+        "metric_semantic_version",
+        "reference_condition_id",
+        "unit",
+        "observation_count",
+        "episode_count",
+        "independent_aircraft_count",
+        "effective_evidence_count",
+        "knowledge_cutoff_utc",
+        "segment_hash"
+      ]
+    },
+    "P3ModelValidationSnapshotDTO": {
+      "fields": [
+        "validation_snapshot_id",
+        "training_dataset_snapshot_id",
+        "profile_id",
+        "profile_version",
+        "aircraft_id",
+        "capability_type",
+        "segment_snapshot_id",
+        "training_estimate_ids",
+        "validation_estimate_ids",
+        "independent_aircraft_count",
+        "observation_count",
+        "effective_evidence_count",
+        "claim_evidence_tier",
+        "as_of_utc",
+        "data_hash"
+      ]
+    },
+    "CapabilityModelDTO": {
+      "fields": [
+        "capability_model_id",
+        "model_spec_id",
+        "model_spec_version",
+        "subject_type",
+        "subject_id",
+        "capability_type",
+        "training_dataset_snapshot_id",
+        "plugin_name",
+        "plugin_version",
+        "model_artifact_uri",
+        "model_artifact_hash",
+        "model_object_ref_id",
+        "validity_domain",
+        "validation_metrics",
+        "status",
+        "trained_at",
+        "published_at",
+        "supersedes_model_id"
+      ]
+    },
+    "CapabilitySurfaceDTO": {
+      "fields": [
+        "surface_id",
+        "capability_model_id",
+        "surface_semantics",
+        "axes",
+        "dataset_uri",
+        "dataset_hash",
+        "dataset_object_ref_id",
+        "uncertainty_dataset_uri",
+        "uncertainty_dataset_object_ref_id",
+        "validity_domain",
+        "created_at"
+      ]
+    },
+    "AircraftTwinRevisionDTO": {
+      "fields": [
+        "twin_revision_id",
+        "aircraft_id",
+        "revision_no",
+        "component_model_refs",
+        "config_snapshot_id",
+        "valid_from",
+        "valid_to",
+        "as_of_data_time",
+        "published_at",
+        "status",
+        "uncertainty_summary",
+        "evidence_snapshot_id",
+        "supersedes_twin_revision_id"
+      ]
+    },
+    "IntrinsicCapabilityEstimateDTO": {
+      "fields": [
+        "estimate_id",
+        "twin_revision_id",
+        "capability_type",
+        "condition_point",
+        "value",
+        "unit",
+        "uncertainty",
+        "validity_domain_status",
+        "claim_level",
+        "as_of_time",
+        "created_at"
+      ]
+    },
+    "P3AdmissionStateDTO": {
+      "fields": [
+        "source_revision",
+        "event_name",
+        "git_ref",
+        "protected_main",
+        "m7_exit_decision",
+        "run_conclusion",
+        "required_jobs_success",
+        "required_jobs_total",
+        "p4_p6_inactive"
+      ]
+    }
+  },
+  "error_codes": [
+    "FAIL_CLOSED_P3_AUTHORITY_REQUIRED",
+    "FAIL_CLOSED_P3_EXACT_IDENTITY_REQUIRED",
+    "FAIL_CLOSED_P3_CURRENT_LATEST_DEFAULT_FORBIDDEN",
+    "FAIL_CLOSED_P3_PUBLISHED_P2_REQUIRED",
+    "FAIL_CLOSED_P3_NOT_IDENTIFIABLE_NUMERIC_USE",
+    "FAIL_CLOSED_P3_UNCERTAINTY_REQUIRED",
+    "FAIL_CLOSED_P3_SESSION_ORDER_REQUIRED",
+    "FAIL_CLOSED_P3_CONFIGURATION_SEGMENT_REQUIRED",
+    "FAIL_CLOSED_P3_LIFECYCLE_FUTURE_INFORMATION",
+    "FAIL_CLOSED_P3_VALIDATION_SNAPSHOT_REQUIRED",
+    "FAIL_CLOSED_P3_TRAINING_VALIDATION_LEAKAGE",
+    "FAIL_CLOSED_P3_MANAGED_OBJECT_REQUIRED",
+    "FAIL_CLOSED_P3_MANAGED_OBJECT_HASH_MISMATCH",
+    "FAIL_CLOSED_P3_CLAIM_EVIDENCE_REQUIRED",
+    "FAIL_CLOSED_P3_P1_P2_MUTATION_FORBIDDEN",
+    "FAIL_CLOSED_P3_NOT_ADMITTED",
+    "FAIL_CLOSED_P4_P6_NOT_ADMITTED"
+  ],
+  "contract_hashes": {
+    "p2_eligibility_contract_sha256": "b5dbe22d948732ac17d486e7b61d6800e550f03af63fc0b80af7c6c84d808633",
+    "lifecycle_segment_contract_sha256": "7e9316936feefcbe8677b9aa9184a06830211484a7c7681d937eed896d81767c",
+    "validation_snapshot_contract_sha256": "e4917af5768f8514449f02c12a8b23435bfcf15b8cbe8ca1aedf43df2af9d2ca",
+    "managed_object_contract_sha256": "13a71fe8196b2869b160bf77f30213eef142bf814279069591b313079e4bee82",
+    "execution_profile_contract_sha256": "2902e7f3c304a50c444049aa7139d3b76430f471f122d328b83c15e490bda00b",
+    "claim_contract_sha256": "2cc2d8b9c20da30dfffa883580eb4d402c0ca5b6b50e08a72d550b5ab7972eef",
+    "knowledge_time_contract_sha256": "fde2ab52f591498365d067502ee327c9f8e213bb235c36d15199ced45dafac57",
+    "release_replay_contract_sha256": "5a53fb3c54aeef41cabaa0d9a73c27ff2184bac7f676220b64da8951df8769e8",
+    "admission_guard_sha256": "40778a7a1ec658b81df45d7cd465aa7904221582b362dc1effc047cdccc732cf",
+    "dto_contracts_sha256": "32edf922a389b178dd8f57fb7f0a8cfbaec6e4a2339381140bfb129217b32340"
+  },
+  "golden_vectors": {
+    "not_identifiable_numeric_fail": {
+      "status": "NOT_IDENTIFIABLE",
+      "expected_error": "FAIL_CLOSED_P3_NOT_IDENTIFIABLE_NUMERIC_USE"
+    },
+    "current_latest_fail": {
+      "value": "LATEST",
+      "expected_error": "FAIL_CLOSED_P3_CURRENT_LATEST_DEFAULT_FORBIDDEN"
+    },
+    "lifecycle_inside_segment_fail": {
+      "expected_error": "FAIL_CLOSED_P3_CONFIGURATION_SEGMENT_REQUIRED"
+    },
+    "future_lifecycle_fail": {
+      "expected_error": "FAIL_CLOSED_P3_LIFECYCLE_FUTURE_INFORMATION"
+    },
+    "training_validation_overlap_fail": {
+      "expected_error": "FAIL_CLOSED_P3_TRAINING_VALIDATION_LEAKAGE"
+    },
+    "unsealed_object_fail": {
+      "expected_error": "FAIL_CLOSED_P3_MANAGED_OBJECT_REQUIRED"
+    },
+    "managed_hash_mismatch_fail": {
+      "expected_error": "FAIL_CLOSED_P3_MANAGED_OBJECT_HASH_MISMATCH"
+    },
+    "intrinsic_claim_profile_v1_fail": {
+      "expected_error": "FAIL_CLOSED_P3_CLAIM_EVIDENCE_REQUIRED"
+    },
+    "p3_pre_exit_claim_fail": {
+      "expected_error": "FAIL_CLOSED_P3_NOT_ADMITTED"
+    }
+  }
+}

@@ -6,8 +6,9 @@
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
     "date": "2026-09-28",
-    "rebaseline": "R3.8_M6_P2_DTO_EXECUTION_PROFILE",
+    "rebaseline": "R3.9_M7_P3_AUTHORITY_PROFILE",
     "lock_lineage_sha256": [
+      "f95167aca59dc993ced607e55f21f01080c4e24cc0759bf97482d49654ea182b",
       "7eafadbb1d47297688595a8a0c48d4836dad13e040f76340ce2c0fa38a5547fa",
       "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8",
       "e4f6c2bb97c169cc8db9eecfa09c67201510b5fad85e6e59fc2b96532b011db9",
@@ -33,8 +34,8 @@
     },
     {
       "file": "CROSS_LAYER_DTO_CONTRACTS.json",
-      "sha256": "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4",
-      "bytes": 43293
+      "sha256": "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41",
+      "bytes": 72984
     },
     {
       "file": "DEVELOPMENT_MILESTONE_REGISTRY.json",
@@ -95,6 +96,16 @@
       "file": "P2_LINEAR_REFERENCE_ADJUSTMENT_PROFILE.json",
       "sha256": "202e255bd09349407e0e7cc4d77d8b848df99d84dc00e50e46871eb4f82f0d68",
       "bytes": 10356
+    },
+    {
+      "file": "P3_CAPABILITY_TWIN_AUTHORITY.json",
+      "sha256": "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b",
+      "bytes": 16963
+    },
+    {
+      "file": "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL_PROFILE.json",
+      "sha256": "d66aa780d1c2e31ec664d173a0cdbc355f98c9ff3f751a6949e84f74cdf93876",
+      "bytes": 9927
     },
     {
       "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",
