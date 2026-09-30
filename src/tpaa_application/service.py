@@ -18,6 +18,11 @@ from .m4_workspace import (
     M4TrendQuery,
     M4WorkspaceService,
 )
+from .m6_workspace import (
+    M6P2ComparisonQuery,
+    M6P2DiagnosticsQuery,
+    M6WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -42,6 +47,7 @@ class ApplicationService:
         m1_publication: M1PublicationService | None = None,
         m3_publication: M3PublicationService | None = None,
         m4_workspace: M4WorkspaceService | None = None,
+        m6_workspace: M6WorkspaceService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -49,6 +55,7 @@ class ApplicationService:
         self._m1_publication = m1_publication
         self._m3_publication = m3_publication
         self._m4_workspace = m4_workspace
+        self._m6_workspace = m6_workspace
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -216,3 +223,20 @@ class ApplicationService:
         command: M4AnnotationCommand,
     ) -> dict[str, object]:
         return self._m4().annotation(command)
+
+    def _m6(self) -> M6WorkspaceService:
+        if self._m6_workspace is None:
+            raise RuntimeError("M6 workspace service is not configured")
+        return self._m6_workspace
+
+    def m6_p2_comparison(
+        self,
+        query: M6P2ComparisonQuery,
+    ) -> dict[str, object]:
+        return self._m6().comparison(query)
+
+    def m6_p2_diagnostics(
+        self,
+        query: M6P2DiagnosticsQuery,
+    ) -> dict[str, object]:
+        return self._m6().diagnostics(query)

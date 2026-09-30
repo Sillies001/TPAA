@@ -6,6 +6,7 @@ from .m1_app import create_m1_app
 from .m3_app import create_m3_app
 from .m4_app import create_m4_app
 from .m5_secure import M5ServiceSecurityError, create_m5_service_app
+from .m6_app import create_m6_app, register_m6_routes
 
 __all__ = [
     "create_app",
@@ -14,5 +15,7 @@ __all__ = [
     "create_m3_app",
     "create_m4_app",
     "M5ServiceSecurityError",
+    "create_m6_app",
+    "register_m6_routes",
     "create_m5_service_app",
 ]
