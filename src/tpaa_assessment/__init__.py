@@ -1,5 +1,15 @@
 """P2 assessment governance and attribution substrate."""
 
+from .p2_attribution import (
+    P2AdjustedCapabilityEstimate,
+    P2AttributionExecution,
+    P2AttributionRunProduct,
+    P2CohortRow,
+    P2ExecutionProfile,
+    P2FactorFeatureSet,
+    execute_p2_attribution,
+    materialize_factor_feature_set,
+)
 from .p2_substrate import (
     P1ObservationInput,
     P2AdmissionEvidence,
@@ -24,6 +34,12 @@ from .p2_substrate import (
 
 __all__ = [
     "P1ObservationInput",
+    "P2AdjustedCapabilityEstimate",
+    "P2AttributionExecution",
+    "P2AttributionRunProduct",
+    "P2CohortRow",
+    "P2ExecutionProfile",
+    "P2FactorFeatureSet",
     "P2AdmissionEvidence",
     "P2ArtifactBinding",
     "P2AttributionSpec",
@@ -34,9 +50,11 @@ __all__ = [
     "P2InputBundle",
     "P2ReferenceCondition",
     "assert_capability_claim_allowed",
+    "execute_p2_attribution",
     "assert_p1_observed_value_immutable",
     "build_p2_input_bundle",
     "governed_result",
+    "materialize_factor_feature_set",
     "project_p1_observation",
     "validate_attribution_spec",
     "validate_cohort_snapshot",

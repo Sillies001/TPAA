@@ -1,0 +1,34 @@
+{
+  "schema": "TPAA_M6_P2_ATTRIBUTION_GOLDEN_V1",
+  "profile": "P2_LINEAR_REFERENCE_ADJUSTMENT:1.0.0",
+  "nominal_single_factor": {
+    "expected_status": "IDENTIFIABLE",
+    "expected_adjusted_value": 15,
+    "expected_residual": 1,
+    "expected_factor_effects": {
+      "x": -2
+    },
+    "expected_uncertainty_lower": 15,
+    "expected_uncertainty_upper": 15,
+    "expected_claim_level": "ASSOCIATION_ONLY"
+  },
+  "nominal_two_factor": {
+    "expected_status": "IDENTIFIABLE",
+    "expected_adjusted_value": 14,
+    "expected_residual": 1,
+    "expected_factor_effects": {
+      "x": -2,
+      "z": 0
+    },
+    "expected_uncertainty_lower": 14,
+    "expected_uncertainty_upper": 14
+  },
+  "not_identifiable": {
+    "missing_factor": "FEATURE_COVERAGE_INSUFFICIENT",
+    "insufficient_subjects": "INSUFFICIENT_EFFECTIVE_EVIDENCE",
+    "rank_deficient": "MODEL_SPEC_DIAGNOSTIC_FAILURE",
+    "reference_out_of_support": "REFERENCE_CONDITION_OUT_OF_SUPPORT",
+    "non_comparable": "COHORT_NOT_COMPARABLE",
+    "jackknife_fold_failure": "UNCERTAINTY_NOT_ESTIMABLE"
+  }
+}
