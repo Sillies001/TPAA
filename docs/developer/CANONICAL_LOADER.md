@@ -9,7 +9,7 @@
 The loader fails closed unless all of the following hold:
 
 1. `BASELINE_LOCK.json` matches the repository-pinned SHA-256 for CB-1.4.0.
-2. The lock identifies the expected Core baseline and exactly 21 controlled artifacts.
+2. The lock identifies the expected Core baseline and exactly 28 controlled artifacts.
 3. Only lock-listed JSON artifacts are addressable.
 4. The selected artifact byte count and SHA-256 match the lock before its JSON payload is trusted.
 5. The payload is a JSON object and declared envelope fields have valid string types.
@@ -49,4 +49,4 @@ python tools/dev/tpaa_dev.py test-unit
 python tools/dev/tpaa_dev.py test-contract
 ```
 
-`tools/canonical/verify_loader.py` emits machine-readable M0 gate evidence and exercises both the 21-artifact success path and fail-closed negative contracts.
+`tools/canonical/verify_loader.py` emits machine-readable M0 gate evidence and exercises both the 28-artifact success path and fail-closed negative contracts.

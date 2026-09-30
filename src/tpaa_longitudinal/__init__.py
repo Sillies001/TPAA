@@ -35,7 +35,6 @@ from .m4_trend import (
     build_performance_trend_series,
     load_m4_trend_authority,
 )
-
 from .p3_substrate import (
     P3AdjustedEstimateInput,
     P3AdmissionEvidence,
