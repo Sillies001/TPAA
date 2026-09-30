@@ -1,0 +1,336 @@
+{
+  "schema": "TPAA_SDIB_M7_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.6",
+  "milestone": "M7",
+  "milestone_name": "P3 Capability/Twin Activation",
+  "entry_evidence": {
+    "predecessor_milestone": "M6",
+    "protected_main_sha": "892e4a64a321be9c7252b66207a7d1d90a6ce98d",
+    "protected_main_run_number": 494,
+    "protected_main_actions_run_id": 36697493917,
+    "p2_qualification": "P2_M6_QUALIFIED",
+    "m6_exit_decision": "GO",
+    "p2_admitted": true,
+    "protected_main_exact": true,
+    "hosted_ci_required_jobs": 14,
+    "hosted_ci_result": "PASS"
+  },
+  "task_count": 18,
+  "canonical_required_workstreams": [
+    "WS-CAPABILITY",
+    "WS-LONGITUDINAL",
+    "WS-TEST",
+    "WS-GUI",
+    "WS-GOVERNANCE"
+  ],
+  "supporting_workstreams": [
+    "WS-DATA",
+    "WS-API"
+  ],
+  "capability_boundary": {
+    "currently_admitted_phases": [
+      "P1",
+      "P2"
+    ],
+    "candidate_phase": "P3",
+    "explicitly_not_admitted": [
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "p3_claim_before_m7_exit_forbidden": true,
+    "p1_observed_evidence_immutable": true,
+    "p2_adjusted_evidence_immutable": true,
+    "p2_not_identifiable_numeric_training_target_forbidden": true,
+    "p3_may_consume_but_never_overwrite_p1_or_p2": true
+  },
+  "rolling_design": {
+    "policy_issue": 149,
+    "current_implementation_milestone": "M7",
+    "next_detailed_design_milestone": "M8",
+    "next_design_issue": 170,
+    "m8_implementation_forbidden_before_m7_exit_go": true,
+    "m8_design_runway_starts_after_m7_implementation_starts": true,
+    "distant_algorithm_precommitment_forbidden": true
+  },
+  "core_storage_authority": {
+    "canonical_business_authority": "CB-1.4.0",
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "historical_p1_p2_release_replay_semantics_must_remain_immutable": true,
+    "managed_object_registry": "registry.object_reference"
+  },
+  "authority_blockers": {
+    "c3_issue": 169,
+    "reason": "P3 high-level semantics and Core tables are frozen, but exact P2 eligibility projection, lifecycle/as-of segmentation, managed-object URI binding, model/plugin/profile and validation semantics, applicability/OOD/validity-domain statuses, claim tiers, cross-layer DTOs, twin revision/replay identity and M7 admission evidence require machine-authority closure before dependent implementation may claim completion.",
+    "fail_closed": true,
+    "blocker_task_id": "M7-GOV-001",
+    "dependent_task_ids": [
+      "M7-GOV-002",
+      "M7-DATA-001",
+      "M7-DATA-002",
+      "M7-DATA-003",
+      "M7-CAP-001",
+      "M7-CAP-002",
+      "M7-CAP-003",
+      "M7-CAP-004",
+      "M7-CAP-005",
+      "M7-API-001",
+      "M7-GUI-001",
+      "M7-TST-001",
+      "M7-TST-002",
+      "M7-TST-003",
+      "M7-TST-004",
+      "M7-TST-005"
+    ]
+  },
+  "authority_boundaries": {
+    "capability_registry": "CAPABILITY_PHASE_REGISTRY.json",
+    "milestone_registry": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+    "extension_contract_registry": "EXTENSION_CONTRACT_REGISTRY.json",
+    "core_logical_model": "CORE_LOGICAL_MODEL.json",
+    "cross_layer_dto_contracts": "CROSS_LAYER_DTO_CONTRACTS.json",
+    "implementation_invented_model_algorithm_or_threshold_forbidden": true,
+    "current_latest_default_historical_resolution_forbidden": true,
+    "same_episode_or_future_information_leakage_forbidden": true,
+    "p2_not_identifiable_numeric_use_forbidden": true,
+    "lifecycle_configuration_change_segmentation_required": true,
+    "independent_aircraft_episode_observation_counts_must_remain_distinct": true,
+    "model_surface_uri_must_bind_sealed_active_managed_object": true,
+    "local_file_or_mutable_model_alias_forbidden": true,
+    "stronger_intrinsic_claim_requires_independent_evidence": true,
+    "p4_p6_activation_forbidden": true
+  },
+  "batches": [
+    {
+      "batch_id": "M7-BATCH-1",
+      "name": "P3 authority + exact P2/lifecycle/validation substrate",
+      "task_ids": [
+        "M7-GOV-001",
+        "M7-GOV-002",
+        "M7-DATA-001",
+        "M7-DATA-002",
+        "M7-DATA-003",
+        "M7-TST-001"
+      ]
+    },
+    {
+      "batch_id": "M7-BATCH-2",
+      "name": "Capability model + surface",
+      "task_ids": [
+        "M7-CAP-001",
+        "M7-CAP-002",
+        "M7-CAP-003",
+        "M7-TST-002",
+        "M7-TST-003"
+      ]
+    },
+    {
+      "batch_id": "M7-BATCH-3",
+      "name": "Aircraft twin + P3 estimate + API/GUI + M8 runway",
+      "task_ids": [
+        "M7-CAP-004",
+        "M7-CAP-005",
+        "M7-API-001",
+        "M7-GUI-001",
+        "M7-GOV-003",
+        "M7-TST-004"
+      ]
+    },
+    {
+      "batch_id": "M7-BATCH-4",
+      "name": "M7 Exit / P3 admission",
+      "task_ids": [
+        "M7-TST-005"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M7-GOV-001",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "P3 implementation authority closure",
+      "dependencies": [
+        "P2_M6_QUALIFIED",
+        "C3 issue #169"
+      ],
+      "minimum_acceptance": "Versioned machine authority freezes exact P2-to-P3 eligibility and exclusion projection, lifecycle/configuration/as-of segmentation, model-spec/plugin/profile and validation semantics, applicability/OOD/validity-domain status, managed-object URI/hash binding, exact P3 DTO/replay identities, claim tiers and immutable evidence/release binding; implementation-local substitutes are forbidden."
+    },
+    {
+      "task_id": "M7-GOV-002",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "C4 P3 admission / claim guard",
+      "dependencies": [
+        "P2_M6_QUALIFIED",
+        "CAPABILITY_PHASE_REGISTRY.json",
+        "M7-GOV-001"
+      ],
+      "minimum_acceptance": "P3 remains externally unclaimable until protected-main M7 Exit GO; P1/P2 remain immutable distinct evidence layers; P4-P6 remain inactive; reference-condition wording is default unless exact independent-evidence authority permits a stronger claim."
+    },
+    {
+      "task_id": "M7-DATA-001",
+      "workstream": "WS-DATA",
+      "deliverable": "Exact immutable P2 longitudinal eligibility projection for P3",
+      "dependencies": [
+        "M7-GOV-001",
+        "M7-GOV-002",
+        "capability.adjusted_capability_estimate"
+      ],
+      "minimum_acceptance": "Select only exact published immutable P2 products with exact P2 Release, source P1 Release/observation, attribution run/spec/plugin/model artifact/reference condition, uncertainty/evidence/configuration/as-of identity; numeric training requires IDENTIFIABLE and rejects NOT_IDENTIFIABLE without fabricating values or current/latest fallback."
+    },
+    {
+      "task_id": "M7-DATA-002",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Lifecycle/configuration/as-of segment snapshot",
+      "dependencies": [
+        "M7-DATA-001",
+        "master.aircraft_configuration_snapshot"
+      ],
+      "minimum_acceptance": "Materialize exact aircraft/model/configuration/lifecycle segment identities and validity/as-of boundaries; software/hardware/maintenance changes are explicit governed markers when authoritative evidence exists; independent-aircraft, episode, observation and effective-evidence counts remain distinct; missing authority fails closed."
+    },
+    {
+      "task_id": "M7-DATA-003",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Model-validation evidence snapshot and claim-tier eligibility",
+      "dependencies": [
+        "M7-GOV-001",
+        "M7-DATA-002"
+      ],
+      "minimum_acceptance": "Freeze exact training/validation snapshot identities, validation evidence and applicability/validity-domain inputs; default claim remains reference-condition longitudinal estimate and stronger intrinsic wording requires exact independent evidence; no implementation-selected threshold."
+    },
+    {
+      "task_id": "M7-CAP-001",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Deterministic capability-model training-set materialization",
+      "dependencies": [
+        "M7-DATA-001",
+        "M7-DATA-002",
+        "M7-DATA-003"
+      ],
+      "minimum_acceptance": "Create deterministic model-training input identity from exact eligible P2 products, lifecycle segments, validation snapshot and as-of cutoff; stable ordering/weighting semantics come only from adopted authority/profile; P1/P2 remain unmodified."
+    },
+    {
+      "task_id": "M7-CAP-002",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Governed capability-model execution and validation provenance",
+      "dependencies": [
+        "M7-GOV-001",
+        "M7-CAP-001",
+        "capability.capability_model"
+      ],
+      "minimum_acceptance": "Execute only an adopted exact model spec/plugin/profile against frozen training data; persist model artifact hash, sealed ACTIVE managed-object URI, validity domain, validation metrics/status and provenance sufficient for exact replay; no local/file/current model alias."
+    },
+    {
+      "task_id": "M7-CAP-003",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Capability-surface generation and validity-domain product",
+      "dependencies": [
+        "M7-CAP-002",
+        "capability.capability_surface"
+      ],
+      "minimum_acceptance": "Publish deterministic capability surface bound to exact capability model, axes/semantics, sealed ACTIVE dataset managed URI/hash, optional governed uncertainty dataset and exact validity domain; extrapolation/unsupported domain is fail-closed."
+    },
+    {
+      "task_id": "M7-CAP-004",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Immutable aircraft twin revision publication",
+      "dependencies": [
+        "M7-CAP-003",
+        "capability.aircraft_twin_revision"
+      ],
+      "minimum_acceptance": "Publish an immutable twin revision with exact aircraft, revision number, ordered component-model refs, configuration snapshot, validity interval, as_of_data_time, uncertainty, evidence snapshot and supersession; twin is a capability read model, never same-episode World state."
+    },
+    {
+      "task_id": "M7-CAP-005",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "P3 reference-condition/intrinsic capability estimate",
+      "dependencies": [
+        "M7-CAP-004",
+        "capability.intrinsic_capability_estimate"
+      ],
+      "minimum_acceptance": "Evaluate only exact twin/model/surface revisions inside governed validity domain; output value may be null when invalid/out-of-domain, uncertainty and as-of time are preserved, and claim level follows exact independent-evidence tier without overwriting P1/P2."
+    },
+    {
+      "task_id": "M7-API-001",
+      "workstream": "WS-API",
+      "deliverable": "Exact twin-revision-bound P3 read API",
+      "dependencies": [
+        "M7-CAP-005"
+      ],
+      "minimum_acceptance": "Expose exact immutable model/surface/twin/estimate projections with explicit revision/release/model identities and diagnostics; historical reads require exact ids and never resolve current/latest/default aliases or recompute business results."
+    },
+    {
+      "task_id": "M7-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "P1 observed / P2 adjusted / P3 reference-condition product separation",
+      "dependencies": [
+        "M7-API-001"
+      ],
+      "minimum_acceptance": "UI presents P1 observed, P2 adjusted/attributed, P3 reference-condition longitudinal estimate and any independently-supported stronger claim as visibly distinct layers with exact evidence/version/as-of/validity-domain state; out-of-domain and unavailable are not zero/N_A."
+    },
+    {
+      "task_id": "M7-GOV-003",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "M8/P4-P5 one-milestone-ahead detailed-design runway",
+      "dependencies": [
+        "M7-BATCH-1 accepted",
+        "program issue #149",
+        "design issue #170"
+      ],
+      "minimum_acceptance": "During active M7 implementation refine M8/P4-P5 from real P3 evidence to task/interface/test detail, including human-machine, team/mission scope separation, instructor/privacy/security and longitudinal evidence boundaries; no P4/P5 implementation or admission is activated."
+    },
+    {
+      "task_id": "M7-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "P3 authority/admission/leakage/managed-object Golden-negative suite",
+      "dependencies": [
+        "M7-GOV-001",
+        "M7-GOV-002",
+        "M7-DATA-003"
+      ],
+      "minimum_acceptance": "Fail closed on missing/stale P3 authority/profile, P2 NOT_IDENTIFIABLE numeric use, current/latest fallback, future/same-episode leakage, config drift, insufficient independent-aircraft evidence, unsealed/inactive/hash-mismatched managed objects, unsupported intrinsic wording, pre-Exit P3 claim and premature P4-P6 activation."
+    },
+    {
+      "task_id": "M7-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "Capability-model/surface synthetic fixture family",
+      "dependencies": [
+        "M7-CAP-001"
+      ],
+      "minimum_acceptance": "Synthetic fixtures cover nominal multi-aircraft longitudinal evidence, lifecycle/config segments, NI exclusions, low independent-aircraft support, validation/applicability/OOD cases, managed-object failures and deterministic as-of replay with exact governed identities."
+    },
+    {
+      "task_id": "M7-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "Deterministic model/surface Golden and replay qualification",
+      "dependencies": [
+        "M7-CAP-002",
+        "M7-CAP-003",
+        "M7-TST-002"
+      ],
+      "minimum_acceptance": "Golden vectors verify exact training-set/model/surface logical identities, model artifact and managed-object hashes, validation/validity-domain status, uncertainty dataset identity and deterministic replay; no algorithm/threshold fallback is accepted."
+    },
+    {
+      "task_id": "M7-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "Twin revision/API/GUI replay, cross-platform equivalence and P1/P2 non-regression",
+      "dependencies": [
+        "M7-CAP-004",
+        "M7-CAP-005",
+        "M7-API-001",
+        "M7-GUI-001",
+        "M7-TST-003"
+      ],
+      "minimum_acceptance": "One exact candidate proves Windows/Linux logical equivalence, twin revision supersession/replay, configuration/as-of boundaries, validity-domain fail-closed behavior, no same-episode World substitution, immutable P1/P2 hashes/releases, DB 1.6.0 compatibility and retained M5/M6 product guarantees."
+    },
+    {
+      "task_id": "M7-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "M7 Exit review and C4 P3 admission decision",
+      "dependencies": [
+        "ALL_M7_TASKS"
+      ],
+      "minimum_acceptance": "Exact 18/18 M7 evidence, C3 authority/profile closure, exact P2/lifecycle/model-validation substrate, managed-object/validation/applicability/claim gates, Golden/negative coverage, twin/API/GUI separation, cross-platform/replay/P1-P2 non-regression and M8 design-runway evidence all pass with failed_acceptance=[]; only protected-main exact M7 Exit GO admits P3."
+    }
+  ]
+}
