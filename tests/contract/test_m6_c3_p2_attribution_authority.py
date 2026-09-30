@@ -114,6 +114,8 @@ def test_m6_c3_p2_subtypes_use_existing_core_artifact_kinds() -> None:
 
 def test_m6_c3_lock_lineage_preserves_protected_main_parent() -> None:
     lock = json.loads((BASELINE / "BASELINE_LOCK.json").read_text(encoding="utf-8"))
-    assert lock["baseline"]["lock_lineage_sha256"][0] == (
-        "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8"
-    )
+    lineage = lock["baseline"]["lock_lineage_sha256"]
+    assert lineage[:2] == [
+        "7eafadbb1d47297688595a8a0c48d4836dad13e040f76340ce2c0fa38a5547fa",
+        "be54a16d2f33aca73f0686ffe09414045611fa4ad4c452e0e57ca96e460736d8",
+    ]
