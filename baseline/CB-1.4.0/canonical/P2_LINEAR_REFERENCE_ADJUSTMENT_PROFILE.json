@@ -1,0 +1,244 @@
+{
+  "profile_id": "P2_LINEAR_REFERENCE_ADJUSTMENT",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_EXECUTION_PROFILE",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "tracking_issue": 161,
+  "source_bindings": {
+    "p2_authority_id": "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY",
+    "p2_authority_version": "1.0.0",
+    "p2_authority_sha256": "1bfc6c9eb8e2142249c327af5698bc6a8925f983fd8363b1d2bd835966eea5fa",
+    "cross_layer_dto_sha256": "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4",
+    "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+    "extension_contract_registry_sha256": "f987ea2801557befac44aaf3b47b3953a5cdbaaa662e39c2f3970526f3371f41"
+  },
+  "activation_rule": {
+    "profile_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "profile_adoption_does_not_admit_p2": true,
+    "p2_external_claim_requires_protected_main_m6_exit_go": true,
+    "p3_p6_active": false
+  },
+  "runtime_binding": {
+    "carrier_table": "registry.context_artifact",
+    "artifact_kind": "ASSESSMENT_PROFILE",
+    "logical_key": "P2_ATTRIBUTION_SPEC:P2_LINEAR_REFERENCE_ADJUSTMENT",
+    "artifact_version": "1.0.0",
+    "artifact_schema_version": "TPAA_P2_ATTRIBUTION_SPEC_V1",
+    "attribution_spec_id": "P2_ATTRIBUTION_SPEC:P2_LINEAR_REFERENCE_ADJUSTMENT",
+    "attribution_spec_version": "1.0.0",
+    "model_plugin": "LINEAR_REFERENCE_ADJUSTMENT",
+    "model_plugin_version": "1.0.0",
+    "exact_identity_only": true,
+    "current_latest_default_forbidden": true
+  },
+  "scope": {
+    "numeric_p1_observations_only": true,
+    "factor_taxonomy_inference_forbidden": true,
+    "root_cause_inference_forbidden": true,
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "p1_overwrite_forbidden": true
+  },
+  "eligibility_contract": {
+    "release_status": "PUBLISHED",
+    "observation_eligibility_status": "ELIGIBLE",
+    "metric_value_kind": "NUMERIC",
+    "observed_value_source": "metric.capability_observation.observed_value_numeric",
+    "knowledge_time_source": "registry.analysis_release.published_at",
+    "feature_set_required_coverage": "1.0",
+    "confidence_business_minimum": null,
+    "required_factor_missing_policy": "ROW_INELIGIBLE_NO_IMPUTATION",
+    "non_finite_numeric_policy": "REJECT"
+  },
+  "ordering_contract": {
+    "factor_order": "EXACT_SEALED_FEATURE_SPEC_ORDER",
+    "cohort_row_order": "SOURCE_OBSERVATION_ID_ASC",
+    "independent_subject_order": "SUBJECT_ENTITY_ID_ASC",
+    "jackknife_fold_order": "SUBJECT_ENTITY_ID_ASC",
+    "database_default_order_forbidden": true
+  },
+  "subject_balancing_contract": {
+    "independent_subject_key": "subject_entity_id",
+    "row_weight_formula": "1 / eligible_observation_count_for_subject",
+    "total_weight_per_subject": "1",
+    "full_fit_min_independent_subjects": "factor_count + 3",
+    "leave_one_out_min_independent_subjects": "factor_count + 2",
+    "repeated_rows_do_not_increase_subject_total_weight": true
+  },
+  "arithmetic_contract": {
+    "backend": "PYTHON_DECIMAL",
+    "decimal_precision": 50,
+    "rounding_mode": "ROUND_HALF_EVEN",
+    "input_conversion": "Decimal(str(value)) after finite-number validation",
+    "output_quantum": "1E-12",
+    "output_rounding_mode": "ROUND_HALF_EVEN",
+    "model_artifact_numeric_encoding": "QUANTIZED_DECIMAL_STRING",
+    "external_blas_backend_forbidden": true,
+    "random_sampling_forbidden": true
+  },
+  "scaling_contract": {
+    "weighted_mean": "subject-balanced weighted mean",
+    "weighted_rms_scale": "sqrt(subject-balanced weighted squared deviation)",
+    "zero_scale_tolerance": "1E-24",
+    "zero_or_near_zero_scale_reason": "FEATURE_COVERAGE_INSUFFICIENT"
+  },
+  "solver_contract": {
+    "algorithm": "DECIMAL_MODIFIED_GRAM_SCHMIDT_QR2",
+    "intercept": true,
+    "reorthogonalization_passes": 2,
+    "weighted_row_transform": "multiply design row and outcome by sqrt(row_weight)",
+    "factor_columns": "standardized in exact feature-spec order; no pivot reordering",
+    "rank_ratio_metric": "min(abs(R_diag)) / max(abs(R_diag))",
+    "rank_ratio_minimum": "1E-10",
+    "rank_failure_reason": "MODEL_SPEC_DIAGNOSTIC_FAILURE",
+    "regularization_forbidden": true,
+    "factor_dropping_fallback_forbidden": true,
+    "alternate_solver_fallback_forbidden": true
+  },
+  "support_contract": {
+    "support_source": "eligible comparable cohort",
+    "per_factor_interval": "inclusive [min,max]",
+    "tolerance": "0",
+    "target_must_be_in_support": true,
+    "reference_must_be_in_support": true,
+    "out_of_support_reason": "REFERENCE_CONDITION_OUT_OF_SUPPORT"
+  },
+  "adjustment_contract": {
+    "raw_coefficient_projection": "beta_raw_j = beta_standardized_j / factor_scale_j",
+    "factor_effect_formula": "beta_raw_j * (reference_j - target_j)",
+    "adjusted_value_formula": "target_observed_value + sum(factor_effect_j)",
+    "residual_formula": "target_observed_value - model_prediction_at_target",
+    "factor_effect_semantics": "MODEL_CONDITIONED_ASSOCIATION",
+    "claim_level": "ASSOCIATION_ONLY",
+    "causal_upgrade_supported": false
+  },
+  "uncertainty_contract": {
+    "method": "JACKKNIFE_LEAVE_ONE_INDEPENDENT_SUBJECT_OUT",
+    "level": "0.95",
+    "z_value": "1.959963984540054",
+    "theta_bar": "mean(leave_one_subject_out_adjusted_values)",
+    "standard_error_formula": "sqrt((S-1)/S * sum((theta_without_s - theta_bar)^2))",
+    "interval_formula": "full_adjusted_value +/- z_value * standard_error",
+    "any_fold_failure_reason": "UNCERTAINTY_NOT_ESTIMABLE",
+    "alternate_uncertainty_fallback_forbidden": true
+  },
+  "identifiability_contract": {
+    "identifiable_status": "IDENTIFIABLE",
+    "not_identifiable_status": "NOT_IDENTIFIABLE",
+    "adjusted_value_null_when_not_identifiable": true,
+    "reason_codes": [
+      "INSUFFICIENT_EFFECTIVE_EVIDENCE",
+      "REFERENCE_CONDITION_OUT_OF_SUPPORT",
+      "COHORT_NOT_COMPARABLE",
+      "FEATURE_COVERAGE_INSUFFICIENT",
+      "MODEL_SPEC_DIAGNOSTIC_FAILURE",
+      "INDEPENDENCE_REQUIREMENT_NOT_MET",
+      "UNCERTAINTY_NOT_ESTIMABLE"
+    ],
+    "synthetic_adjusted_value_forbidden": true
+  },
+  "artifact_replay_contract": {
+    "canonical_json": {
+      "sort_keys": true,
+      "separators": [
+        ",",
+        ":"
+      ],
+      "ensure_ascii": true,
+      "allow_nan": false
+    },
+    "model_artifact_required_fields": [
+      "profile_id",
+      "profile_version",
+      "attribution_spec_id",
+      "attribution_spec_version",
+      "model_plugin",
+      "model_plugin_version",
+      "factor_order",
+      "cohort_snapshot_id",
+      "cohort_data_hash",
+      "reference_condition_id",
+      "reference_artifact_sha256",
+      "feature_spec_id",
+      "feature_spec_version",
+      "feature_spec_sha256",
+      "as_of_utc",
+      "scaling",
+      "coefficients",
+      "diagnostics",
+      "jackknife_adjusted_values"
+    ],
+    "model_artifact_hash": "SHA-256 of canonical model artifact bytes",
+    "model_artifact_uri_policy": "NULL unless stored through an existing managed-object path",
+    "replay_equality": [
+      "exact model_artifact_hash",
+      "exact factor_feature_set input_hash",
+      "exact P1 source release",
+      "exact P2 analysis release",
+      "exact adjusted-estimate logical hash"
+    ],
+    "historical_current_latest_fallback_forbidden": true
+  },
+  "identity_contract": {
+    "namespace_derivation": "UUIDv5 using RFC 4122 NAMESPACE_URL and the exact URN names below",
+    "namespace_url": "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+    "factor_feature_set": {
+      "urn": "urn:tpaa:p2:factor-feature-set",
+      "namespace_uuid": "584cb5ba-75d3-5e80-a065-41a252cf59ab",
+      "material": "input_hash"
+    },
+    "attribution_run": {
+      "urn": "urn:tpaa:p2:attribution-run",
+      "namespace_uuid": "40f66ec0-89f5-5318-8464-70bc72b52ec5",
+      "material": "run_request_hash|model_artifact_hash_or_status_hash"
+    },
+    "adjusted_estimate": {
+      "urn": "urn:tpaa:p2:adjusted-estimate",
+      "namespace_uuid": "9f83ba49-7c80-5f0e-969a-5ede618f84ec",
+      "material": "p2_release_id|source_observation_id|attribution_run_id|estimate_logical_hash"
+    }
+  },
+  "forbidden_fallbacks": [
+    "IMPUTATION",
+    "REGULARIZATION",
+    "FACTOR_REMOVAL",
+    "ALTERNATE_SOLVER",
+    "ALTERNATE_UNCERTAINTY_METHOD",
+    "CURRENT_LATEST_DEFAULT_IDENTITY",
+    "SYNTHETIC_ADJUSTED_VALUE"
+  ],
+  "qualification_matrix": [
+    "EXACT_LINEAR_NOMINAL",
+    "TWO_FACTOR_SUBJECT_BALANCED_NOMINAL",
+    "ROW_ORDER_PERMUTATION_REPLAY_EQUAL",
+    "REPEATED_ROWS_ONE_SUBJECT_WEIGHT_INVARIANT",
+    "MISSING_REQUIRED_FACTOR_NOT_IDENTIFIABLE",
+    "NON_COMPARABLE_COHORT_FAIL_CLOSED",
+    "INSUFFICIENT_INDEPENDENT_SUBJECTS_NOT_IDENTIFIABLE",
+    "RANK_DEFICIENT_FACTORS_NOT_IDENTIFIABLE",
+    "REFERENCE_OUT_OF_SUPPORT_NOT_IDENTIFIABLE",
+    "FUTURE_INFORMATION_REJECTED",
+    "SAME_EPISODE_REJECTED",
+    "JACKKNIFE_FOLD_FAILURE_NOT_IDENTIFIABLE",
+    "UNSUPPORTED_CAUSAL_LABEL_REJECTED",
+    "P1_RELEASE_AND_OBSERVED_VALUE_UNCHANGED"
+  ],
+  "contract_hashes": {
+    "runtime_binding_sha256": "5e30333a9967f235a8b3bc8ce482d9b77074a1f5eb1d49f37ee8f2259979641c",
+    "eligibility_sha256": "c6e121fcf6f63169affbe7fff3528a25b161c294a774278ddf68fabf107e510c",
+    "ordering_sha256": "0ebaee36be8a673281274fc0c371d97c06dd0105ed9dce149d9e7b97a69656fa",
+    "subject_balancing_sha256": "16b51aba4a6f815cb46a5002090f28205773a76222257e7dd32f47787e84213f",
+    "arithmetic_sha256": "b8c03436b97c2b665dbea8155085769e53681b337c832861a04ffa830aaf8d22",
+    "scaling_sha256": "a20c1ad3493621aa38c0d64e03879817e822b18fb96719ace1687b2240f93324",
+    "solver_sha256": "66076eda5914787090912be310ca126dfb40dae207af313346b28e055b53e4ba",
+    "support_sha256": "125259622b1b5f98d6103ee46f551996329058b9f9b206bd439cd57a6622fb53",
+    "adjustment_sha256": "87b461894d807386eaee4baad0cb9c50c3299e1720a4f1069c066752ff66dd06",
+    "uncertainty_sha256": "f7cd453c2563683ab0e0196cd47c661847d5971265ff61b5d9d0131e22064568",
+    "identifiability_sha256": "b69367874828b5363b1690cef6347512f7d9ed8d867d730f36f4a7ff462e8538",
+    "artifact_replay_sha256": "0c3542f5ba5207003ccdca0e5c51bccda939cac828add58d13a2f0467fcb0633",
+    "identity_sha256": "3dc5959593560734db46371d52422a06adb5ba3fa667f5c75e063852967a27a7"
+  }
+}
