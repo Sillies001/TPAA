@@ -64,6 +64,14 @@ from .m4_workspace import (
     M4TrendQuery,
     M4WorkspaceService,
 )
+from .m6_workspace import (
+    InMemoryM6P2WorkspaceRepository,
+    M6ApplicationError,
+    M6P2ComparisonQuery,
+    M6P2DiagnosticsQuery,
+    M6P2WorkspaceSnapshot,
+    M6WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import (
     GetRuntimeBaselineStatus,
@@ -124,6 +132,12 @@ __all__ = [
     "M4DebriefTimelineItem",
     "M4TrendQuery",
     "M4WorkspaceService",
+    "InMemoryM6P2WorkspaceRepository",
+    "M6ApplicationError",
+    "M6P2ComparisonQuery",
+    "M6P2DiagnosticsQuery",
+    "M6P2WorkspaceSnapshot",
+    "M6WorkspaceService",
     "GetRuntimeBaselineStatus",
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",

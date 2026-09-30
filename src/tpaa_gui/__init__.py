@@ -47,6 +47,18 @@ from .m4_workspace import (
     build_m4_trend_workspace_model,
     create_m4_workspace,
 )
+from .m6_workspace import (
+    M6_P2_STATUS_STYLES,
+    M6AdjustedPresentation,
+    M6ComparisonWorkspaceModel,
+    M6DesktopTransport,
+    M6DiagnosticsWorkspaceModel,
+    M6ObservedPresentation,
+    M6WorkspacePresentationError,
+    build_m6_comparison_workspace_model,
+    build_m6_diagnostics_workspace_model,
+    create_m6_workspace,
+)
 from .shell import PYSIDE6_DEPENDENCY_MISSING, GuiShellConfig, GuiShellError, run_gui
 
 __all__ = [
@@ -84,6 +96,16 @@ __all__ = [
     "M4TrendPointPresentation",
     "M4TrendWorkspaceModel",
     "M4WorkspacePresentationError",
+    "M6_P2_STATUS_STYLES",
+    "M6AdjustedPresentation",
+    "M6ComparisonWorkspaceModel",
+    "M6DesktopTransport",
+    "M6DiagnosticsWorkspaceModel",
+    "M6ObservedPresentation",
+    "M6WorkspacePresentationError",
+    "build_m6_comparison_workspace_model",
+    "build_m6_diagnostics_workspace_model",
+    "create_m6_workspace",
     "build_annotation_command_payload",
     "build_m4_debrief_workspace_model",
     "build_m4_trend_workspace_model",
