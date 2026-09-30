@@ -273,10 +273,10 @@ class P1ObservationInput:
     context_id: str
     capability_type: str
     metric_semantic_id: str
-    metric_semantic_version: str
+    metric_semantic_version: int
     comparison_key_hash: str
     evidence_set_id: str
-    observed_value: float | None
+    observed_value: float
     unit: str
     coverage: float
     confidence: float
@@ -347,7 +347,7 @@ class P2CohortSnapshot:
     frozen: bool
     cohort_spec_id: str
     cohort_spec_version: str
-    comparability_dimensions: tuple[tuple[str, str], ...]
+    comparability_dimensions: tuple[tuple[str, str | int], ...]
     knowledge_cutoff_utc: str
     raw_record_count: int
     observation_count: int
@@ -415,10 +415,18 @@ def project_p1_observation(
     for field, identity in (
         ("capability_type", value.capability_type),
         ("metric_semantic_id", value.metric_semantic_id),
-        ("metric_semantic_version", value.metric_semantic_version),
         ("unit", value.unit),
     ):
         _exact(identity, field=field, policy=p)
+    if (
+        not isinstance(value.metric_semantic_version, int)
+        or isinstance(value.metric_semantic_version, bool)
+        or value.metric_semantic_version <= 0
+    ):
+        raise P2GovernanceError(
+            "FAIL_CLOSED_P2_EXACT_IDENTITY_REQUIRED",
+            f"metric_semantic_version={value.metric_semantic_version!r}",
+        )
     _hash64(value.comparison_key_hash, field="comparison_key_hash")
     _utc(value.knowledge_time_utc, field="knowledge_time_utc")
     if value.release_status != p.required_release_status or not value.release_sealed:
@@ -436,10 +444,14 @@ def project_p1_observation(
             "FAIL_CLOSED_P2_PUBLISHED_P1_REQUIRED",
             "coverage/confidence outside [0,1]",
         )
-    if value.observed_value is not None and not math.isfinite(value.observed_value):
+    if (
+        isinstance(value.observed_value, bool)
+        or not isinstance(value.observed_value, (int, float))
+        or not math.isfinite(value.observed_value)
+    ):
         raise P2GovernanceError(
             "FAIL_CLOSED_P2_PUBLISHED_P1_REQUIRED",
-            "observed_value must be finite or null",
+            "observed_value must be a finite numeric value",
         )
     return value
 
@@ -560,7 +572,24 @@ def validate_cohort_snapshot(
                 "FAIL_CLOSED_P2_COMPARABILITY_MISMATCH",
                 f"missing dimension {name}",
             )
-        _exact(dimensions[name], field=f"comparability.{name}", policy=p)
+        dimension = dimensions[name]
+        if name == "metric_semantic_version":
+            if (
+                not isinstance(dimension, int)
+                or isinstance(dimension, bool)
+                or dimension <= 0
+            ):
+                raise P2GovernanceError(
+                    "FAIL_CLOSED_P2_COMPARABILITY_MISMATCH",
+                    f"comparability.{name}={dimension!r}",
+                )
+        else:
+            if not isinstance(dimension, str):
+                raise P2GovernanceError(
+                    "FAIL_CLOSED_P2_COMPARABILITY_MISMATCH",
+                    f"comparability.{name}={dimension!r}",
+                )
+            _exact(dimension, field=f"comparability.{name}", policy=p)
     if value.raw_record_count < value.observation_count:
         raise P2GovernanceError(
             "FAIL_CLOSED_P2_EVIDENCE_INDEPENDENCE",
@@ -635,7 +664,7 @@ def build_p2_input_bundle(
             "FAIL_CLOSED_P2_SAME_EPISODE_LEAKAGE",
             "target episode is present in cohort",
         )
-    target_dimensions = {
+    target_dimensions: dict[str, str | int] = {
         "capability_type": target.capability_type,
         "metric_semantic_id": target.metric_semantic_id,
         "metric_semantic_version": target.metric_semantic_version,

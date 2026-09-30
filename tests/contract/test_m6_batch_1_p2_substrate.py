@@ -64,7 +64,7 @@ def _target() -> P1ObservationInput:
         context_id=U["context"],
         capability_type="KINEMATIC_ENERGY_CONTROL",
         metric_semantic_id="metric.test.energy",
-        metric_semantic_version="1",
+        metric_semantic_version=1,
         comparison_key_hash=H,
         evidence_set_id=U["evidence"],
         observed_value=42.0,
@@ -137,7 +137,7 @@ def _inputs(
         comparability_dimensions=(
             ("capability_type", "KINEMATIC_ENERGY_CONTROL"),
             ("metric_semantic_id", "metric.test.energy"),
-            ("metric_semantic_version", "1"),
+            ("metric_semantic_version", 1),
             ("unit", "1"),
             ("aircraft_model_id", U["model"]),
             ("comparison_key_hash", H),
@@ -197,7 +197,7 @@ def test_m6_batch1_valid_input_bundle_is_deterministic(
     assert len(first.input_hash) == 64
 
 
-def test_m6_batch1_rejects_unpublished_or_latest_p1(
+def test_m6_batch1_rejects_unpublished_or_invalid_numeric_p1(
     policy: P2AuthorityPolicy,
 ) -> None:
     with pytest.raises(P2GovernanceError) as unpublished:
@@ -209,10 +209,17 @@ def test_m6_batch1_rejects_unpublished_or_latest_p1(
 
     with pytest.raises(P2GovernanceError) as latest:
         project_p1_observation(
-            replace(_target(), metric_semantic_version="LATEST"),
+            replace(_target(), metric_semantic_version=0),
             policy=policy,
         )
-    assert latest.value.code == "FAIL_CLOSED_P2_CURRENT_LATEST_FORBIDDEN"
+    assert latest.value.code == "FAIL_CLOSED_P2_EXACT_IDENTITY_REQUIRED"
+
+    with pytest.raises(P2GovernanceError) as missing_numeric:
+        project_p1_observation(
+            replace(_target(), observed_value=None),
+            policy=policy,
+        )
+    assert missing_numeric.value.code == "FAIL_CLOSED_P2_PUBLISHED_P1_REQUIRED"
 
 
 def test_m6_batch1_rejects_same_episode_and_future_information(

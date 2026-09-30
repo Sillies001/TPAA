@@ -19,6 +19,7 @@ _TRANSPORT_TYPES = {
     "uuid-string?": "str | None",
     "integer": "int",
     "number": "int | float",
+    "number?": "int | float | None",
     "boolean": "bool",
     "decimal-string": "str",
     "decimal-string?": "str | None",
