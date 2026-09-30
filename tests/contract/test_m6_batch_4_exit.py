@@ -117,6 +117,56 @@ def _review(
     )
 
 
+def _close_m6_exit_with_exact_go_evidence(bundle: dict[str, object]) -> None:
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    entry = issues["166"]
+    assert isinstance(entry, dict)
+    issue = entry["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    entry["comments"] = [
+        {
+            "body": (
+                "M6 protected-main Exit is formally qualified. "
+                "actual M6 merge SHA: 892e4a64a321be9c7252b66207a7d1d90a6ce98d "
+                "protected-main Run #494 / 36697493917: push / main / exact merge SHA / "
+                "14 of 14 SUCCESS; final decision: `GO`; "
+                "`failed_acceptance=[]`; `p2_admitted=true`; "
+                "qualification: `P2_M6_QUALIFIED`."
+            )
+        }
+    ]
+
+
+def test_m6_batch_4_closed_exit_tracker_with_exact_go_evidence_remains_valid(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    _close_m6_exit_with_exact_go_evidence(bundle)
+    result = _review(tmp_path, issues=bundle)
+    assert result["status"] == "PASS"
+    assert result["decision"] == "PENDING_PROTECTED_MAIN"
+    assert result["failed_acceptance"] == []
+
+
+def test_m6_batch_4_closed_exit_tracker_without_go_evidence_is_no_go(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    entry = issues["166"]
+    assert isinstance(entry, dict)
+    issue = entry["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    entry["comments"] = []
+    result = _review(tmp_path, issues=bundle)
+    assert result["decision"] == "NO_GO"
+    assert "program_and_exit_tracker_lifecycle_valid" in result["failed_acceptance"]
+
+
 def test_m6_batch_4_pr_candidate_passes_but_cannot_admit_p2(tmp_path: Path) -> None:
     result = _review(tmp_path)
     assert result["status"] == "PASS"

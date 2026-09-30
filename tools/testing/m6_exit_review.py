@@ -184,6 +184,27 @@ def _m7_runway_exact(bundle: dict[str, Any]) -> bool:
     )
 
 
+def _program_and_exit_tracker_lifecycle_valid(bundle: dict[str, Any]) -> bool:
+    if _issue_state(bundle, 149) != "open":
+        return False
+    exit_state = _issue_state(bundle, 166)
+    if exit_state == "open":
+        return True
+    if exit_state != "closed":
+        return False
+    text = _issue_text(bundle, 166)
+    return (
+        "892e4a64a321be9c7252b66207a7d1d90a6ce98d" in text
+        and "Run #494" in text
+        and "36697493917" in text
+        and ("14 of 14 SUCCESS" in text or "14/14 SUCCESS" in text)
+        and "final decision: `GO`" in text
+        and "`failed_acceptance=[]`" in text
+        and "`p2_admitted=true`" in text
+        and "`P2_M6_QUALIFIED`" in text
+    )
+
+
 def _paths_clean(paths: tuple[Path, ...]) -> bool:
     text = "\n".join(path.read_text(encoding="utf-8") for path in paths)
     return all(
@@ -323,8 +344,8 @@ def review(
         "batch_trackers_closed": all(_issue_state(issues, n) == "closed" for n in (156, 158, 164)),
         "batch_protected_main_evidence_exact": _batch_issue_evidence_exact(issues),
         "m7_design_runway_exact": _m7_runway_exact(issues),
-        "program_and_exit_tracker_open": (
-            _issue_state(issues, 149) == "open" and _issue_state(issues, 166) == "open"
+        "program_and_exit_tracker_lifecycle_valid": (
+            _program_and_exit_tracker_lifecycle_valid(issues)
         ),
         "authority_lock_exact": (
             lock_hashes.get("P2_ATTRIBUTION_NORMALIZATION_AUTHORITY.json") == _sha(authority_path)
