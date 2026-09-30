@@ -14,7 +14,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_EVEN, localcontext
+from decimal import ROUND_HALF_EVEN, Decimal, localcontext
 from typing import cast
 from uuid import UUID, uuid5
 
@@ -798,26 +798,26 @@ def _fit(
         ]
         diagonal: list[Decimal] = []
         for column_index, original in enumerate(columns):
-            vector = list(original)
+            work_column = list(original)
             for _pass in range(2):
                 for previous in range(column_index):
-                    coefficient = _dot(q_columns[previous], vector)
+                    coefficient = _dot(q_columns[previous], work_column)
                     upper[previous][column_index] += coefficient
-                    vector = [
+                    work_column = [
                         value - coefficient * basis
                         for value, basis in zip(
-                            vector,
+                            work_column,
                             q_columns[previous],
                             strict=True,
                         )
                     ]
-            norm_squared = _dot(vector, vector)
+            norm_squared = _dot(work_column, work_column)
             if norm_squared <= 0:
                 return "MODEL_SPEC_DIAGNOSTIC_FAILURE"
             norm = norm_squared.sqrt()
             upper[column_index][column_index] = norm
             diagonal.append(abs(norm))
-            q_columns.append([value / norm for value in vector])
+            q_columns.append([value / norm for value in work_column])
 
         maximum = max(diagonal)
         minimum = min(diagonal)
@@ -1239,7 +1239,7 @@ def execute_p2_attribution(
     if semantics != active.factor_effect_semantics:
         raise P2GovernanceError(
             "FAIL_CLOSED_P2_CAUSAL_EVIDENCE_REQUIRED",
-            factor_effect_semantics,
+            semantics,
         )
     factor_order = target_feature_set.factor_order
     reference = _reference_vector(reference_factor_values, factor_order)
@@ -1257,7 +1257,7 @@ def execute_p2_attribution(
         factor_order=factor_order,
         reference=reference,
         profile=active,
-        factor_effect_semantics=factor_effect_semantics,
+        factor_effect_semantics=semantics,
     )
     if validation_reason is not None:
         return _not_identifiable(
