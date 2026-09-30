@@ -27,6 +27,17 @@ def test_openapi_snapshot_is_exact_projection_of_canonical_authority() -> None:
     assert context["properties"]["valid_from_session_time_us"]["anyOf"][0][
         "x-tpaa-transport-type"
     ] == "decimal-string?"
+    for p3_dto in (
+        "P3EligibleAdjustedEstimateDTO",
+        "P3LifecycleSegmentDTO",
+        "P3ModelValidationSnapshotDTO",
+        "CapabilityModelDTO",
+        "CapabilitySurfaceDTO",
+        "AircraftTwinRevisionDTO",
+        "IntrinsicCapabilityEstimateDTO",
+        "P3AdmissionStateDTO",
+    ):
+        assert p3_dto in schemas
     observation = schemas["CapabilityObservationDTO"]
     assert "observation_start_session_time_us" in observation["required"]
     assert observation["properties"]["value"]["x-tpaa-transport-type"] == "json-union"
@@ -44,5 +55,5 @@ def test_snapshot_carries_frozen_authority_hash() -> None:
     assert authority["artifact_id"] == "CROSS_LAYER_DTO_CONTRACTS"
     assert authority["core_baseline"] == "CB-1.4.0"
     assert authority["sha256"] == (
-        "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4"
+        "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
     )

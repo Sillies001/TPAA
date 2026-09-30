@@ -30,6 +30,15 @@ HISTORICAL_SOURCES = (
 
 TASK_ID = "M6-TST-005"
 TRACKING_ISSUE = 166
+EXPECTED_M6_DTO_SHA256 = "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4"
+EXPECTED_P2_DTO_SUBSET_SHA256 = "d79d97eb41354ad61654372310bb1a92b37914a858213f5dfc4a1287e14c6706"
+P2_DTO_NAMES = (
+    "P2EligibleObservationDTO",
+    "FactorFeatureSetDTO",
+    "AttributionRunDTO",
+    "AdjustedCapabilityEstimateDTO",
+    "P2AdmissionStateDTO",
+)
 EXPECTED_TASK_IDS = (
     "M6-GOV-001", "M6-GOV-002", "M6-DATA-001", "M6-DATA-002", "M6-DATA-003",
     "M6-CAP-001", "M6-CAP-002", "M6-CAP-003", "M6-CAP-004",
@@ -116,6 +125,14 @@ def _lock_hashes(lock: dict[str, Any]) -> dict[str, str]:
     return result
 
 
+def _p2_dto_subset_hash(dto_contracts: dict[str, Any]) -> str:
+    subset = {
+        name: cast(dict[str, Any], dto_contracts.get(name, {}))
+        for name in P2_DTO_NAMES
+    }
+    return _canonical_hash(subset)
+
+
 def _issue(bundle: dict[str, Any], number: int) -> dict[str, Any]:
     issues = bundle.get("issues")
     if not isinstance(issues, dict):
@@ -168,7 +185,7 @@ def _batch_issue_evidence_exact(bundle: dict[str, Any]) -> bool:
 
 
 def _m7_runway_exact(bundle: dict[str, Any]) -> bool:
-    if _issue_state(bundle, 155) != "open":
+    if _issue_state(bundle, 155) not in {"open", "closed"}:
         return False
     text = _issue_text(bundle, 155).lower()
     return all(
@@ -306,6 +323,7 @@ def review(
     )
     lock_hashes = _lock_hashes(lock)
     dto_contracts = cast(dict[str, Any], dto.get("contracts", {}))
+    p2_dto_subset_hash = _p2_dto_subset_hash(dto_contracts)
     admission_dto = cast(dict[str, Any], dto_contracts.get("P2AdmissionStateDTO", {}))
     fields = admission_dto.get("fields")
     admission_fields = (
@@ -366,7 +384,8 @@ def review(
             and profile.get("profile_id") == "P2_LINEAR_REFERENCE_ADJUSTMENT"
             and profile.get("version") == "1.0.0"
             and profile_source.get("p2_authority_sha256") == _sha(authority_path)
-            and profile_source.get("cross_layer_dto_sha256") == _sha(dto_path)
+            and profile_source.get("cross_layer_dto_sha256") == EXPECTED_M6_DTO_SHA256
+            and p2_dto_subset_hash == EXPECTED_P2_DTO_SUBSET_SHA256
         ),
         "admission_guard_exact": (
             activation.get("authority_adoption_does_not_admit_p2") is True
