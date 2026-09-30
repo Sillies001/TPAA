@@ -1,0 +1,40 @@
+TPAA SDIB-1.6 CANDIDATE STRUCTURAL VALIDATION
+Date: 2026-09-30
+Document SHA-256: 7be4a44ab24a0384c45dd4f2693cf6d7c070e71d73d5111fe620344649ba5913
+M7 Task Baseline SHA-256: 29788e3eb003ea8f1411b8e8b72185f3a3bf3f107bc5aca4721e2225e16e2800
+Entry protected-main: 892e4a64a321be9c7252b66207a7d1d90a6ce98d
+Entry Run: #494 / 36697493917 / 14/14 PASS
+Entry qualification: P2_M6_QUALIFIED / M6 Exit GO
+Result: 28/28 CANDIDATE STRUCTURAL PASS
+Hosted adoption CI: PENDING
+Protected-main adoption: PENDING
+Adoption decision: PENDING; P3 NOT ADMITTED
+
+01. [PASS] Version header SDIB-1.6
+02. [PASS] Parent SDIB-1.5 retained
+03. [PASS] Protected-main entry exact SHA
+04. [PASS] Entry Run #494 / 36697493917 is 14/14 PASS
+05. [PASS] Entry M6 Exit is GO / P2_M6_QUALIFIED
+06. [PASS] CB-1.4.0 retained
+07. [PASS] DB schema 1.6.0 retained
+08. [PASS] M7 milestone maps to P3 Capability/Twin Activation
+09. [PASS] M7 backlog exact 18 unique tasks
+10. [PASS] Four M7 coarse batches
+11. [PASS] Batches cover 18/18 exactly once
+12. [PASS] Canonical required M7 workstreams retained
+13. [PASS] DATA/API are supporting implementation workstreams
+14. [PASS] P1/P2 remain admitted immutable distinct layers
+15. [PASS] P3 claim blocked until protected-main M7 Exit GO
+16. [PASS] P4-P6 remain inactive
+17. [PASS] P2 NOT_IDENTIFIABLE numeric training use forbidden
+18. [PASS] Future-information leakage forbidden
+19. [PASS] Same-episode leakage forbidden
+20. [PASS] Historical current/latest/default fallback forbidden
+21. [PASS] Independent-aircraft vs episode/observation counts distinct
+22. [PASS] Lifecycle/configuration segmentation explicit
+23. [PASS] Managed model/surface URI must bind sealed ACTIVE object_reference
+24. [PASS] Local/file/current model aliases forbidden
+25. [PASS] Stronger intrinsic wording requires independent evidence
+26. [PASS] C3 #169 explicit fail-closed authority blocker
+27. [PASS] No shadow schema
+28. [PASS] M8/P4-P5 rolling-design runway #170 required
