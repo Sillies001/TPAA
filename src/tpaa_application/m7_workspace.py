@@ -173,7 +173,10 @@ class InMemoryM7P3WorkspaceRepository:
         if existing_estimate is not None and existing_estimate != snapshot:
             raise M7ApplicationError("M7_P3_IMMUTABLE_CONFLICT", estimate_id)
         existing_twin = self._snapshots_by_twin.get(twin_revision_id)
-        if existing_twin is not None and existing_twin.twin != snapshot.twin:
+        if existing_twin is not None and (
+            existing_twin.twin != snapshot.twin
+            or existing_twin.components != snapshot.components
+        ):
             raise M7ApplicationError(
                 "M7_P3_IMMUTABLE_CONFLICT",
                 twin_revision_id,

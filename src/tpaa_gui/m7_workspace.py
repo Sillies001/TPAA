@@ -58,7 +58,7 @@ class M7ThreeLayerWorkspaceModel:
 def _mapping(value: object, field: str) -> Mapping[str, object]:
     if not isinstance(value, Mapping):
         raise M7WorkspacePresentationError(f"M7_GUI_MAPPING_INVALID:{field}")
-    return value
+    return cast(Mapping[str, object], value)
 
 
 def _text(value: object, field: str) -> str:

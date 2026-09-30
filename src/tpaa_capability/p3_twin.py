@@ -243,6 +243,19 @@ def publish_aircraft_twin_revision(
         )
     for component in components:
         _validate_component(component, aircraft_id=aircraft_id)
+        model = component.model_build.model
+        surface = component.surface_build.surface
+        if (
+            model.model_spec_id != q.model_spec_id
+            or model.model_spec_version != q.model_spec_version
+            or model.plugin_name != q.plugin_name
+            or model.plugin_version != q.plugin_version
+            or surface.surface_semantics != q.surface_semantics
+        ):
+            raise P3GovernanceError(
+                "FAIL_CLOSED_P3_AUTHORITY_REQUIRED",
+                f"profile/component drift={model.capability_model_id}",
+            )
     component_model_refs = tuple(
         component.model_build.model.capability_model_id
         for component in components
@@ -344,6 +357,11 @@ def evaluate_twin_capability_estimate(
 ) -> P3CapabilityEstimate:
     p = policy or P3AuthorityPolicy.from_canonical()
     q = profile or P3ModelExecutionProfile.from_canonical()
+    if q.profile_sha256 != p.profile_sha256:
+        raise P3GovernanceError(
+            "FAIL_CLOSED_P3_AUTHORITY_REQUIRED",
+            "profile hash does not match adopted P3 authority",
+        )
     requested_claim = claim_level or q.estimate_claim_level
     assert_p3_claim_level(requested_claim, policy=p)
     as_of = _utc(as_of_time_utc, field="as_of_time_utc")
