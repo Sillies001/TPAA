@@ -12,17 +12,18 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE = REPO_ROOT / "baseline" / "CB-1.4.0"
 AUTHORITY = BASELINE / "canonical" / "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY.json"
 LOCK = BASELINE / "BASELINE_LOCK.json"
-EXPECTED_AUTHORITY_SHA256 = "a2bc9d4e68366214002a3b391e1b9764db520bfff123c095967043a8d9990f01"
+CORE = BASELINE / "canonical" / "CORE_LOGICAL_MODEL.json"
+EXPECTED_AUTHORITY_SHA256 = "1bfc6c9eb8e2142249c327af5698bc6a8925f983fd8363b1d2bd835966eea5fa"
 EXPECTED_CONTRACT_HASHES = {
     "p1_eligibility_sha256": "47f19aa6534085914a4644ecf7a122ff4a669cedff2ad14cc051e77881985985",
-    "feature_spec_sha256": "7d358188056979c5f1ea716ef000e144010a4cb96bb21efa4948d243df391248",
+    "feature_spec_sha256": "0b93f62d8f9a830d55c8803d9e65c0a8ed554cc77ba564c8bbaba0ed49b5e438",
     "reference_condition_sha256": (
-        "77a9ff27b563acc4bca5c6a424a17ebbba73e1bacc7307fb5f7df9f66e225c90"
+        "45a07bd94de55a67eaf0d117c93438c18de058ed06dc0eb49f283cadae023c49"
     ),
     "cohort_specification_sha256": (
         "645e815be5d377690f51550bfaf0e3dfeae9623fac44fefbd516d13ec816adcb"
     ),
-    "attribution_spec_sha256": "9592c7f58509f01dd0262c157814cf12f70bef7337f7a86964e04b9c913a8c85",
+    "attribution_spec_sha256": "a48bd61d5b631a3ba0a0f1ec94deaf6c91fcdadeda378825a3ae8c47efd12588",
     "identifiability_sha256": "52ff8b6f713584f39dc94b19eb1ea60ca5d571d3a480895b0f9b34a2ee5722c9",
     "uncertainty_sha256": "e0aafe8568b8bdf1bf98111f5550f470ae621fd7b84e9dd129919227d0d37dbb",
     "factor_effect_sha256": "af4e4bf03cff7ed95816f8c496df4a387bd5eef247a90c7ecaf86ee5461403a9",
@@ -73,8 +74,38 @@ def _load() -> dict[str, Any]:
     return payload
 
 
+def _context_artifact_kind_sql() -> str:
+    core: object = json.loads(CORE.read_text(encoding="utf-8"))
+    if not isinstance(core, dict):
+        raise ValueError("CORE_LOGICAL_MODEL root must be object")
+    tables = core.get("tables")
+    if not isinstance(tables, dict):
+        raise ValueError("CORE_LOGICAL_MODEL tables invalid")
+    table = tables.get("registry.context_artifact")
+    if not isinstance(table, dict):
+        raise ValueError("registry.context_artifact missing")
+    fields = table.get("fields")
+    if not isinstance(fields, list):
+        raise ValueError("registry.context_artifact fields invalid")
+    field = next(
+        (
+            item
+            for item in fields
+            if isinstance(item, dict) and item.get("name") == "artifact_kind"
+        ),
+        None,
+    )
+    if not isinstance(field, dict):
+        raise ValueError("registry.context_artifact.artifact_kind SQL missing")
+    sql = field.get("sql")
+    if not isinstance(sql, str):
+        raise ValueError("registry.context_artifact.artifact_kind SQL missing")
+    return sql
+
+
 def verify() -> dict[str, object]:
     p = _load()
+    artifact_kind_sql = _context_artifact_kind_sql()
     checks: dict[str, bool] = {
         "identity": p.get("authority_id") == "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY",
         "version": p.get("version") == "1.0.0",
@@ -89,9 +120,34 @@ def verify() -> dict[str, object]:
         "p1_immutable": p["scope"]["p1_observed_layer_immutable"] is True,
         "p2_not_admitted": p["scope"]["p2_authority_frozen_not_admitted"] is True,
         "p3_p6_inactive": p["scope"]["p3_p6_active"] is False,
+        "feature_existing_artifact_kind": (
+            f"'{p['feature_spec_contract']['artifact_kind']}'" in artifact_kind_sql
+        ),
         "reference_existing_carrier": (
             p["reference_condition_contract"]["carrier_table"]
             == "registry.context_artifact"
+        ),
+        "reference_existing_artifact_kind": (
+            f"'{p['reference_condition_contract']['artifact_kind']}'"
+            in artifact_kind_sql
+        ),
+        "attribution_existing_artifact_kind": (
+            f"'{p['attribution_spec_contract']['artifact_kind']}'"
+            in artifact_kind_sql
+        ),
+        "p2_subtype_disambiguation": (
+            p["feature_spec_contract"]["logical_key_prefix"]
+            == "P2_FACTOR_FEATURE_SPEC:"
+            and p["reference_condition_contract"]["logical_key_prefix"]
+            == "P2_REFERENCE_CONDITION:"
+            and p["attribution_spec_contract"]["logical_key_prefix"]
+            == "P2_ATTRIBUTION_SPEC:"
+            and p["feature_spec_contract"]["artifact_schema_version"]
+            == "TPAA_P2_FACTOR_FEATURE_SPEC_V1"
+            and p["reference_condition_contract"]["artifact_schema_version"]
+            == "TPAA_P2_REFERENCE_CONDITION_V1"
+            and p["attribution_spec_contract"]["artifact_schema_version"]
+            == "TPAA_P2_ATTRIBUTION_SPEC_V1"
         ),
         "cohort_existing_carrier": (
             p["cohort_specification_contract"]["carrier_table"]

@@ -20,7 +20,8 @@
       "assessment.attribution_run",
       "capability.adjusted_capability_estimate"
     ],
-    "decision_scope": "new implementation authority; no recovered algorithm or threshold is claimed"
+    "decision_scope": "new implementation authority; no recovered algorithm or threshold is claimed",
+    "schema_compatibility_correction": "P2 context-artifact subtypes use existing DB 1.6.0 artifact_kind values plus exact logical-key prefix and artifact schema; no new enum values."
   },
   "scope": {
     "p1_observed_layer_immutable": true,
@@ -81,23 +82,27 @@
   "feature_spec_contract": {
     "carrier_table": "registry.context_artifact",
     "object_table": "registry.object_reference",
-    "artifact_kind": "P2_FACTOR_FEATURE_SPEC",
+    "artifact_kind": "ASSESSMENT_PROFILE",
     "required_status": "ACTIVE",
     "object_must_be_sealed": true,
     "logical_key_maps_to": "assessment.factor_feature_set.feature_spec_id",
     "artifact_version_maps_to": "assessment.factor_feature_set.feature_spec_version",
     "artifact_sha256_must_enter_input_hash": true,
-    "implementation_default_forbidden": true
+    "implementation_default_forbidden": true,
+    "logical_key_prefix": "P2_FACTOR_FEATURE_SPEC:",
+    "artifact_schema_version": "TPAA_P2_FACTOR_FEATURE_SPEC_V1"
   },
   "reference_condition_contract": {
     "carrier_table": "registry.context_artifact",
     "object_table": "registry.object_reference",
-    "artifact_kind": "P2_REFERENCE_CONDITION_SPEC",
+    "artifact_kind": "REFERENCE_SET",
     "required_status": "ACTIVE",
     "object_must_be_sealed": true,
     "reference_condition_id_maps_to": "registry.context_artifact.context_artifact_id",
     "artifact_sha256_must_enter_input_hash": true,
-    "implementation_default_forbidden": true
+    "implementation_default_forbidden": true,
+    "logical_key_prefix": "P2_REFERENCE_CONDITION:",
+    "artifact_schema_version": "TPAA_P2_REFERENCE_CONDITION_V1"
   },
   "cohort_specification_contract": {
     "carrier_table": "registry.dataset_snapshot",
@@ -132,7 +137,7 @@
   "attribution_spec_contract": {
     "carrier_table": "registry.context_artifact",
     "object_table": "registry.object_reference",
-    "artifact_kind": "P2_ATTRIBUTION_SPEC",
+    "artifact_kind": "ASSESSMENT_PROFILE",
     "required_status": "ACTIVE",
     "object_must_be_sealed": true,
     "required_spec_fields": [
@@ -151,7 +156,9 @@
       "assessment.attribution_run.training_dataset_snapshot_id",
       "assessment.attribution_run.reference_condition_id"
     ],
-    "algorithm_or_plugin_default_forbidden": true
+    "algorithm_or_plugin_default_forbidden": true,
+    "logical_key_prefix": "P2_ATTRIBUTION_SPEC:",
+    "artifact_schema_version": "TPAA_P2_ATTRIBUTION_SPEC_V1"
   },
   "identifiability_contract": {
     "statuses": [
@@ -344,10 +351,10 @@
   ],
   "contract_hashes": {
     "p1_eligibility_sha256": "47f19aa6534085914a4644ecf7a122ff4a669cedff2ad14cc051e77881985985",
-    "feature_spec_sha256": "7d358188056979c5f1ea716ef000e144010a4cb96bb21efa4948d243df391248",
-    "reference_condition_sha256": "77a9ff27b563acc4bca5c6a424a17ebbba73e1bacc7307fb5f7df9f66e225c90",
+    "feature_spec_sha256": "0b93f62d8f9a830d55c8803d9e65c0a8ed554cc77ba564c8bbaba0ed49b5e438",
+    "reference_condition_sha256": "45a07bd94de55a67eaf0d117c93438c18de058ed06dc0eb49f283cadae023c49",
     "cohort_specification_sha256": "645e815be5d377690f51550bfaf0e3dfeae9623fac44fefbd516d13ec816adcb",
-    "attribution_spec_sha256": "9592c7f58509f01dd0262c157814cf12f70bef7337f7a86964e04b9c913a8c85",
+    "attribution_spec_sha256": "a48bd61d5b631a3ba0a0f1ec94deaf6c91fcdadeda378825a3ae8c47efd12588",
     "identifiability_sha256": "52ff8b6f713584f39dc94b19eb1ea60ca5d571d3a480895b0f9b34a2ee5722c9",
     "uncertainty_sha256": "e0aafe8568b8bdf1bf98111f5550f470ae621fd7b84e9dd129919227d0d37dbb",
     "factor_effect_sha256": "af4e4bf03cff7ed95816f8c496df4a387bd5eef247a90c7ecaf86ee5461403a9",
