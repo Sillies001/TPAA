@@ -97,6 +97,8 @@ def _review(
     expected_revision: str = REV,
     checked_out_revision: str = REV,
     issues: dict[str, object] | None = None,
+    required_jobs_success: int = 14,
+    required_jobs_total: int = 14,
     **overrides: object,
 ) -> dict[str, object]:
     issue_path = _write(tmp_path / "issues.json", issues or _valid_issues())
@@ -107,8 +109,8 @@ def _review(
         event_name=event_name,
         git_ref=git_ref,
         run_conclusion="success",
-        required_jobs_success=14,
-        required_jobs_total=14,
+        required_jobs_success=required_jobs_success,
+        required_jobs_total=required_jobs_total,
         **overrides,
     )
 
