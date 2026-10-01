@@ -46,6 +46,12 @@ from .p4_revision import (
     P4InstructorWorkflow,
     build_p4_assessment_revision,
 )
+from .p4_subject import (
+    P4SubjectContext,
+    P4SubjectSource,
+    assert_p4_subject_context_identity,
+    build_p4_subject_context,
+)
 from .p5_assessment import (
     P5AggregationResult,
     P5ApprovalCommand,
@@ -59,12 +65,6 @@ from .p5_assessment import (
     build_p5_aggregation,
     build_p5_assessment_revision,
     materialize_p5_team_mission_evidence,
-)
-from .p4_subject import (
-    P4SubjectContext,
-    P4SubjectSource,
-    assert_p4_subject_context_identity,
-    build_p4_subject_context,
 )
 
 __all__ = [

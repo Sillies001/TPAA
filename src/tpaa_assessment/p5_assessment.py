@@ -169,19 +169,19 @@ def materialize_p5_team_mission_evidence(
     )
 
     by_id: dict[str, P4AssessmentRevision] = {}
-    for revision in p4_revisions:
-        if revision.actor_assessment_id in by_id:
+    for source_revision in p4_revisions:
+        if source_revision.actor_assessment_id in by_id:
             raise M8GovernanceError(
                 "FAIL_CLOSED_P4_P5_EXACT_IDENTITY_REQUIRED",
                 "duplicate P4 revision input",
             )
-        by_id[revision.actor_assessment_id] = revision
+        by_id[source_revision.actor_assessment_id] = source_revision
 
     members: list[P5MemberEvidence] = []
     missing: list[str] = []
     for binding in composition.participant_bindings:
-        revision = by_id.get(binding.p4_revision_id)
-        if revision is None:
+        member_revision = by_id.get(binding.p4_revision_id)
+        if member_revision is None:
             missing.append(binding.subject_key)
             members.append(
                 P5MemberEvidence(
@@ -202,18 +202,21 @@ def materialize_p5_team_mission_evidence(
             )
             continue
         if (
-            revision.subject_key != binding.subject_key
-            or revision.aircraft_id != binding.aircraft_id
-            or revision.twin_revision_id != binding.twin_revision_id
+            member_revision.subject_key != binding.subject_key
+            or member_revision.aircraft_id != binding.aircraft_id
+            or member_revision.twin_revision_id != binding.twin_revision_id
         ):
             raise M8GovernanceError(
                 "FAIL_CLOSED_P4_P5_COMPOSITION_DRIFT",
                 binding.subject_key,
             )
-        if utc(revision.created_at_utc, field="p4.created_at_utc") > cutoff:
+        if (
+            utc(member_revision.created_at_utc, field="p4.created_at_utc")
+            > cutoff
+        ):
             raise M8GovernanceError(
                 "FAIL_CLOSED_P4_P5_FUTURE_INFORMATION",
-                revision.actor_assessment_id,
+                member_revision.actor_assessment_id,
             )
         members.append(
             P5MemberEvidence(
@@ -221,15 +224,15 @@ def materialize_p5_team_mission_evidence(
                 mission_role_code=binding.role_code,
                 aircraft_id=binding.aircraft_id,
                 twin_revision_id=binding.twin_revision_id,
-                p4_revision_id=revision.actor_assessment_id,
+                p4_revision_id=member_revision.actor_assessment_id,
                 availability_status="AVAILABLE",
                 reason_codes=(),
-                p4_approval_state=revision.approval_state,
-                p3_claim_level=revision.p3_claim_level,
-                p3_validity_status=revision.p3_validity_status,
-                p3_as_of_utc=revision.p3_as_of_utc,
-                uncertainty_lower=revision.uncertainty_lower,
-                uncertainty_upper=revision.uncertainty_upper,
+                p4_approval_state=member_revision.approval_state,
+                p3_claim_level=member_revision.p3_claim_level,
+                p3_validity_status=member_revision.p3_validity_status,
+                p3_as_of_utc=member_revision.p3_as_of_utc,
+                uncertainty_lower=member_revision.uncertainty_lower,
+                uncertainty_upper=member_revision.uncertainty_upper,
             )
         )
 
