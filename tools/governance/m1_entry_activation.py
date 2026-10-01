@@ -20,11 +20,11 @@ DEFAULT_ROLES = REPO_ROOT / "docs" / "governance" / "M1_ROLE_ASSIGNMENTS.json"
 EXPECTED_FROZEN = {
     "core_baseline": "CB-1.4.0",
     "db_schema_version": "1.6.0",
-    "baseline_lock_sha256": "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
+    "baseline_lock_sha256": "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
     "dependency_lock_sha256": "302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e",
     "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
     "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
-    "dto_authority_sha256": "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41",
+    "dto_authority_sha256": "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47",
 }
 
 

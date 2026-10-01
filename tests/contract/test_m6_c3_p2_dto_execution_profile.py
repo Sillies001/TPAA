@@ -31,7 +31,7 @@ def test_m6_c3_p2_dto_profile_validator_passes() -> None:
     result = VALIDATOR.verify()
     assert result["status"] == "PASS"
     assert result["dto_sha256"] == "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4"
-    assert result["current_dto_sha256"] == "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
+    assert result["current_dto_sha256"] == "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47"
     assert result["p2_dto_subset_sha256"] == "d79d97eb41354ad61654372310bb1a92b37914a858213f5dfc4a1287e14c6706"
     assert result["failed_checks"] == []
     assert result["task_complete"] is False

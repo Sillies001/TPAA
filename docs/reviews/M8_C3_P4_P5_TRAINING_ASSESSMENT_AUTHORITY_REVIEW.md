@@ -56,3 +56,16 @@ M8 extends `CROSS_LAYER_DTO_CONTRACTS.json` and `BASELINE_LOCK.json` additively.
 ## Adoption gate
 
 The candidate remains inactive until exact-head Hosted CI 14/14, expected-head guarded merge, verified merge lineage and protected-main exact merge-SHA 14/14. Only then may #181 / M8-GOV-001 close.
+
+
+## Run #513 remediation
+
+Run #513 / `36818252564` failed at the three M0 root jobs while the new authority/lock verifier itself passed 30/30 controlled artifacts. The failure was historical-compatibility drift only:
+
+- runtime-handshake unit test still pinned the prior current DTO SHA;
+- loader contract still pinned 28 controlled artifacts;
+- M6 DTO-profile contract test still pinned the prior current DTO SHA while its historical P2 subset/profile authority remained unchanged;
+- M1 Entry activation expected the prior current BASELINE_LOCK/DTO identity although its build manifest correctly emitted the new governed identity;
+- OpenAPI exact snapshot had not yet been regenerated after the additive M8 DTO authority extension.
+
+The remediation updates only those current-baseline projections/assertions and regenerates the exact OpenAPI snapshot. Historical P2/P3 subset hashes, profiles, authority bytes, lock lineage and admission semantics are unchanged.
