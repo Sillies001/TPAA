@@ -29,6 +29,14 @@ from .m7_workspace import (
     M7WorkspaceQuery,
     M7WorkspaceService,
 )
+from .m8_workspace import (
+    M8AnnotationMutation,
+    M8ApprovalMutation,
+    M8P4Query,
+    M8P5Query,
+    M8WorkspaceQuery,
+    M8WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -55,6 +63,7 @@ class ApplicationService:
         m4_workspace: M4WorkspaceService | None = None,
         m6_workspace: M6WorkspaceService | None = None,
         m7_workspace: M7WorkspaceService | None = None,
+        m8_workspace: M8WorkspaceService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -64,6 +73,7 @@ class ApplicationService:
         self._m4_workspace = m4_workspace
         self._m6_workspace = m6_workspace
         self._m7_workspace = m7_workspace
+        self._m8_workspace = m8_workspace
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -262,3 +272,39 @@ class ApplicationService:
 
     def m7_p3_workspace(self, query: M7WorkspaceQuery) -> dict[str, object]:
         return self._m7().workspace(query)
+
+
+    def _m8(self) -> M8WorkspaceService:
+        if self._m8_workspace is None:
+            raise RuntimeError("M8 workspace service is not configured")
+        return self._m8_workspace
+
+    def m8_p4(self, query: M8P4Query) -> dict[str, object]:
+        return self._m8().p4(query)
+
+    def m8_p5(self, query: M8P5Query) -> dict[str, object]:
+        return self._m8().p5(query)
+
+    def m8_workspace(self, query: M8WorkspaceQuery) -> dict[str, object]:
+        return self._m8().workspace(query)
+
+    def m8_annotation(
+        self,
+        mutation: M8AnnotationMutation,
+    ) -> dict[str, object]:
+        return self._m8().annotate_p4(mutation)
+
+    def m8_p4_approval(
+        self,
+        mutation: M8ApprovalMutation,
+    ) -> dict[str, object]:
+        return self._m8().approve_p4(mutation)
+
+    def m8_p5_approval(
+        self,
+        mutation: M8ApprovalMutation,
+    ) -> dict[str, object]:
+        return self._m8().approve_p5(mutation)
+
+    def m8_export(self, query: M8WorkspaceQuery) -> dict[str, object]:
+        return self._m8().export_exact(query)

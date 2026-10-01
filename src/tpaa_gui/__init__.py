@@ -68,6 +68,15 @@ from .m7_workspace import (
     build_m7_three_layer_workspace_model,
     create_m7_workspace,
 )
+from .m8_workspace import (
+    M8DesktopTransport,
+    M8IndividualPresentation,
+    M8LayeredWorkspaceModel,
+    M8TeamMissionPresentation,
+    M8WorkspacePresentationError,
+    build_m8_layered_workspace_model,
+    create_m8_workspace,
+)
 from .shell import PYSIDE6_DEPENDENCY_MISSING, GuiShellConfig, GuiShellError, run_gui
 
 __all__ = [
@@ -117,8 +126,15 @@ __all__ = [
     "M7ReferenceConditionPresentation",
     "M7ThreeLayerWorkspaceModel",
     "M7WorkspacePresentationError",
+    "M8DesktopTransport",
+    "M8IndividualPresentation",
+    "M8LayeredWorkspaceModel",
+    "M8TeamMissionPresentation",
+    "M8WorkspacePresentationError",
     "build_m7_three_layer_workspace_model",
     "create_m7_workspace",
+    "build_m8_layered_workspace_model",
+    "create_m8_workspace",
     "build_m6_comparison_workspace_model",
     "build_m6_diagnostics_workspace_model",
     "create_m6_workspace",
