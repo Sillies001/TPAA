@@ -99,3 +99,17 @@ __all__ = [
     "load_m4_trend_authority",
     "validate_m4_product_scope",
 ]
+
+from .p4_replay import (
+    P4AssessmentProjection,
+    P4LongitudinalReplay,
+    P4ReplayRevision,
+    build_p4_longitudinal_replay,
+)
+
+__all__ += [
+    "P4AssessmentProjection",
+    "P4LongitudinalReplay",
+    "P4ReplayRevision",
+    "build_p4_longitudinal_replay",
+]

@@ -89,6 +89,12 @@ class M8AuthorityPolicy:
     required_exit_ref: str
     required_exit_decision: str
     no_profile_behavior: str
+    approval_states: tuple[str, ...]
+    approval_transitions: tuple[str, ...]
+    approval_audit_action_p4: str
+    correction_after_terminal_creates_new_draft_revision: bool
+    annotation_lifecycle_transition: str
+    annotation_physical_delete_forbidden: bool
 
     @classmethod
     def from_canonical(
@@ -108,6 +114,8 @@ class M8AuthorityPolicy:
                         "composition_contract",
                         "evidence_boundary_contract",
                         "status_contract",
+                        "instructor_annotation_contract",
+                        "approval_workflow_contract",
                         "role_privacy_contract",
                         "aggregation_contract",
                         "admission_guard",
@@ -154,6 +162,14 @@ class M8AuthorityPolicy:
             field="evidence_boundary_contract",
         )
         status = _object(a.get("status_contract"), field="status_contract")
+        annotation = _object(
+            a.get("instructor_annotation_contract"),
+            field="instructor_annotation_contract",
+        )
+        approval = _object(
+            a.get("approval_workflow_contract"),
+            field="approval_workflow_contract",
+        )
         role_contract = _object(
             a.get("role_privacy_contract"),
             field="role_privacy_contract",
@@ -308,6 +324,36 @@ class M8AuthorityPolicy:
             no_profile_behavior=_text(
                 aggregation.get("no_profile_behavior"),
                 field="aggregation_contract.no_profile_behavior",
+            ),
+            approval_states=_strings(
+                approval.get("allowed_states"),
+                field="approval_workflow_contract.allowed_states",
+            ),
+            approval_transitions=_strings(
+                approval.get("allowed_transitions"),
+                field="approval_workflow_contract.allowed_transitions",
+            ),
+            approval_audit_action_p4=_text(
+                approval.get("audit_action_p4"),
+                field="approval_workflow_contract.audit_action_p4",
+            ),
+            correction_after_terminal_creates_new_draft_revision=_bool(
+                approval.get("correction_after_terminal_creates_new_draft_revision"),
+                field=(
+                    "approval_workflow_contract."
+                    "correction_after_terminal_creates_new_draft_revision"
+                ),
+            ),
+            annotation_lifecycle_transition=_text(
+                annotation.get("lifecycle_status_transition_allowed_only"),
+                field=(
+                    "instructor_annotation_contract."
+                    "lifecycle_status_transition_allowed_only"
+                ),
+            ),
+            annotation_physical_delete_forbidden=_bool(
+                annotation.get("physical_delete_forbidden"),
+                field="instructor_annotation_contract.physical_delete_forbidden",
             ),
         )
 
