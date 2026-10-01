@@ -52,6 +52,19 @@ from .p3_substrate import (
     project_p2_adjusted_estimate,
     validate_managed_object,
 )
+from .p4_replay import (
+    P4AssessmentProjection,
+    P4LongitudinalReplay,
+    P4ReplayRevision,
+    build_p4_longitudinal_replay,
+)
+from .p5_replay import (
+    P5AssessmentProjection,
+    P5CompositionReplaySeries,
+    P5LongitudinalReplay,
+    P5ReplayRevision,
+    build_p5_longitudinal_replay,
+)
 
 __all__ = [
     "InMemoryM4LongitudinalReleaseRepository",
@@ -80,11 +93,20 @@ __all__ = [
     "P3LifecycleSegment",
     "P3ManagedObject",
     "P3ModelValidationSnapshot",
+    "P4AssessmentProjection",
+    "P4LongitudinalReplay",
+    "P4ReplayRevision",
+    "P5AssessmentProjection",
+    "P5CompositionReplaySeries",
+    "P5LongitudinalReplay",
+    "P5ReplayRevision",
     "assert_capability_claim_allowed",
     "assert_p1_p2_immutable",
     "assert_p3_claim_level",
     "build_p3_lifecycle_segment",
     "build_p3_validation_snapshot",
+    "build_p4_longitudinal_replay",
+    "build_p5_longitudinal_replay",
     "project_p2_adjusted_estimate",
     "validate_managed_object",
     "allocate_m4_longitudinal_release_id",
@@ -100,16 +122,3 @@ __all__ = [
     "validate_m4_product_scope",
 ]
 
-from .p4_replay import (
-    P4AssessmentProjection,
-    P4LongitudinalReplay,
-    P4ReplayRevision,
-    build_p4_longitudinal_replay,
-)
-
-__all__ += [
-    "P4AssessmentProjection",
-    "P4LongitudinalReplay",
-    "P4ReplayRevision",
-    "build_p4_longitudinal_replay",
-]

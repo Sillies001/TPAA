@@ -92,6 +92,7 @@ class M8AuthorityPolicy:
     approval_states: tuple[str, ...]
     approval_transitions: tuple[str, ...]
     approval_audit_action_p4: str
+    approval_audit_action_p5: str
     correction_after_terminal_creates_new_draft_revision: bool
     annotation_lifecycle_transition: str
     annotation_physical_delete_forbidden: bool
@@ -336,6 +337,10 @@ class M8AuthorityPolicy:
             approval_audit_action_p4=_text(
                 approval.get("audit_action_p4"),
                 field="approval_workflow_contract.audit_action_p4",
+            ),
+            approval_audit_action_p5=_text(
+                approval.get("audit_action_p5"),
+                field="approval_workflow_contract.audit_action_p5",
             ),
             correction_after_terminal_creates_new_draft_revision=_bool(
                 approval.get("correction_after_terminal_creates_new_draft_revision"),
