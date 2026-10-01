@@ -72,6 +72,16 @@ from .m6_workspace import (
     M6P2WorkspaceSnapshot,
     M6WorkspaceService,
 )
+from .m7_workspace import (
+    InMemoryM7P3WorkspaceRepository,
+    M7ApplicationError,
+    M7EstimateQuery,
+    M7LayerEvidence,
+    M7P3WorkspaceSnapshot,
+    M7TwinQuery,
+    M7WorkspaceQuery,
+    M7WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import (
     GetRuntimeBaselineStatus,
@@ -138,6 +148,14 @@ __all__ = [
     "M6P2DiagnosticsQuery",
     "M6P2WorkspaceSnapshot",
     "M6WorkspaceService",
+    "InMemoryM7P3WorkspaceRepository",
+    "M7ApplicationError",
+    "M7EstimateQuery",
+    "M7LayerEvidence",
+    "M7P3WorkspaceSnapshot",
+    "M7TwinQuery",
+    "M7WorkspaceQuery",
+    "M7WorkspaceService",
     "GetRuntimeBaselineStatus",
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",

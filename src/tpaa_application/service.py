@@ -23,6 +23,12 @@ from .m6_workspace import (
     M6P2DiagnosticsQuery,
     M6WorkspaceService,
 )
+from .m7_workspace import (
+    M7EstimateQuery,
+    M7TwinQuery,
+    M7WorkspaceQuery,
+    M7WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -48,6 +54,7 @@ class ApplicationService:
         m3_publication: M3PublicationService | None = None,
         m4_workspace: M4WorkspaceService | None = None,
         m6_workspace: M6WorkspaceService | None = None,
+        m7_workspace: M7WorkspaceService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -56,6 +63,7 @@ class ApplicationService:
         self._m3_publication = m3_publication
         self._m4_workspace = m4_workspace
         self._m6_workspace = m6_workspace
+        self._m7_workspace = m7_workspace
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -240,3 +248,17 @@ class ApplicationService:
         query: M6P2DiagnosticsQuery,
     ) -> dict[str, object]:
         return self._m6().diagnostics(query)
+
+    def _m7(self) -> M7WorkspaceService:
+        if self._m7_workspace is None:
+            raise RuntimeError("M7 workspace service is not configured")
+        return self._m7_workspace
+
+    def m7_p3_twin(self, query: M7TwinQuery) -> dict[str, object]:
+        return self._m7().twin(query)
+
+    def m7_p3_estimate(self, query: M7EstimateQuery) -> dict[str, object]:
+        return self._m7().estimate(query)
+
+    def m7_p3_workspace(self, query: M7WorkspaceQuery) -> dict[str, object]:
+        return self._m7().workspace(query)
