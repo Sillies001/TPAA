@@ -66,7 +66,6 @@ from .p5_replay import (
     build_p5_longitudinal_replay,
 )
 
-
 __all__ = [
     "InMemoryM4LongitudinalReleaseRepository",
     "M4LongitudinalAuthority",
