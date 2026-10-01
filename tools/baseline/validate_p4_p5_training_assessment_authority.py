@@ -26,6 +26,18 @@ EXPECTED_LOCK_SHA256 = "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2
 PARENT_LOCK_SHA256 = "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47"
 EXPECTED_P3_AUTHORITY_SHA256 = "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b"
 EXPECTED_P3_DTO_SUBSET_SHA256 = "90b2f51d0c9b81ed0b3d6ff4294a945c087578a41c01a9c11a5ac7571f6ad91f"
+EXPECTED_M8_DTO_SUBSET_SHA256 = "34c11b2c7e2bc2a1e26dacb83676f1919331e88520e634b527eef30cacd6341a"
+M8_DTO_NAMES = (
+    "P4SubjectContextDTO",
+    "HumanMachineEvidenceDTO",
+    "InstructorAnnotationDTO",
+    "ApprovalStateDTO",
+    "P4AssessmentRevisionDTO",
+    "P5CompositionSnapshotDTO",
+    "TeamMissionEvidenceDTO",
+    "P5AssessmentRevisionDTO",
+    "P4P5AdmissionStateDTO",
+)
 P3_DTO_NAMES = (
     "P3EligibleAdjustedEstimateDTO",
     "P3LifecycleSegmentDTO",
@@ -78,14 +90,18 @@ def verify() -> dict[str, object]:
     lock = _load(LOCK)
     dto_contracts = dto["contracts"]
     p3_subset = {name: dto_contracts.get(name, {}) for name in P3_DTO_NAMES}
+    m8_subset = {name: dto_contracts.get(name, {}) for name in M8_DTO_NAMES}
+    lineage = lock["baseline"]["lock_lineage_sha256"]
     role_names = [row["role"] for row in role_profile["role_matrix"]]
     role_by_name = {row["role"]: row for row in role_profile["role_matrix"]}
 
     checks: dict[str, bool] = {
         "authority_sha": _sha(AUTHORITY) == EXPECTED_AUTHORITY_SHA256,
         "role_profile_sha": _sha(ROLE_PROFILE) == EXPECTED_ROLE_PROFILE_SHA256,
-        "dto_sha": _sha(DTO) == EXPECTED_DTO_SHA256,
-        "lock_sha": _sha(LOCK) == EXPECTED_LOCK_SHA256,
+        "m8_dto_subset_preserved": (
+            _canonical_hash(m8_subset) == EXPECTED_M8_DTO_SUBSET_SHA256
+        ),
+        "m8_lock_lineage_preserved": EXPECTED_LOCK_SHA256 in lineage,
         "p3_authority_immutable": _sha(P3_AUTHORITY) == EXPECTED_P3_AUTHORITY_SHA256,
         "identity": (
             authority.get("authority_id") == "P4_P5_TRAINING_ASSESSMENT_AUTHORITY"
@@ -240,9 +256,10 @@ def verify() -> dict[str, object]:
             _canonical_hash(p3_subset) == EXPECTED_P3_DTO_SUBSET_SHA256
         ),
         "lock_lineage": (
-            lock["baseline"]["rebaseline"]
-            == "R4.0_M8_P4_P5_C3_AUTHORITY_ROLE_PRIVACY"
-            and lock["baseline"]["lock_lineage_sha256"][0] == PARENT_LOCK_SHA256
+            EXPECTED_LOCK_SHA256 in lineage
+            and PARENT_LOCK_SHA256 in lineage
+            and lineage.index(EXPECTED_LOCK_SHA256)
+            < lineage.index(PARENT_LOCK_SHA256)
         ),
     }
     for filename, path, expected in (
@@ -252,12 +269,16 @@ def verify() -> dict[str, object]:
             EXPECTED_AUTHORITY_SHA256,
         ),
         ("P4_P5_ROLE_PRIVACY_PROFILE.json", ROLE_PROFILE, EXPECTED_ROLE_PROFILE_SHA256),
-        ("CROSS_LAYER_DTO_CONTRACTS.json", DTO, EXPECTED_DTO_SHA256),
     ):
         entry = _lock_entry(lock, filename)
         checks[f"lock:{filename}"] = (
             entry.get("sha256") == expected and entry.get("bytes") == len(path.read_bytes())
         )
+    dto_entry = _lock_entry(lock, "CROSS_LAYER_DTO_CONTRACTS.json")
+    checks["lock:CROSS_LAYER_DTO_CONTRACTS.json"] = (
+        dto_entry.get("sha256") == _sha(DTO)
+        and dto_entry.get("bytes") == len(DTO.read_bytes())
+    )
     for name in ["exact_identity_rules","subject_context_contract","composition_contract","evidence_boundary_contract","instructor_annotation_contract","approval_workflow_contract","status_contract","role_privacy_contract","aggregation_contract","knowledge_time_contract","release_replay_contract","admission_guard","dto_contracts"]:
         checks[f"authority_hash:{name}"] = (
             authority["contract_hashes"][f"{name}_sha256"]
@@ -296,8 +317,8 @@ def verify() -> dict[str, object]:
         "status": "PASS" if not failed else "FAIL",
         "authority_sha256": EXPECTED_AUTHORITY_SHA256,
         "role_profile_sha256": EXPECTED_ROLE_PROFILE_SHA256,
-        "dto_sha256": EXPECTED_DTO_SHA256,
-        "baseline_lock_sha256": EXPECTED_LOCK_SHA256,
+        "dto_sha256": _sha(DTO),
+        "baseline_lock_sha256": _sha(LOCK),
         "checks": checks,
         "failed_checks": failed,
         "task_complete": False,

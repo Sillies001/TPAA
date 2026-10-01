@@ -318,3 +318,30 @@ def test_m8_batch_4_workflow_keeps_fourteen_job_topology_and_final_sink() -> Non
     assert "--required-jobs-total 14" in workflow
     assert "numbers = (149, 181, 182, 183, 184, 185, 186)" in workflow
     assert workflow.rstrip().endswith("--output evidence/m8-exit/review.json")
+
+
+def test_m8_batch_4_closed_m9_runway_after_sdib_1_8_adoption_remains_valid(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    entry = issues["186"]
+    assert isinstance(entry, dict)
+    issue = entry["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    comments = entry["comments"]
+    assert isinstance(comments, list)
+    comments.append(
+        {
+            "body": (
+                "Design runway consumed by adopted SDIB-1.8 "
+                "ffbd5e5f0561ce39d8736de765dd6be240edfae1 "
+                "Run #529 exactly 14/14 SUCCESS formal task inventory: 15 tasks"
+            )
+        }
+    )
+    result = _review(tmp_path, issues=bundle)
+    assert result["status"] == "PASS"
+    assert result["failed_acceptance"] == []
