@@ -3202,6 +3202,878 @@
         ],
         "type": "object"
       },
+      "P6AdmissionStateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "git_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "m9_exit_decision": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "p6_admitted": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "protected_main": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "required_jobs_success": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "required_jobs_total": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "run_conclusion": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "source_revision": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "source_revision",
+          "event_name",
+          "git_ref",
+          "protected_main",
+          "m9_exit_decision",
+          "run_conclusion",
+          "required_jobs_success",
+          "required_jobs_total",
+          "p6_admitted"
+        ],
+        "type": "object"
+      },
+      "P6CounterfactualRequestDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "applicability_profile_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "base_product_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "counterfactual_request_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "counterfactual_run_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "held_fixed_assumptions": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "interventions": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "model_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "request_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "scenario_definition_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          }
+        },
+        "required": [
+          "counterfactual_request_id",
+          "counterfactual_run_id",
+          "base_product_refs",
+          "scenario_definition_id",
+          "interventions",
+          "held_fixed_assumptions",
+          "model_refs",
+          "applicability_profile_ref",
+          "as_of_utc",
+          "request_hash"
+        ],
+        "type": "object"
+      },
+      "P6CounterfactualResultDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "applicability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assumptions": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "causal_claim_level": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "counterfactual_run_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "identifiability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "logical_content_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "projection_dataset_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "projection_dataset_uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "counterfactual_run_id",
+          "applicability_status",
+          "identifiability_status",
+          "causal_claim_level",
+          "uncertainty",
+          "assumptions",
+          "model_refs",
+          "status",
+          "as_of_utc",
+          "logical_content_hash"
+        ],
+        "type": "object"
+      },
+      "P6ForecastRequestDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assumption_profile_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assumption_profile_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "forecast_origin_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "forecast_request_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "forecast_run_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "forecast_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "forecast_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "horizon_spec": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "input_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "request_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "target_code": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "target_scope": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "forecast_request_id",
+          "forecast_run_id",
+          "input_snapshot_id",
+          "forecast_spec_id",
+          "forecast_spec_version",
+          "target_scope",
+          "subject_ref",
+          "target_code",
+          "forecast_origin_utc",
+          "horizon_spec",
+          "capability_model_id",
+          "assumption_profile_id",
+          "assumption_profile_version",
+          "as_of_utc",
+          "request_hash"
+        ],
+        "type": "object"
+      },
+      "P6ForecastResultDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "applicability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "distribution": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "factual_source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "forecast_result_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "forecast_run_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "logical_content_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_revision_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "target_code": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "target_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "threshold_probabilities": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "forecast_result_id",
+          "forecast_run_id",
+          "target_code",
+          "distribution",
+          "threshold_probabilities",
+          "applicability_status",
+          "uncertainty",
+          "status",
+          "factual_source_refs",
+          "model_revision_id",
+          "as_of_utc",
+          "logical_content_hash"
+        ],
+        "type": "object"
+      },
+      "P6InputSnapshotDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "availability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "data_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "factual_source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "forecast_origin_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "input_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "p3_model_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "scenario_context_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "snapshot_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_or_composition_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "target_scope": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "input_snapshot_id",
+          "snapshot_type",
+          "factual_source_refs",
+          "p3_model_refs",
+          "scenario_context_refs",
+          "target_scope",
+          "subject_or_composition_ref",
+          "forecast_origin_utc",
+          "as_of_utc",
+          "data_hash",
+          "availability_status",
+          "reason_codes"
+        ],
+        "type": "object"
+      },
+      "P6InteropSnapshotDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "adapter_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "applicability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "artifact_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "canonical_entity_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "external_profile_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "external_profile_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "interop_snapshot_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "logical_content_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "object_hashes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "producer_system": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "release_state": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "session_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "source_or_projection_class": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "source_stream_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "time_basis": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "unit_basis": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "interop_snapshot_id",
+          "session_id",
+          "session_type",
+          "source_id",
+          "artifact_refs",
+          "producer_system",
+          "external_profile_id",
+          "external_profile_version",
+          "adapter_id",
+          "adapter_version",
+          "unit_basis",
+          "time_basis",
+          "source_or_projection_class",
+          "canonical_entity_refs",
+          "object_hashes",
+          "applicability_status",
+          "uncertainty",
+          "release_state",
+          "as_of_utc",
+          "logical_content_hash"
+        ],
+        "type": "object"
+      },
+      "P6ModelRevisionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "applicability_profile_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_model_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "model_artifact_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_artifact_uri": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_object_ref_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "model_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "model_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "plugin_name": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "plugin_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_model_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trained_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "training_dataset_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "uncertainty_profile_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "validation_dataset_snapshot_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "validation_metrics": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "validity_domain": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "capability_model_id",
+          "model_spec_id",
+          "model_spec_version",
+          "subject_type",
+          "training_dataset_snapshot_id",
+          "validation_dataset_snapshot_id",
+          "plugin_name",
+          "plugin_version",
+          "model_artifact_uri",
+          "model_artifact_hash",
+          "model_object_ref_id",
+          "validity_domain",
+          "validation_metrics",
+          "applicability_profile_ref",
+          "uncertainty_profile_ref",
+          "status",
+          "trained_at"
+        ],
+        "type": "object"
+      },
+      "P6RecommendationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_action_space": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "applicability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "approval_state": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "audit_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "logical_content_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "objective_constraints": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "proposed_training_items": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "rationale": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "recommendation_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "recommendation_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "recommendation_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "reviewer_subject_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_counterfactual_run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "source_forecast_result_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "source_gap_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          }
+        },
+        "required": [
+          "recommendation_id",
+          "subject_key",
+          "recommendation_spec_id",
+          "recommendation_spec_version",
+          "source_forecast_result_ids",
+          "source_counterfactual_run_ids",
+          "objective_constraints",
+          "allowed_action_space",
+          "rationale",
+          "source_gap_refs",
+          "proposed_training_items",
+          "applicability_status",
+          "uncertainty",
+          "status",
+          "approval_state",
+          "created_at",
+          "logical_content_hash"
+        ],
+        "type": "object"
+      },
       "TPAAChainDTO": {
         "additionalProperties": false,
         "properties": {
@@ -3391,7 +4263,7 @@
     "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
     "artifact_version": "UNVERSIONED_BY_AUTHORITY",
     "core_baseline": "CB-1.4.0",
-    "sha256": "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47"
+    "sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
   },
   "x-tpaa-transport-rules": {
     "session_time_us": "decimal-string for JS-visible API",
