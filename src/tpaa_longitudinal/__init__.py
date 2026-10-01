@@ -113,3 +113,19 @@ __all__ += [
     "P4ReplayRevision",
     "build_p4_longitudinal_replay",
 ]
+
+from .p5_replay import (
+    P5AssessmentProjection,
+    P5CompositionReplaySeries,
+    P5LongitudinalReplay,
+    P5ReplayRevision,
+    build_p5_longitudinal_replay,
+)
+
+__all__ += [
+    "P5AssessmentProjection",
+    "P5CompositionReplaySeries",
+    "P5LongitudinalReplay",
+    "P5ReplayRevision",
+    "build_p5_longitudinal_replay",
+]
