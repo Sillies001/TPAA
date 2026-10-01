@@ -17,7 +17,7 @@ from tpaa_context import (
     pseudonymous_subject_key,
     utc,
 )
-from tpaa_world import P5CompositionSnapshot
+from tpaa_world import P5CompositionSnapshot, assert_composition_identity
 
 from .p4_revision import P4AssessmentRevision
 
@@ -153,6 +153,7 @@ def materialize_p5_team_mission_evidence(
     policy: M8AuthorityPolicy | None = None,
 ) -> P5TeamMissionEvidence:
     p = policy or M8AuthorityPolicy.from_canonical()
+    assert_composition_identity(composition)
     exact_text(composition.composition_id, field="composition_id", policy=p)
     exact_uuid(evidence_set_id, field="evidence_set_id", policy=p)
     if as_of_utc != composition.as_of_utc:
@@ -335,6 +336,7 @@ def build_p5_assessment_revision(
     policy: M8AuthorityPolicy | None = None,
 ) -> P5AssessmentRevision:
     p = policy or M8AuthorityPolicy.from_canonical()
+    assert_composition_identity(composition)
     if evidence.composition_id != composition.composition_id:
         raise M8GovernanceError(
             "FAIL_CLOSED_P4_P5_COMPOSITION_DRIFT",

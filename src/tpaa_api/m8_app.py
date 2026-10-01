@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import cast
-
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 

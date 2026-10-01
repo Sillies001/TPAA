@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Mapping
-
 import pytest
 from fastapi import Request
 from fastapi.testclient import TestClient
@@ -22,6 +20,7 @@ from tpaa_assessment import (
     P4AssessmentRevision,
     P5ApprovalCommand,
     P5ApprovalWorkflow,
+    P5AssessmentRevision,
     build_p5_aggregation,
     build_p5_assessment_revision,
     materialize_p5_team_mission_evidence,
@@ -47,14 +46,7 @@ SCENARIO = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 
 class _Storage:
     def execute(self):
-        from tpaa_application import StorageBaselineStatus
-
-        return StorageBaselineStatus(
-            core_baseline="CB-1.4.0",
-            db_schema_version="1.6.0",
-            migration_head="0016",
-            engine="sqlite",
-        )
+        raise AssertionError("storage baseline is not used by M8 routes")
 
 
 class _AircraftContext(M8AircraftContextPort):
@@ -185,7 +177,14 @@ def _composition(policy: M8AuthorityPolicy) -> P5CompositionSnapshot:
     )
 
 
-def _p5(policy: M8AuthorityPolicy):
+def _p5(
+    policy: M8AuthorityPolicy,
+) -> tuple[
+    P5CompositionSnapshot,
+    object,
+    object,
+    P5AssessmentRevision,
+]:
     p4 = _p4(policy)
     composition = _composition(policy)
     evidence = materialize_p5_team_mission_evidence(
@@ -241,7 +240,9 @@ def _viewer(
     )
 
 
-def _service(policy: M8AuthorityPolicy) -> tuple[M8WorkspaceService, object]:
+def _service(
+    policy: M8AuthorityPolicy,
+) -> tuple[M8WorkspaceService, P5AssessmentRevision]:
     p4 = _p4(policy)
     _, _, _, p5 = _p5(policy)
     repository = InMemoryM8AssessmentRepository()
@@ -256,8 +257,13 @@ def _service(policy: M8AuthorityPolicy) -> tuple[M8WorkspaceService, object]:
     return service, p5
 
 
+@pytest.fixture(scope="module")
+def policy() -> M8AuthorityPolicy:
+    return M8AuthorityPolicy.from_canonical()
+
+
 def test_m8_batch3_p5_evidence_and_no_profile_aggregation(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     composition, evidence, aggregation, revision = _p5(policy)
     assert evidence.composition_id == composition.composition_id
@@ -283,7 +289,7 @@ def test_m8_batch3_p5_evidence_and_no_profile_aggregation(
 
 
 def test_m8_batch3_missing_member_is_explicit(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     composition = _composition(policy)
     evidence = materialize_p5_team_mission_evidence(
@@ -303,7 +309,7 @@ def test_m8_batch3_missing_member_is_explicit(
 
 
 def test_m8_batch3_p5_replay_separates_changed_composition(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     composition, evidence, aggregation, first = _p5(policy)
     workflow = P5ApprovalWorkflow(policy)
@@ -319,10 +325,36 @@ def test_m8_batch3_p5_replay_separates_changed_composition(
             created_at_utc="2026-09-20T12:20:00Z",
         ),
     ).revision
+    from tpaa_context import canonical_hash
+
+    changed_identity = {
+        "session_id": composition.session_id,
+        "mission_episode_id": composition.mission_episode_id,
+        "team_id": composition.team_id,
+        "participant_bindings": [
+            {
+                "subject_key": item.subject_key,
+                "role_code": item.role_code,
+                "aircraft_id": item.aircraft_id,
+                "twin_revision_id": item.twin_revision_id,
+                "p4_revision_id": item.p4_revision_id,
+            }
+            for item in composition.participant_bindings
+        ],
+        "world_snapshot_refs": ["world:mission:2"],
+        "scenario_context_artifact_id": composition.scenario_context_artifact_id,
+        "role_model_context_artifact_id": (
+            composition.role_model_context_artifact_id
+        ),
+        "assessment_spec_id": composition.assessment_spec_id,
+        "assessment_spec_version": composition.assessment_spec_version,
+        "as_of_utc": composition.as_of_utc,
+    }
+    changed_hash = canonical_hash(changed_identity)
     changed = replace(
         composition,
-        composition_id="P5_COMPOSITION_SHA256:" + "e" * 64,
-        composition_hash="e" * 64,
+        composition_id=f"P5_COMPOSITION_SHA256:{changed_hash}",
+        composition_hash=changed_hash,
         world_snapshot_refs=("world:mission:2",),
     )
     changed_evidence = replace(
@@ -357,7 +389,7 @@ def test_m8_batch3_p5_replay_separates_changed_composition(
 
 
 def test_m8_batch3_application_role_projection_and_export_denial(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     service, p5 = _service(policy)
     analyst = service.p4(
@@ -391,7 +423,7 @@ def test_m8_batch3_application_role_projection_and_export_denial(
 
 
 def test_m8_batch3_api_exact_ids_role_privacy_and_idempotent_write(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     service, p5 = _service(policy)
     application = ApplicationService(
@@ -468,7 +500,7 @@ def test_m8_batch3_api_exact_ids_role_privacy_and_idempotent_write(
 
 
 def test_m8_batch3_gui_preserves_aircraft_p4_p5_separation(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     service, p5 = _service(policy)
     projection = service.workspace(
@@ -495,7 +527,7 @@ def test_m8_batch3_gui_preserves_aircraft_p4_p5_separation(
 
 
 def test_m8_batch3_pre_exit_api_fails_closed(
-    policy: M8AuthorityPolicy = M8AuthorityPolicy.from_canonical(),
+    policy: M8AuthorityPolicy,
 ) -> None:
     repository = InMemoryM8AssessmentRepository()
     repository.register_p4(_p4(policy))
