@@ -2184,6 +2184,945 @@
       ],
       "source": "M7 P3 authority #169 exact projection",
       "authority": "cross-layer exact contract"
+    },
+    "P4SubjectContextDTO": {
+      "fields": [
+        {
+          "field": "subject_context_id",
+          "source": "P4/P5 authority deterministic subject-context identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_key",
+          "source": "P4/P5 role/privacy profile pseudonymous subject projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "actor_id",
+          "source": "assessment.actor_assessment.actor_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "role_code",
+          "source": "ROLE_MODEL context artifact assignment.role_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "seat_code",
+          "source": "ROLE_MODEL context artifact assignment.seat_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "function_code",
+          "source": "ROLE_MODEL context artifact assignment.function_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.actor_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "assessment.actor_assessment.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "stage_id",
+          "source": "exact World/evidence scope stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "assessment.actor_assessment.aircraft_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "twin_revision_id",
+          "source": "assessment.actor_assessment.capability_projection_refs exact AIRCRAFT_TWIN_REVISION ref",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "p3_estimate_id",
+          "source": "assessment.actor_assessment.capability_projection_refs exact P3 estimate ref",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.actor_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.actor_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "role_model_context_artifact_id",
+          "source": "context.context_artifact_binding ROLE_MODEL -> registry.context_artifact.context_artifact_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "role_model_version",
+          "source": "registry.context_artifact.artifact_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "world_refs",
+          "source": "assessment.actor_assessment.world_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "assessment.actor_assessment.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "knowledge_time_utc",
+          "source": "latest permissible source evidence time at or before as_of_utc",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "subject_key is the default cross-role identity; actor_id is projected only when the exact role/privacy profile authorizes it.",
+        "twin_revision_id is exact; current/latest/default resolution and hidden P3 recomputation are forbidden.",
+        "subject_context_id changes when any governed identity/scope/configuration input changes."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "HumanMachineEvidenceDTO": {
+      "fields": [
+        {
+          "field": "evidence_id",
+          "source": "M8 authority deterministic human-machine evidence identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_context_id",
+          "source": "P4SubjectContextDTO.subject_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_key",
+          "source": "P4SubjectContextDTO.subject_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_family",
+          "source": "P4/P5 authority approved evidence family",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "origin",
+          "source": "M8 authority MACHINE origin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.evidence_set.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "world_refs",
+          "source": "exact World/relation refs carried by evidence set",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "metric_refs",
+          "source": "assessment.actor_assessment.metric_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "capability_projection_refs",
+          "source": "assessment.actor_assessment.capability_projection_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "source_refs",
+          "source": "authority-governed exact source identifiers",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "availability_status",
+          "source": "M8 authority evidence availability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "authority-governed nonnumeric reason codes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_payload",
+          "source": "authority-approved evidence payload without implicit score",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_hash",
+          "source": "M8 authority canonical evidence content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Machine evidence never carries instructor origin.",
+        "UNAVAILABLE, OUT_OF_DOMAIN and NOT_IDENTIFIABLE never coerce to numeric zero.",
+        "Evidence family membership does not authorize a metric formula, threshold, weight or score."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "InstructorAnnotationDTO": {
+      "fields": [
+        {
+          "field": "annotation_id",
+          "source": "debrief.annotation.annotation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "base_release_id",
+          "source": "debrief.annotation.base_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "debrief.annotation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "debrief.annotation.episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "debrief.annotation.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "author_subject_key",
+          "source": "M8 role/privacy pseudonymous projection of debrief.annotation.author_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "author_id",
+          "source": "debrief.annotation.author_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "annotation_type",
+          "source": "debrief.annotation.annotation_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "debrief.annotation.start_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "debrief.annotation.end_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "body_text",
+          "source": "debrief.annotation.body_text role/visibility-authorized projection",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "visibility",
+          "source": "debrief.annotation.visibility",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "debrief.annotation.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "revision_no",
+          "source": "debrief.annotation.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "supersedes_annotation_id",
+          "source": "debrief.annotation.supersedes_annotation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "debrief.annotation.evidence_set_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "created_at",
+          "source": "debrief.annotation.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Annotation content is human evidence and never overwrites machine evidence.",
+        "A revision creates a new annotation row; prior body/evidence content is preserved.",
+        "body_text is omitted unless both role and annotation visibility authorize projection."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "ApprovalStateDTO": {
+      "fields": [
+        {
+          "field": "assessment_scope",
+          "source": "M8 authority P4 or P5 assessment scope",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_revision_id",
+          "source": "assessment.actor_assessment.actor_assessment_id or assessment.mission_assessment.mission_assessment_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "state",
+          "source": "M8 authority governed approval state carried by assessment status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_revision_id",
+          "source": "assessment supersedes_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "audit_id",
+          "source": "audit.audit_log.audit_id",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "reviewer_subject_key",
+          "source": "M8 role/privacy pseudonymous projection of audit.audit_log.actor_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reviewer_actor_id",
+          "source": "audit.audit_log.actor_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "reason",
+          "source": "audit.audit_log.reason",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "request_id",
+          "source": "audit.audit_log.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "audit.audit_log.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Every state transition creates an immutable assessment revision and an audit record.",
+        "APPROVED and REJECTED are terminal for that revision; later correction creates a new revision.",
+        "Administrator/auditor privilege alone does not imply evaluator approval authority."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P4AssessmentRevisionDTO": {
+      "fields": [
+        {
+          "field": "actor_assessment_id",
+          "source": "assessment.actor_assessment.actor_assessment_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "subject_context_id",
+          "source": "P4SubjectContextDTO.subject_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_key",
+          "source": "P4SubjectContextDTO.subject_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "actor_id",
+          "source": "assessment.actor_assessment.actor_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.actor_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "assessment.actor_assessment.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "assessment.actor_assessment.aircraft_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.actor_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.actor_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "world_refs",
+          "source": "assessment.actor_assessment.world_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "metric_refs",
+          "source": "assessment.actor_assessment.metric_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "capability_projection_refs",
+          "source": "assessment.actor_assessment.capability_projection_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "score",
+          "source": "assessment.actor_assessment.score",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "grade",
+          "source": "assessment.actor_assessment.grade",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "status",
+          "source": "assessment.actor_assessment.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "confidence",
+          "source": "assessment.actor_assessment.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "assessment.actor_assessment.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "created_at",
+          "source": "assessment.actor_assessment.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_id",
+          "source": "assessment.actor_assessment.supersedes_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "approval_state",
+          "source": "ApprovalStateDTO.state exact projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "score and grade may be non-null only when an exact adopted assessment profile authorizes them.",
+        "Unsupported evidence remains explicit and never becomes zero.",
+        "Published revisions are historical exact-ID products and are not mutated in place."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P5CompositionSnapshotDTO": {
+      "fields": [
+        {
+          "field": "composition_id",
+          "source": "M8 authority deterministic P5 composition identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.mission_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "mission_episode_id",
+          "source": "assessment.mission_assessment.mission_episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "team_id",
+          "source": "assessment.mission_assessment.team_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "participant_subject_keys",
+          "source": "pseudonymous projection of assessment.mission_assessment.participant_ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "participant_bindings",
+          "source": "ROLE_MODEL plus exact aircraft/twin/P4 revision bindings keyed by subject_key",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "world_snapshot_refs",
+          "source": "assessment.mission_assessment.world_snapshot_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "scenario_context_artifact_id",
+          "source": "exact SCENARIO context artifact when bound",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "role_model_context_artifact_id",
+          "source": "exact ROLE_MODEL context artifact",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.mission_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.mission_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "composition_hash",
+          "source": "M8 authority canonical composition content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Participant bindings are stable-sorted by subject_key before hashing.",
+        "Membership, role, aircraft, twin revision, relevant P4 revision or governed context change creates a new composition_id.",
+        "Direct participant actor IDs are not part of unrestricted projections."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "TeamMissionEvidenceDTO": {
+      "fields": [
+        {
+          "field": "evidence_id",
+          "source": "M8 authority deterministic team/mission evidence identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "composition_id",
+          "source": "P5CompositionSnapshotDTO.composition_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_family",
+          "source": "P4/P5 authority approved team/mission evidence family",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.evidence_set.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "participant_subject_keys",
+          "source": "P5CompositionSnapshotDTO.participant_subject_keys",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "contributing_p4_revision_ids",
+          "source": "exact P4 assessment revision refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "world_snapshot_refs",
+          "source": "assessment.mission_assessment.world_snapshot_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "objective_result_refs",
+          "source": "assessment.objective_result exact refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "availability_status",
+          "source": "M8 authority evidence availability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "authority-governed nonnumeric reason codes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_payload",
+          "source": "authority-approved evidence payload without implicit aggregate score",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_hash",
+          "source": "M8 authority canonical evidence content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Team evidence remains bound to exact composition.",
+        "Missing member evidence stays explicit.",
+        "Mission objective outcome and team performance evidence remain separate semantics."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P5AssessmentRevisionDTO": {
+      "fields": [
+        {
+          "field": "mission_assessment_id",
+          "source": "assessment.mission_assessment.mission_assessment_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "composition_id",
+          "source": "P5CompositionSnapshotDTO.composition_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.mission_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "mission_episode_id",
+          "source": "assessment.mission_assessment.mission_episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "team_id",
+          "source": "assessment.mission_assessment.team_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.mission_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.mission_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "participant_subject_keys",
+          "source": "P5CompositionSnapshotDTO.participant_subject_keys",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "world_snapshot_refs",
+          "source": "assessment.mission_assessment.world_snapshot_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "adjudication_refs",
+          "source": "assessment.mission_assessment.adjudication_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "overall_score",
+          "source": "assessment.mission_assessment.overall_score",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "grade",
+          "source": "assessment.mission_assessment.grade",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "status",
+          "source": "assessment.mission_assessment.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "confidence",
+          "source": "assessment.mission_assessment.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "assessment.mission_assessment.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "created_at",
+          "source": "assessment.mission_assessment.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_id",
+          "source": "assessment.mission_assessment.supersedes_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "approval_state",
+          "source": "ApprovalStateDTO.state exact projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "aggregation_profile_ref",
+          "source": "exact adopted assessment/aggregation profile identity or null",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "overall_score and grade remain null when no exact adopted aggregation profile authorizes them.",
+        "A composition change requires a different composition_id and therefore a new assessment revision.",
+        "P5 team result is never copied to an individual P4 product."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P4P5AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M8 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M8 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M8 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M8 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m8_exit_decision",
+          "source": "M8 protected-main Exit evidence.m8_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M8 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M8 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M8 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p4_admitted",
+          "source": "M8 protected-main Exit evidence.p4_admitted",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "p5_admitted",
+          "source": "M8 protected-main Exit evidence.p5_admitted",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "p6_inactive",
+          "source": "M8 protected-main Exit evidence.p6_inactive",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; not persisted as a P4/P5 product.",
+        "P4/P5 external claims require protected-main M8 Exit GO and all required jobs success.",
+        "P6 remains inactive."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
     }
   },
   "transport_rules": {

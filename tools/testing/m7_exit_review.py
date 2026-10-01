@@ -36,8 +36,20 @@ TRACKING_ISSUE = 177
 
 EXPECTED_AUTHORITY_SHA256 = "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b"
 EXPECTED_PROFILE_SHA256 = "d66aa780d1c2e31ec664d173a0cdbc355f98c9ff3f751a6949e84f74cdf93876"
-EXPECTED_DTO_SHA256 = "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
-EXPECTED_BASELINE_LOCK_SHA256 = "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47"
+EXPECTED_M7_DTO_SHA256 = "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
+EXPECTED_M7_BASELINE_LOCK_SHA256 = "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47"
+EXPECTED_P3_DTO_SUBSET_SHA256 = "90b2f51d0c9b81ed0b3d6ff4294a945c087578a41c01a9c11a5ac7571f6ad91f"
+
+P3_DTO_NAMES = (
+    "P3EligibleAdjustedEstimateDTO",
+    "P3LifecycleSegmentDTO",
+    "P3ModelValidationSnapshotDTO",
+    "CapabilityModelDTO",
+    "CapabilitySurfaceDTO",
+    "AircraftTwinRevisionDTO",
+    "IntrinsicCapabilityEstimateDTO",
+    "P3AdmissionStateDTO",
+)
 
 EXPECTED_TASK_IDS = (
     "M7-GOV-001",
@@ -146,6 +158,14 @@ def _lock_hashes(lock: dict[str, Any]) -> dict[str, str]:
             if isinstance(name, str) and isinstance(sha, str):
                 result[name] = sha
     return result
+
+
+def _p3_dto_subset_hash(dto_contracts: dict[str, Any]) -> str:
+    subset = {
+        name: cast(dict[str, Any], dto_contracts.get(name, {}))
+        for name in P3_DTO_NAMES
+    }
+    return _canonical_hash(subset)
 
 
 def _issue(bundle: dict[str, Any], number: int) -> dict[str, Any]:
@@ -384,6 +404,11 @@ def review(
     )
     lock_hashes = _lock_hashes(lock)
     dto_contracts = cast(dict[str, Any], dto.get("contracts", {}))
+    p3_dto_subset_hash = _p3_dto_subset_hash(dto_contracts)
+    lineage = cast(
+        list[Any],
+        cast(dict[str, Any], lock.get("baseline", {})).get("lock_lineage_sha256", []),
+    )
     admission_dto = cast(dict[str, Any], dto_contracts.get("P3AdmissionStateDTO", {}))
     fields = admission_dto.get("fields")
     admission_fields = (
@@ -460,13 +485,12 @@ def review(
             and profile_source.get("p3_authority_sha256")
             == EXPECTED_AUTHORITY_SHA256
             and profile_source.get("cross_layer_dto_sha256")
-            == EXPECTED_DTO_SHA256
+            == EXPECTED_M7_DTO_SHA256
         ),
         "dto_and_baseline_lock_exact": (
-            _sha(dto_path) == EXPECTED_DTO_SHA256
-            and lock_hashes.get("CROSS_LAYER_DTO_CONTRACTS.json")
-            == EXPECTED_DTO_SHA256
-            and _sha(lock_path) == EXPECTED_BASELINE_LOCK_SHA256
+            lock_hashes.get("CROSS_LAYER_DTO_CONTRACTS.json") == _sha(dto_path)
+            and p3_dto_subset_hash == EXPECTED_P3_DTO_SUBSET_SHA256
+            and EXPECTED_M7_BASELINE_LOCK_SHA256 in lineage
             and admission_fields
             == (
                 "source_revision",
