@@ -1,0 +1,426 @@
+{
+  "schema": "TPAA_SDIB_M8_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.7",
+  "milestone": "M8",
+  "milestone_name": "P4/P5 Training Assessment Activation",
+  "entry_evidence": {
+    "predecessor_milestone": "M7",
+    "protected_main_sha": "c78604ade0aeffdbf7395fccfc0951751beae751",
+    "protected_main_run_number": 510,
+    "protected_main_actions_run_id": 36807335564,
+    "p3_qualification": "P3_M7_QUALIFIED",
+    "m7_exit_decision": "GO",
+    "p3_admitted": true,
+    "protected_main_exact": true,
+    "hosted_ci_required_jobs": 14,
+    "hosted_ci_result": "PASS"
+  },
+  "governance": {
+    "program_issue": 149,
+    "design_runway_issue": 170,
+    "baseline_issue": 180,
+    "c3_issue": 181,
+    "batch_issues": {
+      "M8-BATCH-1": 182,
+      "M8-BATCH-2": 183,
+      "M8-BATCH-3": 184,
+      "M8-BATCH-4": 185
+    },
+    "next_design_issue": 186
+  },
+  "task_count": 23,
+  "canonical_required_workstreams": [
+    "WS-ASSESS",
+    "WS-WORLD",
+    "WS-LONGITUDINAL",
+    "WS-GUI",
+    "WS-SECURITY",
+    "WS-TEST",
+    "WS-GOVERNANCE"
+  ],
+  "supporting_workstreams": [
+    "WS-DATA",
+    "WS-API"
+  ],
+  "capability_boundary": {
+    "currently_admitted_phases": [
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "candidate_phases": [
+      "P4",
+      "P5"
+    ],
+    "explicitly_not_admitted": [
+      "P6"
+    ],
+    "p4_p5_claim_before_m8_exit_forbidden": true,
+    "p1_p2_p3_historical_products_immutable": true,
+    "p3_exact_revision_consumption_required": true,
+    "current_latest_default_resolution_forbidden": true,
+    "hidden_p3_recomputation_forbidden": true,
+    "p3_ood_unavailable_zero_coercion_forbidden": true,
+    "stronger_p3_claim_upgrade_forbidden": true,
+    "individual_team_scope_conflation_forbidden": true
+  },
+  "rolling_design": {
+    "policy_issue": 149,
+    "current_implementation_milestone": "M8",
+    "next_detailed_design_milestone": "M9",
+    "next_design_issue": 186,
+    "m9_implementation_forbidden_before_m8_exit_go": true,
+    "p6_admission_forbidden_before_m9_exit_go": true,
+    "distant_algorithm_precommitment_forbidden": true
+  },
+  "core_storage_authority": {
+    "canonical_business_authority": "CB-1.4.0",
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "historical_p1_p2_p3_release_replay_semantics_must_remain_immutable": true,
+    "managed_object_registry": "registry.object_reference"
+  },
+  "authority_blockers": {
+    "c3_issue": 181,
+    "reason": "P4/P5 high-level scope is frozen by Canonical and the M8 runway, but exact subject/composition identity, role/privacy projection, instructor approval/audit semantics, machine-vs-human evidence separation, aggregation/profile authority, cross-layer DTOs, exact API/GUI projections and C4 admission evidence require machine-authority closure before dependent P4/P5 implementation may claim completion.",
+    "fail_closed": true,
+    "blocker_task_id": "M8-GOV-001",
+    "dependent_task_ids": [
+      "M8-GOV-002",
+      "M8-DATA-001",
+      "M8-WORLD-001",
+      "M8-WORLD-002",
+      "M8-SEC-001",
+      "M8-ASSESS-001",
+      "M8-ASSESS-002",
+      "M8-ASSESS-003",
+      "M8-LONG-001",
+      "M8-ASSESS-004",
+      "M8-ASSESS-005",
+      "M8-ASSESS-006",
+      "M8-LONG-002",
+      "M8-API-001",
+      "M8-GUI-001",
+      "M8-SEC-002",
+      "M8-GOV-003",
+      "M8-TST-001",
+      "M8-TST-002",
+      "M8-TST-003",
+      "M8-TST-004",
+      "M8-TST-005"
+    ]
+  },
+  "authority_boundaries": {
+    "capability_registry": "CAPABILITY_PHASE_REGISTRY.json",
+    "milestone_registry": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+    "extension_contract_registry": "EXTENSION_CONTRACT_REGISTRY.json",
+    "core_logical_model": "CORE_LOGICAL_MODEL.json",
+    "cross_layer_dto_contracts": "CROSS_LAYER_DTO_CONTRACTS.json",
+    "implementation_invented_metric_formula_threshold_weight_or_role_rule_forbidden": true,
+    "current_latest_default_historical_resolution_forbidden": true,
+    "same_episode_or_future_information_leakage_forbidden": true,
+    "instructor_annotation_machine_result_overwrite_forbidden": true,
+    "published_assessment_mutation_forbidden": true,
+    "direct_identity_exposure_requires_authorized_projection": true,
+    "unavailable_ood_not_identifiable_zero_fill_forbidden": true,
+    "composition_change_requires_new_identity": true,
+    "team_result_copy_to_individual_forbidden": true,
+    "incompatible_reference_condition_or_twin_revision_pooling_without_authority_forbidden": true,
+    "p6_activation_forbidden": true
+  },
+  "batches": [
+    {
+      "batch_id": "M8-BATCH-1",
+      "tracker_issue": 182,
+      "name": "P4/P5 authority + exact subject/composition/privacy substrate",
+      "task_ids": [
+        "M8-GOV-001",
+        "M8-GOV-002",
+        "M8-DATA-001",
+        "M8-WORLD-001",
+        "M8-WORLD-002",
+        "M8-SEC-001",
+        "M8-TST-001"
+      ]
+    },
+    {
+      "batch_id": "M8-BATCH-2",
+      "tracker_issue": 183,
+      "name": "P4 human-machine + instructor assessment",
+      "task_ids": [
+        "M8-ASSESS-001",
+        "M8-ASSESS-002",
+        "M8-ASSESS-003",
+        "M8-LONG-001",
+        "M8-TST-002"
+      ]
+    },
+    {
+      "batch_id": "M8-BATCH-3",
+      "tracker_issue": 184,
+      "name": "P5 team/mission + exact publication/security + M9 runway",
+      "task_ids": [
+        "M8-ASSESS-004",
+        "M8-ASSESS-005",
+        "M8-ASSESS-006",
+        "M8-LONG-002",
+        "M8-API-001",
+        "M8-GUI-001",
+        "M8-SEC-002",
+        "M8-GOV-003",
+        "M8-TST-003",
+        "M8-TST-004"
+      ]
+    },
+    {
+      "batch_id": "M8-BATCH-4",
+      "tracker_issue": 185,
+      "name": "M8 Exit / P4-P5 admission",
+      "task_ids": [
+        "M8-TST-005"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M8-GOV-001",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "P4/P5 implementation authority closure",
+      "dependencies": [
+        "P3_M7_QUALIFIED",
+        "C3 issue #181",
+        "M8 design runway #170"
+      ],
+      "minimum_acceptance": "Versioned machine authority freezes exact P4 subject and P5 composition identities, role/privacy projections, instructor annotation/approval/audit semantics, machine-vs-human evidence separation, explicit unavailable/OOD/not-identifiable semantics, governed aggregation/profile identity, exact cross-layer DTOs and C4 admission evidence. No implementation-local formula, threshold, weight, role rule or alias is permitted."
+    },
+    {
+      "task_id": "M8-GOV-002",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "C4 P4/P5 admission and claim guard",
+      "dependencies": [
+        "P3_M7_QUALIFIED",
+        "CAPABILITY_PHASE_REGISTRY.json",
+        "M8-GOV-001"
+      ],
+      "minimum_acceptance": "P4/P5 remain externally unclaimable until protected-main M8 Exit GO; P1/P2/P3 stay immutable distinct evidence layers; P6 remains inactive; exact P3 claim level/validity/as-of/uncertainty is preserved without upgrade."
+    },
+    {
+      "task_id": "M8-DATA-001",
+      "workstream": "WS-DATA",
+      "deliverable": "Exact immutable P4 subject/context projection",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-GOV-002",
+        "P3 exact twin/estimate products"
+      ],
+      "minimum_acceptance": "Materialize exact governed subject or pseudonymous subject key, role/seat/function, aircraft_id, exact twin_revision_id and optional exact P3 estimate_id, session/episode/stage scope, configuration/evidence refs and as-of cutoff; no current/latest/default or hidden P3 recomputation."
+    },
+    {
+      "task_id": "M8-WORLD-001",
+      "workstream": "WS-WORLD",
+      "deliverable": "Fact/evidence/assessment boundary and interaction-scope snapshot",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-DATA-001",
+        "Ground Truth/Perceived World/Action World authorities"
+      ],
+      "minimum_acceptance": "Freeze exact World/event/evidence references consumed by P4/P5 while keeping facts, machine evidence, instructor annotation and assessment products distinct; same-episode/future-information leakage and fact mutation fail closed."
+    },
+    {
+      "task_id": "M8-WORLD-002",
+      "workstream": "WS-WORLD",
+      "deliverable": "Exact immutable P5 composition snapshot",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-WORLD-001"
+      ],
+      "minimum_acceptance": "Create deterministic composition identity binding team/package/mission scope, participant subject IDs, roles, aircraft IDs, exact twin revisions, relevant P4 revision refs, scenario/mission context and valid/as-of interval; any composition change creates a new identity."
+    },
+    {
+      "task_id": "M8-SEC-001",
+      "workstream": "WS-SECURITY",
+      "deliverable": "Role/privacy/pseudonymization evidence projection contract",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-DATA-001",
+        "M8-WORLD-002"
+      ],
+      "minimum_acceptance": "Freeze least-privilege role matrix and projection rules for subject/self, instructor/evaluator, team lead, analyst and administrator/auditor; direct identity is minimized, privileged access is auditable, and sensitive evidence is excluded from unrestricted client logs/exports."
+    },
+    {
+      "task_id": "M8-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "P4/P5 authority, admission, privacy, leakage and composition Golden-negative suite",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-GOV-002",
+        "M8-SEC-001"
+      ],
+      "minimum_acceptance": "Fail closed on missing/stale authority, current/latest/default resolution, future/same-episode leakage, unauthorized identity/evidence projection, composition drift under one identity, OOD/unavailable zero coercion, P3 claim upgrade, individual/team scope copy and premature P4/P5/P6 admission."
+    },
+    {
+      "task_id": "M8-ASSESS-001",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Deterministic human-machine evidence materialization",
+      "dependencies": [
+        "M8-DATA-001",
+        "M8-WORLD-001",
+        "M8-SEC-001"
+      ],
+      "minimum_acceptance": "Create immutable evidence products for only authority-approved human-machine evidence families, bound to exact subject/context/P3/World provenance and as-of cutoff; no unapproved metric formula or derived score is invented."
+    },
+    {
+      "task_id": "M8-ASSESS-002",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Immutable instructor annotation and approval revision workflow",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-ASSESS-001",
+        "M8-SEC-001"
+      ],
+      "minimum_acceptance": "Author/role/time/target revision/review state are exact; update creates immutable audit-preserving revision/supersession rather than overwriting machine evidence or prior published decisions; write semantics are idempotent and authorized."
+    },
+    {
+      "task_id": "M8-ASSESS-003",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Immutable P4 individual/human-machine assessment revision",
+      "dependencies": [
+        "M8-ASSESS-001",
+        "M8-ASSESS-002"
+      ],
+      "minimum_acceptance": "Publish deterministic P4 assessment identity with exact subject, evidence, instructor/machine origin, approval state, P3 refs, validity/as-of, uncertainty/status and provenance; unsupported or unavailable evidence remains explicit and is never fabricated as zero."
+    },
+    {
+      "task_id": "M8-LONG-001",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "P4 longitudinal identity, supersession and replay",
+      "dependencies": [
+        "M8-ASSESS-003"
+      ],
+      "minimum_acceptance": "Historical individual assessments remain exact-revision addressable; subject/role/configuration/assessment-profile changes preserve boundaries; longitudinal comparison uses only governed comparable identities and exact as-of replay."
+    },
+    {
+      "task_id": "M8-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "P4 synthetic fixture, Golden, annotation and replay qualification",
+      "dependencies": [
+        "M8-ASSESS-003",
+        "M8-LONG-001"
+      ],
+      "minimum_acceptance": "Golden fixtures cover exact subject/P3/World projection, machine evidence, instructor revision/audit, approval states, unavailable/OOD cases, role denial, deterministic logical identity and historical replay without P1/P2/P3 mutation."
+    },
+    {
+      "task_id": "M8-ASSESS-004",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Deterministic team/mission evidence materialization",
+      "dependencies": [
+        "M8-WORLD-002",
+        "M8-ASSESS-003"
+      ],
+      "minimum_acceptance": "Materialize exact composition-bound team/package/mission evidence preserving contributing subject IDs, roles, P4 revisions, aircraft/twin revisions and mission context; missing/unavailable member evidence remains explicit."
+    },
+    {
+      "task_id": "M8-ASSESS-005",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Governed composition-aware aggregation product",
+      "dependencies": [
+        "M8-GOV-001",
+        "M8-ASSESS-004"
+      ],
+      "minimum_acceptance": "Any aggregation executes only an adopted exact profile/formula/weight/threshold authority; incompatible reference conditions/twin/configuration revisions are not pooled without explicit normalization authority; team result is never copied to individual subjects."
+    },
+    {
+      "task_id": "M8-ASSESS-006",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Immutable P5 team/package/mission assessment revision",
+      "dependencies": [
+        "M8-ASSESS-004",
+        "M8-ASSESS-005"
+      ],
+      "minimum_acceptance": "Publish deterministic P5 revision bound to exact composition/evidence/aggregation-profile identity, outcome-vs-performance semantics, approval/claim/validity/as-of state and provenance; composition or governed-input change creates a new revision."
+    },
+    {
+      "task_id": "M8-LONG-002",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Composition-aware P5 longitudinal identity and replay",
+      "dependencies": [
+        "M8-ASSESS-006"
+      ],
+      "minimum_acceptance": "Longitudinal P5 comparisons preserve composition identity and explicitly distinguish same-composition from changed-composition series; exact historical revisions/as-of replay remain available and no roster change is silently followed."
+    },
+    {
+      "task_id": "M8-API-001",
+      "workstream": "WS-API",
+      "deliverable": "Exact revision-bound P4/P5 API and authorized instructor workflow",
+      "dependencies": [
+        "M8-ASSESS-003",
+        "M8-ASSESS-006",
+        "M8-SEC-001"
+      ],
+      "minimum_acceptance": "Expose exact P4/P5 revision reads and authorized/idempotent instructor annotation/approval writes with role-aware privacy projection; historical reads require exact IDs, never current/latest/default aliases, hidden recomputation or claim upgrade."
+    },
+    {
+      "task_id": "M8-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "P1/P2/P3 aircraft vs P4 individual vs P5 team/mission visible separation",
+      "dependencies": [
+        "M8-API-001"
+      ],
+      "minimum_acceptance": "GUI visibly separates aircraft capability context, individual human-machine assessment and team/mission assessment; displays exact scope/revision/evidence origin/approval/validity/unavailable/uncertainty and role-sensitive visibility; no persistence, recomputation or claim upgrade in presentation code."
+    },
+    {
+      "task_id": "M8-SEC-002",
+      "workstream": "WS-SECURITY",
+      "deliverable": "Runtime role/privacy/audit/export enforcement",
+      "dependencies": [
+        "M8-SEC-001",
+        "M8-API-001",
+        "M8-GUI-001"
+      ],
+      "minimum_acceptance": "Runtime/API/GUI enforce frozen role projections, pseudonymous views and privileged audit evidence; unauthorized direct identity/evidence/export access fails closed and no sensitive payload is leaked to unrestricted logs."
+    },
+    {
+      "task_id": "M8-GOV-003",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "M9/P6 one-milestone-ahead detailed-design runway",
+      "dependencies": [
+        "M8-BATCH-1 accepted",
+        "program issue #149",
+        "design issue #186"
+      ],
+      "minimum_acceptance": "During active M8 implementation refine M9/P6 using real P4/P5 evidence to task/interface/test detail, including fact-vs-projection separation, assumptions/model/applicability/uncertainty, approval/release and interoperability boundaries; no P6 implementation or admission is activated."
+    },
+    {
+      "task_id": "M8-TST-003",
+      "workstream": "WS-TEST",
+      "deliverable": "P5 composition, aggregation and team/mission Golden-negative qualification",
+      "dependencies": [
+        "M8-ASSESS-006",
+        "M8-LONG-002"
+      ],
+      "minimum_acceptance": "Golden vectors verify exact composition identity, contributing members/roles/P4/P3 lineage, governed aggregation profile identity, explicit missing/unavailable states, changed-composition new identity and deterministic replay; negatives reject zero-fill, unauthorized pooling and individual/team result copying."
+    },
+    {
+      "task_id": "M8-TST-004",
+      "workstream": "WS-TEST",
+      "deliverable": "P4/P5 API/GUI/security cross-platform replay and P1-P3 non-regression",
+      "dependencies": [
+        "M8-API-001",
+        "M8-GUI-001",
+        "M8-SEC-002",
+        "M8-TST-002",
+        "M8-TST-003"
+      ],
+      "minimum_acceptance": "One exact candidate proves Windows/Linux canonical serialization and logical identity equivalence, exact historical replay, role/privacy behavior, API/GUI architecture boundaries, immutable P1/P2/P3 hashes/releases, DB 1.6.0 compatibility and retained M5-M7 guarantees."
+    },
+    {
+      "task_id": "M8-TST-005",
+      "workstream": "WS-TEST",
+      "deliverable": "M8 Exit review and C4 P4/P5 admission decision",
+      "dependencies": [
+        "ALL_M8_TASKS"
+      ],
+      "minimum_acceptance": "Exact 23/23 M8 evidence, C3 authority closure, subject/composition/privacy/instructor/aggregation gates, Golden/negative/replay/API/GUI/security/cross-platform qualification, P1-P3 non-regression and M9 design-runway evidence all pass with failed_acceptance=[]; only protected-main exact M8 Exit GO admits P4 and P5 while P6 stays inactive."
+    }
+  ]
+}
