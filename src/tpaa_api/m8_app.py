@@ -20,7 +20,6 @@ from tpaa_application import (
 
 from .app import create_app
 
-
 M8PrincipalResolver = Callable[[Request], M8ViewerContext]
 
 

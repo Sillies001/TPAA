@@ -58,7 +58,6 @@ from .p4_replay import (
     P4ReplayRevision,
     build_p4_longitudinal_replay,
 )
-
 from .p5_replay import (
     P5AssessmentProjection,
     P5CompositionReplaySeries,
