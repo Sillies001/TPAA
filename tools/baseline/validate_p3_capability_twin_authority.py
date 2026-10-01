@@ -20,10 +20,22 @@ LOCK = BASELINE / "BASELINE_LOCK.json"
 
 EXPECTED_AUTHORITY_SHA256 = "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b"
 EXPECTED_PROFILE_SHA256 = "d66aa780d1c2e31ec664d173a0cdbc355f98c9ff3f751a6949e84f74cdf93876"
-EXPECTED_DTO_SHA256 = "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
-EXPECTED_LOCK_SHA256 = "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47"
+EXPECTED_M7_DTO_SHA256 = "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
+EXPECTED_M7_LOCK_SHA256 = "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47"
+EXPECTED_P3_DTO_SUBSET_SHA256 = "90b2f51d0c9b81ed0b3d6ff4294a945c087578a41c01a9c11a5ac7571f6ad91f"
 PARENT_LOCK_SHA256 = "f95167aca59dc993ced607e55f21f01080c4e24cc0759bf97482d49654ea182b"
 M4_SHA256 = "c1c073bce8870feceb90bdb6c28172c4c726de6b15fc70208e169336baa59dfa"
+
+P3_DTO_NAMES = (
+    "P3EligibleAdjustedEstimateDTO",
+    "P3LifecycleSegmentDTO",
+    "P3ModelValidationSnapshotDTO",
+    "CapabilityModelDTO",
+    "CapabilitySurfaceDTO",
+    "AircraftTwinRevisionDTO",
+    "IntrinsicCapabilityEstimateDTO",
+    "P3AdmissionStateDTO",
+)
 
 
 def _sha(path: Path) -> str:
@@ -72,11 +84,19 @@ def verify() -> dict[str, object]:
     m4 = _load(M4)
     core = _load(CORE)
     lock = _load(LOCK)
+    dto_contracts = dto["contracts"]
+    p3_dto_subset_hash = _canonical_hash(
+        {name: dto_contracts.get(name, {}) for name in P3_DTO_NAMES}
+    )
+    lineage = lock["baseline"]["lock_lineage_sha256"]
     checks: dict[str, bool] = {
         "authority_sha": _sha(AUTHORITY) == EXPECTED_AUTHORITY_SHA256,
         "profile_sha": _sha(PROFILE) == EXPECTED_PROFILE_SHA256,
-        "dto_sha": _sha(DTO) == EXPECTED_DTO_SHA256,
-        "lock_sha": _sha(LOCK) == EXPECTED_LOCK_SHA256,
+        "dto_lock_current": (
+            _lock_entry(lock, "CROSS_LAYER_DTO_CONTRACTS.json").get("sha256") == _sha(DTO)
+        ),
+        "p3_dto_subset_preserved": p3_dto_subset_hash == EXPECTED_P3_DTO_SUBSET_SHA256,
+        "m7_lock_lineage_preserved": EXPECTED_M7_LOCK_SHA256 in lineage,
         "m4_sha": _sha(M4) == M4_SHA256,
         "identity": (
             authority.get("authority_id") == "P3_CAPABILITY_TWIN_AUTHORITY"
@@ -184,13 +204,14 @@ def verify() -> dict[str, object]:
             profile["source_bindings"]["p3_authority_sha256"]
             == EXPECTED_AUTHORITY_SHA256
             and profile["source_bindings"]["cross_layer_dto_sha256"]
-            == EXPECTED_DTO_SHA256
+            == EXPECTED_M7_DTO_SHA256
             and profile["source_bindings"]["m4_longitudinal_authority_sha256"]
             == M4_SHA256
         ),
         "lock_lineage": (
-            lock["baseline"]["rebaseline"] == "R3.9_M7_P3_AUTHORITY_PROFILE"
-            and lock["baseline"]["lock_lineage_sha256"][0] == PARENT_LOCK_SHA256
+            EXPECTED_M7_LOCK_SHA256 in lineage
+            and PARENT_LOCK_SHA256 in lineage
+            and lineage.index(EXPECTED_M7_LOCK_SHA256) < lineage.index(PARENT_LOCK_SHA256)
         ),
     }
     for filename, path, expected in (
@@ -200,7 +221,7 @@ def verify() -> dict[str, object]:
             PROFILE,
             EXPECTED_PROFILE_SHA256,
         ),
-        ("CROSS_LAYER_DTO_CONTRACTS.json", DTO, EXPECTED_DTO_SHA256),
+        ("CROSS_LAYER_DTO_CONTRACTS.json", DTO, _sha(DTO)),
     ):
         entry = _lock_entry(lock, filename)
         checks[f"lock:{filename}"] = (
@@ -269,8 +290,8 @@ def verify() -> dict[str, object]:
         "status": "PASS" if not failed else "FAIL",
         "authority_sha256": EXPECTED_AUTHORITY_SHA256,
         "profile_sha256": EXPECTED_PROFILE_SHA256,
-        "dto_sha256": EXPECTED_DTO_SHA256,
-        "baseline_lock_sha256": EXPECTED_LOCK_SHA256,
+        "dto_sha256": _sha(DTO),
+        "baseline_lock_sha256": _sha(LOCK),
         "checks": checks,
         "failed_checks": failed,
         "task_complete": False,

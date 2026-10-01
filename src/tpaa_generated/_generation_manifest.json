@@ -1,5 +1,5 @@
 {
-  "baseline_lock_sha256": "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
+  "baseline_lock_sha256": "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
   "core_baseline": "CB-1.4.0",
   "generator_version": "0.2.0",
   "generators": [
@@ -12,13 +12,13 @@
         {
           "bytes": 441,
           "path": "src/tpaa_generated/baseline.py",
-          "sha256": "81869f569628603e0ebdc385a1fe3475b7c93a706af0bfaa3c2b4cfcfe92bff0"
+          "sha256": "f37059cd9ce476e9a3cf21831e890f746bc47098b9a50427feaa051d0c4a0548"
         }
       ],
       "sources": [
         {
           "artifact_id": "BASELINE_LOCK",
-          "sha256": "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
+          "sha256": "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
           "version": "CB-1.4.0"
         }
       ]
@@ -26,20 +26,20 @@
     {
       "generator_id": "dto-types",
       "metadata": {
-        "dto_count": "20",
-        "field_count": "332"
+        "dto_count": "29",
+        "field_count": "472"
       },
       "outputs": [
         {
-          "bytes": 14693,
+          "bytes": 20467,
           "path": "src/tpaa_generated/dto.py",
-          "sha256": "ff244e87c5c19506aad4eb4748d5ee3bad135ac8b2df6dc0182f3aca1f70023d"
+          "sha256": "0d8bbba34c0930e843bdd4cfd291f2f8216929209736d81dea7f9728353980b1"
         }
       ],
       "sources": [
         {
           "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
-          "sha256": "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41",
+          "sha256": "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47",
           "version": "UNVERSIONED_BY_AUTHORITY"
         }
       ]
@@ -53,13 +53,13 @@
         {
           "bytes": 312,
           "path": "src/tpaa_generated/__init__.py",
-          "sha256": "cc6c3b6fbc6db03670429b660a86526e5cb789e7b0ecb6b1d822903fb5fc54a9"
+          "sha256": "2f7a5ebcdd18419653ea7853302c3326eb67a8ca6a1cc1a2ca4cebf09f7d8fa4"
         }
       ],
       "sources": [
         {
           "artifact_id": "BASELINE_LOCK",
-          "sha256": "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
+          "sha256": "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
           "version": "CB-1.4.0"
         }
       ]

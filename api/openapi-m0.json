@@ -243,6 +243,86 @@
         ],
         "type": "object"
       },
+      "ApprovalStateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "assessment_revision_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "assessment_scope": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "audit_id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": "string",
+            "x-tpaa-transport-type": "decimal-string"
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "reviewer_actor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviewer_subject_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "state": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_revision_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "assessment_scope",
+          "assessment_revision_id",
+          "state",
+          "audit_id",
+          "reviewer_subject_key",
+          "request_id",
+          "created_at"
+        ],
+        "type": "object"
+      },
       "AttributionRunDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1245,6 +1325,257 @@
         ],
         "type": "object"
       },
+      "HumanMachineEvidenceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "availability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_projection_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "evidence_family": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "metric_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "origin": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "subject_context_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "world_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          }
+        },
+        "required": [
+          "evidence_id",
+          "subject_context_id",
+          "subject_key",
+          "evidence_family",
+          "origin",
+          "evidence_set_id",
+          "world_refs",
+          "metric_refs",
+          "capability_projection_refs",
+          "source_refs",
+          "availability_status",
+          "reason_codes",
+          "evidence_payload",
+          "as_of_utc",
+          "evidence_hash"
+        ],
+        "type": "object"
+      },
+      "InstructorAnnotationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "annotation_type": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "author_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "author_subject_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "base_release_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "body_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "end_session_time_us": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                "type": "string",
+                "x-tpaa-transport-type": "decimal-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "episode_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_set_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision_no": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start_session_time_us": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                "type": "string",
+                "x-tpaa-transport-type": "decimal-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_annotation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "annotation_id",
+          "base_release_id",
+          "session_id",
+          "author_subject_key",
+          "annotation_type",
+          "visibility",
+          "status",
+          "revision_no",
+          "created_at"
+        ],
+        "type": "object"
+      },
       "IntrinsicCapabilityEstimateDTO": {
         "additionalProperties": false,
         "properties": {
@@ -2243,6 +2574,634 @@
         ],
         "type": "object"
       },
+      "P4AssessmentRevisionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_assessment_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "aircraft_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approval_state": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "capability_projection_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "confidence": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metric_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "x-tpaa-transport-type": "number?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_context_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "world_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          }
+        },
+        "required": [
+          "actor_assessment_id",
+          "subject_context_id",
+          "subject_key",
+          "session_id",
+          "episode_id",
+          "assessment_spec_id",
+          "assessment_spec_version",
+          "world_refs",
+          "metric_refs",
+          "capability_projection_refs",
+          "status",
+          "confidence",
+          "evidence_set_id",
+          "created_at",
+          "approval_state",
+          "as_of_utc"
+        ],
+        "type": "object"
+      },
+      "P4P5AdmissionStateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "git_ref": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "m8_exit_decision": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "p4_admitted": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "p5_admitted": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "p6_inactive": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "protected_main": {
+            "type": "boolean",
+            "x-tpaa-transport-type": "boolean"
+          },
+          "required_jobs_success": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "required_jobs_total": {
+            "type": "integer",
+            "x-tpaa-transport-type": "integer"
+          },
+          "run_conclusion": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "source_revision": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          }
+        },
+        "required": [
+          "source_revision",
+          "event_name",
+          "git_ref",
+          "protected_main",
+          "m8_exit_decision",
+          "run_conclusion",
+          "required_jobs_success",
+          "required_jobs_total",
+          "p4_admitted",
+          "p5_admitted",
+          "p6_inactive"
+        ],
+        "type": "object"
+      },
+      "P4SubjectContextDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "aircraft_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "function_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "knowledge_time_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "p3_estimate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role_code": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "role_model_context_artifact_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "role_model_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "seat_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_context_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "subject_key": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "twin_revision_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "world_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          }
+        },
+        "required": [
+          "subject_context_id",
+          "subject_key",
+          "role_code",
+          "session_id",
+          "episode_id",
+          "twin_revision_id",
+          "assessment_spec_id",
+          "assessment_spec_version",
+          "role_model_context_artifact_id",
+          "role_model_version",
+          "world_refs",
+          "evidence_set_id",
+          "as_of_utc",
+          "knowledge_time_utc"
+        ],
+        "type": "object"
+      },
+      "P5AssessmentRevisionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "adjudication_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "aggregation_profile_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approval_state": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "composition_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "x-tpaa-transport-type": "number"
+          },
+          "created_at": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "x-tpaa-transport-type": "string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mission_assessment_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "mission_episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "overall_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "x-tpaa-transport-type": "number?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "participant_subject_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "world_snapshot_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          }
+        },
+        "required": [
+          "mission_assessment_id",
+          "composition_id",
+          "session_id",
+          "mission_episode_id",
+          "assessment_spec_id",
+          "assessment_spec_version",
+          "participant_subject_keys",
+          "world_snapshot_refs",
+          "adjudication_refs",
+          "status",
+          "confidence",
+          "evidence_set_id",
+          "created_at",
+          "approval_state",
+          "as_of_utc"
+        ],
+        "type": "object"
+      },
+      "P5CompositionSnapshotDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "assessment_spec_version": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "composition_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "composition_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "mission_episode_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "participant_bindings": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "participant_subject_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "role_model_context_artifact_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "scenario_context_artifact_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string",
+                "x-tpaa-transport-type": "uuid-string?"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "world_snapshot_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          }
+        },
+        "required": [
+          "composition_id",
+          "session_id",
+          "mission_episode_id",
+          "participant_subject_keys",
+          "participant_bindings",
+          "world_snapshot_refs",
+          "role_model_context_artifact_id",
+          "assessment_spec_id",
+          "assessment_spec_version",
+          "as_of_utc",
+          "composition_hash"
+        ],
+        "type": "object"
+      },
       "TPAAChainDTO": {
         "additionalProperties": false,
         "properties": {
@@ -2329,6 +3288,96 @@
           "chain_version"
         ],
         "type": "object"
+      },
+      "TeamMissionEvidenceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_utc": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "availability_status": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "composition_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "contributing_p4_revision_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "evidence_family": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_hash": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_id": {
+            "type": "string",
+            "x-tpaa-transport-type": "string"
+          },
+          "evidence_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "x-tpaa-transport-type": "object"
+          },
+          "evidence_set_id": {
+            "format": "uuid",
+            "type": "string",
+            "x-tpaa-transport-type": "uuid-string"
+          },
+          "objective_result_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "participant_subject_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          },
+          "world_snapshot_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "x-tpaa-transport-type": "array[string]"
+          }
+        },
+        "required": [
+          "evidence_id",
+          "composition_id",
+          "evidence_family",
+          "evidence_set_id",
+          "participant_subject_keys",
+          "contributing_p4_revision_ids",
+          "world_snapshot_refs",
+          "objective_result_refs",
+          "availability_status",
+          "reason_codes",
+          "evidence_payload",
+          "as_of_utc",
+          "evidence_hash"
+        ],
+        "type": "object"
       }
     }
   },
@@ -2342,7 +3391,7 @@
     "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
     "artifact_version": "UNVERSIONED_BY_AUTHORITY",
     "core_baseline": "CB-1.4.0",
-    "sha256": "644370d40e42960144102e6f404b6ee31af9753686b67bb27e47690515898c41"
+    "sha256": "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47"
   },
   "x-tpaa-transport-rules": {
     "session_time_us": "decimal-string for JS-visible API",
