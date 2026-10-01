@@ -1,0 +1,330 @@
+{
+  "schema": "TPAA_SDIB_M9_TASK_BASELINE_V1",
+  "sdib_version": "SDIB-1.8",
+  "milestone": "M9",
+  "milestone_name": "P6 Joint/LVC & Predictive Activation",
+  "entry_evidence": {
+    "predecessor_milestone": "M8",
+    "protected_main_sha": "06b9f0c55dda803765fc265b8d5ca0353620476f",
+    "protected_main_run_number": 527,
+    "protected_main_actions_run_id": 36869057230,
+    "p4_p5_qualification": "P4_P5_M8_QUALIFIED",
+    "m8_exit_decision": "GO",
+    "p4_admitted": true,
+    "p5_admitted": true,
+    "p6_inactive": true,
+    "protected_main_exact": true,
+    "hosted_ci_required_jobs": 14,
+    "hosted_ci_result": "PASS"
+  },
+  "governance": {
+    "program_issue": 149,
+    "design_runway_issue": 186,
+    "baseline_issue": 193,
+    "c3_issue": 194,
+    "batch_issues": {
+      "M9-BATCH-1": 195,
+      "M9-BATCH-2": 196,
+      "M9-BATCH-3": 197,
+      "M9-BATCH-4": 198
+    },
+    "next_design_issue": null
+  },
+  "task_count": 15,
+  "canonical_required_workstreams": [
+    "WS-INTEROP",
+    "WS-CAPABILITY",
+    "WS-ASSESS",
+    "WS-GUI",
+    "WS-SECURITY",
+    "WS-TEST",
+    "WS-GOVERNANCE"
+  ],
+  "supporting_workstreams": [
+    "WS-DATA",
+    "WS-API",
+    "WS-LONGITUDINAL"
+  ],
+  "capability_boundary": {
+    "currently_admitted_phases": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5"
+    ],
+    "candidate_phases": [
+      "P6"
+    ],
+    "p6_claim_before_m9_exit_forbidden": true,
+    "p1_p5_historical_products_immutable": true,
+    "exact_source_revision_consumption_required": true,
+    "fact_projection_separation_required": true,
+    "current_latest_default_source_or_model_resolution_forbidden": true,
+    "hidden_source_recomputation_or_substitution_forbidden": true,
+    "future_or_same_outcome_information_leakage_forbidden": true,
+    "unsupported_causal_claim_upgrade_forbidden": true,
+    "unavailable_ood_not_identifiable_zero_coercion_forbidden": true,
+    "recommendation_as_fact_or_command_forbidden": true
+  },
+  "rolling_design": {
+    "policy_issue": 149,
+    "current_implementation_milestone": "M9",
+    "next_detailed_design_milestone": null,
+    "roadmap_ends_at_m9_under_current_registry": true,
+    "m10_or_p7_invention_forbidden_without_new_governance": true,
+    "p6_admission_forbidden_before_m9_exit_go": true,
+    "distant_algorithm_precommitment_forbidden": true
+  },
+  "core_storage_authority": {
+    "canonical_business_authority": "CB-1.4.0",
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "historical_p1_p5_release_replay_semantics_must_remain_immutable": true,
+    "managed_object_registry": "registry.object_reference"
+  },
+  "authority_blockers": {
+    "c3_issue": 194,
+    "reason": "P6 high-level scope is frozen by Canonical and the M9 runway, but exact model/training snapshot identity, leakage/holdout policy, applicability/uncertainty semantics, counterfactual identifiability, recommendation/release rules, Joint/LVC interoperability, role/privacy projection, exact DTO/API/GUI contracts and C4 admission evidence require machine-authority closure before dependent P6 implementation may claim completion.",
+    "fail_closed": true,
+    "blocker_task_id": "M9-GOV-001",
+    "dependent_task_ids": [
+      "M9-DATA-001",
+      "M9-INTEROP-001",
+      "M9-MODEL-001",
+      "M9-MODEL-002",
+      "M9-PROJ-001",
+      "M9-LONG-001",
+      "M9-TST-001",
+      "M9-CF-001",
+      "M9-ASSESS-001",
+      "M9-API-001",
+      "M9-GUI-001",
+      "M9-SEC-001",
+      "M9-TST-002",
+      "M9-EXIT-001"
+    ]
+  },
+  "authority_boundaries": {
+    "capability_registry": "CAPABILITY_PHASE_REGISTRY.json",
+    "milestone_registry": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+    "extension_contract_registry": "EXTENSION_CONTRACT_REGISTRY.json",
+    "core_logical_model": "CORE_LOGICAL_MODEL.json",
+    "cross_layer_dto_contracts": "CROSS_LAYER_DTO_CONTRACTS.json",
+    "implementation_invented_model_formula_threshold_causal_rule_or_role_rule_forbidden": true,
+    "current_latest_default_historical_resolution_forbidden": true,
+    "same_episode_future_or_outcome_information_leakage_forbidden": true,
+    "fact_projection_conflation_forbidden": true,
+    "published_p1_p5_mutation_forbidden": true,
+    "direct_identity_exposure_requires_authorized_projection": true,
+    "unavailable_ood_not_identifiable_zero_fill_forbidden": true,
+    "unsupported_causal_upgrade_forbidden": true,
+    "recommendation_command_upgrade_forbidden": true,
+    "unversioned_joint_lvc_external_alias_forbidden": true
+  },
+  "batches": [
+    {
+      "batch_id": "M9-BATCH-1",
+      "tracker_issue": 195,
+      "name": "P6 authority + leakage-safe input + interoperability substrate",
+      "task_ids": [
+        "M9-GOV-001",
+        "M9-DATA-001",
+        "M9-INTEROP-001"
+      ]
+    },
+    {
+      "batch_id": "M9-BATCH-2",
+      "tracker_issue": 196,
+      "name": "Deterministic model + applicability + forecast + replay",
+      "task_ids": [
+        "M9-MODEL-001",
+        "M9-MODEL-002",
+        "M9-PROJ-001",
+        "M9-LONG-001",
+        "M9-TST-001"
+      ]
+    },
+    {
+      "batch_id": "M9-BATCH-3",
+      "tracker_issue": 197,
+      "name": "Counterfactual + recommendation + exact publication/security",
+      "task_ids": [
+        "M9-CF-001",
+        "M9-ASSESS-001",
+        "M9-API-001",
+        "M9-GUI-001",
+        "M9-SEC-001",
+        "M9-TST-002"
+      ]
+    },
+    {
+      "batch_id": "M9-BATCH-4",
+      "tracker_issue": 198,
+      "name": "M9 Exit / P6 admission",
+      "task_ids": [
+        "M9-EXIT-001"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "M9-GOV-001",
+      "workstream": "WS-GOVERNANCE",
+      "deliverable": "P6 model/projection/counterfactual/interoperability/recommendation authority and C4 admission guard",
+      "dependencies": [
+        "P4_P5_M8_QUALIFIED",
+        "C3 issue #194",
+        "M9 design runway #186"
+      ],
+      "minimum_acceptance": "Versioned machine authority freezes exact P6 source/model/profile/training-snapshot identity, forecast/counterfactual/recommendation separation, leakage/holdout rules, applicability/domain/uncertainty semantics, intervention and identifiability rules, Joint/LVC interoperability boundaries, role/privacy/release/audit rules, exact cross-layer DTOs and C4 admission evidence. No implementation-local formula, threshold, causal upgrade, model alias or hidden source substitution is permitted."
+    },
+    {
+      "task_id": "M9-DATA-001",
+      "workstream": "WS-DATA",
+      "deliverable": "Exact forecast/counterfactual request substrate and leakage-safe dataset snapshots",
+      "dependencies": [
+        "M9-GOV-001",
+        "exact P4/P5/P3 published revisions"
+      ],
+      "minimum_acceptance": "Materialize immutable request/input snapshots binding exact factual source revisions, subject/composition/mission scope, target/horizon, as-of cutoff, model/profile references and training/validation snapshot identity; future/same-outcome leakage, current/latest/default source resolution and hidden P1-P5 recomputation fail closed."
+    },
+    {
+      "task_id": "M9-INTEROP-001",
+      "workstream": "WS-INTEROP",
+      "deliverable": "Exact Joint/LVC and external interoperability snapshot contract",
+      "dependencies": [
+        "M9-GOV-001",
+        "M9-DATA-001"
+      ],
+      "minimum_acceptance": "Freeze deterministic inbound/outbound identity, schema/profile/version, units, time/as-of, source/projection class, provenance, uncertainty/applicability and release state for authorized Joint/LVC/external exchange; missing authority, lossy phase conversion, source/projection conflation and unversioned external aliases fail closed."
+    },
+    {
+      "task_id": "M9-MODEL-001",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Deterministic model-revision training and validation artifact",
+      "dependencies": [
+        "M9-GOV-001",
+        "M9-DATA-001"
+      ],
+      "minimum_acceptance": "Produce immutable model revision identity bound to exact code/profile, training snapshot, feature contract, target contract, validation/holdout evidence, random/deterministic controls and provenance. Training or validation may execute only model families explicitly adopted by C3; no model is resolved by latest/current/default."
+    },
+    {
+      "task_id": "M9-MODEL-002",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Applicability/domain and uncertainty calibration product",
+      "dependencies": [
+        "M9-MODEL-001"
+      ],
+      "minimum_acceptance": "Publish exact applicability/domain and uncertainty/calibration evidence for each model revision, including explicit unavailable/out-of-domain/not-identifiable states. A mathematically executable model remains product-invalid when applicability or required calibration fails; no OOD/unavailable state is encoded as zero."
+    },
+    {
+      "task_id": "M9-PROJ-001",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Exact forecast projection product",
+      "dependencies": [
+        "M9-MODEL-001",
+        "M9-MODEL-002",
+        "M9-DATA-001"
+      ],
+      "minimum_acceptance": "Publish deterministic forecast revision bound to exact factual sources, request, model revision, assumptions, horizon, applicability, uncertainty and as-of cutoff. Projection is physically and semantically separate from P1-P5 facts/assessments and never upgrades into observed truth."
+    },
+    {
+      "task_id": "M9-LONG-001",
+      "workstream": "WS-LONGITUDINAL",
+      "deliverable": "Model/projection longitudinal replay, supersession and validation lineage",
+      "dependencies": [
+        "M9-PROJ-001"
+      ],
+      "minimum_acceptance": "Historical model and forecast revisions remain exact-ID addressable with exact as-of replay; model/profile/source changes create new revision/series boundaries; later observed outcomes may validate prior projections but never rewrite the historical prediction or its original knowledge-time context."
+    },
+    {
+      "task_id": "M9-TST-001",
+      "workstream": "WS-TEST",
+      "deliverable": "P6 model/forecast/leakage/applicability/uncertainty/interoperability Golden-negative suite",
+      "dependencies": [
+        "M9-INTEROP-001",
+        "M9-MODEL-002",
+        "M9-PROJ-001",
+        "M9-LONG-001"
+      ],
+      "minimum_acceptance": "Golden vectors prove deterministic model/projection identity, exact source lineage, leakage-safe snapshots, applicability/calibration and replay. Negatives reject future/same-outcome leakage, stale or aliased source/model revisions, OOD-zero coercion, missing required uncertainty, lossy interoperability and premature P6 claims."
+    },
+    {
+      "task_id": "M9-CF-001",
+      "workstream": "WS-CAPABILITY",
+      "deliverable": "Counterfactual request/intervention projection with explicit assumption trace",
+      "dependencies": [
+        "M9-GOV-001",
+        "M9-MODEL-002",
+        "M9-DATA-001"
+      ],
+      "minimum_acceptance": "Counterfactual revisions bind exact factual baseline, explicit typed intervention, held-fixed assumptions, model revision, applicability/identifiability status, uncertainty and provenance. Association-only evidence cannot silently become causal authority; unsupported causal claims fail closed."
+    },
+    {
+      "task_id": "M9-ASSESS-001",
+      "workstream": "WS-ASSESS",
+      "deliverable": "Governed recommendation/advisory revision and approval boundary",
+      "dependencies": [
+        "M9-PROJ-001",
+        "M9-CF-001"
+      ],
+      "minimum_acceptance": "Recommendation/advisory revisions reference exact forecast/counterfactual products, objective/constraint set, allowed action space, applicability and uncertainty; they remain advisory governed products, never facts or commands, and require exact immutable review/approval/release provenance."
+    },
+    {
+      "task_id": "M9-API-001",
+      "workstream": "WS-API",
+      "deliverable": "Exact model/request/projection/counterfactual/recommendation API",
+      "dependencies": [
+        "M9-PROJ-001",
+        "M9-CF-001",
+        "M9-ASSESS-001"
+      ],
+      "minimum_acceptance": "Expose exact revision-bound reads/writes only with idempotent authorized mutation/release semantics; current/latest/default aliases, recompute-on-read, hidden source substitution, claim upgrade and projection-as-fact transport are forbidden."
+    },
+    {
+      "task_id": "M9-GUI-001",
+      "workstream": "WS-GUI",
+      "deliverable": "Fact vs forecast/counterfactual/recommendation visible separation",
+      "dependencies": [
+        "M9-API-001"
+      ],
+      "minimum_acceptance": "GUI visibly separates P1-P5 observed/adjusted/capability/assessment products from P6 forecast, counterfactual and recommendation; exact source/model/revision, assumptions, applicability, uncertainty and approval state remain visible; presentation performs no business recomputation or persistence."
+    },
+    {
+      "task_id": "M9-SEC-001",
+      "workstream": "WS-SECURITY",
+      "deliverable": "Runtime role/privacy/model-release/audit/export enforcement",
+      "dependencies": [
+        "M9-GOV-001",
+        "M9-API-001",
+        "M9-GUI-001",
+        "M9-INTEROP-001"
+      ],
+      "minimum_acceptance": "Runtime/API/GUI/interoperability enforce frozen role/privacy and model/release permissions, pseudonymous projection and privileged audit/export evidence; unauthorized identity, model, training evidence, projection, release or export access fails closed and sensitive payloads are excluded from unrestricted logs."
+    },
+    {
+      "task_id": "M9-TST-002",
+      "workstream": "WS-TEST",
+      "deliverable": "P6 counterfactual/recommendation/API/GUI/security cross-platform and P1-P5 non-regression qualification",
+      "dependencies": [
+        "M9-CF-001",
+        "M9-ASSESS-001",
+        "M9-API-001",
+        "M9-GUI-001",
+        "M9-SEC-001",
+        "M9-TST-001"
+      ],
+      "minimum_acceptance": "One exact candidate proves Windows/Linux canonical serialization/logical identity equivalence, exact replay, fact-vs-projection transport/presentation, role/privacy/release behavior, Joint/LVC interoperability guards, immutable P1-P5 hashes/provenance, DB 1.6.0 compatibility and retained M5-M8 guarantees."
+    },
+    {
+      "task_id": "M9-EXIT-001",
+      "workstream": "WS-TEST",
+      "deliverable": "M9 Exit review and C4 P6 admission decision",
+      "dependencies": [
+        "ALL_M9_TASKS"
+      ],
+      "minimum_acceptance": "Exact 15/15 M9 evidence, C3 authority closure, leakage-safe input/interoperability/model/applicability/forecast/counterfactual/recommendation/replay/API/GUI/security/cross-platform gates and P1-P5 non-regression all pass with failed_acceptance=[]; only protected-main exact M9 Exit GO admits P6."
+    }
+  ]
+}
