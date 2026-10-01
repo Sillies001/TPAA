@@ -1,0 +1,199 @@
+{
+  "profile_id": "P6_ROLE_PRIVACY_RELEASE_PROFILE",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_ROLE_PRIVACY_RELEASE_PROFILE",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "tracking_issue": 194,
+  "source_bindings": {
+    "p6_authority_id": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY",
+    "p6_authority_version": "1.0.0",
+    "p6_authority_sha256": "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e",
+    "cross_layer_dto_sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",
+    "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+    "extension_contract_registry_sha256": "f987ea2801557befac44aaf3b47b3953a5cdbaaa662e39c2f3970526f3371f41",
+    "p4_p5_authority_sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
+    "p4_p5_role_privacy_profile_sha256": "99a526cead816010373cdd81cd889d33fa359b5d0b74d87743e51d0f649f1113"
+  },
+  "activation_rule": {
+    "profile_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "profile_adoption_does_not_admit_p6": true,
+    "p6_external_claim_requires_protected_main_m9_exit_go": true
+  },
+  "scope": {
+    "role_families": [
+      "SUBJECT_SELF",
+      "INSTRUCTOR_EVALUATOR",
+      "TEAM_LEAD",
+      "ANALYST",
+      "MODEL_REVIEWER",
+      "ADMIN_AUDITOR"
+    ],
+    "default_deny": true,
+    "direct_identity_default": false,
+    "field_level_projection": true,
+    "separation_of_model_release_and_business_approval": true,
+    "db_schema_change": false,
+    "shadow_schema_permitted": false
+  },
+  "identity_privacy_contract": {
+    "reuse_m8_subject_key_profile": "P4_P5_ROLE_PRIVACY_PROFILE:1.0.0",
+    "new_uncontrolled_pseudonym_scheme_forbidden": true,
+    "direct_actor_id_requires_role_and_scope": true,
+    "source_p4_p5_privacy_projection_must_not_be_weakened": true,
+    "model_training_data_identity_minimization_required": true
+  },
+  "role_matrix": [
+    {
+      "role": "SUBJECT_SELF",
+      "projection_read_scope": "OWN_RELEASED_P6_ONLY",
+      "direct_actor_id": "OWN_ONLY",
+      "model_metadata_read": false,
+      "model_release": false,
+      "forecast_run": false,
+      "counterfactual_run": false,
+      "recommendation_approval": false,
+      "interop_export": false,
+      "audit_read": false
+    },
+    {
+      "role": "INSTRUCTOR_EVALUATOR",
+      "projection_read_scope": "ASSIGNED_EVALUATION_SCOPE",
+      "direct_actor_id": "ASSIGNED_SCOPE_ONLY",
+      "model_metadata_read": "RELEASED_MODEL_SUMMARY",
+      "model_release": false,
+      "forecast_run": true,
+      "counterfactual_run": true,
+      "recommendation_approval": true,
+      "interop_export": false,
+      "audit_read": "OWN_AND_ASSIGNED_WORKFLOW"
+    },
+    {
+      "role": "TEAM_LEAD",
+      "projection_read_scope": "ASSIGNED_TEAM_RELEASED_P6_PSEUDONYMOUS",
+      "direct_actor_id": false,
+      "model_metadata_read": "RELEASED_MODEL_SUMMARY",
+      "model_release": false,
+      "forecast_run": false,
+      "counterfactual_run": false,
+      "recommendation_approval": false,
+      "interop_export": false,
+      "audit_read": false
+    },
+    {
+      "role": "ANALYST",
+      "projection_read_scope": "AUTHORIZED_PSEUDONYMOUS_P6_ANALYTICS",
+      "direct_actor_id": false,
+      "model_metadata_read": "AUTHORIZED_TECHNICAL_METADATA",
+      "model_release": false,
+      "forecast_run": true,
+      "counterfactual_run": true,
+      "recommendation_approval": false,
+      "interop_export": false,
+      "audit_read": false
+    },
+    {
+      "role": "MODEL_REVIEWER",
+      "projection_read_scope": "AUTHORIZED_MODEL_VALIDATION_SCOPE",
+      "direct_actor_id": false,
+      "model_metadata_read": "FULL_AUTHORIZED_MODEL_EVIDENCE",
+      "model_release": true,
+      "forecast_run": "VALIDATION_ONLY",
+      "counterfactual_run": "VALIDATION_ONLY",
+      "recommendation_approval": false,
+      "interop_export": false,
+      "audit_read": "MODEL_RELEASE_WORKFLOW"
+    },
+    {
+      "role": "ADMIN_AUDITOR",
+      "projection_read_scope": "AUTHORIZED_IDENTITY_AND_AUDIT_SCOPE",
+      "direct_actor_id": "AUTHORIZED_AUDIT_SCOPE_ONLY",
+      "model_metadata_read": "AUTHORIZED_AUDIT_SCOPE",
+      "model_release": false,
+      "forecast_run": false,
+      "counterfactual_run": false,
+      "recommendation_approval": false,
+      "interop_export": "EXPLICIT_EXPORT_AUTHORIZATION_REQUIRED",
+      "audit_read": true
+    }
+  ],
+  "projection_contract": {
+    "default_subject_projection": "subject_key",
+    "direct_actor_id_projection_requires": [
+      "role_authorization",
+      "scope_match"
+    ],
+    "source_p4_p5_projection_must_preserve_m8_privacy": true,
+    "model_artifact_uri_and_training_snapshot_detail_require_explicit_scope": true,
+    "forecast_counterfactual_assumptions_uncertainty_applicability_visible": true,
+    "recommendation_approval_and_source_refs_visible_when_authorized": true,
+    "unrestricted_client_logs_must_exclude": [
+      "actor_id",
+      "training_snapshot_payload",
+      "model_artifact_uri",
+      "privileged_audit_payload",
+      "restricted_recommendation_body"
+    ],
+    "explicit_field_omission_preferred_over_null_identity_leakage": true
+  },
+  "write_authorization_contract": {
+    "forecast_run_roles": [
+      "INSTRUCTOR_EVALUATOR",
+      "ANALYST",
+      "MODEL_REVIEWER"
+    ],
+    "counterfactual_run_roles": [
+      "INSTRUCTOR_EVALUATOR",
+      "ANALYST",
+      "MODEL_REVIEWER"
+    ],
+    "recommendation_approval_role": "INSTRUCTOR_EVALUATOR",
+    "model_release_role": "MODEL_REVIEWER",
+    "assigned_or_authorized_scope_match_required": true,
+    "request_id_required": true,
+    "duplicate_request_id_idempotent": true,
+    "admin_auditor_business_approval_by_privilege_forbidden": true,
+    "admin_auditor_model_release_by_privilege_forbidden": true,
+    "subject_self_write_forbidden": true,
+    "team_lead_write_forbidden": true
+  },
+  "release_approval_contract": {
+    "model_release_and_recommendation_release_are_distinct": true,
+    "model_release_requires_exact_validation_and_applicability_evidence": true,
+    "recommendation_release_requires_approved_source_projection_refs": true,
+    "approval_does_not_upgrade_source_claim_level": true,
+    "release_does_not_convert_projection_to_fact": true,
+    "released_product_mutation_forbidden": true,
+    "correction_after_release_creates_new_revision": true
+  },
+  "export_audit_contract": {
+    "privileged_direct_identity_access_audited": true,
+    "model_release_audited": true,
+    "recommendation_approval_and_release_audited": true,
+    "interop_export_requires_explicit_authorization": true,
+    "unrestricted_export_of_direct_identity_forbidden": true,
+    "export_must_preserve_source_or_projection_class": true,
+    "audit_carrier": "audit.audit_log",
+    "request_id_required_for_mutating_operations": true
+  },
+  "forbidden_fallbacks": {
+    "missing_role_profile_to_default_role": false,
+    "unknown_role_to_analyst": false,
+    "admin_implies_model_reviewer": false,
+    "admin_implies_instructor_evaluator": false,
+    "model_reviewer_implies_direct_identity": false,
+    "team_lead_implies_direct_identity": false,
+    "missing_release_state_to_released": false,
+    "current_latest_default_role_or_model_resolution": false
+  },
+  "contract_hashes": {
+    "identity_privacy_contract_sha256": "283acccb91597516432d248c33b5989c586d7c0808d0ee15d4e4ea7cc86037b2",
+    "role_matrix_sha256": "2430998360936578ce771de7b936e8abe25971e1e7e339e4eb7c05ae5053cded",
+    "projection_contract_sha256": "ab9ac556068fa387b0d54c1e96e9c7559c73fcaafbf40c3ac4285d771735cbaf",
+    "write_authorization_contract_sha256": "b4b5a3554e0fae9853df3ab190be4276c02b523eb2e7b9b869efa2dc25a35fa9",
+    "release_approval_contract_sha256": "80d2371369815ffcb04a8906b31c2ef99dfc5df0c989f2642e1f503830c6306c",
+    "export_audit_contract_sha256": "1a7524c4d2cda8f23b462ed6a0c80fc71f008c2d6e8cae7c7a37100c78b7eac1",
+    "forbidden_fallbacks_sha256": "9e502c7972eae83c80361cebbedb3628136f7aeb9004892f362a36e93f4d21c0"
+  }
+}

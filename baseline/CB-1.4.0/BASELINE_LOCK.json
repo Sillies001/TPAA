@@ -5,9 +5,10 @@
     "engineering": "ED-2.0",
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
-    "date": "2026-10-01",
-    "rebaseline": "R4.0_M8_P4_P5_C3_AUTHORITY_ROLE_PRIVACY",
+    "date": "2026-10-02",
+    "rebaseline": "R5.0_M9_P6_C3_AUTHORITY_ROLE_PRIVACY_RELEASE",
     "lock_lineage_sha256": [
+      "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
       "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
       "f95167aca59dc993ced607e55f21f01080c4e24cc0759bf97482d49654ea182b",
       "7eafadbb1d47297688595a8a0c48d4836dad13e040f76340ce2c0fa38a5547fa",
@@ -35,8 +36,8 @@
     },
     {
       "file": "CROSS_LAYER_DTO_CONTRACTS.json",
-      "sha256": "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47",
-      "bytes": 104521
+      "sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",
+      "bytes": 134297
     },
     {
       "file": "DEVELOPMENT_MILESTONE_REGISTRY.json",
@@ -117,6 +118,16 @@
       "file": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json",
       "sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
       "bytes": 18296
+    },
+    {
+      "file": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json",
+      "sha256": "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e",
+      "bytes": 17810
+    },
+    {
+      "file": "P6_ROLE_PRIVACY_RELEASE_PROFILE.json",
+      "sha256": "d5eff80dbfa912955ae7b09bc3e4a2868650466560cb1a5b1f558434e8076713",
+      "bytes": 8086
     },
     {
       "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",
