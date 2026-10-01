@@ -1,4 +1,4 @@
-"""P2 assessment governance and attribution substrate."""
+"""P2/P4 assessment governance and attribution substrates."""
 
 from .p2_attribution import (
     P2AdjustedCapabilityEstimate,
@@ -31,28 +31,38 @@ from .p2_substrate import (
     validate_factor_effect_semantics,
     validate_reference_condition,
 )
+from .p4_subject import (
+    P4SubjectContext,
+    P4SubjectSource,
+    assert_p4_subject_context_identity,
+    build_p4_subject_context,
+)
 
 __all__ = [
     "P1ObservationInput",
     "P2AdjustedCapabilityEstimate",
-    "P2AttributionExecution",
-    "P2AttributionRunProduct",
-    "P2CohortRow",
-    "P2ExecutionProfile",
-    "P2FactorFeatureSet",
     "P2AdmissionEvidence",
     "P2ArtifactBinding",
+    "P2AttributionExecution",
+    "P2AttributionRunProduct",
     "P2AttributionSpec",
     "P2AuthorityPolicy",
+    "P2CohortRow",
     "P2CohortSnapshot",
+    "P2ExecutionProfile",
+    "P2FactorFeatureSet",
     "P2GovernanceError",
     "P2GovernedResult",
     "P2InputBundle",
     "P2ReferenceCondition",
+    "P4SubjectContext",
+    "P4SubjectSource",
     "assert_capability_claim_allowed",
-    "execute_p2_attribution",
     "assert_p1_observed_value_immutable",
+    "assert_p4_subject_context_identity",
     "build_p2_input_bundle",
+    "build_p4_subject_context",
+    "execute_p2_attribution",
     "governed_result",
     "materialize_factor_feature_set",
     "project_p1_observation",
