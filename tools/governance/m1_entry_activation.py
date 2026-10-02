@@ -11,16 +11,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+from tpaa_canonical import EXPECTED_BASELINE_LOCK_SHA256  # noqa: E402
 DEFAULT_REVIEW = REPO_ROOT / "docs" / "reviews" / "M1_ENTRY_GATE_REVIEW.json"
 DEFAULT_ROLES = REPO_ROOT / "docs" / "governance" / "M1_ROLE_ASSIGNMENTS.json"
 
 EXPECTED_FROZEN = {
     "core_baseline": "CB-1.4.0",
     "db_schema_version": "1.6.0",
-    "baseline_lock_sha256": "ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08",
+    "baseline_lock_sha256": EXPECTED_BASELINE_LOCK_SHA256,
     "dependency_lock_sha256": "302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e",
     "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
     "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
