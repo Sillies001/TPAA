@@ -17,13 +17,13 @@ from tpaa_application import (
     M9ModelReleaseMutation,
     M9RecommendationApprovalMutation,
     M9RecommendationMutation,
+    M9ViewerContext,
     M9WorkspaceQuery,
 )
-from tpaa_context import P6SecurityViewer
 
 from .app import create_app
 
-M9PrincipalResolver = Callable[[Request], P6SecurityViewer]
+M9PrincipalResolver = Callable[[Request], M9ViewerContext]
 
 
 def _error(exc: M9ApplicationError) -> JSONResponse:
@@ -77,7 +77,7 @@ def register_m9_routes(
 ) -> FastAPI:
     """Register exact-ID M9 routes; transports never resolve aliases or recompute."""
 
-    def principal(request: Request) -> P6SecurityViewer:
+    def principal(request: Request) -> M9ViewerContext:
         try:
             value = principal_resolver(request)
         except M9ApplicationError:
@@ -87,7 +87,7 @@ def register_m9_routes(
                 "M9_PROJECTION_NOT_AUTHORIZED",
                 type(exc).__name__,
             ) from exc
-        if not isinstance(value, P6SecurityViewer):
+        if not isinstance(value, M9ViewerContext):
             raise M9ApplicationError(
                 "M9_PROJECTION_NOT_AUTHORIZED",
                 "invalid principal context",

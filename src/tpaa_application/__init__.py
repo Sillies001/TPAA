@@ -105,6 +105,7 @@ from .m9_workspace import (
     M9ModelReleaseMutation,
     M9RecommendationApprovalMutation,
     M9RecommendationMutation,
+    M9ViewerContext,
     M9WorkspaceQuery,
     M9WorkspaceService,
 )
@@ -202,6 +203,7 @@ __all__ = [
     "M9ModelReleaseMutation",
     "M9RecommendationApprovalMutation",
     "M9RecommendationMutation",
+    "M9ViewerContext",
     "M9WorkspaceQuery",
     "M9WorkspaceService",
     "GetRuntimeBaselineStatus",

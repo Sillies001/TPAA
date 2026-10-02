@@ -33,9 +33,9 @@ from tpaa_capability import (
     P6ModelRevision,
     P6UncertaintyCalibrationEvidence,
     build_p6_counterfactual_request_binding,
-    execute_p6_counterfactual,
     build_p6_forecast_request_binding,
     build_p6_input_snapshot,
+    execute_p6_counterfactual,
 )
 from tpaa_context import P6GovernanceError, P6SecurityViewer
 from tpaa_gui import build_m9_layered_workspace_model

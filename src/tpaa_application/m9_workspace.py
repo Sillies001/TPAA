@@ -41,8 +41,8 @@ from tpaa_context import (
     utc,
 )
 
-
 _T = TypeVar("_T")
+M9ViewerContext = P6SecurityViewer
 
 
 class M9ApplicationError(RuntimeError):
@@ -918,11 +918,14 @@ class M9WorkspaceService:
         except P6GovernanceError as exc:
             raise M9ApplicationError(exc.code, exc.detail) from exc
         build = self._repo.exact_model_build(mutation.capability_model_id)
-        published = utc(
+        published_at = utc(
             mutation.published_at_utc,
             field="published_at_utc",
         )
-        if published < utc(build.model.trained_at, field="model.trained_at"):
+        if published_at < utc(
+            build.model.trained_at,
+            field="model.trained_at",
+        ):
             raise M9ApplicationError(
                 "M9_MODEL_RELEASE_NOT_QUALIFIED",
                 "published_at precedes trained_at",
@@ -947,23 +950,23 @@ class M9WorkspaceService:
                 "M9_MODEL_RELEASE_NOT_QUALIFIED",
                 mutation.capability_model_id,
             )
-        published = replace(
+        published_model = replace(
             build.model,
             status="PUBLISHED",
             published_at=mutation.published_at_utc,
         )
-        self._repo.replace_model_release(published)
+        self._repo.replace_model_release(published_model)
         payload = {
-            "capability_model_id": published.capability_model_id,
-            "status": published.status,
-            "published_at": published.published_at,
+            "capability_model_id": published_model.capability_model_id,
+            "status": published_model.status,
+            "published_at": published_model.published_at,
             "request_id": request_id,
             "reused": False,
         }
         self._record(
             mutation.viewer,
             action="MODEL_RELEASE",
-            object_ref=published.capability_model_id,
+            object_ref=published_model.capability_model_id,
             outcome="ALLOW",
             request_id=request_id,
         )

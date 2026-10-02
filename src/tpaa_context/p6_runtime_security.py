@@ -44,7 +44,7 @@ class P6RuntimeSecurityPolicy:
     def from_canonical(
         cls,
         loader: CanonicalArtifactLoader | None = None,
-    ) -> "P6RuntimeSecurityPolicy":
+    ) -> P6RuntimeSecurityPolicy:
         canonical = loader or CanonicalArtifactLoader()
         try:
             profile = canonical.load(
