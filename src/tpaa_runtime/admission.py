@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Mapping
 
 from tpaa_context import M8AdmissionEvidence, P6AdmissionEvidence
 from tpaa_longitudinal import P3AdmissionEvidence

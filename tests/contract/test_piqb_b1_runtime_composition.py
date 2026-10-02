@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -105,6 +106,17 @@ def test_b1_feature_availability_states_are_all_reachable() -> None:
         configured=True,
         available=False,
     ).value == "UNAVAILABLE"
+
+    records = {
+        phase: resolver.record(phase)
+        for phase in ("P1", "P2", "P3", "P4", "P5", "P6")
+    }
+    records["P6"] = replace(records["P6"], admitted=False)
+    not_admitted = ProductAdmissionResolver(records)
+    assert not_admitted.feature_state(
+        "P6",
+        configured=True,
+    ).value == "NOT_ADMITTED"
 
 
 def test_b1_desktop_runtime_exposes_one_p1_p6_backend_surface() -> None:
