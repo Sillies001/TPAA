@@ -39,7 +39,8 @@ Recommendations are immutable `ADVISORY` revisions. They require:
 - explicit objective/constraint set;
 - explicit allowed training action space;
 - exact source applicability and uncertainty;
-- immutable DRAFT -> IN_REVIEW -> APPROVED/REJECTED -> RELEASED provenance.
+- immutable DRAFT -> IN_REVIEW -> APPROVED/REJECTED -> RELEASED provenance;
+- RELEASED transition revalidates exact source projections are still published and applicable.
 
 Operational, tactical, targeting, weapon, engagement and command semantics are
 rejected by the advisory action-space guard. Approval/release never converts a
@@ -111,7 +112,9 @@ The contract suite covers:
 The existing Batch 1 interop negative suite remains part of full CI and continues
 to cover unversioned external aliases, lossy mapping and fact/projection
 conflation. Existing M5-M8 suites remain unchanged and therefore act as
-non-regression qualification on the same exact candidate.
+non-regression qualification on the same exact candidate. TST-002 also pins
+the protected P4/P5 authority/profile SHA256 values and DB schema `1.6.0`
+from the unchanged BASELINE_LOCK.
 
 No Canonical artifact, BASELINE_LOCK, migration, schema or CI workflow is
 modified in this batch.

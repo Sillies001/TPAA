@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import cast
 
 import pytest
@@ -52,6 +54,7 @@ U = {
 }
 H = "a" * 64
 AS_OF = "2026-09-10T12:00:00Z"
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _viewer(
@@ -590,3 +593,25 @@ def test_m9_batch3_security_audit_excludes_sensitive_payloads() -> None:
         "restricted_recommendation_body",
     ):
         assert forbidden not in serialized
+
+
+
+def test_m9_batch3_p1_p5_authority_hashes_and_db_schema_remain_immutable() -> None:
+    baseline = ROOT / "baseline" / "CB-1.4.0"
+    lock = json.loads(
+        (baseline / "BASELINE_LOCK.json").read_text(encoding="utf-8")
+    )
+    assert lock["baseline"]["db_schema"] == "1.6.0"
+    entries = {
+        row["file"]: row["sha256"]
+        for row in lock["artifacts"]
+    }
+    assert entries["P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json"] == (
+        "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77"
+    )
+    assert entries["P4_P5_ROLE_PRIVACY_PROFILE.json"] == (
+        "99a526cead816010373cdd81cd889d33fa359b5d0b74d87743e51d0f649f1113"
+    )
+    assert entries["P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json"] == (
+        "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e"
+    )

@@ -832,6 +832,29 @@ class M9WorkspaceService:
         previous = self._repo.exact_recommendation(
             mutation.recommendation_id
         )
+        if mutation.target_state == "RELEASED":
+            for forecast_id in previous.source_forecast_result_ids:
+                forecast = self._repo.exact_forecast(forecast_id)
+                if (
+                    forecast.status != "PUBLISHED_PROJECTION"
+                    or forecast.applicability_status != "APPLICABLE"
+                ):
+                    raise M9ApplicationError(
+                        "M9_RECOMMENDATION_SOURCE_NOT_RELEASEABLE",
+                        forecast_id,
+                    )
+            for counterfactual_id in previous.source_counterfactual_run_ids:
+                counterfactual = self._repo.exact_counterfactual(
+                    counterfactual_id
+                )
+                if (
+                    counterfactual.status != "PUBLISHED_PROJECTION"
+                    or counterfactual.applicability_status != "APPLICABLE"
+                ):
+                    raise M9ApplicationError(
+                        "M9_RECOMMENDATION_SOURCE_NOT_RELEASEABLE",
+                        counterfactual_id,
+                    )
         try:
             result = self._recommendation_workflow.transition(
                 previous,
@@ -888,7 +911,15 @@ class M9WorkspaceService:
         except P6GovernanceError as exc:
             raise M9ApplicationError(exc.code, exc.detail) from exc
         build = self._repo.exact_model_build(mutation.capability_model_id)
-        utc(mutation.published_at_utc, field="published_at_utc")
+        published = utc(
+            mutation.published_at_utc,
+            field="published_at_utc",
+        )
+        if published < utc(build.model.trained_at, field="model.trained_at"):
+            raise M9ApplicationError(
+                "M9_MODEL_RELEASE_NOT_QUALIFIED",
+                "published_at precedes trained_at",
+            )
         fingerprint = canonical_hash(
             {
                 "request_id": request_id,

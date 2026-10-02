@@ -281,7 +281,7 @@ def execute_p6_counterfactual(
             "held_fixed": assumptions,
             "interventions": interventions,
         },
-        status="CANDIDATE_PROJECTION",
+        status="PUBLISHED_PROJECTION",
         as_of_utc=request.as_of_utc,
         created_at_utc=created_at_utc,
         supersedes_counterfactual_run_id=supersedes_counterfactual_run_id,
