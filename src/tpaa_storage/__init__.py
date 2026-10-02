@@ -9,6 +9,18 @@ from .bootstrap import (
     verify_sqlite,
 )
 from .ports import BaselineMetadataRepository, RepositoryBaselineMetadata, RepositoryUnitOfWork
+from .product_publication import (
+    OrphanRecoveryReport,
+    ProductPublicationCoordinator,
+    ProductPublicationError,
+    ProductPublicationLedger,
+    ProductPublicationReceipt,
+    ProductPublicationRegistration,
+    ProductPublicationRequest,
+    ProductPublicationResult,
+    ProductPublicationUnitOfWork,
+    recover_sealed_orphans,
+)
 from .sqlite_repository import (
     SQLiteBaselineMetadataRepository,
     SQLiteDesktopUnitOfWork,
@@ -23,11 +35,21 @@ __all__ = [
     "BootstrapVerification",
     "RepositoryBaselineMetadata",
     "RepositoryUnitOfWork",
+    "OrphanRecoveryReport",
+    "ProductPublicationCoordinator",
+    "ProductPublicationError",
+    "ProductPublicationLedger",
+    "ProductPublicationReceipt",
+    "ProductPublicationRegistration",
+    "ProductPublicationRequest",
+    "ProductPublicationResult",
+    "ProductPublicationUnitOfWork",
     "SQLiteBaselineMetadataRepository",
     "SQLiteDesktopUnitOfWork",
     "SQLiteRepositoryError",
     "bootstrap_sqlite",
     "postgres_create_statements",
+    "recover_sealed_orphans",
     "sqlite_repository_smoke",
     "verify_sqlite",
 ]
