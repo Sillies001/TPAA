@@ -525,8 +525,15 @@ class M9WorkspaceService:
 
     def counterfactual(self, query: M9ExactQuery) -> dict[str, object]:
         value = self._repo.exact_counterfactual(query.object_id)
+        request = self._repo.exact_counterfactual_request(
+            value.counterfactual_request_id
+        )
         self._read_allowed(query.viewer, released=False)
         payload = value.projection()
+        payload["counterfactual_request_id"] = request.counterfactual_request_id
+        payload["base_product_refs"] = list(request.base_product_refs)
+        payload["scenario_definition_id"] = request.scenario_definition_id
+        payload["interventions"] = dict(request.interventions)
         payload["projection_class"] = "P6_COUNTERFACTUAL_PROJECTION"
         payload["release_state"] = (
             "ADMITTED_RELEASE" if self._p6_admitted else "CANDIDATE_NOT_ADMITTED"

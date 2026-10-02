@@ -196,6 +196,29 @@ def build_m9_layered_workspace_model(
         counterfactual.get("model_refs"),
         "counterfactual.model_refs",
     )
+    counterfactual_base_refs = _strings(
+        counterfactual.get("base_product_refs"),
+        "counterfactual.base_product_refs",
+    )
+    recommendation_forecasts = _strings(
+        recommendation.get("source_forecast_result_ids"),
+        "recommendation.source_forecast_result_ids",
+    )
+    recommendation_counterfactuals = _strings(
+        recommendation.get("source_counterfactual_run_ids"),
+        "recommendation.source_counterfactual_run_ids",
+    )
+    if model_ref not in counterfactual_models:
+        raise M9WorkspacePresentationError("M9_GUI_MODEL_REVISION_MISMATCH")
+    if not set(counterfactual_base_refs).issubset(set(factual_refs)):
+        raise M9WorkspacePresentationError("M9_GUI_FACT_BASELINE_MISMATCH")
+    if (
+        forecast_id not in recommendation_forecasts
+        or counterfactual_id not in recommendation_counterfactuals
+    ):
+        raise M9WorkspacePresentationError(
+            "M9_GUI_RECOMMENDATION_SOURCE_MISMATCH"
+        )
     if contract.get("business_recompute") is not False:
         raise M9WorkspacePresentationError("M9_GUI_RECOMPUTE_FORBIDDEN")
     if contract.get("persistence_access") is not False:
@@ -257,14 +280,8 @@ def build_m9_layered_workspace_model(
                 recommendation.get("allowed_action_space"),
                 "recommendation.allowed_action_space",
             ),
-            source_forecast_result_ids=_strings(
-                recommendation.get("source_forecast_result_ids"),
-                "recommendation.source_forecast_result_ids",
-            ),
-            source_counterfactual_run_ids=_strings(
-                recommendation.get("source_counterfactual_run_ids"),
-                "recommendation.source_counterfactual_run_ids",
-            ),
+            source_forecast_result_ids=recommendation_forecasts,
+            source_counterfactual_run_ids=recommendation_counterfactuals,
             release_state=_text(
                 recommendation.get("release_state"),
                 "recommendation.release_state",

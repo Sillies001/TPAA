@@ -72,12 +72,16 @@ class P6RuntimeSecurityPolicy:
         bindings = root.get("source_bindings")
         write = root.get("write_authorization_contract")
         projection = root.get("projection_contract")
+        release = root.get("release_approval_contract")
+        export = root.get("export_audit_contract")
         scope = root.get("scope")
         rows = root.get("role_matrix")
         if (
             not isinstance(bindings, dict)
             or not isinstance(write, dict)
             or not isinstance(projection, dict)
+            or not isinstance(release, dict)
+            or not isinstance(export, dict)
             or not isinstance(scope, dict)
             or not isinstance(rows, list)
         ):
@@ -94,9 +98,25 @@ class P6RuntimeSecurityPolicy:
             or write.get("recommendation_approval_role")
             != "INSTRUCTOR_EVALUATOR"
             or write.get("model_release_role") != "MODEL_REVIEWER"
+            or write.get("request_id_required") is not True
+            or write.get("duplicate_request_id_idempotent") is not True
             or write.get("admin_auditor_business_approval_by_privilege_forbidden")
             is not True
             or write.get("admin_auditor_model_release_by_privilege_forbidden")
+            is not True
+            or release.get(
+                "model_release_and_recommendation_release_are_distinct"
+            )
+            is not True
+            or release.get(
+                "recommendation_release_requires_approved_source_projection_refs"
+            )
+            is not True
+            or release.get("release_does_not_convert_projection_to_fact")
+            is not True
+            or export.get("interop_export_requires_explicit_authorization")
+            is not True
+            or export.get("unrestricted_export_of_direct_identity_forbidden")
             is not True
         ):
             raise P6GovernanceError(

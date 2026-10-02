@@ -33,6 +33,7 @@ from tpaa_capability import (
     P6ModelRevision,
     P6UncertaintyCalibrationEvidence,
     build_p6_counterfactual_request_binding,
+    execute_p6_counterfactual,
     build_p6_forecast_request_binding,
     build_p6_input_snapshot,
 )
@@ -419,6 +420,18 @@ def test_m9_batch3_model_release_is_model_reviewer_only_and_idempotent() -> None
     second = service.release_model(command)
     assert first["status"] == "PUBLISHED"
     assert second == first
+    published_repo, published_service, request_id, _ = _runtime()
+    published_service.release_model(command)
+    forecast = published_service.run_forecast(
+        M9ForecastMutation(
+            request_id="req-published-model-forecast",
+            forecast_request_id=request_id,
+            published_at_utc="2026-09-10T14:00:00Z",
+            viewer=_viewer("INSTRUCTOR_EVALUATOR", U["instructor"]),
+        )
+    )
+    assert forecast["applicability_status"] == "APPLICABLE"
+    assert published_repo.exact_model_build(U["model"]).model.status == "PUBLISHED"
 
 
 def test_m9_batch3_command_and_causal_upgrades_fail_closed() -> None:
@@ -429,8 +442,6 @@ def test_m9_batch3_command_and_causal_upgrades_fail_closed() -> None:
         repo.exact_model_build(model_id).model
         for model_id in request.model_refs
     )
-    from tpaa_capability import execute_p6_counterfactual
-
     with pytest.raises(P6GovernanceError) as causal:
         execute_p6_counterfactual(
             request=request,

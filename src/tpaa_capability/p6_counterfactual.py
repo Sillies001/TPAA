@@ -168,7 +168,7 @@ def execute_p6_counterfactual(
         exact_uuid(model_id, field="counterfactual.model_ref", policy=p)
         exact_hash64(model.model_artifact_hash, field="model_artifact_hash")
         if (
-            model.status != "VALIDATED"
+            model.status not in {"VALIDATED", "PUBLISHED"}
             or model.applicability_profile_ref
             != request.applicability_profile_ref
             or utc(model.trained_at, field="model.trained_at") > as_of

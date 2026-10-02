@@ -36,6 +36,7 @@ with `FAIL_CLOSED_P6_CAUSAL_CLAIM_NOT_AUTHORIZED`.
 Recommendations are immutable `ADVISORY` revisions. They require:
 
 - exact forecast and/or counterfactual source revisions;
+- RELEASED recommendations revalidate source projections remain published/applicable;
 - explicit objective/constraint set;
 - explicit allowed training action space;
 - exact source applicability and uncertainty;
@@ -103,6 +104,7 @@ The contract suite covers:
 - non-causal counterfactual boundary;
 - command-upgrade rejection;
 - model-release vs recommendation-approval separation;
+- released-model forecast execution remains exact and valid;
 - idempotent mutation;
 - exact-ID API with alias rejection;
 - GUI fact/projection separation;
