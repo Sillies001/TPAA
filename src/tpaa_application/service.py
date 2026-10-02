@@ -37,6 +37,16 @@ from .m8_workspace import (
     M8WorkspaceQuery,
     M8WorkspaceService,
 )
+from .m9_workspace import (
+    M9CounterfactualMutation,
+    M9ExactQuery,
+    M9ForecastMutation,
+    M9ModelReleaseMutation,
+    M9RecommendationApprovalMutation,
+    M9RecommendationMutation,
+    M9WorkspaceQuery,
+    M9WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
 
@@ -64,6 +74,7 @@ class ApplicationService:
         m6_workspace: M6WorkspaceService | None = None,
         m7_workspace: M7WorkspaceService | None = None,
         m8_workspace: M8WorkspaceService | None = None,
+        m9_workspace: M9WorkspaceService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -74,6 +85,7 @@ class ApplicationService:
         self._m6_workspace = m6_workspace
         self._m7_workspace = m7_workspace
         self._m8_workspace = m8_workspace
+        self._m9_workspace = m9_workspace
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -308,3 +320,57 @@ class ApplicationService:
 
     def m8_export(self, query: M8WorkspaceQuery) -> dict[str, object]:
         return self._m8().export_exact(query)
+
+
+    def _m9(self) -> M9WorkspaceService:
+        if self._m9_workspace is None:
+            raise RuntimeError("M9 workspace service is not configured")
+        return self._m9_workspace
+
+    def m9_model(self, query: M9ExactQuery) -> dict[str, object]:
+        return self._m9().model(query)
+
+    def m9_forecast(self, query: M9ExactQuery) -> dict[str, object]:
+        return self._m9().forecast(query)
+
+    def m9_counterfactual(self, query: M9ExactQuery) -> dict[str, object]:
+        return self._m9().counterfactual(query)
+
+    def m9_recommendation(self, query: M9ExactQuery) -> dict[str, object]:
+        return self._m9().recommendation(query)
+
+    def m9_workspace(self, query: M9WorkspaceQuery) -> dict[str, object]:
+        return self._m9().workspace(query)
+
+    def m9_run_forecast(
+        self,
+        mutation: M9ForecastMutation,
+    ) -> dict[str, object]:
+        return self._m9().run_forecast(mutation)
+
+    def m9_run_counterfactual(
+        self,
+        mutation: M9CounterfactualMutation,
+    ) -> dict[str, object]:
+        return self._m9().run_counterfactual(mutation)
+
+    def m9_create_recommendation(
+        self,
+        mutation: M9RecommendationMutation,
+    ) -> dict[str, object]:
+        return self._m9().create_recommendation(mutation)
+
+    def m9_approve_recommendation(
+        self,
+        mutation: M9RecommendationApprovalMutation,
+    ) -> dict[str, object]:
+        return self._m9().approve_recommendation(mutation)
+
+    def m9_release_model(
+        self,
+        mutation: M9ModelReleaseMutation,
+    ) -> dict[str, object]:
+        return self._m9().release_model(mutation)
+
+    def m9_export(self, query: M9WorkspaceQuery) -> dict[str, object]:
+        return self._m9().export_exact(query)
