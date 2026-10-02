@@ -249,6 +249,16 @@ class OrphanRecoveryReport:
     dry_run: bool
 
 
+@dataclass(frozen=True, slots=True)
+class StagingRecoveryReport:
+    logical_prefix: str
+    scanned: int
+    active_operations: tuple[str, ...]
+    orphaned: tuple[str, ...]
+    removed: tuple[str, ...]
+    dry_run: bool
+
+
 def recover_sealed_orphans(
     store: LocalObjectStore,
     *,
@@ -281,6 +291,78 @@ def recover_sealed_orphans(
         referenced=sum(
             1 for item in objects if item.logical_uri in referenced
         ),
+        orphaned=orphaned,
+        removed=tuple(removed),
+        dry_run=dry_run,
+    )
+
+
+def recover_registered_product_orphans(
+    store: LocalObjectStore,
+    ledger: ProductPublicationLedger,
+    *,
+    logical_prefix: str,
+    dry_run: bool = True,
+) -> OrphanRecoveryReport:
+    """Recover sealed objects against the DB ledger as the only reference authority."""
+
+    return recover_sealed_orphans(
+        store,
+        logical_prefix=logical_prefix,
+        referenced_uris=ledger.referenced_object_uris(logical_prefix),
+        dry_run=dry_run,
+    )
+
+
+def _staging_operation_id(logical_uri: str) -> str:
+    parts = logical_uri.split("/")
+    if len(parts) < 5 or parts[2] != "staging":
+        raise ProductPublicationError(
+            "STAGING_URI_INVALID",
+            logical_uri,
+        )
+    operation_id = parts[3]
+    if not operation_id:
+        raise ProductPublicationError(
+            "STAGING_URI_INVALID",
+            logical_uri,
+        )
+    return operation_id
+
+
+def recover_staging_orphans(
+    store: LocalObjectStore,
+    *,
+    scheme: str,
+    active_operation_ids: Iterable[str] = (),
+    dry_run: bool = True,
+) -> StagingRecoveryReport:
+    """Reclaim staging bytes not owned by an explicitly active operation."""
+
+    if scheme not in {"tpaa-object", "tpaa-parquet"}:
+        raise ProductPublicationError("STAGING_SCHEME_INVALID", scheme)
+    logical_prefix = f"{scheme}://staging"
+    active = frozenset(active_operation_ids)
+    objects = store.list_objects(logical_prefix)
+    orphaned = tuple(
+        item.logical_uri
+        for item in objects
+        if _staging_operation_id(item.logical_uri) not in active
+    )
+    removed: list[str] = []
+    if not dry_run:
+        by_uri = {item.logical_uri: item for item in objects}
+        for logical_uri in orphaned:
+            item = by_uri[logical_uri]
+            if store.delete_object(
+                logical_uri,
+                expected_sha256=item.artifact_sha256,
+            ):
+                removed.append(logical_uri)
+    return StagingRecoveryReport(
+        logical_prefix=logical_prefix,
+        scanned=len(objects),
+        active_operations=tuple(sorted(active)),
         orphaned=orphaned,
         removed=tuple(removed),
         dry_run=dry_run,

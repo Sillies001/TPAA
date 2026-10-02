@@ -33,7 +33,10 @@ from .product_publication import (
     ProductPublicationResult,
     ProductPublicationUnitOfWork,
     ProductReleaseIdentity,
+    StagingRecoveryReport,
+    recover_registered_product_orphans,
     recover_sealed_orphans,
+    recover_staging_orphans,
 )
 from .sqlite_product_repository import SQLiteProductPublicationLedger
 from .sqlite_repository import (
@@ -73,13 +76,16 @@ __all__ = [
     "ProductPublicationResult",
     "ProductPublicationUnitOfWork",
     "ProductReleaseIdentity",
+    "StagingRecoveryReport",
     "SQLiteBaselineMetadataRepository",
     "SQLiteProductPublicationLedger",
     "SQLiteDesktopUnitOfWork",
     "SQLiteRepositoryError",
     "bootstrap_sqlite",
     "postgres_create_statements",
+    "recover_registered_product_orphans",
     "recover_sealed_orphans",
+    "recover_staging_orphans",
     "sqlite_repository_smoke",
     "verify_sqlite",
 ]

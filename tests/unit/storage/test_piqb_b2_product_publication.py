@@ -14,7 +14,9 @@ from tpaa_storage.product_publication import (
     ProductPublicationRegistration,
     ProductPublicationRequest,
     ProductReleaseIdentity,
+    recover_registered_product_orphans,
     recover_sealed_orphans,
+    recover_staging_orphans,
 )
 
 
@@ -178,3 +180,59 @@ def test_recovery_never_deletes_registered_object(tmp_path: Path) -> None:
     assert report.orphaned == ()
     assert report.removed == ()
     assert store.verify(stored)
+
+
+def test_registered_recovery_uses_ledger_reference_authority(
+    tmp_path: Path,
+) -> None:
+    store = LocalObjectStore(tmp_path)
+    referenced = store.put_bytes(
+        "tpaa-object://products/piqb-b2/referenced.json",
+        b"referenced",
+    )
+    orphan = store.put_bytes(
+        "tpaa-object://products/piqb-b2/orphan.json",
+        b"orphan",
+    )
+
+    class Ledger:
+        def referenced_object_uris(
+            self,
+            logical_prefix: str | None = None,
+        ) -> tuple[str, ...]:
+            assert logical_prefix == "tpaa-object://products/piqb-b2"
+            return (referenced.logical_uri,)
+
+    report = recover_registered_product_orphans(
+        store,
+        Ledger(),  # type: ignore[arg-type]
+        logical_prefix="tpaa-object://products/piqb-b2",
+        dry_run=False,
+    )
+    assert report.removed == (orphan.logical_uri,)
+    assert store.verify(referenced)
+
+
+def test_staging_recovery_preserves_explicit_active_operation(
+    tmp_path: Path,
+) -> None:
+    store = LocalObjectStore(tmp_path)
+    active = store.put_bytes(
+        "tpaa-object://staging/active-op/a.bin",
+        b"active",
+    )
+    orphan = store.put_bytes(
+        "tpaa-object://staging/dead-op/b.bin",
+        b"dead",
+    )
+
+    report = recover_staging_orphans(
+        store,
+        scheme="tpaa-object",
+        active_operation_ids=("active-op",),
+        dry_run=False,
+    )
+    assert report.active_operations == ("active-op",)
+    assert report.orphaned == (orphan.logical_uri,)
+    assert report.removed == (orphan.logical_uri,)
+    assert store.verify(active)
