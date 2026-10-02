@@ -34,7 +34,7 @@ class M0Core001BaselineVerifyTests(unittest.TestCase):
     def test_approved_snapshot_passes_exactly(self) -> None:
         lock, results, errors = VERIFY_BASELINE.verify(self.baseline)
         self.assertEqual(lock["baseline"]["core"], "CB-1.4.0")
-        self.assertEqual(len(results), 32)
+        self.assertEqual(len(results), VERIFY_BASELINE.EXPECTED_CONTROLLED_ARTIFACT_COUNT)
         self.assertTrue(all(item.status == "PASS" for item in results))
         self.assertEqual(
             next(item for item in results if item.file == "M2_QA_SNS_AUTHORITY.json").status,

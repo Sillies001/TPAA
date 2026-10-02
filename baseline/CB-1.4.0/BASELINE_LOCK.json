@@ -6,8 +6,9 @@
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
     "date": "2026-10-02",
-    "rebaseline": "R5.0_M9_P6_C3_AUTHORITY_ROLE_PRIVACY_RELEASE",
+    "rebaseline": "R5.1_M9_P6_P3_CAPABILITY_FORECAST_PROFILE_ADOPTION",
     "lock_lineage_sha256": [
+      "ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08",
       "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
       "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
       "f95167aca59dc993ced607e55f21f01080c4e24cc0759bf97482d49654ea182b",
@@ -118,6 +119,11 @@
       "file": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json",
       "sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
       "bytes": 18296
+    },
+    {
+      "file": "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE.json",
+      "sha256": "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394",
+      "bytes": 14787
     },
     {
       "file": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json",

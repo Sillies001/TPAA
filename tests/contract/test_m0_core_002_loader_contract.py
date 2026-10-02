@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tpaa_canonical import EXPECTED_CONTROLLED_ARTIFACT_COUNT
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VERIFY_LOADER = REPO_ROOT / "tools" / "canonical" / "verify_loader.py"
 DEV_CLI = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
@@ -22,8 +24,8 @@ def test_machine_readable_loader_acceptance_verifier_passes() -> None:
     evidence = json.loads(result.stdout)
     assert evidence["status"] == "PASS"
     assert evidence["task_id"] == "M0-CORE-002"
-    assert evidence["controlled_artifact_count"] == 32
-    assert len(evidence["artifacts"]) == 32
+    assert evidence["controlled_artifact_count"] == EXPECTED_CONTROLLED_ARTIFACT_COUNT
+    assert len(evidence["artifacts"]) == EXPECTED_CONTROLLED_ARTIFACT_COUNT
     assert all(check["status"] == "PASS" for check in evidence["checks"])
 
 

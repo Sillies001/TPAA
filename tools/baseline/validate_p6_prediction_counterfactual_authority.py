@@ -105,7 +105,7 @@ def verify() -> dict[str, object]:
         "authority_sha": _sha(AUTHORITY) == EXPECTED_AUTHORITY_SHA256,
         "role_profile_sha": _sha(ROLE_PROFILE) == EXPECTED_ROLE_PROFILE_SHA256,
         "dto_sha": _sha(DTO) == EXPECTED_DTO_SHA256,
-        "lock_sha": _sha(LOCK) == EXPECTED_LOCK_SHA256,
+        "m9_c3_lock_lineage_preserved": EXPECTED_LOCK_SHA256 in lineage,
         "m8_authority_immutable": (
             _sha(M8_AUTHORITY) == EXPECTED_M8_AUTHORITY_SHA256
         ),
@@ -117,7 +117,9 @@ def verify() -> dict[str, object]:
         ),
         "m8_lock_lineage_preserved": (
             EXPECTED_M8_LOCK_SHA256 in lineage
-            and lineage.index(EXPECTED_M8_LOCK_SHA256) == 0
+            and EXPECTED_LOCK_SHA256 in lineage
+            and lineage.index(EXPECTED_LOCK_SHA256)
+            < lineage.index(EXPECTED_M8_LOCK_SHA256)
         ),
         "identity": (
             authority.get("authority_id")
@@ -264,10 +266,10 @@ def verify() -> dict[str, object]:
             ]
             == EXPECTED_M8_ROLE_PROFILE_SHA256
         ),
-        "rebaseline_exact": (
-            lock["baseline"]["rebaseline"]
-            == "R5.0_M9_P6_C3_AUTHORITY_ROLE_PRIVACY_RELEASE"
-            and len(lock["artifacts"]) == 32
+        "post_c3_rebaseline_compatible": (
+            EXPECTED_LOCK_SHA256 in lineage
+            and len(lock["artifacts"]) >= 32
+            and lock["baseline"]["db_schema"] == "1.6.0"
         ),
     }
 
@@ -366,6 +368,7 @@ def verify() -> dict[str, object]:
         "role_profile_sha256": EXPECTED_ROLE_PROFILE_SHA256,
         "dto_sha256": EXPECTED_DTO_SHA256,
         "baseline_lock_sha256": EXPECTED_LOCK_SHA256,
+        "current_baseline_lock_sha256": _sha(LOCK),
         "checks": checks,
         "failed_checks": failed,
         "task_complete": False,
