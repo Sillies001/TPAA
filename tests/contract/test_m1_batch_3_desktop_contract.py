@@ -63,7 +63,7 @@ def test_desktop_m1_routes_reuse_bearer_origin_and_path_security_boundary() -> N
             },
         )
         unrelated = client.get(
-            "/jobs",
+            "/outside-governed-surface",
             headers={"Authorization": "Bearer desktop-test"},
         )
 

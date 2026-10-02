@@ -59,6 +59,14 @@ class StorageBaselineStatusUseCase(Protocol):
         ...
 
 
+class FeatureAvailabilityUseCase(Protocol):
+    """Runtime-composition dependency for product feature availability."""
+
+    def execute(self) -> dict[str, object]:
+        """Return a transport-neutral P1-P6 availability projection."""
+        ...
+
+
 class ApplicationService:
     """Typed facade that is the transport-facing business-entry boundary."""
 
@@ -75,6 +83,7 @@ class ApplicationService:
         m7_workspace: M7WorkspaceService | None = None,
         m8_workspace: M8WorkspaceService | None = None,
         m9_workspace: M9WorkspaceService | None = None,
+        feature_availability: FeatureAvailabilityUseCase | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -86,6 +95,7 @@ class ApplicationService:
         self._m7_workspace = m7_workspace
         self._m8_workspace = m8_workspace
         self._m9_workspace = m9_workspace
+        self._feature_availability = feature_availability
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -102,6 +112,12 @@ class ApplicationService:
             raise RuntimeError("runtime baseline status use case is not configured")
         return self._get_runtime_baseline_status.execute()
 
+    def feature_availability(self) -> dict[str, object]:
+        """Return the PIQB runtime feature-availability projection."""
+
+        if self._feature_availability is None:
+            raise RuntimeError("feature availability use case is not configured")
+        return dict(self._feature_availability.execute())
 
     def submit_job(
         self,

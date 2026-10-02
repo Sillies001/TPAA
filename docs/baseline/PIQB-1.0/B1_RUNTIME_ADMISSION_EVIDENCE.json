@@ -1,0 +1,81 @@
+{
+  "schema": "TPAA_PIQB_B1_RUNTIME_ADMISSION_EVIDENCE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B1",
+  "source_b0_protected_main_sha": "cc4099c0780e092b33e8812373c62a44cb8ea0f6",
+  "required_job_count": 14,
+  "records": [
+    {
+      "phase": "P1",
+      "qualification": "P1_M5_QUALIFIED",
+      "source_revision": "68767397c028f7aa6ad3a22a49302710481951c6",
+      "run_number": 470,
+      "actions_run_id": 36549239360,
+      "event_name": "push",
+      "git_ref": "refs/heads/main",
+      "decision": "GO",
+      "run_conclusion": "success",
+      "admitted": true
+    },
+    {
+      "phase": "P2",
+      "qualification": "P2_M6_QUALIFIED",
+      "source_revision": "892e4a64a321be9c7252b66207a7d1d90a6ce98d",
+      "run_number": 494,
+      "actions_run_id": 36697493917,
+      "event_name": "push",
+      "git_ref": "refs/heads/main",
+      "decision": "GO",
+      "run_conclusion": "success",
+      "admitted": true
+    },
+    {
+      "phase": "P3",
+      "qualification": "P3_M7_QUALIFIED",
+      "source_revision": "c78604ade0aeffdbf7395fccfc0951751beae751",
+      "run_number": 510,
+      "actions_run_id": 36807335564,
+      "event_name": "push",
+      "git_ref": "refs/heads/main",
+      "decision": "GO",
+      "run_conclusion": "success",
+      "admitted": true
+    },
+    {
+      "phase": "P4",
+      "qualification": "P4_P5_M8_QUALIFIED",
+      "source_revision": "06b9f0c55dda803765fc265b8d5ca0353620476f",
+      "run_number": 527,
+      "actions_run_id": 36869057230,
+      "event_name": "push",
+      "git_ref": "refs/heads/main",
+      "decision": "GO",
+      "run_conclusion": "success",
+      "admitted": true
+    },
+    {
+      "phase": "P5",
+      "qualification": "P4_P5_M8_QUALIFIED",
+      "source_revision": "06b9f0c55dda803765fc265b8d5ca0353620476f",
+      "run_number": 527,
+      "actions_run_id": 36869057230,
+      "event_name": "push",
+      "git_ref": "refs/heads/main",
+      "decision": "GO",
+      "run_conclusion": "success",
+      "admitted": true
+    },
+    {
+      "phase": "P6",
+      "qualification": "P6_M9_QUALIFIED",
+      "source_revision": "06945127c86069918ffdfd415201d321d53aae4d",
+      "run_number": 549,
+      "actions_run_id": 37000963653,
+      "event_name": "push",
+      "git_ref": "refs/heads/main",
+      "decision": "GO",
+      "run_conclusion": "success",
+      "admitted": true
+    }
+  ]
+}
