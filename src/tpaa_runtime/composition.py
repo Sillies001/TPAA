@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Never, cast
+from typing import Never
 
 from fastapi import FastAPI
 
@@ -19,7 +19,6 @@ from tpaa_api.m9_app import M9PrincipalResolver, register_m9_routes
 from tpaa_api.runtime import register_product_runtime_routes
 from tpaa_application import (
     ApplicationService,
-    GetStorageBaselineStatus,
     InMemoryM3ReleasePublicationRepository,
     InMemoryM4DebriefRepository,
     InMemoryM6P2WorkspaceRepository,
@@ -114,10 +113,7 @@ def _build(config: ProductRuntimeConfig) -> ProductRuntime:
         configured=configured,
     )
     application = ApplicationService(
-        get_storage_baseline_status=cast(
-            GetStorageBaselineStatus,
-            _UnavailableStorageBaseline(),
-        ),
+        get_storage_baseline_status=_UnavailableStorageBaseline(),
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=config.product_build_version
         ),

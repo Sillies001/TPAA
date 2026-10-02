@@ -43,6 +43,9 @@ def review(
     required_jobs_total: int,
 ) -> dict[str, object]:
     baseline = _json(TASK_BASELINE)
+    admission_manifest = _json(
+        BASE / "B1_RUNTIME_ADMISSION_EVIDENCE.json"
+    )
     tasks = baseline.get("tasks")
     task_ids = tuple(
         item.get("task_id")
@@ -68,6 +71,19 @@ def review(
         "task_inventory_exact_6": (
             baseline.get("task_count") == 6
             and task_ids == EXPECTED_TASKS
+        ),
+        "runtime_admission_manifest_exact": (
+            admission_manifest.get("schema")
+            == "TPAA_PIQB_B1_RUNTIME_ADMISSION_EVIDENCE_V1"
+            and admission_manifest.get("source_b0_protected_main_sha")
+            == SOURCE_B0_SHA
+            and admission_manifest.get("required_job_count") == 14
+            and [
+                item.get("phase")
+                for item in admission_manifest.get("records", [])
+                if isinstance(item, dict)
+            ]
+            == ["P1", "P2", "P3", "P4", "P5", "P6"]
         ),
         "db_schema_1_6_0_no_authority_change": (
             baseline.get("db_schema_version") == "1.6.0"

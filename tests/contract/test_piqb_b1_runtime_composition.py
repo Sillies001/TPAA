@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -32,6 +33,30 @@ def _config(profile: RuntimeProfile) -> ProductRuntimeConfig:
         authority_root=ROOT / "baseline" / "CB-1.4.0" / "canonical",
         m1_fixture_root=ROOT / "tests" / "fixtures" / "m1",
     )
+
+
+def test_b1_machine_admission_evidence_matches_runtime_resolver() -> None:
+    manifest = json.loads(
+        (
+            ROOT
+            / "docs"
+            / "baseline"
+            / "PIQB-1.0"
+            / "B1_RUNTIME_ADMISSION_EVIDENCE.json"
+        ).read_text(encoding="utf-8")
+    )
+    resolver = ProductAdmissionResolver()
+    records = manifest["records"]
+    assert [record["phase"] for record in records] == [
+        "P1", "P2", "P3", "P4", "P5", "P6"
+    ]
+    for expected in records:
+        actual = resolver.record(expected["phase"])
+        assert actual.qualification == expected["qualification"]
+        assert actual.source_revision == expected["source_revision"]
+        assert actual.run_number == expected["run_number"]
+        assert actual.actions_run_id == expected["actions_run_id"]
+        assert actual.exact is True
 
 
 def test_b1_admission_resolver_uses_exact_protected_main_evidence() -> None:
