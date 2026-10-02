@@ -4,69 +4,79 @@
 
 Candidate status: **READY FOR EXACT-HEAD HOSTED CI QUALIFICATION**.
 
-This sub-gate adopts one explicit P6 execution profile before any P6 model training or forecast runtime is implemented. It exists because the frozen P6 authority requires an exact adopted model profile and forbids implementation-selected default model families.
+This sub-gate adopts one explicit P6 execution profile before any P6 model execution code is implemented. The frozen P6 authority requires an exact adopted model profile and forbids an implementation-selected default model family.
+
+An earlier Draft-only candidate attempted to forecast P4/P5 scores directly. That design was withdrawn before qualification because the current M8 authority intentionally has no adopted aggregation profile and current P4/P5 score fields remain evidence-only/null. The qualified candidate must be executable against already admitted products rather than depending on an unadopted scoring formula.
 
 ## Adopted candidate
 
-- Profile ID: `P6_TRAINING_SCORE_OLS_MAD_FORECAST`
+- Profile ID: `P6_P3_CAPABILITY_OLS_MAD_FORECAST`
 - Version: `1.0.0`
-- Canonical SHA256: `43bf6f3814d764de812c6ff478600959b3f7bd9c54e6b8bfec5297531271d038`
-- Rebaseline: `R5.1_M9_P6_EXECUTION_PROFILE_ADOPTION`
-- Candidate BASELINE_LOCK SHA256: `2852dc2904854fcd65e3207ddda4859795b003e839ff1d95e241b199879ddd1f`
+- Canonical SHA256: `6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394`
+- Rebaseline: `R5.1_M9_P6_P3_CAPABILITY_FORECAST_PROFILE_ADOPTION`
+- Candidate BASELINE_LOCK SHA256: `9920b59601d8441f883879e813164f33ee5c02db81aa5e1b759e3a1772469e51`
+- Parent qualified M9 C3 lock: `ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08`
 - DB schema: unchanged at `1.6.0`
 - Shadow schema: forbidden
 
-## Scope
+## Executable target and context
 
-Profile v1 is restricted to training-evaluation projections. It forecasts only the next governed training session-order score from exact approved numeric P4/P5 assessment revisions:
+Profile v1 forecasts the next-session value of an exact in-domain P3 reference-condition capability estimate:
 
-- `P4_ASSESSMENT_SCORE`
-- `P5_OVERALL_SCORE`
+- numeric target DTO: `IntrinsicCapabilityEstimateDTO`;
+- numeric target: exact `value`;
+- session axis: exact `condition_point.session_order`;
+- reference condition: exact `condition_point.reference_condition_id`;
+- uncertainty: exact P3 estimate interval.
 
-A P5 numeric target requires an exact aggregation-profile reference. Missing numeric scores are insufficient evidence and are never imputed.
+Every training row also requires an exact APPROVED P4 assessment revision for the same governed training session, with an exact capability-projection reference to the P3 estimate. The P4 session's exact session-order assignment must equal the P3 estimate condition-point session order.
 
-Operational/tactical optimization, weapon/targeting recommendations, mission-command generation and real-time control are explicitly outside the profile.
+This satisfies the P6 requirement for exact P4/P5 factual context without inventing a P4/P5 score. Profile v1 uses P4 context only; P5 expansion requires a later explicitly adopted profile.
 
 ## Determinism and leakage controls
 
 The profile freezes:
 
-- exact source revision and subject/composition semantics;
-- exact assessment spec and P5 aggregation profile where applicable;
+- one exact aircraft/capability/reference-condition/unit/configuration domain;
 - distinct exact session-order assignments;
 - deterministic OLS with intercept;
 - temporal last-point holdout, never random split;
 - no RNG, regularization, hidden weighting, clipping or imputation;
+- exact P3 estimate + exact P4 context row identity;
 - future and same-outcome leakage rejection;
 - exact training/validation snapshot identity.
 
 ## Validation and uncertainty
 
-Minimum evidence is four distinct numeric sessions. The final historical point is the temporal holdout. Validation records the exact finite holdout residual and then refits on the final governed window.
+Minimum evidence is four eligible sessions. The last historical point is the temporal holdout. Validation records the exact holdout residual and refits on the final governed window.
 
-Numeric projection uncertainty is explicit:
+Forecast uncertainty is explicit:
 
-`half_width = max(abs(holdout_error), final_refit_residual_MAD)`
+`half_width = max(max_P3_input_half_width, abs(holdout_error), final_refit_residual_MAD)`
 
-No confidence-to-uncertainty conversion, implementation-selected multiplier or threshold probability is allowed.
+P4/P5 confidence is never converted into uncertainty. No implementation-selected accuracy multiplier or threshold-probability rule is permitted.
 
 ## Forecast and applicability
 
 Profile v1 supports only:
 
-- horizon type `NEXT_SESSION_ORDER`;
+- `NEXT_SESSION_ORDER`;
 - exactly one step;
 - no recursive multi-step forecast;
 - numeric output only when applicability is `APPLICABLE`.
 
-Identity or assessment-semantics drift is `OUT_OF_DOMAIN`; missing numeric evidence is `INSUFFICIENT_EVIDENCE`; ambiguous targets are `NOT_IDENTIFIABLE`. None of those states may be encoded as zero.
+Configuration/reference-condition/semantic drift is `OUT_OF_DOMAIN`; too few eligible points is `INSUFFICIENT_EVIDENCE`; ambiguous targets are `NOT_IDENTIFIABLE`. None may be encoded as zero.
+
+## Safety boundary
+
+The profile is limited to training-evaluation forecast/debrief support. Operational/tactical optimization, weapon/targeting recommendation, mission-command generation, automatic training command and real-time control are explicitly forbidden.
 
 ## Historical governance compatibility
 
-The prior M9 C3 lock `ba4f152a...` is preserved as the first parent in lock lineage. The historical P6 authority and role/release profile remain byte-identical. Their validator now verifies historical lock lineage rather than incorrectly requiring the R5.0 lock to remain the current repository lock forever.
+The prior qualified M9 C3 lock `ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08` remains the first historical lineage parent. The withdrawn Draft-only lock is not added to lineage because it was never protected-main qualified.
 
-Generated baseline/package-init projections and the baseline verifier/loader trust root were updated coherently with R5.1.
+Historical P6 authority, P3 authority/profile and P4/P5 authority remain byte-identical. Generated baseline/package-init projections and the loader/baseline-verifier trust root are updated coherently.
 
 ## Admission boundary
 
-Execution-profile adoption **does not admit P6** and does not complete M9-MODEL-001. After exact-head PR CI, guarded merge and protected-main CI, the implementation phase may execute this exact profile. Formal P6 admission still requires protected-main M9 Exit GO.
+Profile adoption does **not** admit P6 and does not complete M9-MODEL-001. Only after exact-head PR CI, guarded merge and protected-main exact merge-SHA CI may runtime implementation execute this exact profile. Formal P6 admission still requires protected-main M9 Exit GO.

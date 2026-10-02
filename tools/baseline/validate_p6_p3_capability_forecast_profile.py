@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the adopted M9 P6 training-score forecast execution profile exactly."""
+"""Validate the adopted M9 P6 P3-capability forecast execution profile exactly."""
 
 from __future__ import annotations
 
@@ -11,8 +11,10 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
 CANONICAL = BASELINE / "canonical"
-PROFILE = CANONICAL / "P6_TRAINING_SCORE_OLS_MAD_FORECAST_PROFILE.json"
-AUTHORITY = CANONICAL / "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json"
+PROFILE = CANONICAL / "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE.json"
+P6_AUTHORITY = CANONICAL / "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json"
+P3_AUTHORITY = CANONICAL / "P3_CAPABILITY_TWIN_AUTHORITY.json"
+P3_PROFILE = CANONICAL / "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL_PROFILE.json"
 P4_P5_AUTHORITY = CANONICAL / "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json"
 DTO = CANONICAL / "CROSS_LAYER_DTO_CONTRACTS.json"
 CORE = CANONICAL / "CORE_LOGICAL_MODEL.json"
@@ -20,10 +22,12 @@ EXTENSION = CANONICAL / "EXTENSION_CONTRACT_REGISTRY.json"
 M4 = CANONICAL / "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json"
 LOCK = BASELINE / "BASELINE_LOCK.json"
 
-EXPECTED_PROFILE_SHA256 = "43bf6f3814d764de812c6ff478600959b3f7bd9c54e6b8bfec5297531271d038"
-EXPECTED_ADOPTION_LOCK_SHA256 = "2852dc2904854fcd65e3207ddda4859795b003e839ff1d95e241b199879ddd1f"
+EXPECTED_PROFILE_SHA256 = "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394"
+EXPECTED_ADOPTION_LOCK_SHA256 = "9920b59601d8441f883879e813164f33ee5c02db81aa5e1b759e3a1772469e51"
 EXPECTED_PARENT_LOCK_SHA256 = "ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08"
-EXPECTED_AUTHORITY_SHA256 = "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e"
+EXPECTED_P6_AUTHORITY_SHA256 = "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e"
+EXPECTED_P3_AUTHORITY_SHA256 = "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b"
+EXPECTED_P3_PROFILE_SHA256 = "d66aa780d1c2e31ec664d173a0cdbc355f98c9ff3f751a6949e84f74cdf93876"
 EXPECTED_P4_P5_AUTHORITY_SHA256 = "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77"
 EXPECTED_DTO_SHA256 = "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
 EXPECTED_CORE_SHA256 = "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245"
@@ -82,7 +86,9 @@ def _lock_entry(lock: dict[str, Any], filename: str) -> dict[str, Any]:
 
 def verify() -> dict[str, object]:
     profile = _load(PROFILE)
-    authority = _load(AUTHORITY)
+    p6 = _load(P6_AUTHORITY)
+    p3 = _load(P3_AUTHORITY)
+    p3_profile = _load(P3_PROFILE)
     p4_p5 = _load(P4_P5_AUTHORITY)
     dto = _load(DTO)
     core = _load(CORE)
@@ -105,7 +111,9 @@ def verify() -> dict[str, object]:
 
     checks: dict[str, bool] = {
         "profile_sha": _sha(PROFILE) == EXPECTED_PROFILE_SHA256,
-        "authority_immutable": _sha(AUTHORITY) == EXPECTED_AUTHORITY_SHA256,
+        "p6_authority_immutable": _sha(P6_AUTHORITY) == EXPECTED_P6_AUTHORITY_SHA256,
+        "p3_authority_immutable": _sha(P3_AUTHORITY) == EXPECTED_P3_AUTHORITY_SHA256,
+        "p3_profile_immutable": _sha(P3_PROFILE) == EXPECTED_P3_PROFILE_SHA256,
         "p4_p5_authority_immutable": (
             _sha(P4_P5_AUTHORITY) == EXPECTED_P4_P5_AUTHORITY_SHA256
         ),
@@ -115,24 +123,22 @@ def verify() -> dict[str, object]:
         "m4_immutable": _sha(M4) == EXPECTED_M4_SHA256,
         "adoption_lock_chain": adoption_chain_ok,
         "identity": (
-            profile.get("profile_id") == "P6_TRAINING_SCORE_OLS_MAD_FORECAST"
+            profile.get("profile_id") == "P6_P3_CAPABILITY_OLS_MAD_FORECAST"
             and profile.get("version") == "1.0.0"
             and profile.get("change_class") == "C3_EXECUTION_PROFILE"
             and profile.get("tracking_issue") == 196
         ),
         "source_bindings": (
             profile["source_bindings"]["p6_authority_sha256"]
-            == EXPECTED_AUTHORITY_SHA256
+            == EXPECTED_P6_AUTHORITY_SHA256
+            and profile["source_bindings"]["p3_authority_sha256"]
+            == EXPECTED_P3_AUTHORITY_SHA256
+            and profile["source_bindings"]["p3_execution_profile_sha256"]
+            == EXPECTED_P3_PROFILE_SHA256
             and profile["source_bindings"]["p4_p5_authority_sha256"]
             == EXPECTED_P4_P5_AUTHORITY_SHA256
             and profile["source_bindings"]["cross_layer_dto_sha256"]
             == EXPECTED_DTO_SHA256
-            and profile["source_bindings"]["core_logical_model_sha256"]
-            == EXPECTED_CORE_SHA256
-            and profile["source_bindings"]["extension_contract_registry_sha256"]
-            == EXPECTED_EXTENSION_SHA256
-            and profile["source_bindings"]["m4_longitudinal_authority_sha256"]
-            == EXPECTED_M4_SHA256
         ),
         "activation_is_adoption_not_admission": (
             profile["activation_rule"][
@@ -154,38 +160,46 @@ def verify() -> dict[str, object]:
         ),
         "runtime_binding_exact": (
             profile["runtime_binding"]["model_spec_id"]
-            == "P6_MODEL_SPEC:P6_TRAINING_SCORE_OLS_MAD_FORECAST"
-            and profile["runtime_binding"]["model_spec_version"] == "1.0.0"
+            == "P6_MODEL_SPEC:P6_P3_CAPABILITY_OLS_MAD_FORECAST"
             and profile["runtime_binding"]["plugin_name"]
-            == "TRAINING_SCORE_OLS_MAD_FORECAST"
+            == "P3_CAPABILITY_OLS_MAD_FORECAST"
             and profile["runtime_binding"]["plugin_version"] == "1.0.0"
             and profile["runtime_binding"]["exact_identity_only"] is True
             and profile["runtime_binding"]["current_latest_default_forbidden"]
             is True
         ),
-        "training_evaluation_only": (
-            profile["scope"]["domain"] == "TRAINING_EVALUATION"
-            and profile["scope"]["allowed_target_kinds"]
-            == ["P4_ASSESSMENT_SCORE", "P5_OVERALL_SCORE"]
-            and profile["scope"]["operational_tactical_use_forbidden"] is True
-            and profile["scope"]["weapon_employment_target_forbidden"] is True
-            and profile["scope"]["command_or_control_output_forbidden"] is True
+        "executable_current_target": (
+            profile["scope"]["target_kind"]
+            == "P3_REFERENCE_CONDITION_CAPABILITY_ESTIMATE"
+            and profile["scope"]["numeric_target_dto"]
+            == "IntrinsicCapabilityEstimateDTO"
+            and profile["scope"]["required_context_dto"]
+            == "P4AssessmentRevisionDTO"
+            and profile["scope"]["p4_context_required_for_every_training_row"]
+            is True
         ),
-        "approved_numeric_sources_only": (
+        "p3_numeric_and_uncertainty_exact": (
             profile["source_eligibility_contract"][
-                "required_assessment_approval_state"
+                "p3_required_validity_domain_status"
             ]
+            == "IN_DOMAIN"
+            and profile["source_eligibility_contract"]["p3_numeric_field"] == "value"
+            and profile["source_eligibility_contract"][
+                "p3_uncertainty_bounds_must_contain_value"
+            ]
+            is True
+        ),
+        "p4_context_exact_and_approved": (
+            profile["source_eligibility_contract"]["p4_required_approval_state"]
             == "APPROVED"
-            and profile["source_eligibility_contract"]["finite_numeric_required"]
-            is True
             and profile["source_eligibility_contract"][
-                "p5_exact_aggregation_profile_ref_required_for_numeric_target"
+                "p4_capability_projection_ref_must_include_exact_p3_estimate_id"
             ]
             is True
             and profile["source_eligibility_contract"][
-                "missing_numeric_score_policy"
+                "p4_session_order_must_equal_p3_condition_session_order"
             ]
-            == "INSUFFICIENT_EVIDENCE_NO_IMPUTATION"
+            is True
         ),
         "leakage_fail_closed": (
             profile["source_eligibility_contract"]["future_information_forbidden"]
@@ -225,7 +239,7 @@ def verify() -> dict[str, object]:
             profile["uncertainty_calibration_contract"]["calibration_evidence_required"]
             is True
             and profile["uncertainty_calibration_contract"]["half_width_rule"]
-            == "max(holdout_component,final_refit_component)"
+            == "max(input_component,holdout_component,final_refit_component)"
             and profile["uncertainty_calibration_contract"][
                 "unquantified_uncertainty_fallback_forbidden"
             ]
@@ -237,7 +251,7 @@ def verify() -> dict[str, object]:
         ),
         "applicability_matches_authority": (
             profile["applicability_contract"]["states"]
-            == authority["applicability_uncertainty_contract"]["applicability_states"]
+            == p6["applicability_uncertainty_contract"]["applicability_states"]
             and profile["applicability_contract"][
                 "numeric_forecast_allowed_only_when"
             ]
@@ -275,45 +289,46 @@ def verify() -> dict[str, object]:
                 "later_observed_outcome_must_not_rewrite_prior_forecast"
             ]
             is True
-            and profile["replay_supersession_contract"][
-                "original_forecast_origin_and_as_of_preserved"
-            ]
-            is True
         ),
         "safety_boundary": (
-            profile["safety_boundary"]["advisory_projection_only"] is True
+            profile["scope"]["operational_tactical_use_forbidden"] is True
+            and profile["safety_boundary"]["advisory_projection_only"] is True
             and profile["safety_boundary"][
                 "operational_or_tactical_optimization_forbidden"
             ]
             is True
-            and profile["safety_boundary"]["weapon_or_targeting_recommendation_forbidden"]
+            and profile["safety_boundary"][
+                "weapon_or_targeting_recommendation_forbidden"
+            ]
             is True
             and profile["safety_boundary"]["mission_command_generation_forbidden"]
             is True
-            and profile["safety_boundary"]["p1_p5_fact_mutation_forbidden"] is True
-        ),
-        "p4_p5_numeric_aggregation_still_profile_bound": (
-            p4_p5["aggregation_contract"]["default_aggregation_profile"] is None
-            and p4_p5["aggregation_contract"][
-                "exact_profile_formula_weight_threshold_required_for_numeric_aggregate"
-            ]
-            is True
         ),
         "p6_still_has_no_default_model": (
-            authority["model_authority_contract"]["default_model_profile"] is None
-            and authority["model_authority_contract"][
+            p6["model_authority_contract"]["default_model_profile"] is None
+            and p6["model_authority_contract"][
                 "exact_adopted_model_profile_required_for_execution"
             ]
             is True
+        ),
+        "p3_claim_and_surface_boundary_preserved": (
+            p3["claim_contract"]["default_claim_level"]
+            == "REFERENCE_CONDITION_LONGITUDINAL_ESTIMATE"
+            and p3_profile["output_contract"]["surface_extrapolation_forbidden"]
+            is True
+        ),
+        "p4_score_still_evidence_only_without_aggregation_profile": (
+            p4_p5["aggregation_contract"]["default_aggregation_profile"] is None
+            and p4_p5["aggregation_contract"]["no_profile_behavior"]
+            == "EVIDENCE_ONLY_SCORE_AND_GRADE_NULL"
         ),
         "extension_safety_boundary_preserved": any(
             "Operational/tactical optimization remains outside" in rule
             for rule in extension["p_capability_contracts"]["P6"]["rules"]
         ),
-        "m4_numeric_semantics_reused_without_m4_product_mutation": (
+        "m4_ols_mad_reference_preserved": (
             m4["trend_profile"]["profile_hash"]
             == "87981c6e3c79f9587786d082d826a6393d15192f67b10c817612da8912982729"
-            and profile["scope"]["p1_p5_historical_products_immutable"] is True
         ),
     }
 
@@ -330,6 +345,17 @@ def verify() -> dict[str, object]:
             == _canonical_hash(profile[section])
         )
 
+    dto_contracts = dto["contracts"]
+    for name in (
+        "IntrinsicCapabilityEstimateDTO",
+        "P4AssessmentRevisionDTO",
+        "P6InputSnapshotDTO",
+        "P6ModelRevisionDTO",
+        "P6ForecastRequestDTO",
+        "P6ForecastResultDTO",
+    ):
+        checks[f"dto:{name}"] = name in dto_contracts
+
     for table in (
         "registry.context_artifact",
         "registry.dataset_snapshot",
@@ -339,17 +365,6 @@ def verify() -> dict[str, object]:
         "intelligence.forecast_result",
     ):
         checks[f"core:{table}"] = core["tables"][table]["schema_version"] == "1.6.0"
-
-    dto_contracts = dto["contracts"]
-    for name in (
-        "P4AssessmentRevisionDTO",
-        "P5AssessmentRevisionDTO",
-        "P6InputSnapshotDTO",
-        "P6ModelRevisionDTO",
-        "P6ForecastRequestDTO",
-        "P6ForecastResultDTO",
-    ):
-        checks[f"dto:{name}"] = name in dto_contracts
 
     failed = sorted(name for name, ok in checks.items() if not ok)
     return {

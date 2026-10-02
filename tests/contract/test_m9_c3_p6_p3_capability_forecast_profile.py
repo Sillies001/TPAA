@@ -12,16 +12,16 @@ BASELINE = ROOT / "baseline" / "CB-1.4.0"
 PROFILE = (
     BASELINE
     / "canonical"
-    / "P6_TRAINING_SCORE_OLS_MAD_FORECAST_PROFILE.json"
+    / "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE.json"
 )
 VALIDATOR_PATH = (
     ROOT
     / "tools"
     / "baseline"
-    / "validate_p6_training_score_forecast_profile.py"
+    / "validate_p6_p3_capability_forecast_profile.py"
 )
 
-EXPECTED_PROFILE_SHA256 = "43bf6f3814d764de812c6ff478600959b3f7bd9c54e6b8bfec5297531271d038"
+EXPECTED_PROFILE_SHA256 = "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394"
 
 SPEC = importlib.util.spec_from_file_location("p6_profile_validator", VALIDATOR_PATH)
 assert SPEC is not None and SPEC.loader is not None
@@ -39,7 +39,7 @@ def test_p6_execution_profile_is_controlled_and_loadable() -> None:
     assert hashlib.sha256(PROFILE.read_bytes()).hexdigest() == EXPECTED_PROFILE_SHA256
     loader = CanonicalArtifactLoader(BASELINE)
     artifact = loader.load(
-        "P6_TRAINING_SCORE_OLS_MAD_FORECAST_PROFILE",
+        "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE",
         expectation=ArtifactExpectation(
             version="1.0.0",
             schema_version="1.6.0",
@@ -66,24 +66,21 @@ def test_p6_execution_profile_validator_passes_without_claiming_task_completion(
     assert all(result["checks"].values())
 
 
-def test_p6_profile_uses_only_approved_governed_training_scores() -> None:
+def test_p6_profile_uses_executable_p3_numeric_target_with_exact_p4_context() -> None:
     profile = _profile()
-    eligibility = profile["source_eligibility_contract"]
     scope = profile["scope"]
-    assert isinstance(eligibility, dict)
+    eligibility = profile["source_eligibility_contract"]
     assert isinstance(scope, dict)
-    assert scope["allowed_target_kinds"] == [
-        "P4_ASSESSMENT_SCORE",
-        "P5_OVERALL_SCORE",
-    ]
-    assert eligibility["required_assessment_approval_state"] == "APPROVED"
-    assert eligibility["finite_numeric_required"] is True
+    assert isinstance(eligibility, dict)
+    assert scope["target_kind"] == "P3_REFERENCE_CONDITION_CAPABILITY_ESTIMATE"
+    assert scope["numeric_target_dto"] == "IntrinsicCapabilityEstimateDTO"
+    assert scope["required_context_dto"] == "P4AssessmentRevisionDTO"
+    assert scope["p4_context_required_for_every_training_row"] is True
+    assert eligibility["p3_required_validity_domain_status"] == "IN_DOMAIN"
+    assert eligibility["p4_required_approval_state"] == "APPROVED"
     assert eligibility[
-        "p5_exact_aggregation_profile_ref_required_for_numeric_target"
+        "p4_capability_projection_ref_must_include_exact_p3_estimate_id"
     ] is True
-    assert eligibility["missing_numeric_score_policy"] == (
-        "INSUFFICIENT_EVIDENCE_NO_IMPUTATION"
-    )
 
 
 def test_p6_profile_is_deterministic_and_leakage_safe() -> None:
@@ -120,7 +117,7 @@ def test_p6_profile_has_exact_temporal_validation_and_single_step_horizon() -> N
     assert forecast["threshold_probabilities_forbidden_profile_v1"] is True
 
 
-def test_p6_profile_requires_explicit_uncertainty_and_applicability() -> None:
+def test_p6_profile_uses_p3_uncertainty_without_confidence_substitution() -> None:
     profile = _profile()
     uncertainty = profile["uncertainty_calibration_contract"]
     applicability = profile["applicability_contract"]
@@ -128,14 +125,15 @@ def test_p6_profile_requires_explicit_uncertainty_and_applicability() -> None:
     assert isinstance(applicability, dict)
     assert uncertainty["calibration_evidence_required"] is True
     assert uncertainty["half_width_rule"] == (
-        "max(holdout_component,final_refit_component)"
+        "max(input_component,holdout_component,final_refit_component)"
     )
+    assert uncertainty["confidence_field_is_not_uncertainty"] is True
     assert uncertainty["unquantified_uncertainty_fallback_forbidden"] is True
     assert applicability["numeric_forecast_allowed_only_when"] == "APPLICABLE"
     assert applicability["out_of_domain_zero_coercion_forbidden"] is True
 
 
-def test_p6_profile_keeps_training_projection_outside_operational_tactical_use() -> None:
+def test_p6_profile_keeps_projection_outside_operational_tactical_use() -> None:
     profile = _profile()
     safety = profile["safety_boundary"]
     activation = profile["activation_rule"]
