@@ -1,0 +1,37 @@
+{
+  "schema": "TPAA_M9_P6_MODEL_FORECAST_GOLDEN_V1",
+  "case_id": "LINEAR_FOUR_SESSION_P3_WITH_APPROVED_P4_CONTEXT",
+  "profile_sha256": "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394",
+  "applicability_evidence_id": "P6_APPLICABILITY_SHA256:7a937fe3fa466025cda3b0e28489d95920bc26ce6e65c6e52a9715fd53e2d5b0",
+  "training_dataset_snapshot_id": "661e53f1-f589-5182-b14c-89b1fc317e21",
+  "training_dataset_hash": "592176684249fcdcf432318e85affd9b92a300000851a022e72d7c4f0bc40e7b",
+  "validation_dataset_snapshot_id": "7cc69cb5-e78b-5728-835e-95b246a8de74",
+  "validation_dataset_hash": "c73973d9356b118cb92373b8df20389dbd6c399a73fb400159fcec80cff8e8a6",
+  "calibration_evidence_id": "P6_UNCERTAINTY_SHA256:1b251b3f1fdd7eba741c1f579f44e1403e518594107fa9a79096fc6ecf25b0ed",
+  "model_artifact_hash": "2a22f22257e7b50a0c125e7bafd737e18212da79ef0bcd1fa83afb36fdea4ea0",
+  "capability_model_id": "e0758973-7894-5c12-8a02-76b601696728",
+  "model_object_ref_id": "b1cfb84f-d34a-51d3-aa57-74b8d5883073",
+  "input_snapshot_id": "P6_INPUT_SHA256:7a402a227e1fce39434e0e0a18fc2b869fc47021ac59d0b1114c6f9236c57a9a",
+  "forecast_request_id": "P6_FORECAST_REQUEST_SHA256:ea54fa9b1c38462a3711806a91d890ec60b9eaa3b83b94818e3394e4248f3c10",
+  "forecast_run_id": "51ad25e5-245c-5715-abf6-dc510f48e23e",
+  "forecast_result_id": "ae8ed708-51eb-5aac-85a5-51042cf5fa60",
+  "forecast_logical_content_hash": "dc8d9c65a9172663306577029eab8f23714b8638e30a18fba614d33cdf58a0e4",
+  "validation": {
+    "holdout_predicted_value": 13.0,
+    "holdout_observed_value": 13.0,
+    "holdout_absolute_error": 0.0
+  },
+  "model": {
+    "intercept": 10.0,
+    "slope": 1.0,
+    "uncertainty_half_width": 0.5,
+    "target_session_order": 5
+  },
+  "forecast": {
+    "applicability_status": "APPLICABLE",
+    "point": 14.0,
+    "lower": 13.5,
+    "upper": 14.5,
+    "threshold_probabilities": {}
+  }
+}
