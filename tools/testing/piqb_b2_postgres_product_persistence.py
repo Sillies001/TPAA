@@ -256,7 +256,11 @@ def _restart_acceptance(value: dict[str, object]) -> bool:
     first = value["first"]
     replay = value["replay"]
     exact = value["exact"]
-    if not all(isinstance(item, dict) for item in (first, replay, exact)):
+    if not isinstance(first, dict):
+        return False
+    if not isinstance(replay, dict):
+        return False
+    if not isinstance(exact, dict):
         return False
     first_row = first
     replay_row = replay
