@@ -2473,3 +2473,13 @@ jobs:
             --required-jobs-success 14 \
             --required-jobs-total 14 \
             --output evidence/piqb-b2/review.json
+      - name: Review ACP-216 adoption readiness without authority mutation
+        shell: bash
+        run: |
+          python tools/testing/acp_216_adoption_readiness.py \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --output evidence/piqb-b2/acp-216-adoption-readiness.json
