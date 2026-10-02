@@ -209,5 +209,7 @@
     "P1/longitudinal wiring",
     "P3-owned model/surface/twin/estimate persistence component implementation; production runtime activation remains blocked by exact P2 dependency",
     "schema-fit tests and Authority Change Proposal design"
-  ]
+  ],
+  "authority_change_proposal_issue": 216,
+  "authority_change_proposal_status": "PROPOSED_NOT_ADOPTED"
 }
