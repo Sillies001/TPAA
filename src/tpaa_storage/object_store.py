@@ -23,18 +23,31 @@ class StoredObject:
     byte_size: int
 
 
-def _logical_relative(logical_uri: str) -> str:
+def _parse_logical_uri(logical_uri: str) -> tuple[str, str, str]:
     parsed = urlsplit(logical_uri)
     if parsed.scheme not in {"tpaa-object", "tpaa-parquet"}:
         raise ObjectStoreError("unsupported logical object scheme")
     if not parsed.netloc:
         raise ObjectStoreError("logical object URI requires a namespace")
     if parsed.query or parsed.fragment or parsed.username or parsed.password or parsed.port:
-        raise ObjectStoreError("logical object URI may not contain credentials/query/fragment/port")
-    path = parsed.path.lstrip("/")
+        raise ObjectStoreError(
+            "logical object URI may not contain credentials/query/fragment/port"
+        )
+    return parsed.scheme, parsed.netloc, parsed.path.lstrip("/")
+
+
+def _logical_relative(logical_uri: str) -> str:
+    scheme, namespace, path = _parse_logical_uri(logical_uri)
     if not path:
         raise ObjectStoreError("logical object URI requires a path")
-    return f"{parsed.scheme}/{parsed.netloc}/{path}"
+    return f"{scheme}/{namespace}/{path}"
+
+
+def _logical_prefix_relative(logical_prefix: str) -> str:
+    scheme, namespace, path = _parse_logical_uri(logical_prefix)
+    if not path:
+        return f"{scheme}/{namespace}"
+    return f"{scheme}/{namespace}/{path}"
 
 
 class LocalObjectStore:
@@ -77,7 +90,7 @@ class LocalObjectStore:
     def list_objects(self, logical_prefix: str) -> tuple[StoredObject, ...]:
         """Enumerate durable objects below one governed logical prefix."""
 
-        relative = _logical_relative(logical_prefix)
+        relative = _logical_prefix_relative(logical_prefix)
         base = self.filesystem.resolve(relative)
         if not base.exists():
             return ()

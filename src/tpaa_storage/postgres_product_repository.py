@@ -18,6 +18,15 @@ from .product_publication import (
 )
 
 
+def _required_int(value: object, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ProductPublicationError(
+            "POSTGRES_ROW_TYPE_INVALID",
+            field,
+        )
+    return value
+
+
 def _uuid(value: str, field: str) -> str:
     try:
         parsed = UUID(value)
@@ -124,7 +133,7 @@ class PostgreSQLProductPublicationLedger:
             scope_key=value.release.scope_key,
             object_uri=value.object_uri,
             object_sha256=value.object_sha256,
-            version_token=int(row[5]),
+            version_token=_required_int(row[5], "release_no"),
             reused=True,
         )
 
@@ -172,7 +181,11 @@ class PostgreSQLProductPublicationLedger:
                 release.scope_key,
             )
         current_release_id = None if not pointer else pointer[0][0]
-        actual_token = 0 if not pointer else int(pointer[0][1])
+        actual_token = (
+            0
+            if not pointer
+            else _required_int(pointer[0][1], "version_token")
+        )
         if actual_token != value.expected_version_token:
             raise ProductPublicationError(
                 "PUBLISH_CAS_CONFLICT",
@@ -198,7 +211,7 @@ class PostgreSQLProductPublicationLedger:
             row = existing_object[0]
             if (
                 str(row[1]) != value.object_sha256
-                or int(row[2]) != value.object_byte_size
+                or _required_int(row[2], "size_bytes") != value.object_byte_size
                 or bool(row[3]) is not True
                 or str(row[4]) != "ACTIVE"
             ):
@@ -383,7 +396,7 @@ class PostgreSQLProductPublicationLedger:
             release_id=str(row[2]),
             scope_type=str(row[3]),
             scope_key=str(row[4]),
-            version_token=int(row[5]),
+            version_token=_required_int(row[5], "release_no"),
             object_uri=str(row[6]),
             object_sha256=str(row[7]),
             reused=False,

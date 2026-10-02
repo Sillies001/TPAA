@@ -106,7 +106,8 @@ def review(
         ),
         "authority_gap_truthfully_recorded": (
             authority_blocked
-            and fit.get("authority_change_proposal_required") is True
+            and isinstance(fit.get("summary"), dict)
+            and fit["summary"].get("authority_change_proposal_required") is True
             and fit.get("authority_change_proposal_issue") == 216
             and fit.get("authority_change_proposal_status")
             == "PROPOSED_NOT_ADOPTED"

@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tpaa_runtime.persistence import (
     DesktopPersistenceConfig,
     build_desktop_persistence,
 )
-import pytest
 
 from tpaa_storage import (
     PersistenceFitError,

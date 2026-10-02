@@ -26,7 +26,8 @@ from tpaa_storage import (
 
 
 class _ProductPublicationReadUnitOfWork(Protocol):
-    product_publication: ProductPublicationLedger
+    @property
+    def product_publication(self) -> ProductPublicationLedger: ...
 
     def __enter__(self) -> _ProductPublicationReadUnitOfWork: ...
     def commit(self) -> None: ...

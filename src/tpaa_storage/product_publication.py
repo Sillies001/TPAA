@@ -112,7 +112,9 @@ class ProductPublicationLedger(Protocol):
 class ProductPublicationUnitOfWork(Protocol):
     """Transaction boundary required by the publication coordinator."""
 
-    product_publication: ProductPublicationLedger
+    @property
+    def product_publication(self) -> ProductPublicationLedger:
+        """Return the durable product publication ledger."""
 
     def __enter__(self) -> ProductPublicationUnitOfWork:
         """Enter one explicit write transaction."""
