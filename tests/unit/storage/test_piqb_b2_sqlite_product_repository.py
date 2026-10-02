@@ -21,7 +21,7 @@ from tpaa_storage import (
 def _request(*, token: int = 0) -> ProductPublicationRequest:
     return ProductPublicationRequest(
         operation_id=f"sqlite-op-{token}",
-        product_family="P6_FORECAST",
+        product_family="PIQB_TEST_PRODUCT",
         product_id="91000000-0000-4000-8000-000000000001",
         release=ProductReleaseIdentity(
             release_id="91000000-0000-4000-8000-000000000003",
@@ -66,7 +66,7 @@ def test_sqlite_product_publication_survives_repository_restart(
 
     with SQLiteDesktopUnitOfWork(database) as uow:
         replay = uow.product_publication.exact_product(
-            "P6_FORECAST",
+            "PIQB_TEST_PRODUCT",
             "91000000-0000-4000-8000-000000000001",
         )
         referenced = uow.product_publication.referenced_object_uris(

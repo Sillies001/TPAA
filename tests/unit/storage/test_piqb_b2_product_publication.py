@@ -68,7 +68,7 @@ class _Uow:
 def _request() -> ProductPublicationRequest:
     return ProductPublicationRequest(
         operation_id="op-1",
-        product_family="P6_FORECAST",
+        product_family="PIQB_TEST_PRODUCT",
         product_id="90000000-0000-4000-8000-000000000001",
         release=ProductReleaseIdentity(
             release_id="90000000-0000-4000-8000-000000000003",

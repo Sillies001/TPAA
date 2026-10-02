@@ -6,7 +6,10 @@ from tpaa_runtime.persistence import (
     DesktopPersistenceConfig,
     build_desktop_persistence,
 )
+import pytest
+
 from tpaa_storage import (
+    PersistenceFitError,
     ProductPublicationRequest,
     ProductReleaseIdentity,
     bootstrap_sqlite,
@@ -54,7 +57,7 @@ def test_desktop_persistence_composes_publication_restart_and_recovery(
     )
 
     assert runtime.fit_gate.record("LONGITUDINAL_RELEASE").production_allowed
-    published = runtime.publication.publish(_request())
+    published = runtime.publish(_request())
     assert runtime.object_store.verify(published.sealed_object)
 
     recovery = runtime.recover_registered_objects(
@@ -93,3 +96,49 @@ def test_desktop_persistence_staging_recovery_is_explicit(
     )
     assert report.removed == (orphan.logical_uri,)
     assert runtime.object_store.verify(active)
+
+
+def test_desktop_persistence_blocks_unqualified_family_before_object_stage(
+    tmp_path: Path,
+) -> None:
+    database = tmp_path / "tpaa.db"
+    bootstrap_sqlite(database)
+    runtime = build_desktop_persistence(
+        DesktopPersistenceConfig(
+            database_path=database,
+            object_root=tmp_path / "objects",
+        )
+    )
+    blocked = ProductPublicationRequest(
+        operation_id="blocked-p6-op",
+        product_family="P6_MODEL_PROJECTION_ADVISORY",
+        product_id="93000000-0000-4000-8000-000000000011",
+        release=ProductReleaseIdentity(
+            release_id="93000000-0000-4000-8000-000000000012",
+            scope_type="LONGITUDINAL",
+            scope_key="PIQB-B2-BLOCKED-P6",
+            session_id=None,
+            longitudinal_scope_id=None,
+            catalog_version="P1-METRIC-CATALOG-1.0",
+            catalog_hash="1" * 64,
+            context_binding_hash="2" * 64,
+            manifest_hash="3" * 64,
+        ),
+        sealed_uri=(
+            "tpaa-object://products/piqb-b2/"
+            "93000000-0000-4000-8000-000000000011.json"
+        ),
+        payload=b'{"schema":"MUST_NOT_BE_STAGED"}',
+        media_type="application/json",
+        storage_backend="LOCAL_OBJECT_STORE",
+        idempotency_key="blocked-p6-1",
+        expected_version_token=0,
+    )
+
+    with pytest.raises(PersistenceFitError) as failed:
+        runtime.publish(blocked)
+    assert failed.value.product_family == "P6_MODEL_PROJECTION_ADVISORY"
+    assert failed.value.status == "BLOCKED"
+    assert runtime.object_store.list_objects(
+        "tpaa-object://products/piqb-b2"
+    ) == ()

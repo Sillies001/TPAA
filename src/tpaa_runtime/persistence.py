@@ -15,6 +15,8 @@ from tpaa_storage import (
     ProductPersistenceFitGate,
     ProductPublicationCoordinator,
     ProductPublicationLedger,
+    ProductPublicationRequest,
+    ProductPublicationResult,
     SQLiteDesktopUnitOfWork,
     StagingRecoveryReport,
     recover_registered_product_orphans,
@@ -57,8 +59,17 @@ class ProductPersistenceRuntime:
 
     fit_gate: ProductPersistenceFitGate
     object_store: LocalObjectStore
-    publication: ProductPublicationCoordinator
+    _publication: ProductPublicationCoordinator
     _read_uow_factory: Callable[[], _ProductPublicationReadUnitOfWork]
+
+    def publish(
+        self,
+        request: ProductPublicationRequest,
+    ) -> ProductPublicationResult:
+        """Publish only product families that the frozen fit gate admits."""
+
+        self.fit_gate.assert_production_allowed(request.product_family)
+        return self._publication.publish(request)
 
     def recover_registered_objects(
         self,
@@ -110,7 +121,7 @@ def build_desktop_persistence(
     return ProductPersistenceRuntime(
         fit_gate=fit_gate,
         object_store=store,
-        publication=ProductPublicationCoordinator(
+        _publication=ProductPublicationCoordinator(
             object_flow=LocalSealedObjectFlow(store),
             unit_of_work_factory=write_uow,
         ),
@@ -136,7 +147,7 @@ def build_service_persistence(
     return ProductPersistenceRuntime(
         fit_gate=fit_gate,
         object_store=store,
-        publication=ProductPublicationCoordinator(
+        _publication=ProductPublicationCoordinator(
             object_flow=LocalSealedObjectFlow(store),
             unit_of_work_factory=write_uow,
         ),
