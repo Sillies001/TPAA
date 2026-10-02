@@ -103,6 +103,8 @@ def build_p6_interop_snapshot(
 ) -> P6InteropSnapshot:
     from tpaa_context.p6_governance import (
         P6AuthorityPolicy as RuntimeP6AuthorityPolicy,
+    )
+    from tpaa_context.p6_governance import (
         P6GovernanceError,
         assert_p6_claim_allowed,
         canonical_hash,
