@@ -106,7 +106,7 @@ def test_trusted_identity_is_derived_from_verified_canonical_baseline() -> None:
         "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d"
     )
     assert identity.dto_authority_sha256 == (
-        "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47"
+        "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
     )
 
 

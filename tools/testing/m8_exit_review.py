@@ -46,6 +46,19 @@ TRACKING_ISSUE = 185
 EXPECTED_AUTHORITY_SHA256 = "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77"
 EXPECTED_ROLE_PROFILE_SHA256 = "99a526cead816010373cdd81cd889d33fa359b5d0b74d87743e51d0f649f1113"
 EXPECTED_DTO_SHA256 = "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47"
+EXPECTED_M8_BASELINE_LOCK_SHA256 = "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a"
+EXPECTED_M8_DTO_SUBSET_SHA256 = "34c11b2c7e2bc2a1e26dacb83676f1919331e88520e634b527eef30cacd6341a"
+M8_DTO_NAMES = (
+    "P4SubjectContextDTO",
+    "HumanMachineEvidenceDTO",
+    "InstructorAnnotationDTO",
+    "ApprovalStateDTO",
+    "P4AssessmentRevisionDTO",
+    "P5CompositionSnapshotDTO",
+    "TeamMissionEvidenceDTO",
+    "P5AssessmentRevisionDTO",
+    "P4P5AdmissionStateDTO",
+)
 
 EXPECTED_TASK_IDS = (
     "M8-GOV-001",
@@ -282,8 +295,21 @@ def _entry_qualification_exact(tasks: dict[str, Any]) -> bool:
 def _program_exit_runway_lifecycle_valid(bundle: dict[str, Any]) -> bool:
     if _issue_state(bundle, 149) != "open":
         return False
-    if _issue_state(bundle, 186) != "open":
+    runway_state = _issue_state(bundle, 186)
+    if runway_state not in ("open", "closed"):
         return False
+    if runway_state == "closed":
+        runway_text = _issue_text(bundle, 186)
+        if not all(
+            token in runway_text
+            for token in (
+                "SDIB-1.8",
+                "ffbd5e5f0561ce39d8736de765dd6be240edfae1",
+                "Run #529",
+                "15 tasks",
+            )
+        ):
+            return False
     exit_state = _issue_state(bundle, 185)
     if exit_state == "open":
         return True
@@ -424,6 +450,8 @@ def review(
         role_profile.get("projection_contract", {}),
     )
     dto_contracts = cast(dict[str, Any], dto.get("contracts", {}))
+    m8_dto_subset = {name: dto_contracts.get(name, {}) for name in M8_DTO_NAMES}
+    lineage = cast(list[Any], baseline_info.get("lock_lineage_sha256", []))
     admission = cast(
         dict[str, Any],
         dto_contracts.get("P4P5AdmissionStateDTO", {}),
@@ -468,13 +496,14 @@ def review(
         "authority_role_dto_lock_exact": (
             _sha(authority_path) == EXPECTED_AUTHORITY_SHA256
             and _sha(role_profile_path) == EXPECTED_ROLE_PROFILE_SHA256
-            and _sha(dto_path) == EXPECTED_DTO_SHA256
             and lock_hashes.get("P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json")
             == EXPECTED_AUTHORITY_SHA256
             and lock_hashes.get("P4_P5_ROLE_PRIVACY_PROFILE.json")
             == EXPECTED_ROLE_PROFILE_SHA256
             and lock_hashes.get("CROSS_LAYER_DTO_CONTRACTS.json")
-            == EXPECTED_DTO_SHA256
+            == _sha(dto_path)
+            and _canonical_hash(m8_dto_subset) == EXPECTED_M8_DTO_SUBSET_SHA256
+            and EXPECTED_M8_BASELINE_LOCK_SHA256 in lineage
             and authority.get("authority_id")
             == "P4_P5_TRAINING_ASSESSMENT_AUTHORITY"
             and authority.get("version") == "1.0.0"

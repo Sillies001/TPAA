@@ -67,5 +67,5 @@ def test_snapshot_carries_frozen_authority_hash() -> None:
     assert authority["artifact_id"] == "CROSS_LAYER_DTO_CONTRACTS"
     assert authority["core_baseline"] == "CB-1.4.0"
     assert authority["sha256"] == (
-        "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47"
+        "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
     )

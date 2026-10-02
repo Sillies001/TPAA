@@ -3123,6 +3123,899 @@
       ],
       "source": "M8 P4/P5 authority #181 exact projection",
       "authority": "cross-layer exact contract"
+    },
+    "P6InputSnapshotDTO": {
+      "fields": [
+        {
+          "field": "input_snapshot_id",
+          "source": "registry.dataset_snapshot.dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "snapshot_type",
+          "source": "registry.dataset_snapshot.snapshot_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "factual_source_refs",
+          "source": "ordered exact P4/P5 published revision refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "p3_model_refs",
+          "source": "ordered exact P3 model/twin/estimate refs when explicitly required",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "scenario_context_refs",
+          "source": "ordered exact scenario/context artifact refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "target_scope",
+          "source": "governed SUBJECT|COMPOSITION|MISSION scope",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_or_composition_ref",
+          "source": "exact governed subject/composition/mission identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_origin_utc",
+          "source": "knowledge-time forecast origin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "data_hash",
+          "source": "registry.dataset_snapshot.data_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "availability_status",
+          "source": "governed input availability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "explicit unavailable/OOD/not-identifiable reasons",
+          "required": true,
+          "transport_type": "array[string]"
+        }
+      ],
+      "rules": [
+        "snapshot_type is P6_INPUT and frozen=true.",
+        "Every factual_source_ref is an exact published P4/P5 revision; P3 refs are exact when present.",
+        "All inputs must be available by as_of_utc; future and same-outcome leakage are forbidden.",
+        "Historical resolution never falls back to current/latest/default."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6ModelRevisionDTO": {
+      "fields": [
+        {
+          "field": "capability_model_id",
+          "source": "capability.capability_model.capability_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "model_spec_id",
+          "source": "capability.capability_model.model_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_spec_version",
+          "source": "capability.capability_model.model_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_type",
+          "source": "capability.capability_model.subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "capability.capability_model.subject_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "capability.capability_model.training_dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "validation_dataset_snapshot_id",
+          "source": "exact frozen P6 validation dataset snapshot id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "plugin_name",
+          "source": "capability.capability_model.plugin_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "plugin_version",
+          "source": "capability.capability_model.plugin_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_uri",
+          "source": "capability.capability_model.model_artifact_uri",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_hash",
+          "source": "capability.capability_model.model_artifact_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_object_ref_id",
+          "source": "registry.object_reference resolved by exact managed_uri",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "validity_domain",
+          "source": "capability.capability_model.validity_domain",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "validation_metrics",
+          "source": "capability.capability_model.validation_metrics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "applicability_profile_ref",
+          "source": "exact adopted applicability profile identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty_profile_ref",
+          "source": "exact adopted uncertainty/calibration profile identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.capability_model.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "trained_at",
+          "source": "capability.capability_model.trained_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "published_at",
+          "source": "capability.capability_model.published_at",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "supersedes_model_id",
+          "source": "capability.capability_model.supersedes_model_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "P6 reuses capability.capability_model and sealed registry.object_reference; no parallel model registry is created.",
+        "Training and validation snapshots are exact, frozen and leakage-disjoint.",
+        "A model is projection-eligible only under exact adopted model/applicability/uncertainty profiles.",
+        "Historical model resolution never uses current/latest/default aliases."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6ForecastRequestDTO": {
+      "fields": [
+        {
+          "field": "forecast_request_id",
+          "source": "M9 authority deterministic forecast request identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_run_id",
+          "source": "intelligence.forecast_run.forecast_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "input_snapshot_id",
+          "source": "intelligence.forecast_run.input_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "forecast_spec_id",
+          "source": "intelligence.forecast_run.forecast_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_spec_version",
+          "source": "intelligence.forecast_run.forecast_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "target_scope",
+          "source": "governed SUBJECT|COMPOSITION|MISSION scope",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_ref",
+          "source": "exact subject/composition/mission reference",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "target_code",
+          "source": "governed projection target code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_origin_utc",
+          "source": "explicit forecast origin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "horizon_spec",
+          "source": "intelligence.forecast_run.horizon_spec",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "capability_model_id",
+          "source": "exact P6 model revision",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "assumption_profile_id",
+          "source": "exact assumption profile id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assumption_profile_version",
+          "source": "exact assumption profile version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_hash",
+          "source": "M9 canonical request content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "forecast_request_id is deterministic over exact source, model, target, horizon, assumptions and as_of_utc.",
+        "Forecast origin/horizon cannot be silently shifted by runtime defaults.",
+        "Current/latest/default model or source resolution is forbidden."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6ForecastResultDTO": {
+      "fields": [
+        {
+          "field": "forecast_result_id",
+          "source": "intelligence.forecast_result.forecast_result_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "forecast_run_id",
+          "source": "intelligence.forecast_result.forecast_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "target_code",
+          "source": "intelligence.forecast_result.target_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "target_time",
+          "source": "intelligence.forecast_result.target_time",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "distribution",
+          "source": "intelligence.forecast_result.distribution",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "threshold_probabilities",
+          "source": "intelligence.forecast_result.threshold_probabilities",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed P6 applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "governed uncertainty/calibration projection",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "intelligence.forecast_result.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "factual_source_refs",
+          "source": "ordered exact source revision refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "model_revision_id",
+          "source": "exact capability model revision",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "original request knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical forecast result hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Forecast result is a projection and never an observed/adjusted/capability/assessment fact.",
+        "Numeric projection is invalid when applicability is OUT_OF_DOMAIN, INSUFFICIENT_EVIDENCE or NOT_IDENTIFIABLE.",
+        "threshold_probabilities may be populated only when the exact adopted model profile authorizes them."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6CounterfactualRequestDTO": {
+      "fields": [
+        {
+          "field": "counterfactual_request_id",
+          "source": "M9 authority deterministic counterfactual request identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "counterfactual_run_id",
+          "source": "intelligence.counterfactual_run.counterfactual_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "base_product_refs",
+          "source": "intelligence.counterfactual_run.base_product_refs exact factual refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "scenario_definition_id",
+          "source": "intelligence.counterfactual_run.scenario_definition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "interventions",
+          "source": "typed governed intervention set",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "held_fixed_assumptions",
+          "source": "explicit invariant assumptions",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "model_refs",
+          "source": "intelligence.counterfactual_run.model_refs exact model refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "applicability_profile_ref",
+          "source": "exact applicability profile identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_hash",
+          "source": "M9 canonical request content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Interventions and held-fixed assumptions are explicit and hash-bound.",
+        "Association-only models cannot be upgraded to causal claims.",
+        "Base products and models use exact identities only."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6CounterfactualResultDTO": {
+      "fields": [
+        {
+          "field": "counterfactual_run_id",
+          "source": "intelligence.counterfactual_run.counterfactual_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "projection_dataset_uri",
+          "source": "intelligence.counterfactual_run.projection_dataset_uri",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "projection_dataset_hash",
+          "source": "intelligence.counterfactual_run.projection_dataset_hash",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed P6 applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "identifiability_status",
+          "source": "governed intervention identifiability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "causal_claim_level",
+          "source": "governed causal-claim boundary",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "governed uncertainty projection",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "assumptions",
+          "source": "intelligence.counterfactual_run.assumptions",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "model_refs",
+          "source": "ordered exact model refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "status",
+          "source": "intelligence.counterfactual_run.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "original request knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical counterfactual result hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Default claim level is SCENARIO_PROJECTION_NON_CAUSAL.",
+        "A stronger causal claim requires separately adopted causal authority and identifiable intervention evidence.",
+        "Projection output never mutates the factual baseline."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6RecommendationDTO": {
+      "fields": [
+        {
+          "field": "recommendation_id",
+          "source": "intelligence.training_recommendation.recommendation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "subject_key",
+          "source": "authorized pseudonymous subject projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "intelligence.training_recommendation.subject_id authorized direct identity",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "recommendation_spec_id",
+          "source": "intelligence.training_recommendation.recommendation_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "recommendation_spec_version",
+          "source": "intelligence.training_recommendation.recommendation_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_forecast_result_ids",
+          "source": "exact source forecast result ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "source_counterfactual_run_ids",
+          "source": "exact source counterfactual run ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "objective_constraints",
+          "source": "governed objective and constraint set",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "allowed_action_space",
+          "source": "governed advisory action space",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "rationale",
+          "source": "intelligence.training_recommendation.rationale",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "source_gap_refs",
+          "source": "intelligence.training_recommendation.source_gap_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "proposed_training_items",
+          "source": "intelligence.training_recommendation.proposed_training_items",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed recommendation applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "source projection uncertainty summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "intelligence.training_recommendation.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "approval_state",
+          "source": "intelligence.training_recommendation.approval_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reviewer_subject_key",
+          "source": "authorized reviewer pseudonymous identity",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "audit_ref",
+          "source": "exact audit evidence reference",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "created_at",
+          "source": "intelligence.training_recommendation.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical recommendation content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Recommendation is advisory only; it is never fact, historical truth or an automatic command.",
+        "Approval/release does not upgrade source forecast/counterfactual claims.",
+        "Direct subject identity is projected only under exact role and scope authorization."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6InteropSnapshotDTO": {
+      "fields": [
+        {
+          "field": "interop_snapshot_id",
+          "source": "M9 authority deterministic interoperability snapshot identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "registry.training_session.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_type",
+          "source": "registry.training_session.session_type LIVE|SIM|LVC",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_id",
+          "source": "registry.data_source.source_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_stream_id",
+          "source": "registry.source_stream.source_stream_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "artifact_refs",
+          "source": "ordered exact registry.source_artifact/object references",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "producer_system",
+          "source": "registry.data_source.producer_system",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "external_profile_id",
+          "source": "exact external schema/profile id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "external_profile_version",
+          "source": "exact external schema/profile version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "adapter_id",
+          "source": "exact ingest/egress adapter id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "adapter_version",
+          "source": "exact ingest/egress adapter version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "unit_basis",
+          "source": "explicit unit mapping contract",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "time_basis",
+          "source": "registry.data_source.time_basis",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_or_projection_class",
+          "source": "FACT_SOURCE|P6_PROJECTION classification",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "canonical_entity_refs",
+          "source": "ordered canonical entity/relation refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "object_hashes",
+          "source": "ordered exact artifact/object hashes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed interoperability applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "preserved uncertainty metadata",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "release_state",
+          "source": "governed external release state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical interoperability snapshot hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "External mappings are exact-profile/version and preserve fact-versus-projection class.",
+        "Lossy phase conversion, unknown/unversioned profile and source/projection conflation fail closed.",
+        "Joint/LVC extends source/entity/relation/plugin vocabularies without creating a second fact model."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M9 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M9 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M9 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M9 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m9_exit_decision",
+          "source": "M9 protected-main Exit evidence.m9_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M9 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M9 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M9 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p6_admitted",
+          "source": "M9 protected-main Exit evidence.p6_admitted",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; not persisted as a P6 product.",
+        "P6 external claims require protected-main M9 Exit GO and all required jobs success.",
+        "Authority/profile adoption and development projections do not admit P6."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
     }
   },
   "transport_rules": {
