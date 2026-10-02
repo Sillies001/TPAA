@@ -1,0 +1,83 @@
+{
+  "schema": "TPAA_PIQB_PRODUCT_ADMISSION_MAPPING_V1",
+  "baseline": "PIQB-1.0",
+  "source_m9_protected_main_sha": "06945127c86069918ffdfd415201d321d53aae4d",
+  "db_schema_version": "1.6.0",
+  "umbrella_issue": 206,
+  "batch_issue": 207,
+  "rule": "Product runtime must derive capability availability from exact protected-main qualification evidence; naked booleans are not a production trust root.",
+  "phases": [
+    {
+      "phase": "P1",
+      "qualified": true,
+      "source_milestone": "M5",
+      "runtime_current": "M1/P1 runtime baseline paths exist; final full-product resolver missing",
+      "existing_evidence_type": "M5 qualification evidence / protected-main qualification",
+      "target_runtime_resolver": "ProductAdmissionResolver.resolve('P1')",
+      "batch": "B1"
+    },
+    {
+      "phase": "P2",
+      "qualified": true,
+      "source_milestone": "M6",
+      "runtime_current": "M6 exact-release workspace validates sealed P2 release but no unified product admission resolver",
+      "existing_evidence_type": "M6 protected-main qualification evidence",
+      "target_runtime_resolver": "ProductAdmissionResolver.resolve('P2')",
+      "batch": "B1"
+    },
+    {
+      "phase": "P3",
+      "qualified": true,
+      "source_milestone": "M7",
+      "runtime_current": "M7WorkspaceService accepts P3AdmissionEvidence and fail-closes when absent",
+      "existing_evidence_type": "P3AdmissionEvidence",
+      "target_runtime_resolver": "ProductAdmissionResolver.resolve('P3') -> P3AdmissionEvidence",
+      "batch": "B1"
+    },
+    {
+      "phase": "P4",
+      "qualified": true,
+      "source_milestone": "M8",
+      "runtime_current": "M8WorkspaceService accepts M8AdmissionEvidence",
+      "existing_evidence_type": "M8AdmissionEvidence",
+      "target_runtime_resolver": "ProductAdmissionResolver.resolve('P4') -> M8AdmissionEvidence",
+      "batch": "B1"
+    },
+    {
+      "phase": "P5",
+      "qualified": true,
+      "source_milestone": "M8",
+      "runtime_current": "M8WorkspaceService accepts M8AdmissionEvidence",
+      "existing_evidence_type": "M8AdmissionEvidence",
+      "target_runtime_resolver": "ProductAdmissionResolver.resolve('P5') -> M8AdmissionEvidence",
+      "batch": "B1"
+    },
+    {
+      "phase": "P6",
+      "qualified": true,
+      "source_milestone": "M9",
+      "runtime_current": "P6AdmissionEvidence helper exists, but M9WorkspaceService product gate currently accepts p6_admitted: bool",
+      "existing_evidence_type": "P6AdmissionEvidence / P6AdmissionStateDTO / M9 Exit GO evidence",
+      "target_runtime_resolver": "ProductAdmissionResolver.resolve('P6') -> validated P6AdmissionEvidence",
+      "batch": "B1",
+      "required_final_evidence": {
+        "source_revision": "06945127c86069918ffdfd415201d321d53aae4d",
+        "event_name": "push",
+        "git_ref": "refs/heads/main",
+        "m9_exit_decision": "GO",
+        "run_conclusion": "success",
+        "required_jobs_success": 14,
+        "required_jobs_total": 14,
+        "p6_admitted": true
+      }
+    }
+  ],
+  "feature_availability_states": [
+    "AVAILABLE",
+    "NOT_ADMITTED",
+    "UNAVAILABLE",
+    "UNSUPPORTED_PROFILE",
+    "DEPENDENCY_MISSING",
+    "NOT_CONFIGURED"
+  ]
+}

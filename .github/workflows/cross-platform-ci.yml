@@ -2416,3 +2416,15 @@ jobs:
           --required-jobs-success 14
           --required-jobs-total 14
           --output evidence/m9-exit/review.json
+      - name: Review PIQB B0 product topology baseline
+        shell: bash
+        run: |
+          python tools/testing/piqb_b0_review.py \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --output evidence/piqb-b0/review.json

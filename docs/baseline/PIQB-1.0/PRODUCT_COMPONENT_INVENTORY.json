@@ -1,0 +1,361 @@
+{
+  "schema": "TPAA_PIQB_PRODUCT_COMPONENT_INVENTORY_V1",
+  "baseline": "PIQB-1.0",
+  "source_m9_protected_main_sha": "06945127c86069918ffdfd415201d321d53aae4d",
+  "db_schema_version": "1.6.0",
+  "umbrella_issue": 206,
+  "batch_issue": 207,
+  "runtime_modification_permitted_in_b0": false,
+  "status_vocabulary": [
+    "PRODUCTION_SUBSTRATE_PRESENT",
+    "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+    "TEST_REFERENCE_ONLY",
+    "PRODUCTION_WIRING_MISSING",
+    "PRODUCTIZATION_REQUIRED"
+  ],
+  "components": [
+    {
+      "component_id": "CANONICAL_AUTHORITY",
+      "module": [
+        "src/tpaa_canonical",
+        "baseline/CB-1.4.0/canonical"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": false,
+      "current_status": "PRODUCTION_SUBSTRATE_PRESENT",
+      "production_adapter": "CanonicalArtifactLoader / BASELINE_LOCK",
+      "piqb_batch": "B1",
+      "notes": "Frozen authority consumption remains unchanged."
+    },
+    {
+      "component_id": "INGEST_SOURCE_BOUNDARY",
+      "module": [
+        "src/tpaa_ingest/source_adapter.py",
+        "src/tpaa_ingest/canonical_flight_channels.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "TEST_REFERENCE_ONLY",
+      "production_adapter": null,
+      "piqb_batch": "B3",
+      "notes": "Current narrow path is synthetic fixture oriented; production Source Adapter Registry is missing."
+    },
+    {
+      "component_id": "CONTEXT",
+      "module": [
+        "src/tpaa_context"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B1/B2",
+      "notes": "Domain/governance logic exists; production persistence/composition remains."
+    },
+    {
+      "component_id": "EPISODE_STAGE",
+      "module": [
+        "src/tpaa_episode"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B1/B2",
+      "notes": "Qualified algorithms/contracts exist; final product wiring remains."
+    },
+    {
+      "component_id": "WORLD",
+      "module": [
+        "src/tpaa_world"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B1/B2/B3",
+      "notes": "World builders exist; high-frequency production series plane remains."
+    },
+    {
+      "component_id": "METRIC_P1",
+      "module": [
+        "src/tpaa_metric"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B1/B2/B3",
+      "notes": "P1 catalog implementation is qualified; production compute/data plane remains."
+    },
+    {
+      "component_id": "OBSERVATION_RELEASE",
+      "module": [
+        "src/tpaa_observation",
+        "src/tpaa_application/m1_publication.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": "CorePublicationLedger substrate",
+      "piqb_batch": "B1/B2",
+      "notes": "Publication semantics exist; Desktop composition currently uses InMemorySessionPublicationRepository."
+    },
+    {
+      "component_id": "LONGITUDINAL",
+      "module": [
+        "src/tpaa_longitudinal"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B1/B2/B3",
+      "notes": "Trend/replay components exist but are not fully product-composed."
+    },
+    {
+      "component_id": "P2_ATTRIBUTION",
+      "module": [
+        "src/tpaa_assessment/p2_attribution.py",
+        "src/tpaa_application/m6_workspace.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": "InMemoryM6P2WorkspaceRepository (test/reference)",
+      "piqb_batch": "B1/B2",
+      "notes": "M6 qualified; product persistence/composition missing."
+    },
+    {
+      "component_id": "P3_TWIN_CAPABILITY",
+      "module": [
+        "src/tpaa_capability/p3_model.py",
+        "src/tpaa_capability/p3_twin.py",
+        "src/tpaa_application/m7_workspace.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": "InMemoryM7P3WorkspaceRepository (test/reference)",
+      "piqb_batch": "B1/B2",
+      "notes": "Admission-gated component exists; production repository missing."
+    },
+    {
+      "component_id": "P4_HUMAN_MACHINE",
+      "module": [
+        "src/tpaa_assessment/p4_evidence.py",
+        "src/tpaa_assessment/p4_revision.py",
+        "src/tpaa_application/m8_workspace.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": "InMemoryM8AssessmentRepository (test/reference)",
+      "piqb_batch": "B1/B2",
+      "notes": "Qualified P4 component; production repository and product composition missing."
+    },
+    {
+      "component_id": "P5_TEAM_MISSION",
+      "module": [
+        "src/tpaa_assessment/p5_assessment.py",
+        "src/tpaa_application/m8_workspace.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": "InMemoryM8AssessmentRepository (test/reference)",
+      "piqb_batch": "B1/B2",
+      "notes": "Qualified P5 component; production repository and product composition missing."
+    },
+    {
+      "component_id": "P6_FORECAST_COUNTERFACTUAL_RECOMMENDATION",
+      "module": [
+        "src/tpaa_capability/p6_input.py",
+        "src/tpaa_capability/p6_forecast.py",
+        "src/tpaa_capability/p6_counterfactual.py",
+        "src/tpaa_assessment/p6_recommendation.py",
+        "src/tpaa_application/m9_workspace.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": "InMemoryM9P6Repository (test/reference)",
+      "piqb_batch": "B1/B2",
+      "notes": "M9/P6 formally admitted; runtime composition, durable repository and admission trust-root wiring remain."
+    },
+    {
+      "component_id": "APPLICATION_FACADE",
+      "module": [
+        "src/tpaa_application/service.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": false,
+      "current_status": "PRODUCTION_WIRING_MISSING",
+      "production_adapter": null,
+      "piqb_batch": "B1",
+      "notes": "Facade exposes M1-M9 methods but no single production composition root injects all admitted services."
+    },
+    {
+      "component_id": "DESKTOP_LOCAL_BACKEND",
+      "module": [
+        "src/tpaa_api/local_backend_child.py",
+        "src/tpaa_api/desktop.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": false,
+      "persistence_required": false,
+      "current_status": "PRODUCTION_WIRING_MISSING",
+      "production_adapter": "M1-only current composition",
+      "piqb_batch": "B1",
+      "notes": "Current executable Desktop backend wires M1 publication only and allowlists /m1/."
+    },
+    {
+      "component_id": "SERVICE_API",
+      "module": [
+        "src/tpaa_api"
+      ],
+      "runtime_required": true,
+      "desktop_required": false,
+      "service_required": true,
+      "persistence_required": false,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B1/B4",
+      "notes": "Mx route factories exist independently; full service factory is missing."
+    },
+    {
+      "component_id": "DESKTOP_GUI",
+      "module": [
+        "src/tpaa_gui"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": false,
+      "persistence_required": false,
+      "current_status": "PRODUCTION_WIRING_MISSING",
+      "production_adapter": "M1 workspace mounted by shell",
+      "piqb_batch": "B1/B5",
+      "notes": "M6-M9 presentation modules exist but the real shell mounts only M1."
+    },
+    {
+      "component_id": "RELATIONAL_STORAGE",
+      "module": [
+        "src/tpaa_storage/sqlite_repository.py",
+        "src/tpaa_storage/postgres_repository.py",
+        "src/tpaa_storage/core_publication_ledger.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "PRODUCTION_SUBSTRATE_PRESENT",
+      "production_adapter": "SQLiteDesktopUnitOfWork / PostgreSQLServiceUnitOfWork",
+      "piqb_batch": "B2",
+      "notes": "Storage substrate exists; P2-P6 product repositories are not wired."
+    },
+    {
+      "component_id": "OBJECT_PARQUET_STORE",
+      "module": [
+        "src/tpaa_storage/object_store.py",
+        "src/tpaa_storage/object_seal.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "PRODUCTIZATION_REQUIRED",
+      "production_adapter": "LocalObjectStore byte abstraction",
+      "piqb_batch": "B2/B3",
+      "notes": "Logical URI/hash substrate exists; governed Parquet schema/partition/scan plane is missing."
+    },
+    {
+      "component_id": "JOB_MANAGER",
+      "module": [
+        "src/tpaa_application/job_control.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "PRODUCTIZATION_REQUIRED",
+      "production_adapter": "M0JobControl in-memory skeleton",
+      "piqb_batch": "B3",
+      "notes": "Current lifecycle is SUBMITTED/CANCELLED only and does not execute domain work."
+    },
+    {
+      "component_id": "WORKER",
+      "module": [
+        "src/tpaa_platform/worker.py"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": false,
+      "current_status": "PRODUCTIZATION_REQUIRED",
+      "production_adapter": "spawn echo smoke",
+      "piqb_batch": "B3",
+      "notes": "Spawn compatibility exists; production command execution is missing."
+    },
+    {
+      "component_id": "SECURITY_AUDIT",
+      "module": [
+        "src/tpaa_application/security_ports.py",
+        "src/tpaa_context/p6_runtime_security.py",
+        "src/tpaa_audit"
+      ],
+      "runtime_required": true,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": true,
+      "current_status": "QUALIFIED_COMPONENT_NOT_PRODUCT_COMPOSED",
+      "production_adapter": null,
+      "piqb_batch": "B4",
+      "notes": "Policies/contracts exist; full identity/RBAC/persistent audit composition remains."
+    },
+    {
+      "component_id": "PACKAGING_RELEASE",
+      "module": [
+        "tools/packaging",
+        "packaging/windows",
+        "packaging/linux"
+      ],
+      "runtime_required": false,
+      "desktop_required": true,
+      "service_required": true,
+      "persistence_required": false,
+      "current_status": "PRODUCTIZATION_REQUIRED",
+      "production_adapter": "M5 qualification substrate",
+      "piqb_batch": "B6",
+      "notes": "M9-complete product has not been re-qualified as final installable package."
+    }
+  ]
+}

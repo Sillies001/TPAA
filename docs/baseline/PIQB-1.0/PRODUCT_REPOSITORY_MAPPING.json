@@ -1,0 +1,116 @@
+{
+  "schema": "TPAA_PIQB_PRODUCT_REPOSITORY_MAPPING_V1",
+  "baseline": "PIQB-1.0",
+  "source_m9_protected_main_sha": "06945127c86069918ffdfd415201d321d53aae4d",
+  "db_schema_version": "1.6.0",
+  "umbrella_issue": 206,
+  "batch_issue": 207,
+  "no_shadow_schema": true,
+  "mapping": [
+    {
+      "product_family": "P1_SESSION_RELEASE",
+      "logical_objects": [
+        "SessionRelease",
+        "MetricInstance",
+        "EvidenceSet",
+        "CapabilityObservation"
+      ],
+      "repository_port": "SessionPublicationRepository / Core publication ledger",
+      "current_desktop_adapter": "InMemorySessionPublicationRepository",
+      "sqlite_substrate": "SQLiteCorePublicationLedger",
+      "postgres_substrate": "PostgreSQLCorePublicationLedger",
+      "object_payload": "series/evidence via managed object refs (partial substrate)",
+      "target_batch": "B2",
+      "production_status": "NOT_WIRED_IN_PRODUCT"
+    },
+    {
+      "product_family": "LONGITUDINAL_RELEASE",
+      "logical_objects": [
+        "Longitudinal release/trend products"
+      ],
+      "repository_port": "existing longitudinal publication/replay contracts",
+      "current_desktop_adapter": "component-specific/in-memory test paths",
+      "sqlite_substrate": "TO_BE_BOUND_WITHOUT_SCHEMA_CHANGE",
+      "postgres_substrate": "TO_BE_BOUND_WITHOUT_SCHEMA_CHANGE",
+      "object_payload": "trend/evidence payload where authorized",
+      "target_batch": "B2",
+      "production_status": "NOT_WIRED_IN_PRODUCT"
+    },
+    {
+      "product_family": "P2_ATTRIBUTION",
+      "logical_objects": [
+        "P2 input bundle",
+        "cohort snapshot",
+        "attribution run",
+        "adjusted capability estimate"
+      ],
+      "repository_port": "TO_BE_EXTRACTED_ENGINE_NEUTRAL_PORT",
+      "current_desktop_adapter": "InMemoryM6P2WorkspaceRepository",
+      "sqlite_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "postgres_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "object_payload": "model artifact / diagnostics where object-backed",
+      "target_batch": "B2",
+      "production_status": "TEST_REFERENCE_ONLY"
+    },
+    {
+      "product_family": "P3_TWIN_CAPABILITY",
+      "logical_objects": [
+        "P3 twin revision",
+        "P3 capability estimate",
+        "model/component refs"
+      ],
+      "repository_port": "TO_BE_EXTRACTED_ENGINE_NEUTRAL_PORT",
+      "current_desktop_adapter": "InMemoryM7P3WorkspaceRepository",
+      "sqlite_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "postgres_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "object_payload": "model/profile payload where object-backed",
+      "target_batch": "B2",
+      "production_status": "TEST_REFERENCE_ONLY"
+    },
+    {
+      "product_family": "P4_P5_ASSESSMENT",
+      "logical_objects": [
+        "P4 assessment",
+        "P5 assessment",
+        "annotation",
+        "approval/revision"
+      ],
+      "repository_port": "TO_BE_EXTRACTED_ENGINE_NEUTRAL_PORT",
+      "current_desktop_adapter": "InMemoryM8AssessmentRepository",
+      "sqlite_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "postgres_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "object_payload": "evidence/media refs only; no duplicate authority",
+      "target_batch": "B2",
+      "production_status": "TEST_REFERENCE_ONLY"
+    },
+    {
+      "product_family": "P6_MODEL_PROJECTION_ADVISORY",
+      "logical_objects": [
+        "P6 input snapshot",
+        "model revision",
+        "forecast request/result",
+        "counterfactual request/result",
+        "recommendation",
+        "approval",
+        "audit/idempotency state"
+      ],
+      "repository_port": "TO_BE_EXTRACTED_ENGINE_NEUTRAL_PORT",
+      "current_desktop_adapter": "InMemoryM9P6Repository + in-memory audit/idempotency",
+      "sqlite_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "postgres_substrate": "TO_BE_IMPLEMENTED_AGAINST_SCHEMA_1_6_0",
+      "object_payload": "model artifacts and projection payloads by immutable ref/hash",
+      "target_batch": "B2",
+      "production_status": "TEST_REFERENCE_ONLY"
+    }
+  ],
+  "publication_protocol": [
+    "compute",
+    "staging",
+    "validate",
+    "seal object",
+    "database transaction",
+    "register immutable product/release",
+    "CAS current pointer where applicable"
+  ],
+  "authority_change_rule": "If schema 1.6.0 cannot legally persist a required product, fail closed and raise a separately governed Authority Change Proposal; PIQB may not invent a table."
+}
