@@ -1,0 +1,312 @@
+{
+  "profile_id": "P6_TRAINING_SCORE_OLS_MAD_FORECAST",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_EXECUTION_PROFILE",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "tracking_issue": 196,
+  "source_bindings": {
+    "p6_authority_id": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY",
+    "p6_authority_version": "1.0.0",
+    "p6_authority_sha256": "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e",
+    "p4_p5_authority_sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
+    "cross_layer_dto_sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",
+    "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+    "extension_contract_registry_sha256": "f987ea2801557befac44aaf3b47b3953a5cdbaaa662e39c2f3970526f3371f41",
+    "m4_longitudinal_authority_sha256": "c1c073bce8870feceb90bdb6c28172c4c726de6b15fc70208e169336baa59dfa"
+  },
+  "activation_rule": {
+    "profile_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "profile_adoption_does_not_admit_p6": true,
+    "p6_external_claim_requires_protected_main_m9_exit_go": true,
+    "model_execution_before_profile_protected_main_qualification_forbidden": true
+  },
+  "runtime_binding": {
+    "carrier_table": "registry.context_artifact",
+    "artifact_kind": "ASSESSMENT_PROFILE",
+    "logical_key": "P6_MODEL_SPEC:P6_TRAINING_SCORE_OLS_MAD_FORECAST",
+    "artifact_version": "1.0.0",
+    "artifact_schema_version": "TPAA_P6_MODEL_SPEC_V1",
+    "model_spec_id": "P6_MODEL_SPEC:P6_TRAINING_SCORE_OLS_MAD_FORECAST",
+    "model_spec_version": "1.0.0",
+    "plugin_name": "TRAINING_SCORE_OLS_MAD_FORECAST",
+    "plugin_version": "1.0.0",
+    "exact_identity_only": true,
+    "current_latest_default_forbidden": true
+  },
+  "scope": {
+    "domain": "TRAINING_EVALUATION",
+    "allowed_target_kinds": [
+      "P4_ASSESSMENT_SCORE",
+      "P5_OVERALL_SCORE"
+    ],
+    "p4_source_dto": "P4AssessmentRevisionDTO",
+    "p5_source_dto": "P5AssessmentRevisionDTO",
+    "p3_input_used_by_profile_v1": false,
+    "p1_p5_historical_products_immutable": true,
+    "p6_profile_adoption_does_not_admit_p6": true,
+    "operational_tactical_use_forbidden": true,
+    "weapon_employment_target_forbidden": true,
+    "command_or_control_output_forbidden": true,
+    "real_time_control_loop_forbidden": true,
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false
+  },
+  "source_eligibility_contract": {
+    "required_assessment_approval_state": "APPROVED",
+    "p4_numeric_field": "score",
+    "p5_numeric_field": "overall_score",
+    "finite_numeric_required": true,
+    "p4_exact_assessment_spec_id_and_version_required": true,
+    "p5_exact_assessment_spec_id_and_version_required": true,
+    "p5_exact_aggregation_profile_ref_required_for_numeric_target": true,
+    "p4_p5_target_kind_mixing_forbidden": true,
+    "subject_or_composition_identity_exact": true,
+    "assessment_semantics_exact_across_training_rows": true,
+    "distinct_session_id_required": true,
+    "exact_session_order_assignment_required": true,
+    "minimum_distinct_session_orders": 4,
+    "future_information_forbidden": true,
+    "same_outcome_or_forecast_session_target_leakage_forbidden": true,
+    "rejected_draft_or_in_review_assessment_forbidden": true,
+    "missing_numeric_score_policy": "INSUFFICIENT_EVIDENCE_NO_IMPUTATION",
+    "unavailable_ood_not_identifiable_zero_coercion_forbidden": true,
+    "confidence_to_uncertainty_conversion_forbidden": true
+  },
+  "feature_target_contract": {
+    "feature_set": [
+      "SESSION_ORDER_OFFSET"
+    ],
+    "x_rule": "x_i=session_order_i-first_training_session_order",
+    "target_rule": "y_i=exact approved numeric P4 score or P5 overall_score",
+    "target_unit_rule": "preserve exact governed score semantics; no implementation normalization",
+    "feature_or_target_imputation_forbidden": true,
+    "hidden_context_feature_inference_forbidden": true,
+    "target_scale_conversion_requires_separately_adopted_profile": true
+  },
+  "ordering_contract": {
+    "row_order": "SESSION_ORDER_ASC_THEN_SOURCE_REVISION_ID_ASC",
+    "duplicate_session_order_forbidden": true,
+    "database_default_order_forbidden": true,
+    "training_window_selection": "LAST_UP_TO_5_ROWS_BEFORE_TEMPORAL_HOLDOUT",
+    "final_refit_window_selection": "LAST_UP_TO_5_ROWS_INCLUDING_VALIDATED_HOLDOUT"
+  },
+  "arithmetic_contract": {
+    "backend": "IEEE754_BINARY64",
+    "non_finite_input_or_output_forbidden": true,
+    "estimator": "ORDINARY_LEAST_SQUARES",
+    "intercept_and_slope_rule": "closed_form_OLS_with_intercept",
+    "residual_statistic": "UNSCALED_MEDIAN_ABSOLUTE_DEVIATION",
+    "no_rng": true,
+    "no_regularization": true,
+    "no_implicit_weighting": true,
+    "no_hidden_clipping_or_score_bounds": true
+  },
+  "training_validation_contract": {
+    "strategy": "TEMPORAL_LAST_POINT_HOLDOUT_THEN_FINAL_REFIT",
+    "minimum_total_eligible_points": 4,
+    "holdout_count": 1,
+    "training_prefix_min_points": 3,
+    "training_prefix_max_points": 5,
+    "random_split_forbidden": true,
+    "training_validation_identity_overlap_forbidden": true,
+    "holdout_prediction": "OLS training-prefix line evaluated at exact heldout session_order",
+    "validation_pass_rule": "finite prediction and finite holdout residual with all leakage and identity guards satisfied",
+    "accuracy_threshold_or_multiplier": null,
+    "implementation_selected_accuracy_threshold_forbidden": true,
+    "validation_pass_status": "VALIDATED",
+    "validation_fail_status": "VALIDATION_FAILED",
+    "final_refit_requires_validation_pass": true
+  },
+  "uncertainty_calibration_contract": {
+    "calibration_profile": "HOLDOUT_ERROR_MAX_FINAL_REFIT_MAD_V1",
+    "calibration_evidence_required": true,
+    "holdout_component": "abs(holdout_prediction-holdout_observed_score)",
+    "final_refit_component": "UNSCALED_MEDIAN_ABSOLUTE_DEVIATION_OF_FINAL_REFIT_RESIDUALS",
+    "half_width_rule": "max(holdout_component,final_refit_component)",
+    "interval_rule": "point_forecast +/- half_width",
+    "confidence_field_is_not_uncertainty": true,
+    "unquantified_uncertainty_fallback_forbidden": true,
+    "threshold_probability_output_supported": false,
+    "implementation_selected_probability_threshold_forbidden": true
+  },
+  "applicability_contract": {
+    "states": [
+      "APPLICABLE",
+      "OUT_OF_DOMAIN",
+      "INSUFFICIENT_EVIDENCE",
+      "NOT_IDENTIFIABLE"
+    ],
+    "numeric_forecast_allowed_only_when": "APPLICABLE",
+    "exact_subject_or_composition_identity_required": true,
+    "exact_target_kind_required": true,
+    "exact_assessment_spec_required": true,
+    "exact_p5_aggregation_profile_required_when_target_is_p5": true,
+    "minimum_evidence_required": true,
+    "horizon_must_match_profile": true,
+    "semantics_or_identity_drift_state": "OUT_OF_DOMAIN",
+    "missing_numeric_or_too_few_points_state": "INSUFFICIENT_EVIDENCE",
+    "ambiguous_target_or_invalid_session_order_state": "NOT_IDENTIFIABLE",
+    "out_of_domain_zero_coercion_forbidden": true,
+    "unavailable_zero_coercion_forbidden": true
+  },
+  "forecast_contract": {
+    "horizon_type": "NEXT_SESSION_ORDER",
+    "horizon_steps": 1,
+    "multi_step_recursive_forecast_forbidden": true,
+    "wall_clock_horizon_inference_forbidden": true,
+    "point_forecast_rule": "final_refit_intercept + final_refit_slope * x_next_session_order",
+    "exact_input_snapshot_required": true,
+    "exact_model_revision_required": true,
+    "exact_assumption_profile_required": true,
+    "explicit_forecast_origin_required": true,
+    "explicit_as_of_utc_required": true,
+    "projection_class": "P6_PROJECTION",
+    "projection_to_fact_upgrade_forbidden": true,
+    "threshold_probabilities_forbidden_profile_v1": true,
+    "recompute_on_read_forbidden": true
+  },
+  "managed_object_contract": {
+    "model_artifact_requires_sealed_active_object": true,
+    "required_gc_state": "ACTIVE",
+    "required_sealed": true,
+    "required_deleted_at": null,
+    "managed_uri_exact_match": true,
+    "model_artifact_hash_must_match_managed_object": true,
+    "training_snapshot_exact": true,
+    "validation_snapshot_exact": true
+  },
+  "replay_supersession_contract": {
+    "exact_profile_id_and_version_required": true,
+    "exact_model_revision_required": true,
+    "exact_training_and_validation_snapshot_required": true,
+    "exact_forecast_request_and_result_revision_required": true,
+    "historical_current_latest_default_resolution_forbidden": true,
+    "model_or_profile_or_source_change_creates_new_revision": true,
+    "later_observed_outcome_may_validate_prior_forecast": true,
+    "later_observed_outcome_must_not_rewrite_prior_forecast": true,
+    "original_forecast_origin_and_as_of_preserved": true
+  },
+  "identity_contract": {
+    "training_dataset_snapshot_type": "P6_MODEL_TRAINING",
+    "validation_dataset_snapshot_type": "P6_MODEL_VALIDATION",
+    "model_revision_identity_material": [
+      "model_spec_id",
+      "model_spec_version",
+      "subject_id",
+      "training_dataset_snapshot_id",
+      "validation_dataset_snapshot_id",
+      "plugin_name",
+      "plugin_version",
+      "model_artifact_hash"
+    ],
+    "forecast_result_identity_material": [
+      "forecast_request_id",
+      "capability_model_id",
+      "model_artifact_hash",
+      "applicability_status",
+      "uncertainty",
+      "target_time",
+      "projection_value"
+    ],
+    "exact_source_revision_ids_bound_through_input_and_dataset_snapshots": true,
+    "no_rng": true
+  },
+  "safety_boundary": {
+    "allowed_use": "TRAINING_EVALUATION_FORECAST_AND_DEBRIEF_SUPPORT",
+    "advisory_projection_only": true,
+    "operational_or_tactical_optimization_forbidden": true,
+    "weapon_or_targeting_recommendation_forbidden": true,
+    "mission_command_generation_forbidden": true,
+    "automatic_training_command_forbidden": true,
+    "p1_p5_fact_mutation_forbidden": true
+  },
+  "forbidden_fallbacks": [
+    "CURRENT",
+    "LATEST",
+    "DEFAULT",
+    "RANDOM_SPLIT",
+    "FUTURE_INFORMATION",
+    "SAME_OUTCOME_LEAKAGE",
+    "MISSING_SCORE_IMPUTATION",
+    "CONFIDENCE_AS_UNCERTAINTY",
+    "MULTI_STEP_RECURSIVE_FORECAST",
+    "OOD_AS_ZERO",
+    "UNAVAILABLE_AS_ZERO",
+    "UNSEALED_MODEL_OBJECT",
+    "MODEL_HASH_MISMATCH",
+    "TACTICAL_OR_OPERATIONAL_TARGET"
+  ],
+  "qualification_matrix": [
+    {
+      "case": "approved_p4_four_distinct_sessions_next_session",
+      "expected": "VALIDATABLE_AND_FORECASTABLE"
+    },
+    {
+      "case": "approved_p5_with_exact_aggregation_profile_four_sessions",
+      "expected": "VALIDATABLE_AND_FORECASTABLE"
+    },
+    {
+      "case": "three_or_fewer_numeric_sessions",
+      "expected": "INSUFFICIENT_EVIDENCE"
+    },
+    {
+      "case": "p5_numeric_without_aggregation_profile",
+      "expected": "FAIL_CLOSED_PROFILE_REQUIRED"
+    },
+    {
+      "case": "draft_in_review_or_rejected_source",
+      "expected": "FAIL_CLOSED_SOURCE_NOT_APPROVED"
+    },
+    {
+      "case": "future_or_same_outcome_source",
+      "expected": "FAIL_CLOSED_LEAKAGE"
+    },
+    {
+      "case": "current_latest_default_model_or_source",
+      "expected": "FAIL_CLOSED_EXACT_ID_REQUIRED"
+    },
+    {
+      "case": "two_step_or_recursive_horizon",
+      "expected": "OUT_OF_DOMAIN"
+    },
+    {
+      "case": "assessment_semantics_or_subject_drift",
+      "expected": "OUT_OF_DOMAIN"
+    },
+    {
+      "case": "missing_calibration_uncertainty",
+      "expected": "FAIL_CLOSED_UNCERTAINTY_REQUIRED"
+    },
+    {
+      "case": "unsealed_or_hash_mismatched_model_object",
+      "expected": "FAIL_CLOSED_MANAGED_OBJECT"
+    },
+    {
+      "case": "operational_tactical_or_weapon_target",
+      "expected": "FAIL_CLOSED_SAFETY_BOUNDARY"
+    },
+    {
+      "case": "later_observed_outcome",
+      "expected": "VALIDATE_WITHOUT_REWRITE"
+    }
+  ],
+  "contract_hashes": {
+    "source_eligibility_contract_sha256": "c9b23d3c103ece2e445835a73197b01607f6b54220e1abf6585b47ec191fa2f8",
+    "feature_target_contract_sha256": "ddaf20a5f07fe7c8918eb6953ee37ec25515d24093058830f22fac26cc9337d9",
+    "ordering_contract_sha256": "b1961874bc082a1e6128722fb0ffd96069a5d8e9f9f2721446393e4754386dcc",
+    "arithmetic_contract_sha256": "4e1426593bfd22c46149e5bfae76c3fa369e3e83c36e733a65b2e622ee765f02",
+    "training_validation_contract_sha256": "5c956550f4f4d98ed9cb64474de50299a81d6d67c6206f1fcd541b158cfec113",
+    "uncertainty_calibration_contract_sha256": "0365f894d8071ec6bc707c7ac14a9e1167834219a0913181bf35b5ce71a64e1c",
+    "applicability_contract_sha256": "f1efe42cbfa5f9be87c60e5d3ace746ddfb9b897568a76520517369d508b9593",
+    "forecast_contract_sha256": "378f5ed95a82fc2b60c0cfdd7de2f9dc7b3ee85e2e17cf6b94333ae41a00a2bc",
+    "managed_object_contract_sha256": "e7e775f9502da28d6e0c8258a6f5f9248b5ec10dbeebb0938c2ade47d0d56d4f",
+    "replay_supersession_contract_sha256": "2f4d52a06d77835a8b86aa5b5340a6e21f56fa4b2de7ffbc4bc213247477d8fd",
+    "identity_contract_sha256": "0b498cc39f440acd63bdc8eb4720e3ffb38df128744d20d73e99a8a308a8942c",
+    "safety_boundary_sha256": "59b3bf248713b14f6c94e5666d7a870519228b957eba5745edde0e297f4a04af",
+    "forbidden_fallbacks_sha256": "229bc2b045dd64c5ce6372ec5f0e3c606457f8b3305ffa1a99aa874bd123ce53",
+    "qualification_matrix_sha256": "3b51c6559e94031803682dcf4f906205705022b2068eaeb26feac74e3cb7c0c2"
+  }
+}

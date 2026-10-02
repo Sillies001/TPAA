@@ -6,8 +6,9 @@
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
     "date": "2026-10-02",
-    "rebaseline": "R5.0_M9_P6_C3_AUTHORITY_ROLE_PRIVACY_RELEASE",
+    "rebaseline": "R5.1_M9_P6_EXECUTION_PROFILE_ADOPTION",
     "lock_lineage_sha256": [
+      "ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08",
       "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
       "0d2f11dc5ee41038a1ef63b8b4157730bd1cd313c7a98faaa286132397b8de47",
       "f95167aca59dc993ced607e55f21f01080c4e24cc0759bf97482d49654ea182b",
@@ -128,6 +129,11 @@
       "file": "P6_ROLE_PRIVACY_RELEASE_PROFILE.json",
       "sha256": "d5eff80dbfa912955ae7b09bc3e4a2868650466560cb1a5b1f558434e8076713",
       "bytes": 8086
+    },
+    {
+      "file": "P6_TRAINING_SCORE_OLS_MAD_FORECAST_PROFILE.json",
+      "sha256": "43bf6f3814d764de812c6ff478600959b3f7bd9c54e6b8bfec5297531271d038",
+      "bytes": 13402
     },
     {
       "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",
