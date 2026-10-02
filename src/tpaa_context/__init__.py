@@ -22,6 +22,13 @@ from .m8_p4_p5 import (
     validate_availability_numeric,
     validate_role_model_binding,
 )
+from .p6_governance import (
+    P6AdmissionEvidence,
+    P6AuthorityPolicy,
+    P6GovernanceError,
+    assert_p1_p5_immutable,
+    assert_p6_claim_allowed,
+)
 from .resolver import (
     ContextArtifactRef,
     EvaluationContextError,
@@ -39,10 +46,15 @@ __all__ = [
     "M8RoleModelBinding",
     "M8RoleRule",
     "P3ClaimEnvelope",
+    "P6AdmissionEvidence",
+    "P6AuthorityPolicy",
+    "P6GovernanceError",
     "ResolvedEvaluationContext",
     "assert_annotation_body_allowed",
     "assert_capability_claim_allowed",
+    "assert_p1_p5_immutable",
     "assert_p3_claim_preserved",
+    "assert_p6_claim_allowed",
     "assert_scope_copy_allowed",
     "assert_write_allowed",
     "canonical_hash",
