@@ -1363,7 +1363,7 @@ def execute_p6_forecast(
             "FAIL_CLOSED_P6_MODEL_PROFILE_REQUIRED",
             "forecast request/model exact binding drift",
         )
-    if model.status != "VALIDATED":
+    if model.status not in {"VALIDATED", "PUBLISHED"}:
         raise P6GovernanceError(
             "FAIL_CLOSED_P6_MODEL_PROFILE_REQUIRED",
             f"model status={model.status!r}",

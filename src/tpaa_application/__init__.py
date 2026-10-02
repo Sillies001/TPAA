@@ -96,6 +96,19 @@ from .m8_workspace import (
     M8WorkspaceQuery,
     M8WorkspaceService,
 )
+from .m9_workspace import (
+    InMemoryM9P6Repository,
+    M9ApplicationError,
+    M9CounterfactualMutation,
+    M9ExactQuery,
+    M9ForecastMutation,
+    M9ModelReleaseMutation,
+    M9RecommendationApprovalMutation,
+    M9RecommendationMutation,
+    M9ViewerContext,
+    M9WorkspaceQuery,
+    M9WorkspaceService,
+)
 from .models import StorageBaselineStatus
 from .runtime import (
     GetRuntimeBaselineStatus,
@@ -182,6 +195,17 @@ __all__ = [
     "M8ViewerContext",
     "M8WorkspaceQuery",
     "M8WorkspaceService",
+    "InMemoryM9P6Repository",
+    "M9ApplicationError",
+    "M9CounterfactualMutation",
+    "M9ExactQuery",
+    "M9ForecastMutation",
+    "M9ModelReleaseMutation",
+    "M9RecommendationApprovalMutation",
+    "M9RecommendationMutation",
+    "M9ViewerContext",
+    "M9WorkspaceQuery",
+    "M9WorkspaceService",
     "GetRuntimeBaselineStatus",
     "GetStorageBaselineStatus",
     "RuntimeBaselineIdentityView",
