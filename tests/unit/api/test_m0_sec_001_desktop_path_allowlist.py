@@ -46,7 +46,7 @@ def test_desktop_http_is_bearer_origin_and_path_allowlisted() -> None:
             headers={"Authorization": "Bearer test-token", "Origin": "https://example.invalid"},
         )
         path = client.get(
-            "/jobs",
+            "/outside-governed-surface",
             headers={"Authorization": "Bearer test-token"},
         )
 

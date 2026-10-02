@@ -1,0 +1,77 @@
+{
+  "schema": "TPAA_PIQB_B1_TASK_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B1",
+  "source_b0_protected_main_sha": "cc4099c0780e092b33e8812373c62a44cb8ea0f6",
+  "source_b0_qualification": "PIQB_B0_QUALIFIED",
+  "umbrella_issue": 206,
+  "batch_issue": 208,
+  "db_schema_version": "1.6.0",
+  "task_count": 6,
+  "tasks": [
+    {
+      "task_id": "PIQB-B1-001",
+      "title": "Production Composition Root",
+      "workstream": "WS-RUNTIME",
+      "dependencies": [],
+      "minimum_acceptance": "Desktop and Service build through one tpaa_runtime composition root over the same Application core."
+    },
+    {
+      "task_id": "PIQB-B1-002",
+      "title": "Unified Desktop Backend",
+      "workstream": "WS-API",
+      "dependencies": [
+        "PIQB-B1-001"
+      ],
+      "minimum_acceptance": "One loopback FastAPI process registers admitted P1-P6 route surfaces behind retained bearer/origin/path controls."
+    },
+    {
+      "task_id": "PIQB-B1-003",
+      "title": "Unified Desktop Transport",
+      "workstream": "WS-GUI",
+      "dependencies": [
+        "PIQB-B1-002"
+      ],
+      "minimum_acceptance": "GUI backend controller exposes governed generic request_json while retaining M1 compatibility without exposing bearer credentials."
+    },
+    {
+      "task_id": "PIQB-B1-004",
+      "title": "Product Admission Resolver",
+      "workstream": "WS-GOV",
+      "dependencies": [
+        "PIQB-B1-001"
+      ],
+      "minimum_acceptance": "P1-P6 availability derives from exact protected-main qualification records; P6 runtime construction no longer accepts a naked admission boolean."
+    },
+    {
+      "task_id": "PIQB-B1-005",
+      "title": "Unified Feature Availability",
+      "workstream": "WS-APP",
+      "dependencies": [
+        "PIQB-B1-004"
+      ],
+      "minimum_acceptance": "Application/API exposes AVAILABLE, NOT_ADMITTED, UNAVAILABLE, UNSUPPORTED_PROFILE, DEPENDENCY_MISSING and NOT_CONFIGURED semantics without changing capability authority."
+    },
+    {
+      "task_id": "PIQB-B1-006",
+      "title": "Composition Contract Tests",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B1-001",
+        "PIQB-B1-002",
+        "PIQB-B1-003",
+        "PIQB-B1-004",
+        "PIQB-B1-005"
+      ],
+      "minimum_acceptance": "Composition, route, admission, transport and no-persistence-pull-forward contracts pass on exactly 14 Hosted CI jobs."
+    }
+  ],
+  "scope": {
+    "no_db_schema_change": true,
+    "no_canonical_mutation": true,
+    "no_persistence_adapter_implementation": true,
+    "no_production_data_plane_implementation": true,
+    "no_new_capability": true,
+    "no_m10_p7": true
+  }
+}
