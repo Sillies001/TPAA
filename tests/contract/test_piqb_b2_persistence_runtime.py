@@ -16,12 +16,12 @@ from tpaa_storage import (
 def _request() -> ProductPublicationRequest:
     return ProductPublicationRequest(
         operation_id="runtime-persistence-op",
-        product_family="P1_SESSION_RELEASE",
+        product_family="LONGITUDINAL_RELEASE",
         product_id="93000000-0000-4000-8000-000000000001",
         release=ProductReleaseIdentity(
             release_id="93000000-0000-4000-8000-000000000002",
-            scope_type="SESSION",
-            scope_key="93000000-0000-4000-8000-000000000003",
+            scope_type="LONGITUDINAL",
+            scope_key="PIQB-B2-RUNTIME-PERSISTENCE-TEST",
             session_id=None,
             longitudinal_scope_id=None,
             catalog_version="P1-METRIC-CATALOG-1.0",
@@ -53,7 +53,7 @@ def test_desktop_persistence_composes_publication_restart_and_recovery(
         )
     )
 
-    assert runtime.fit_gate.record("P1_SESSION_RELEASE").production_allowed
+    assert runtime.fit_gate.record("LONGITUDINAL_RELEASE").production_allowed
     published = runtime.publication.publish(_request())
     assert runtime.object_store.verify(published.sealed_object)
 

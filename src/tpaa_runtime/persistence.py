@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -57,7 +58,7 @@ class ProductPersistenceRuntime:
     fit_gate: ProductPersistenceFitGate
     object_store: LocalObjectStore
     publication: ProductPublicationCoordinator
-    _read_uow_factory: object
+    _read_uow_factory: Callable[[], _ProductPublicationReadUnitOfWork]
 
     def recover_registered_objects(
         self,
@@ -65,19 +66,7 @@ class ProductPersistenceRuntime:
         logical_prefix: str,
         dry_run: bool = True,
     ) -> OrphanRecoveryReport:
-        factory = self._read_uow_factory
-        if not callable(factory):
-            raise RuntimeError("read UoW factory is not callable")
-        uow = factory()
-        if not isinstance(uow, _ProductPublicationReadUnitOfWork):
-            # Structural protocols with data attributes are not reliably runtime-checkable.
-            if not (
-                hasattr(uow, "__enter__")
-                and hasattr(uow, "__exit__")
-                and hasattr(uow, "commit")
-            ):
-                raise RuntimeError("read UoW factory returned invalid unit of work")
-        with uow as active:
+        with self._read_uow_factory() as active:
             report = recover_registered_product_orphans(
                 self.object_store,
                 active.product_publication,
