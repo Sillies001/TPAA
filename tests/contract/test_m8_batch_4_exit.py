@@ -378,4 +378,4 @@ def test_m8_historical_review_rejects_unqualified_program_closure(
     program["comments"] = [{"body": "closed without final qualification"}]
     result = _review(tmp_path, issues=bundle)
     assert result["decision"] == "NO_GO"
-    assert "program_exit_runway_lifecycle_valid" in result["failed_acceptance"]
+    assert "program_exit_and_m9_runway_lifecycle_valid" in result["failed_acceptance"]
