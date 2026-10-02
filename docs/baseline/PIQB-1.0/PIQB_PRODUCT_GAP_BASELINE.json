@@ -1,0 +1,170 @@
+{
+  "schema": "TPAA_PIQB_PRODUCT_GAP_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "source_m9_protected_main_sha": "06945127c86069918ffdfd415201d321d53aae4d",
+  "db_schema_version": "1.6.0",
+  "umbrella_issue": 206,
+  "batch_issue": 207,
+  "runtime_changes_forbidden_in_b0": true,
+  "gaps": [
+    {
+      "gap_id": "PIQB-GAP-001",
+      "severity": "BLOCKER",
+      "title": "No single production composition root",
+      "evidence": [
+        "src/tpaa_application/service.py",
+        "src/tpaa_api/local_backend_child.py"
+      ],
+      "current_state": "Application facade exposes M1-M9 methods, but executable runtime injects only a subset.",
+      "target_batch": "B1"
+    },
+    {
+      "gap_id": "PIQB-GAP-002",
+      "severity": "BLOCKER",
+      "title": "Desktop runtime is M1-only",
+      "evidence": [
+        "src/tpaa_api/desktop.py",
+        "src/tpaa_api/local_backend_child.py",
+        "src/tpaa_gui/shell.py"
+      ],
+      "current_state": "Desktop path allowlists /m1/* and mounts M1 workspace only.",
+      "target_batch": "B1"
+    },
+    {
+      "gap_id": "PIQB-GAP-003",
+      "severity": "BLOCKER",
+      "title": "P2-P6 production persistence missing",
+      "evidence": [
+        "src/tpaa_application/m6_workspace.py",
+        "src/tpaa_application/m7_workspace.py",
+        "src/tpaa_application/m8_workspace.py",
+        "src/tpaa_application/m9_workspace.py"
+      ],
+      "current_state": "InMemory repositories are used as reference/test storage for later capabilities.",
+      "target_batch": "B2"
+    },
+    {
+      "gap_id": "PIQB-GAP-004",
+      "severity": "HIGH",
+      "title": "P6 production admission trust root is a boolean at M9 service boundary",
+      "evidence": [
+        "src/tpaa_context/p6_governance.py",
+        "src/tpaa_application/m9_workspace.py"
+      ],
+      "current_state": "P6AdmissionEvidence exists, but M9WorkspaceService uses p6_admitted: bool.",
+      "target_batch": "B1"
+    },
+    {
+      "gap_id": "PIQB-GAP-005",
+      "severity": "BLOCKER",
+      "title": "Production source adapter/import path missing",
+      "evidence": [
+        "src/tpaa_ingest/source_adapter.py",
+        "src/tpaa_api/local_backend_child.py"
+      ],
+      "current_state": "Narrow executable path is synthetic fixture oriented.",
+      "target_batch": "B3"
+    },
+    {
+      "gap_id": "PIQB-GAP-006",
+      "severity": "BLOCKER",
+      "title": "Governed Polars compute runtime not active",
+      "evidence": [
+        "pyproject.toml",
+        "docs/developer/DATAFRAME_POLICY.md"
+      ],
+      "current_state": "Polars is preferred by policy but not a runtime dependency.",
+      "target_batch": "B3"
+    },
+    {
+      "gap_id": "PIQB-GAP-007",
+      "severity": "BLOCKER",
+      "title": "Parquet plane is only a byte/object substrate",
+      "evidence": [
+        "src/tpaa_storage/object_store.py"
+      ],
+      "current_state": "Logical tpaa-parquet URI exists but no governed schema/partition/scan/write data plane.",
+      "target_batch": "B2/B3"
+    },
+    {
+      "gap_id": "PIQB-GAP-008",
+      "severity": "BLOCKER",
+      "title": "Job Manager and Worker remain skeleton/smoke",
+      "evidence": [
+        "src/tpaa_application/job_control.py",
+        "src/tpaa_platform/worker.py"
+      ],
+      "current_state": "Job lifecycle is SUBMITTED/CANCELLED and worker executes spawn echo only.",
+      "target_batch": "B3"
+    },
+    {
+      "gap_id": "PIQB-GAP-009",
+      "severity": "HIGH",
+      "title": "Unified full API and OpenAPI pipeline missing",
+      "evidence": [
+        "src/tpaa_api",
+        "api/openapi-m0.json"
+      ],
+      "current_state": "Later route factories exist independently; only M0 OpenAPI snapshot is productized.",
+      "target_batch": "B4"
+    },
+    {
+      "gap_id": "PIQB-GAP-010",
+      "severity": "HIGH",
+      "title": "Service identity/RBAC/persistent audit not fully composed",
+      "evidence": [
+        "src/tpaa_api/m5_secure.py",
+        "src/tpaa_context/p6_runtime_security.py",
+        "src/tpaa_application/m9_workspace.py"
+      ],
+      "current_state": "Strong contracts exist, but production identity provider composition and durable audit are missing.",
+      "target_batch": "B4"
+    },
+    {
+      "gap_id": "PIQB-GAP-011",
+      "severity": "BLOCKER",
+      "title": "P01-P13/replay visualization is not product-complete",
+      "evidence": [
+        "src/tpaa_gui"
+      ],
+      "current_state": "Presentation modules exist, but real shell is M1-centric and no full replay/Cesium product path exists.",
+      "target_batch": "B5"
+    },
+    {
+      "gap_id": "PIQB-GAP-012",
+      "severity": "BLOCKER",
+      "title": "Integration/E2E/performance coverage is not full-product level",
+      "evidence": [
+        "tests/integration",
+        "tests/e2e",
+        "tests/performance"
+      ],
+      "current_state": "Integration suite is absent; E2E/performance coverage is mostly bootstrap-level.",
+      "target_batch": "B6"
+    },
+    {
+      "gap_id": "PIQB-GAP-013",
+      "severity": "BLOCKER",
+      "title": "M9-complete product packaging has not been re-qualified",
+      "evidence": [
+        "tools/packaging",
+        "packaging/windows",
+        "packaging/linux"
+      ],
+      "current_state": "M5 packaging substrate exists; final P1-P6 clean-install product qualification is missing.",
+      "target_batch": "B6"
+    },
+    {
+      "gap_id": "PIQB-GAP-014",
+      "severity": "MEDIUM",
+      "title": "Repository documentation/version identity drift",
+      "evidence": [
+        "README.md",
+        "pyproject.toml"
+      ],
+      "current_state": "README still reports M5/P1-only state and package version remains 0.0.0.",
+      "target_batch": "B1/B6"
+    }
+  ],
+  "exit_rule": "All BLOCKER gaps must be closed or explicitly superseded by governed evidence before PIQB Exit GO."
+}

@@ -1,0 +1,129 @@
+{
+  "schema": "TPAA_PIQB_PRODUCT_RUNTIME_TOPOLOGY_V1",
+  "baseline": "PIQB-1.0",
+  "source_m9_protected_main_sha": "06945127c86069918ffdfd415201d321d53aae4d",
+  "db_schema_version": "1.6.0",
+  "umbrella_issue": 206,
+  "batch_issue": 207,
+  "b0_runtime_change": false,
+  "invariants": {
+    "gui_direct_database_write": false,
+    "api_business_recompute": false,
+    "worker_live_qt_connection": false,
+    "worker_live_db_connection": false,
+    "backend_owns_desktop_db_writes": true,
+    "desktop_backend_loopback_only": true,
+    "exact_historical_identity_required": true,
+    "current_latest_default_historical_fallback_forbidden": true,
+    "platform_neutral_business_core": true
+  },
+  "current_actual": {
+    "desktop": {
+      "entrypoint": "python -m tpaa_gui",
+      "gui": "src/tpaa_gui/shell.py",
+      "backend_child": "src/tpaa_api/local_backend_child.py",
+      "backend_routes": [
+        "/health",
+        "/readiness",
+        "/version",
+        "/m1/*"
+      ],
+      "mounted_workspace": [
+        "M1"
+      ],
+      "application_services": [
+        "M1 publication",
+        "runtime baseline"
+      ],
+      "repository": "InMemorySessionPublicationRepository",
+      "worker": "not part of business execution path"
+    },
+    "service": {
+      "state": "component factories exist, no single full production composition",
+      "factories": [
+        "create_m1_app",
+        "create_m3_app",
+        "create_m4_app",
+        "create_m6_app",
+        "create_m7_app",
+        "create_m8_app",
+        "create_m9_app",
+        "create_m5_service_app"
+      ]
+    }
+  },
+  "target_frozen": {
+    "composition_root": {
+      "module_target": "src/tpaa_runtime",
+      "required_factories": [
+        "build_desktop_application",
+        "build_service_application",
+        "create_full_desktop_app",
+        "create_full_service_app"
+      ],
+      "implementation_batch": "B1"
+    },
+    "desktop_processes": [
+      {
+        "process": "tpaa-desktop",
+        "owns": [
+          "PySide6 GUI",
+          "presentation state"
+        ],
+        "forbidden": [
+          "business recompute",
+          "direct database writes"
+        ]
+      },
+      {
+        "process": "tpaa-backend",
+        "owns": [
+          "FastAPI",
+          "Application Service",
+          "Job Manager",
+          "Repository coordination",
+          "auth/audit boundary"
+        ],
+        "forbidden": [
+          "GUI rendering"
+        ]
+      },
+      {
+        "process": "tpaa-worker",
+        "cardinality": "1..N",
+        "owns": [
+          "governed compute commands",
+          "staging outputs"
+        ],
+        "forbidden": [
+          "live Qt state",
+          "authoritative SQLite writes",
+          "business authority mutation"
+        ]
+      }
+    ],
+    "desktop_storage": [
+      "SQLite WAL",
+      "Local Parquet",
+      "Object/Evidence Store"
+    ],
+    "service_components": [
+      "FastAPI Service",
+      "Application Service",
+      "Identity/RBAC",
+      "Job Manager",
+      "Worker Pool",
+      "PostgreSQL",
+      "Parquet/Object Store",
+      "Structured Logging/Metrics"
+    ],
+    "shutdown_order": [
+      "stop new submissions",
+      "cancel/drain workers",
+      "flush/close publication transactions",
+      "stop backend",
+      "exit GUI"
+    ],
+    "failure_policy": "fail closed; no partial published product may become current"
+  }
+}

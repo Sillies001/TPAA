@@ -376,3 +376,37 @@ def test_m6_batch_4_workflow_keeps_fourteen_job_topology_and_final_sink() -> Non
         "m1-exit-review",
     ):
         assert f"      - {job_id}" in m0_exit
+
+def test_m6_historical_review_accepts_program_closed_after_m9_qualification(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    program = issues["149"]
+    assert isinstance(program, dict)
+    issue = program["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    program["comments"] = [{"body": "Program closure P6_M9_QUALIFIED"}]
+    _close_m6_exit_with_exact_go_evidence(bundle)
+    result = _review(tmp_path, issues=bundle)
+    assert result["status"] == "PASS"
+    assert result["failed_acceptance"] == []
+
+
+def test_m6_historical_review_rejects_unqualified_program_closure(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    program = issues["149"]
+    assert isinstance(program, dict)
+    issue = program["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    program["comments"] = [{"body": "closed without final qualification"}]
+    result = _review(tmp_path, issues=bundle)
+    assert result["decision"] == "NO_GO"
+    assert "program_and_exit_tracker_lifecycle_valid" in result["failed_acceptance"]
