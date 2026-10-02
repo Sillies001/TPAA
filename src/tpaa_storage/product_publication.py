@@ -218,8 +218,14 @@ class ProductPublicationCoordinator:
                         sealed_object=sealed,
                     )
                 uow.commit()
-        except ProductPublicationError:
-            raise
+        except ProductPublicationError as exc:
+            if exc.sealed_object is not None:
+                raise
+            raise ProductPublicationError(
+                exc.code,
+                exc.detail,
+                sealed_object=sealed,
+            ) from exc
         except Exception as exc:
             raise ProductPublicationError(
                 "DATABASE_PUBLICATION_FAILED",

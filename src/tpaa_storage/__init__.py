@@ -8,6 +8,8 @@ from .bootstrap import (
     postgres_create_statements,
     verify_sqlite,
 )
+from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
+from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
 from .ports import BaselineMetadataRepository, RepositoryBaselineMetadata, RepositoryUnitOfWork
 from .product_publication import (
     OrphanRecoveryReport,
@@ -33,6 +35,12 @@ from .sqlite_repository import (
 __all__ = [
     "EXPECTED_DB_SCHEMA_VERSION",
     "BaselineMetadataRepository",
+    "LocalObjectStore",
+    "LocalSealedObjectFlow",
+    "ObjectSealError",
+    "ObjectStoreError",
+    "StagedObject",
+    "StoredObject",
     "BootstrapError",
     "BootstrapVerification",
     "RepositoryBaselineMetadata",

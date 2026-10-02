@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -107,16 +108,12 @@ def test_sqlite_product_publication_is_idempotent_and_cas_guarded(
     assert reused.receipt.version_token == 1
     assert reused.receipt.reused is True
 
-    conflicting = ProductPublicationRequest(
-        **{
-            **_request().__dict__,
-            "idempotency_key": "sqlite-product-publication-2",
-            "expected_version_token": 0,
-        }
+    conflicting = replace(
+        _request(),
+        idempotency_key="sqlite-product-publication-2",
+        expected_version_token=0,
     )
     with pytest.raises(ProductPublicationError) as failed:
         coordinator.publish(conflicting)
-    assert failed.value.code == "DATABASE_PUBLICATION_FAILED"
-    assert failed.value.__cause__ is not None
-    assert isinstance(failed.value.__cause__, ProductPublicationError)
-    assert failed.value.__cause__.code == "PUBLISH_CAS_CONFLICT"
+    assert failed.value.code == "PUBLISH_CAS_CONFLICT"
+    assert failed.value.sealed_object is not None
