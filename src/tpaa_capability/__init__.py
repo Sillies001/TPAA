@@ -22,6 +22,18 @@ from .p3_twin import (
     evaluate_twin_capability_estimate,
     publish_aircraft_twin_revision,
 )
+from .p6_input import (
+    P6ContextRef,
+    P6CounterfactualRequestBinding,
+    P6FactualSourceRevision,
+    P6ForecastRequestBinding,
+    P6InputSnapshot,
+    P6P3ModelRef,
+    assert_p6_input_snapshot_identity,
+    build_p6_counterfactual_request_binding,
+    build_p6_forecast_request_binding,
+    build_p6_input_snapshot,
+)
 
 __all__ = [
     "P3CapabilityModelBuild",
@@ -35,7 +47,17 @@ __all__ = [
     "P3AircraftTwinRevision",
     "P3CapabilityEstimate",
     "P3TwinComponentBinding",
+    "P6ContextRef",
+    "P6CounterfactualRequestBinding",
+    "P6FactualSourceRevision",
+    "P6ForecastRequestBinding",
+    "P6InputSnapshot",
+    "P6P3ModelRef",
+    "assert_p6_input_snapshot_identity",
+    "build_p6_counterfactual_request_binding",
+    "build_p6_forecast_request_binding",
     "build_capability_surface",
+    "build_p6_input_snapshot",
     "evaluate_surface",
     "evaluate_temporal_holdout",
     "execute_capability_model",
