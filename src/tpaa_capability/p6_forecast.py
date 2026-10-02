@@ -18,7 +18,6 @@ from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 from tpaa_context.p6_governance import (
     P6AuthorityPolicy,
     P6GovernanceError,
-    assert_p6_input_snapshot_identity,
     canonical_hash,
     exact_hash64,
     exact_text,
@@ -27,7 +26,11 @@ from tpaa_context.p6_governance import (
 )
 
 from .p3_twin import P3CapabilityEstimate
-from .p6_input import P6ForecastRequestBinding, P6InputSnapshot
+from .p6_input import (
+    P6ForecastRequestBinding,
+    P6InputSnapshot,
+    assert_p6_input_snapshot_identity,
+)
 
 _PROFILE_ARTIFACT_ID = "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE"
 _EXPECTED_PROFILE_SHA256 = (
@@ -555,7 +558,7 @@ def _row_projection(
     )
     if row.p4_revision.aircraft_id is None:
         raise P6GovernanceError(
-            "FAIL_CLOSED_P6_P4_CONTEXT_REQUIRED",
+            "FAIL_CLOSED_P6_INPUT_SNAPSHOT_REQUIRED",
             "P4 aircraft_id is required",
         )
     exact_uuid(
@@ -579,7 +582,7 @@ def _row_projection(
         or row.p4_revision.status != profile.required_p4_approval_state
     ):
         raise P6GovernanceError(
-            "FAIL_CLOSED_P6_P4_CONTEXT_REQUIRED",
+            "FAIL_CLOSED_P6_INPUT_SNAPSHOT_REQUIRED",
             row.p4_revision.actor_assessment_id,
         )
     if (
@@ -592,7 +595,7 @@ def _row_projection(
         or row.p4_revision.p3_as_of_utc != row.estimate.as_of_time
     ):
         raise P6GovernanceError(
-            "FAIL_CLOSED_P6_P4_CONTEXT_REQUIRED",
+            "FAIL_CLOSED_P6_INPUT_SNAPSHOT_REQUIRED",
             "P4 context does not bind exact P3 estimate",
         )
     if row.p4_revision.score is not None or row.p4_revision.grade is not None:
@@ -656,7 +659,7 @@ def _row_projection(
         or row.p4_revision.uncertainty_upper != upper
     ):
         raise P6GovernanceError(
-            "FAIL_CLOSED_P6_P4_CONTEXT_REQUIRED",
+            "FAIL_CLOSED_P6_INPUT_SNAPSHOT_REQUIRED",
             "P4 uncertainty does not preserve exact P3 uncertainty",
         )
     payload = {
@@ -908,7 +911,7 @@ def _ols(
     denominator = sum((value - mean_x) ** 2 for value in xs)
     if denominator == 0:
         raise P6GovernanceError(
-            "FAIL_CLOSED_P6_NOT_IDENTIFIABLE",
+            "FAIL_CLOSED_P6_APPLICABILITY_REQUIRED",
             "zero OLS denominator",
         )
     slope = sum(
@@ -1173,10 +1176,14 @@ def validate_p6_managed_model_object(
             "FAIL_CLOSED_P6_MANAGED_OBJECT_REQUIRED",
             "file URI is not a sealed managed object",
         )
+    if value.artifact_sha256 != model.model_artifact_hash:
+        raise P6GovernanceError(
+            "FAIL_CLOSED_P6_MODEL_HASH_MISMATCH",
+            model.capability_model_id,
+        )
     if (
         value.object_ref_id != model.model_object_ref_id
         or value.managed_uri != model.model_artifact_uri
-        or value.artifact_sha256 != model.model_artifact_hash
         or not value.sealed
         or value.gc_state != "ACTIVE"
         or value.deleted_at is not None
