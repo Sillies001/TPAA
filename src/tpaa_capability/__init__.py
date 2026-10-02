@@ -39,6 +39,10 @@ from .p6_forecast import (
     materialize_p6_model_datasets,
     validate_p6_managed_model_object,
 )
+from .p6_counterfactual import (
+    P6CounterfactualRevision,
+    execute_p6_counterfactual,
+)
 from .p6_input import (
     P6ContextRef,
     P6CounterfactualRequestBinding,
@@ -65,6 +69,7 @@ __all__ = [
     "P3CapabilityEstimate",
     "P3TwinComponentBinding",
     "P6ContextRef",
+    "P6CounterfactualRevision",
     "P6CounterfactualRequestBinding",
     "P6FactualSourceRevision",
     "P6ForecastRequestBinding",
@@ -89,6 +94,7 @@ __all__ = [
     "execute_p6_forecast",
     "execute_p6_model_training",
     "evaluate_surface",
+    "execute_p6_counterfactual",
     "evaluate_temporal_holdout",
     "execute_capability_model",
     "materialize_p6_model_datasets",
