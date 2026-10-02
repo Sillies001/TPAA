@@ -61,10 +61,11 @@ def _system_error(code: str, detail: str, http_status: int) -> JSONResponse:
     )
 
 
-def create_app(application: ApplicationService) -> FastAPI:
-    """Create the local/service HTTP adapter around an already-wired Application Service."""
-
-    app = FastAPI(title="TPAA", version="0.0.0")
+def register_base_routes(
+    app: FastAPI,
+    application: ApplicationService,
+) -> FastAPI:
+    """Register process/runtime/job routes on an existing governed FastAPI app."""
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -77,14 +78,35 @@ def create_app(application: ApplicationService) -> FastAPI:
         """Expose the Application-projected Core handshake with fail-closed HTTP status."""
 
         runtime = application.runtime_baseline_status()
-        http_status = status.HTTP_200_OK if runtime.ready else status.HTTP_503_SERVICE_UNAVAILABLE
-        return JSONResponse(status_code=http_status, content=_readiness_payload(runtime))
+        http_status = (
+            status.HTTP_200_OK
+            if runtime.ready
+            else status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+        return JSONResponse(
+            status_code=http_status,
+            content=_readiness_payload(runtime),
+        )
 
     @app.get("/version")
     def version() -> dict[str, object]:
         """Expose expected/observed runtime baseline/build identity for diagnostics."""
 
         return _version_payload(application.runtime_baseline_status())
+
+    @app.get("/runtime/features")
+    def runtime_features() -> JSONResponse:
+        """Expose exact qualification-backed P1-P6 product availability."""
+
+        try:
+            payload = application.feature_availability()
+        except RuntimeError as exc:
+            return _system_error(
+                "FEATURE_AVAILABILITY_NOT_CONFIGURED",
+                str(exc),
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
 
     @app.post("/jobs")
     def submit_job(
@@ -95,11 +117,25 @@ def create_app(application: ApplicationService) -> FastAPI:
         command = body.get("command")
         payload = body.get("payload")
         if idempotency_key is None or not idempotency_key.strip():
-            return _system_error("IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key is required", 400)
+            return _system_error(
+                "IDEMPOTENCY_KEY_REQUIRED",
+                "Idempotency-Key is required",
+                400,
+            )
         if not isinstance(command, str) or not command:
-            return _system_error("JOB_COMMAND_INVALID", "command must be non-empty string", 422)
-        if not isinstance(payload, dict) or not all(isinstance(key, str) for key in payload):
-            return _system_error("JOB_PAYLOAD_INVALID", "payload must be an object", 422)
+            return _system_error(
+                "JOB_COMMAND_INVALID",
+                "command must be non-empty string",
+                422,
+            )
+        if not isinstance(payload, dict) or not all(
+            isinstance(key, str) for key in payload
+        ):
+            return _system_error(
+                "JOB_PAYLOAD_INVALID",
+                "payload must be an object",
+                422,
+            )
         try:
             submission = application.submit_job(
                 idempotency_key=idempotency_key,
@@ -130,11 +166,28 @@ def create_app(application: ApplicationService) -> FastAPI:
     ) -> JSONResponse:
         reason = body.get("reason")
         if not isinstance(reason, str) or not reason:
-            return _system_error("CANCEL_REASON_REQUIRED", "reason must be non-empty string", 422)
+            return _system_error(
+                "CANCEL_REASON_REQUIRED",
+                "reason must be non-empty string",
+                422,
+            )
         try:
-            record = application.cancel_job(job_id=job_id, actor=actor, reason=reason)
+            record = application.cancel_job(
+                job_id=job_id,
+                actor=actor,
+                reason=reason,
+            )
         except JobNotFound as exc:
             return _system_error("JOB_NOT_FOUND", str(exc), 404)
         return JSONResponse(status_code=200, content=_job_payload(record))
 
     return app
+
+
+def create_app(application: ApplicationService) -> FastAPI:
+    """Create the local/service HTTP adapter around a composed Application Service."""
+
+    return register_base_routes(
+        FastAPI(title="TPAA", version="0.0.0"),
+        application,
+    )

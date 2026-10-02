@@ -25,6 +25,19 @@ CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
 STARTUP_TIMEOUT_SECONDS = 10.0
 GRACEFUL_SHUTDOWN_SECONDS = 5.0
 TERMINATE_WAIT_SECONDS = 2.0
+_LOCAL_HTTP_ALLOWED_PATHS = frozenset(
+    {"/health", "/readiness", "/version", "/runtime/features", "/jobs"}
+)
+_LOCAL_HTTP_ALLOWED_PREFIXES = (
+    "/jobs/",
+    "/m1/",
+    "/m3/",
+    "/m4/",
+    "/m6/",
+    "/m7/",
+    "/m8/",
+    "/m9/",
+)
 
 
 def _prepare_child_spawn(
@@ -272,7 +285,7 @@ class LocalBackendController:
             raise LocalBackendError("LISTENING_PID_MISMATCH")
         self._port = port
 
-    def m1_request_json(
+    def request_json(
         self,
         method: str,
         path: str,
@@ -280,19 +293,26 @@ class LocalBackendController:
         body: dict[str, object] | None = None,
         headers: dict[str, str] | None = None,
     ) -> tuple[int, dict[str, Any]]:
-        """Issue one authenticated M1 request while keeping the bearer private."""
+        """Issue one authenticated product request while keeping the bearer private."""
 
         status = self.status
         if not status.ready or status.state is not LocalBackendState.READY:
             raise LocalBackendError("BACKEND_NOT_READY")
         normalized_method = method.upper()
         if normalized_method not in {"GET", "POST"}:
-            raise LocalBackendError("M1_HTTP_METHOD_FORBIDDEN")
-        if not path.startswith("/m1/"):
-            raise LocalBackendError("M1_HTTP_PATH_FORBIDDEN")
+            raise LocalBackendError("LOCAL_HTTP_METHOD_FORBIDDEN")
+        allowed_path = (
+            path in _LOCAL_HTTP_ALLOWED_PATHS
+            or any(path.startswith(prefix) for prefix in _LOCAL_HTTP_ALLOWED_PREFIXES)
+        )
+        if not allowed_path:
+            raise LocalBackendError("LOCAL_HTTP_PATH_FORBIDDEN")
         supplied_headers = dict(headers or {})
-        if any(key.lower() in {"authorization", "origin"} for key in supplied_headers):
-            raise LocalBackendError("M1_HTTP_HEADER_FORBIDDEN")
+        if any(
+            key.lower() in {"authorization", "origin"}
+            for key in supplied_headers
+        ):
+            raise LocalBackendError("LOCAL_HTTP_HEADER_FORBIDDEN")
         if self._port is None or self._token is None:
             raise LocalBackendError("HANDSHAKE_NOT_CONFIGURED")
 
@@ -311,7 +331,10 @@ class LocalBackendController:
             method=normalized_method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=self._startup_timeout) as response:
+            with urllib.request.urlopen(
+                request,
+                timeout=self._startup_timeout,
+            ) as response:
                 payload = json.loads(response.read().decode("utf-8"))
                 if not isinstance(payload, dict):
                     raise LocalBackendError("INVALID_HTTP_PAYLOAD")
@@ -323,7 +346,28 @@ class LocalBackendController:
                 payload = {}
             return exc.code, payload if isinstance(payload, dict) else {}
         except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
-            raise LocalBackendError("M1_HTTP_REQUEST_FAILED") from exc
+            raise LocalBackendError("LOCAL_HTTP_REQUEST_FAILED") from exc
+
+    def m1_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        """Compatibility adapter for the existing M1 workspace."""
+
+        if method.upper() not in {"GET", "POST"}:
+            raise LocalBackendError("M1_HTTP_METHOD_FORBIDDEN")
+        if not path.startswith("/m1/"):
+            raise LocalBackendError("M1_HTTP_PATH_FORBIDDEN")
+        return self.request_json(
+            method,
+            path,
+            body=body,
+            headers=headers,
+        )
 
     def _get_json(self, path: str) -> tuple[int, dict[str, Any]]:
         if self._port is None or self._token is None:

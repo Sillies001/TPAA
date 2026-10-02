@@ -1,4 +1,4 @@
-"""Isolated local FastAPI child process for M0-GUI-002."""
+"""Isolated local FastAPI child process for the PIQB Desktop runtime."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import socket
 import sys
 import threading
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -16,23 +16,14 @@ if str(SRC_ROOT) not in sys.path:
 
 import uvicorn  # noqa: E402
 
-from tpaa_api import create_desktop_app  # noqa: E402
-from tpaa_application import (  # noqa: E402
-    ApplicationService,
-    GetStorageBaselineStatus,
-    M1PublicationService,
-    build_trusted_runtime_status_use_case,
-)
-from tpaa_application.m1_repository import (  # noqa: E402
-    InMemorySessionPublicationRepository,
+from tpaa_runtime import (  # noqa: E402
+    ProductRuntimeConfig,
+    RuntimeProfile,
+    build_desktop_application,
+    create_full_desktop_app,
 )
 
 CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
-
-
-class _UnusedStorageUseCase:
-    def execute(self) -> object:
-        raise RuntimeError("storage baseline status is not part of local lifecycle handshake")
 
 
 def _read_record() -> dict[str, Any]:
@@ -50,18 +41,14 @@ def _emit(record: dict[str, object]) -> None:
     sys.stdout.flush()
 
 
-def _application(product_build_version: str) -> ApplicationService:
-    publication = M1PublicationService(
-        fixture_root=REPO_ROOT / "tests" / "fixtures" / "m1",
-        authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
-        repository=InMemorySessionPublicationRepository(),
-    )
-    return ApplicationService(
-        get_storage_baseline_status=cast(GetStorageBaselineStatus, _UnusedStorageUseCase()),
-        get_runtime_baseline_status=build_trusted_runtime_status_use_case(
-            product_build_version=product_build_version
-        ),
-        m1_publication=publication,
+def _runtime(product_build_version: str):
+    return build_desktop_application(
+        ProductRuntimeConfig(
+            profile=RuntimeProfile.DESKTOP,
+            product_build_version=product_build_version,
+            authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
+            m1_fixture_root=REPO_ROOT / "tests" / "fixtures" / "m1",
+        )
     )
 
 
@@ -80,7 +67,10 @@ def main() -> int:
     sock.listen(2048)
     port = int(sock.getsockname()[1])
 
-    app = create_desktop_app(application=_application(build), bearer_token=token)
+    app = create_full_desktop_app(
+        _runtime(build),
+        bearer_token=token,
+    )
     config = uvicorn.Config(
         app,
         host="127.0.0.1",
@@ -91,9 +81,20 @@ def main() -> int:
         date_header=False,
     )
     server = uvicorn.Server(config)
-    thread = threading.Thread(target=server.run, kwargs={"sockets": [sock]}, daemon=True)
+    thread = threading.Thread(
+        target=server.run,
+        kwargs={"sockets": [sock]},
+        daemon=True,
+    )
     thread.start()
-    _emit({"protocol": CONTROL_PROTOCOL, "type": "LISTENING", "pid": __import__("os").getpid(), "port": port})
+    _emit(
+        {
+            "protocol": CONTROL_PROTOCOL,
+            "type": "LISTENING",
+            "pid": __import__("os").getpid(),
+            "port": port,
+        }
+    )
 
     try:
         while True:

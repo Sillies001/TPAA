@@ -28,10 +28,12 @@ from tpaa_capability.p6_input import (
     P6InputSnapshot,
 )
 from tpaa_context import (
+    P6AdmissionEvidence,
     P6GovernanceError,
     P6RuntimeSecurityPolicy,
     P6SecurityAuditEvent,
     P6SecurityViewer,
+    assert_p6_claim_allowed,
     assert_p6_permission,
     assert_safe_request_id,
     canonical_hash,
@@ -310,12 +312,18 @@ class M9WorkspaceService:
         self,
         repository: InMemoryM9P6Repository,
         *,
-        p6_admitted: bool = False,
+        admission_evidence: P6AdmissionEvidence | None = None,
         security_policy: P6RuntimeSecurityPolicy | None = None,
         recommendation_workflow: P6RecommendationWorkflow | None = None,
     ) -> None:
         self._repo = repository
-        self._p6_admitted = p6_admitted
+        self._p6_admission_evidence = admission_evidence
+        try:
+            assert_p6_claim_allowed("P6", evidence=admission_evidence)
+        except P6GovernanceError:
+            self._p6_admitted = False
+        else:
+            self._p6_admitted = True
         self._security = (
             security_policy or P6RuntimeSecurityPolicy.from_canonical()
         )
