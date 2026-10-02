@@ -16,6 +16,7 @@ from tpaa_api.m6_app import register_m6_routes
 from tpaa_api.m7_app import register_m7_routes
 from tpaa_api.m8_app import M8PrincipalResolver, register_m8_routes
 from tpaa_api.m9_app import M9PrincipalResolver, register_m9_routes
+from tpaa_api.runtime import register_product_runtime_routes
 from tpaa_application import (
     ApplicationService,
     GetStorageBaselineStatus,
@@ -179,6 +180,7 @@ def create_full_service_app(
     """Expose the same P1-P6 Application graph through one Service process."""
 
     app = create_app(runtime.application)
+    register_product_runtime_routes(app, runtime.application)
     register_m1_routes(app, runtime.application)
     register_m3_routes(app, runtime.application)
     register_m4_routes(app, runtime.application)

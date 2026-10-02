@@ -94,20 +94,6 @@ def register_base_routes(
 
         return _version_payload(application.runtime_baseline_status())
 
-    @app.get("/runtime/features")
-    def runtime_features() -> JSONResponse:
-        """Expose exact qualification-backed P1-P6 product availability."""
-
-        try:
-            payload = application.feature_availability()
-        except RuntimeError as exc:
-            return _system_error(
-                "FEATURE_AVAILABILITY_NOT_CONFIGURED",
-                str(exc),
-                status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
-
     @app.post("/jobs")
     def submit_job(
         body: dict[str, object],

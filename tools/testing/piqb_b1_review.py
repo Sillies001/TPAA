@@ -58,6 +58,7 @@ def review(
     m9 = _text("src/tpaa_application/m9_workspace.py")
     app_service = _text("src/tpaa_application/service.py")
     api_base = _text("src/tpaa_api/app.py")
+    api_runtime = _text("src/tpaa_api/runtime.py")
 
     acceptance = {
         "b0_entry_exact": (
@@ -126,8 +127,12 @@ def review(
         ),
         "feature_availability_application_boundary": (
             "feature_availability" in app_service
-            and '"/runtime/features"' in api_base
+            and '"/runtime/features"' in api_runtime
+            and "register_product_runtime_routes" in desktop
             and "ProductFeatureAvailability" in admission
+        ),
+        "legacy_base_api_surface_not_extended_by_piqb": (
+            '"/runtime/features"' not in api_base
         ),
         "b2_b3_not_pulled_forward": all(
             token not in composition

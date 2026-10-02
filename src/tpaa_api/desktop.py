@@ -19,6 +19,7 @@ from .m6_app import register_m6_routes
 from .m7_app import register_m7_routes
 from .m8_app import M8PrincipalResolver, register_m8_routes
 from .m9_app import M9PrincipalResolver, register_m9_routes
+from .runtime import register_product_runtime_routes
 
 _bearer = HTTPBearer(auto_error=False)
 _DESKTOP_ALLOWED_PATHS = frozenset(
@@ -104,6 +105,7 @@ def create_desktop_app(
         return await call_next(request)
 
     register_base_routes(app, application)
+    register_product_runtime_routes(app, application)
     register_m1_routes(app, application)
     register_m3_routes(app, application)
     register_m4_routes(app, application)
