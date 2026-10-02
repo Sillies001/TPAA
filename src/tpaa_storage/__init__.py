@@ -10,6 +10,11 @@ from .bootstrap import (
 )
 from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
 from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
+from .persistence_fit import (
+    PersistenceFitError,
+    PersistenceFitRecord,
+    ProductPersistenceFitGate,
+)
 from .ports import BaselineMetadataRepository, RepositoryBaselineMetadata, RepositoryUnitOfWork
 from .postgres_product_repository import PostgreSQLProductPublicationLedger
 from .postgres_repository import (
@@ -56,6 +61,9 @@ __all__ = [
     "PostgreSQLProductPublicationLedger",
     "PostgreSQLRepositoryError",
     "PostgreSQLServiceUnitOfWork",
+    "PersistenceFitError",
+    "PersistenceFitRecord",
+    "ProductPersistenceFitGate",
     "ProductPublicationCoordinator",
     "ProductPublicationError",
     "ProductPublicationLedger",
