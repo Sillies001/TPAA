@@ -22,7 +22,6 @@ from .p3_twin import (
     evaluate_twin_capability_estimate,
     publish_aircraft_twin_revision,
 )
-
 from .p6_input import (
     P6ContextRef,
     P6CounterfactualRequestBinding,

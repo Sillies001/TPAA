@@ -167,19 +167,19 @@ def build_p6_input_snapshot(
         normalized_sources.append(source)
 
     normalized_p3: list[P6P3ModelRef] = []
-    for source in p3_model_refs:
-        exact_uuid(source.model_ref_id, field="p3_model_ref_id", policy=p)
-        if source.publication_status != "PUBLISHED":
+    for p3_source in p3_model_refs:
+        exact_uuid(p3_source.model_ref_id, field="p3_model_ref_id", policy=p)
+        if p3_source.publication_status != "PUBLISHED":
             raise P6GovernanceError(
                 "FAIL_CLOSED_P6_INPUT_SNAPSHOT_REQUIRED",
-                f"P3 source status={source.publication_status!r}",
+                f"P3 source status={p3_source.publication_status!r}",
             )
-        if utc(source.knowledge_time_utc, field="p3.knowledge_time_utc") > origin:
+        if utc(p3_source.knowledge_time_utc, field="p3.knowledge_time_utc") > origin:
             raise P6GovernanceError(
                 "FAIL_CLOSED_P6_FUTURE_INFORMATION",
-                source.model_ref_id,
+                p3_source.model_ref_id,
             )
-        normalized_p3.append(source)
+        normalized_p3.append(p3_source)
 
     normalized_context: list[P6ContextRef] = []
     for context in scenario_context_refs:

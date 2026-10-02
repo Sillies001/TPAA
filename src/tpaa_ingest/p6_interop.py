@@ -4,18 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from tpaa_context.p6_governance import (
-    P6AdmissionEvidence,
-    P6AuthorityPolicy,
-    P6GovernanceError,
-    assert_p6_claim_allowed,
-    canonical_hash,
-    exact_hash64,
-    exact_text,
-    exact_uuid,
-    utc,
-)
+if TYPE_CHECKING:
+    from tpaa_context.p6_governance import P6AdmissionEvidence, P6AuthorityPolicy
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,7 +101,18 @@ def build_p6_interop_snapshot(
     admission_evidence: P6AdmissionEvidence | None = None,
     policy: P6AuthorityPolicy | None = None,
 ) -> P6InteropSnapshot:
-    p = policy or P6AuthorityPolicy.from_canonical()
+    from tpaa_context.p6_governance import (
+        P6AuthorityPolicy as RuntimeP6AuthorityPolicy,
+        P6GovernanceError,
+        assert_p6_claim_allowed,
+        canonical_hash,
+        exact_hash64,
+        exact_text,
+        exact_uuid,
+        utc,
+    )
+
+    p = policy or RuntimeP6AuthorityPolicy.from_canonical()
     exact_uuid(session_id, field="session_id", policy=p)
     if session_type not in p.session_types:
         raise P6GovernanceError(
@@ -261,6 +264,8 @@ def build_p6_interop_snapshot(
 
 
 def assert_p6_interop_snapshot_identity(snapshot: P6InteropSnapshot) -> None:
+    from tpaa_context.p6_governance import P6GovernanceError, canonical_hash
+
     digest = canonical_hash(_identity_material(snapshot))
     if (
         not snapshot.lossless_phase_mapping
