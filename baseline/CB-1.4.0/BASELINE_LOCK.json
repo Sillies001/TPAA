@@ -6,7 +6,7 @@
     "core": "CB-1.4.0",
     "db_schema": "1.6.0",
     "date": "2026-10-02",
-    "rebaseline": "R5.1_M9_P6_EXECUTION_PROFILE_ADOPTION",
+    "rebaseline": "R5.1_M9_P6_P3_CAPABILITY_FORECAST_PROFILE_ADOPTION",
     "lock_lineage_sha256": [
       "ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08",
       "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
@@ -121,6 +121,11 @@
       "bytes": 18296
     },
     {
+      "file": "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE.json",
+      "sha256": "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394",
+      "bytes": 14787
+    },
+    {
       "file": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json",
       "sha256": "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e",
       "bytes": 17810
@@ -129,11 +134,6 @@
       "file": "P6_ROLE_PRIVACY_RELEASE_PROFILE.json",
       "sha256": "d5eff80dbfa912955ae7b09bc3e4a2868650466560cb1a5b1f558434e8076713",
       "bytes": 8086
-    },
-    {
-      "file": "P6_TRAINING_SCORE_OLS_MAD_FORECAST_PROFILE.json",
-      "sha256": "43bf6f3814d764de812c6ff478600959b3f7bd9c54e6b8bfec5297531271d038",
-      "bytes": 13402
     },
     {
       "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",

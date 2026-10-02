@@ -1,5 +1,5 @@
 {
-  "profile_id": "P6_TRAINING_SCORE_OLS_MAD_FORECAST",
+  "profile_id": "P6_P3_CAPABILITY_OLS_MAD_FORECAST",
   "version": "1.0.0",
   "db_schema_version": "1.6.0",
   "core_baseline": "CB-1.4.0",
@@ -10,6 +10,8 @@
     "p6_authority_id": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY",
     "p6_authority_version": "1.0.0",
     "p6_authority_sha256": "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e",
+    "p3_authority_sha256": "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b",
+    "p3_execution_profile_sha256": "d66aa780d1c2e31ec664d173a0cdbc355f98c9ff3f751a6949e84f74cdf93876",
     "p4_p5_authority_sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
     "cross_layer_dto_sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",
     "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
@@ -25,25 +27,23 @@
   "runtime_binding": {
     "carrier_table": "registry.context_artifact",
     "artifact_kind": "ASSESSMENT_PROFILE",
-    "logical_key": "P6_MODEL_SPEC:P6_TRAINING_SCORE_OLS_MAD_FORECAST",
+    "logical_key": "P6_MODEL_SPEC:P6_P3_CAPABILITY_OLS_MAD_FORECAST",
     "artifact_version": "1.0.0",
     "artifact_schema_version": "TPAA_P6_MODEL_SPEC_V1",
-    "model_spec_id": "P6_MODEL_SPEC:P6_TRAINING_SCORE_OLS_MAD_FORECAST",
+    "model_spec_id": "P6_MODEL_SPEC:P6_P3_CAPABILITY_OLS_MAD_FORECAST",
     "model_spec_version": "1.0.0",
-    "plugin_name": "TRAINING_SCORE_OLS_MAD_FORECAST",
+    "plugin_name": "P3_CAPABILITY_OLS_MAD_FORECAST",
     "plugin_version": "1.0.0",
     "exact_identity_only": true,
     "current_latest_default_forbidden": true
   },
   "scope": {
     "domain": "TRAINING_EVALUATION",
-    "allowed_target_kinds": [
-      "P4_ASSESSMENT_SCORE",
-      "P5_OVERALL_SCORE"
-    ],
-    "p4_source_dto": "P4AssessmentRevisionDTO",
-    "p5_source_dto": "P5AssessmentRevisionDTO",
-    "p3_input_used_by_profile_v1": false,
+    "target_kind": "P3_REFERENCE_CONDITION_CAPABILITY_ESTIMATE",
+    "numeric_target_dto": "IntrinsicCapabilityEstimateDTO",
+    "required_context_dto": "P4AssessmentRevisionDTO",
+    "p4_context_required_for_every_training_row": true,
+    "p5_context_supported_profile_v1": false,
     "p1_p5_historical_products_immutable": true,
     "p6_profile_adoption_does_not_admit_p6": true,
     "operational_tactical_use_forbidden": true,
@@ -55,24 +55,28 @@
     "shadow_schema_permitted": false
   },
   "source_eligibility_contract": {
-    "required_assessment_approval_state": "APPROVED",
-    "p4_numeric_field": "score",
-    "p5_numeric_field": "overall_score",
+    "p3_required_validity_domain_status": "IN_DOMAIN",
+    "p3_required_claim_level": "REFERENCE_CONDITION_LONGITUDINAL_ESTIMATE",
+    "p3_numeric_field": "value",
+    "p3_uncertainty_lower_field": "uncertainty.lower",
+    "p3_uncertainty_upper_field": "uncertainty.upper",
+    "p3_condition_session_order_field": "condition_point.session_order",
+    "p3_condition_reference_field": "condition_point.reference_condition_id",
+    "p4_required_approval_state": "APPROVED",
+    "p4_capability_projection_ref_must_include_exact_p3_estimate_id": true,
+    "p4_session_exact_session_order_assignment_required": true,
+    "p4_session_order_must_equal_p3_condition_session_order": true,
+    "p4_subject_aircraft_must_match_p3_twin_aircraft": true,
     "finite_numeric_required": true,
-    "p4_exact_assessment_spec_id_and_version_required": true,
-    "p5_exact_assessment_spec_id_and_version_required": true,
-    "p5_exact_aggregation_profile_ref_required_for_numeric_target": true,
-    "p4_p5_target_kind_mixing_forbidden": true,
-    "subject_or_composition_identity_exact": true,
-    "assessment_semantics_exact_across_training_rows": true,
-    "distinct_session_id_required": true,
-    "exact_session_order_assignment_required": true,
+    "p3_uncertainty_bounds_must_contain_value": true,
+    "exact_aircraft_capability_reference_condition_unit_required": true,
+    "exact_configuration_binding_required": true,
+    "distinct_session_order_required": true,
     "minimum_distinct_session_orders": 4,
     "future_information_forbidden": true,
     "same_outcome_or_forecast_session_target_leakage_forbidden": true,
-    "rejected_draft_or_in_review_assessment_forbidden": true,
-    "missing_numeric_score_policy": "INSUFFICIENT_EVIDENCE_NO_IMPUTATION",
-    "unavailable_ood_not_identifiable_zero_coercion_forbidden": true,
+    "draft_in_review_rejected_p4_context_forbidden": true,
+    "out_of_domain_or_null_p3_value_policy": "ROW_INELIGIBLE_NO_ZERO_NO_IMPUTATION",
     "confidence_to_uncertainty_conversion_forbidden": true
   },
   "feature_target_contract": {
@@ -80,14 +84,16 @@
       "SESSION_ORDER_OFFSET"
     ],
     "x_rule": "x_i=session_order_i-first_training_session_order",
-    "target_rule": "y_i=exact approved numeric P4 score or P5 overall_score",
-    "target_unit_rule": "preserve exact governed score semantics; no implementation normalization",
+    "target_rule": "y_i=exact IN_DOMAIN IntrinsicCapabilityEstimateDTO.value",
+    "target_unit_rule": "preserve exact P3 capability estimate unit",
+    "input_uncertainty_rule": "exact P3 estimate uncertainty interval",
+    "p4_context_used_as_identity_and_training_context_not_numeric_target": true,
     "feature_or_target_imputation_forbidden": true,
     "hidden_context_feature_inference_forbidden": true,
-    "target_scale_conversion_requires_separately_adopted_profile": true
+    "target_scale_conversion_forbidden": true
   },
   "ordering_contract": {
-    "row_order": "SESSION_ORDER_ASC_THEN_SOURCE_REVISION_ID_ASC",
+    "row_order": "SESSION_ORDER_ASC_THEN_P3_ESTIMATE_ID_ASC",
     "duplicate_session_order_forbidden": true,
     "database_default_order_forbidden": true,
     "training_window_selection": "LAST_UP_TO_5_ROWS_BEFORE_TEMPORAL_HOLDOUT",
@@ -102,7 +108,7 @@
     "no_rng": true,
     "no_regularization": true,
     "no_implicit_weighting": true,
-    "no_hidden_clipping_or_score_bounds": true
+    "no_hidden_clipping": true
   },
   "training_validation_contract": {
     "strategy": "TEMPORAL_LAST_POINT_HOLDOUT_THEN_FINAL_REFIT",
@@ -113,7 +119,7 @@
     "random_split_forbidden": true,
     "training_validation_identity_overlap_forbidden": true,
     "holdout_prediction": "OLS training-prefix line evaluated at exact heldout session_order",
-    "validation_pass_rule": "finite prediction and finite holdout residual with all leakage and identity guards satisfied",
+    "validation_pass_rule": "finite prediction and residual with exact P3/P4 binding and leakage guards satisfied",
     "accuracy_threshold_or_multiplier": null,
     "implementation_selected_accuracy_threshold_forbidden": true,
     "validation_pass_status": "VALIDATED",
@@ -121,11 +127,12 @@
     "final_refit_requires_validation_pass": true
   },
   "uncertainty_calibration_contract": {
-    "calibration_profile": "HOLDOUT_ERROR_MAX_FINAL_REFIT_MAD_V1",
+    "calibration_profile": "P3_INPUT_MAX_HOLDOUT_ERROR_FINAL_REFIT_MAD_V1",
     "calibration_evidence_required": true,
-    "holdout_component": "abs(holdout_prediction-holdout_observed_score)",
+    "input_component": "maximum exact P3 uncertainty half-width in final refit window",
+    "holdout_component": "abs(holdout_prediction-heldout_p3_value)",
     "final_refit_component": "UNSCALED_MEDIAN_ABSOLUTE_DEVIATION_OF_FINAL_REFIT_RESIDUALS",
-    "half_width_rule": "max(holdout_component,final_refit_component)",
+    "half_width_rule": "max(input_component,holdout_component,final_refit_component)",
     "interval_rule": "point_forecast +/- half_width",
     "confidence_field_is_not_uncertainty": true,
     "unquantified_uncertainty_fallback_forbidden": true,
@@ -140,13 +147,15 @@
       "NOT_IDENTIFIABLE"
     ],
     "numeric_forecast_allowed_only_when": "APPLICABLE",
-    "exact_subject_or_composition_identity_required": true,
-    "exact_target_kind_required": true,
-    "exact_assessment_spec_required": true,
-    "exact_p5_aggregation_profile_required_when_target_is_p5": true,
+    "exact_aircraft_required": true,
+    "exact_capability_type_required": true,
+    "exact_reference_condition_required": true,
+    "exact_unit_required": true,
+    "exact_configuration_binding_required": true,
+    "p4_context_required": true,
     "minimum_evidence_required": true,
     "horizon_must_match_profile": true,
-    "semantics_or_identity_drift_state": "OUT_OF_DOMAIN",
+    "configuration_or_semantic_identity_drift_state": "OUT_OF_DOMAIN",
     "missing_numeric_or_too_few_points_state": "INSUFFICIENT_EVIDENCE",
     "ambiguous_target_or_invalid_session_order_state": "NOT_IDENTIFIABLE",
     "out_of_domain_zero_coercion_forbidden": true,
@@ -158,7 +167,9 @@
     "multi_step_recursive_forecast_forbidden": true,
     "wall_clock_horizon_inference_forbidden": true,
     "point_forecast_rule": "final_refit_intercept + final_refit_slope * x_next_session_order",
-    "exact_input_snapshot_required": true,
+    "exact_p6_input_snapshot_required": true,
+    "exact_p3_estimate_refs_required": true,
+    "exact_p4_factual_context_refs_required": true,
     "exact_model_revision_required": true,
     "exact_assumption_profile_required": true,
     "explicit_forecast_origin_required": true,
@@ -182,6 +193,7 @@
     "exact_profile_id_and_version_required": true,
     "exact_model_revision_required": true,
     "exact_training_and_validation_snapshot_required": true,
+    "exact_p3_estimate_and_p4_context_refs_required": true,
     "exact_forecast_request_and_result_revision_required": true,
     "historical_current_latest_default_resolution_forbidden": true,
     "model_or_profile_or_source_change_creates_new_revision": true,
@@ -202,6 +214,16 @@
       "plugin_version",
       "model_artifact_hash"
     ],
+    "training_row_identity_material": [
+      "p3_estimate_id",
+      "p4_assessment_revision_id",
+      "session_order",
+      "aircraft_id",
+      "capability_type",
+      "reference_condition_id",
+      "unit",
+      "configuration_binding"
+    ],
     "forecast_result_identity_material": [
       "forecast_request_id",
       "capability_model_id",
@@ -215,7 +237,7 @@
     "no_rng": true
   },
   "safety_boundary": {
-    "allowed_use": "TRAINING_EVALUATION_FORECAST_AND_DEBRIEF_SUPPORT",
+    "allowed_use": "TRAINING_EVALUATION_CAPABILITY_FORECAST_AND_DEBRIEF_SUPPORT",
     "advisory_projection_only": true,
     "operational_or_tactical_optimization_forbidden": true,
     "weapon_or_targeting_recommendation_forbidden": true,
@@ -230,35 +252,41 @@
     "RANDOM_SPLIT",
     "FUTURE_INFORMATION",
     "SAME_OUTCOME_LEAKAGE",
-    "MISSING_SCORE_IMPUTATION",
+    "MISSING_P3_VALUE_IMPUTATION",
     "CONFIDENCE_AS_UNCERTAINTY",
     "MULTI_STEP_RECURSIVE_FORECAST",
     "OOD_AS_ZERO",
     "UNAVAILABLE_AS_ZERO",
+    "CONFIGURATION_CROSS_SEGMENT_POOLING",
+    "P4_CONTEXT_BYPASS",
     "UNSEALED_MODEL_OBJECT",
     "MODEL_HASH_MISMATCH",
     "TACTICAL_OR_OPERATIONAL_TARGET"
   ],
   "qualification_matrix": [
     {
-      "case": "approved_p4_four_distinct_sessions_next_session",
+      "case": "four_in_domain_p3_estimates_with_exact_approved_p4_context",
       "expected": "VALIDATABLE_AND_FORECASTABLE"
     },
     {
-      "case": "approved_p5_with_exact_aggregation_profile_four_sessions",
-      "expected": "VALIDATABLE_AND_FORECASTABLE"
-    },
-    {
-      "case": "three_or_fewer_numeric_sessions",
+      "case": "three_or_fewer_eligible_sessions",
       "expected": "INSUFFICIENT_EVIDENCE"
     },
     {
-      "case": "p5_numeric_without_aggregation_profile",
-      "expected": "FAIL_CLOSED_PROFILE_REQUIRED"
+      "case": "p3_out_of_domain_or_null_value",
+      "expected": "ROW_INELIGIBLE_NO_ZERO"
     },
     {
-      "case": "draft_in_review_or_rejected_source",
-      "expected": "FAIL_CLOSED_SOURCE_NOT_APPROVED"
+      "case": "p3_estimate_without_exact_approved_p4_context",
+      "expected": "FAIL_CLOSED_P4_CONTEXT_REQUIRED"
+    },
+    {
+      "case": "p4_context_draft_in_review_or_rejected",
+      "expected": "FAIL_CLOSED_P4_CONTEXT_NOT_APPROVED"
+    },
+    {
+      "case": "p4_session_order_mismatch",
+      "expected": "FAIL_CLOSED_EXACT_BINDING_REQUIRED"
     },
     {
       "case": "future_or_same_outcome_source",
@@ -273,11 +301,11 @@
       "expected": "OUT_OF_DOMAIN"
     },
     {
-      "case": "assessment_semantics_or_subject_drift",
+      "case": "configuration_or_reference_condition_drift",
       "expected": "OUT_OF_DOMAIN"
     },
     {
-      "case": "missing_calibration_uncertainty",
+      "case": "missing_p3_uncertainty",
       "expected": "FAIL_CLOSED_UNCERTAINTY_REQUIRED"
     },
     {
@@ -294,19 +322,19 @@
     }
   ],
   "contract_hashes": {
-    "source_eligibility_contract_sha256": "c9b23d3c103ece2e445835a73197b01607f6b54220e1abf6585b47ec191fa2f8",
-    "feature_target_contract_sha256": "ddaf20a5f07fe7c8918eb6953ee37ec25515d24093058830f22fac26cc9337d9",
-    "ordering_contract_sha256": "b1961874bc082a1e6128722fb0ffd96069a5d8e9f9f2721446393e4754386dcc",
-    "arithmetic_contract_sha256": "4e1426593bfd22c46149e5bfae76c3fa369e3e83c36e733a65b2e622ee765f02",
-    "training_validation_contract_sha256": "5c956550f4f4d98ed9cb64474de50299a81d6d67c6206f1fcd541b158cfec113",
-    "uncertainty_calibration_contract_sha256": "0365f894d8071ec6bc707c7ac14a9e1167834219a0913181bf35b5ce71a64e1c",
-    "applicability_contract_sha256": "f1efe42cbfa5f9be87c60e5d3ace746ddfb9b897568a76520517369d508b9593",
-    "forecast_contract_sha256": "378f5ed95a82fc2b60c0cfdd7de2f9dc7b3ee85e2e17cf6b94333ae41a00a2bc",
+    "source_eligibility_contract_sha256": "364dfd6ecb37be418940348a627fc6b35850d1911a98e77dc44b09b0a2ac9f73",
+    "feature_target_contract_sha256": "728affe1ef47801c7c600c72cbc054f3b1fef84a3b61cf270aabf2494f8ea554",
+    "ordering_contract_sha256": "523bc513ec8f65f1f97ba77bb79febcb1481cda75b452fac2eddba2c4a02d769",
+    "arithmetic_contract_sha256": "ae72f58f6c4d7517917d56981d3fb191a3b6f535363b3ee3ec04fa9865b8a7ca",
+    "training_validation_contract_sha256": "98b051d02a8fce070fe2dcea4da967d0a767db21c41458794f0c0dce8d0d0111",
+    "uncertainty_calibration_contract_sha256": "bb0ba5b04e2bbb9efafaa2c253a348df2037196e695d911e70a1db668ede6a41",
+    "applicability_contract_sha256": "1b40214e8027b8dc24ab018834970375f15810b26e8fe3b56ddb4215a905e90b",
+    "forecast_contract_sha256": "8171e096addaceb4689be29a8c4132af21e70d6c903c17889958359670d77d57",
     "managed_object_contract_sha256": "e7e775f9502da28d6e0c8258a6f5f9248b5ec10dbeebb0938c2ade47d0d56d4f",
-    "replay_supersession_contract_sha256": "2f4d52a06d77835a8b86aa5b5340a6e21f56fa4b2de7ffbc4bc213247477d8fd",
-    "identity_contract_sha256": "0b498cc39f440acd63bdc8eb4720e3ffb38df128744d20d73e99a8a308a8942c",
-    "safety_boundary_sha256": "59b3bf248713b14f6c94e5666d7a870519228b957eba5745edde0e297f4a04af",
-    "forbidden_fallbacks_sha256": "229bc2b045dd64c5ce6372ec5f0e3c606457f8b3305ffa1a99aa874bd123ce53",
-    "qualification_matrix_sha256": "3b51c6559e94031803682dcf4f906205705022b2068eaeb26feac74e3cb7c0c2"
+    "replay_supersession_contract_sha256": "677db6f3aedecbbef077d57a92928060969976966fa09d9233a3ebc904936b70",
+    "identity_contract_sha256": "a374616bb3c8f9a4cb209471c23d29713f4c0dcd47efdf82a14193c3970e0f16",
+    "safety_boundary_sha256": "758d230c7c220df64e1570d8a6fc99801cbf5e17979fc270d3e4271a85649e71",
+    "forbidden_fallbacks_sha256": "3385be2d095155255ba0f41ba464ef2db13960298ecec61214111d6d33a57019",
+    "qualification_matrix_sha256": "e79734e4dcf5d3948997cb65b9512aa01b0931abb842ff3bf6536d31c1c17264"
   }
 }
