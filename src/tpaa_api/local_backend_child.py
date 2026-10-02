@@ -17,6 +17,7 @@ if str(SRC_ROOT) not in sys.path:
 import uvicorn  # noqa: E402
 
 from tpaa_runtime import (  # noqa: E402
+    ProductRuntime,
     ProductRuntimeConfig,
     RuntimeProfile,
     build_desktop_application,
@@ -41,7 +42,7 @@ def _emit(record: dict[str, object]) -> None:
     sys.stdout.flush()
 
 
-def _runtime(product_build_version: str):
+def _runtime(product_build_version: str) -> ProductRuntime:
     return build_desktop_application(
         ProductRuntimeConfig(
             profile=RuntimeProfile.DESKTOP,
