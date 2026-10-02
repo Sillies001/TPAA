@@ -65,6 +65,10 @@ from .p5_replay import (
     P5ReplayRevision,
     build_p5_longitudinal_replay,
 )
+from .p6_replay import (
+    InMemoryP6ReplayRepository,
+    P6ProjectionValidation,
+)
 
 __all__ = [
     "InMemoryM4LongitudinalReleaseRepository",
@@ -100,6 +104,8 @@ __all__ = [
     "P5CompositionReplaySeries",
     "P5LongitudinalReplay",
     "P5ReplayRevision",
+    "InMemoryP6ReplayRepository",
+    "P6ProjectionValidation",
     "assert_capability_claim_allowed",
     "assert_p1_p2_immutable",
     "assert_p3_claim_level",
