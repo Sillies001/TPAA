@@ -42,6 +42,12 @@ def review(
     baseline = _json(TASK_BASELINE)
     fit = _json(FIT_BASELINE)
     state = _json(STATE)
+    fit_summary_raw = fit.get("summary")
+    fit_summary = (
+        cast(dict[str, Any], fit_summary_raw)
+        if isinstance(fit_summary_raw, dict)
+        else {}
+    )
 
     tasks = baseline.get("tasks")
     task_ids = tuple(
