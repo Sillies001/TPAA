@@ -80,6 +80,33 @@ def test_b1_admission_resolver_uses_exact_protected_main_evidence() -> None:
     assert_p6_claim_allowed("P6", evidence=evidence)
 
 
+def test_b1_feature_availability_states_are_all_reachable() -> None:
+    resolver = ProductAdmissionResolver()
+    assert resolver.feature_state(
+        "P1",
+        configured=True,
+    ).value == "AVAILABLE"
+    assert resolver.feature_state(
+        "P1",
+        configured=False,
+    ).value == "NOT_CONFIGURED"
+    assert resolver.feature_state(
+        "P1",
+        configured=True,
+        dependency_ready=False,
+    ).value == "DEPENDENCY_MISSING"
+    assert resolver.feature_state(
+        "P1",
+        configured=True,
+        supported_profile=False,
+    ).value == "UNSUPPORTED_PROFILE"
+    assert resolver.feature_state(
+        "P1",
+        configured=True,
+        available=False,
+    ).value == "UNAVAILABLE"
+
+
 def test_b1_desktop_runtime_exposes_one_p1_p6_backend_surface() -> None:
     runtime = build_desktop_application(_config(RuntimeProfile.DESKTOP))
     app = create_full_desktop_app(runtime, bearer_token="b1-secret")

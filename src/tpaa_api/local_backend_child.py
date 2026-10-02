@@ -87,14 +87,12 @@ def main() -> int:
         daemon=True,
     )
     thread.start()
-    _emit(
-        {
-            "protocol": CONTROL_PROTOCOL,
-            "type": "LISTENING",
-            "pid": __import__("os").getpid(),
-            "port": port,
-        }
-    )
+    _emit({
+        "protocol": CONTROL_PROTOCOL,
+        "type": "LISTENING",
+        "pid": __import__("os").getpid(),
+        "port": port,
+    })
 
     try:
         while True:

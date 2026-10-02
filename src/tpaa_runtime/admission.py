@@ -188,6 +188,7 @@ class ProductAdmissionResolver:
         configured: bool,
         dependency_ready: bool = True,
         supported_profile: bool = True,
+        available: bool = True,
     ) -> FeatureAvailabilityState:
         if not supported_profile:
             return FeatureAvailabilityState.UNSUPPORTED_PROFILE
@@ -197,6 +198,8 @@ class ProductAdmissionResolver:
             return FeatureAvailabilityState.NOT_CONFIGURED
         if not dependency_ready:
             return FeatureAvailabilityState.DEPENDENCY_MISSING
+        if not available:
+            return FeatureAvailabilityState.UNAVAILABLE
         return FeatureAvailabilityState.AVAILABLE
 
 
