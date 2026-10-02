@@ -34,10 +34,15 @@ class PersistenceFitRecord:
     product_family: str
     status: str
     blockers: tuple[str, ...]
+    dependency_blockers: tuple[str, ...]
+
+    @property
+    def schema_fit(self) -> bool:
+        return self.status in FIT_STATUSES and not self.blockers
 
     @property
     def production_allowed(self) -> bool:
-        return self.status in FIT_STATUSES and not self.blockers
+        return self.schema_fit and not self.dependency_blockers
 
 
 class ProductPersistenceFitGate:
@@ -94,10 +99,29 @@ class ProductPersistenceFitGate:
                 if not isinstance(field, str) or not isinstance(reason, str):
                     raise PersistenceFitError(family, "BLOCKER_INVALID")
                 blockers.append(f"{field}: {reason}")
+            dependency_raw = item.get("dependency_blockers", [])
+            if not isinstance(dependency_raw, list):
+                raise PersistenceFitError(family, "DEPENDENCY_BLOCKERS_INVALID")
+            dependency_blockers: list[str] = []
+            for dependency in dependency_raw:
+                if not isinstance(dependency, dict):
+                    raise PersistenceFitError(
+                        family,
+                        "DEPENDENCY_BLOCKER_INVALID",
+                    )
+                name = dependency.get("dependency")
+                reason = dependency.get("reason")
+                if not isinstance(name, str) or not isinstance(reason, str):
+                    raise PersistenceFitError(
+                        family,
+                        "DEPENDENCY_BLOCKER_INVALID",
+                    )
+                dependency_blockers.append(f"{name}: {reason}")
             records[family] = PersistenceFitRecord(
                 product_family=family,
                 status=status,
                 blockers=tuple(blockers),
+                dependency_blockers=tuple(dependency_blockers),
             )
         return cls(records)
 
@@ -113,4 +137,9 @@ class ProductPersistenceFitGate:
     def assert_production_allowed(self, product_family: str) -> None:
         record = self.record(product_family)
         if not record.production_allowed:
-            raise PersistenceFitError(product_family, record.status)
+            status = (
+                "DEPENDENCY_BLOCKED"
+                if record.schema_fit and record.dependency_blockers
+                else record.status
+            )
+            raise PersistenceFitError(product_family, status)

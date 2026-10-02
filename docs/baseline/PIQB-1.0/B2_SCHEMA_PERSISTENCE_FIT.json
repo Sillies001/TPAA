@@ -13,7 +13,7 @@
     "p1_session_release": "FIT_EXISTING",
     "longitudinal_release": "FIT_EXISTING_SUBSTRATE",
     "p2_attribution": "BLOCKED",
-    "p3_twin_capability": "FIT_WITH_DERIVATIONS",
+    "p3_twin_capability": "FIT_WITH_DERIVATIONS_DEPENDENCY_BLOCKED",
     "p4_p5_assessment": "BLOCKED",
     "p6_model_projection_advisory": "BLOCKED",
     "authority_change_proposal_required": true
@@ -34,7 +34,8 @@
       ],
       "notes": [
         "Existing SQLiteCorePublicationLedger/PostgreSQLCorePublicationLedger already implement the qualified publication path."
-      ]
+      ],
+      "dependency_blockers": []
     },
     {
       "product_family": "LONGITUDINAL_RELEASE",
@@ -51,7 +52,8 @@
       ],
       "notes": [
         "B2 wiring is still required, but the frozen logical model contains dedicated longitudinal authority relations."
-      ]
+      ],
+      "dependency_blockers": []
     },
     {
       "product_family": "P2_ATTRIBUTION",
@@ -84,7 +86,8 @@
           "field": "P2AttributionRunProduct.run_request_hash",
           "reason": "assessment.attribution_run has no request/input hash and no governed link to registry.compute_job."
         }
-      ]
+      ],
+      "dependency_blockers": []
     },
     {
       "product_family": "P3_TWIN_CAPABILITY",
@@ -104,7 +107,13 @@
         "model build coefficients/fit metadata in immutable model artifact payload",
         "surface dataset in immutable surface object payload"
       ],
-      "blockers": []
+      "blockers": [],
+      "dependency_blockers": [
+        {
+          "dependency": "P2_ATTRIBUTION",
+          "reason": "Full M7P3WorkspaceSnapshot exact reconstruction includes the P2_ADJUSTED layer. P3-owned tables/object payloads are schema-fit, but production repository activation must remain blocked until exact P2 persistence is qualified."
+        }
+      ]
     },
     {
       "product_family": "P4_P5_ASSESSMENT",
@@ -140,7 +149,8 @@
           "field": "P4/P5 logical_content_hash",
           "reason": "Hash is derivable only if every authoritative logical field can be reconstructed; blockers above prevent this."
         }
-      ]
+      ],
+      "dependency_blockers": []
     },
     {
       "product_family": "P6_MODEL_PROJECTION_ADVISORY",
@@ -182,7 +192,8 @@
           "field": "P6RecommendationRevision source forecast/counterfactual refs/objective constraints/allowed action space/applicability/uncertainty/reviewer/audit/supersession/logical-hash",
           "reason": "training_recommendation lacks governed locations for these fields; rationale/proposed_training_items cannot be overloaded as a hidden schema."
         }
-      ]
+      ],
+      "dependency_blockers": []
     }
   ],
   "forbidden_workarounds": [
@@ -196,7 +207,7 @@
     "SQLite/PostgreSQL common release/object/CAS registration substrate",
     "object/Parquet staging, sealing, enumeration and orphan recovery",
     "P1/longitudinal wiring",
-    "P3 adapter implementation where exact derivations are pinned and tested",
+    "P3-owned model/surface/twin/estimate persistence component implementation; production runtime activation remains blocked by exact P2 dependency",
     "schema-fit tests and Authority Change Proposal design"
   ]
 }

@@ -27,10 +27,17 @@ def test_fit_gate_allows_only_reviewed_non_blocked_families() -> None:
     for family in (
         "P1_SESSION_RELEASE",
         "LONGITUDINAL_RELEASE",
-        "P3_TWIN_CAPABILITY",
     ):
         assert gate.record(family).production_allowed is True
         gate.assert_production_allowed(family)
+
+    p3 = gate.record("P3_TWIN_CAPABILITY")
+    assert p3.schema_fit is True
+    assert p3.production_allowed is False
+    assert p3.dependency_blockers
+    with pytest.raises(PersistenceFitError) as p3_blocked:
+        gate.assert_production_allowed("P3_TWIN_CAPABILITY")
+    assert p3_blocked.value.status == "DEPENDENCY_BLOCKED"
 
     for family in (
         "P2_ATTRIBUTION",
