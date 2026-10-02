@@ -9,7 +9,6 @@ import statistics
 import struct
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime
 from typing import cast
 from uuid import UUID, uuid5
 
