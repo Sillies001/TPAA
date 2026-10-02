@@ -8,7 +8,6 @@ from tpaa_runtime.persistence import (
     DesktopPersistenceConfig,
     build_desktop_persistence,
 )
-
 from tpaa_storage import (
     PersistenceFitError,
     ProductPublicationRequest,
