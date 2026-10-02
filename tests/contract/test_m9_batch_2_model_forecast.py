@@ -400,6 +400,34 @@ def test_m9_batch2_out_of_domain_row_is_excluded_never_zero_filled() -> None:
     assert blocked.value.code == "FAIL_CLOSED_P6_APPLICABILITY_REQUIRED"
 
 
+def test_m9_batch2_duplicate_session_order_is_not_identifiable() -> None:
+    rows = list(_rows())
+    duplicate = replace(
+        rows[-1],
+        session_order=rows[-2].session_order,
+        estimate=replace(
+            rows[-1].estimate,
+            condition_point={
+                "session_order": rows[-2].session_order,
+                "reference_condition_id": REFERENCE,
+            },
+        ),
+    )
+    duplicate = replace(
+        duplicate,
+        p4_revision=replace(
+            duplicate.p4_revision,
+            p3_estimate_id=duplicate.estimate.estimate_id,
+        ),
+    )
+    applicability = assess_p6_training_applicability(
+        (*rows[:-1], duplicate),
+        as_of_utc="2026-09-04T18:00:00Z",
+    )
+    assert applicability.status == "NOT_IDENTIFIABLE"
+    assert "DUPLICATE_SESSION_ORDER" in applicability.reason_codes
+
+
 def test_m9_batch2_missing_uncertainty_and_future_context_fail_closed() -> None:
     rows = list(_rows())
     bad_estimate = replace(

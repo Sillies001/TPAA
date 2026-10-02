@@ -22,18 +22,6 @@ from .p3_twin import (
     evaluate_twin_capability_estimate,
     publish_aircraft_twin_revision,
 )
-from .p6_input import (
-    P6ContextRef,
-    P6CounterfactualRequestBinding,
-    P6FactualSourceRevision,
-    P6ForecastRequestBinding,
-    P6InputSnapshot,
-    P6P3ModelRef,
-    assert_p6_input_snapshot_identity,
-    build_p6_counterfactual_request_binding,
-    build_p6_forecast_request_binding,
-    build_p6_input_snapshot,
-)
 from .p6_forecast import (
     P6ApplicabilityEvidence,
     P6CapabilityTrainingRow,
@@ -50,6 +38,18 @@ from .p6_forecast import (
     execute_p6_model_training,
     materialize_p6_model_datasets,
     validate_p6_managed_model_object,
+)
+from .p6_input import (
+    P6ContextRef,
+    P6CounterfactualRequestBinding,
+    P6FactualSourceRevision,
+    P6ForecastRequestBinding,
+    P6InputSnapshot,
+    P6P3ModelRef,
+    assert_p6_input_snapshot_identity,
+    build_p6_counterfactual_request_binding,
+    build_p6_forecast_request_binding,
+    build_p6_input_snapshot,
 )
 
 __all__ = [
