@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
+from typing import Protocol
 from uuid import UUID
 
 from tpaa_assessment import (
@@ -258,6 +259,13 @@ def _validate_snapshot(value: M6P2WorkspaceSnapshot) -> None:
             raise M6ApplicationError("M6_P2_NOT_IDENTIFIABLE_INVALID", estimate.estimate_id)
 
 
+class M6P2WorkspaceRepository(Protocol):
+    """Engine-neutral exact P2 workspace repository port."""
+
+    def exact(self, estimate_id: str) -> M6P2WorkspaceSnapshot:
+        """Return one immutable exact-identity P2 workspace snapshot."""
+
+
 class InMemoryM6P2WorkspaceRepository:
     """Exact-identity in-memory read repository used by Application/transport tests."""
 
@@ -283,7 +291,7 @@ class InMemoryM6P2WorkspaceRepository:
 class M6WorkspaceService:
     """Release-bound P2 read projections; never executes attribution."""
 
-    def __init__(self, repository: InMemoryM6P2WorkspaceRepository) -> None:
+    def __init__(self, repository: M6P2WorkspaceRepository) -> None:
         self._repository = repository
 
     def _snapshot(

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import TypeVar, cast
+from typing import Protocol, TypeVar, cast
 
 from tpaa_assessment.p6_recommendation import (
     P6RecommendationApprovalCommand,
@@ -119,6 +119,37 @@ class M9ModelReleaseMutation:
     request_id: str
     published_at_utc: str
     viewer: P6SecurityViewer
+
+
+class M9P6Repository(Protocol):
+    """Engine-neutral exact P6 repository port for durable product adapters."""
+
+    def register_input(self, value: P6InputSnapshot) -> None: ...
+    def register_forecast_request(self, value: P6ForecastRequestBinding) -> None: ...
+    def register_counterfactual_request(
+        self,
+        value: P6CounterfactualRequestBinding,
+    ) -> None: ...
+    def register_model_build(
+        self,
+        build: P6ModelBuild,
+        managed_object: P6ManagedModelObject,
+    ) -> None: ...
+    def register_forecast(self, value: P6ForecastRevision) -> None: ...
+    def register_counterfactual(self, value: P6CounterfactualRevision) -> None: ...
+    def register_recommendation(self, value: P6RecommendationRevision) -> None: ...
+    def replace_model_release(self, model: P6ModelRevision) -> None: ...
+    def exact_input(self, object_id: str) -> P6InputSnapshot: ...
+    def exact_forecast_request(self, object_id: str) -> P6ForecastRequestBinding: ...
+    def exact_counterfactual_request(
+        self,
+        object_id: str,
+    ) -> P6CounterfactualRequestBinding: ...
+    def exact_model_build(self, object_id: str) -> P6ModelBuild: ...
+    def exact_managed_object(self, model_id: str) -> P6ManagedModelObject: ...
+    def exact_forecast(self, object_id: str) -> P6ForecastRevision: ...
+    def exact_counterfactual(self, object_id: str) -> P6CounterfactualRevision: ...
+    def exact_recommendation(self, object_id: str) -> P6RecommendationRevision: ...
 
 
 class InMemoryM9P6Repository:
@@ -310,7 +341,7 @@ class M9WorkspaceService:
 
     def __init__(
         self,
-        repository: InMemoryM9P6Repository,
+        repository: M9P6Repository,
         *,
         admission_evidence: P6AdmissionEvidence | None = None,
         security_policy: P6RuntimeSecurityPolicy | None = None,
