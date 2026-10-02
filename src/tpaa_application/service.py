@@ -330,6 +330,18 @@ class ApplicationService:
     def m9_model(self, query: M9ExactQuery) -> dict[str, object]:
         return self._m9().model(query)
 
+    def m9_forecast_request(
+        self,
+        query: M9ExactQuery,
+    ) -> dict[str, object]:
+        return self._m9().forecast_request(query)
+
+    def m9_counterfactual_request(
+        self,
+        query: M9ExactQuery,
+    ) -> dict[str, object]:
+        return self._m9().counterfactual_request(query)
+
     def m9_forecast(self, query: M9ExactQuery) -> dict[str, object]:
         return self._m9().forecast(query)
 

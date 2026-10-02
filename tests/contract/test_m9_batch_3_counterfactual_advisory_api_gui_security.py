@@ -438,10 +438,12 @@ def test_m9_batch3_command_and_causal_upgrades_fail_closed() -> None:
         )
     assert causal.value.code == "FAIL_CLOSED_P6_CAUSAL_CLAIM_NOT_AUTHORIZED"
 
-    _, _, forecast_id, counterfactual_id, _ = _candidate_products()
+    _, command_service, forecast_id, counterfactual_id, _ = (
+        _candidate_products()
+    )
     instructor = _viewer("INSTRUCTOR_EVALUATOR", U["instructor"])
     with pytest.raises(M9ApplicationError) as command:
-        service.create_recommendation(
+        command_service.create_recommendation(
             M9RecommendationMutation(
                 request_id="req-command-upgrade",
                 subject_id=U["subject"],
@@ -485,6 +487,8 @@ def test_m9_batch3_workspace_and_gui_keep_fact_and_projection_separate() -> None
     assert model.persistence_access is False
     assert model.projection_to_fact_upgrade is False
     assert model.forecast.projection_class == "P6_FORECAST_PROJECTION"
+    assert model.forecast.assumptions["assumption_profile_version"] == "1.0.0"
+    assert model.counterfactual.assumptions["held_fixed"]
     assert model.counterfactual.projection_class == (
         "P6_COUNTERFACTUAL_PROJECTION"
     )
@@ -525,7 +529,7 @@ class _UnusedStorageStatus:
 
 
 def test_m9_batch3_api_uses_exact_ids_and_application_service_only() -> None:
-    _, workspace, forecast_id, counterfactual_id, recommendation_id = (
+    repo, workspace, forecast_id, counterfactual_id, recommendation_id = (
         _candidate_products()
     )
     application = ApplicationService(
@@ -539,6 +543,21 @@ def test_m9_batch3_api_uses_exact_ids_and_application_service_only() -> None:
             principal_resolver=lambda request: viewer,
         )
     )
+    forecast_request_id = repo.exact_forecast(
+        forecast_id
+    ).forecast_request_id
+    counterfactual_request_id = repo.exact_counterfactual(
+        counterfactual_id
+    ).counterfactual_request_id
+    request_response = client.get(
+        f"/m9/forecast-requests/{forecast_request_id}"
+    )
+    assert request_response.status_code == 200
+    assert request_response.json()["forecast_request_id"] == forecast_request_id
+    cf_request_response = client.get(
+        f"/m9/counterfactual-requests/{counterfactual_request_id}"
+    )
+    assert cf_request_response.status_code == 200
     response = client.get(f"/m9/forecasts/{forecast_id}")
     assert response.status_code == 200
     assert response.json()["forecast_result_id"] == forecast_id

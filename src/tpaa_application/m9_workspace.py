@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import cast
+from typing import TypeVar, cast
 
 from tpaa_assessment.p6_recommendation import (
     P6RecommendationApprovalCommand,
@@ -40,6 +40,9 @@ from tpaa_context import (
     pseudonymous_subject_key,
     utc,
 )
+
+
+_T = TypeVar("_T")
 
 
 class M9ApplicationError(RuntimeError):
@@ -134,9 +137,9 @@ class InMemoryM9P6Repository:
 
     @staticmethod
     def _register_exact(
-        target: dict[str, object],
+        target: dict[str, _T],
         key: str,
-        value: object,
+        value: _T,
     ) -> None:
         current = target.get(key)
         if current is not None and current != value:
@@ -290,10 +293,10 @@ class InMemoryM9P6Repository:
 
     @staticmethod
     def _exact(
-        source: dict[str, object],
+        source: dict[str, _T],
         object_id: str,
         code: str,
-    ):
+    ) -> _T:
         try:
             return source[object_id]
         except KeyError as exc:
@@ -434,10 +437,80 @@ class M9WorkspaceService:
         )
         return payload
 
+    def forecast_request(self, query: M9ExactQuery) -> dict[str, object]:
+        value = self._repo.exact_forecast_request(query.object_id)
+        self._read_allowed(query.viewer, released=False)
+        payload: dict[str, object] = {
+            "forecast_request_id": value.forecast_request_id,
+            "input_snapshot_id": value.input_snapshot_id,
+            "forecast_spec_id": value.forecast_spec_id,
+            "forecast_spec_version": value.forecast_spec_version,
+            "target_scope": value.target_scope,
+            "subject_ref": value.subject_ref,
+            "target_code": value.target_code,
+            "forecast_origin_utc": value.forecast_origin_utc,
+            "horizon_spec": dict(value.horizon_spec),
+            "capability_model_id": value.capability_model_id,
+            "model_profile_id": value.model_profile_id,
+            "model_profile_version": value.model_profile_version,
+            "training_dataset_snapshot_id": value.training_dataset_snapshot_id,
+            "validation_dataset_snapshot_id": value.validation_dataset_snapshot_id,
+            "assumption_profile_id": value.assumption_profile_id,
+            "assumption_profile_version": value.assumption_profile_version,
+            "as_of_utc": value.as_of_utc,
+            "request_hash": value.request_hash,
+            "release_state": "CANDIDATE_NOT_ADMITTED",
+        }
+        self._record(
+            query.viewer,
+            action="FORECAST_REQUEST_READ",
+            object_ref=query.object_id,
+            outcome="ALLOW",
+        )
+        return payload
+
+    def counterfactual_request(
+        self,
+        query: M9ExactQuery,
+    ) -> dict[str, object]:
+        value = self._repo.exact_counterfactual_request(query.object_id)
+        self._read_allowed(query.viewer, released=False)
+        payload: dict[str, object] = {
+            "counterfactual_request_id": value.counterfactual_request_id,
+            "input_snapshot_id": value.input_snapshot_id,
+            "base_product_refs": list(value.base_product_refs),
+            "scenario_definition_id": value.scenario_definition_id,
+            "interventions": dict(value.interventions),
+            "held_fixed_assumptions": dict(value.held_fixed_assumptions),
+            "model_refs": list(value.model_refs),
+            "applicability_profile_ref": value.applicability_profile_ref,
+            "as_of_utc": value.as_of_utc,
+            "request_hash": value.request_hash,
+            "release_state": "CANDIDATE_NOT_ADMITTED",
+        }
+        self._record(
+            query.viewer,
+            action="COUNTERFACTUAL_REQUEST_READ",
+            object_ref=query.object_id,
+            outcome="ALLOW",
+        )
+        return payload
+
     def forecast(self, query: M9ExactQuery) -> dict[str, object]:
         value = self._repo.exact_forecast(query.object_id)
+        request = self._repo.exact_forecast_request(
+            value.forecast_request_id
+        )
         self._read_allowed(query.viewer, released=False)
         payload = value.projection()
+        payload["forecast_request_id"] = request.forecast_request_id
+        payload["model_artifact_hash"] = value.model_artifact_hash
+        payload["forecast_origin_utc"] = value.forecast_origin_utc
+        payload["assumptions"] = {
+            "assumption_profile_id": request.assumption_profile_id,
+            "assumption_profile_version": request.assumption_profile_version,
+            "horizon_spec": dict(request.horizon_spec),
+        }
         payload["projection_class"] = "P6_FORECAST_PROJECTION"
         payload["release_state"] = (
             "ADMITTED_RELEASE" if self._p6_admitted else "CANDIDATE_NOT_ADMITTED"
@@ -815,15 +888,6 @@ class M9WorkspaceService:
         except P6GovernanceError as exc:
             raise M9ApplicationError(exc.code, exc.detail) from exc
         build = self._repo.exact_model_build(mutation.capability_model_id)
-        if (
-            build.model.status != "VALIDATED"
-            or build.applicability.status != "APPLICABLE"
-            or build.uncertainty.status != "CALIBRATED"
-        ):
-            raise M9ApplicationError(
-                "M9_MODEL_RELEASE_NOT_QUALIFIED",
-                mutation.capability_model_id,
-            )
         utc(mutation.published_at_utc, field="published_at_utc")
         fingerprint = canonical_hash(
             {
@@ -836,6 +900,15 @@ class M9WorkspaceService:
         reused = self._idempotent(request_id, fingerprint)
         if reused is not None:
             return reused
+        if (
+            build.model.status != "VALIDATED"
+            or build.applicability.status != "APPLICABLE"
+            or build.uncertainty.status != "CALIBRATED"
+        ):
+            raise M9ApplicationError(
+                "M9_MODEL_RELEASE_NOT_QUALIFIED",
+                mutation.capability_model_id,
+            )
         published = replace(
             build.model,
             status="PUBLISHED",

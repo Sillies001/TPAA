@@ -27,6 +27,7 @@ class M9ProjectionPresentation:
     projection_class: str
     applicability_status: str
     uncertainty: Mapping[str, object]
+    assumptions: Mapping[str, object]
     exact_refs: tuple[str, ...]
     release_state: str
 
@@ -38,6 +39,8 @@ class M9RecommendationPresentation:
     approval_state: str
     applicability_status: str
     uncertainty: Mapping[str, object]
+    objective_constraints: Mapping[str, object]
+    allowed_action_space: Mapping[str, object]
     source_forecast_result_ids: tuple[str, ...]
     source_counterfactual_run_ids: tuple[str, ...]
     release_state: str
@@ -169,6 +172,14 @@ def build_m9_layered_workspace_model(
         counterfactual.get("uncertainty"),
         "counterfactual.uncertainty",
     )
+    forecast_assumptions = _mapping(
+        forecast.get("assumptions"),
+        "forecast.assumptions",
+    )
+    counterfactual_assumptions = _mapping(
+        counterfactual.get("assumptions"),
+        "counterfactual.assumptions",
+    )
     recommendation_uncertainty = _mapping(
         recommendation.get("uncertainty"),
         "recommendation.uncertainty",
@@ -204,6 +215,7 @@ def build_m9_layered_workspace_model(
                 "forecast.applicability_status",
             ),
             uncertainty=forecast_uncertainty,
+            assumptions=forecast_assumptions,
             exact_refs=(model_ref, *factual_refs),
             release_state=_text(
                 forecast.get("release_state"),
@@ -218,6 +230,7 @@ def build_m9_layered_workspace_model(
                 "counterfactual.applicability_status",
             ),
             uncertainty=counterfactual_uncertainty,
+            assumptions=counterfactual_assumptions,
             exact_refs=counterfactual_models,
             release_state=_text(
                 counterfactual.get("release_state"),
@@ -236,6 +249,14 @@ def build_m9_layered_workspace_model(
                 "recommendation.applicability_status",
             ),
             uncertainty=recommendation_uncertainty,
+            objective_constraints=_mapping(
+                recommendation.get("objective_constraints"),
+                "recommendation.objective_constraints",
+            ),
+            allowed_action_space=_mapping(
+                recommendation.get("allowed_action_space"),
+                "recommendation.allowed_action_space",
+            ),
             source_forecast_result_ids=_strings(
                 recommendation.get("source_forecast_result_ids"),
                 "recommendation.source_forecast_result_ids",

@@ -72,11 +72,13 @@ class P6RuntimeSecurityPolicy:
         bindings = root.get("source_bindings")
         write = root.get("write_authorization_contract")
         projection = root.get("projection_contract")
+        scope = root.get("scope")
         rows = root.get("role_matrix")
         if (
             not isinstance(bindings, dict)
             or not isinstance(write, dict)
             or not isinstance(projection, dict)
+            or not isinstance(scope, dict)
             or not isinstance(rows, list)
         ):
             raise P6GovernanceError(
@@ -88,7 +90,7 @@ class P6RuntimeSecurityPolicy:
             bindings.get("p6_authority_sha256") != authority.authority_sha256
             or root.get("profile_id") != _ROLE_PROFILE_ID
             or root.get("version") != "1.0.0"
-            or root.get("scope", {}).get("default_deny") is not True
+            or scope.get("default_deny") is not True
             or write.get("recommendation_approval_role")
             != "INSTRUCTOR_EVALUATOR"
             or write.get("model_release_role") != "MODEL_REVIEWER"

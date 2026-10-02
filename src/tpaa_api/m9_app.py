@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
+from typing import cast
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -65,7 +66,7 @@ def _strings(body: Mapping[str, object], field: str) -> tuple[str, ...]:
         raise M9ApplicationError("M9_DTO_STRINGS_INVALID", field)
     if not all(isinstance(item, str) and item for item in value):
         raise M9ApplicationError("M9_DTO_STRINGS_INVALID", field)
-    return tuple(value)
+    return tuple(cast(Sequence[str], value))
 
 
 def register_m9_routes(
@@ -98,6 +99,34 @@ def register_m9_routes(
         try:
             payload = application.m9_model(
                 M9ExactQuery(capability_model_id, principal(request))
+            )
+        except M9ApplicationError as exc:
+            return _error(exc)
+        return JSONResponse(status_code=200, content=payload)
+
+    @app.get("/m9/forecast-requests/{forecast_request_id}")
+    def forecast_request(
+        forecast_request_id: str,
+        request: Request,
+    ) -> JSONResponse:
+        try:
+            payload = application.m9_forecast_request(
+                M9ExactQuery(forecast_request_id, principal(request))
+            )
+        except M9ApplicationError as exc:
+            return _error(exc)
+        return JSONResponse(status_code=200, content=payload)
+
+    @app.get(
+        "/m9/counterfactual-requests/{counterfactual_request_id}"
+    )
+    def counterfactual_request(
+        counterfactual_request_id: str,
+        request: Request,
+    ) -> JSONResponse:
+        try:
+            payload = application.m9_counterfactual_request(
+                M9ExactQuery(counterfactual_request_id, principal(request))
             )
         except M9ApplicationError as exc:
             return _error(exc)
