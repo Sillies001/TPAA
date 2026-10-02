@@ -9,6 +9,7 @@ from .m5_secure import M5ServiceSecurityError, create_m5_service_app
 from .m6_app import create_m6_app, register_m6_routes
 from .m7_app import create_m7_app, register_m7_routes
 from .m8_app import M8PrincipalResolver, create_m8_app, register_m8_routes
+from .m9_app import M9PrincipalResolver, create_m9_app, register_m9_routes
 
 __all__ = [
     "create_app",
@@ -24,5 +25,8 @@ __all__ = [
     "M8PrincipalResolver",
     "create_m8_app",
     "register_m8_routes",
+    "M9PrincipalResolver",
+    "create_m9_app",
+    "register_m9_routes",
     "create_m5_service_app",
 ]
