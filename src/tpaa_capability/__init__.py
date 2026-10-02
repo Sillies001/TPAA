@@ -23,6 +23,15 @@ from .p3_twin import (
     publish_aircraft_twin_revision,
 )
 
+from .p6_input import (
+    P6ContextRef,
+    P6FactualSourceRevision,
+    P6InputSnapshot,
+    P6P3ModelRef,
+    assert_p6_input_snapshot_identity,
+    build_p6_input_snapshot,
+)
+
 __all__ = [
     "P3CapabilityModelBuild",
     "P3CapabilityModelProduct",
@@ -35,7 +44,13 @@ __all__ = [
     "P3AircraftTwinRevision",
     "P3CapabilityEstimate",
     "P3TwinComponentBinding",
+    "P6ContextRef",
+    "P6FactualSourceRevision",
+    "P6InputSnapshot",
+    "P6P3ModelRef",
+    "assert_p6_input_snapshot_identity",
     "build_capability_surface",
+    "build_p6_input_snapshot",
     "evaluate_surface",
     "evaluate_temporal_holdout",
     "execute_capability_model",
