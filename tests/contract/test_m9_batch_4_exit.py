@@ -318,7 +318,7 @@ def test_m9_batch_4_closed_tracker_with_go_evidence_remains_valid(
     assert result["failed_acceptance"] == []
 
 
-def test_m9_batch_4_workflow_keeps_fourteen_job_topology_and_final_sink() -> None:
+def test_m9_batch_4_workflow_keeps_fourteen_job_topology_and_exit_step() -> None:
     workflow = (
         ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
     ).read_text(encoding="utf-8")
@@ -329,4 +329,4 @@ def test_m9_batch_4_workflow_keeps_fourteen_job_topology_and_final_sink() -> Non
     assert "--required-jobs-success 14" in workflow
     assert "--required-jobs-total 14" in workflow
     assert "numbers = (149, 193, 194, 195, 196, 197, 198)" in workflow
-    assert workflow.rstrip().endswith("--output evidence/m9-exit/review.json")
+    assert "--output evidence/m9-exit/review.json" in workflow

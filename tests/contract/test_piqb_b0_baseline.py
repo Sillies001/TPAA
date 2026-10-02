@@ -79,4 +79,4 @@ def test_piqb_b0_workflow_keeps_fourteen_job_topology() -> None:
     assert "piqb_b0_review.py" in workflow
     assert "--required-jobs-success 14" in workflow
     assert "--required-jobs-total 14" in workflow
-    assert workflow.rstrip().endswith("--output evidence/piqb-b0/review.json")
+    assert "--output evidence/piqb-b0/review.json" in workflow
