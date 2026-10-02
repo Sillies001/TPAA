@@ -20,6 +20,7 @@ from .bootstrap import (
 )
 from .core_publication_ledger import SQLiteCorePublicationLedger
 from .ports import RepositoryBaselineMetadata
+from .sqlite_product_repository import SQLiteProductPublicationLedger
 
 
 class SQLiteRepositoryError(RuntimeError):
@@ -112,6 +113,7 @@ class SQLiteDesktopUnitOfWork:
         self._finalized = False
         self.metadata: SQLiteBaselineMetadataRepository
         self.publication: SQLiteCorePublicationLedger
+        self.product_publication: SQLiteProductPublicationLedger
 
     @property
     def write(self) -> bool:
@@ -151,6 +153,7 @@ class SQLiteDesktopUnitOfWork:
             self._finalized = False
             self.metadata = SQLiteBaselineMetadataRepository(connection)
             self.publication = SQLiteCorePublicationLedger(connection)
+            self.product_publication = SQLiteProductPublicationLedger(connection)
             return self
         except Exception:
             if connection is not None:

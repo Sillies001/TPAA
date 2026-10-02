@@ -13,6 +13,7 @@ from tpaa_storage.product_publication import (
     ProductPublicationReceipt,
     ProductPublicationRegistration,
     ProductPublicationRequest,
+    ProductReleaseIdentity,
     recover_sealed_orphans,
 )
 
@@ -32,7 +33,9 @@ class _Ledger:
         return ProductPublicationReceipt(
             product_family=value.product_family,
             product_id=value.product_id,
-            scope_key=value.scope_key,
+            release_id=value.release.release_id,
+            scope_type=value.release.scope_type,
+            scope_key=value.release.scope_key,
             object_uri=value.object_uri,
             object_sha256=value.object_sha256,
             version_token=value.expected_version_token + 1,
@@ -65,12 +68,24 @@ def _request() -> ProductPublicationRequest:
         operation_id="op-1",
         product_family="P6_FORECAST",
         product_id="90000000-0000-4000-8000-000000000001",
-        scope_key="subject:90000000-0000-4000-8000-000000000002",
+        release=ProductReleaseIdentity(
+            release_id="90000000-0000-4000-8000-000000000003",
+            scope_type="LONGITUDINAL",
+            scope_key="subject:90000000-0000-4000-8000-000000000002",
+            session_id=None,
+            longitudinal_scope_id=None,
+            catalog_version="P1-METRIC-CATALOG-1.0",
+            catalog_hash="1" * 64,
+            context_binding_hash="2" * 64,
+            manifest_hash="3" * 64,
+        ),
         sealed_uri=(
             "tpaa-object://products/piqb-b2/"
             "90000000-0000-4000-8000-000000000001.json"
         ),
         payload=b'{"schema":"P6_FORECAST_TEST"}',
+        media_type="application/json",
+        storage_backend="LOCAL_OBJECT_STORE",
         idempotency_key="publish-1",
         expected_version_token=0,
     )

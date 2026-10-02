@@ -19,8 +19,10 @@ from .product_publication import (
     ProductPublicationRequest,
     ProductPublicationResult,
     ProductPublicationUnitOfWork,
+    ProductReleaseIdentity,
     recover_sealed_orphans,
 )
+from .sqlite_product_repository import SQLiteProductPublicationLedger
 from .sqlite_repository import (
     SQLiteBaselineMetadataRepository,
     SQLiteDesktopUnitOfWork,
@@ -44,7 +46,9 @@ __all__ = [
     "ProductPublicationRequest",
     "ProductPublicationResult",
     "ProductPublicationUnitOfWork",
+    "ProductReleaseIdentity",
     "SQLiteBaselineMetadataRepository",
+    "SQLiteProductPublicationLedger",
     "SQLiteDesktopUnitOfWork",
     "SQLiteRepositoryError",
     "bootstrap_sqlite",

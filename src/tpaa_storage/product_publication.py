@@ -27,13 +27,28 @@ class ProductPublicationError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
+class ProductReleaseIdentity:
+    release_id: str
+    scope_type: str
+    scope_key: str
+    session_id: str | None
+    longitudinal_scope_id: str | None
+    catalog_version: str
+    catalog_hash: str
+    context_binding_hash: str
+    manifest_hash: str
+
+
+@dataclass(frozen=True, slots=True)
 class ProductPublicationRequest:
     operation_id: str
     product_family: str
     product_id: str
-    scope_key: str
+    release: ProductReleaseIdentity
     sealed_uri: str
     payload: bytes
+    media_type: str
+    storage_backend: str
     idempotency_key: str
     expected_version_token: int
 
@@ -42,10 +57,12 @@ class ProductPublicationRequest:
 class ProductPublicationRegistration:
     product_family: str
     product_id: str
-    scope_key: str
+    release: ProductReleaseIdentity
     object_uri: str
     object_sha256: str
     object_byte_size: int
+    media_type: str
+    storage_backend: str
     idempotency_key: str
     expected_version_token: int
 
@@ -54,6 +71,8 @@ class ProductPublicationRegistration:
 class ProductPublicationReceipt:
     product_family: str
     product_id: str
+    release_id: str
+    scope_type: str
     scope_key: str
     object_uri: str
     object_sha256: str
@@ -75,6 +94,19 @@ class ProductPublicationLedger(Protocol):
         value: ProductPublicationRegistration,
     ) -> ProductPublicationReceipt:
         """Register the already-sealed object and advance its governed CAS pointer."""
+
+    def exact_product(
+        self,
+        product_family: str,
+        product_id: str,
+    ) -> ProductPublicationReceipt:
+        """Return an exact durable product/object registration."""
+
+    def referenced_object_uris(
+        self,
+        logical_prefix: str | None = None,
+    ) -> tuple[str, ...]:
+        """Return DB-authoritative managed object URIs for recovery."""
 
 
 class ProductPublicationUnitOfWork(Protocol):
@@ -118,8 +150,20 @@ class ProductPublicationCoordinator:
             )
         if not request.product_id.strip():
             raise ProductPublicationError("PRODUCT_ID_REQUIRED", "product_id")
-        if not request.scope_key.strip():
+        if request.release.scope_type not in {"SESSION", "LONGITUDINAL"}:
+            raise ProductPublicationError(
+                "SCOPE_TYPE_INVALID",
+                request.release.scope_type,
+            )
+        if not request.release.scope_key.strip():
             raise ProductPublicationError("SCOPE_KEY_REQUIRED", "scope_key")
+        if not request.media_type.strip():
+            raise ProductPublicationError("MEDIA_TYPE_REQUIRED", "media_type")
+        if not request.storage_backend.strip():
+            raise ProductPublicationError(
+                "STORAGE_BACKEND_REQUIRED",
+                "storage_backend",
+            )
         if not request.idempotency_key.strip():
             raise ProductPublicationError(
                 "IDEMPOTENCY_KEY_REQUIRED",
@@ -147,10 +191,12 @@ class ProductPublicationCoordinator:
         registration = ProductPublicationRegistration(
             product_family=request.product_family,
             product_id=request.product_id,
-            scope_key=request.scope_key,
+            release=request.release,
             object_uri=sealed.logical_uri,
             object_sha256=sealed.artifact_sha256,
             object_byte_size=sealed.byte_size,
+            media_type=request.media_type,
+            storage_backend=request.storage_backend,
             idempotency_key=request.idempotency_key,
             expected_version_token=request.expected_version_token,
         )
@@ -160,7 +206,9 @@ class ProductPublicationCoordinator:
                 if (
                     receipt.product_family != registration.product_family
                     or receipt.product_id != registration.product_id
-                    or receipt.scope_key != registration.scope_key
+                    or receipt.release_id != registration.release.release_id
+                    or receipt.scope_type != registration.release.scope_type
+                    or receipt.scope_key != registration.release.scope_key
                     or receipt.object_uri != registration.object_uri
                     or receipt.object_sha256 != registration.object_sha256
                 ):
