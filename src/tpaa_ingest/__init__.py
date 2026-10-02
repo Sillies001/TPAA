@@ -32,6 +32,12 @@ from tpaa_ingest.m2_time_alignment import (
     NavTimeUncertaintyInput,
     load_m2_time_alignment,
 )
+from tpaa_ingest.p6_interop import (
+    P6InteropArtifactRef,
+    P6InteropSnapshot,
+    assert_p6_interop_snapshot_identity,
+    build_p6_interop_snapshot,
+)
 from tpaa_ingest.source_adapter import (
     GOVERNED_FIXTURE_IDS,
     SourceArtifactIdentity,
@@ -65,6 +71,8 @@ __all__ = [
     "ReferenceFrameProvenance",
     "ReferenceMatchQualityProfile",
     "ReferenceIdentity",
+    "P6InteropArtifactRef",
+    "P6InteropSnapshot",
     "ReferenceTruthRow",
     "SourceArtifactIdentity",
     "SyntheticAircraftSource",
@@ -73,6 +81,8 @@ __all__ = [
     "SyntheticSourceBundle",
     "SyntheticSourceMarker",
     "SyntheticSourceRow",
+    "assert_p6_interop_snapshot_identity",
+    "build_p6_interop_snapshot",
     "load_m2_measurement_alignment",
     "load_m2_mission_system",
     "load_m2_reference_truth",
