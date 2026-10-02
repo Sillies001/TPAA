@@ -181,6 +181,17 @@ class InMemoryP6ReplayRepository:
                 "FAIL_CLOSED_P6_APPLICABILITY_REQUIRED",
                 "observed outcome is not an in-domain numeric P3 estimate",
             )
+        model = self._models[forecast.model_revision_id]
+        reference_id = condition.get("reference_condition_id")
+        if (
+            observed.capability_type != model.capability_type
+            or observed.unit != model.validity_domain.get("unit")
+            or reference_id != model.validity_domain.get("reference_condition_id")
+        ):
+            raise P6GovernanceError(
+                "FAIL_CLOSED_P6_APPLICABILITY_REQUIRED",
+                "observed outcome domain does not match forecast model",
+            )
         if utc(observed.created_at, field="observed.created_at") > utc(
             validated_at_utc,
             field="validated_at_utc",
