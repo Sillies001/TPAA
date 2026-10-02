@@ -1,8 +1,8 @@
-"""SQLite PIQB B2 product release/object registration over frozen DB 1.6.0."""
+"""PostgreSQL PIQB B2 product release/object registration over DB 1.6.0."""
 
 from __future__ import annotations
 
-import sqlite3
+from typing import Any
 from uuid import UUID
 
 from .product_identity import (
@@ -28,43 +28,63 @@ def _uuid(value: str, field: str) -> str:
     return value
 
 
-class SQLiteProductPublicationLedger:
-    """Register sealed product objects, releases and CAS pointers atomically."""
+class PostgreSQLProductPublicationLedger:
+    """Psycopg-backed durable product registration with transaction locks."""
 
-    def __init__(self, connection: sqlite3.Connection) -> None:
+    def __init__(self, connection: Any) -> None:
         self._connection = connection
 
     def _execute(
         self,
         sql: str,
         params: tuple[object, ...] = (),
-    ) -> sqlite3.Cursor:
+    ) -> Any:
         try:
-            return self._connection.execute(sql, params)
-        except sqlite3.DatabaseError as exc:
+            cursor = self._connection.cursor()
+            cursor.execute(sql, params)
+            return cursor
+        except Exception as exc:
             raise ProductPublicationError(
-                "SQLITE_PRODUCT_PUBLICATION_FAILED",
+                "POSTGRES_PRODUCT_PUBLICATION_FAILED",
                 str(exc),
             ) from exc
+
+    def _fetchall(
+        self,
+        sql: str,
+        params: tuple[object, ...] = (),
+    ) -> list[tuple[object, ...]]:
+        cursor = self._execute(sql, params)
+        try:
+            return list(cursor.fetchall())
+        finally:
+            cursor.close()
+
+    def _lock(self, key: str) -> None:
+        cursor = self._execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+            (key,),
+        )
+        cursor.close()
 
     def _idempotent(
         self,
         value: ProductPublicationRegistration,
     ) -> ProductPublicationReceipt | None:
-        rows = self._execute(
+        rows = self._fetchall(
             '''SELECT b.owner_type, b.owner_id, b.release_id,
                       r.scope_type, r.scope_key, r.release_no,
                       o.managed_uri, o.artifact_sha256
-               FROM "registry.compute_job" AS j
-               JOIN "registry.analysis_release" AS r
+               FROM "registry"."compute_job" AS j
+               JOIN "registry"."analysis_release" AS r
                  ON r.compute_job_id = j.job_id
-               JOIN "registry.object_binding" AS b
+               JOIN "registry"."object_binding" AS b
                  ON b.release_id = r.release_id
-               JOIN "registry.object_reference" AS o
+               JOIN "registry"."object_reference" AS o
                  ON o.object_ref_id = b.object_ref_id
-               WHERE j.job_key = ?''',
+               WHERE j.job_key = %s''',
             (value.idempotency_key,),
-        ).fetchall()
+        )
         if not rows:
             return None
         if len(rows) != 1:
@@ -130,16 +150,22 @@ class SQLiteProductPublicationLedger:
                 str(value.expected_version_token),
             )
 
+        self._lock(f"PIQB_PRODUCT_IDEMPOTENCY|{value.idempotency_key}")
+        self._lock(
+            f"PIQB_PRODUCT_SCOPE|{release.scope_type}|{release.scope_key}"
+        )
+
         reused = self._idempotent(value)
         if reused is not None:
             return reused
 
-        pointer = self._execute(
+        pointer = self._fetchall(
             '''SELECT current_release_id, version_token
-               FROM "registry.release_scope_pointer"
-               WHERE scope_type = ? AND scope_key = ?''',
+               FROM "registry"."release_scope_pointer"
+               WHERE scope_type = %s AND scope_key = %s
+               FOR UPDATE''',
             (release.scope_type, release.scope_key),
-        ).fetchall()
+        )
         if len(pointer) > 1:
             raise ProductPublicationError(
                 "RELEASE_POINTER_CARDINALITY",
@@ -157,12 +183,12 @@ class SQLiteProductPublicationLedger:
             value.object_uri,
             value.object_sha256,
         )
-        existing_object = self._execute(
+        existing_object = self._fetchall(
             '''SELECT object_ref_id, artifact_sha256, size_bytes, sealed, gc_state
-               FROM "registry.object_reference"
-               WHERE managed_uri = ?''',
+               FROM "registry"."object_reference"
+               WHERE managed_uri = %s''',
             (value.object_uri,),
-        ).fetchall()
+        )
         if existing_object:
             if len(existing_object) != 1:
                 raise ProductPublicationError(
@@ -173,7 +199,7 @@ class SQLiteProductPublicationLedger:
             if (
                 str(row[1]) != value.object_sha256
                 or int(row[2]) != value.object_byte_size
-                or int(row[3]) != 1
+                or bool(row[3]) is not True
                 or str(row[4]) != "ACTIVE"
             ):
                 raise ProductPublicationError(
@@ -182,14 +208,14 @@ class SQLiteProductPublicationLedger:
                 )
             object_ref_id = str(row[0])
         else:
-            self._execute(
-                '''INSERT INTO "registry.object_reference" (
+            cursor = self._execute(
+                '''INSERT INTO "registry"."object_reference" (
                        object_ref_id, managed_uri, media_type, size_bytes,
                        artifact_sha256, logical_content_hash, storage_backend,
                        sealed, gc_state, gc_state_version,
                        gc_marked_at, created_at, deleted_at
-                   ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 'ACTIVE', 0, NULL,
-                             CURRENT_TIMESTAMP, NULL)''',
+                   ) VALUES (%s, %s, %s, %s, %s, %s, %s, true,
+                             'ACTIVE', 0, NULL, CURRENT_TIMESTAMP, NULL)''',
                 (
                     object_ref_id,
                     value.object_uri,
@@ -200,19 +226,20 @@ class SQLiteProductPublicationLedger:
                     value.storage_backend,
                 ),
             )
+            cursor.close()
 
         job_id = product_job_id(
             value.idempotency_key,
             release.manifest_hash,
         )
-        self._execute(
-            '''INSERT INTO "registry.compute_job" (
+        cursor = self._execute(
+            '''INSERT INTO "registry"."compute_job" (
                    job_id, job_type, session_id, episode_id, job_key, status,
                    component_version, input_hash, progress, reason_codes,
                    error_detail, created_at, started_at, finished_at
-               ) VALUES (?, ?, ?, NULL, ?, 'SUCCEEDED', ?, ?, 1.0, '[]',
-                         NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-                         CURRENT_TIMESTAMP)''',
+               ) VALUES (%s, %s, %s, NULL, %s, 'SUCCEEDED', %s, %s,
+                         1.0, %s, NULL, CURRENT_TIMESTAMP,
+                         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)''',
             (
                 job_id,
                 f"PIQB_PRODUCT_PUBLICATION:{value.product_family}",
@@ -220,19 +247,22 @@ class SQLiteProductPublicationLedger:
                 value.idempotency_key,
                 PRODUCT_PUBLICATION_COMPONENT_VERSION,
                 release.manifest_hash,
+                [],
             ),
         )
+        cursor.close()
 
         next_token = actual_token + 1
-        self._execute(
-            '''INSERT INTO "registry.analysis_release" (
+        cursor = self._execute(
+            '''INSERT INTO "registry"."analysis_release" (
                    release_id, scope_type, scope_key, session_id,
                    longitudinal_scope_id, release_no, compute_job_id,
                    catalog_version, catalog_hash, context_binding_hash,
                    status, parent_release_id, manifest_hash, created_at,
                    published_at
-               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PUBLISHED', ?, ?,
-                         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)''',
+               ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                         'PUBLISHED', %s, %s, CURRENT_TIMESTAMP,
+                         CURRENT_TIMESTAMP)''',
             (
                 release.release_id,
                 release.scope_type,
@@ -248,6 +278,7 @@ class SQLiteProductPublicationLedger:
                 release.manifest_hash,
             ),
         )
+        cursor.close()
 
         binding_id = product_binding_id(
             value.product_family,
@@ -255,11 +286,11 @@ class SQLiteProductPublicationLedger:
             release.release_id,
             object_ref_id,
         )
-        self._execute(
-            '''INSERT INTO "registry.object_binding" (
+        cursor = self._execute(
+            '''INSERT INTO "registry"."object_binding" (
                    binding_id, object_ref_id, owner_type, owner_id,
                    release_id, role, created_at
-               ) VALUES (?, ?, ?, ?, ?, 'PRIMARY_PRODUCT',
+               ) VALUES (%s, %s, %s, %s, %s, 'PRIMARY_PRODUCT',
                          CURRENT_TIMESTAMP)''',
             (
                 binding_id,
@@ -269,14 +300,15 @@ class SQLiteProductPublicationLedger:
                 release.release_id,
             ),
         )
+        cursor.close()
 
         if pointer:
             cursor = self._execute(
-                '''UPDATE "registry.release_scope_pointer"
-                   SET current_release_id = ?, version_token = ?,
+                '''UPDATE "registry"."release_scope_pointer"
+                   SET current_release_id = %s, version_token = %s,
                        updated_at = CURRENT_TIMESTAMP
-                   WHERE scope_type = ? AND scope_key = ?
-                     AND version_token = ?''',
+                   WHERE scope_type = %s AND scope_key = %s
+                     AND version_token = %s''',
                 (
                     release.release_id,
                     next_token,
@@ -285,17 +317,20 @@ class SQLiteProductPublicationLedger:
                     actual_token,
                 ),
             )
-            if cursor.rowcount != 1:
-                raise ProductPublicationError(
-                    "PUBLISH_CAS_UPDATE_LOST",
-                    release.scope_key,
-                )
+            try:
+                if cursor.rowcount != 1:
+                    raise ProductPublicationError(
+                        "PUBLISH_CAS_UPDATE_LOST",
+                        release.scope_key,
+                    )
+            finally:
+                cursor.close()
         else:
-            self._execute(
-                '''INSERT INTO "registry.release_scope_pointer" (
+            cursor = self._execute(
+                '''INSERT INTO "registry"."release_scope_pointer" (
                        scope_type, scope_key, current_release_id,
                        version_token, updated_at
-                   ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)''',
+                   ) VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)''',
                 (
                     release.scope_type,
                     release.scope_key,
@@ -303,6 +338,7 @@ class SQLiteProductPublicationLedger:
                     next_token,
                 ),
             )
+            cursor.close()
 
         return ProductPublicationReceipt(
             product_family=value.product_family,
@@ -322,19 +358,19 @@ class SQLiteProductPublicationLedger:
         product_id: str,
     ) -> ProductPublicationReceipt:
         _uuid(product_id, "product_id")
-        rows = self._execute(
+        rows = self._fetchall(
             '''SELECT b.owner_type, b.owner_id, b.release_id,
                       r.scope_type, r.scope_key, r.release_no,
                       o.managed_uri, o.artifact_sha256
-               FROM "registry.object_binding" AS b
-               JOIN "registry.analysis_release" AS r
+               FROM "registry"."object_binding" AS b
+               JOIN "registry"."analysis_release" AS r
                  ON r.release_id = b.release_id
-               JOIN "registry.object_reference" AS o
+               JOIN "registry"."object_reference" AS o
                  ON o.object_ref_id = b.object_ref_id
-               WHERE b.owner_type = ? AND b.owner_id = ?
+               WHERE b.owner_type = %s AND b.owner_id = %s
                  AND b.role = 'PRIMARY_PRODUCT' ''',
             (product_family, product_id),
-        ).fetchall()
+        )
         if len(rows) != 1:
             raise ProductPublicationError(
                 "PRODUCT_REGISTRATION_CARDINALITY",
@@ -358,19 +394,19 @@ class SQLiteProductPublicationLedger:
         logical_prefix: str | None = None,
     ) -> tuple[str, ...]:
         if logical_prefix is None:
-            rows = self._execute(
+            rows = self._fetchall(
                 '''SELECT managed_uri
-                   FROM "registry.object_reference"
-                   WHERE sealed = 1 AND gc_state = 'ACTIVE'
+                   FROM "registry"."object_reference"
+                   WHERE sealed = true AND gc_state = 'ACTIVE'
                    ORDER BY managed_uri'''
-            ).fetchall()
+            )
         else:
-            rows = self._execute(
+            rows = self._fetchall(
                 '''SELECT managed_uri
-                   FROM "registry.object_reference"
-                   WHERE sealed = 1 AND gc_state = 'ACTIVE'
-                     AND managed_uri LIKE ?
+                   FROM "registry"."object_reference"
+                   WHERE sealed = true AND gc_state = 'ACTIVE'
+                     AND managed_uri LIKE %s
                    ORDER BY managed_uri''',
                 (f"{logical_prefix}%",),
-            ).fetchall()
+            )
         return tuple(str(row[0]) for row in rows)

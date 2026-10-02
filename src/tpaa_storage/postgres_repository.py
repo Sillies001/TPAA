@@ -24,6 +24,7 @@ from .bootstrap import (
 )
 from .core_publication_ledger import PostgreSQLCorePublicationLedger
 from .ports import RepositoryBaselineMetadata
+from .postgres_product_repository import PostgreSQLProductPublicationLedger
 
 
 class PostgreSQLRepositoryError(RuntimeError):
@@ -177,6 +178,7 @@ class PostgreSQLServiceUnitOfWork:
         self._finalized = True
         self.metadata: PostgreSQLBaselineMetadataRepository
         self.publication: PostgreSQLCorePublicationLedger
+        self.product_publication: PostgreSQLProductPublicationLedger
 
     @property
     def active(self) -> bool:
@@ -197,6 +199,9 @@ class PostgreSQLServiceUnitOfWork:
             self._finalized = False
             self.metadata = PostgreSQLBaselineMetadataRepository(connection)
             self.publication = PostgreSQLCorePublicationLedger(connection)
+            self.product_publication = PostgreSQLProductPublicationLedger(
+                connection
+            )
             return self
         except Exception:
             try:

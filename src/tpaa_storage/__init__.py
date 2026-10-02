@@ -11,6 +11,12 @@ from .bootstrap import (
 from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
 from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
 from .ports import BaselineMetadataRepository, RepositoryBaselineMetadata, RepositoryUnitOfWork
+from .postgres_product_repository import PostgreSQLProductPublicationLedger
+from .postgres_repository import (
+    PostgreSQLBaselineMetadataRepository,
+    PostgreSQLRepositoryError,
+    PostgreSQLServiceUnitOfWork,
+)
 from .product_publication import (
     OrphanRecoveryReport,
     ProductPublicationCoordinator,
@@ -46,6 +52,10 @@ __all__ = [
     "RepositoryBaselineMetadata",
     "RepositoryUnitOfWork",
     "OrphanRecoveryReport",
+    "PostgreSQLBaselineMetadataRepository",
+    "PostgreSQLProductPublicationLedger",
+    "PostgreSQLRepositoryError",
+    "PostgreSQLServiceUnitOfWork",
     "ProductPublicationCoordinator",
     "ProductPublicationError",
     "ProductPublicationLedger",
