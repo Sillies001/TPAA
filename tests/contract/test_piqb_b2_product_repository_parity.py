@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 
 from tpaa_storage.postgres_product_repository import (
     PostgreSQLProductPublicationLedger,
@@ -68,5 +69,25 @@ def test_postgres_product_adapter_uses_transaction_lock_and_frozen_tables() -> N
         '"registry"."release_scope_pointer"',
     ):
         assert table in source
+    assert "CREATE TABLE" not in source
+    assert "ALTER TABLE" not in source
+
+
+def test_live_postgres_product_qualification_uses_frozen_authority() -> None:
+    source = (
+        Path(__file__).resolve().parents[2]
+        / "tools"
+        / "testing"
+        / "piqb_b2_postgres_product_persistence.py"
+    ).read_text(encoding="utf-8")
+    for token in (
+        "_recreate_scoped_database",
+        "bootstrap_postgres",
+        "build_desktop_persistence",
+        "build_service_persistence",
+        "PROPOSED_NOT_ADOPTED",
+        "shadow_schema_created",
+    ):
+        assert token in source
     assert "CREATE TABLE" not in source
     assert "ALTER TABLE" not in source

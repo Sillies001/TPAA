@@ -90,6 +90,10 @@ def review(
     postgres = _text("src/tpaa_storage/postgres_product_repository.py")
     persistence = _text("src/tpaa_runtime/persistence.py")
     fit_gate = _text("src/tpaa_storage/persistence_fit.py")
+    workflow = _text(".github/workflows/cross-platform-ci.yml")
+    live_postgres = _text(
+        "tools/testing/piqb_b2_postgres_product_persistence.py"
+    )
 
     acceptance = {
         "b1_entry_exact": (
@@ -181,6 +185,34 @@ def review(
             / "contract"
             / "test_piqb_b2_product_repository_parity.py"
         ).is_file(),
+        "real_postgres_restart_parity_gate_present": (
+            isinstance(task_state.get("PIQB-B2-006"), dict)
+            and task_state["PIQB-B2-006"].get("state")
+            == "PARTIAL_AUTHORITY_BLOCKED"
+            and "real PostgreSQL exact read and idempotent replay after reconnect"
+            in task_state["PIQB-B2-006"].get("evidence", [])
+            and isinstance(task_state.get("PIQB-B2-008"), dict)
+            and "real SQLite/PostgreSQL publication restart/CAS/recovery parity"
+            in task_state["PIQB-B2-008"].get("evidence", [])
+            and all(
+                token in workflow
+                for token in (
+                    "Execute PIQB B2 PostgreSQL restart/parity qualification",
+                    "piqb_b2_postgres_product_persistence.py",
+                    "evidence/piqb-b2/postgres-product-persistence.json",
+                )
+            )
+            and all(
+                token in live_postgres
+                for token in (
+                    "build_desktop_persistence",
+                    "build_service_persistence",
+                    "PUBLISH_CAS_CONFLICT",
+                    "PROPOSED_NOT_ADOPTED",
+                    "shadow_schema_created",
+                )
+            )
+        ),
         "blocked_tasks_not_claimed_complete": all(
             not (
                 isinstance(task_state.get(task), dict)

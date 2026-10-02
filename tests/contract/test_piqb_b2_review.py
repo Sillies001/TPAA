@@ -34,6 +34,9 @@ def test_b2_truthful_candidate_passes_ci_but_remains_authority_blocked() -> None
     assert result["persistence_recovery_qualified"] is False
     assert result["formal_completion_blocked_by_authority_change"] is True
     assert result["authority_change_proposal_issue"] == 216
+    acceptance = result["acceptance"]
+    assert isinstance(acceptance, dict)
+    assert acceptance["real_postgres_restart_parity_gate_present"] is True
     assert result["blocked_families"] == (
         "P2_ATTRIBUTION",
         "P4_P5_ASSESSMENT",
@@ -67,6 +70,9 @@ def test_b2_workflow_keeps_exact_fourteen_job_topology() -> None:
     assert "\n  piqb-b2-review:" not in workflow
     assert workflow.count("\n  m0-cross-platform:") == 1
     assert "Review PIQB B2 persistence and recovery state" in workflow
+    assert "Execute PIQB B2 PostgreSQL restart/parity qualification" in workflow
+    assert "piqb_b2_postgres_product_persistence.py" in workflow
+    assert "evidence/piqb-b2/postgres-product-persistence.json" in workflow
     assert "piqb_b2_review.py" in workflow
     assert "--required-jobs-success 14" in workflow
     assert "--required-jobs-total 14" in workflow
