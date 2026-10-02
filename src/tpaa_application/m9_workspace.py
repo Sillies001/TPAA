@@ -956,7 +956,7 @@ class M9WorkspaceService:
             published_at=mutation.published_at_utc,
         )
         self._repo.replace_model_release(published_model)
-        payload = {
+        payload: dict[str, object] = {
             "capability_model_id": published_model.capability_model_id,
             "status": published_model.status,
             "published_at": published_model.published_at,
