@@ -25,10 +25,14 @@ from .p3_twin import (
 
 from .p6_input import (
     P6ContextRef,
+    P6CounterfactualRequestBinding,
     P6FactualSourceRevision,
+    P6ForecastRequestBinding,
     P6InputSnapshot,
     P6P3ModelRef,
     assert_p6_input_snapshot_identity,
+    build_p6_counterfactual_request_binding,
+    build_p6_forecast_request_binding,
     build_p6_input_snapshot,
 )
 
@@ -45,10 +49,14 @@ __all__ = [
     "P3CapabilityEstimate",
     "P3TwinComponentBinding",
     "P6ContextRef",
+    "P6CounterfactualRequestBinding",
     "P6FactualSourceRevision",
+    "P6ForecastRequestBinding",
     "P6InputSnapshot",
     "P6P3ModelRef",
     "assert_p6_input_snapshot_identity",
+    "build_p6_counterfactual_request_binding",
+    "build_p6_forecast_request_binding",
     "build_capability_surface",
     "build_p6_input_snapshot",
     "evaluate_surface",
