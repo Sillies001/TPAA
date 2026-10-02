@@ -27,4 +27,17 @@ __all__ = [
     "build_service_application",
     "create_full_desktop_app",
     "create_full_service_app",
+    "DesktopPersistenceConfig",
+    "ProductPersistenceRuntime",
+    "ServicePersistenceConfig",
+    "build_desktop_persistence",
+    "build_service_persistence",
 ]
+
+from .persistence import (
+    DesktopPersistenceConfig,
+    ProductPersistenceRuntime,
+    ServicePersistenceConfig,
+    build_desktop_persistence,
+    build_service_persistence,
+)
