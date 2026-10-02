@@ -202,7 +202,10 @@ def _m7_runway_exact(bundle: dict[str, Any]) -> bool:
 
 
 def _program_and_exit_tracker_lifecycle_valid(bundle: dict[str, Any]) -> bool:
-    if _issue_state(bundle, 149) != "open":
+    program_state = _issue_state(bundle, 149)
+    if program_state not in {"open", "closed"}:
+        return False
+    if program_state == "closed" and "P6_M9_QUALIFIED" not in _issue_text(bundle, 149):
         return False
     exit_state = _issue_state(bundle, 166)
     if exit_state == "open":

@@ -293,7 +293,10 @@ def _entry_qualification_exact(tasks: dict[str, Any]) -> bool:
 
 
 def _program_exit_runway_lifecycle_valid(bundle: dict[str, Any]) -> bool:
-    if _issue_state(bundle, 149) != "open":
+    program_state = _issue_state(bundle, 149)
+    if program_state not in {"open", "closed"}:
+        return False
+    if program_state == "closed" and "P6_M9_QUALIFIED" not in _issue_text(bundle, 149):
         return False
     runway_state = _issue_state(bundle, 186)
     if runway_state not in ("open", "closed"):

@@ -345,3 +345,37 @@ def test_m8_batch_4_closed_m9_runway_after_sdib_1_8_adoption_remains_valid(
     result = _review(tmp_path, issues=bundle)
     assert result["status"] == "PASS"
     assert result["failed_acceptance"] == []
+
+def test_m8_historical_review_accepts_program_closed_after_m9_qualification(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    program = issues["149"]
+    assert isinstance(program, dict)
+    issue = program["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    program["comments"] = [{"body": "Program closure P6_M9_QUALIFIED"}]
+    _close_exit_with_go_evidence(bundle)
+    result = _review(tmp_path, issues=bundle)
+    assert result["status"] == "PASS"
+    assert result["failed_acceptance"] == []
+
+
+def test_m8_historical_review_rejects_unqualified_program_closure(
+    tmp_path: Path,
+) -> None:
+    bundle = _valid_issues()
+    issues = bundle["issues"]
+    assert isinstance(issues, dict)
+    program = issues["149"]
+    assert isinstance(program, dict)
+    issue = program["issue"]
+    assert isinstance(issue, dict)
+    issue["state"] = "closed"
+    program["comments"] = [{"body": "closed without final qualification"}]
+    result = _review(tmp_path, issues=bundle)
+    assert result["decision"] == "NO_GO"
+    assert "program_exit_runway_lifecycle_valid" in result["failed_acceptance"]
