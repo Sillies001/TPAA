@@ -4,8 +4,6 @@ import hashlib
 import json
 from pathlib import Path
 from typing import cast
-from uuid import UUID
-
 import pytest
 
 from tpaa_application import P6PersistenceError, P6PersistenceRepository
