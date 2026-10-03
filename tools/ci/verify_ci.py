@@ -18,6 +18,7 @@ WORKFLOW = REPO_ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
 TOOLCHAIN = REPO_ROOT / "tools" / "dev" / "TOOLCHAIN.json"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
 GATE_RUNNER = REPO_ROOT / "tools" / "ci" / "run_gate.py"
+PARALLEL_RUNNER = REPO_ROOT / "tools" / "ci" / "run_platform_parallel_lanes.py"
 
 EXPECTED_PYTHON = "3.13.5"
 EXPECTED_UV = "0.12.17"
@@ -51,6 +52,11 @@ def verify() -> dict[str, object]:
 
     text = WORKFLOW.read_text(encoding="utf-8")
     gate_text = GATE_RUNNER.read_text(encoding="utf-8") if GATE_RUNNER.is_file() else ""
+    parallel_text = (
+        PARALLEL_RUNNER.read_text(encoding="utf-8")
+        if PARALLEL_RUNNER.is_file()
+        else ""
+    )
     toolchain = json.loads(TOOLCHAIN.read_text(encoding="utf-8"))
     pyproject = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
 
@@ -393,10 +399,41 @@ def verify() -> dict[str, object]:
         "--output evidence/m0-exit/review.json",
         "if: ${{ always() }}",
     )
+    checks.append(
+        _pass(
+            "parallel_platform_lanes",
+            "five governed milestone lanes execute concurrently inside each platform job",
+        )
+        if (
+            "python tools/ci/run_platform_parallel_lanes.py" in text
+            and "--platform ${{ matrix.platform }}" in text
+            and f"--source-revision {SOURCE_REVISION}" in text
+            and 'EXPECTED_LANES = ("m1", "m2", "m3", "m4", "m5")' in parallel_text
+            and "ThreadPoolExecutor" in parallel_text
+            and "as_completed" in parallel_text
+            and "PARALLEL_LANE_FAIL" in parallel_text
+        )
+        else _fail(
+            "parallel_platform_lanes",
+            "governed five-lane parallel platform runner is missing or incomplete",
+        )
+    )
+
     for token in required_tokens:
         code = "workflow_command_" + re.sub(r"[^a-z0-9]+", "_", token.lower()).strip("_")[:48]
+        parallel_token = (
+            token.replace("${{ matrix.platform }}", "{platform}")
+            .replace(SOURCE_REVISION, "{source_revision}")
+            .replace("${{ matrix.desktop_profile }}", "{desktop_profile}")
+        )
+        present = token in text or parallel_token in parallel_text
         checks.append(
-            _pass(code, token) if token in text else _fail(code, f"missing workflow token: {token}")
+            _pass(code, token)
+            if present
+            else _fail(
+                code,
+                f"missing governed orchestration token: {token}",
+            )
         )
 
     required_gate_tokens = (

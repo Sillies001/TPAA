@@ -68,4 +68,11 @@ def test_b2_workflow_keeps_exact_fourteen_job_topology() -> None:
     assert "Execute PIQB B2 PostgreSQL restart/parity qualification" in workflow
     assert "Execute PIQB B2 P4/P5 real PostgreSQL exact persistence qualification" in workflow
     assert "Review ACP-219 DB 1.8.0 authority adoption gate" in workflow
+    assert "run_platform_parallel_lanes.py" in workflow
+    runner = (ROOT / "tools/ci/run_platform_parallel_lanes.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'EXPECTED_LANES = ("m1", "m2", "m3", "m4", "m5")' in runner
+    assert "ThreadPoolExecutor" in runner
+    assert "PARALLEL_LANE_FAIL" in runner
     assert "Review ACP-216 DB 1.7.0 authority adoption gate" not in workflow
