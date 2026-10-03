@@ -30,7 +30,7 @@ from .m2_reference_time import (
     project_m2_reference_time_world,
 )
 
-CORE_SCHEMA_VERSION = "1.7.0"
+CORE_SCHEMA_VERSION = "1.8.0"
 STAGE_TABLE = "episode.episode_stage"
 STAGE_REGISTRY_ID = "STAGE_REGISTRY"
 STAGE_REGISTRY_VERSION = "1.1.0"

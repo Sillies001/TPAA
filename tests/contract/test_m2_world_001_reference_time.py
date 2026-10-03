@@ -40,7 +40,7 @@ def test_world_001_manifest_shape_is_exact_core_1_6_0_authority() -> None:
         if item["name"] != "created_at"
     )
 
-    assert core["db_schema_version"] == "1.7.0"
+    assert core["db_schema_version"] == "1.8.0"
     assert authority_fields == CORE_WORLD_MANIFEST_WRITABLE_FIELDS
     assert tuple(item.name for item in fields(CoreWorldManifest)) == authority_fields
     assert policy["registry_id"] == "WORLD_CAPABILITY_REGISTRY"

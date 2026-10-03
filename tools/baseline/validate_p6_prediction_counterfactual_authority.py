@@ -137,7 +137,7 @@ def verify() -> dict[str, object]:
             and authority["scope"]["shadow_schema_permitted"] is False
             and role_profile["scope"]["db_schema_change"] is False
             and role_profile["scope"]["shadow_schema_permitted"] is False
-            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
+            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0", "1.8.0"}
         ),
         "p1_p5_immutable_p6_not_admitted": (
             authority["scope"]["p1_p5_historical_products_immutable"] is True
@@ -269,7 +269,7 @@ def verify() -> dict[str, object]:
             == EXPECTED_M8_ROLE_PROFILE_SHA256
         ),
         "current_core_schema_transition_compatible": (
-            core.get("db_schema_version") in {"1.6.0", "1.7.0"}
+            core.get("db_schema_version") in {"1.6.0", "1.7.0", "1.8.0"}
             and isinstance(core.get("tables"), dict)
             and all(
                 isinstance(value, dict)
@@ -280,7 +280,7 @@ def verify() -> dict[str, object]:
         "post_c3_rebaseline_compatible": (
             EXPECTED_LOCK_SHA256 in lineage
             and len(lock["artifacts"]) >= 32
-            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
+            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0", "1.8.0"}
         ),
     }
 

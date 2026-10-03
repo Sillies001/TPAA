@@ -103,7 +103,7 @@ def run(
     acceptance["M1-STO-001"] = (
         acceptance["M1-STO-001"]
         and storage.get("status") == "PASS"
-        and storage_acceptance.get("current_core_schema_is_1_7_0") is True
+        and storage_acceptance.get("current_core_schema_is_1_8_0") is True
         and storage_acceptance.get("sqlite_publish_pass") is True
         and storage_acceptance.get("postgres_publish_pass") is True
     )

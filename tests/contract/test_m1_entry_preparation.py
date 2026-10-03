@@ -88,7 +88,7 @@ def test_m1_entry_manifest_contains_all_condition_6_identities(tmp_path: Path) -
     assert payload["status"] == "FROZEN_ENTRY_CANDIDATE"
     assert payload["admission"] == "M1_NOT_ADMITTED_BY_THIS_MANIFEST"
     assert payload["core_baseline"] == "CB-1.4.0"
-    assert payload["db_schema_version"] == "1.7.0"
+    assert payload["db_schema_version"] == "1.8.0"
     assert len(payload["source_revision"]) == 40
     for key in (
         "baseline_lock_sha256",

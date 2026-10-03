@@ -270,8 +270,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-desktop-lifecycle-policy", "ADR-M0-005", "IMPLEMENTED", "Verify the frozen Desktop backend lifecycle/IPC/token decision."),
     CommandSpec("verify-baseline", "M0-CORE-001", "IMPLEMENTED", "Verify BASELINE_LOCK and controlled Canonical artifact hashes."),
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
-    CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from current schema 1.7.0 authority."),
-    CommandSpec("db-verify", "M0-STO-001", "IMPLEMENTED", "Verify SQLite schema/version/provenance against current schema 1.7.0 authority."),
+    CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from current schema 1.8.0 authority."),
+    CommandSpec("db-verify", "M0-STO-001", "IMPLEMENTED", "Verify SQLite schema/version/provenance against current schema 1.8.0 authority."),
     CommandSpec("db-sqlite-repository-acceptance", "M0-STO-002", "IMPLEMENTED", "Run disposable SQLite Desktop Repository/UoW/WAL/single-writer acceptance."),
     CommandSpec("db-postgres-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap PostgreSQL through the repository-controlled external psql harness."),
     CommandSpec("db-postgres-verify", "M0-STO-001", "IMPLEMENTED", "Verify PostgreSQL schema/version/provenance through the external psql harness."),
@@ -546,7 +546,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("verify-repository-policy", help="Verify frozen ADR-M0-004 Repository DB access policy")
     sub.add_parser("verify-desktop-lifecycle-policy", help="Verify frozen ADR-M0-005 Desktop backend lifecycle/IPC policy")
     sub.add_parser("api-smoke", help="Run M0-API-002 health/readiness/version HTTP smoke")
-    db_bootstrap = sub.add_parser("db-bootstrap", help="Bootstrap empty SQLite Desktop DB to schema 1.7.0")
+    db_bootstrap = sub.add_parser("db-bootstrap", help="Bootstrap empty SQLite Desktop DB to schema 1.8.0")
     db_bootstrap.add_argument("database", type=Path)
     db_verify = sub.add_parser("db-verify", help="Verify SQLite Desktop DB schema/version/provenance")
     db_verify.add_argument("database", type=Path)
@@ -559,7 +559,7 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--psql", default="psql")
         command.add_argument("--docker-container")
 
-    pg_bootstrap = sub.add_parser("db-postgres-bootstrap", help="Bootstrap PostgreSQL schema 1.7.0 through external psql")
+    pg_bootstrap = sub.add_parser("db-postgres-bootstrap", help="Bootstrap PostgreSQL schema 1.8.0 through external psql")
     add_postgres_client_args(pg_bootstrap)
     pg_bootstrap.add_argument("database")
     pg_verify = sub.add_parser("db-postgres-verify", help="Verify PostgreSQL schema/version/provenance through external psql")

@@ -99,6 +99,6 @@ def test_application_service_integrates_with_real_sqlite_repository(tmp_path) ->
     actual = service.storage_baseline_status()
 
     assert actual.engine_profile == "sqlite-desktop"
-    assert actual.schema_version == "1.7.0"
+    assert actual.schema_version == "1.8.0"
     assert actual.core_baseline == "CB-1.4.0"
     assert actual.authority_artifact_id == "CORE_LOGICAL_MODEL"

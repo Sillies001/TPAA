@@ -1,4 +1,4 @@
-"""ACP-216 governed DB 1.6.0 -> 1.7.0 migration primitives.
+"""ACP-219 governed DB 1.7.0 -> 1.8.0 migration primitives.
 
 The current Canonical model remains the target authority. The exact pre-adoption
 CORE_LOGICAL_MODEL bytes are retained only as a historical migration source
@@ -23,6 +23,7 @@ from tpaa_storage.bootstrap import (
     BootstrapVerification,
     _bootstrap_connection,
     _configure_sqlite,
+    _load_authority,
     _postgres_catalog_hash_query,
     _postgres_create_statements,
     _postgres_manifest_create_statement,
@@ -37,40 +38,24 @@ from tpaa_storage.bootstrap import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE_CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_6_0.json"
-TARGET_CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_7_0.json"
-SOURCE_CORE_SHA256 = "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245"
-SOURCE_LOCK_SHA256 = "9920b59601d8441f883879e813164f33ee5c02db81aa5e1b759e3a1772469e51"
-TARGET_CORE_SHA256 = "dd8461ff572338006455f7b6eac5325900c60640f5d163c3b61c3f5bd5767f74"
-TARGET_LOCK_SHA256 = "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6"
-SOURCE_DB_SCHEMA_VERSION = "1.6.0"
-TARGET_DB_SCHEMA_VERSION = "1.7.0"
+SOURCE_CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_7_0.json"
+SOURCE_CORE_SHA256 = "dd8461ff572338006455f7b6eac5325900c60640f5d163c3b61c3f5bd5767f74"
+SOURCE_LOCK_SHA256 = "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6"
+SOURCE_DB_SCHEMA_VERSION = "1.7.0"
+TARGET_DB_SCHEMA_VERSION = "1.8.0"
 NEW_RELATIONS: tuple[str, ...] = (
-    "capability.adjusted_capability_estimate_revision",
-    "assessment.attribution_run_request_binding",
-    "registry.mutation_idempotency",
-    "assessment.p4_subject_context",
-    "assessment.actor_assessment_revision",
-    "assessment.actor_assessment_annotation_ref",
-    "assessment.p5_composition_snapshot",
-    "assessment.p5_composition_participant",
-    "assessment.mission_assessment_revision",
-    "intelligence.forecast_request",
-    "capability.p6_model_revision",
-    "intelligence.forecast_result_revision",
-    "intelligence.counterfactual_request",
-    "intelligence.counterfactual_revision",
-    "intelligence.training_recommendation_revision",
+    "assessment.actor_assessment_machine_evidence_ref",
+    "assessment.mission_assessment_objective_ref",
 )
 
 
 class MigrationError(RuntimeError):
-    """Fail-closed ACP-216 migration error."""
+    """Fail-closed ACP-219 migration error."""
 
     def __init__(self, reason: str, detail: str) -> None:
         self.reason = reason
         self.detail = detail
-        super().__init__(f"ACP216_MIGRATION_FAIL reason={reason} detail={detail}")
+        super().__init__(f"ACP219_MIGRATION_FAIL reason={reason} detail={detail}")
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -114,34 +99,13 @@ def historical_authority() -> _SchemaAuthority:
 
 
 def target_authority() -> _SchemaAuthority:
-    raw = TARGET_CORE.read_bytes()
-    actual_hash = _sha256_bytes(raw)
-    if actual_hash != TARGET_CORE_SHA256:
-        raise MigrationError(
-            "TARGET_AUTHORITY_HASH_MISMATCH",
-            f"expected={TARGET_CORE_SHA256} actual={actual_hash}",
-        )
-    payload = json.loads(raw.decode("utf-8"))
-    if not isinstance(payload, dict):
-        raise MigrationError("TARGET_AUTHORITY_INVALID", "root must be an object")
-    if payload.get("db_schema_version") != TARGET_DB_SCHEMA_VERSION:
+    authority = _load_authority()
+    if authority.schema_version != TARGET_DB_SCHEMA_VERSION:
         raise MigrationError(
             "TARGET_SCHEMA_VERSION_MISMATCH",
-            f"actual={payload.get('db_schema_version')!r}",
+            f"actual={authority.schema_version}",
         )
-    tables = payload.get("tables")
-    if not isinstance(tables, dict) or not tables:
-        raise MigrationError("TARGET_AUTHORITY_INVALID", "tables missing")
-    core_baseline = payload.get("core_baseline")
-    if not isinstance(core_baseline, str) or not core_baseline:
-        raise MigrationError("TARGET_CORE_BASELINE_INVALID", f"actual={core_baseline!r}")
-    return _SchemaAuthority(
-        schema_version=TARGET_DB_SCHEMA_VERSION,
-        core_baseline=core_baseline,
-        authority_sha256=TARGET_CORE_SHA256,
-        baseline_lock_sha256=TARGET_LOCK_SHA256,
-        tables=tables,
-    )
+    return authority
 
 
 def new_relation_names() -> tuple[str, ...]:
@@ -307,7 +271,7 @@ BEGIN
      OR baseline_lock_sha256 <> {_sql_literal(authority.baseline_lock_sha256)}
      OR physical_schema_sha256 <> {_sql_literal(_schema_fingerprint(_postgres_create_statements(authority)))};
   IF mismatch_count <> 0 THEN
-    RAISE EXCEPTION 'ACP216_MANIFEST_MISMATCH';
+    RAISE EXCEPTION 'ACP219_MANIFEST_MISMATCH';
   END IF;
 END $$"""
 
@@ -324,7 +288,7 @@ BEGIN
   FROM {manifest} WHERE singleton = 1;
   actual_hash := ({query});
   IF expected_hash IS NULL OR actual_hash <> expected_hash THEN
-    RAISE EXCEPTION 'ACP216_CATALOG_MISMATCH expected=% actual=%',
+    RAISE EXCEPTION 'ACP219_CATALOG_MISMATCH expected=% actual=%',
       expected_hash, actual_hash;
   END IF;
 END $$"""
@@ -431,7 +395,7 @@ def postgres_downgrade_script() -> str:
         (
             f"  IF EXISTS (SELECT 1 FROM \"{name.split('.', 1)[0]}\"."
             f"\"{name.split('.', 1)[1]}\" LIMIT 1) THEN\n"
-            f"    RAISE EXCEPTION 'ACP216_DOWNGRADE_NONEMPTY relation={name}';\n"
+            f"    RAISE EXCEPTION 'ACP219_DOWNGRADE_NONEMPTY relation={name}';\n"
             "  END IF;"
         )
         for name in names
