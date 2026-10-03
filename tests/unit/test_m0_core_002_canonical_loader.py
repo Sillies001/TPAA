@@ -34,7 +34,7 @@ def test_loader_exposes_authority_version_without_inventing_missing_version() ->
     assert stage.version_label == "1.1.0"
     assert logical_model.declared_version is None
     assert logical_model.version_label == UNVERSIONED_BY_AUTHORITY
-    assert logical_model.schema_version == "1.7.0"
+    assert logical_model.schema_version == "1.8.0"
 
 
 def test_consumer_version_mismatch_fails_closed_with_context() -> None:
@@ -61,7 +61,7 @@ def test_consumer_schema_version_mismatch_fails_closed() -> None:
             expectation=ArtifactExpectation(schema_version="9.9.9"),
         )
     assert captured.value.reason == "SCHEMA_VERSION_MISMATCH"
-    assert captured.value.actual_schema_version == "1.7.0"
+    assert captured.value.actual_schema_version == "1.8.0"
 
 
 def test_required_top_level_schema_shape_mismatch_fails_closed() -> None:

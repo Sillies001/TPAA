@@ -49,7 +49,7 @@ def run() -> dict[str, object]:
         verification = verify_sqlite(restored_db)
         checks = {
             "manifest": manifest.is_file(),
-            "database_schema": verification.schema_version == "1.7.0",
+            "database_schema": verification.schema_version == "1.8.0",
             "database_core": verification.core_baseline == "CB-1.4.0",
             "object_count": len(restored_objects) == 1,
             "object_ref": restored_objects[0] == source_object,

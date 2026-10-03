@@ -220,7 +220,7 @@ def verify() -> dict[str, object]:
             and profile_entry.get("bytes") == len(PROFILE.read_bytes())
         ),
         "controlled_count": len(_list(lock.get("artifacts"), "lock.artifacts")) >= 26,
-        "schema_unchanged": baseline.get("db_schema") in {"1.6.0", "1.7.0"},
+        "schema_unchanged": baseline.get("db_schema") in {"1.6.0", "1.7.0", "1.8.0"},
         "lineage_parent": _lineage_preserves_m6(
             current_lock_sha256=current_lock_sha256,
             lineage=lineage,

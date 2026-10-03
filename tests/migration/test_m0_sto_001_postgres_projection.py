@@ -37,9 +37,9 @@ def test_postgres_projection_covers_frozen_authority_deterministically() -> None
     second = postgres_create_statements()
 
     assert first == second
-    assert len(first) == 103  # 11 schemas + 92 Canonical tables
+    assert len(first) == 105  # 11 schemas + 94 Canonical tables
     assert sum(statement.startswith("CREATE SCHEMA") for statement in first) == 11
-    assert sum(statement.startswith("CREATE TABLE") for statement in first) == 92
+    assert sum(statement.startswith("CREATE TABLE") for statement in first) == 94
     assert any('CREATE TABLE "registry"."analysis_release"' in statement for statement in first)
     assert any("jsonb_typeof(" in statement for statement in first)
 
@@ -51,9 +51,9 @@ def test_frozen_authority_fk_graph_is_complete_and_acyclic() -> None:
     dependencies = _table_dependencies(authority)
     order = _postgres_table_order(authority)
 
-    assert len(authority.tables) == 92
-    assert sum(len(targets) for targets in dependencies.values()) == 159
-    assert len(order) == 92
+    assert len(authority.tables) == 94
+    assert sum(len(targets) for targets in dependencies.values()) == 161
+    assert len(order) == 94
     assert set(order) == set(authority.tables)
     positions = {table_name: index for index, table_name in enumerate(order)}
     for table_name, targets in dependencies.items():
