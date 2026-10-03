@@ -402,16 +402,19 @@ def verify() -> dict[str, object]:
     checks.append(
         _pass(
             "parallel_platform_lanes",
-            "five governed milestone lanes execute concurrently inside each platform job",
+            "m1-m4 execute concurrently; m5 waits for governed m3/m4 evidence prerequisites",
         )
         if (
             "python tools/ci/run_platform_parallel_lanes.py" in text
             and "--platform ${{ matrix.platform }}" in text
             and f"--source-revision {SOURCE_REVISION}" in text
             and 'EXPECTED_LANES = ("m1", "m2", "m3", "m4", "m5")' in parallel_text
+            and 'INDEPENDENT_LANES = ("m1", "m2", "m3", "m4")' in parallel_text
+            and 'M5_PREREQUISITE_LANES = ("m3", "m4")' in parallel_text
             and "ThreadPoolExecutor" in parallel_text
             and "as_completed" in parallel_text
             and "PARALLEL_LANE_FAIL" in parallel_text
+            and "PARALLEL_LANE_BLOCKED" in parallel_text
         )
         else _fail(
             "parallel_platform_lanes",

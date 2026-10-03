@@ -22,6 +22,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_LANES = ("m1", "m2", "m3", "m4", "m5")
+INDEPENDENT_LANES = ("m1", "m2", "m3", "m4")
+M5_PREREQUISITE_LANES = ("m3", "m4")
 DESKTOP_PROFILES = {
     "linux": "LINUX_DESKTOP_X64",
     "windows": "WINDOWS_DESKTOP_X64",
@@ -462,6 +464,8 @@ def verify_contract() -> dict[str, object]:
     command_count = sum(len(commands) for commands in LANES.values())
     checks = {
         "lane_inventory_exact": lane_names == EXPECTED_LANES,
+        "independent_lane_inventory_exact": INDEPENDENT_LANES == ("m1", "m2", "m3", "m4"),
+        "m5_prerequisite_lanes_exact": M5_PREREQUISITE_LANES == ("m3", "m4"),
         "command_count_nonzero": command_count > 0,
         "m5_chain_ordered": tuple(
             command.template.split()[1]
@@ -509,8 +513,8 @@ def main() -> int:
         print(json.dumps(contract, indent=2, sort_keys=True))
         return 2
 
-    results: list[dict[str, object]] = []
-    with ThreadPoolExecutor(max_workers=len(EXPECTED_LANES)) as executor:
+    results_by_name: dict[str, dict[str, object]] = {}
+    with ThreadPoolExecutor(max_workers=len(INDEPENDENT_LANES)) as executor:
         futures = {
             executor.submit(
                 _run_lane,
@@ -519,12 +523,39 @@ def main() -> int:
                 platform=args.platform,
                 source_revision=args.source_revision,
             ): name
-            for name in EXPECTED_LANES
+            for name in INDEPENDENT_LANES
         }
         for future in as_completed(futures):
-            results.append(future.result())
+            name = futures[future]
+            results_by_name[name] = future.result()
 
-    results.sort(key=lambda item: EXPECTED_LANES.index(str(item["lane"])))
+    blocked_by = [
+        name
+        for name in M5_PREREQUISITE_LANES
+        if results_by_name[name]["status"] != "PASS"
+    ]
+    if blocked_by:
+        print(
+            "PARALLEL_LANE_BLOCKED lane=m5 prerequisites=" + ",".join(blocked_by),
+            flush=True,
+        )
+        results_by_name["m5"] = {
+            "lane": "m5",
+            "status": "FAIL",
+            "return_code": 2,
+            "completed": [],
+            "failed_command": None,
+            "blocked_by": blocked_by,
+        }
+    else:
+        results_by_name["m5"] = _run_lane(
+            "m5",
+            LANES["m5"],
+            platform=args.platform,
+            source_revision=args.source_revision,
+        )
+
+    results = [results_by_name[name] for name in EXPECTED_LANES]
     status = "PASS" if all(item["status"] == "PASS" for item in results) else "FAIL"
     payload = {
         "schema": "TPAA_PLATFORM_PARALLEL_EXECUTION_V1",
