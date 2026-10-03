@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
+
 from tpaa_assessment import (
     P2AdjustedCapabilityEstimate,
     P2AttributionRunProduct,
@@ -73,7 +74,7 @@ def _time_text(value: object) -> str:
     if isinstance(value, datetime):
         normalized = value
         if normalized.tzinfo is not None:
-            normalized = normalized.astimezone(timezone.utc)
+            normalized = normalized.astimezone(UTC)
         return normalized.isoformat().replace("+00:00", "Z")
     raise P2PersistenceError("P2_DB_TIME_INVALID", type(value).__name__)
 

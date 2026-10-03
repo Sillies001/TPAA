@@ -7,14 +7,14 @@ from dataclasses import replace
 
 import pytest
 
+from tpaa_application.p2_persistence import (
+    P2PersistenceError,
+    P2PersistenceRepository,
+)
 from tpaa_assessment import (
     P2AdjustedCapabilityEstimate,
     P2AttributionRunProduct,
     P2ExecutionProfile,
-)
-from tpaa_application.p2_persistence import (
-    P2PersistenceError,
-    P2PersistenceRepository,
 )
 from tpaa_storage.canonical_rows import SQLiteCanonicalRowRepository
 
