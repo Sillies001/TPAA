@@ -41,7 +41,14 @@ def test_m5_batch_4_signoff_principals_are_role_exact_and_distinct() -> None:
 
 
 def test_m5_batch_4_workflow_preserves_fourteen_job_topology() -> None:
-    text = (\n        WORKFLOW.read_text(encoding="utf-8")\n        + "\\n"\n        + PLATFORM_RUNNER.read_text(encoding="utf-8")\n    )\n    required = (\n        "python tools/testing/m5_batch_4_cold_reconstruction.py",\n        "Review M5-TST-005 same-candidate four-profile parity",
+    text = (
+        WORKFLOW.read_text(encoding="utf-8")
+        + "\n"
+        + PLATFORM_RUNNER.read_text(encoding="utf-8")
+    )
+    required = (
+        "python tools/testing/m5_batch_4_cold_reconstruction.py",
+        "Review M5-TST-005 same-candidate four-profile parity",
         "Review M5-TST-006 cold reconstruction and complete RC manifest",
         "Review exact M5 task inventory and Exit gate",
         "tpaa-m5-batch-4-platform-",
@@ -54,7 +61,6 @@ def test_m5_batch_4_workflow_preserves_fourteen_job_topology() -> None:
     assert text.count("\n  m0-cross-platform:") == 1
     assert text.count("\n  m0-logical-equivalence:") == 1
     assert text.count("\n  m4-exit-review:") == 1
-
 
 def test_m5_batch_4_cold_reconstruction_follows_c3_archive_rule() -> None:
     authority = load_m5_qualification_authority(BASELINE)
