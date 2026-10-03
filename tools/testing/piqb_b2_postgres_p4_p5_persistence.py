@@ -9,6 +9,7 @@ import sys
 import tempfile
 from dataclasses import asdict, replace
 from pathlib import Path
+from typing import cast
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
@@ -27,9 +28,18 @@ from tools.storage.postgres_db import (  # noqa: E402
     verify_postgres,
 )
 from tpaa_application import P4P5PersistenceError, P4P5PersistenceRepository  # noqa: E402
-from tpaa_assessment import P4AssessmentRevision, P4SubjectContext, P5AssessmentRevision  # noqa: E402
+from tpaa_assessment import (  # noqa: E402
+    P4AssessmentRevision,
+    P4SubjectContext,
+    P5AssessmentRevision,
+)
 from tpaa_context import canonical_hash, pseudonymous_subject_key  # noqa: E402
-from tpaa_storage import SQLiteDesktopUnitOfWork, bootstrap_sqlite, verify_sqlite  # noqa: E402
+from tpaa_storage import (  # noqa: E402
+    CanonicalRowRepository,
+    SQLiteDesktopUnitOfWork,
+    bootstrap_sqlite,
+    verify_sqlite,
+)
 from tpaa_storage.postgres_repository import PostgreSQLServiceUnitOfWork  # noqa: E402
 from tpaa_world import P5CompositionSnapshot, P5ParticipantBinding  # noqa: E402
 
@@ -270,7 +280,7 @@ def _p5(composition: P5CompositionSnapshot) -> P5AssessmentRevision:
     )
 
 
-def _seed(rows: object) -> None:
+def _seed(rows: CanonicalRowRepository) -> None:
     rows.insert(
         "master.aircraft_model",
         {
@@ -421,9 +431,7 @@ def _seed(rows: object) -> None:
 
 def _projection(repo: P4P5PersistenceRepository) -> dict[str, object]:
     subject = _subject()
-    p4 = _p4(subject)
     composition = _composition(subject)
-    p5 = _p5(composition)
     exact_subject = repo.exact_p4_subject(subject.subject_context_id)
     exact_p4 = repo.exact_p4_revision(P4_ID)
     exact_composition = repo.exact_p5_composition(composition.composition_id)
@@ -542,6 +550,8 @@ def run(
             "P4_HM_EVIDENCE_SHA256:" + "1" * 64,
         ]
         expected_objectives = ["objective:ordered:2", "objective:ordered:1"]
+        sqlite_first = cast(dict[str, object], sqlite_result["first_restart"])
+        postgres_first = cast(dict[str, object], postgres_result["first_restart"])
         acceptance = {
             "sqlite_current_db_1_8": (
                 sqlite_bootstrap.schema_version == "1.8.0"
@@ -559,16 +569,12 @@ def run(
                 postgres_result["first_restart"] == postgres_result["idempotent_replay"]
             ),
             "ordered_machine_evidence_refs_preserved": (
-                sqlite_result["first_restart"]["ordered_machine_evidence_refs"]
-                == expected_machine
-                and postgres_result["first_restart"]["ordered_machine_evidence_refs"]
-                == expected_machine
+                sqlite_first["ordered_machine_evidence_refs"] == expected_machine
+                and postgres_first["ordered_machine_evidence_refs"] == expected_machine
             ),
             "ordered_objective_refs_preserved": (
-                sqlite_result["first_restart"]["ordered_objective_refs"]
-                == expected_objectives
-                and postgres_result["first_restart"]["ordered_objective_refs"]
-                == expected_objectives
+                sqlite_first["ordered_objective_refs"] == expected_objectives
+                and postgres_first["ordered_objective_refs"] == expected_objectives
             ),
             "immutable_conflict_fail_closed": (
                 sqlite_result["immutable_conflict_code"] == "P4_P5_IMMUTABLE_CONFLICT"
