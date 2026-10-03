@@ -137,6 +137,7 @@ def review(
     core = _json(CORE)
     lock = _json(LOCK)
     migrations = MIGRATIONS_README.read_text(encoding="utf-8")
+    migrations_plain = migrations.replace("**", "")
 
     changes_raw = proposal.get("changes")
     changes = (
@@ -179,11 +180,7 @@ def review(
     )
 
     lock_artifacts_raw = lock.get("artifacts")
-    lock_artifacts = (
-        cast(list[Any], lock_artifacts_raw)
-        if isinstance(lock_artifacts_raw, list)
-        else []
-    )
+    lock_artifacts = lock_artifacts_raw if isinstance(lock_artifacts_raw, list) else []
     core_lock = next(
         (
             item
@@ -258,7 +255,8 @@ def review(
             and any("1.6.0 -> 1.7.0" in str(item) for item in migration_plan)
             and any("SQLite/PostgreSQL" in str(item) for item in migration_plan)
             and any("Downgrade" in str(item) for item in migration_plan)
-            and "first real approved schema transition" in migrations
+            and "first real approved schema transition" in migrations_plain
+            and "first governed Alembic revision" in migrations_plain
         ),
         "adoption_acceptance_inventory_present": (
             isinstance(adoption_acceptance, list)
