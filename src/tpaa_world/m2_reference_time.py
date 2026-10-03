@@ -23,7 +23,7 @@ from tpaa_ingest import (
     load_m2_time_alignment,
 )
 
-CORE_SCHEMA_VERSION = "1.7.0"
+CORE_SCHEMA_VERSION = "1.8.0"
 CORE_WORLD_TABLE = "world.world_product_manifest"
 WORLD_POLICY_ID = "WORLD_CAPABILITY_REGISTRY"
 WORLD_POLICY_VERSION = "1.0.0"

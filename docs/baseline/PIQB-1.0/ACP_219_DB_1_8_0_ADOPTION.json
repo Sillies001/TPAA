@@ -1,0 +1,34 @@
+{
+  "schema": "TPAA_ACP219_DB_1_8_0_ADOPTION_V1",
+  "proposal_id": "ACP-219",
+  "issue": 219,
+  "source_protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+  "source_db_schema_version": "1.7.0",
+  "target_db_schema_version": "1.8.0",
+  "source_core_sha256": "dd8461ff572338006455f7b6eac5325900c60640f5d163c3b61c3f5bd5767f74",
+  "target_core_sha256": "cbb15c1e0029be45213e4d7ab57a78fac47d7cc09c4627a9c388fafdadd2d44e",
+  "source_baseline_lock_sha256": "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6",
+  "target_baseline_lock_sha256": "2f3690d5e74e585a34ae35fdef9fb1e0cccb5504c6983d0c97417bb6a106b389",
+  "additive_relation_count": 2,
+  "additive_relations": [
+    "assessment.actor_assessment_machine_evidence_ref",
+    "assessment.mission_assessment_objective_ref"
+  ],
+  "blocker_coverage_expected": 2,
+  "blocker_coverage_uncovered": [],
+  "migration_revision": "0002_acp219_db_1_8_0",
+  "shadow_schema_created": false,
+  "historical_policy": {
+    "frozen_m0_m9_authority_files_remain_unchanged": true,
+    "historical_db_1_7_0_core_snapshot_preserved": true,
+    "current_db_schema_may_advance_only_through_this_adoption": true
+  },
+  "candidate_state": "AUTHORITY_CORRECTION_CANDIDATE",
+  "formal_adoption_claimed": false,
+  "formal_adoption_gate": {
+    "pull_request_exact_head_required_jobs": 14,
+    "guarded_merge_required": true,
+    "merge_parent_verification_required": true,
+    "protected_main_exact_merge_sha_required_jobs": 14
+  }
+}

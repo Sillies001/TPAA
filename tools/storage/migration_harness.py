@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""M0-STO-005 / ACP-216 real schema-transition migration harness."""
+"""M0-STO-005 sequential governed schema-transition migration harness."""
 
 from __future__ import annotations
 
@@ -18,11 +18,28 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from tools.storage.acp216_migration import (  # noqa: E402
-    MigrationError,
-    bootstrap_historical_sqlite,
-    downgrade_sqlite,
-    upgrade_sqlite,
-    verify_historical_sqlite,
+    bootstrap_historical_sqlite as bootstrap_1_6,
+)
+from tools.storage.acp216_migration import (  # noqa: E402
+    downgrade_sqlite as downgrade_1_7_to_1_6,
+)
+from tools.storage.acp216_migration import (  # noqa: E402
+    upgrade_sqlite as upgrade_1_6_to_1_7,
+)
+from tools.storage.acp216_migration import (  # noqa: E402
+    verify_historical_sqlite as verify_1_6,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
+    MigrationError as ACP219MigrationError,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
+    downgrade_sqlite as downgrade_1_8_to_1_7,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
+    upgrade_sqlite as upgrade_1_7_to_1_8,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
+    verify_historical_sqlite as verify_1_7,
 )
 from tpaa_storage.bootstrap import (  # noqa: E402
     BOOTSTRAP_MANIFEST_TABLE,
@@ -39,9 +56,10 @@ PROBE_ENTITY_ID = "94000000-0000-4000-8000-000000000001"
 PROBE_ROW = (
     PROBE_ENTITY_ID,
     "AIRCRAFT",
-    "ACP216-HISTORY-PROBE",
+    "ACP219-HISTORY-PROBE",
     "BLUE",
 )
+ACP219_ACTOR_ID = "95000000-0000-4000-8000-000000000001"
 
 
 def _backup_database(source: Path, destination: Path) -> None:
@@ -50,7 +68,6 @@ def _backup_database(source: Path, destination: Path) -> None:
 
 
 def _restore_database(source: Path, destination: Path) -> None:
-    destination.parent.mkdir(parents=True, exist_ok=True)
     with closing(sqlite3.connect(source)) as src, closing(sqlite3.connect(destination)) as dst:
         src.backup(dst)
 
@@ -76,12 +93,42 @@ def _read_historical_probe(database: Path) -> tuple[str, str, str, str] | None:
         ).fetchone()
     if row is None:
         return None
-    return (
-        str(row[0]),
-        str(row[1]),
-        str(row[2]),
-        str(row[3]),
-    )
+    return str(row[0]), str(row[1]), str(row[2]), str(row[3])
+
+
+def _insert_acp219_nonempty_probe(database: Path) -> None:
+    with closing(sqlite3.connect(database)) as connection:
+        connection.execute(
+            '''INSERT INTO "assessment.actor_assessment" (
+                   actor_assessment_id, session_id, episode_id, actor_id,
+                   aircraft_id, assessment_spec_id, assessment_spec_version,
+                   world_refs, metric_refs, capability_projection_refs,
+                   score, grade, status, confidence, evidence_set_id,
+                   created_at, supersedes_id
+               ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, NULL)''',
+            (
+                ACP219_ACTOR_ID,
+                "95000000-0000-4000-8000-000000000002",
+                "95000000-0000-4000-8000-000000000003",
+                "95000000-0000-4000-8000-000000000004",
+                "ACP219_TEST",
+                "1.0.0",
+                "[]",
+                "[]",
+                "[]",
+                "DRAFT",
+                1.0,
+                "95000000-0000-4000-8000-000000000005",
+                "2026-10-03T00:00:00Z",
+            ),
+        )
+        connection.execute(
+            '''INSERT INTO "assessment.actor_assessment_machine_evidence_ref" (
+                   actor_assessment_id, ref_order, evidence_ref
+               ) VALUES (?, ?, ?)''',
+            (ACP219_ACTOR_ID, 0, "machine:acp219:ordered-text-probe"),
+        )
+        connection.commit()
 
 
 def run() -> dict[str, object]:
@@ -93,7 +140,7 @@ def run() -> dict[str, object]:
         historical = root / "historical.sqlite3"
 
         clean = bootstrap_sqlite(current)
-        checks["clean_bootstrap"] = clean.schema_version == "1.7.0"
+        checks["clean_bootstrap"] = clean.schema_version == "1.8.0"
         checks["readiness_verify"] = verify_sqlite(current) == clean
 
         _backup_database(current, recovery)
@@ -104,7 +151,7 @@ def run() -> dict[str, object]:
                 ("rollback-probe",),
             )
             connection.rollback()
-        checks["rollback"] = verify_sqlite(current).schema_version == "1.7.0"
+        checks["rollback"] = verify_sqlite(current).schema_version == "1.8.0"
 
         with closing(sqlite3.connect(current)) as connection:
             connection.execute(
@@ -125,83 +172,103 @@ def run() -> dict[str, object]:
             if sidecar.exists():
                 sidecar.unlink()
         _restore_database(recovery, current)
-        checks["forward_recovery"] = verify_sqlite(current).schema_version == "1.7.0"
+        checks["forward_recovery"] = verify_sqlite(current).schema_version == "1.8.0"
         checks["repository_conformance"] = (
-            sqlite_repository_smoke(current)["schema_version"] == "1.7.0"
+            sqlite_repository_smoke(current)["schema_version"] == "1.8.0"
         )
 
-        source = bootstrap_historical_sqlite(historical)
-        checks["historical_1_6_bootstrap"] = source.schema_version == "1.6.0"
+        source_1_6 = bootstrap_1_6(historical)
+        checks["historical_1_6_bootstrap"] = source_1_6.schema_version == "1.6.0"
         _write_historical_probe(historical)
         before = _read_historical_probe(historical)
-        upgraded = upgrade_sqlite(historical)
-        checks["upgrade_1_6_to_1_7"] = upgraded.schema_version == "1.7.0"
-        checks["historical_row_exact_after_upgrade"] = (
-            before == PROBE_ROW and _read_historical_probe(historical) == PROBE_ROW
+
+        step_1_7 = upgrade_1_6_to_1_7(historical)
+        checks["upgrade_1_6_to_1_7"] = step_1_7.schema_version == "1.7.0"
+        checks["historical_row_exact_at_1_7"] = (
+            before == PROBE_ROW
+            and verify_1_7(historical).schema_version == "1.7.0"
+            and _read_historical_probe(historical) == PROBE_ROW
+        )
+
+        step_1_8 = upgrade_1_7_to_1_8(historical)
+        checks["upgrade_1_7_to_1_8"] = step_1_8.schema_version == "1.8.0"
+        checks["historical_row_exact_at_1_8"] = (
+            _read_historical_probe(historical) == PROBE_ROW
+        )
+
+        _insert_acp219_nonempty_probe(historical)
+        downgrade_blocked = False
+        try:
+            downgrade_1_8_to_1_7(historical)
+        except ACP219MigrationError as exc:
+            downgrade_blocked = exc.reason == "DOWNGRADE_BLOCKED_NONEMPTY_RELATION"
+        checks["acp219_nonempty_downgrade_fail_closed"] = downgrade_blocked
+        checks["failed_downgrade_preserves_1_8"] = (
+            verify_sqlite(historical).schema_version == "1.8.0"
         )
 
         with closing(sqlite3.connect(historical)) as connection:
             connection.execute(
-                '''INSERT INTO "registry.mutation_idempotency" (
-                       operation_code, request_id, request_hash,
-                       result_object_type, result_object_id
-                   ) VALUES (?, ?, ?, ?, ?)''',
-                ("ACP216_TEST", "request-1", "a" * 64, "TEST", "result-1"),
+                'DELETE FROM "assessment.actor_assessment_machine_evidence_ref"'
             )
             connection.commit()
-        downgrade_blocked = False
-        try:
-            downgrade_sqlite(historical)
-        except MigrationError as exc:
-            downgrade_blocked = exc.reason == "DOWNGRADE_BLOCKED_NONEMPTY_RELATION"
-        checks["nonempty_downgrade_fail_closed"] = downgrade_blocked
-        checks["failed_downgrade_preserves_1_7"] = (
-            verify_sqlite(historical).schema_version == "1.7.0"
-        )
-
-        with closing(sqlite3.connect(historical)) as connection:
-            connection.execute('DELETE FROM "registry.mutation_idempotency"')
-            connection.commit()
-        downgraded = downgrade_sqlite(historical)
-        checks["empty_downgrade_to_1_6"] = downgraded.schema_version == "1.6.0"
-        checks["historical_row_exact_after_downgrade"] = (
-            verify_historical_sqlite(historical).schema_version == "1.6.0"
+        back_1_7 = downgrade_1_8_to_1_7(historical)
+        checks["empty_downgrade_to_1_7"] = back_1_7.schema_version == "1.7.0"
+        checks["historical_row_exact_after_1_8_downgrade"] = (
+            verify_1_7(historical).schema_version == "1.7.0"
             and _read_historical_probe(historical) == PROBE_ROW
         )
-        reupgraded = upgrade_sqlite(historical)
-        checks["forward_reupgrade_to_1_7"] = reupgraded.schema_version == "1.7.0"
+
+        back_1_6 = downgrade_1_7_to_1_6(historical)
+        checks["empty_downgrade_to_1_6"] = back_1_6.schema_version == "1.6.0"
+        checks["historical_row_exact_after_full_downgrade"] = (
+            verify_1_6(historical).schema_version == "1.6.0"
+            and _read_historical_probe(historical) == PROBE_ROW
+        )
+
+        re_1_7 = upgrade_1_6_to_1_7(historical)
+        re_1_8 = upgrade_1_7_to_1_8(historical)
+        checks["forward_reupgrade_to_1_8"] = (
+            re_1_7.schema_version == "1.7.0"
+            and re_1_8.schema_version == "1.8.0"
+        )
         checks["historical_row_exact_after_reupgrade"] = (
             _read_historical_probe(historical) == PROBE_ROW
         )
 
         fixture = json.loads(FIXTURE_MANIFEST.read_text(encoding="utf-8"))
         replay = fixture.get("replay")
+        expected = fixture.get("expected")
+        input_spec = fixture.get("input")
         checks["historical_fixture_hook"] = (
-            isinstance(replay, dict)
-            and isinstance(replay.get("release_id"), str)
-            and isinstance(replay.get("frozen_input_sha256"), str)
+            fixture.get("fixture_id") == "M0_BASIC_TRANSPORT_V1"
+            and isinstance(replay, dict)
+            and isinstance(expected, dict)
+            and isinstance(input_spec, dict)
+            and replay.get("frozen_expected_sha256") == expected.get("sha256")
+            and replay.get("frozen_input_sha256") == input_spec.get("sha256")
         )
 
     status = "PASS" if all(checks.values()) else "FAIL"
     return {
-        "schema": "TPAA_M0_MIGRATION_HARNESS_V2",
+        "schema": "TPAA_M0_MIGRATION_HARNESS_V3",
         "task": "M0-STO-005",
-        "proposal_id": "ACP-216",
+        "proposal_chain": ["ACP-216", "ACP-219"],
         "status": status,
-        "schema_target": "1.7.0",
-        "schema_transition": "1.6.0->1.7.0",
+        "schema_target": "1.8.0",
+        "schema_transition": "1.6.0->1.7.0->1.8.0",
         "checks": checks,
         "note": (
-            "ACP-216 is the first real governed schema transition. Historical 1.6.0 "
-            "bytes are preserved as migration-source evidence; 1.7.0 is current authority."
+            "Historical DB authority snapshots remain immutable migration sources; "
+            "DB 1.8.0 is the current physical authority candidate."
         ),
     }
 
 
 def main() -> int:
-    result = run()
-    print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if result["status"] == "PASS" else 2
+    payload = run()
+    print(json.dumps(payload, sort_keys=True))
+    return 0 if payload["status"] == "PASS" else 2
 
 
 if __name__ == "__main__":

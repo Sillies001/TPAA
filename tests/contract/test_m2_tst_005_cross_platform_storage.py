@@ -62,7 +62,7 @@ def test_m2_tst_005_aggregates_cross_platform_and_storage_parity(
                 "sqlite_membership_hash": "c" * 64,
                 "postgres_membership_hash": "c" * 64,
                 "acceptance": {
-                    "current_core_schema_is_1_7_0": True,
+                    "current_core_schema_is_1_8_0": True,
                     "sqlite_publish_pass": True,
                     "postgres_publish_pass": True,
                     "receipt_identity_equal": True,
@@ -125,7 +125,7 @@ def test_m2_tst_005_fails_when_storage_hashes_differ(tmp_path: Path) -> None:
                 "sqlite_membership_hash": "c" * 64,
                 "postgres_membership_hash": "d" * 64,
                 "acceptance": {
-                    "current_core_schema_is_1_7_0": True,
+                    "current_core_schema_is_1_8_0": True,
                     "sqlite_publish_pass": True,
                     "postgres_publish_pass": True,
                     "receipt_identity_equal": True,

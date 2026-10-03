@@ -402,7 +402,7 @@ def review(
             and profile_activation.get("p2_external_claim_requires_protected_main_m6_exit_go") is True
         ),
         "db_schema_1_6_0_no_shadow_schema": (
-            baseline_info.get("db_schema") in {"1.6.0", "1.7.0"}
+            baseline_info.get("db_schema") in {"1.6.0", "1.7.0", "1.8.0"}
             and authority.get("db_schema_version") == "1.6.0"
             and profile.get("db_schema_version") == "1.6.0"
             and scope.get("db_schema_change") is False

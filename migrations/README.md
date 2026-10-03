@@ -1,6 +1,6 @@
 # M0 Migration Harness
 
-The current governed DB schema target is **1.7.0**.
+The current governed DB schema target is **1.8.0**.
 
 ACP-216 is the first real approved schema transition in the repository:
 
@@ -35,3 +35,8 @@ Qualification requires:
 A later toolchain change may install/pin Alembic and SQLAlchemy and execute the
 revision through the Alembic CLI. That dependency change is separate from the schema
 authority adoption and must update `pyproject.toml` and `uv.lock` together.
+
+
+## ACP-219 / DB 1.8.0
+
+`0002_acp219_db_1_8_0` is an additive correction from DB 1.7.0. It adds only the two ordered-text M8 persistence relations approved by Issue #219. The exact DB 1.7.0 CORE bytes are retained under `migrations/authority/CORE_LOGICAL_MODEL_DB_1_7_0.json`. Downgrade is fail-closed whenever either new relation is non-empty.

@@ -612,7 +612,7 @@ def test_m9_batch3_p1_p5_authority_hashes_and_db_schema_remain_immutable() -> No
     lock = json.loads(
         (baseline / "BASELINE_LOCK.json").read_text(encoding="utf-8")
     )
-    assert lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
+    assert lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0", "1.8.0"}
     entries = {
         row["file"]: row["sha256"]
         for row in lock["artifacts"]
