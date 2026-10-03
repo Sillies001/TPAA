@@ -30,7 +30,11 @@ from tpaa_qualification.m5_recovery import (  # noqa: E402
     exercise_failed_install_rollback,
     restore_consistent_file_backup,
 )
-from tpaa_storage.bootstrap import bootstrap_sqlite, verify_sqlite  # noqa: E402
+from tpaa_storage.bootstrap import (  # noqa: E402
+    EXPECTED_DB_SCHEMA_VERSION,
+    bootstrap_sqlite,
+    verify_sqlite,
+)
 
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
 TRACKING_ISSUE = 141
@@ -126,8 +130,8 @@ def _profile_recovery(
         sqlite_path = state / "tpaa.sqlite3"
         bootstrap_sqlite(sqlite_path)
         sqlite_verification = verify_sqlite(sqlite_path)
-        if sqlite_verification.schema_version != authority.db_schema_version:
-            raise RuntimeError("SQLite DB schema drift")
+        if sqlite_verification.schema_version != EXPECTED_DB_SCHEMA_VERSION:
+            raise RuntimeError("SQLite current physical DB schema drift")
 
         object_path = state / "release-object.bin"
         object_path.write_bytes(
@@ -193,8 +197,8 @@ def _profile_recovery(
             raise RuntimeError("local restored member hash mismatch")
         sqlite_index = local_categories.index("SQLite")
         restored_sqlite = restored / f"{sqlite_index:04d}.bin"
-        if verify_sqlite(restored_sqlite).schema_version != authority.db_schema_version:
-            raise RuntimeError("restored SQLite verification failed")
+        if verify_sqlite(restored_sqlite).schema_version != EXPECTED_DB_SCHEMA_VERSION:
+            raise RuntimeError("restored SQLite current physical schema verification failed")
 
         corrupt = root / "corrupt-backup"
         shutil.copytree(backup, corrupt)
@@ -237,6 +241,7 @@ def _profile_recovery(
             "in_flight_uncommitted_state_excluded_and_reported": True,
             "sqlite_schema_version": sqlite_verification.schema_version,
             "sqlite_baseline_lock_sha256": sqlite_verification.baseline_lock_sha256,
+            "historical_authority_db_schema_version": authority.db_schema_version,
         }
 
     return {
@@ -309,7 +314,8 @@ def verify(platform_name: str, *, batch2: Path) -> dict[str, Any]:
         "scope": {
             "p1_only": True,
             "p2_p6_inactive": True,
-            "db_schema_version": authority.db_schema_version,
+            "db_schema_version": EXPECTED_DB_SCHEMA_VERSION,
+            "historical_authority_db_schema_version": authority.db_schema_version,
             "formal_release_claimed": False,
             "m5_exit_go_claimed": False,
         },
