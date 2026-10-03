@@ -49,11 +49,13 @@ def test_workflow_is_real_windows_and_linux_matrix() -> None:
 
 
 def test_workflow_calls_one_governed_ci_gate_command() -> None:
-    text = _orchestration_text()
-    assert "python tools/dev/tpaa_dev.py ci-check" in text
-    assert "--expected-platform ${{ matrix.platform }}" in text
-    assert "continue-on-error" not in text
-    assert "|| true" not in text
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    orchestration = _orchestration_text()
+    assert "python tools/dev/tpaa_dev.py ci-check" in workflow
+    assert "--expected-platform ${{ matrix.platform }}" in workflow
+    assert "continue-on-error" not in workflow
+    assert "|| true" not in workflow
+    assert "run_platform_parallel_lanes.py" in orchestration
 
 
 def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
