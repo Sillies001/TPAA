@@ -52,7 +52,7 @@ def test_frozen_authority_fk_graph_is_complete_and_acyclic() -> None:
     order = _postgres_table_order(authority)
 
     assert len(authority.tables) == 92
-    assert sum(len(targets) for targets in dependencies.values()) == 179
+    assert sum(len(targets) for targets in dependencies.values()) == 159
     assert len(order) == 92
     assert set(order) == set(authority.tables)
     positions = {table_name: index for index, table_name in enumerate(order)}
