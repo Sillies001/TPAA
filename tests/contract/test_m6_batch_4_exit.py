@@ -311,7 +311,7 @@ def test_m6_batch_4_p1_non_regression_evidence_missing_is_no_go(tmp_path: Path) 
 
 def test_m6_batch_4_db_schema_drift_is_no_go(tmp_path: Path) -> None:
     lock = json.loads(EXIT.LOCK_PATH.read_text(encoding="utf-8"))
-    lock["baseline"]["db_schema"] = "1.7.0"
+    lock["baseline"]["db_schema"] = "1.8.0"
     path = _write(tmp_path / "lock.json", lock)
     result = _review(tmp_path, lock_path=path)
     assert result["decision"] == "NO_GO"

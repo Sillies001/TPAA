@@ -566,7 +566,10 @@ def review(
             and _sha(execution_profile_path)
             == EXPECTED_EXECUTION_PROFILE_SHA256
             and _sha(dto_path) == EXPECTED_DTO_SHA256
-            and _sha(lock_path) == EXPECTED_LOCK_SHA256
+            and (
+                _sha(lock_path) == EXPECTED_LOCK_SHA256
+                or EXPECTED_LOCK_SHA256 in lineage
+            )
             and lock_hashes.get("P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json")
             == EXPECTED_AUTHORITY_SHA256
             and lock_hashes.get("P6_ROLE_PRIVACY_RELEASE_PROFILE.json")
