@@ -115,6 +115,7 @@ from .m9_workspace import (
 )
 from .models import StorageBaselineStatus
 from .p2_persistence import P2PersistenceError, P2PersistenceRepository
+from .p4_p5_persistence import P4P5PersistenceError, P4P5PersistenceRepository
 from .runtime import (
     GetRuntimeBaselineStatus,
     RuntimeBaselineIdentityView,
@@ -151,6 +152,8 @@ __all__ = [
     "M2ReplayComparison",
     "P2PersistenceError",
     "P2PersistenceRepository",
+    "P4P5PersistenceError",
+    "P4P5PersistenceRepository",
     "compare_m2_release_replay",
     "InMemoryM3ReleasePublicationRepository",
     "M3MetricNotFound",

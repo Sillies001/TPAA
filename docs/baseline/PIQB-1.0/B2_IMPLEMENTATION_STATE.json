@@ -24,9 +24,10 @@
         "SQLiteProductPublicationLedger",
         "SQLiteDesktopUnitOfWork.product_publication",
         "Desktop persistence runtime",
-        "P2PersistenceRepository exact canonical-row mapping"
+        "P2PersistenceRepository exact canonical-row mapping",
+        "P4P5PersistenceRepository exact DB 1.8 canonical mapping"
       ],
-      "remaining_work": "Complete and qualify exact P4/P5/P6 domain persistence adapters over adopted DB 1.8.0 authority; retain P3 dependency gating."
+      "remaining_work": "Qualify P4/P5 against real PostgreSQL and complete P6 exact persistence; retain P3 dependency gating."
     },
     "PIQB-B2-003": {
       "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
@@ -34,9 +35,10 @@
         "PostgreSQLProductPublicationLedger",
         "PostgreSQLServiceUnitOfWork.product_publication",
         "Service persistence runtime",
-        "P2PersistenceRepository shared engine-neutral mapping"
+        "P2PersistenceRepository shared engine-neutral mapping",
+        "P4P5PersistenceRepository exact DB 1.8 canonical mapping"
       ],
-      "remaining_work": "Complete and qualify exact P4/P5/P6 domain persistence adapters over adopted DB 1.8.0 authority; retain P3 dependency gating."
+      "remaining_work": "Qualify P4/P5 against real PostgreSQL and complete P6 exact persistence; retain P3 dependency gating."
     },
     "PIQB-B2-004": {
       "state": "COMPLETE_CANDIDATE",
@@ -61,9 +63,10 @@
         "Desktop persistence reconstruction",
         "real PostgreSQL service runtime reconstruction across new connections",
         "real PostgreSQL exact read and idempotent replay after reconnect",
-        "P2 exact durable restart mapping"
+        "P2 exact durable restart mapping",
+        "P4/P5 SQLite restart exactness candidate"
       ],
-      "remaining_work": "Complete restart qualification for remaining P4/P5/P6 exact domain adapters."
+      "remaining_work": "Complete real PostgreSQL P4/P5 restart qualification and remaining P6 exact restart qualification."
     },
     "PIQB-B2-007": {
       "state": "COMPLETE_CANDIDATE",
@@ -79,9 +82,10 @@
         "shared identity derivation",
         "SQLite/PostgreSQL ledger contract parity",
         "real SQLite/PostgreSQL publication restart/CAS/recovery parity",
-        "DB 1.8 current-authority parity gate"
+        "DB 1.8 current-authority parity gate",
+        "P4/P5 ordered-text DB 1.8 exact mapping candidate"
       ],
-      "remaining_work": "Complete logical parity for remaining P4/P5/P6 exact domain adapters and final B2 qualification."
+      "remaining_work": "Complete real PostgreSQL logical parity for P4/P5, then P6 and final B2 qualification."
     }
   },
   "production_activation": {
@@ -93,10 +97,10 @@
       "P3_TWIN_CAPABILITY"
     ],
     "implemented_not_b2_qualified": [
-      "P2_ATTRIBUTION"
+      "P2_ATTRIBUTION",
+      "P4_P5_ASSESSMENT"
     ],
     "adapter_pending": [
-      "P4_P5_ASSESSMENT",
       "P6_MODEL_PROJECTION_ADVISORY"
     ],
     "authority_blocked": []
@@ -120,5 +124,11 @@
       "actions_run_id": 37105587377,
       "qualification": "ACP216_DB_1_7_0_ADOPTED"
     }
-  ]
+  ],
+  "domain_adapter_progress": {
+    "P2_ATTRIBUTION": "EXACT_IMPLEMENTED_CI_STABLE",
+    "P3_TWIN_CAPABILITY": "DEPENDENCY_BLOCKED",
+    "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_CANDIDATE",
+    "P6_MODEL_PROJECTION_ADVISORY": "PENDING"
+  }
 }
