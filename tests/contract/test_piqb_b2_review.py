@@ -40,6 +40,7 @@ def test_b2_authority_resolved_exact_adapters_in_progress() -> None:
     assert acceptance["real_postgres_restart_parity_gate_present"] is True
     assert acceptance["p4_p5_exact_adapter_present"] is True
     assert acceptance["real_postgres_p4_p5_gate_present"] is True
+    assert acceptance["p6_durable_substrate_present"] is True
 
 
 def test_b2_protected_main_not_qualified_before_adapter_completion() -> None:

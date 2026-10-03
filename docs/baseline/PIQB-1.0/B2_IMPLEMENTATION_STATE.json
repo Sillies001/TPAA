@@ -26,9 +26,10 @@
         "Desktop persistence runtime",
         "P2PersistenceRepository exact canonical-row mapping",
         "P4P5PersistenceRepository exact DB 1.8 canonical mapping",
-        "P4/P5 real PostgreSQL restart/parity qualification gate"
+        "P4/P5 real PostgreSQL restart/parity qualification gate",
+        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests"
       ],
-      "remaining_work": "Qualify P4/P5 against real PostgreSQL and complete P6 exact persistence; retain P3 dependency gating."
+      "remaining_work": "Complete P6 forecast/counterfactual/recommendation result persistence and real PostgreSQL parity; retain P3 dependency gating."
     },
     "PIQB-B2-003": {
       "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
@@ -38,9 +39,10 @@
         "Service persistence runtime",
         "P2PersistenceRepository shared engine-neutral mapping",
         "P4P5PersistenceRepository exact DB 1.8 canonical mapping",
-        "P4/P5 real PostgreSQL restart/parity qualification gate"
+        "P4/P5 real PostgreSQL restart/parity qualification gate",
+        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests"
       ],
-      "remaining_work": "Qualify P4/P5 against real PostgreSQL and complete P6 exact persistence; retain P3 dependency gating."
+      "remaining_work": "Complete P6 forecast/counterfactual/recommendation result persistence and real PostgreSQL parity; retain P3 dependency gating."
     },
     "PIQB-B2-004": {
       "state": "COMPLETE_CANDIDATE",
@@ -67,9 +69,10 @@
         "real PostgreSQL exact read and idempotent replay after reconnect",
         "P2 exact durable restart mapping",
         "P4/P5 SQLite restart exactness candidate",
-        "P4/P5 real PostgreSQL restart/parity qualification gate"
+        "P4/P5 real PostgreSQL restart/parity qualification gate",
+        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests"
       ],
-      "remaining_work": "Qualify P4/P5 real PostgreSQL restart/parity and complete remaining P6 exact restart qualification."
+      "remaining_work": "Complete P6 result restart qualification and P3-dependent model-build reconstruction."
     },
     "PIQB-B2-007": {
       "state": "COMPLETE_CANDIDATE",
@@ -87,9 +90,10 @@
         "real SQLite/PostgreSQL publication restart/CAS/recovery parity",
         "DB 1.8 current-authority parity gate",
         "P4/P5 ordered-text DB 1.8 exact mapping candidate",
-        "P4/P5 real PostgreSQL restart/parity qualification gate"
+        "P4/P5 real PostgreSQL restart/parity qualification gate",
+        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests"
       ],
-      "remaining_work": "Qualify P4/P5 SQLite/PostgreSQL logical parity, then P6 and final B2 qualification."
+      "remaining_work": "Complete P6 result SQLite/PostgreSQL logical parity, then P3 dependency closure and final B2 qualification."
     }
   },
   "production_activation": {
@@ -132,7 +136,7 @@
   "domain_adapter_progress": {
     "P2_ATTRIBUTION": "EXACT_IMPLEMENTED_CI_STABLE",
     "P3_TWIN_CAPABILITY": "DEPENDENCY_BLOCKED",
-    "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_CANDIDATE",
-    "P6_MODEL_PROJECTION_ADVISORY": "PENDING"
+    "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
+    "P6_MODEL_PROJECTION_ADVISORY": "DURABLE_SUBSTRATE_IN_PROGRESS"
   }
 }

@@ -87,6 +87,7 @@ def review(
     workflow = _text(".github/workflows/cross-platform-ci.yml")
     live_postgres = _text("tools/testing/piqb_b2_postgres_product_persistence.py")
     p4_p5_adapter = _text("src/tpaa_application/p4_p5_persistence.py")
+    p6_adapter = _text("src/tpaa_application/p6_persistence.py")
     live_p4_p5 = _text("tools/testing/piqb_b2_postgres_p4_p5_persistence.py")
     lock_baseline = lock.get("baseline")
     adopted = rebase.get("adopted_authority")
@@ -240,6 +241,21 @@ def review(
                     "ordered_objective_refs_preserved",
                     "P4_P5_IMMUTABLE_CONFLICT",
                 )
+            )
+        ),
+        "p6_durable_substrate_present": all(
+            token in p6_adapter
+            for token in (
+                "P6PersistenceRepository",
+                "register_input",
+                "register_model_build",
+                "register_forecast_request",
+                "register_counterfactual_request",
+                "P6_MODEL_BUILD_DEPENDENCY_BLOCKED",
+                "registry.dataset_snapshot",
+                "capability.p6_model_revision",
+                "intelligence.forecast_request",
+                "intelligence.counterfactual_request",
             )
         ),
         "adapter_tasks_not_prematurely_complete": all(
