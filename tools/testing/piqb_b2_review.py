@@ -258,6 +258,20 @@ def review(
                 "intelligence.counterfactual_request",
             )
         ),
+        "p6_result_adapter_present": all(
+            token in p6_adapter
+            for token in (
+                "register_forecast",
+                "register_counterfactual",
+                "register_recommendation",
+                "intelligence.forecast_result_revision",
+                "intelligence.counterfactual_revision",
+                "intelligence.training_recommendation_revision",
+                "P6_FORECAST_IDENTITY_MISMATCH",
+                "P6_COUNTERFACTUAL_IDENTITY_MISMATCH",
+                "P6_RECOMMENDATION_IDENTITY_MISMATCH",
+            )
+        ),
         "adapter_tasks_not_prematurely_complete": all(
             isinstance(task_state.get(task), dict)
             and task_state[task].get("state") in IN_PROGRESS_STATES

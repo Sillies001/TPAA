@@ -4,9 +4,11 @@ import hashlib
 import json
 from pathlib import Path
 from typing import cast
+
 import pytest
 
 from tpaa_application import P6PersistenceError, P6PersistenceRepository
+from tpaa_assessment.p6_recommendation import build_p6_recommendation
 from tpaa_capability import (
     P6ApplicabilityEvidence,
     P6CapabilityTrainingRow,
@@ -22,6 +24,8 @@ from tpaa_capability import (
     build_p6_counterfactual_request_binding,
     build_p6_forecast_request_binding,
     build_p6_input_snapshot,
+    execute_p6_counterfactual,
+    execute_p6_forecast,
 )
 from tpaa_context.p6_governance import canonical_hash
 from tpaa_storage import LocalObjectStore, SQLiteDesktopUnitOfWork, bootstrap_sqlite
@@ -33,6 +37,7 @@ MODEL = "95100000-0000-4000-8000-000000000004"
 OBJECT = "95100000-0000-4000-8000-000000000005"
 TRAINING = "95100000-0000-4000-8000-000000000006"
 VALIDATION = "95100000-0000-4000-8000-000000000007"
+GAP = "95100000-0000-4000-8000-000000000008"
 AS_OF = "2026-09-10T12:00:00Z"
 
 
@@ -281,3 +286,122 @@ def test_p6_substrate_idempotent_replay_is_exact(tmp_path: Path) -> None:
         assert repo.exact_input(snapshot.input_snapshot_id) == snapshot
         assert repo.exact_model_revision(MODEL) == build.model
         uow.commit()
+
+def test_p6_results_survive_sqlite_restart_and_replay(tmp_path: Path) -> None:
+    database = tmp_path / "p6-results.db"
+    object_store = LocalObjectStore(tmp_path / "objects-results")
+    bootstrap_sqlite(database)
+    snapshot = _input()
+    build, managed = _model_build()
+    profile = P6ForecastExecutionProfile.from_canonical()
+    forecast_request = build_p6_forecast_request_binding(
+        input_snapshot=snapshot,
+        forecast_spec_id="P6_FORECAST:P3_CAPABILITY_NEXT_SESSION",
+        forecast_spec_version="1.0.0",
+        target_code=profile.target_code,
+        horizon_spec={
+            "type": profile.horizon_type,
+            "steps": profile.horizon_steps,
+            "target_session_order": 5,
+        },
+        capability_model_id=MODEL,
+        model_profile_id=profile.profile_id,
+        model_profile_version=profile.profile_version,
+        training_dataset_snapshot_id=TRAINING,
+        validation_dataset_snapshot_id=VALIDATION,
+        assumption_profile_id="P6_ASSUMPTION:TRAINING_EVALUATION",
+        assumption_profile_version="1.0.0",
+    )
+    counterfactual_request = build_p6_counterfactual_request_binding(
+        input_snapshot=snapshot,
+        base_product_refs=(P4,),
+        scenario_definition_id=CONTEXT,
+        interventions={
+            "training_focus": {
+                "type": "TRAINING_FOCUS",
+                "value": "DEBRIEF_REPEAT",
+            }
+        },
+        held_fixed_assumptions={"configuration": "UNCHANGED"},
+        model_refs=(MODEL,),
+        applicability_profile_ref=profile.applicability_profile_ref,
+    )
+    forecast = execute_p6_forecast(
+        request=forecast_request,
+        input_snapshot=snapshot,
+        model_build=build,
+        managed_object=managed,
+        published_at_utc="2026-09-10T12:30:00Z",
+    )
+    counterfactual = execute_p6_counterfactual(
+        request=counterfactual_request,
+        input_snapshot=snapshot,
+        models=(build.model,),
+        created_at_utc="2026-09-10T12:40:00Z",
+    )
+    recommendation = build_p6_recommendation(
+        subject_key="SUBJECT-P6",
+        subject_id=SUBJECT,
+        recommendation_spec_id="P6_TRAINING_ADVISORY",
+        recommendation_spec_version="1.0.0",
+        source_forecast_result_ids=(forecast.forecast_result_id,),
+        source_counterfactual_run_ids=(
+            counterfactual.counterfactual_run_id,
+        ),
+        objective_constraints={
+            "objective": "TRAINING_PROFICIENCY",
+            "constraint": "EVALUATION_ONLY",
+        },
+        allowed_action_space={
+            "mode": "TRAINING_SESSION",
+            "options": ["DEBRIEF_REPEAT"],
+        },
+        rationale={"basis": "P6_PROJECTION_EVIDENCE"},
+        source_gap_refs=(GAP,),
+        proposed_training_items={"items": ["DEBRIEF_REVIEW"]},
+        applicability_status="APPLICABLE",
+        uncertainty={
+            "forecast": dict(forecast.uncertainty),
+            "counterfactual": dict(counterfactual.uncertainty),
+        },
+        created_at_utc="2026-09-10T12:50:00Z",
+    )
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+        )
+        repo.register_input(snapshot)
+        repo.register_model_build(build, managed)
+        repo.register_forecast_request(forecast_request)
+        repo.register_counterfactual_request(counterfactual_request)
+        repo.register_forecast(forecast)
+        repo.register_counterfactual(counterfactual)
+        repo.register_recommendation(recommendation)
+        uow.commit()
+
+    with SQLiteDesktopUnitOfWork(database) as uow:
+        repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+        )
+        assert repo.exact_forecast(forecast.forecast_result_id) == forecast
+        assert repo.exact_counterfactual(
+            counterfactual.counterfactual_run_id
+        ) == counterfactual
+        assert repo.exact_recommendation(
+            recommendation.recommendation_id
+        ) == recommendation
+        uow.commit()
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+        )
+        repo.register_forecast(forecast)
+        repo.register_counterfactual(counterfactual)
+        repo.register_recommendation(recommendation)
+        uow.commit()
+

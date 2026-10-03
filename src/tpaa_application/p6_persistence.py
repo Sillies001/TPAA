@@ -5,16 +5,20 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
+from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Protocol
 from uuid import UUID, uuid5
 
+from tpaa_assessment.p6_recommendation import P6RecommendationRevision
 from tpaa_capability import (
     P6ContextRef,
     P6CounterfactualRequestBinding,
+    P6CounterfactualRevision,
     P6FactualSourceRevision,
     P6ForecastExecutionProfile,
     P6ForecastRequestBinding,
+    P6ForecastRevision,
     P6InputSnapshot,
     P6ManagedModelObject,
     P6ModelBuild,
@@ -30,11 +34,17 @@ from tpaa_storage.canonical_rows import CanonicalRowRepository
 _INPUT_NAMESPACE = UUID("7256bfa5-8cb5-54c4-9174-1324fe77f4db")
 _FORECAST_REQUEST_NAMESPACE = UUID("55585db6-8d47-5fcb-8b92-cfbe1b468592")
 _COUNTERFACTUAL_REQUEST_NAMESPACE = UUID("3a205859-8096-5d99-bf08-1d89d16442b0")
+_FORECAST_RUN_NAMESPACE = UUID("a19e6794-d21c-5b71-8118-d7f428a2cc31")
+_FORECAST_RESULT_NAMESPACE = UUID("91bd01db-d727-5212-a5e5-728a4cbb23dc")
+_COUNTERFACTUAL_NAMESPACE = UUID("454034a4-9098-55b4-812b-a1c83f6bea73")
+_RECOMMENDATION_NAMESPACE = UUID("b0a421cb-b6bc-5659-bf37-aa298bdf360c")
 _INPUT_PREFIX = "P6_INPUT_SHA256:"
 _FORECAST_REQUEST_PREFIX = "P6_FORECAST_REQUEST_SHA256:"
 _COUNTERFACTUAL_REQUEST_PREFIX = "P6_COUNTERFACTUAL_REQUEST_SHA256:"
 _INPUT_SCHEMA = "TPAA_P6_INPUT_SNAPSHOT_MANIFEST_V1"
 _MODEL_DATASET_SCHEMA = "TPAA_P6_MODEL_DATASET_MANIFEST_V1"
+_COUNTERFACTUAL_SPEC_ID = "P6_COUNTERFACTUAL_PROJECTION"
+_COUNTERFACTUAL_SPEC_VERSION = "1.0.0"
 
 
 class P6PersistenceError(RuntimeError):
@@ -220,6 +230,129 @@ def _counterfactual_request_hash(value: P6CounterfactualRequestBinding) -> str:
             "model_refs": list(value.model_refs),
             "applicability_profile_ref": value.applicability_profile_ref,
             "as_of_utc": value.as_of_utc,
+        }
+    )
+
+
+def _optional_text(value: object) -> str | None:
+    return None if value is None else str(value)
+
+
+def _optional_int(value: object, field: str) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise P6PersistenceError("P6_DB_INTEGER_INVALID", field)
+    return value
+
+
+def _uuid_text(value: object, field: str) -> str:
+    try:
+        return str(UUID(str(value)))
+    except (TypeError, ValueError, AttributeError) as exc:
+        raise P6PersistenceError("P6_DB_UUID_INVALID", field) from exc
+
+
+def _forecast_result_hash(value: P6ForecastRevision) -> str:
+    return canonical_hash(
+        {
+            "forecast_request_id": value.forecast_request_id,
+            "forecast_run_id": value.forecast_run_id,
+            "model_revision_id": value.model_revision_id,
+            "model_artifact_hash": value.model_artifact_hash,
+            "target_code": value.target_code,
+            "target_time": value.target_time,
+            "target_session_order": value.target_session_order,
+            "distribution": dict(value.distribution),
+            "threshold_probabilities": dict(value.threshold_probabilities),
+            "applicability_status": value.applicability_status,
+            "uncertainty": dict(value.uncertainty),
+            "factual_source_refs": list(value.factual_source_refs),
+            "as_of_utc": value.as_of_utc,
+            "forecast_origin_utc": value.forecast_origin_utc,
+            "supersedes_forecast_result_id": (
+                value.supersedes_forecast_result_id
+            ),
+        }
+    )
+
+
+def _forecast_run_id(
+    request: P6ForecastRequestBinding,
+    model: P6ModelRevision,
+) -> str:
+    digest = canonical_hash(
+        {
+            "forecast_request_id": request.forecast_request_id,
+            "capability_model_id": model.capability_model_id,
+            "model_artifact_hash": model.model_artifact_hash,
+            "input_snapshot_id": request.input_snapshot_id,
+        }
+    )
+    return str(uuid5(_FORECAST_RUN_NAMESPACE, digest))
+
+
+def _counterfactual_result_hash(value: P6CounterfactualRevision) -> str:
+    return canonical_hash(
+        {
+            "counterfactual_run_id": value.counterfactual_run_id,
+            "counterfactual_request_id": value.counterfactual_request_id,
+            "projection_dataset_hash": value.projection_dataset_hash,
+            "applicability_status": value.applicability_status,
+            "identifiability_status": value.identifiability_status,
+            "causal_claim_level": value.causal_claim_level,
+            "uncertainty": dict(value.uncertainty),
+            "as_of_utc": value.as_of_utc,
+        }
+    )
+
+
+def _counterfactual_run_id(
+    request: P6CounterfactualRequestBinding,
+    value: P6CounterfactualRevision,
+) -> str:
+    digest = canonical_hash(
+        {
+            "request_hash": request.request_hash,
+            "projection_dataset_hash": value.projection_dataset_hash,
+            "applicability_status": value.applicability_status,
+            "identifiability_status": value.identifiability_status,
+            "causal_claim_level": value.causal_claim_level,
+            "as_of_utc": value.as_of_utc,
+            "supersedes_counterfactual_run_id": (
+                value.supersedes_counterfactual_run_id
+            ),
+        }
+    )
+    return str(uuid5(_COUNTERFACTUAL_NAMESPACE, digest))
+
+
+def _draft_recommendation_hash(value: P6RecommendationRevision) -> str:
+    return canonical_hash(
+        {
+            "subject_key": value.subject_key,
+            "subject_id": value.subject_id,
+            "recommendation_spec_id": value.recommendation_spec_id,
+            "recommendation_spec_version": value.recommendation_spec_version,
+            "source_forecast_result_ids": list(
+                value.source_forecast_result_ids
+            ),
+            "source_counterfactual_run_ids": list(
+                value.source_counterfactual_run_ids
+            ),
+            "objective_constraints": dict(value.objective_constraints),
+            "allowed_action_space": dict(value.allowed_action_space),
+            "rationale": dict(value.rationale),
+            "source_gap_refs": list(value.source_gap_refs),
+            "proposed_training_items": dict(value.proposed_training_items),
+            "applicability_status": value.applicability_status,
+            "uncertainty": dict(value.uncertainty),
+            "status": value.status,
+            "approval_state": value.approval_state,
+            "created_at": value.created_at,
+            "supersedes_recommendation_id": (
+                value.supersedes_recommendation_id
+            ),
         }
     )
 
@@ -1042,3 +1175,862 @@ class P6PersistenceRepository:
         if row is None:
             raise P6PersistenceError("M9_INPUT_NOT_FOUND", physical_id)
         return self._input_from_row(row)
+
+    def _forecast_request_by_physical(
+        self,
+        physical_id: object,
+    ) -> P6ForecastRequestBinding:
+        row = self._rows.one(
+            "intelligence.forecast_request",
+            where={"forecast_request_id": str(physical_id)},
+            columns=("request_hash",),
+        )
+        if row is None:
+            raise P6PersistenceError(
+                "M9_FORECAST_REQUEST_NOT_FOUND",
+                str(physical_id),
+            )
+        logical_id = f"{_FORECAST_REQUEST_PREFIX}{row['request_hash']}"
+        if str(physical_id) != _physical(
+            _FORECAST_REQUEST_NAMESPACE,
+            logical_id,
+            _FORECAST_REQUEST_PREFIX,
+        ):
+            raise P6PersistenceError(
+                "P6_PHYSICAL_ID_MISMATCH",
+                logical_id,
+            )
+        return self.exact_forecast_request(logical_id)
+
+    def _counterfactual_request_by_physical(
+        self,
+        physical_id: object,
+    ) -> P6CounterfactualRequestBinding:
+        row = self._rows.one(
+            "intelligence.counterfactual_request",
+            where={"counterfactual_request_id": str(physical_id)},
+            columns=("request_hash",),
+        )
+        if row is None:
+            raise P6PersistenceError(
+                "M9_COUNTERFACTUAL_REQUEST_NOT_FOUND",
+                str(physical_id),
+            )
+        logical_id = f"{_COUNTERFACTUAL_REQUEST_PREFIX}{row['request_hash']}"
+        if str(physical_id) != _physical(
+            _COUNTERFACTUAL_REQUEST_NAMESPACE,
+            logical_id,
+            _COUNTERFACTUAL_REQUEST_PREFIX,
+        ):
+            raise P6PersistenceError(
+                "P6_PHYSICAL_ID_MISMATCH",
+                logical_id,
+            )
+        return self.exact_counterfactual_request(logical_id)
+
+    def _ensure_forecast_run(
+        self,
+        value: P6ForecastRevision,
+        request: P6ForecastRequestBinding,
+        model: P6ModelRevision,
+    ) -> None:
+        if value.forecast_run_id != _forecast_run_id(request, model):
+            raise P6PersistenceError(
+                "P6_FORECAST_RUN_IDENTITY_MISMATCH",
+                value.forecast_result_id,
+            )
+        subject_id = _uuid_text(
+            request.subject_ref,
+            "forecast_request.subject_ref",
+        )
+        current = self._rows.one(
+            "intelligence.forecast_run",
+            where={"forecast_run_id": value.forecast_run_id},
+            columns=(
+                "forecast_spec_id",
+                "forecast_spec_version",
+                "subject_type",
+                "subject_id",
+                "input_snapshot_id",
+                "model_artifact_uri",
+                "model_artifact_hash",
+                "horizon_spec",
+                "status",
+            ),
+        )
+        if current is not None:
+            if (
+                str(current["forecast_spec_id"]) != request.forecast_spec_id
+                or str(current["forecast_spec_version"])
+                != request.forecast_spec_version
+                or str(current["subject_type"]) != model.subject_type
+                or str(current["subject_id"]) != subject_id
+                or str(current["input_snapshot_id"])
+                != _physical(
+                    _INPUT_NAMESPACE,
+                    request.input_snapshot_id,
+                    _INPUT_PREFIX,
+                )
+                or str(current["model_artifact_uri"])
+                != model.model_artifact_uri
+                or str(current["model_artifact_hash"])
+                != model.model_artifact_hash
+                or _mapping(
+                    current["horizon_spec"],
+                    "forecast_run.horizon_spec",
+                )
+                != dict(request.horizon_spec)
+                or str(current["status"]) != "SUCCEEDED"
+            ):
+                raise P6PersistenceError(
+                    "P6_IMMUTABLE_CONFLICT",
+                    value.forecast_run_id,
+                )
+            return
+        self._rows.insert(
+            "intelligence.forecast_run",
+            {
+                "forecast_run_id": value.forecast_run_id,
+                "forecast_spec_id": request.forecast_spec_id,
+                "forecast_spec_version": request.forecast_spec_version,
+                "subject_type": model.subject_type,
+                "subject_id": subject_id,
+                "input_snapshot_id": _physical(
+                    _INPUT_NAMESPACE,
+                    request.input_snapshot_id,
+                    _INPUT_PREFIX,
+                ),
+                "model_artifact_uri": model.model_artifact_uri,
+                "model_artifact_hash": model.model_artifact_hash,
+                "horizon_spec": dict(request.horizon_spec),
+                "backtest_metrics": {},
+                "status": "SUCCEEDED",
+                "created_at": request.as_of_utc,
+            },
+            field_kinds={
+                "horizon_spec": "json",
+                "backtest_metrics": "json",
+            },
+        )
+
+    def register_forecast(self, value: P6ForecastRevision) -> None:
+        current = self._try_forecast(value.forecast_result_id)
+        if current is not None:
+            if current != value:
+                raise P6PersistenceError(
+                    "P6_IMMUTABLE_CONFLICT",
+                    value.forecast_result_id,
+                )
+            return
+        request = self.exact_forecast_request(value.forecast_request_id)
+        model = self.exact_model_revision(value.model_revision_id)
+        input_snapshot = self.exact_input(request.input_snapshot_id)
+        digest = _forecast_result_hash(value)
+        if (
+            request.capability_model_id != value.model_revision_id
+            or request.subject_ref != model.subject_id
+            or request.target_code != value.target_code
+            or request.forecast_origin_utc != value.forecast_origin_utc
+            or request.as_of_utc != value.as_of_utc
+            or model.model_artifact_hash != value.model_artifact_hash
+            or input_snapshot.factual_source_refs
+            != value.factual_source_refs
+            or value.logical_content_hash != digest
+            or value.forecast_identity
+            != f"P6_FORECAST_RESULT_SHA256:{digest}"
+            or value.forecast_result_id
+            != str(uuid5(_FORECAST_RESULT_NAMESPACE, digest))
+        ):
+            raise P6PersistenceError(
+                "P6_FORECAST_IDENTITY_MISMATCH",
+                value.forecast_result_id,
+            )
+        self._ensure_forecast_run(value, request, model)
+        self._rows.insert(
+            "intelligence.forecast_result",
+            {
+                "forecast_result_id": value.forecast_result_id,
+                "forecast_run_id": value.forecast_run_id,
+                "target_code": value.target_code,
+                "target_time": value.target_time,
+                "distribution": dict(value.distribution),
+                "threshold_probabilities": dict(
+                    value.threshold_probabilities
+                ),
+                "status": value.status,
+            },
+            field_kinds={
+                "distribution": "json",
+                "threshold_probabilities": "json",
+            },
+        )
+        self._rows.insert(
+            "intelligence.forecast_result_revision",
+            {
+                "forecast_result_id": value.forecast_result_id,
+                "forecast_identity": value.forecast_identity,
+                "forecast_request_id": _physical(
+                    _FORECAST_REQUEST_NAMESPACE,
+                    value.forecast_request_id,
+                    _FORECAST_REQUEST_PREFIX,
+                ),
+                "target_session_order": value.target_session_order,
+                "applicability_status": value.applicability_status,
+                "uncertainty": dict(value.uncertainty),
+                "factual_source_refs": value.factual_source_refs,
+                "model_revision_id": value.model_revision_id,
+                "model_artifact_hash": value.model_artifact_hash,
+                "as_of_utc": value.as_of_utc,
+                "forecast_origin_utc": value.forecast_origin_utc,
+                "published_at_utc": value.published_at_utc,
+                "supersedes_forecast_result_id": (
+                    value.supersedes_forecast_result_id
+                ),
+                "logical_content_hash": value.logical_content_hash,
+            },
+            field_kinds={
+                "uncertainty": "json",
+                "factual_source_refs": "text_array",
+            },
+        )
+
+    def _try_forecast(self, object_id: str) -> P6ForecastRevision | None:
+        base = self._rows.one(
+            "intelligence.forecast_result",
+            where={"forecast_result_id": object_id},
+            columns=(
+                "forecast_result_id",
+                "forecast_run_id",
+                "target_code",
+                "target_time",
+                "distribution",
+                "threshold_probabilities",
+                "status",
+            ),
+        )
+        if base is None:
+            return None
+        revision = self._rows.one(
+            "intelligence.forecast_result_revision",
+            where={"forecast_result_id": object_id},
+            columns=(
+                "forecast_identity",
+                "forecast_request_id",
+                "target_session_order",
+                "applicability_status",
+                "uncertainty",
+                "factual_source_refs",
+                "model_revision_id",
+                "model_artifact_hash",
+                "as_of_utc",
+                "forecast_origin_utc",
+                "published_at_utc",
+                "supersedes_forecast_result_id",
+                "logical_content_hash",
+            ),
+        )
+        if revision is None:
+            raise P6PersistenceError(
+                "P6_FORECAST_REVISION_METADATA_MISSING",
+                object_id,
+            )
+        request = self._forecast_request_by_physical(
+            revision["forecast_request_id"]
+        )
+        value = P6ForecastRevision(
+            forecast_result_id=str(base["forecast_result_id"]),
+            forecast_identity=str(revision["forecast_identity"]),
+            forecast_run_id=str(base["forecast_run_id"]),
+            forecast_request_id=request.forecast_request_id,
+            target_code=str(base["target_code"]),
+            target_time=(
+                None
+                if base["target_time"] is None
+                else _time_text(base["target_time"])
+            ),
+            target_session_order=_optional_int(
+                revision["target_session_order"],
+                "forecast_result_revision.target_session_order",
+            ),
+            distribution=_mapping(
+                base["distribution"],
+                "forecast_result.distribution",
+            ),
+            threshold_probabilities=_mapping(
+                base["threshold_probabilities"],
+                "forecast_result.threshold_probabilities",
+            ),
+            applicability_status=str(revision["applicability_status"]),
+            uncertainty=_mapping(
+                revision["uncertainty"],
+                "forecast_result_revision.uncertainty",
+            ),
+            status=str(base["status"]),
+            factual_source_refs=_strings(
+                revision["factual_source_refs"],
+                "forecast_result_revision.factual_source_refs",
+            ),
+            model_revision_id=str(revision["model_revision_id"]),
+            model_artifact_hash=str(revision["model_artifact_hash"]),
+            as_of_utc=_time_text(revision["as_of_utc"]),
+            forecast_origin_utc=_time_text(
+                revision["forecast_origin_utc"]
+            ),
+            published_at_utc=_time_text(revision["published_at_utc"]),
+            supersedes_forecast_result_id=_optional_text(
+                revision["supersedes_forecast_result_id"]
+            ),
+            logical_content_hash=str(revision["logical_content_hash"]),
+        )
+        model = self.exact_model_revision(value.model_revision_id)
+        run = self._rows.one(
+            "intelligence.forecast_run",
+            where={"forecast_run_id": value.forecast_run_id},
+            columns=(
+                "subject_id",
+                "input_snapshot_id",
+                "model_artifact_uri",
+                "model_artifact_hash",
+                "horizon_spec",
+                "status",
+            ),
+        )
+        digest = _forecast_result_hash(value)
+        if (
+            run is None
+            or str(run["subject_id"]) != request.subject_ref
+            or str(run["input_snapshot_id"])
+            != _physical(
+                _INPUT_NAMESPACE,
+                request.input_snapshot_id,
+                _INPUT_PREFIX,
+            )
+            or str(run["model_artifact_uri"])
+            != model.model_artifact_uri
+            or str(run["model_artifact_hash"])
+            != model.model_artifact_hash
+            or _mapping(run["horizon_spec"], "forecast_run.horizon_spec")
+            != dict(request.horizon_spec)
+            or str(run["status"]) != "SUCCEEDED"
+            or value.forecast_run_id != _forecast_run_id(request, model)
+            or value.logical_content_hash != digest
+            or value.forecast_identity
+            != f"P6_FORECAST_RESULT_SHA256:{digest}"
+            or value.forecast_result_id
+            != str(uuid5(_FORECAST_RESULT_NAMESPACE, digest))
+        ):
+            raise P6PersistenceError(
+                "P6_FORECAST_IDENTITY_MISMATCH",
+                object_id,
+            )
+        return value
+
+    def exact_forecast(self, object_id: str) -> P6ForecastRevision:
+        value = self._try_forecast(object_id)
+        if value is None:
+            raise P6PersistenceError("M9_FORECAST_NOT_FOUND", object_id)
+        return value
+
+    def register_counterfactual(
+        self,
+        value: P6CounterfactualRevision,
+    ) -> None:
+        current = self._try_counterfactual(value.counterfactual_run_id)
+        if current is not None:
+            if current != value:
+                raise P6PersistenceError(
+                    "P6_IMMUTABLE_CONFLICT",
+                    value.counterfactual_run_id,
+                )
+            return
+        request = self.exact_counterfactual_request(
+            value.counterfactual_request_id
+        )
+        expected_assumptions = {
+            "held_fixed": dict(value.held_fixed_assumptions),
+            "interventions": dict(value.interventions),
+        }
+        if (
+            value.base_product_refs != request.base_product_refs
+            or value.scenario_definition_id
+            != request.scenario_definition_id
+            or dict(value.interventions) != dict(request.interventions)
+            or dict(value.held_fixed_assumptions)
+            != dict(request.held_fixed_assumptions)
+            or value.model_refs != request.model_refs
+            or value.applicability_profile_ref
+            != request.applicability_profile_ref
+            or value.as_of_utc != request.as_of_utc
+            or dict(value.assumptions) != expected_assumptions
+            or value.counterfactual_run_id
+            != _counterfactual_run_id(request, value)
+            or value.logical_content_hash
+            != _counterfactual_result_hash(value)
+        ):
+            raise P6PersistenceError(
+                "P6_COUNTERFACTUAL_IDENTITY_MISMATCH",
+                value.counterfactual_run_id,
+            )
+        self._rows.insert(
+            "intelligence.counterfactual_run",
+            {
+                "counterfactual_run_id": value.counterfactual_run_id,
+                "spec_id": _COUNTERFACTUAL_SPEC_ID,
+                "spec_version": _COUNTERFACTUAL_SPEC_VERSION,
+                "base_product_refs": value.base_product_refs,
+                "scenario_definition_id": value.scenario_definition_id,
+                "assumptions": expected_assumptions,
+                "model_refs": value.model_refs,
+                "projection_dataset_uri": value.projection_dataset_uri,
+                "projection_dataset_hash": value.projection_dataset_hash,
+                "status": value.status,
+                "created_at": value.created_at_utc,
+            },
+            field_kinds={
+                "base_product_refs": "uuid_array",
+                "assumptions": "json",
+                "model_refs": "uuid_array",
+            },
+        )
+        self._rows.insert(
+            "intelligence.counterfactual_revision",
+            {
+                "counterfactual_run_id": value.counterfactual_run_id,
+                "counterfactual_request_id": _physical(
+                    _COUNTERFACTUAL_REQUEST_NAMESPACE,
+                    value.counterfactual_request_id,
+                    _COUNTERFACTUAL_REQUEST_PREFIX,
+                ),
+                "interventions": dict(value.interventions),
+                "held_fixed_assumptions": dict(
+                    value.held_fixed_assumptions
+                ),
+                "applicability_profile_ref": (
+                    value.applicability_profile_ref
+                ),
+                "applicability_status": value.applicability_status,
+                "identifiability_status": value.identifiability_status,
+                "causal_claim_level": value.causal_claim_level,
+                "uncertainty": dict(value.uncertainty),
+                "as_of_utc": value.as_of_utc,
+                "supersedes_counterfactual_run_id": (
+                    value.supersedes_counterfactual_run_id
+                ),
+                "logical_content_hash": value.logical_content_hash,
+            },
+            field_kinds={
+                "interventions": "json",
+                "held_fixed_assumptions": "json",
+                "uncertainty": "json",
+            },
+        )
+
+    def _try_counterfactual(
+        self,
+        object_id: str,
+    ) -> P6CounterfactualRevision | None:
+        base = self._rows.one(
+            "intelligence.counterfactual_run",
+            where={"counterfactual_run_id": object_id},
+            columns=(
+                "counterfactual_run_id",
+                "spec_id",
+                "spec_version",
+                "base_product_refs",
+                "scenario_definition_id",
+                "assumptions",
+                "model_refs",
+                "projection_dataset_uri",
+                "projection_dataset_hash",
+                "status",
+                "created_at",
+            ),
+        )
+        if base is None:
+            return None
+        revision = self._rows.one(
+            "intelligence.counterfactual_revision",
+            where={"counterfactual_run_id": object_id},
+            columns=(
+                "counterfactual_request_id",
+                "interventions",
+                "held_fixed_assumptions",
+                "applicability_profile_ref",
+                "applicability_status",
+                "identifiability_status",
+                "causal_claim_level",
+                "uncertainty",
+                "as_of_utc",
+                "supersedes_counterfactual_run_id",
+                "logical_content_hash",
+            ),
+        )
+        if revision is None:
+            raise P6PersistenceError(
+                "P6_COUNTERFACTUAL_REVISION_METADATA_MISSING",
+                object_id,
+            )
+        if (
+            str(base["spec_id"]) != _COUNTERFACTUAL_SPEC_ID
+            or str(base["spec_version"])
+            != _COUNTERFACTUAL_SPEC_VERSION
+            or base["projection_dataset_uri"] is None
+            or base["projection_dataset_hash"] is None
+        ):
+            raise P6PersistenceError(
+                "P6_COUNTERFACTUAL_RUN_INVALID",
+                object_id,
+            )
+        request = self._counterfactual_request_by_physical(
+            revision["counterfactual_request_id"]
+        )
+        value = P6CounterfactualRevision(
+            counterfactual_run_id=str(base["counterfactual_run_id"]),
+            counterfactual_request_id=request.counterfactual_request_id,
+            base_product_refs=_strings(
+                base["base_product_refs"],
+                "counterfactual_run.base_product_refs",
+            ),
+            scenario_definition_id=str(base["scenario_definition_id"]),
+            interventions=_mapping(
+                revision["interventions"],
+                "counterfactual_revision.interventions",
+            ),
+            held_fixed_assumptions=_mapping(
+                revision["held_fixed_assumptions"],
+                "counterfactual_revision.held_fixed_assumptions",
+            ),
+            model_refs=_strings(
+                base["model_refs"],
+                "counterfactual_run.model_refs",
+            ),
+            applicability_profile_ref=str(
+                revision["applicability_profile_ref"]
+            ),
+            projection_dataset_uri=str(base["projection_dataset_uri"]),
+            projection_dataset_hash=str(
+                base["projection_dataset_hash"]
+            ),
+            applicability_status=str(revision["applicability_status"]),
+            identifiability_status=str(
+                revision["identifiability_status"]
+            ),
+            causal_claim_level=str(revision["causal_claim_level"]),
+            uncertainty=_mapping(
+                revision["uncertainty"],
+                "counterfactual_revision.uncertainty",
+            ),
+            assumptions=_mapping(
+                base["assumptions"],
+                "counterfactual_run.assumptions",
+            ),
+            status=str(base["status"]),
+            as_of_utc=_time_text(revision["as_of_utc"]),
+            created_at_utc=_time_text(base["created_at"]),
+            supersedes_counterfactual_run_id=_optional_text(
+                revision["supersedes_counterfactual_run_id"]
+            ),
+            logical_content_hash=str(revision["logical_content_hash"]),
+        )
+        expected_assumptions = {
+            "held_fixed": dict(value.held_fixed_assumptions),
+            "interventions": dict(value.interventions),
+        }
+        if (
+            value.base_product_refs != request.base_product_refs
+            or value.scenario_definition_id
+            != request.scenario_definition_id
+            or dict(value.interventions) != dict(request.interventions)
+            or dict(value.held_fixed_assumptions)
+            != dict(request.held_fixed_assumptions)
+            or value.model_refs != request.model_refs
+            or dict(value.assumptions) != expected_assumptions
+            or value.counterfactual_run_id
+            != _counterfactual_run_id(request, value)
+            or value.logical_content_hash
+            != _counterfactual_result_hash(value)
+        ):
+            raise P6PersistenceError(
+                "P6_COUNTERFACTUAL_IDENTITY_MISMATCH",
+                object_id,
+            )
+        return value
+
+    def exact_counterfactual(
+        self,
+        object_id: str,
+    ) -> P6CounterfactualRevision:
+        value = self._try_counterfactual(object_id)
+        if value is None:
+            raise P6PersistenceError(
+                "M9_COUNTERFACTUAL_NOT_FOUND",
+                object_id,
+            )
+        return value
+
+    def _assert_recommendation_identity(
+        self,
+        value: P6RecommendationRevision,
+        visited: frozenset[str] = frozenset(),
+    ) -> None:
+        if value.recommendation_id in visited:
+            raise P6PersistenceError(
+                "P6_RECOMMENDATION_SUPERSESSION_CYCLE",
+                value.recommendation_id,
+            )
+        if value.approval_state == "DRAFT":
+            digest = _draft_recommendation_hash(value)
+        else:
+            previous_id = value.supersedes_recommendation_id
+            if previous_id is None:
+                raise P6PersistenceError(
+                    "P6_RECOMMENDATION_SUPERSESSION_MISSING",
+                    value.recommendation_id,
+                )
+            previous = self._exact_recommendation_checked(
+                previous_id,
+                visited | {value.recommendation_id},
+            )
+            material = {
+                **previous.projection(),
+                "subject_id": previous.subject_id,
+                "approval_state": value.approval_state,
+                "reviewer_subject_key": value.reviewer_subject_key,
+                "audit_ref": value.audit_ref,
+                "created_at": value.created_at,
+                "supersedes_recommendation_id": (
+                    previous.recommendation_id
+                ),
+            }
+            digest = canonical_hash(material)
+            expected = replace(
+                previous,
+                recommendation_id=value.recommendation_id,
+                approval_state=value.approval_state,
+                reviewer_subject_key=value.reviewer_subject_key,
+                audit_ref=value.audit_ref,
+                created_at=value.created_at,
+                supersedes_recommendation_id=previous.recommendation_id,
+                logical_content_hash=value.logical_content_hash,
+            )
+            if expected != value:
+                raise P6PersistenceError(
+                    "P6_RECOMMENDATION_SUPERSESSION_MISMATCH",
+                    value.recommendation_id,
+                )
+        if (
+            value.logical_content_hash != digest
+            or value.recommendation_id
+            != str(uuid5(_RECOMMENDATION_NAMESPACE, digest))
+        ):
+            raise P6PersistenceError(
+                "P6_RECOMMENDATION_IDENTITY_MISMATCH",
+                value.recommendation_id,
+            )
+
+    def register_recommendation(
+        self,
+        value: P6RecommendationRevision,
+    ) -> None:
+        current = self._try_recommendation(value.recommendation_id)
+        if current is not None:
+            self._assert_recommendation_identity(current)
+            if current != value:
+                raise P6PersistenceError(
+                    "P6_IMMUTABLE_CONFLICT",
+                    value.recommendation_id,
+                )
+            return
+        for forecast_id in value.source_forecast_result_ids:
+            self.exact_forecast(forecast_id)
+        for counterfactual_id in value.source_counterfactual_run_ids:
+            self.exact_counterfactual(counterfactual_id)
+        if value.supersedes_recommendation_id is not None:
+            self.exact_recommendation(value.supersedes_recommendation_id)
+        self._assert_recommendation_identity(value)
+        self._rows.insert(
+            "intelligence.training_recommendation",
+            {
+                "recommendation_id": value.recommendation_id,
+                "subject_id": value.subject_id,
+                "recommendation_spec_id": value.recommendation_spec_id,
+                "recommendation_spec_version": (
+                    value.recommendation_spec_version
+                ),
+                "rationale": dict(value.rationale),
+                "source_gap_refs": value.source_gap_refs,
+                "proposed_training_items": dict(
+                    value.proposed_training_items
+                ),
+                "status": value.status,
+                "approval_state": value.approval_state,
+                "created_at": value.created_at,
+            },
+            field_kinds={
+                "rationale": "json",
+                "source_gap_refs": "uuid_array",
+                "proposed_training_items": "json",
+            },
+        )
+        self._rows.insert(
+            "intelligence.training_recommendation_revision",
+            {
+                "recommendation_id": value.recommendation_id,
+                "subject_key": value.subject_key,
+                "source_forecast_result_ids": (
+                    value.source_forecast_result_ids
+                ),
+                "source_counterfactual_run_ids": (
+                    value.source_counterfactual_run_ids
+                ),
+                "objective_constraints": dict(
+                    value.objective_constraints
+                ),
+                "allowed_action_space": dict(value.allowed_action_space),
+                "applicability_status": value.applicability_status,
+                "uncertainty": dict(value.uncertainty),
+                "reviewer_subject_key": value.reviewer_subject_key,
+                "audit_ref": value.audit_ref,
+                "supersedes_recommendation_id": (
+                    value.supersedes_recommendation_id
+                ),
+                "logical_content_hash": value.logical_content_hash,
+            },
+            field_kinds={
+                "source_forecast_result_ids": "uuid_array",
+                "source_counterfactual_run_ids": "uuid_array",
+                "objective_constraints": "json",
+                "allowed_action_space": "json",
+                "uncertainty": "json",
+            },
+        )
+
+    def _try_recommendation(
+        self,
+        object_id: str,
+    ) -> P6RecommendationRevision | None:
+        base = self._rows.one(
+            "intelligence.training_recommendation",
+            where={"recommendation_id": object_id},
+            columns=(
+                "recommendation_id",
+                "subject_id",
+                "recommendation_spec_id",
+                "recommendation_spec_version",
+                "rationale",
+                "source_gap_refs",
+                "proposed_training_items",
+                "status",
+                "approval_state",
+                "created_at",
+            ),
+        )
+        if base is None:
+            return None
+        revision = self._rows.one(
+            "intelligence.training_recommendation_revision",
+            where={"recommendation_id": object_id},
+            columns=(
+                "subject_key",
+                "source_forecast_result_ids",
+                "source_counterfactual_run_ids",
+                "objective_constraints",
+                "allowed_action_space",
+                "applicability_status",
+                "uncertainty",
+                "reviewer_subject_key",
+                "audit_ref",
+                "supersedes_recommendation_id",
+                "logical_content_hash",
+            ),
+        )
+        if revision is None:
+            raise P6PersistenceError(
+                "P6_RECOMMENDATION_REVISION_METADATA_MISSING",
+                object_id,
+            )
+        return P6RecommendationRevision(
+            recommendation_id=str(base["recommendation_id"]),
+            subject_key=str(revision["subject_key"]),
+            subject_id=str(base["subject_id"]),
+            recommendation_spec_id=str(
+                base["recommendation_spec_id"]
+            ),
+            recommendation_spec_version=str(
+                base["recommendation_spec_version"]
+            ),
+            source_forecast_result_ids=_strings(
+                revision["source_forecast_result_ids"],
+                "training_recommendation_revision."
+                "source_forecast_result_ids",
+            ),
+            source_counterfactual_run_ids=_strings(
+                revision["source_counterfactual_run_ids"],
+                "training_recommendation_revision."
+                "source_counterfactual_run_ids",
+            ),
+            objective_constraints=_mapping(
+                revision["objective_constraints"],
+                "training_recommendation_revision."
+                "objective_constraints",
+            ),
+            allowed_action_space=_mapping(
+                revision["allowed_action_space"],
+                "training_recommendation_revision."
+                "allowed_action_space",
+            ),
+            rationale=_mapping(
+                base["rationale"],
+                "training_recommendation.rationale",
+            ),
+            source_gap_refs=_strings(
+                base["source_gap_refs"],
+                "training_recommendation.source_gap_refs",
+            ),
+            proposed_training_items=_mapping(
+                base["proposed_training_items"],
+                "training_recommendation.proposed_training_items",
+            ),
+            applicability_status=str(
+                revision["applicability_status"]
+            ),
+            uncertainty=_mapping(
+                revision["uncertainty"],
+                "training_recommendation_revision.uncertainty",
+            ),
+            status=str(base["status"]),
+            approval_state=str(base["approval_state"]),
+            reviewer_subject_key=_optional_text(
+                revision["reviewer_subject_key"]
+            ),
+            audit_ref=_optional_text(revision["audit_ref"]),
+            created_at=_time_text(base["created_at"]),
+            supersedes_recommendation_id=_optional_text(
+                revision["supersedes_recommendation_id"]
+            ),
+            logical_content_hash=str(revision["logical_content_hash"]),
+        )
+
+    def _exact_recommendation_checked(
+        self,
+        object_id: str,
+        visited: frozenset[str],
+    ) -> P6RecommendationRevision:
+        value = self._try_recommendation(object_id)
+        if value is None:
+            raise P6PersistenceError(
+                "M9_RECOMMENDATION_NOT_FOUND",
+                object_id,
+            )
+        self._assert_recommendation_identity(value, visited)
+        return value
+
+    def exact_recommendation(
+        self,
+        object_id: str,
+    ) -> P6RecommendationRevision:
+        return self._exact_recommendation_checked(
+            object_id,
+            frozenset(),
+        )
+
