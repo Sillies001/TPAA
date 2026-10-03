@@ -23,18 +23,31 @@ class StoredObject:
     byte_size: int
 
 
-def _logical_relative(logical_uri: str) -> str:
+def _parse_logical_uri(logical_uri: str) -> tuple[str, str, str]:
     parsed = urlsplit(logical_uri)
     if parsed.scheme not in {"tpaa-object", "tpaa-parquet"}:
         raise ObjectStoreError("unsupported logical object scheme")
     if not parsed.netloc:
         raise ObjectStoreError("logical object URI requires a namespace")
     if parsed.query or parsed.fragment or parsed.username or parsed.password or parsed.port:
-        raise ObjectStoreError("logical object URI may not contain credentials/query/fragment/port")
-    path = parsed.path.lstrip("/")
+        raise ObjectStoreError(
+            "logical object URI may not contain credentials/query/fragment/port"
+        )
+    return parsed.scheme, parsed.netloc, parsed.path.lstrip("/")
+
+
+def _logical_relative(logical_uri: str) -> str:
+    scheme, namespace, path = _parse_logical_uri(logical_uri)
     if not path:
         raise ObjectStoreError("logical object URI requires a path")
-    return f"{parsed.scheme}/{parsed.netloc}/{path}"
+    return f"{scheme}/{namespace}/{path}"
+
+
+def _logical_prefix_relative(logical_prefix: str) -> str:
+    scheme, namespace, path = _parse_logical_uri(logical_prefix)
+    if not path:
+        return f"{scheme}/{namespace}"
+    return f"{scheme}/{namespace}/{path}"
 
 
 class LocalObjectStore:
@@ -69,4 +82,59 @@ class LocalObjectStore:
 
     def verify(self, stored: StoredObject) -> bool:
         data = self.read_bytes(stored.logical_uri)
-        return len(data) == stored.byte_size and artifact_byte_hash(data) == stored.artifact_sha256
+        return (
+            len(data) == stored.byte_size
+            and artifact_byte_hash(data) == stored.artifact_sha256
+        )
+
+    def list_objects(self, logical_prefix: str) -> tuple[StoredObject, ...]:
+        """Enumerate durable objects below one governed logical prefix."""
+
+        relative = _logical_prefix_relative(logical_prefix)
+        base = self.filesystem.resolve(relative)
+        if not base.exists():
+            return ()
+        candidates = [base] if base.is_file() else sorted(base.rglob("*"))
+        objects: list[StoredObject] = []
+        for path in candidates:
+            if not path.is_file():
+                continue
+            if path.name.startswith(".") or path.name.endswith(".lock"):
+                continue
+            relative_path = path.resolve().relative_to(self.filesystem.root)
+            parts = relative_path.parts
+            if len(parts) < 3 or parts[0] not in {"tpaa-object", "tpaa-parquet"}:
+                raise ObjectStoreError("physical object layout is invalid")
+            logical_uri = f"{parts[0]}://{parts[1]}/{'/'.join(parts[2:])}"
+            data = path.read_bytes()
+            objects.append(
+                StoredObject(
+                    logical_uri=logical_uri,
+                    artifact_sha256=artifact_byte_hash(data),
+                    byte_size=len(data),
+                )
+            )
+        return tuple(objects)
+
+    def delete_object(
+        self,
+        logical_uri: str,
+        *,
+        expected_sha256: str | None = None,
+    ) -> bool:
+        """Delete one known orphan only when optional byte identity still matches."""
+
+        target = self.physical_path(logical_uri)
+        lock = InterProcessFileLock(target.with_name(f".{target.name}.lock"))
+        with lock:
+            if not target.exists():
+                return False
+            if expected_sha256 is not None:
+                actual = artifact_byte_hash(target.read_bytes())
+                if actual != expected_sha256:
+                    raise ObjectStoreError(
+                        "object hash changed before delete: "
+                        f"{logical_uri}"
+                    )
+            target.unlink()
+            return True

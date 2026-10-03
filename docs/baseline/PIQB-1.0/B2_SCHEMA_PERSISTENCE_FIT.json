@@ -1,0 +1,215 @@
+{
+  "schema": "TPAA_PIQB_B2_SCHEMA_PERSISTENCE_FIT_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B2",
+  "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
+  "db_schema_version": "1.6.0",
+  "canonical_authority": "CB-1.4.0/CORE_LOGICAL_MODEL",
+  "no_shadow_schema": true,
+  "rule": "A runtime product is FIT only when every field required for exact historical reconstruction is directly persisted in an authorized canonical relation, deterministically derivable from another exact authoritative relation/profile, or stored in an explicitly authorized object/snapshot payload. Audit payloads, unrelated JSON columns, or ad-hoc object blobs may not be used as shadow authority.",
+  "summary": {
+    "overall": "BLOCKED_FOR_FULL_P2_P6_DOMAIN_PERSISTENCE",
+    "common_publication_substrate": "FIT",
+    "p1_session_release": "FIT_EXISTING",
+    "longitudinal_release": "FIT_EXISTING_SUBSTRATE",
+    "p2_attribution": "BLOCKED",
+    "p3_twin_capability": "FIT_WITH_DERIVATIONS_DEPENDENCY_BLOCKED",
+    "p4_p5_assessment": "BLOCKED",
+    "p6_model_projection_advisory": "BLOCKED",
+    "authority_change_proposal_required": true
+  },
+  "families": [
+    {
+      "product_family": "P1_SESSION_RELEASE",
+      "status": "FIT_EXISTING",
+      "authorized_locations": [
+        "registry.analysis_release",
+        "registry.release_scope_pointer",
+        "registry.compute_job",
+        "metric.metric_instance",
+        "metric.evidence_set",
+        "metric.capability_observation",
+        "registry.object_reference",
+        "registry.object_binding"
+      ],
+      "notes": [
+        "Existing SQLiteCorePublicationLedger/PostgreSQLCorePublicationLedger already implement the qualified publication path."
+      ],
+      "dependency_blockers": []
+    },
+    {
+      "product_family": "LONGITUDINAL_RELEASE",
+      "status": "FIT_EXISTING_SUBSTRATE",
+      "authorized_locations": [
+        "registry.analysis_release",
+        "registry.longitudinal_scope",
+        "registry.longitudinal_release_input",
+        "metric.longitudinal_sample",
+        "metric.performance_trend_series",
+        "metric.performance_trend_point",
+        "metric.trend_bridge",
+        "metric.trend_input_bridge"
+      ],
+      "notes": [
+        "B2 wiring is still required, but the frozen logical model contains dedicated longitudinal authority relations."
+      ],
+      "dependency_blockers": []
+    },
+    {
+      "product_family": "P2_ATTRIBUTION",
+      "status": "BLOCKED",
+      "direct_fit": [
+        "P2FactorFeatureSet -> assessment.factor_feature_set",
+        "P2AttributionRunProduct core fields -> assessment.attribution_run",
+        "P2AdjustedCapabilityEstimate core numeric/claim fields -> capability.adjusted_capability_estimate",
+        "P2CohortSnapshot core snapshot identity -> registry.dataset_snapshot"
+      ],
+      "derivable": [
+        "source_release_id from source_observation_id -> metric.capability_observation.release_id",
+        "uncertainty_method/uncertainty_level from exact adopted attribution execution profile",
+        "logical_hash only after all logical fields are reconstructable"
+      ],
+      "authorized_payload": [
+        "cohort query/manifest detail may reside in registry.dataset_snapshot.query_or_manifest",
+        "model artifact bytes/diagnostics may reside behind model_artifact_uri/hash and registry.object_reference"
+      ],
+      "blockers": [
+        {
+          "field": "P2AdjustedCapabilityEstimate.p2_release_id",
+          "reason": "No canonical membership relation binds adjusted_capability_estimate to a P2 analysis_release; object_binding cannot be invented without a governed object authority for every estimate."
+        },
+        {
+          "field": "P2AdjustedCapabilityEstimate.reason_codes",
+          "reason": "No dedicated canonical field or governed relation stores the exact ordered reason-code set; status/diagnostics do not guarantee lossless reconstruction."
+        },
+        {
+          "field": "P2AttributionRunProduct.run_request_hash",
+          "reason": "assessment.attribution_run has no request/input hash and no governed link to registry.compute_job."
+        }
+      ],
+      "dependency_blockers": []
+    },
+    {
+      "product_family": "P3_TWIN_CAPABILITY",
+      "status": "FIT_WITH_DERIVATIONS",
+      "direct_fit": [
+        "P3CapabilityModelProduct -> capability.capability_model",
+        "P3CapabilitySurfaceProduct -> capability.capability_surface",
+        "P3AircraftTwinRevision -> capability.aircraft_twin_revision",
+        "P3CapabilityEstimate core fields -> capability.intrinsic_capability_estimate"
+      ],
+      "derivable": [
+        "P3CapabilityEstimate.claim_level from the exact admitted P3 execution profile/authority",
+        "observed and adjusted layer evidence from exact P1/P2 upstream identities",
+        "model_object_ref_id and surface_object_ref_id from exact managed_uri/hash registry.object_reference bindings"
+      ],
+      "authorized_payload": [
+        "model build coefficients/fit metadata in immutable model artifact payload",
+        "surface dataset in immutable surface object payload"
+      ],
+      "blockers": [],
+      "dependency_blockers": [
+        {
+          "dependency": "P2_ATTRIBUTION",
+          "reason": "Full M7P3WorkspaceSnapshot exact reconstruction includes the P2_ADJUSTED layer. P3-owned tables/object payloads are schema-fit, but production repository activation must remain blocked until exact P2 persistence is qualified."
+        }
+      ]
+    },
+    {
+      "product_family": "P4_P5_ASSESSMENT",
+      "status": "BLOCKED",
+      "direct_fit": [
+        "P4 core assessment identity/spec/world/status/confidence/evidence -> assessment.actor_assessment",
+        "P5 core mission identity/spec/participants/world/status/confidence/evidence -> assessment.mission_assessment",
+        "Instructor annotations -> debrief.annotation",
+        "workflow audit events -> audit.audit_log"
+      ],
+      "derivable": [
+        "P3 claim/validity/as-of/uncertainty may be resolved from exact capability_projection_refs when an exact P3 estimate link is present",
+        "objective_result_refs may be resolved from assessment.objective_result rows keyed by mission_assessment_id"
+      ],
+      "blockers": [
+        {
+          "field": "P4 subject_context_id/subject_key/role_code/seat_code/function_code/role_model_version",
+          "reason": "actor_assessment has no authoritative subject-context or role-model relation preserving these exact revision fields."
+        },
+        {
+          "field": "P4 instructor_annotation_ids and approval_state",
+          "reason": "No canonical relation binds annotation revisions to actor_assessment or stores the assessment approval state; audit_log is append-only evidence, not the frozen assessment state authority."
+        },
+        {
+          "field": "P5 composition_id and participant_subject_keys",
+          "reason": "mission_assessment stores participant_ids UUID[] but no governed composition identity or pseudonymous subject-key membership needed for exact P5 reconstruction."
+        },
+        {
+          "field": "P5 team_performance_evidence_id/approval_state/claim_level/validity_status/as_of_utc",
+          "reason": "No canonical columns or dedicated relations preserve these revision semantics."
+        },
+        {
+          "field": "P4/P5 logical_content_hash",
+          "reason": "Hash is derivable only if every authoritative logical field can be reconstructed; blockers above prevent this."
+        }
+      ],
+      "dependency_blockers": []
+    },
+    {
+      "product_family": "P6_MODEL_PROJECTION_ADVISORY",
+      "status": "BLOCKED",
+      "direct_fit": [
+        "P6 input snapshot core snapshot identity -> registry.dataset_snapshot",
+        "P6 model core identity/artifact/validity/validation -> capability.capability_model",
+        "forecast run core identity/spec/input/model/horizon/status -> intelligence.forecast_run",
+        "forecast result core target/distribution/probabilities/status -> intelligence.forecast_result",
+        "counterfactual core spec/base/scenario/assumptions/model/projection/status -> intelligence.counterfactual_run",
+        "recommendation core subject/spec/rationale/gaps/items/status/approval -> intelligence.training_recommendation"
+      ],
+      "derivable": [
+        "model_object_ref_id from model_artifact_uri/hash -> registry.object_reference",
+        "source/model identities may be resolved through exact input snapshot/model relations where explicit IDs exist"
+      ],
+      "authorized_payload": [
+        "model artifact payload may carry model-build coefficients and fit diagnostics",
+        "counterfactual projection dataset may remain object-backed through projection_dataset_uri/hash"
+      ],
+      "blockers": [
+        {
+          "field": "P6ForecastRequestBinding exact request identity/profile set/request_hash/as_of",
+          "reason": "forecast_run has no forecast_request_id, request_hash, model-profile, validation-dataset, assumption-profile, or as-of fields; backtest_metrics is not a request-authority container."
+        },
+        {
+          "field": "P6ModelRevision validation_dataset_snapshot_id/applicability_profile_ref/uncertainty_profile_ref",
+          "reason": "capability_model has no dedicated fields; placing these governance bindings inside validation_metrics would change the semantics of that canonical field."
+        },
+        {
+          "field": "P6ForecastRevision request/supersession/applicability/uncertainty/source/as-of/publication/logical-hash semantics",
+          "reason": "forecast_result stores only run/target/distribution/probabilities/status and cannot losslessly reconstruct the qualified revision."
+        },
+        {
+          "field": "P6CounterfactualRevision request_id/held-fixed separation/applicability/identifiability/causal-claim/uncertainty/as-of/supersession/logical-hash",
+          "reason": "counterfactual_run lacks governed locations for these separately qualified semantics; flattening all values into assumptions would make assumptions a shadow schema."
+        },
+        {
+          "field": "P6RecommendationRevision source forecast/counterfactual refs/objective constraints/allowed action space/applicability/uncertainty/reviewer/audit/supersession/logical-hash",
+          "reason": "training_recommendation lacks governed locations for these fields; rationale/proposed_training_items cannot be overloaded as a hidden schema."
+        }
+      ],
+      "dependency_blockers": []
+    }
+  ],
+  "forbidden_workarounds": [
+    "store complete P2/P4/P5/P6 revisions in arbitrary object JSON solely to bypass missing DB authority",
+    "encode missing authority fields inside audit.audit_log.old_value/new_value and treat audit as current product state",
+    "overload semantically unrelated jsonb columns such as validation_metrics, backtest_metrics, rationale, proposed_training_items, or assumptions as an undocumented shadow schema",
+    "add tables/columns/migrations while DB schema remains frozen at 1.6.0"
+  ],
+  "allowed_b2_work_while_blocked": [
+    "repository port extraction",
+    "SQLite/PostgreSQL common release/object/CAS registration substrate",
+    "object/Parquet staging, sealing, enumeration and orphan recovery",
+    "P1/longitudinal wiring",
+    "P3-owned model/surface/twin/estimate persistence component implementation; production runtime activation remains blocked by exact P2 dependency",
+    "schema-fit tests and Authority Change Proposal design"
+  ],
+  "authority_change_proposal_issue": 216,
+  "authority_change_proposal_status": "PROPOSED_NOT_ADOPTED"
+}

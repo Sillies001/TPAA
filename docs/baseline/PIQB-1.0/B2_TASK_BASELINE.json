@@ -1,0 +1,100 @@
+{
+  "schema": "TPAA_PIQB_B2_TASK_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B2",
+  "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
+  "source_b1_qualification": "PIQB_B1_QUALIFIED",
+  "umbrella_issue": 206,
+  "batch_issue": 209,
+  "db_schema_version": "1.6.0",
+  "task_count": 8,
+  "tasks": [
+    {
+      "task_id": "PIQB-B2-001",
+      "title": "Product Repository Ports",
+      "workstream": "WS-STORAGE",
+      "dependencies": [],
+      "minimum_acceptance": "Application P2-P6 services depend on engine-neutral repository protocols, not InMemory concrete types."
+    },
+    {
+      "task_id": "PIQB-B2-002",
+      "title": "SQLite Desktop Product Adapters",
+      "workstream": "WS-STORAGE",
+      "dependencies": [
+        "PIQB-B2-001"
+      ],
+      "minimum_acceptance": "Desktop adapters persist governed P2-P6 products in frozen 1.6.0 tables with exact historical reads and restart durability."
+    },
+    {
+      "task_id": "PIQB-B2-003",
+      "title": "PostgreSQL Service Product Adapters",
+      "workstream": "WS-STORAGE",
+      "dependencies": [
+        "PIQB-B2-001"
+      ],
+      "minimum_acceptance": "Service adapters implement the same ports and frozen 1.6.0 semantics without driver leakage into Application."
+    },
+    {
+      "task_id": "PIQB-B2-004",
+      "title": "Object and Parquet Store Durability",
+      "workstream": "WS-STORAGE",
+      "dependencies": [
+        "PIQB-B2-001"
+      ],
+      "minimum_acceptance": "Logical object URIs are staged, byte-verified, immutably sealed, listable for recovery, and never expose physical paths as product identity."
+    },
+    {
+      "task_id": "PIQB-B2-005",
+      "title": "Publication Transaction and CAS",
+      "workstream": "WS-APP",
+      "dependencies": [
+        "PIQB-B2-002",
+        "PIQB-B2-003",
+        "PIQB-B2-004"
+      ],
+      "minimum_acceptance": "Publication follows compute/staging/validate/seal/DB transaction/release registration/CAS with explicit idempotency and fail-closed conflicts."
+    },
+    {
+      "task_id": "PIQB-B2-006",
+      "title": "Restart Durability",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B2-002",
+        "PIQB-B2-003"
+      ],
+      "minimum_acceptance": "Exact products remain readable after repository/process restart and no production authority depends on process-local state."
+    },
+    {
+      "task_id": "PIQB-B2-007",
+      "title": "Crash and Orphan Recovery",
+      "workstream": "WS-STORAGE",
+      "dependencies": [
+        "PIQB-B2-004",
+        "PIQB-B2-005"
+      ],
+      "minimum_acceptance": "Interrupted staging is reclaimable, sealed-but-unregistered objects are detected deterministically, and registered immutable objects are never deleted."
+    },
+    {
+      "task_id": "PIQB-B2-008",
+      "title": "SQLite PostgreSQL Logical Parity and Qualification",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B2-002",
+        "PIQB-B2-003",
+        "PIQB-B2-005",
+        "PIQB-B2-006",
+        "PIQB-B2-007"
+      ],
+      "minimum_acceptance": "Both engines project logically equivalent exact identities and B2 qualifies under the existing exactly-14-job Hosted CI topology."
+    }
+  ],
+  "scope": {
+    "no_db_schema_change": true,
+    "no_shadow_schema": true,
+    "no_canonical_mutation": true,
+    "exact_historical_reads_required": true,
+    "current_latest_fallback_forbidden": true,
+    "no_b3_source_adapter_work": true,
+    "no_m10_p7": true
+  }
+}

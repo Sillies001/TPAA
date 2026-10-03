@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
 TASK_BASELINE = ROOT / "docs" / "baseline" / "SDIB-1.4" / "M5_TASK_BASELINE.json"
 WORKFLOW = ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
+PLATFORM_RUNNER = ROOT / "tools" / "ci" / "run_platform_parallel_lanes.py"
 EXIT_PATH = ROOT / "tools" / "testing" / "m5_exit_review.py"
 
 SPEC = importlib.util.spec_from_file_location("m5_exit_review", EXIT_PATH)
@@ -40,9 +41,13 @@ def test_m5_batch_4_signoff_principals_are_role_exact_and_distinct() -> None:
 
 
 def test_m5_batch_4_workflow_preserves_fourteen_job_topology() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = (
+        WORKFLOW.read_text(encoding="utf-8")
+        + "\n"
+        + PLATFORM_RUNNER.read_text(encoding="utf-8")
+    )
     required = (
-        "Execute M5 Batch 4 clean formal package reconstruction",
+        "python tools/testing/m5_batch_4_cold_reconstruction.py",
         "Review M5-TST-005 same-candidate four-profile parity",
         "Review M5-TST-006 cold reconstruction and complete RC manifest",
         "Review exact M5 task inventory and Exit gate",
@@ -56,7 +61,6 @@ def test_m5_batch_4_workflow_preserves_fourteen_job_topology() -> None:
     assert text.count("\n  m0-cross-platform:") == 1
     assert text.count("\n  m0-logical-equivalence:") == 1
     assert text.count("\n  m4-exit-review:") == 1
-
 
 def test_m5_batch_4_cold_reconstruction_follows_c3_archive_rule() -> None:
     authority = load_m5_qualification_authority(BASELINE)

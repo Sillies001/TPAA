@@ -139,6 +139,28 @@ def _uuid(value: str, *, field: str) -> str:
     return value
 
 
+class M8AssessmentRepository(Protocol):
+    """Engine-neutral P4/P5 exact-revision read/write repository port."""
+
+    def register_p4(self, revision: P4AssessmentRevision) -> None:
+        """Persist one immutable P4 revision."""
+
+    def register_p5(self, revision: P5AssessmentRevision) -> None:
+        """Persist one immutable P5 revision."""
+
+    def register_annotation(self, revision: InstructorAnnotationRevision) -> None:
+        """Persist one immutable instructor annotation revision."""
+
+    def exact_p4(self, revision_id: str) -> P4AssessmentRevision:
+        """Return an exact P4 revision."""
+
+    def exact_p5(self, revision_id: str) -> P5AssessmentRevision:
+        """Return an exact P5 revision."""
+
+    def exact_annotation(self, annotation_id: str) -> InstructorAnnotationRevision:
+        """Return an exact annotation revision."""
+
+
 class InMemoryM8AssessmentRepository:
     """Immutable exact-ID P4/P5 candidate repository for Application/API wiring."""
 
@@ -207,7 +229,7 @@ class M8WorkspaceService:
 
     def __init__(
         self,
-        repository: InMemoryM8AssessmentRepository,
+        repository: M8AssessmentRepository,
         *,
         admission_evidence: M8AdmissionEvidence | None = None,
         aircraft_context: M8AircraftContextPort | None = None,
