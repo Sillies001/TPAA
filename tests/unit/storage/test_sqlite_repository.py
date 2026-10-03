@@ -30,7 +30,7 @@ def test_sqlite_uow_and_metadata_repository_satisfy_engine_neutral_ports(tmp_pat
         assert isinstance(uow.metadata, SQLiteBaselineMetadataRepository)
         metadata = uow.metadata.get()
         assert metadata.engine_profile == "sqlite-desktop"
-        assert metadata.schema_version == "1.6.0"
+        assert metadata.schema_version == "1.7.0"
         assert metadata.core_baseline == "CB-1.4.0"
         uow.commit()
 

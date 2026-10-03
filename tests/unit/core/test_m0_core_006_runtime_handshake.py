@@ -96,10 +96,10 @@ def test_trusted_identity_is_derived_from_verified_canonical_baseline() -> None:
 
     assert identity.product_build_version == "0.0.0+test"
     assert identity.core_baseline == "CB-1.4.0"
-    assert identity.db_schema_version == "1.6.0"
+    assert identity.db_schema_version == "1.7.0"
     assert identity.core_authority_artifact_id == "CORE_LOGICAL_MODEL"
     assert identity.core_authority_sha256 == (
-        "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245"
+        "dd8461ff572338006455f7b6eac5325900c60640f5d163c3b61c3f5bd5767f74"
     )
     assert identity.p1_metric_catalog_version == "1.14.0"
     assert identity.p1_metric_catalog_sha256 == (

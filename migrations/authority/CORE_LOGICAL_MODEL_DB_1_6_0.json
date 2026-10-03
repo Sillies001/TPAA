@@ -3,7 +3,7 @@
   "core_baseline": "CB-1.4.0",
   "overall_baseline": "TPAA V8.0",
   "engineering_baseline": "ED-2.0",
-  "db_schema_version": "1.7.0",
+  "db_schema_version": "1.6.0",
   "governance": {
     "rule": "This JSON is the single field-name/type/nullability authority for current logical persistence objects in the re-baselined document set.",
     "document_rule": "Human documents may explain or render generated projections but shall not redefine field identity or nullability.",
@@ -134,7 +134,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.data_source": {
       "fields": [
@@ -224,7 +224,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.source_stream": {
       "fields": [
@@ -266,7 +266,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.source_artifact": {
       "fields": [
@@ -356,7 +356,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.dataset_manifest": {
       "fields": [
@@ -494,7 +494,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.aircraft_model": {
       "fields": [
@@ -542,7 +542,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.aircraft": {
       "fields": [
@@ -602,7 +602,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.aircraft_configuration": {
       "fields": [
@@ -686,7 +686,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.aircraft_configuration_snapshot": {
       "fields": [
@@ -740,7 +740,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.aircraft_lifecycle_event": {
       "fields": [
@@ -794,7 +794,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.entity": {
       "fields": [
@@ -842,7 +842,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.entity_link": {
       "fields": [
@@ -908,7 +908,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.source_clock_segment": {
       "fields": [
@@ -974,7 +974,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.time_transform": {
       "fields": [
@@ -1082,7 +1082,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.time_alignment_domain": {
       "fields": [
@@ -1142,7 +1142,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.time_alignment_domain_member": {
       "fields": [
@@ -1184,7 +1184,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.quality_event": {
       "fields": [
@@ -1250,7 +1250,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "context.evaluation_context": {
       "fields": [
@@ -1370,7 +1370,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "episode.training_episode": {
       "fields": [
@@ -1496,7 +1496,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "episode.episode_stage": {
       "fields": [
@@ -1580,7 +1580,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "episode.performance_window_tag": {
       "fields": [
@@ -1646,7 +1646,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "world.world_product_manifest": {
       "fields": [
@@ -1808,7 +1808,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "world.world_product_series_ref": {
       "fields": [
@@ -1832,7 +1832,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "world.world_relation": {
       "fields": [
@@ -1934,7 +1934,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "world.tpaa_m_chain": {
       "fields": [
@@ -2012,7 +2012,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.structured_output_schema_registry": {
       "fields": [
@@ -2060,7 +2060,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.metric_semantic_registry": {
       "fields": [
@@ -2120,7 +2120,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.metric_definition": {
       "fields": [
@@ -2270,7 +2270,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.metric_instance": {
       "fields": [
@@ -2432,7 +2432,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.evidence_set": {
       "fields": [
@@ -2492,7 +2492,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.evidence_world_ref": {
       "fields": [
@@ -2510,7 +2510,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.evidence_relation_ref": {
       "fields": [
@@ -2528,7 +2528,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.evidence_dataset_ref": {
       "fields": [
@@ -2546,7 +2546,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.capability_observation": {
       "fields": [
@@ -2762,7 +2762,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.system_performance_observation": {
       "fields": [
@@ -2912,7 +2912,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.performance_trend_series": {
       "fields": [
@@ -3098,7 +3098,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.performance_trend_point": {
       "fields": [
@@ -3170,7 +3170,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.compute_job": {
       "fields": [
@@ -3260,7 +3260,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "audit.audit_log": {
       "fields": [
@@ -3326,7 +3326,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "debrief.annotation": {
       "fields": [
@@ -3428,7 +3428,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "assessment.factor_feature_set": {
       "fields": [
@@ -3506,7 +3506,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "assessment.attribution_run": {
       "fields": [
@@ -3596,7 +3596,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "capability.adjusted_capability_estimate": {
       "fields": [
@@ -3710,7 +3710,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "capability.capability_model": {
       "fields": [
@@ -3818,7 +3818,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "capability.capability_surface": {
       "fields": [
@@ -3878,7 +3878,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "capability.aircraft_twin_revision": {
       "fields": [
@@ -3962,7 +3962,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "capability.intrinsic_capability_estimate": {
       "fields": [
@@ -4028,7 +4028,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "assessment.actor_assessment": {
       "fields": [
@@ -4136,7 +4136,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "assessment.competency_observation": {
       "fields": [
@@ -4214,7 +4214,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "assessment.mission_assessment": {
       "fields": [
@@ -4316,7 +4316,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "assessment.objective_result": {
       "fields": [
@@ -4376,7 +4376,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "intelligence.forecast_run": {
       "fields": [
@@ -4454,7 +4454,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "intelligence.forecast_result": {
       "fields": [
@@ -4502,7 +4502,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "intelligence.counterfactual_run": {
       "fields": [
@@ -4574,7 +4574,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "intelligence.training_recommendation": {
       "fields": [
@@ -4640,7 +4640,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "intelligence.intervention_outcome": {
       "fields": [
@@ -4688,7 +4688,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.dataset_snapshot": {
       "fields": [
@@ -4742,7 +4742,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.longitudinal_scope": {
       "fields": [
@@ -4832,7 +4832,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.analysis_release": {
       "fields": [
@@ -4928,7 +4928,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.session_release_context_ref": {
       "fields": [
@@ -4982,7 +4982,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.release_scope_pointer": {
       "fields": [
@@ -5018,7 +5018,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.longitudinal_release_input": {
       "fields": [
@@ -5054,7 +5054,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.session_order_scope": {
       "fields": [
@@ -5132,7 +5132,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.session_order_assignment": {
       "fields": [
@@ -5204,7 +5204,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.aircraft_instance": {
       "fields": [
@@ -5282,7 +5282,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "master.mission_system_instance": {
       "fields": [
@@ -5366,7 +5366,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.mapping_manifest": {
       "fields": [
@@ -5438,7 +5438,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.measurement_semantics": {
       "fields": [
@@ -5528,7 +5528,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "episode.analysis_series": {
       "fields": [
@@ -5612,7 +5612,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "episode.analysis_series_source_member": {
       "fields": [
@@ -5648,7 +5648,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.longitudinal_sample": {
       "fields": [
@@ -5822,7 +5822,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.object_reference": {
       "fields": [
@@ -5906,7 +5906,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.object_binding": {
       "fields": [
@@ -5954,7 +5954,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "registry.context_artifact": {
       "fields": [
@@ -6014,7 +6014,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "context.context_artifact_binding": {
       "fields": [
@@ -6038,7 +6038,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.trend_bridge": {
       "fields": [
@@ -6140,7 +6140,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     },
     "metric.trend_input_bridge": {
       "fields": [
@@ -6158,954 +6158,7 @@
         }
       ],
       "source": "R39 Engineering 05 DDL",
-      "schema_version": "1.7.0"
-    },
-    "capability.adjusted_capability_estimate_revision": {
-      "fields": [
-        {
-          "name": "estimate_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "estimate_id uuid PRIMARY KEY REFERENCES capability.adjusted_capability_estimate(estimate_id)"
-        },
-        {
-          "name": "p2_release_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "p2_release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
-        },
-        {
-          "name": "reason_codes",
-          "type": "text[]",
-          "nullable": false,
-          "sql": "reason_codes text[] NOT NULL DEFAULT '{}'"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.attribution_run_request_binding": {
-      "fields": [
-        {
-          "name": "attribution_run_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "attribution_run_id uuid PRIMARY KEY REFERENCES assessment.attribution_run(attribution_run_id)"
-        },
-        {
-          "name": "run_request_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "run_request_hash char(64) NOT NULL"
-        },
-        {
-          "name": "compute_job_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "compute_job_id uuid NULL REFERENCES registry.compute_job(job_id)"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "registry.mutation_idempotency": {
-      "fields": [
-        {
-          "name": "operation_code",
-          "type": "text",
-          "nullable": false,
-          "sql": "operation_code text NOT NULL"
-        },
-        {
-          "name": "request_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "request_id text NOT NULL"
-        },
-        {
-          "name": "request_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "request_hash char(64) NOT NULL"
-        },
-        {
-          "name": "result_object_type",
-          "type": "text",
-          "nullable": false,
-          "sql": "result_object_type text NOT NULL"
-        },
-        {
-          "name": "result_object_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "result_object_id text NOT NULL"
-        },
-        {
-          "name": "actor_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "actor_id uuid NULL"
-        },
-        {
-          "name": "created_at",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
-        }
-      ],
-      "constraints": [
-        "PRIMARY KEY (operation_code, request_id)"
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.p4_subject_context": {
-      "fields": [
-        {
-          "name": "subject_context_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "subject_context_id text PRIMARY KEY"
-        },
-        {
-          "name": "subject_key",
-          "type": "text",
-          "nullable": false,
-          "sql": "subject_key text NOT NULL"
-        },
-        {
-          "name": "actor_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "actor_id uuid NOT NULL"
-        },
-        {
-          "name": "role_code",
-          "type": "text",
-          "nullable": false,
-          "sql": "role_code text NOT NULL"
-        },
-        {
-          "name": "seat_code",
-          "type": "text",
-          "nullable": true,
-          "sql": "seat_code text NULL"
-        },
-        {
-          "name": "function_code",
-          "type": "text",
-          "nullable": true,
-          "sql": "function_code text NULL"
-        },
-        {
-          "name": "session_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
-        },
-        {
-          "name": "episode_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
-        },
-        {
-          "name": "stage_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
-        },
-        {
-          "name": "aircraft_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "aircraft_id uuid NULL"
-        },
-        {
-          "name": "twin_revision_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "twin_revision_id uuid NOT NULL REFERENCES capability.aircraft_twin_revision(twin_revision_id)"
-        },
-        {
-          "name": "p3_estimate_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "p3_estimate_id uuid NULL REFERENCES capability.intrinsic_capability_estimate(estimate_id)"
-        },
-        {
-          "name": "assessment_spec_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "assessment_spec_id text NOT NULL"
-        },
-        {
-          "name": "assessment_spec_version",
-          "type": "text",
-          "nullable": false,
-          "sql": "assessment_spec_version text NOT NULL"
-        },
-        {
-          "name": "role_model_context_artifact_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "role_model_context_artifact_id uuid NOT NULL REFERENCES registry.context_artifact(context_artifact_id)"
-        },
-        {
-          "name": "role_model_version",
-          "type": "text",
-          "nullable": false,
-          "sql": "role_model_version text NOT NULL"
-        },
-        {
-          "name": "world_refs",
-          "type": "text[]",
-          "nullable": false,
-          "sql": "world_refs text[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "evidence_set_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "evidence_set_id uuid NOT NULL REFERENCES metric.evidence_set(evidence_set_id)"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "knowledge_time_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "knowledge_time_utc timestamptz NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.actor_assessment_revision": {
-      "fields": [
-        {
-          "name": "actor_assessment_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "actor_assessment_id uuid PRIMARY KEY REFERENCES assessment.actor_assessment(actor_assessment_id)"
-        },
-        {
-          "name": "subject_context_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "subject_context_id text NOT NULL REFERENCES assessment.p4_subject_context(subject_context_id)"
-        },
-        {
-          "name": "approval_state",
-          "type": "text",
-          "nullable": false,
-          "sql": "approval_state text NOT NULL"
-        },
-        {
-          "name": "p3_claim_level",
-          "type": "text",
-          "nullable": false,
-          "sql": "p3_claim_level text NOT NULL"
-        },
-        {
-          "name": "p3_validity_status",
-          "type": "text",
-          "nullable": false,
-          "sql": "p3_validity_status text NOT NULL"
-        },
-        {
-          "name": "p3_as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "p3_as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "uncertainty_lower",
-          "type": "double precision",
-          "nullable": true,
-          "sql": "uncertainty_lower double precision NULL"
-        },
-        {
-          "name": "uncertainty_upper",
-          "type": "double precision",
-          "nullable": true,
-          "sql": "uncertainty_upper double precision NULL"
-        },
-        {
-          "name": "logical_content_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "logical_content_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.actor_assessment_annotation_ref": {
-      "fields": [
-        {
-          "name": "actor_assessment_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "actor_assessment_id uuid NOT NULL REFERENCES assessment.actor_assessment(actor_assessment_id)"
-        },
-        {
-          "name": "ref_order",
-          "type": "integer",
-          "nullable": false,
-          "sql": "ref_order integer NOT NULL"
-        },
-        {
-          "name": "annotation_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "annotation_id uuid NOT NULL REFERENCES debrief.annotation(annotation_id)"
-        }
-      ],
-      "constraints": [
-        "PRIMARY KEY (actor_assessment_id, ref_order)",
-        "UNIQUE (actor_assessment_id, annotation_id)"
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.p5_composition_snapshot": {
-      "fields": [
-        {
-          "name": "composition_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "composition_id text PRIMARY KEY"
-        },
-        {
-          "name": "session_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
-        },
-        {
-          "name": "mission_episode_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "mission_episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
-        },
-        {
-          "name": "team_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "team_id uuid NULL"
-        },
-        {
-          "name": "world_snapshot_refs",
-          "type": "text[]",
-          "nullable": false,
-          "sql": "world_snapshot_refs text[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "scenario_context_artifact_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "scenario_context_artifact_id uuid NULL REFERENCES registry.context_artifact(context_artifact_id)"
-        },
-        {
-          "name": "role_model_context_artifact_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "role_model_context_artifact_id uuid NOT NULL REFERENCES registry.context_artifact(context_artifact_id)"
-        },
-        {
-          "name": "assessment_spec_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "assessment_spec_id text NOT NULL"
-        },
-        {
-          "name": "assessment_spec_version",
-          "type": "text",
-          "nullable": false,
-          "sql": "assessment_spec_version text NOT NULL"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "composition_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "composition_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.p5_composition_participant": {
-      "fields": [
-        {
-          "name": "composition_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "composition_id text NOT NULL REFERENCES assessment.p5_composition_snapshot(composition_id)"
-        },
-        {
-          "name": "ref_order",
-          "type": "integer",
-          "nullable": false,
-          "sql": "ref_order integer NOT NULL"
-        },
-        {
-          "name": "subject_key",
-          "type": "text",
-          "nullable": false,
-          "sql": "subject_key text NOT NULL"
-        },
-        {
-          "name": "role_code",
-          "type": "text",
-          "nullable": false,
-          "sql": "role_code text NOT NULL"
-        },
-        {
-          "name": "aircraft_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "aircraft_id uuid NULL"
-        },
-        {
-          "name": "twin_revision_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "twin_revision_id uuid NULL REFERENCES capability.aircraft_twin_revision(twin_revision_id)"
-        },
-        {
-          "name": "p4_revision_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "p4_revision_id uuid NOT NULL REFERENCES assessment.actor_assessment(actor_assessment_id)"
-        }
-      ],
-      "constraints": [
-        "PRIMARY KEY (composition_id, ref_order)",
-        "UNIQUE (composition_id, subject_key)"
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "assessment.mission_assessment_revision": {
-      "fields": [
-        {
-          "name": "mission_assessment_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "mission_assessment_id uuid PRIMARY KEY REFERENCES assessment.mission_assessment(mission_assessment_id)"
-        },
-        {
-          "name": "composition_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "composition_id text NOT NULL REFERENCES assessment.p5_composition_snapshot(composition_id)"
-        },
-        {
-          "name": "team_performance_evidence_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "team_performance_evidence_id text NOT NULL"
-        },
-        {
-          "name": "approval_state",
-          "type": "text",
-          "nullable": false,
-          "sql": "approval_state text NOT NULL"
-        },
-        {
-          "name": "claim_level",
-          "type": "text",
-          "nullable": false,
-          "sql": "claim_level text NOT NULL"
-        },
-        {
-          "name": "validity_status",
-          "type": "text",
-          "nullable": false,
-          "sql": "validity_status text NOT NULL"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "logical_content_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "logical_content_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "intelligence.forecast_request": {
-      "fields": [
-        {
-          "name": "forecast_request_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "forecast_request_id uuid PRIMARY KEY"
-        },
-        {
-          "name": "input_snapshot_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "input_snapshot_id uuid NOT NULL REFERENCES registry.dataset_snapshot(dataset_snapshot_id)"
-        },
-        {
-          "name": "forecast_spec_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "forecast_spec_id text NOT NULL"
-        },
-        {
-          "name": "forecast_spec_version",
-          "type": "text",
-          "nullable": false,
-          "sql": "forecast_spec_version text NOT NULL"
-        },
-        {
-          "name": "target_scope",
-          "type": "text",
-          "nullable": false,
-          "sql": "target_scope text NOT NULL"
-        },
-        {
-          "name": "subject_ref",
-          "type": "text",
-          "nullable": false,
-          "sql": "subject_ref text NOT NULL"
-        },
-        {
-          "name": "target_code",
-          "type": "text",
-          "nullable": false,
-          "sql": "target_code text NOT NULL"
-        },
-        {
-          "name": "forecast_origin_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "forecast_origin_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "horizon_spec",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "horizon_spec jsonb NOT NULL"
-        },
-        {
-          "name": "capability_model_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "capability_model_id uuid NOT NULL REFERENCES capability.capability_model(capability_model_id)"
-        },
-        {
-          "name": "model_profile_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "model_profile_id text NOT NULL"
-        },
-        {
-          "name": "model_profile_version",
-          "type": "text",
-          "nullable": false,
-          "sql": "model_profile_version text NOT NULL"
-        },
-        {
-          "name": "training_dataset_snapshot_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "training_dataset_snapshot_id uuid NOT NULL REFERENCES registry.dataset_snapshot(dataset_snapshot_id)"
-        },
-        {
-          "name": "validation_dataset_snapshot_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "validation_dataset_snapshot_id uuid NOT NULL REFERENCES registry.dataset_snapshot(dataset_snapshot_id)"
-        },
-        {
-          "name": "assumption_profile_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "assumption_profile_id text NOT NULL"
-        },
-        {
-          "name": "assumption_profile_version",
-          "type": "text",
-          "nullable": false,
-          "sql": "assumption_profile_version text NOT NULL"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "request_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "request_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "capability.p6_model_revision": {
-      "fields": [
-        {
-          "name": "capability_model_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "capability_model_id uuid PRIMARY KEY REFERENCES capability.capability_model(capability_model_id)"
-        },
-        {
-          "name": "validation_dataset_snapshot_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "validation_dataset_snapshot_id uuid NOT NULL REFERENCES registry.dataset_snapshot(dataset_snapshot_id)"
-        },
-        {
-          "name": "applicability_profile_ref",
-          "type": "text",
-          "nullable": false,
-          "sql": "applicability_profile_ref text NOT NULL"
-        },
-        {
-          "name": "uncertainty_profile_ref",
-          "type": "text",
-          "nullable": false,
-          "sql": "uncertainty_profile_ref text NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "intelligence.forecast_result_revision": {
-      "fields": [
-        {
-          "name": "forecast_result_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "forecast_result_id uuid PRIMARY KEY REFERENCES intelligence.forecast_result(forecast_result_id)"
-        },
-        {
-          "name": "forecast_identity",
-          "type": "text",
-          "nullable": false,
-          "sql": "forecast_identity text NOT NULL"
-        },
-        {
-          "name": "forecast_request_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "forecast_request_id uuid NOT NULL REFERENCES intelligence.forecast_request(forecast_request_id)"
-        },
-        {
-          "name": "target_session_order",
-          "type": "integer",
-          "nullable": true,
-          "sql": "target_session_order integer NULL"
-        },
-        {
-          "name": "applicability_status",
-          "type": "text",
-          "nullable": false,
-          "sql": "applicability_status text NOT NULL"
-        },
-        {
-          "name": "uncertainty",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "uncertainty jsonb NOT NULL"
-        },
-        {
-          "name": "factual_source_refs",
-          "type": "text[]",
-          "nullable": false,
-          "sql": "factual_source_refs text[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "model_revision_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "model_revision_id uuid NOT NULL REFERENCES capability.capability_model(capability_model_id)"
-        },
-        {
-          "name": "model_artifact_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "model_artifact_hash char(64) NOT NULL"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "forecast_origin_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "forecast_origin_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "published_at_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "published_at_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "supersedes_forecast_result_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "supersedes_forecast_result_id uuid NULL REFERENCES intelligence.forecast_result(forecast_result_id)"
-        },
-        {
-          "name": "logical_content_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "logical_content_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "intelligence.counterfactual_request": {
-      "fields": [
-        {
-          "name": "counterfactual_request_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "counterfactual_request_id uuid PRIMARY KEY"
-        },
-        {
-          "name": "input_snapshot_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "input_snapshot_id uuid NOT NULL REFERENCES registry.dataset_snapshot(dataset_snapshot_id)"
-        },
-        {
-          "name": "base_product_refs",
-          "type": "text[]",
-          "nullable": false,
-          "sql": "base_product_refs text[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "scenario_definition_id",
-          "type": "text",
-          "nullable": false,
-          "sql": "scenario_definition_id text NOT NULL"
-        },
-        {
-          "name": "interventions",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "interventions jsonb NOT NULL"
-        },
-        {
-          "name": "held_fixed_assumptions",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "held_fixed_assumptions jsonb NOT NULL"
-        },
-        {
-          "name": "model_refs",
-          "type": "text[]",
-          "nullable": false,
-          "sql": "model_refs text[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "applicability_profile_ref",
-          "type": "text",
-          "nullable": false,
-          "sql": "applicability_profile_ref text NOT NULL"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "request_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "request_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "intelligence.counterfactual_revision": {
-      "fields": [
-        {
-          "name": "counterfactual_run_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "counterfactual_run_id uuid PRIMARY KEY REFERENCES intelligence.counterfactual_run(counterfactual_run_id)"
-        },
-        {
-          "name": "counterfactual_request_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "counterfactual_request_id uuid NOT NULL REFERENCES intelligence.counterfactual_request(counterfactual_request_id)"
-        },
-        {
-          "name": "interventions",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "interventions jsonb NOT NULL"
-        },
-        {
-          "name": "held_fixed_assumptions",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "held_fixed_assumptions jsonb NOT NULL"
-        },
-        {
-          "name": "applicability_profile_ref",
-          "type": "text",
-          "nullable": false,
-          "sql": "applicability_profile_ref text NOT NULL"
-        },
-        {
-          "name": "applicability_status",
-          "type": "text",
-          "nullable": false,
-          "sql": "applicability_status text NOT NULL"
-        },
-        {
-          "name": "identifiability_status",
-          "type": "text",
-          "nullable": false,
-          "sql": "identifiability_status text NOT NULL"
-        },
-        {
-          "name": "causal_claim_level",
-          "type": "text",
-          "nullable": false,
-          "sql": "causal_claim_level text NOT NULL"
-        },
-        {
-          "name": "uncertainty",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "uncertainty jsonb NOT NULL"
-        },
-        {
-          "name": "as_of_utc",
-          "type": "timestamptz",
-          "nullable": false,
-          "sql": "as_of_utc timestamptz NOT NULL"
-        },
-        {
-          "name": "supersedes_counterfactual_run_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "supersedes_counterfactual_run_id uuid NULL REFERENCES intelligence.counterfactual_run(counterfactual_run_id)"
-        },
-        {
-          "name": "logical_content_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "logical_content_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
-    },
-    "intelligence.training_recommendation_revision": {
-      "fields": [
-        {
-          "name": "recommendation_id",
-          "type": "uuid",
-          "nullable": false,
-          "sql": "recommendation_id uuid PRIMARY KEY REFERENCES intelligence.training_recommendation(recommendation_id)"
-        },
-        {
-          "name": "subject_key",
-          "type": "text",
-          "nullable": false,
-          "sql": "subject_key text NOT NULL"
-        },
-        {
-          "name": "source_forecast_result_ids",
-          "type": "uuid[]",
-          "nullable": false,
-          "sql": "source_forecast_result_ids uuid[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "source_counterfactual_run_ids",
-          "type": "uuid[]",
-          "nullable": false,
-          "sql": "source_counterfactual_run_ids uuid[] NOT NULL DEFAULT '{}'"
-        },
-        {
-          "name": "objective_constraints",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "objective_constraints jsonb NOT NULL"
-        },
-        {
-          "name": "allowed_action_space",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "allowed_action_space jsonb NOT NULL"
-        },
-        {
-          "name": "applicability_status",
-          "type": "text",
-          "nullable": false,
-          "sql": "applicability_status text NOT NULL"
-        },
-        {
-          "name": "uncertainty",
-          "type": "jsonb",
-          "nullable": false,
-          "sql": "uncertainty jsonb NOT NULL"
-        },
-        {
-          "name": "reviewer_subject_key",
-          "type": "text",
-          "nullable": true,
-          "sql": "reviewer_subject_key text NULL"
-        },
-        {
-          "name": "audit_ref",
-          "type": "text",
-          "nullable": true,
-          "sql": "audit_ref text NULL"
-        },
-        {
-          "name": "supersedes_recommendation_id",
-          "type": "uuid",
-          "nullable": true,
-          "sql": "supersedes_recommendation_id uuid NULL REFERENCES intelligence.training_recommendation(recommendation_id)"
-        },
-        {
-          "name": "logical_content_hash",
-          "type": "char(64)",
-          "nullable": false,
-          "sql": "logical_content_hash char(64) NOT NULL"
-        }
-      ],
-      "source": "ACP-216 / PIQB-1.0 DB 1.7.0 authority adoption",
-      "schema_version": "1.7.0"
+      "schema_version": "1.6.0"
     }
   }
 }

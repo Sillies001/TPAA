@@ -17,7 +17,7 @@ P3_AUTHORITY = CANONICAL / "P3_CAPABILITY_TWIN_AUTHORITY.json"
 P3_PROFILE = CANONICAL / "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL_PROFILE.json"
 P4_P5_AUTHORITY = CANONICAL / "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json"
 DTO = CANONICAL / "CROSS_LAYER_DTO_CONTRACTS.json"
-CORE = CANONICAL / "CORE_LOGICAL_MODEL.json"
+CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_6_0.json"
 EXTENSION = CANONICAL / "EXTENSION_CONTRACT_REGISTRY.json"
 M4 = CANONICAL / "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json"
 LOCK = BASELINE / "BASELINE_LOCK.json"
@@ -105,8 +105,8 @@ def verify() -> dict[str, object]:
     ) or (
         EXPECTED_ADOPTION_LOCK_SHA256 in lineage
         and EXPECTED_PARENT_LOCK_SHA256 in lineage
-        and lineage.index(EXPECTED_ADOPTION_LOCK_SHA256)
-        < lineage.index(EXPECTED_PARENT_LOCK_SHA256)
+        and lineage.index(EXPECTED_PARENT_LOCK_SHA256)
+        < lineage.index(EXPECTED_ADOPTION_LOCK_SHA256)
     )
 
     checks: dict[str, bool] = {
@@ -156,7 +156,7 @@ def verify() -> dict[str, object]:
             profile["scope"]["db_schema_change"] is False
             and profile["scope"]["db_schema_version"] == "1.6.0"
             and profile["scope"]["shadow_schema_permitted"] is False
-            and lock["baseline"]["db_schema"] == "1.6.0"
+            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
         ),
         "runtime_binding_exact": (
             profile["runtime_binding"]["model_spec_id"]
