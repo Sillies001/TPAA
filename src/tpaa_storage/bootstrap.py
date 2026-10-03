@@ -1,4 +1,4 @@
-"""Fail-closed DB 1.6.0 clean-bootstrap kernel.
+"""Fail-closed DB 1.7.0 clean-bootstrap kernel.
 
 The logical schema remains owned by the frozen ``CORE_LOGICAL_MODEL`` Canonical
 artifact.  This module only projects that authority into a concrete engine DDL
@@ -18,7 +18,7 @@ from typing import Any
 
 from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 
-EXPECTED_DB_SCHEMA_VERSION = "1.6.0"
+EXPECTED_DB_SCHEMA_VERSION = "1.7.0"
 CORE_MODEL_ARTIFACT_ID = "CORE_LOGICAL_MODEL"
 BOOTSTRAP_MANIFEST_TABLE = "_tpaa_bootstrap_manifest"
 SQLITE_ENGINE_PROFILE = "sqlite-desktop"
@@ -29,6 +29,8 @@ _REFERENCE_RE = re.compile(
     r"\bREFERENCES\s+([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE
 )
 _WHITESPACE_RE = re.compile(r"\s+")
+_TABLE_CONSTRAINT_RE = re.compile(r"^(PRIMARY KEY|UNIQUE)\s*\(([^)]+)\)$", re.IGNORECASE)
+_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 _SQLITE_TYPE_MAP: Mapping[str, str] = {
     "uuid": "TEXT",
@@ -164,6 +166,7 @@ def _load_authority(loader: CanonicalArtifactLoader | None = None) -> _SchemaAut
                 raise BootstrapError(
                     "FIELD_SQL_INVALID", f"table={table_name} field={field_name}"
                 )
+        _canonical_table_constraints(table_name, raw_table, seen_fields=seen)
     return _SchemaAuthority(
         schema_version=schema_version,
         core_baseline=core_baseline,
@@ -202,6 +205,60 @@ def _sqlite_field_sql(table_name: str, raw_field: Mapping[str, Any]) -> str:
     suffix = re.sub(r"\bjsonb_typeof\s*\(", "json_type(", suffix, flags=re.I)
     suffix = _REFERENCE_RE.sub(lambda match: f'REFERENCES "{match.group(1)}"', suffix)
     return f'"{field_name}" {_SQLITE_TYPE_MAP[field_type]}{suffix}'
+
+
+def _canonical_table_constraints(
+    table_name: str,
+    raw_table: Mapping[str, Any],
+    *,
+    seen_fields: set[str] | None = None,
+) -> tuple[str, ...]:
+    raw_constraints = raw_table.get("constraints", [])
+    if not isinstance(raw_constraints, list):
+        raise BootstrapError("TABLE_CONSTRAINTS_INVALID", f"table={table_name}")
+    fields = seen_fields
+    if fields is None:
+        raw_fields = raw_table.get("fields")
+        if not isinstance(raw_fields, list):
+            raise BootstrapError("FIELD_CATALOG_INVALID", f"table={table_name}")
+        fields = {
+            str(field.get("name"))
+            for field in raw_fields
+            if isinstance(field, Mapping) and isinstance(field.get("name"), str)
+        }
+    constraints: list[str] = []
+    primary_keys = 0
+    for raw_constraint in raw_constraints:
+        if not isinstance(raw_constraint, str) or not raw_constraint.strip():
+            raise BootstrapError("TABLE_CONSTRAINT_INVALID", f"table={table_name}")
+        constraint = raw_constraint.strip()
+        match = _TABLE_CONSTRAINT_RE.fullmatch(constraint)
+        if match is None:
+            raise BootstrapError(
+                "TABLE_CONSTRAINT_UNSUPPORTED",
+                f"table={table_name} constraint={constraint!r}",
+            )
+        kind = match.group(1).upper()
+        columns = tuple(part.strip() for part in match.group(2).split(","))
+        if not columns or len(set(columns)) != len(columns):
+            raise BootstrapError(
+                "TABLE_CONSTRAINT_COLUMNS_INVALID",
+                f"table={table_name} constraint={constraint!r}",
+            )
+        if any(
+            not _IDENTIFIER_RE.fullmatch(column) or column not in fields
+            for column in columns
+        ):
+            raise BootstrapError(
+                "TABLE_CONSTRAINT_FIELD_MISSING",
+                f"table={table_name} constraint={constraint!r}",
+            )
+        if kind == "PRIMARY KEY":
+            primary_keys += 1
+            if primary_keys > 1:
+                raise BootstrapError("MULTIPLE_TABLE_PRIMARY_KEYS", f"table={table_name}")
+        constraints.append(f"{kind} ({', '.join(columns)})")
+    return tuple(constraints)
 
 
 def _table_dependencies(authority: _SchemaAuthority) -> dict[str, set[str]]:
@@ -255,6 +312,7 @@ def _postgres_create_statements(authority: _SchemaAuthority) -> tuple[str, ...]:
         raw_fields = raw_table["fields"]
         assert isinstance(raw_fields, list)
         fields = [_canonical_field_sql(table_name, field) for field in raw_fields]
+        fields.extend(_canonical_table_constraints(table_name, raw_table))
         schema_name, relation_name = table_name.split(".", 1)
         statements.append(
             f'CREATE TABLE "{schema_name}"."{relation_name}" (\n  '
@@ -552,6 +610,7 @@ def _sqlite_create_statements(authority: _SchemaAuthority) -> tuple[str, ...]:
         raw_fields = raw_table["fields"]
         assert isinstance(raw_fields, list)
         fields = [_sqlite_field_sql(table_name, field) for field in raw_fields]
+        fields.extend(_canonical_table_constraints(table_name, raw_table))
         statements.append(f'CREATE TABLE "{table_name}" (\n  ' + ",\n  ".join(fields) + "\n)")
     return tuple(statements)
 

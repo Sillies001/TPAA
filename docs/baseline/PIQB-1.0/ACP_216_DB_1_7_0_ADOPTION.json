@@ -1,0 +1,50 @@
+{
+  "schema": "TPAA_ACP216_DB_1_7_0_ADOPTION_V1",
+  "proposal_id": "ACP-216",
+  "issue": 216,
+  "source_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
+  "readiness_candidate_sha": "f960ed520e40d9179a450bdeba10a16c4266c2dd",
+  "readiness_run_number": 567,
+  "readiness_actions_run_id": 37088867390,
+  "source_db_schema_version": "1.6.0",
+  "target_db_schema_version": "1.7.0",
+  "source_core_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+  "target_core_sha256": "dd8461ff572338006455f7b6eac5325900c60640f5d163c3b61c3f5bd5767f74",
+  "source_baseline_lock_sha256": "9920b59601d8441f883879e813164f33ee5c02db81aa5e1b759e3a1772469e51",
+  "target_baseline_lock_sha256": "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6",
+  "additive_relation_count": 15,
+  "additive_relations": [
+    "capability.adjusted_capability_estimate_revision",
+    "assessment.attribution_run_request_binding",
+    "registry.mutation_idempotency",
+    "assessment.p4_subject_context",
+    "assessment.actor_assessment_revision",
+    "assessment.actor_assessment_annotation_ref",
+    "assessment.p5_composition_snapshot",
+    "assessment.p5_composition_participant",
+    "assessment.mission_assessment_revision",
+    "intelligence.forecast_request",
+    "capability.p6_model_revision",
+    "intelligence.forecast_result_revision",
+    "intelligence.counterfactual_request",
+    "intelligence.counterfactual_revision",
+    "intelligence.training_recommendation_revision"
+  ],
+  "blocker_coverage_expected": 13,
+  "blocker_coverage_uncovered": [],
+  "migration_revision": "0001_acp216_db_1_7_0",
+  "shadow_schema_created": false,
+  "historical_policy": {
+    "frozen_m0_m9_authority_files_remain_unchanged": true,
+    "historical_db_1_6_0_core_snapshot_preserved": true,
+    "current_db_schema_may_advance_only_through_this_adoption": true
+  },
+  "candidate_state": "AUTHORITY_ADOPTION_CANDIDATE",
+  "formal_adoption_claimed": false,
+  "formal_adoption_gate": {
+    "pull_request_exact_head_required_jobs": 14,
+    "guarded_merge_required": true,
+    "merge_parent_verification_required": true,
+    "protected_main_exact_merge_sha_required_jobs": 14
+  }
+}
