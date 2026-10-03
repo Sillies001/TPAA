@@ -19,14 +19,26 @@ if str(SRC_ROOT) not in sys.path:
 
 from tools.storage.acp216_migration import (  # noqa: E402
     bootstrap_historical_sqlite as bootstrap_1_6,
+)
+from tools.storage.acp216_migration import (  # noqa: E402
     downgrade_sqlite as downgrade_1_7_to_1_6,
+)
+from tools.storage.acp216_migration import (  # noqa: E402
     upgrade_sqlite as upgrade_1_6_to_1_7,
+)
+from tools.storage.acp216_migration import (  # noqa: E402
     verify_historical_sqlite as verify_1_6,
 )
 from tools.storage.acp219_migration import (  # noqa: E402
     MigrationError as ACP219MigrationError,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
     downgrade_sqlite as downgrade_1_8_to_1_7,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
     upgrade_sqlite as upgrade_1_7_to_1_8,
+)
+from tools.storage.acp219_migration import (  # noqa: E402
     verify_historical_sqlite as verify_1_7,
 )
 from tpaa_storage.bootstrap import (  # noqa: E402
@@ -226,10 +238,15 @@ def run() -> dict[str, object]:
 
         fixture = json.loads(FIXTURE_MANIFEST.read_text(encoding="utf-8"))
         replay = fixture.get("replay")
+        expected = fixture.get("expected")
+        input_spec = fixture.get("input")
         checks["historical_fixture_hook"] = (
             fixture.get("fixture_id") == "M0_BASIC_TRANSPORT_V1"
             and isinstance(replay, dict)
-            and replay.get("expected_status") == "PASS"
+            and isinstance(expected, dict)
+            and isinstance(input_spec, dict)
+            and replay.get("frozen_expected_sha256") == expected.get("sha256")
+            and replay.get("frozen_input_sha256") == input_spec.get("sha256")
         )
 
     status = "PASS" if all(checks.values()) else "FAIL"
