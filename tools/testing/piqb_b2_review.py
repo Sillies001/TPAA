@@ -86,6 +86,8 @@ def review(
     fit_gate = _text("src/tpaa_storage/persistence_fit.py")
     workflow = _text(".github/workflows/cross-platform-ci.yml")
     live_postgres = _text("tools/testing/piqb_b2_postgres_product_persistence.py")
+    p4_p5_adapter = _text("src/tpaa_application/p4_p5_persistence.py")
+    live_p4_p5 = _text("tools/testing/piqb_b2_postgres_p4_p5_persistence.py")
     lock_baseline = lock.get("baseline")
     adopted = rebase.get("adopted_authority")
     lineage = rebase.get("authority_lineage")
@@ -213,6 +215,30 @@ def review(
                     "ADOPTED_PROTECTED_MAIN",
                     "current_db_1_8",
                     "shadow_schema_created",
+                )
+            )
+        ),
+        "p4_p5_exact_adapter_present": all(
+            token in p4_p5_adapter
+            for token in (
+                "P4P5PersistenceRepository",
+                "assessment.actor_assessment_machine_evidence_ref",
+                "assessment.mission_assessment_objective_ref",
+                "P4_P5_IMMUTABLE_CONFLICT",
+            )
+        ),
+        "real_postgres_p4_p5_gate_present": (
+            "Execute PIQB B2 P4/P5 real PostgreSQL exact persistence qualification"
+            in workflow
+            and "piqb_b2_postgres_p4_p5_persistence.py" in workflow
+            and all(
+                token in live_p4_p5
+                for token in (
+                    "PostgreSQLServiceUnitOfWork",
+                    "SQLiteDesktopUnitOfWork",
+                    "ordered_machine_evidence_refs_preserved",
+                    "ordered_objective_refs_preserved",
+                    "P4_P5_IMMUTABLE_CONFLICT",
                 )
             )
         ),

@@ -25,7 +25,8 @@
         "SQLiteDesktopUnitOfWork.product_publication",
         "Desktop persistence runtime",
         "P2PersistenceRepository exact canonical-row mapping",
-        "P4P5PersistenceRepository exact DB 1.8 canonical mapping"
+        "P4P5PersistenceRepository exact DB 1.8 canonical mapping",
+        "P4/P5 real PostgreSQL restart/parity qualification gate"
       ],
       "remaining_work": "Qualify P4/P5 against real PostgreSQL and complete P6 exact persistence; retain P3 dependency gating."
     },
@@ -36,7 +37,8 @@
         "PostgreSQLServiceUnitOfWork.product_publication",
         "Service persistence runtime",
         "P2PersistenceRepository shared engine-neutral mapping",
-        "P4P5PersistenceRepository exact DB 1.8 canonical mapping"
+        "P4P5PersistenceRepository exact DB 1.8 canonical mapping",
+        "P4/P5 real PostgreSQL restart/parity qualification gate"
       ],
       "remaining_work": "Qualify P4/P5 against real PostgreSQL and complete P6 exact persistence; retain P3 dependency gating."
     },
@@ -64,9 +66,10 @@
         "real PostgreSQL service runtime reconstruction across new connections",
         "real PostgreSQL exact read and idempotent replay after reconnect",
         "P2 exact durable restart mapping",
-        "P4/P5 SQLite restart exactness candidate"
+        "P4/P5 SQLite restart exactness candidate",
+        "P4/P5 real PostgreSQL restart/parity qualification gate"
       ],
-      "remaining_work": "Complete real PostgreSQL P4/P5 restart qualification and remaining P6 exact restart qualification."
+      "remaining_work": "Qualify P4/P5 real PostgreSQL restart/parity and complete remaining P6 exact restart qualification."
     },
     "PIQB-B2-007": {
       "state": "COMPLETE_CANDIDATE",
@@ -83,9 +86,10 @@
         "SQLite/PostgreSQL ledger contract parity",
         "real SQLite/PostgreSQL publication restart/CAS/recovery parity",
         "DB 1.8 current-authority parity gate",
-        "P4/P5 ordered-text DB 1.8 exact mapping candidate"
+        "P4/P5 ordered-text DB 1.8 exact mapping candidate",
+        "P4/P5 real PostgreSQL restart/parity qualification gate"
       ],
-      "remaining_work": "Complete real PostgreSQL logical parity for P4/P5, then P6 and final B2 qualification."
+      "remaining_work": "Qualify P4/P5 SQLite/PostgreSQL logical parity, then P6 and final B2 qualification."
     }
   },
   "production_activation": {

@@ -38,6 +38,8 @@ def test_b2_authority_resolved_exact_adapters_in_progress() -> None:
     assert acceptance["db_schema_1_8_authority_adopted"] is True
     assert acceptance["historical_db_1_7_adoption_preserved"] is True
     assert acceptance["real_postgres_restart_parity_gate_present"] is True
+    assert acceptance["p4_p5_exact_adapter_present"] is True
+    assert acceptance["real_postgres_p4_p5_gate_present"] is True
 
 
 def test_b2_protected_main_not_qualified_before_adapter_completion() -> None:
@@ -62,5 +64,6 @@ def test_b2_workflow_keeps_exact_fourteen_job_topology() -> None:
     assert workflow.count("\n  m0-cross-platform:") == 1
     assert "Review PIQB B2 persistence and recovery state" in workflow
     assert "Execute PIQB B2 PostgreSQL restart/parity qualification" in workflow
+    assert "Execute PIQB B2 P4/P5 real PostgreSQL exact persistence qualification" in workflow
     assert "Review ACP-219 DB 1.8.0 authority adoption gate" in workflow
     assert "Review ACP-216 DB 1.7.0 authority adoption gate" not in workflow
