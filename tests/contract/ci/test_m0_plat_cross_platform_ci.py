@@ -627,3 +627,16 @@ def test_m2_batch_2_review_aggregates_exact_revision_without_unblocking() -> Non
         in review_upload
     )
     assert "path: evidence/m2-batch-2/review.json" in review_upload
+
+
+def test_piqb_b2_p6_postgres_persistence_is_governed_in_required_job() -> None:
+    text = _orchestration_text()
+    assert "Execute PIQB B2 P6 real PostgreSQL exact persistence qualification" in text
+    assert "python tools/testing/piqb_b2_postgres_p6_persistence.py" in text
+    assert "--database tpaa_piqb_b2_p6_persistence" in text
+    assert (
+        "--evidence evidence/piqb-b2/postgres-p6-persistence.json"
+        in text
+    )
+    assert "evidence/piqb-b2/postgres-p4-p5-persistence.json" in text
+    assert "evidence/piqb-b2/postgres-product-persistence.json" in text

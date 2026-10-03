@@ -1038,6 +1038,18 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/piqb-b2/postgres-p4-p5-persistence.json
 
+      - name: Execute PIQB B2 P6 real PostgreSQL exact persistence qualification
+        run: >-
+          uv run --locked python tools/testing/piqb_b2_postgres_p6_persistence.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_piqb_b2_p6_persistence
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b2/postgres-p6-persistence.json
+
       - name: Execute ACP-219 PostgreSQL 1.7.0 to 1.8.0 migration qualification
         run: >-
           uv run --locked python tools/testing/acp_219_postgres_migration.py
@@ -1074,7 +1086,10 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: tpaa-piqb-b2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
-          path: evidence/piqb-b2/postgres-product-persistence.json
+          path: |
+            evidence/piqb-b2/postgres-product-persistence.json
+            evidence/piqb-b2/postgres-p4-p5-persistence.json
+            evidence/piqb-b2/postgres-p6-persistence.json
           if-no-files-found: error
           retention-days: 30
 
