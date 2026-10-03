@@ -13,7 +13,7 @@ SOURCE_HASHES = SDIB_DIR / "SDIB-1.5_SOURCE_BASELINE.sha256"
 MILESTONES = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "DEVELOPMENT_MILESTONE_REGISTRY.json"
 CAPABILITY = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "CAPABILITY_PHASE_REGISTRY.json"
 EXTENSION = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "EXTENSION_CONTRACT_REGISTRY.json"
-CORE = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "CORE_LOGICAL_MODEL.json"
+CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_6_0.json"
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
