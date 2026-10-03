@@ -4,8 +4,8 @@
   "batch": "B2",
   "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
   "source_b1_qualification": "PIQB_B1_QUALIFIED",
-  "db_schema_version": "1.7.0",
-  "authority_change_proposal_issue": 216,
+  "db_schema_version": "1.8.0",
+  "authority_change_proposal_issue": 219,
   "authority_change_proposal_status": "ADOPTED_PROTECTED_MAIN",
   "no_shadow_schema": true,
   "task_state": {
@@ -19,22 +19,24 @@
       ]
     },
     "PIQB-B2-002": {
-      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
+      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
       "evidence": [
         "SQLiteProductPublicationLedger",
         "SQLiteDesktopUnitOfWork.product_publication",
-        "Desktop persistence runtime"
+        "Desktop persistence runtime",
+        "P2PersistenceRepository exact canonical-row mapping"
       ],
-      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
+      "remaining_work": "Complete and qualify exact P4/P5/P6 domain persistence adapters over adopted DB 1.8.0 authority; retain P3 dependency gating."
     },
     "PIQB-B2-003": {
-      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
+      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
       "evidence": [
         "PostgreSQLProductPublicationLedger",
         "PostgreSQLServiceUnitOfWork.product_publication",
-        "Service persistence runtime"
+        "Service persistence runtime",
+        "P2PersistenceRepository shared engine-neutral mapping"
       ],
-      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
+      "remaining_work": "Complete and qualify exact P4/P5/P6 domain persistence adapters over adopted DB 1.8.0 authority; retain P3 dependency gating."
     },
     "PIQB-B2-004": {
       "state": "COMPLETE_CANDIDATE",
@@ -53,14 +55,15 @@
       ]
     },
     "PIQB-B2-006": {
-      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
+      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
       "evidence": [
         "SQLite close/reopen exact registration test",
         "Desktop persistence reconstruction",
         "real PostgreSQL service runtime reconstruction across new connections",
-        "real PostgreSQL exact read and idempotent replay after reconnect"
+        "real PostgreSQL exact read and idempotent replay after reconnect",
+        "P2 exact durable restart mapping"
       ],
-      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
+      "remaining_work": "Complete restart qualification for remaining P4/P5/P6 exact domain adapters."
     },
     "PIQB-B2-007": {
       "state": "COMPLETE_CANDIDATE",
@@ -71,13 +74,14 @@
       ]
     },
     "PIQB-B2-008": {
-      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
+      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
       "evidence": [
         "shared identity derivation",
         "SQLite/PostgreSQL ledger contract parity",
-        "real SQLite/PostgreSQL publication restart/CAS/recovery parity"
+        "real SQLite/PostgreSQL publication restart/CAS/recovery parity",
+        "DB 1.8 current-authority parity gate"
       ],
-      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
+      "remaining_work": "Complete logical parity for remaining P4/P5/P6 exact domain adapters and final B2 qualification."
     }
   },
   "production_activation": {
@@ -88,8 +92,10 @@
     "dependency_blocked": [
       "P3_TWIN_CAPABILITY"
     ],
+    "implemented_not_b2_qualified": [
+      "P2_ATTRIBUTION"
+    ],
     "adapter_pending": [
-      "P2_ATTRIBUTION",
       "P4_P5_ASSESSMENT",
       "P6_MODEL_PROJECTION_ADVISORY"
     ],
@@ -97,9 +103,22 @@
   },
   "b2_qualified": false,
   "authority_adoption": {
-    "protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
-    "run_number": 576,
-    "actions_run_id": 37105587377,
-    "qualification": "ACP216_DB_1_7_0_ADOPTED"
-  }
+    "proposal_id": "ACP-219",
+    "issue": 219,
+    "protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+    "run_number": 583,
+    "actions_run_id": 37119777187,
+    "qualification": "ACP219_DB_1_8_0_ADOPTED"
+  },
+  "historical_authority_adoptions": [
+    {
+      "proposal_id": "ACP-216",
+      "issue": 216,
+      "db_schema_version": "1.7.0",
+      "protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+      "run_number": 576,
+      "actions_run_id": 37105587377,
+      "qualification": "ACP216_DB_1_7_0_ADOPTED"
+    }
+  ]
 }

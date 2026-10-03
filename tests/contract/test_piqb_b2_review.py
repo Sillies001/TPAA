@@ -12,7 +12,15 @@ SPEC.loader.exec_module(REVIEW)
 
 
 def _review(**overrides: object) -> dict[str, object]:
-    values: dict[str, object] = {"expected_revision":"a"*40,"checked_out_revision":"a"*40,"event_name":"pull_request","git_ref":"refs/pull/217/merge","run_conclusion":"success","required_jobs_success":14,"required_jobs_total":14}
+    values: dict[str, object] = {
+        "expected_revision": "a" * 40,
+        "checked_out_revision": "a" * 40,
+        "event_name": "pull_request",
+        "git_ref": "refs/pull/217/merge",
+        "run_conclusion": "success",
+        "required_jobs_success": 14,
+        "required_jobs_total": 14,
+    }
     values.update(overrides)
     return REVIEW.review(**values)
 
@@ -27,7 +35,8 @@ def test_b2_authority_resolved_exact_adapters_in_progress() -> None:
     assert result["formal_completion_blocked_by_authority_change"] is False
     acceptance = result["acceptance"]
     assert isinstance(acceptance, dict)
-    assert acceptance["db_schema_1_7_authority_adopted"] is True
+    assert acceptance["db_schema_1_8_authority_adopted"] is True
+    assert acceptance["historical_db_1_7_adoption_preserved"] is True
     assert acceptance["real_postgres_restart_parity_gate_present"] is True
 
 
@@ -39,15 +48,19 @@ def test_b2_protected_main_not_qualified_before_adapter_completion() -> None:
 
 
 def test_b2_review_fails_exact_head_or_job_count_drift() -> None:
-    assert "candidate_revision_exact" in _review(checked_out_revision="b"*40)["failed_acceptance"]
-    assert "required_jobs_exact" in _review(required_jobs_success=13)["failed_acceptance"]
+    failed_head = _review(checked_out_revision="b" * 40)["failed_acceptance"]
+    failed_jobs = _review(required_jobs_success=13)["failed_acceptance"]
+    assert "candidate_revision_exact" in failed_head
+    assert "required_jobs_exact" in failed_jobs
 
 
 def test_b2_workflow_keeps_exact_fourteen_job_topology() -> None:
-    workflow = (ROOT / ".github/workflows/cross-platform-ci.yml").read_text(encoding="utf-8")
+    workflow = (ROOT / ".github/workflows/cross-platform-ci.yml").read_text(
+        encoding="utf-8"
+    )
     assert "\n  piqb-b2-review:" not in workflow
     assert workflow.count("\n  m0-cross-platform:") == 1
     assert "Review PIQB B2 persistence and recovery state" in workflow
     assert "Execute PIQB B2 PostgreSQL restart/parity qualification" in workflow
-    assert "Review ACP-216 DB 1.7.0 authority adoption gate" in workflow
-    assert "Review ACP-216 adoption readiness without authority mutation" not in workflow
+    assert "Review ACP-219 DB 1.8.0 authority adoption gate" in workflow
+    assert "Review ACP-216 DB 1.7.0 authority adoption gate" not in workflow

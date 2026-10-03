@@ -46,10 +46,10 @@ from tpaa_storage.postgres_repository import (  # noqa: E402
     PostgreSQLServiceUnitOfWork,
 )
 
-SCHEMA = "TPAA_PIQB_B2_POSTGRES_PERSISTENCE_V1"
+SCHEMA = "TPAA_PIQB_B2_POSTGRES_PERSISTENCE_V2"
 TASK_IDS = ("PIQB-B2-006", "PIQB-B2-008")
 TRACKING_ISSUE = 209
-ACP_ISSUE = 216
+ACP_ISSUE = 219
 ACP_STATUS = "ADOPTED_PROTECTED_MAIN"
 PREFIX = "tpaa-object://products/piqb-b2-live"
 PRODUCT_FAMILY = "LONGITUDINAL_RELEASE"
@@ -328,13 +328,13 @@ def run(
             postgres_after = verify_postgres(client, database)
 
         acceptance = {
-            "sqlite_current_db_1_7": (
-                sqlite_bootstrap.schema_version == "1.7.0"
-                and sqlite_after.schema_version == "1.7.0"
+            "sqlite_current_db_1_8": (
+                sqlite_bootstrap.schema_version == "1.8.0"
+                and sqlite_after.schema_version == "1.8.0"
             ),
-            "postgres_current_db_1_7": (
-                postgres_bootstrap.schema_version == "1.7.0"
-                and postgres_after.schema_version == "1.7.0"
+            "postgres_current_db_1_8": (
+                postgres_bootstrap.schema_version == "1.8.0"
+                and postgres_after.schema_version == "1.8.0"
             ),
             "sqlite_restart_exact": _restart_acceptance(sqlite_result),
             "postgres_restart_exact": _restart_acceptance(postgres_result),
@@ -375,8 +375,8 @@ def run(
             "scope": {
                 "real_sqlite_executed": True,
                 "real_postgresql_executed": True,
-                "db_schema_version": "1.7.0",
-                "canonical_1_7_tables_only": True,
+                "db_schema_version": "1.8.0",
+                "canonical_1_8_tables_only": True,
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },
@@ -443,7 +443,7 @@ def main() -> int:
             "authority_change_proposal_status": ACP_STATUS,
             "error": f"{type(exc).__name__}: {exc}",
             "scope": {
-                "db_schema_version": "1.7.0",
+                "db_schema_version": "1.8.0",
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },
