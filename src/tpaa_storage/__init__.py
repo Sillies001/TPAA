@@ -9,6 +9,11 @@ from .bootstrap import (
     verify_sqlite,
 )
 from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
+from .p2_domain_repository import (
+    P2DomainPersistenceError,
+    PostgreSQLP2DomainRepository,
+    SQLiteP2DomainRepository,
+)
 from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
 from .persistence_fit import (
     PersistenceFitError,
@@ -60,6 +65,8 @@ __all__ = [
     "RepositoryBaselineMetadata",
     "RepositoryUnitOfWork",
     "OrphanRecoveryReport",
+    "P2DomainPersistenceError",
+    "PostgreSQLP2DomainRepository",
     "PostgreSQLBaselineMetadataRepository",
     "PostgreSQLProductPublicationLedger",
     "PostgreSQLRepositoryError",
@@ -78,6 +85,7 @@ __all__ = [
     "ProductReleaseIdentity",
     "StagingRecoveryReport",
     "SQLiteBaselineMetadataRepository",
+    "SQLiteP2DomainRepository",
     "SQLiteProductPublicationLedger",
     "SQLiteDesktopUnitOfWork",
     "SQLiteRepositoryError",

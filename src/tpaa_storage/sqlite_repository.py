@@ -19,6 +19,7 @@ from .bootstrap import (
     verify_sqlite,
 )
 from .core_publication_ledger import SQLiteCorePublicationLedger
+from .p2_domain_repository import SQLiteP2DomainRepository
 from .ports import RepositoryBaselineMetadata
 from .sqlite_product_repository import SQLiteProductPublicationLedger
 
@@ -114,6 +115,7 @@ class SQLiteDesktopUnitOfWork:
         self.metadata: SQLiteBaselineMetadataRepository
         self.publication: SQLiteCorePublicationLedger
         self.product_publication: SQLiteProductPublicationLedger
+        self.p2_domain: SQLiteP2DomainRepository
 
     @property
     def write(self) -> bool:
@@ -154,6 +156,7 @@ class SQLiteDesktopUnitOfWork:
             self.metadata = SQLiteBaselineMetadataRepository(connection)
             self.publication = SQLiteCorePublicationLedger(connection)
             self.product_publication = SQLiteProductPublicationLedger(connection)
+            self.p2_domain = SQLiteP2DomainRepository(connection)
             return self
         except Exception:
             if connection is not None:

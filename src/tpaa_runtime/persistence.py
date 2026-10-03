@@ -41,7 +41,7 @@ class DesktopPersistenceConfig:
 
     def __post_init__(self) -> None:
         if not self.database_path.is_file():
-            raise ValueError("Desktop database_path must be an existing DB 1.6.0 file")
+            raise ValueError("Desktop database_path must be an existing DB 1.7.0 file")
 
 
 @dataclass(frozen=True, slots=True)
