@@ -15,10 +15,10 @@ import os
 import shlex
 import shutil
 import subprocess
+from collections.abc import Mapping
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Mapping
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_LANES = ("m1", "m2", "m3", "m4", "m5")
