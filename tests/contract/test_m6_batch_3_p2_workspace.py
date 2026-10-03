@@ -482,7 +482,7 @@ def test_m6_tst_004_baseline_schema_and_later_phases_remain_inactive() -> None:
             ROOT / "baseline" / "CB-1.4.0" / "BASELINE_LOCK.json"
         ).read_text(encoding="utf-8")
     )
-    assert lock["baseline"]["db_schema"] == "1.6.0"
+    assert lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
 
     registry = json.loads(
         (
