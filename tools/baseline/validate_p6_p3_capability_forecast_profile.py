@@ -105,8 +105,8 @@ def verify() -> dict[str, object]:
     ) or (
         EXPECTED_ADOPTION_LOCK_SHA256 in lineage
         and EXPECTED_PARENT_LOCK_SHA256 in lineage
-        and lineage.index(EXPECTED_ADOPTION_LOCK_SHA256)
-        < lineage.index(EXPECTED_PARENT_LOCK_SHA256)
+        and lineage.index(EXPECTED_PARENT_LOCK_SHA256)
+        < lineage.index(EXPECTED_ADOPTION_LOCK_SHA256)
     )
 
     checks: dict[str, bool] = {

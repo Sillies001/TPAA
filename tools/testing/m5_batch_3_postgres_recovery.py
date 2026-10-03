@@ -28,6 +28,7 @@ from tools.storage.postgres_db import (  # noqa: E402
     verify_postgres,
 )
 from tpaa_qualification import load_m5_qualification_authority  # noqa: E402
+from tpaa_storage.bootstrap import EXPECTED_DB_SCHEMA_VERSION  # noqa: E402
 
 BASELINE = ROOT / "baseline" / "CB-1.4.0"
 TRACKING_ISSUE = 141
@@ -148,8 +149,8 @@ def verify(
     try:
         _create_clean_database(client, admin_database, source_database)
         source_verification = bootstrap_postgres(client, source_database)
-        if source_verification.schema_version != authority.db_schema_version:
-            raise RuntimeError("PostgreSQL DB schema drift")
+        if source_verification.schema_version != EXPECTED_DB_SCHEMA_VERSION:
+            raise RuntimeError("PostgreSQL current physical DB schema drift")
 
         dump_bytes = _dump_database(
             user=user,
@@ -163,7 +164,8 @@ def verify(
             "integrity_hash": "SHA-256",
             "source_revision": revision,
             "database_dump_sha256": dump_sha256,
-            "db_schema_version": authority.db_schema_version,
+            "db_schema_version": source_verification.schema_version,
+            "historical_authority_db_schema_version": authority.db_schema_version,
         }
         manifest_sha256 = _sha256(
             json.dumps(
@@ -229,7 +231,8 @@ def verify(
             "scope": {
                 "p1_only": True,
                 "p2_p6_inactive": True,
-                "db_schema_version": authority.db_schema_version,
+                "db_schema_version": source_verification.schema_version,
+                "historical_authority_db_schema_version": authority.db_schema_version,
                 "formal_release_claimed": False,
                 "m5_exit_go_claimed": False,
             },
