@@ -46,6 +46,16 @@ def _probe(client: PsqlClient, database: str) -> str:
     ).strip()
 
 
+def _ordered_text_probe(client: PsqlClient, database: str) -> str:
+    return client.run(
+        database,
+        '''SELECT ref_order::text || '|' || evidence_ref
+           FROM "assessment"."actor_assessment_machine_evidence_ref"
+           WHERE actor_assessment_id=
+                 '95000000-0000-4000-8000-000000000001'::uuid''',
+    ).strip()
+
+
 def run(
     *,
     user: str,
@@ -112,6 +122,7 @@ def run(
                    0, 'machine:acp219:ordered-text-probe'
                )""",
         )
+        ordered_text = _ordered_text_probe(client, database)
         downgrade_error = client.run(
             database,
             postgres_downgrade_script(),
@@ -132,15 +143,18 @@ def run(
         after_reupgrade = _probe(client, database)
 
         acceptance = {
-            "historical_1_6_bootstrap_verified": before == PROBE_VALUE,
-            "upgrade_to_1_7_verified": upgraded.schema_version == "1.8.0",
+            "historical_1_7_bootstrap_verified": before == PROBE_VALUE,
+            "upgrade_to_1_8_verified": upgraded.schema_version == "1.8.0",
             "historical_row_exact_after_upgrade": after_upgrade == PROBE_VALUE,
+            "ordered_text_probe_exact": (
+                ordered_text == "0|machine:acp219:ordered-text-probe"
+            ),
             "nonempty_downgrade_fail_closed": (
                 "ACP219_DOWNGRADE_NONEMPTY" in downgrade_error
             ),
-            "failed_downgrade_preserves_1_7": after_failed.schema_version == "1.8.0",
-            "empty_downgrade_to_1_6_verified": after_downgrade == PROBE_VALUE,
-            "forward_reupgrade_to_1_7": reupgraded.schema_version == "1.8.0",
+            "failed_downgrade_preserves_1_8": after_failed.schema_version == "1.8.0",
+            "empty_downgrade_to_1_7_verified": after_downgrade == PROBE_VALUE,
+            "forward_reupgrade_to_1_8": reupgraded.schema_version == "1.8.0",
             "historical_row_exact_after_reupgrade": after_reupgrade == PROBE_VALUE,
         }
         failed = sorted(key for key, ok in acceptance.items() if ok is not True)
