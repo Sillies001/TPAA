@@ -8,12 +8,13 @@ from .bootstrap import (
     postgres_create_statements,
     verify_sqlite,
 )
-from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
-from .p2_domain_repository import (
-    P2DomainPersistenceError,
-    PostgreSQLP2DomainRepository,
-    SQLiteP2DomainRepository,
+from .canonical_rows import (
+    CanonicalRowRepository,
+    CanonicalRowRepositoryError,
+    PostgreSQLCanonicalRowRepository,
+    SQLiteCanonicalRowRepository,
 )
+from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
 from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
 from .persistence_fit import (
     PersistenceFitError,
@@ -64,10 +65,11 @@ __all__ = [
     "BootstrapVerification",
     "RepositoryBaselineMetadata",
     "RepositoryUnitOfWork",
+    "CanonicalRowRepository",
+    "CanonicalRowRepositoryError",
     "OrphanRecoveryReport",
-    "P2DomainPersistenceError",
-    "PostgreSQLP2DomainRepository",
     "PostgreSQLBaselineMetadataRepository",
+    "PostgreSQLCanonicalRowRepository",
     "PostgreSQLProductPublicationLedger",
     "PostgreSQLRepositoryError",
     "PostgreSQLServiceUnitOfWork",
@@ -85,7 +87,7 @@ __all__ = [
     "ProductReleaseIdentity",
     "StagingRecoveryReport",
     "SQLiteBaselineMetadataRepository",
-    "SQLiteP2DomainRepository",
+    "SQLiteCanonicalRowRepository",
     "SQLiteProductPublicationLedger",
     "SQLiteDesktopUnitOfWork",
     "SQLiteRepositoryError",

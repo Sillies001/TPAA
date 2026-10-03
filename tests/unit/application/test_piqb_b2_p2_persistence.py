@@ -12,10 +12,11 @@ from tpaa_assessment import (
     P2AttributionRunProduct,
     P2ExecutionProfile,
 )
-from tpaa_storage.p2_domain_repository import (
-    P2DomainPersistenceError,
-    SQLiteP2DomainRepository,
+from tpaa_application.p2_persistence import (
+    P2PersistenceError,
+    P2PersistenceRepository,
 )
+from tpaa_storage.canonical_rows import SQLiteCanonicalRowRepository
 
 
 def _canonical_hash(value: object) -> str:
@@ -175,7 +176,7 @@ def test_sqlite_p2_db_1_7_exact_round_trip() -> None:
         "(observation_id, release_id) VALUES (?, ?)",
         (estimate.source_observation_id, estimate.source_release_id),
     )
-    repository = SQLiteP2DomainRepository(connection)
+    repository = P2PersistenceRepository(SQLiteCanonicalRowRepository(connection))
     repository.register_attribution_run(run)
     repository.register_adjusted_estimate(estimate)
 
@@ -191,13 +192,13 @@ def test_sqlite_p2_db_1_7_idempotent_replay_and_conflict_fail_closed() -> None:
         "(observation_id, release_id) VALUES (?, ?)",
         (estimate.source_observation_id, estimate.source_release_id),
     )
-    repository = SQLiteP2DomainRepository(connection)
+    repository = P2PersistenceRepository(SQLiteCanonicalRowRepository(connection))
     repository.register_attribution_run(run)
     repository.register_adjusted_estimate(estimate)
     repository.register_attribution_run(run)
     repository.register_adjusted_estimate(estimate)
 
-    with pytest.raises(P2DomainPersistenceError, match="P2_IMMUTABLE_CONFLICT"):
+    with pytest.raises(P2PersistenceError, match="P2_IMMUTABLE_CONFLICT"):
         repository.register_attribution_run(
             replace(run, created_by="conflicting-writer")
         )
@@ -211,10 +212,10 @@ def test_sqlite_p2_db_1_7_rejects_logical_hash_drift() -> None:
         "(observation_id, release_id) VALUES (?, ?)",
         (estimate.source_observation_id, estimate.source_release_id),
     )
-    repository = SQLiteP2DomainRepository(connection)
+    repository = P2PersistenceRepository(SQLiteCanonicalRowRepository(connection))
     repository.register_attribution_run(run)
 
-    with pytest.raises(P2DomainPersistenceError, match="P2_LOGICAL_HASH_MISMATCH"):
+    with pytest.raises(P2PersistenceError, match="P2_LOGICAL_HASH_MISMATCH"):
         repository.register_adjusted_estimate(
             replace(estimate, logical_hash="0" * 64)
         )

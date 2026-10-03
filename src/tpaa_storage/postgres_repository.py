@@ -22,8 +22,8 @@ from .bootstrap import (
     _postgres_expected_tables,
     _schema_fingerprint,
 )
+from .canonical_rows import PostgreSQLCanonicalRowRepository
 from .core_publication_ledger import PostgreSQLCorePublicationLedger
-from .p2_domain_repository import PostgreSQLP2DomainRepository
 from .ports import RepositoryBaselineMetadata
 from .postgres_product_repository import PostgreSQLProductPublicationLedger
 
@@ -180,7 +180,7 @@ class PostgreSQLServiceUnitOfWork:
         self.metadata: PostgreSQLBaselineMetadataRepository
         self.publication: PostgreSQLCorePublicationLedger
         self.product_publication: PostgreSQLProductPublicationLedger
-        self.p2_domain: PostgreSQLP2DomainRepository
+        self.canonical_rows: PostgreSQLCanonicalRowRepository
 
     @property
     def active(self) -> bool:
@@ -204,7 +204,7 @@ class PostgreSQLServiceUnitOfWork:
             self.product_publication = PostgreSQLProductPublicationLedger(
                 connection
             )
-            self.p2_domain = PostgreSQLP2DomainRepository(connection)
+            self.canonical_rows = PostgreSQLCanonicalRowRepository(connection)
             return self
         except Exception:
             try:
