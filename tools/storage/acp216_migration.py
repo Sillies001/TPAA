@@ -19,7 +19,6 @@ from tpaa_storage.bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     CORE_MODEL_ARTIFACT_ID,
     POSTGRES_ENGINE_PROFILE,
-    SQLITE_ENGINE_PROFILE,
     BootstrapError,
     BootstrapVerification,
     _SchemaAuthority,
@@ -44,7 +43,7 @@ SOURCE_CORE_SHA256 = "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda
 SOURCE_LOCK_SHA256 = "9920b59601d8441f883879e813164f33ee5c02db81aa5e1b759e3a1772469e51"
 SOURCE_DB_SCHEMA_VERSION = "1.6.0"
 TARGET_DB_SCHEMA_VERSION = "1.7.0"
-NEW_RELATIONS = [
+NEW_RELATIONS: tuple[str, ...] = (
     "capability.adjusted_capability_estimate_revision",
     "assessment.attribution_run_request_binding",
     "registry.mutation_idempotency",
@@ -59,8 +58,8 @@ NEW_RELATIONS = [
     "intelligence.forecast_result_revision",
     "intelligence.counterfactual_request",
     "intelligence.counterfactual_revision",
-    "intelligence.training_recommendation_revision"
-]
+    "intelligence.training_recommendation_revision",
+)
 
 
 class MigrationError(RuntimeError):

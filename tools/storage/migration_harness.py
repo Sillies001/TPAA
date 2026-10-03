@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 import sqlite3
 import sys
 import tempfile
@@ -77,7 +76,12 @@ def _read_historical_probe(database: Path) -> tuple[str, str, str, str] | None:
         ).fetchone()
     if row is None:
         return None
-    return tuple(str(value) for value in row)  # type: ignore[return-value]
+    return (
+        str(row[0]),
+        str(row[1]),
+        str(row[2]),
+        str(row[3]),
+    )
 
 
 def run() -> dict[str, object]:
