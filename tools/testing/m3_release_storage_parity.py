@@ -651,10 +651,10 @@ def run(
     )
 
     acceptance = {
-        "core_schema_is_frozen_1_6_0": (
-            bootstrap.schema_version == "1.6.0"
+        "current_core_schema_is_1_7_0": (
+            bootstrap.schema_version == "1.7.0"
             and bootstrap.core_baseline == "CB-1.4.0"
-            and bootstrap.table_count == 77
+            and bootstrap.table_count == 92
         ),
         "m3_release_snapshot_exact_116": (
             len(release.definitions) == 116
@@ -746,7 +746,7 @@ def run(
         "scope": {
             "real_sqlite_executed": True,
             "real_postgresql_executed": True,
-            "frozen_db_schema_1_6_0_only": True,
+            "current_db_schema_1_7_0_only": True,
             "existing_core_publication_ledger_only": True,
             "shadow_schema_created": False,
             "business_metric_recomputation_executed": False,

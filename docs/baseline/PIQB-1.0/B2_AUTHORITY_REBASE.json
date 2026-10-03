@@ -1,0 +1,28 @@
+{
+  "schema": "TPAA_PIQB_B2_AUTHORITY_REBASE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B2",
+  "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
+  "historical_fit_audit": {
+    "file": "B2_SCHEMA_PERSISTENCE_FIT.json",
+    "db_schema_version": "1.6.0",
+    "preserved_as_pre_adoption_evidence": true
+  },
+  "adopted_authority": {
+    "proposal_id": "ACP-216",
+    "issue": 216,
+    "db_schema_version": "1.7.0",
+    "protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+    "run_number": 576,
+    "actions_run_id": 37105587377,
+    "reviewer_schema": "TPAA_ACP216_AUTHORITY_ADOPTION_REVIEW_V1",
+    "qualification": "ACP216_DB_1_7_0_ADOPTED"
+  },
+  "branch_sync": {
+    "strategy": "TRUE_MERGE_NO_FORCE_PUSH",
+    "b2_pre_merge_head": "f960ed520e40d9179a450bdeba10a16c4266c2dd",
+    "adopted_main_parent": "d5be58189d7fbd81f7fb3e49506eb0a61544db46"
+  },
+  "no_shadow_schema": true,
+  "b3_activated": false
+}

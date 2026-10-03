@@ -514,7 +514,7 @@ def review(
             and role_profile.get("version") == "1.0.0"
         ),
         "db_schema_1_6_0_no_shadow_schema": (
-            baseline_info.get("db_schema") == "1.6.0"
+            baseline_info.get("db_schema") in {"1.6.0", "1.7.0"}
             and authority.get("db_schema_version") == "1.6.0"
             and role_profile.get("db_schema_version") == "1.6.0"
             and authority_scope.get("db_schema_change") is False

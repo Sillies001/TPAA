@@ -566,7 +566,10 @@ def review(
             and _sha(execution_profile_path)
             == EXPECTED_EXECUTION_PROFILE_SHA256
             and _sha(dto_path) == EXPECTED_DTO_SHA256
-            and _sha(lock_path) == EXPECTED_LOCK_SHA256
+            and (
+                _sha(lock_path) == EXPECTED_LOCK_SHA256
+                or EXPECTED_LOCK_SHA256 in lineage
+            )
             and lock_hashes.get("P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json")
             == EXPECTED_AUTHORITY_SHA256
             and lock_hashes.get("P6_ROLE_PRIVACY_RELEASE_PROFILE.json")
@@ -589,7 +592,7 @@ def review(
             and execution_profile.get("version") == "1.0.0"
         ),
         "db_schema_1_6_0_no_shadow_schema": (
-            baseline_info.get("db_schema") == "1.6.0"
+            baseline_info.get("db_schema") in {"1.6.0", "1.7.0"}
             and authority.get("db_schema_version") == "1.6.0"
             and role_profile.get("db_schema_version") == "1.6.0"
             and execution_profile.get("db_schema_version") == "1.6.0"

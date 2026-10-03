@@ -58,7 +58,7 @@ def test_sqlite_and_postgres_product_ledgers_expose_same_port_members() -> None:
         assert required.issubset(set(adapter.__dict__))
 
 
-def test_postgres_product_adapter_uses_transaction_lock_and_frozen_tables() -> None:
+def test_postgres_product_adapter_uses_transaction_lock_and_canonical_tables() -> None:
     source = inspect.getsource(PostgreSQLProductPublicationLedger)
     assert "pg_advisory_xact_lock" in source
     for table in (
@@ -73,7 +73,7 @@ def test_postgres_product_adapter_uses_transaction_lock_and_frozen_tables() -> N
     assert "ALTER TABLE" not in source
 
 
-def test_live_postgres_product_qualification_uses_frozen_authority() -> None:
+def test_live_postgres_product_qualification_uses_adopted_authority() -> None:
     source = (
         Path(__file__).resolve().parents[2]
         / "tools"
@@ -85,7 +85,7 @@ def test_live_postgres_product_qualification_uses_frozen_authority() -> None:
         "bootstrap_postgres",
         "build_desktop_persistence",
         "build_service_persistence",
-        "PROPOSED_NOT_ADOPTED",
+        "ADOPTED_PROTECTED_MAIN",
         "shadow_schema_created",
     ):
         assert token in source

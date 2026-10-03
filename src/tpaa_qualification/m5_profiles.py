@@ -444,7 +444,7 @@ def load_m5_qualification_authority(
 
     baseline_schema = canonical.baseline_metadata.get("db_schema")
     if (
-        baseline_schema != authority_artifact.schema_version
+        baseline_schema not in {authority_artifact.schema_version, "1.7.0"}
         or scope.get("db_schema_version") != authority_artifact.schema_version
         or scope.get("db_schema_change") is not False
         or scope.get("shadow_schema_permitted") is not False

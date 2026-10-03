@@ -40,7 +40,7 @@ def test_world_003_stage_authority_remains_frozen() -> None:
         "STABILIZATION_RECOVERY",
         "COMPLETION",
     ]
-    assert core["db_schema_version"] == "1.6.0"
+    assert core["db_schema_version"] == "1.7.0"
     fields = [
         item["name"]
         for item in core["tables"]["episode.episode_stage"]["fields"]

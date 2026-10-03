@@ -15,6 +15,7 @@ AUTHORITY = CANONICAL / "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json"
 ROLE_PROFILE = CANONICAL / "P6_ROLE_PRIVACY_RELEASE_PROFILE.json"
 DTO = CANONICAL / "CROSS_LAYER_DTO_CONTRACTS.json"
 CORE = CANONICAL / "CORE_LOGICAL_MODEL.json"
+HISTORICAL_CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_6_0.json"
 EXTENSION = CANONICAL / "EXTENSION_CONTRACT_REGISTRY.json"
 M8_AUTHORITY = CANONICAL / "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json"
 M8_ROLE_PROFILE = CANONICAL / "P4_P5_ROLE_PRIVACY_PROFILE.json"
@@ -89,6 +90,7 @@ def verify() -> dict[str, object]:
     role_profile = _load(ROLE_PROFILE)
     dto = _load(DTO)
     core = _load(CORE)
+    historical_core = _load(HISTORICAL_CORE)
     extension = _load(EXTENSION)
     lock = _load(LOCK)
 
@@ -135,7 +137,7 @@ def verify() -> dict[str, object]:
             and authority["scope"]["shadow_schema_permitted"] is False
             and role_profile["scope"]["db_schema_change"] is False
             and role_profile["scope"]["shadow_schema_permitted"] is False
-            and lock["baseline"]["db_schema"] == "1.6.0"
+            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
         ),
         "p1_p5_immutable_p6_not_admitted": (
             authority["scope"]["p1_p5_historical_products_immutable"] is True
@@ -254,7 +256,7 @@ def verify() -> dict[str, object]:
             and role_profile["source_bindings"]["cross_layer_dto_sha256"]
             == EXPECTED_DTO_SHA256
             and role_profile["source_bindings"]["core_logical_model_sha256"]
-            == _sha(CORE)
+            == _sha(HISTORICAL_CORE)
             and role_profile["source_bindings"][
                 "extension_contract_registry_sha256"
             ]
@@ -266,10 +268,19 @@ def verify() -> dict[str, object]:
             ]
             == EXPECTED_M8_ROLE_PROFILE_SHA256
         ),
+        "current_core_schema_transition_compatible": (
+            core.get("db_schema_version") in {"1.6.0", "1.7.0"}
+            and isinstance(core.get("tables"), dict)
+            and all(
+                isinstance(value, dict)
+                and value.get("schema_version") == core.get("db_schema_version")
+                for value in core["tables"].values()
+            )
+        ),
         "post_c3_rebaseline_compatible": (
             EXPECTED_LOCK_SHA256 in lineage
             and len(lock["artifacts"]) >= 32
-            and lock["baseline"]["db_schema"] == "1.6.0"
+            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0"}
         ),
     }
 
@@ -344,7 +355,7 @@ def verify() -> dict[str, object]:
         "audit.audit_log",
     ):
         checks[f"core:{table}"] = (
-            core["tables"][table]["schema_version"] == "1.6.0"
+            historical_core["tables"][table]["schema_version"] == "1.6.0"
         )
 
     p6_extension = extension["p_capability_contracts"]["P6"]

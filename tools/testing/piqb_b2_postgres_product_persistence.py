@@ -50,7 +50,7 @@ SCHEMA = "TPAA_PIQB_B2_POSTGRES_PERSISTENCE_V1"
 TASK_IDS = ("PIQB-B2-006", "PIQB-B2-008")
 TRACKING_ISSUE = 209
 ACP_ISSUE = 216
-ACP_STATUS = "PROPOSED_NOT_ADOPTED"
+ACP_STATUS = "ADOPTED_PROTECTED_MAIN"
 PREFIX = "tpaa-object://products/piqb-b2-live"
 PRODUCT_FAMILY = "LONGITUDINAL_RELEASE"
 PRODUCT_ID = "93000000-0000-4000-8000-000000000001"
@@ -328,13 +328,13 @@ def run(
             postgres_after = verify_postgres(client, database)
 
         acceptance = {
-            "sqlite_frozen_db_1_6_0": (
-                sqlite_bootstrap.schema_version == "1.6.0"
-                and sqlite_after.schema_version == "1.6.0"
+            "sqlite_current_db_1_7": (
+                sqlite_bootstrap.schema_version == "1.7.0"
+                and sqlite_after.schema_version == "1.7.0"
             ),
-            "postgres_frozen_db_1_6_0": (
-                postgres_bootstrap.schema_version == "1.6.0"
-                and postgres_after.schema_version == "1.6.0"
+            "postgres_current_db_1_7": (
+                postgres_bootstrap.schema_version == "1.7.0"
+                and postgres_after.schema_version == "1.7.0"
             ),
             "sqlite_restart_exact": _restart_acceptance(sqlite_result),
             "postgres_restart_exact": _restart_acceptance(postgres_result),
@@ -351,7 +351,7 @@ def run(
                 and sqlite_result["conflict_object_removed"] is True
                 and postgres_result["conflict_object_removed"] is True
             ),
-            "authority_change_not_adopted": ACP_STATUS == "PROPOSED_NOT_ADOPTED",
+            "authority_change_adopted": ACP_STATUS == "ADOPTED_PROTECTED_MAIN",
             "shadow_schema_not_created": True,
         }
         failed = sorted(key for key, ok in acceptance.items() if ok is not True)
@@ -363,7 +363,7 @@ def run(
             "status": "PASS" if not failed else "FAIL",
             "implementation_complete": False,
             "task_complete": False,
-            "completion_gate": "B2_REMAINS_BLOCKED_BY_AUTHORITY_CHANGE",
+            "completion_gate": "B2_EXACT_DOMAIN_ADAPTERS_PENDING",
             "authority_change_proposal_issue": ACP_ISSUE,
             "authority_change_proposal_status": ACP_STATUS,
             "acceptance": acceptance,
@@ -375,8 +375,8 @@ def run(
             "scope": {
                 "real_sqlite_executed": True,
                 "real_postgresql_executed": True,
-                "db_schema_version": "1.6.0",
-                "existing_core_tables_only": True,
+                "db_schema_version": "1.7.0",
+                "canonical_1_7_tables_only": True,
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },
@@ -438,12 +438,12 @@ def main() -> int:
             "status": "FAIL",
             "implementation_complete": False,
             "task_complete": False,
-            "completion_gate": "B2_REMAINS_BLOCKED_BY_AUTHORITY_CHANGE",
+            "completion_gate": "B2_EXACT_DOMAIN_ADAPTERS_PENDING",
             "authority_change_proposal_issue": ACP_ISSUE,
             "authority_change_proposal_status": ACP_STATUS,
             "error": f"{type(exc).__name__}: {exc}",
             "scope": {
-                "db_schema_version": "1.6.0",
+                "db_schema_version": "1.7.0",
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },

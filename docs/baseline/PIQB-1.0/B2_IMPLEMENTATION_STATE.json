@@ -4,9 +4,9 @@
   "batch": "B2",
   "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
   "source_b1_qualification": "PIQB_B1_QUALIFIED",
-  "db_schema_version": "1.6.0",
+  "db_schema_version": "1.7.0",
   "authority_change_proposal_issue": 216,
-  "authority_change_proposal_status": "PROPOSED_NOT_ADOPTED",
+  "authority_change_proposal_status": "ADOPTED_PROTECTED_MAIN",
   "no_shadow_schema": true,
   "task_state": {
     "PIQB-B2-001": {
@@ -19,22 +19,22 @@
       ]
     },
     "PIQB-B2-002": {
-      "state": "PARTIAL_AUTHORITY_BLOCKED",
+      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
       "evidence": [
         "SQLiteProductPublicationLedger",
         "SQLiteDesktopUnitOfWork.product_publication",
         "Desktop persistence runtime"
       ],
-      "blocker": "Full P2/P4/P5/P6 exact domain adapters require ACP #216."
+      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
     },
     "PIQB-B2-003": {
-      "state": "PARTIAL_AUTHORITY_BLOCKED",
+      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
       "evidence": [
         "PostgreSQLProductPublicationLedger",
         "PostgreSQLServiceUnitOfWork.product_publication",
         "Service persistence runtime"
       ],
-      "blocker": "Full P2/P4/P5/P6 exact domain adapters require ACP #216."
+      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
     },
     "PIQB-B2-004": {
       "state": "COMPLETE_CANDIDATE",
@@ -53,14 +53,14 @@
       ]
     },
     "PIQB-B2-006": {
-      "state": "PARTIAL_AUTHORITY_BLOCKED",
+      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
       "evidence": [
         "SQLite close/reopen exact registration test",
         "Desktop persistence reconstruction",
         "real PostgreSQL service runtime reconstruction across new connections",
         "real PostgreSQL exact read and idempotent replay after reconnect"
       ],
-      "blocker": "Production-allowed DB 1.6.0 substrate restart is qualified; full P2/P4/P5/P6 exact-product restart remains blocked by ACP #216."
+      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
     },
     "PIQB-B2-007": {
       "state": "COMPLETE_CANDIDATE",
@@ -71,13 +71,13 @@
       ]
     },
     "PIQB-B2-008": {
-      "state": "PARTIAL_AUTHORITY_BLOCKED",
+      "state": "IN_PROGRESS_DB_1_7_ADAPTERS",
       "evidence": [
         "shared identity derivation",
         "SQLite/PostgreSQL ledger contract parity",
         "real SQLite/PostgreSQL publication restart/CAS/recovery parity"
       ],
-      "blocker": "Real-server common-substrate parity is qualified; ACP #216 adoption is still required for full P2/P4/P5/P6 exact-domain parity and B2 qualification."
+      "remaining_work": "Implement and qualify exact P2/P4/P5/P6 domain persistence adapters over adopted DB 1.7.0 authority."
     }
   },
   "production_activation": {
@@ -85,14 +85,21 @@
       "P1_SESSION_RELEASE",
       "LONGITUDINAL_RELEASE"
     ],
-    "schema_fit_but_dependency_blocked": [
+    "dependency_blocked": [
       "P3_TWIN_CAPABILITY"
     ],
-    "authority_blocked": [
+    "adapter_pending": [
       "P2_ATTRIBUTION",
       "P4_P5_ASSESSMENT",
       "P6_MODEL_PROJECTION_ADVISORY"
-    ]
+    ],
+    "authority_blocked": []
   },
-  "b2_qualified": false
+  "b2_qualified": false,
+  "authority_adoption": {
+    "protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+    "run_number": 576,
+    "actions_run_id": 37105587377,
+    "qualification": "ACP216_DB_1_7_0_ADOPTED"
+  }
 }
