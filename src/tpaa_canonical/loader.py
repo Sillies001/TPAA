@@ -475,7 +475,7 @@ class CanonicalArtifactLoader:
             )
 
         lock_schema = self._baseline_metadata.get("db_schema")
-        if schema_version is not None and schema_version != lock_schema:
+        if normalized_id == "CORE_LOGICAL_MODEL" and schema_version != lock_schema:
             raise CanonicalArtifactError(
                 reason="SCHEMA_VERSION_MISMATCH",
                 artifact_id=normalized_id,
@@ -485,7 +485,10 @@ class CanonicalArtifactLoader:
                     str(lock_schema) if lock_schema is not None else expected.schema_version
                 ),
                 actual_schema_version=schema_version,
-                detail="artifact db_schema_version disagrees with BASELINE_LOCK baseline metadata",
+                detail=(
+                    "current CORE_LOGICAL_MODEL db_schema_version disagrees with "
+                    "BASELINE_LOCK baseline metadata"
+                ),
             )
 
         if expected.version is not None:

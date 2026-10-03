@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import cast
 from uuid import UUID
 
-CORE_SCHEMA_VERSION = "1.6.0"
+CORE_SCHEMA_VERSION = "1.7.0"
 CORE_TABLE = "master.mission_system_instance"
 CATALOG_DELIVERY_MILESTONE = "M3"
 CATALOG_DELIVERY_BATCH = "P1_REMAINDER_84"
