@@ -178,13 +178,17 @@ def review(
         for change in changes
     )
 
-    lock_artifacts = lock.get("artifacts")
+    lock_artifacts_raw = lock.get("artifacts")
+    lock_artifacts = (
+        cast(list[Any], lock_artifacts_raw)
+        if isinstance(lock_artifacts_raw, list)
+        else []
+    )
     core_lock = next(
         (
             item
             for item in lock_artifacts
-            if isinstance(lock_artifacts, list)
-            and isinstance(item, dict)
+            if isinstance(item, dict)
             and item.get("file") == "CORE_LOGICAL_MODEL.json"
         ),
         None,
