@@ -269,7 +269,7 @@ def qualify(
         "acceptance":acceptance,
         "failed_acceptance":failed,
         "scope":{
-            "db_schema_version":"1.8.0",
+            "db_schema_version":"1.9.0",
             "shadow_schema_created":False,
             "windows_linux_logical_equivalence":True,
             "sqlite_postgresql_longitudinal_release_membership_parity":True,
