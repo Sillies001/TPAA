@@ -123,7 +123,11 @@ from .p3_persistence import (
     P3WorkspaceLayerResolver,
 )
 from .p4_p5_persistence import P4P5PersistenceError, P4P5PersistenceRepository
-from .p6_persistence import P6PersistenceError, P6PersistenceRepository
+from .p6_persistence import (
+    DurableP6ModelBuildResolver,
+    P6PersistenceError,
+    P6PersistenceRepository,
+)
 from .runtime import (
     GetRuntimeBaselineStatus,
     RuntimeBaselineIdentityView,
@@ -167,6 +171,7 @@ __all__ = [
     "P3WorkspaceLayerResolver",
     "P4P5PersistenceError",
     "P4P5PersistenceRepository",
+    "DurableP6ModelBuildResolver",
     "P6PersistenceError",
     "P6PersistenceRepository",
     "compare_m2_release_replay",

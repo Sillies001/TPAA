@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import struct
 from collections.abc import Mapping
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -12,6 +14,8 @@ from uuid import UUID, uuid5
 
 from tpaa_assessment.p6_recommendation import P6RecommendationRevision
 from tpaa_capability import (
+    P6ApplicabilityEvidence,
+    P6CapabilityTrainingRow,
     P6ContextRef,
     P6CounterfactualRequestBinding,
     P6CounterfactualRevision,
@@ -22,14 +26,21 @@ from tpaa_capability import (
     P6InputSnapshot,
     P6ManagedModelObject,
     P6ModelBuild,
+    P6ModelDatasetBundle,
     P6ModelDatasetSnapshot,
     P6ModelRevision,
     P6P3ModelRef,
+    P6UncertaintyCalibrationEvidence,
     assert_p6_input_snapshot_identity,
+    assess_p6_training_applicability,
+    p6_capability_training_row_id,
     validate_p6_managed_model_object,
 )
 from tpaa_context.p6_governance import canonical_hash
 from tpaa_storage.canonical_rows import CanonicalRowRepository
+
+from .p3_persistence import P3PersistenceRepository
+from .p4_p5_persistence import P4P5PersistenceRepository
 
 _INPUT_NAMESPACE = UUID("7256bfa5-8cb5-54c4-9174-1324fe77f4db")
 _FORECAST_REQUEST_NAMESPACE = UUID("55585db6-8d47-5fcb-8b92-cfbe1b468592")
@@ -355,6 +366,339 @@ def _draft_recommendation_hash(value: P6RecommendationRevision) -> str:
             ),
         }
     )
+
+
+class DurableP6ModelBuildResolver:
+    """Rehydrate a P6 model build from exact durable P3/P4 membership."""
+
+    def __init__(self, rows: CanonicalRowRepository) -> None:
+        self._rows = rows
+        self._p3 = P3PersistenceRepository(rows)
+        self._p4 = P4P5PersistenceRepository(rows)
+
+    @staticmethod
+    def _mismatch(detail: str) -> P6PersistenceError:
+        return P6PersistenceError(
+            "P6_MODEL_BUILD_RECONSTRUCTION_MISMATCH",
+            detail,
+        )
+
+    @staticmethod
+    def _number(value: object, field: str) -> float:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise DurableP6ModelBuildResolver._mismatch(field)
+        result = float(value)
+        if not math.isfinite(result):
+            raise DurableP6ModelBuildResolver._mismatch(field)
+        return result
+
+    @staticmethod
+    def _integer(value: object, field: str) -> int:
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise DurableP6ModelBuildResolver._mismatch(field)
+        return value
+
+    @staticmethod
+    def _float_hex(value: float) -> str:
+        return struct.pack(">d", value).hex()
+
+    def _assignment_id(self, *, session_id: str, session_order: int) -> str:
+        session = self._rows.one(
+            "registry.training_session",
+            where={"session_id": session_id},
+            columns=(
+                "session_order",
+                "session_order_scope_id",
+            ),
+        )
+        if session is None:
+            raise self._mismatch(f"training_session:{session_id}")
+        scope_raw = session["session_order_scope_id"]
+        order_raw = session["session_order"]
+        if (
+            scope_raw is None
+            or isinstance(order_raw, bool)
+            or not isinstance(order_raw, int)
+            or order_raw != session_order
+        ):
+            raise self._mismatch(f"session_order:{session_id}")
+        scope_id = str(scope_raw)
+        assignments = self._rows.many(
+            "registry.session_order_assignment",
+            where={
+                "session_order_scope_id": scope_id,
+                "session_id": session_id,
+                "order_value": session_order,
+                "is_current": True,
+            },
+            columns=("assignment_id", "revision_no"),
+            order_by=("revision_no",),
+        )
+        if len(assignments) != 1:
+            raise self._mismatch(
+                f"session_order_assignment:{session_id}:{session_order}"
+            )
+        return str(assignments[0]["assignment_id"])
+
+    def _training_row(
+        self,
+        *,
+        p3_estimate_id: str,
+        p4_revision_id: str,
+    ) -> P6CapabilityTrainingRow:
+        estimate = self._p3.exact_capability_estimate(p3_estimate_id)
+        revision = self._p4.exact_p4_revision(p4_revision_id)
+        twin = self._p3.exact_twin_revision(estimate.twin_revision_id)
+        condition = dict(estimate.condition_point)
+        session_order = condition.get("session_order")
+        if (
+            isinstance(session_order, bool)
+            or not isinstance(session_order, int)
+            or revision.p3_estimate_id != estimate.estimate_id
+            or revision.twin_revision_id != twin.twin_revision_id
+            or revision.aircraft_id != twin.aircraft_id
+        ):
+            raise self._mismatch(
+                f"training_row_binding:{p3_estimate_id}:{p4_revision_id}"
+            )
+        assignment_id = self._assignment_id(
+            session_id=revision.session_id,
+            session_order=session_order,
+        )
+        return P6CapabilityTrainingRow(
+            estimate=estimate,
+            p4_revision=revision,
+            aircraft_id=twin.aircraft_id,
+            configuration_snapshot_id=twin.config_snapshot_id,
+            session_order_assignment_id=assignment_id,
+            session_order=session_order,
+        )
+
+    def _rows_for_snapshot(
+        self,
+        snapshot: P6ModelDatasetSnapshot,
+    ) -> tuple[P6CapabilityTrainingRow, ...]:
+        if (
+            not snapshot.frozen
+            or len(snapshot.row_ids) != len(snapshot.p3_estimate_ids)
+            or len(snapshot.row_ids) != len(snapshot.p4_revision_ids)
+        ):
+            raise self._mismatch(snapshot.dataset_snapshot_id)
+        rows = tuple(
+            self._training_row(
+                p3_estimate_id=estimate_id,
+                p4_revision_id=revision_id,
+            )
+            for estimate_id, revision_id in zip(
+                snapshot.p3_estimate_ids,
+                snapshot.p4_revision_ids,
+                strict=True,
+            )
+        )
+        actual_ids = tuple(
+            p6_capability_training_row_id(
+                row,
+                as_of_utc=snapshot.as_of_utc,
+            )
+            for row in rows
+        )
+        if actual_ids != snapshot.row_ids:
+            raise self._mismatch(
+                f"dataset_membership:{snapshot.dataset_snapshot_id}"
+            )
+        return rows
+
+    def rebuild(
+        self,
+        *,
+        model: P6ModelRevision,
+        artifact: Mapping[str, object],
+        artifact_bytes: bytes,
+        training: P6ModelDatasetSnapshot,
+        validation: P6ModelDatasetSnapshot,
+    ) -> P6ModelBuild:
+        profile = P6ForecastExecutionProfile.from_canonical()
+        if (
+            training.snapshot_type != "P6_MODEL_TRAINING"
+            or validation.snapshot_type != "P6_MODEL_VALIDATION"
+            or training.as_of_utc != validation.as_of_utc
+            or len(validation.row_ids) != 1
+        ):
+            raise self._mismatch("dataset_snapshot_contract")
+
+        try:
+            canonical_bytes = json.dumps(
+                dict(artifact),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+                allow_nan=False,
+            ).encode("ascii")
+        except (TypeError, ValueError) as exc:
+            raise self._mismatch("artifact_canonical_json") from exc
+        if canonical_bytes != artifact_bytes:
+            raise self._mismatch("artifact_bytes")
+
+        validation_metrics = _mapping(
+            artifact.get("validation_metrics"),
+            "model_artifact.validation_metrics",
+        )
+        validity_domain = _mapping(
+            artifact.get("validity_domain"),
+            "model_artifact.validity_domain",
+        )
+        scalar_bindings = {
+            "schema": "TPAA_P6_P3_CAPABILITY_OLS_MAD_MODEL_V1",
+            "profile_id": profile.profile_id,
+            "profile_version": profile.profile_version,
+            "profile_sha256": profile.profile_sha256,
+            "model_spec_id": model.model_spec_id,
+            "model_spec_version": model.model_spec_version,
+            "plugin_name": model.plugin_name,
+            "plugin_version": model.plugin_version,
+            "subject_type": model.subject_type,
+            "subject_id": model.subject_id,
+            "capability_type": model.capability_type,
+            "training_dataset_snapshot_id": training.dataset_snapshot_id,
+            "training_dataset_hash": training.data_hash,
+            "validation_dataset_snapshot_id": validation.dataset_snapshot_id,
+            "validation_dataset_hash": validation.data_hash,
+            "applicability_profile_ref": model.applicability_profile_ref,
+            "uncertainty_profile_ref": model.uncertainty_profile_ref,
+        }
+        for field, expected in scalar_bindings.items():
+            if artifact.get(field) != expected:
+                raise self._mismatch(f"artifact_binding:{field}")
+        if (
+            dict(model.validation_metrics) != validation_metrics
+            or dict(model.validity_domain) != validity_domain
+            or model.model_spec_id != profile.model_spec_id
+            or model.model_spec_version != profile.model_spec_version
+            or model.plugin_name != profile.plugin_name
+            or model.plugin_version != profile.plugin_version
+            or model.applicability_profile_ref
+            != profile.applicability_profile_ref
+            or model.uncertainty_profile_ref
+            != profile.uncertainty_profile_ref
+        ):
+            raise self._mismatch("model_metadata")
+
+        training_rows = self._rows_for_snapshot(training)
+        validation_rows = self._rows_for_snapshot(validation)
+        eligible_rows = tuple(
+            sorted(
+                (*training_rows, *validation_rows),
+                key=lambda item: (
+                    item.session_order,
+                    item.estimate.estimate_id,
+                ),
+            )
+        )
+        applicability = assess_p6_training_applicability(
+            eligible_rows,
+            as_of_utc=training.as_of_utc,
+            profile=profile,
+        )
+        if (
+            applicability.status != "APPLICABLE"
+            or validation_metrics.get("applicability_evidence_id")
+            != applicability.applicability_evidence_id
+        ):
+            raise self._mismatch("applicability_evidence")
+
+        fit_raw = artifact.get("fit_row_ids")
+        if not isinstance(fit_raw, list) or not all(
+            isinstance(item, str) for item in fit_raw
+        ):
+            raise self._mismatch("fit_row_ids")
+        fit_row_ids = tuple(fit_raw)
+        by_row_id = {
+            p6_capability_training_row_id(
+                row,
+                as_of_utc=training.as_of_utc,
+                profile=profile,
+            ): row
+            for row in eligible_rows
+        }
+        if len(by_row_id) != len(eligible_rows) or any(
+            row_id not in by_row_id for row_id in fit_row_ids
+        ):
+            raise self._mismatch("fit_row_membership")
+        final_refit_rows = tuple(by_row_id[row_id] for row_id in fit_row_ids)
+
+        input_half_width = self._number(
+            validation_metrics.get("p3_input_half_width_max"),
+            "p3_input_half_width_max",
+        )
+        holdout_error = self._number(
+            validation_metrics.get("holdout_absolute_error"),
+            "holdout_absolute_error",
+        )
+        residual_mad = self._number(
+            validation_metrics.get("final_refit_residual_mad"),
+            "final_refit_residual_mad",
+        )
+        half_width = self._number(
+            validation_metrics.get("uncertainty_half_width"),
+            "uncertainty_half_width",
+        )
+        calibration_material = {
+            "profile_ref": profile.uncertainty_profile_ref,
+            "training_dataset_snapshot_id": training.dataset_snapshot_id,
+            "validation_dataset_snapshot_id": validation.dataset_snapshot_id,
+            "p3_input_half_width_max": self._float_hex(input_half_width),
+            "holdout_absolute_error": self._float_hex(holdout_error),
+            "final_refit_residual_mad": self._float_hex(residual_mad),
+            "half_width": self._float_hex(half_width),
+            "status": "CALIBRATED",
+        }
+        calibration_hash = canonical_hash(calibration_material)
+        calibration_id = f"P6_UNCERTAINTY_SHA256:{calibration_hash}"
+        if validation_metrics.get("calibration_evidence_id") != calibration_id:
+            raise self._mismatch("uncertainty_calibration")
+        uncertainty = P6UncertaintyCalibrationEvidence(
+            calibration_evidence_id=calibration_id,
+            profile_ref=profile.uncertainty_profile_ref,
+            p3_input_half_width_max=input_half_width,
+            holdout_absolute_error=holdout_error,
+            final_refit_residual_mad=residual_mad,
+            half_width=half_width,
+            status="CALIBRATED",
+            data_hash=calibration_hash,
+        )
+
+        intercept = self._number(artifact.get("intercept"), "intercept")
+        slope = self._number(artifact.get("slope"), "slope")
+        session_order_origin = self._integer(
+            artifact.get("session_order_origin"),
+            "session_order_origin",
+        )
+        target_session_order = self._integer(
+            artifact.get("target_session_order"),
+            "target_session_order",
+        )
+        datasets = P6ModelDatasetBundle(
+            applicability=applicability,
+            training=training,
+            validation=validation,
+            eligible_rows=eligible_rows,
+            training_rows=training_rows,
+            validation_row=validation_rows[0],
+            final_refit_rows=final_refit_rows,
+        )
+        return P6ModelBuild(
+            model=model,
+            artifact=dict(artifact),
+            artifact_bytes=artifact_bytes,
+            datasets=datasets,
+            applicability=applicability,
+            uncertainty=uncertainty,
+            intercept=intercept,
+            slope=slope,
+            session_order_origin=session_order_origin,
+            target_session_order=target_session_order,
+            fit_row_ids=fit_row_ids,
+        )
 
 
 class P6PersistenceRepository:

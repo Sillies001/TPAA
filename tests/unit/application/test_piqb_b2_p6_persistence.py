@@ -7,7 +7,14 @@ from typing import cast
 
 import pytest
 
-from tpaa_application import P6PersistenceError, P6PersistenceRepository
+from tools.testing.piqb_b2_p6_resolver_fixture import (
+    seed_p6_model_resolver_case,
+)
+from tpaa_application import (
+    DurableP6ModelBuildResolver,
+    P6PersistenceError,
+    P6PersistenceRepository,
+)
 from tpaa_assessment.p6_recommendation import build_p6_recommendation
 from tpaa_capability import (
     P6ApplicabilityEvidence,
@@ -405,3 +412,34 @@ def test_p6_results_survive_sqlite_restart_and_replay(tmp_path: Path) -> None:
         repo.register_recommendation(recommendation)
         uow.commit()
 
+
+
+
+def test_p6_model_build_rehydrates_from_durable_p3_p4_rows(
+    tmp_path: Path,
+) -> None:
+    database = tmp_path / "p6-model-resolver.db"
+    object_store = LocalObjectStore(tmp_path / "objects-model-resolver")
+    bootstrap_sqlite(database)
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        case = seed_p6_model_resolver_case(
+            uow.canonical_rows,
+            object_store,
+        )
+        uow.commit()
+
+    with SQLiteDesktopUnitOfWork(database) as uow:
+        resolver = DurableP6ModelBuildResolver(uow.canonical_rows)
+        repository = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+            model_build_resolver=resolver,
+        )
+        assert (
+            repository.exact_model_build(
+                case.build.model.capability_model_id
+            )
+            == case.build
+        )
+        uow.commit()

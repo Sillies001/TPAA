@@ -41,6 +41,7 @@ from .p6_forecast import (
     execute_p6_forecast,
     execute_p6_model_training,
     materialize_p6_model_datasets,
+    p6_capability_training_row_id,
     validate_p6_managed_model_object,
 )
 from .p6_input import (
@@ -98,6 +99,7 @@ __all__ = [
     "evaluate_temporal_holdout",
     "execute_capability_model",
     "materialize_p6_model_datasets",
+    "p6_capability_training_row_id",
     "materialize_training_dataset",
     "validate_p6_managed_model_object",
     "evaluate_twin_capability_estimate",

@@ -29,7 +29,14 @@ from tools.storage.postgres_db import (  # noqa: E402
     bootstrap_postgres,
     verify_postgres,
 )
-from tpaa_application import P6PersistenceError, P6PersistenceRepository  # noqa: E402
+from tools.testing.piqb_b2_p6_resolver_fixture import (  # noqa: E402
+    seed_p6_model_resolver_case,
+)
+from tpaa_application import (  # noqa: E402
+    DurableP6ModelBuildResolver,
+    P6PersistenceError,
+    P6PersistenceRepository,
+)
 from tpaa_assessment.p6_recommendation import build_p6_recommendation  # noqa: E402
 from tpaa_capability import (  # noqa: E402
     P6ApplicabilityEvidence,
@@ -415,6 +422,10 @@ def _exercise_sqlite(
     values = _products()
     object_store = LocalObjectStore(object_root)
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        resolver_case = seed_p6_model_resolver_case(
+            uow.canonical_rows,
+            object_store,
+        )
         repo = P6PersistenceRepository(
             uow.canonical_rows,
             object_store=object_store,
@@ -430,6 +441,19 @@ def _exercise_sqlite(
         first = _projection(repo, values)
         dependency_code = _model_build_dependency_code(repo)
         artifact_hash = _artifact_hash(object_store, values)
+        resolver_repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+            model_build_resolver=DurableP6ModelBuildResolver(
+                uow.canonical_rows
+            ),
+        )
+        resolver_exact = (
+            resolver_repo.exact_model_build(
+                resolver_case.build.model.capability_model_id
+            )
+            == resolver_case.build
+        )
         uow.commit()
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
@@ -438,8 +462,25 @@ def _exercise_sqlite(
             object_store=object_store,
         )
         _register_all(repo, values)
+        repo.register_model_build(
+            resolver_case.build,
+            resolver_case.managed,
+        )
         conflicts = _immutable_conflict_codes(repo, values)
         replay = _projection(repo, values)
+        resolver_repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+            model_build_resolver=DurableP6ModelBuildResolver(
+                uow.canonical_rows
+            ),
+        )
+        resolver_replay_exact = (
+            resolver_repo.exact_model_build(
+                resolver_case.build.model.capability_model_id
+            )
+            == resolver_case.build
+        )
         uow.commit()
 
     return {
@@ -448,6 +489,9 @@ def _exercise_sqlite(
         "immutable_conflict_codes": conflicts,
         "model_build_dependency_code": dependency_code,
         "model_artifact_sha256": artifact_hash,
+        "model_build_resolver_exact": (
+            resolver_exact and resolver_replay_exact
+        ),
     }
 
 
@@ -458,6 +502,10 @@ def _exercise_postgres(
     values = _products()
     object_store = LocalObjectStore(object_root)
     with PostgreSQLServiceUnitOfWork(conninfo) as uow:
+        resolver_case = seed_p6_model_resolver_case(
+            uow.canonical_rows,
+            object_store,
+        )
         repo = P6PersistenceRepository(
             uow.canonical_rows,
             object_store=object_store,
@@ -473,6 +521,19 @@ def _exercise_postgres(
         first = _projection(repo, values)
         dependency_code = _model_build_dependency_code(repo)
         artifact_hash = _artifact_hash(object_store, values)
+        resolver_repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+            model_build_resolver=DurableP6ModelBuildResolver(
+                uow.canonical_rows
+            ),
+        )
+        resolver_exact = (
+            resolver_repo.exact_model_build(
+                resolver_case.build.model.capability_model_id
+            )
+            == resolver_case.build
+        )
         uow.commit()
 
     with PostgreSQLServiceUnitOfWork(conninfo) as uow:
@@ -481,8 +542,25 @@ def _exercise_postgres(
             object_store=object_store,
         )
         _register_all(repo, values)
+        repo.register_model_build(
+            resolver_case.build,
+            resolver_case.managed,
+        )
         conflicts = _immutable_conflict_codes(repo, values)
         replay = _projection(repo, values)
+        resolver_repo = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+            model_build_resolver=DurableP6ModelBuildResolver(
+                uow.canonical_rows
+            ),
+        )
+        resolver_replay_exact = (
+            resolver_repo.exact_model_build(
+                resolver_case.build.model.capability_model_id
+            )
+            == resolver_case.build
+        )
         uow.commit()
 
     return {
@@ -491,6 +569,9 @@ def _exercise_postgres(
         "immutable_conflict_codes": conflicts,
         "model_build_dependency_code": dependency_code,
         "model_artifact_sha256": artifact_hash,
+        "model_build_resolver_exact": (
+            resolver_exact and resolver_replay_exact
+        ),
     }
 
 
@@ -581,6 +662,10 @@ def run(
                 and postgres_result["model_build_dependency_code"]
                 == "P6_MODEL_BUILD_DEPENDENCY_BLOCKED"
             ),
+            "model_build_durable_resolver_exact": (
+                sqlite_result["model_build_resolver_exact"] is True
+                and postgres_result["model_build_resolver_exact"] is True
+            ),
             "shadow_schema_not_created": True,
         }
         failed = sorted(
@@ -594,7 +679,7 @@ def run(
             "status": "PASS" if not failed else "FAIL",
             "implementation_complete": False,
             "task_complete": False,
-            "completion_gate": "P3_MODEL_BUILD_RESOLVER_PENDING",
+            "completion_gate": "B2_RECOVERY_CLOSURE_PENDING",
             "acceptance": acceptance,
             "failed_acceptance": failed,
             "sqlite": sqlite_result,
@@ -611,6 +696,7 @@ def run(
                 "counterfactual_request_result_exact": True,
                 "recommendation_exact": True,
                 "model_build_dependency_blocked_expected": True,
+                "model_build_durable_resolver_exact": True,
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },
