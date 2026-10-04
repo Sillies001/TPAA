@@ -236,6 +236,7 @@ def build_evidence(profile: str) -> dict[str, dict[str, object]]:
         "pyside6-essentials",
         "shiboken6",
         "psycopg-binary",
+        "polars-runtime-32",
     }
     native_dependencies: dict[str, object] = {
         "schema": "TPAA_M0_NATIVE_DEPENDENCIES_V1",

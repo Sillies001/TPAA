@@ -7,9 +7,19 @@ from .filesystem import (
     casefold_name_key,
     ensure_no_case_collisions,
 )
+from .polars_runtime import (
+    EXPECTED_POLARS_VERSION,
+    GovernedPolarsRuntime,
+    PolarsRuntimeError,
+    PolarsRuntimeIdentity,
+)
 from .worker import WorkerPayload, run_spawn_echo
 
 __all__ = [
+    "EXPECTED_POLARS_VERSION",
+    "GovernedPolarsRuntime",
+    "PolarsRuntimeError",
+    "PolarsRuntimeIdentity",
     "InterProcessFileLock",
     "LockUnavailable",
     "PlatformFilesystem",

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import tomllib
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_ROOT = REPO_ROOT / "docs" / "baseline" / "PIQB-1.0"
 B2_SHA = "4b6e7c1e40d857b859b7fd322af9943706e79354"
+FOUNDATION_SHA = "3edefce018af7bf75a1af319994f5f59b6ec4c28"
 
 
 def _load(name: str) -> dict[str, object]:
@@ -60,14 +62,42 @@ def test_b3_task_baseline_freezes_exact_scope_and_entry_authority() -> None:
     assert scope["proprietary_decoder_is_external_adapter"] is True
 
 
-def test_b3_foundation_state_does_not_claim_compute_plane_completion() -> None:
+def test_b3_foundation_run_612_is_preserved_and_compute_plane_is_not_complete() -> None:
     state = _load("B3_IMPLEMENTATION_STATE.json")
 
     assert state["b3_qualified"] is False
+    foundation = state["foundation_qualification"]
+    assert isinstance(foundation, dict)
+    assert foundation["exact_head"] == FOUNDATION_SHA
+    assert foundation["run_number"] == 612
+    assert foundation["required_jobs_success"] == 14
+    assert foundation["required_jobs_total"] == 14
+
     task_state = state["task_state"]
     assert isinstance(task_state, dict)
-    assert task_state["PIQB-B3-001"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-002"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-003"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-004"]["state"] == "NOT_STARTED"
+    assert task_state["PIQB-B3-001"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-002"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-003"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-004"]["state"] == "IMPLEMENTED_PENDING_CI"
+    assert task_state["PIQB-B3-005"]["state"] == "IMPLEMENTED_PENDING_CI"
+    assert task_state["PIQB-B3-006"]["state"] == "NOT_STARTED"
     assert task_state["PIQB-B3-008"]["state"] == "NOT_STARTED"
+
+
+def test_b3_polars_runtime_dependency_and_lock_are_exact() -> None:
+    project = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    dependencies = project["project"]["dependencies"]
+    assert "polars==1.44.2" in dependencies
+    assert not any(str(item).startswith("pandas") for item in dependencies)
+
+    lock = tomllib.loads((REPO_ROOT / "uv.lock").read_text(encoding="utf-8"))
+    packages = {
+        (item["name"], item["version"]): item
+        for item in lock["package"]
+        if isinstance(item, dict) and "name" in item and "version" in item
+    }
+    assert ("polars", "1.44.2") in packages
+    assert ("polars-runtime-32", "1.44.2") in packages
+
+    polars = packages[("polars", "1.44.2")]
+    assert polars["dependencies"] == [{"name": "polars-runtime-32"}]

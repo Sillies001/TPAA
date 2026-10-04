@@ -16,6 +16,16 @@ from .canonical_rows import (
 )
 from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
 from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
+from .parquet_plane import (
+    ParquetColumn,
+    ParquetDatasetArtifact,
+    ParquetPartition,
+    ParquetPlaneError,
+    ParquetScalarType,
+    ParquetSchema,
+    ParquetWriteRequest,
+    PolarsParquetPlane,
+)
 from .persistence_fit import (
     PersistenceFitError,
     PersistenceFitRecord,
@@ -67,6 +77,14 @@ __all__ = [
     "RepositoryUnitOfWork",
     "CanonicalRowRepository",
     "CanonicalRowRepositoryError",
+    "ParquetColumn",
+    "ParquetDatasetArtifact",
+    "ParquetPartition",
+    "ParquetPlaneError",
+    "ParquetScalarType",
+    "ParquetSchema",
+    "ParquetWriteRequest",
+    "PolarsParquetPlane",
     "OrphanRecoveryReport",
     "PostgreSQLBaselineMetadataRepository",
     "PostgreSQLCanonicalRowRepository",

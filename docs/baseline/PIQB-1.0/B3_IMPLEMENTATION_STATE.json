@@ -7,23 +7,83 @@
   "db_schema_version": "1.9.0",
   "task_state": {
     "PIQB-B3-001": {
-      "state": "IMPLEMENTED_PENDING_CI",
-      "evidence": ["SourceFamily exact six-family enum", "SourceAdapterDescriptor", "SourceAdapterRegistry exact immutable registration", "SourceArtifactEnvelope byte identity", "external decoder metadata boundary"]
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "SourceFamily exact six-family enum",
+        "SourceAdapterDescriptor",
+        "SourceAdapterRegistry exact immutable registration",
+        "SourceArtifactEnvelope byte identity",
+        "external decoder metadata boundary",
+        "Run #612 exact-head 14/14 SUCCESS"
+      ]
     },
     "PIQB-B3-002": {
-      "state": "IMPLEMENTED_PENDING_CI",
-      "evidence": ["SourceImportCommand", "ProductionImportService", "adapter/family/media/hash validation before projection", "no tpaa_platform dependency from Application"]
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "SourceImportCommand",
+        "ProductionImportService",
+        "adapter/family/media/hash validation before projection",
+        "no tpaa_platform dependency from Application",
+        "Run #612 exact-head 14/14 SUCCESS"
+      ]
     },
     "PIQB-B3-003": {
-      "state": "IMPLEMENTED_PENDING_CI",
-      "evidence": ["SourceProvenanceRepository", "registry.data_source", "registry.source_stream", "registry.source_artifact", "SQLite restart exact reconstruction", "immutable source/stream/artifact conflict checks"]
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "SourceProvenanceRepository",
+        "registry.data_source",
+        "registry.source_stream",
+        "registry.source_artifact",
+        "SQLite restart exact reconstruction",
+        "immutable source/stream/artifact conflict checks",
+        "Run #612 exact-head 14/14 SUCCESS"
+      ]
     },
-    "PIQB-B3-004": {"state": "NOT_STARTED", "evidence": []},
-    "PIQB-B3-005": {"state": "NOT_STARTED", "evidence": []},
-    "PIQB-B3-006": {"state": "NOT_STARTED", "evidence": []},
-    "PIQB-B3-007": {"state": "NOT_STARTED", "evidence": []},
-    "PIQB-B3-008": {"state": "NOT_STARTED", "evidence": []}
+    "PIQB-B3-004": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "polars==1.44.2 frozen project dependency",
+        "polars-runtime-32==1.44.2 exact uv lock",
+        "GovernedPolarsRuntime exact version check",
+        "typed frame construction",
+        "zstd Parquet write/read",
+        "streaming lazy scan/collect",
+        "no business semantics in platform adapter"
+      ]
+    },
+    "PIQB-B3-005": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "PolarsParquetPlane",
+        "tpaa-parquet logical URI identity",
+        "typed schema/nullability contract",
+        "partition contract",
+        "LocalSealedObjectFlow stage/verify/seal",
+        "artifact SHA-256 distinct from logical content hash",
+        "restart read and streaming scan exactness"
+      ]
+    },
+    "PIQB-B3-006": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    },
+    "PIQB-B3-007": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    },
+    "PIQB-B3-008": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    }
   },
   "b3_qualified": false,
-  "b4_blocked": true
+  "b4_blocked": true,
+  "foundation_qualification": {
+    "exact_head": "3edefce018af7bf75a1af319994f5f59b6ec4c28",
+    "run_number": 612,
+    "actions_run_id": 37183618797,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "conclusion": "SUCCESS"
+  }
 }

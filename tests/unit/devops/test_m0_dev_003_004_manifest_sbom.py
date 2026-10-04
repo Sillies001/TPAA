@@ -13,7 +13,9 @@ def _profile() -> str:
     return "WINDOWS_DESKTOP_X64" if sys.platform == "win32" else "LINUX_DESKTOP_X64"
 
 
-def test_build_manifest_sbom_license_and_native_inventory_are_traceable(tmp_path: Path) -> None:
+def test_build_manifest_sbom_license_and_native_inventory_are_traceable(
+    tmp_path: Path,
+) -> None:
     profile = _profile()
     evidence = build_evidence(profile)
 
@@ -42,6 +44,7 @@ def test_build_manifest_sbom_license_and_native_inventory_are_traceable(tmp_path
     native_names = {item["name"] for item in native["dependencies"]}
     assert "pyside6" in native_names
     assert "psycopg-binary" in native_names
+    assert "polars-runtime-32" in native_names
 
     written = write_evidence(profile, tmp_path)
     assert set(written) == {
