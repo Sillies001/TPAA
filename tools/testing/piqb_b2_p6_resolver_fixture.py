@@ -19,6 +19,7 @@ from tpaa_application import (
 )
 from tpaa_assessment import P4AssessmentRevision, P4SubjectContext
 from tpaa_capability import (
+    P3CapabilityEstimate,
     P6CapabilityTrainingRow,
     P6ManagedModelObject,
     P6ModelBuild,
@@ -32,6 +33,7 @@ from tpaa_storage.object_store import LocalObjectStore
 SESSION_ORDER_SCOPE = "96100000-0000-4000-8000-000000000020"
 ACTOR = "96600000-0000-4000-8000-000000000001"
 ROLE_ARTIFACT = "96600000-0000-4000-8000-000000000002"
+ROLE_OBJECT = "96600000-0000-4000-8000-000000000003"
 AS_OF = "2026-09-10T12:00:00Z"
 
 
@@ -48,7 +50,7 @@ def _uuid(prefix: str, index: int) -> str:
 
 def _subject_and_revision(
     *,
-    estimate,
+    estimate: P3CapabilityEstimate,
     session_id: str,
     episode_id: str,
     actor_assessment_id: str,
@@ -189,6 +191,35 @@ def seed_p6_model_resolver_case(
     p3.register_twin(source.twin, components=(source.component,))
 
     rows.insert(
+        "registry.object_reference",
+        {
+            "object_ref_id": ROLE_OBJECT,
+            "managed_uri": "tpaa-object://piqb-b2/p6-role-model.json",
+            "media_type": "application/json",
+            "size_bytes": 2,
+            "artifact_sha256": "d" * 64,
+            "logical_content_hash": "d" * 64,
+            "storage_backend": "LOCAL_OBJECT_STORE",
+            "sealed": True,
+            "gc_state": "ACTIVE",
+            "gc_state_version": 0,
+        },
+    )
+    rows.insert(
+        "registry.context_artifact",
+        {
+            "context_artifact_id": ROLE_ARTIFACT,
+            "artifact_kind": "ROLE_MODEL",
+            "logical_key": "PIQB-B2:P6-RESOLVER-ROLE-MODEL",
+            "artifact_version": "1.0.0",
+            "object_ref_id": ROLE_OBJECT,
+            "artifact_sha256": "d" * 64,
+            "schema_version": "TPAA_M8_ROLE_PRIVACY_PROFILE_V1",
+            "status": "ACTIVE",
+        },
+    )
+
+    rows.insert(
         "registry.session_order_scope",
         {
             "session_order_scope_id": SESSION_ORDER_SCOPE,
@@ -216,7 +247,7 @@ def seed_p6_model_resolver_case(
                 "session_order": order,
                 "reference_condition_id": source.segment.reference_condition_id,
             },
-            as_of_time_utc="2026-09-10T04:00:00Z",
+            as_of_time_utc=source.twin.as_of_data_time,
             created_at_utc=f"2026-09-10T04:{order:02d}:00Z",
         )
         p3.register_estimate(estimate)

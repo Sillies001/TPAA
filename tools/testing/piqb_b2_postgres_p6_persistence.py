@@ -753,7 +753,7 @@ def main() -> int:
             "status": "FAIL",
             "implementation_complete": False,
             "task_complete": False,
-            "completion_gate": "P3_MODEL_BUILD_RESOLVER_PENDING",
+            "completion_gate": "B2_RECOVERY_CLOSURE_PENDING",
             "error": f"{type(exc).__name__}: {exc}",
             "scope": {
                 "db_schema_version": "1.8.0",

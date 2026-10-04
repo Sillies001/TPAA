@@ -14,7 +14,6 @@ from uuid import UUID, uuid5
 
 from tpaa_assessment.p6_recommendation import P6RecommendationRevision
 from tpaa_capability import (
-    P6ApplicabilityEvidence,
     P6CapabilityTrainingRow,
     P6ContextRef,
     P6CounterfactualRequestBinding,
