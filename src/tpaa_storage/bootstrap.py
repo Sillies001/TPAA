@@ -1,4 +1,4 @@
-"""Fail-closed DB 1.8.0 clean-bootstrap kernel.
+"""Fail-closed DB 1.9.0 clean-bootstrap kernel.
 
 The logical schema remains owned by the frozen ``CORE_LOGICAL_MODEL`` Canonical
 artifact.  This module only projects that authority into a concrete engine DDL
@@ -18,7 +18,7 @@ from typing import Any
 
 from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 
-EXPECTED_DB_SCHEMA_VERSION = "1.8.0"
+EXPECTED_DB_SCHEMA_VERSION = "1.9.0"
 CORE_MODEL_ARTIFACT_ID = "CORE_LOGICAL_MODEL"
 BOOTSTRAP_MANIFEST_TABLE = "_tpaa_bootstrap_manifest"
 SQLITE_ENGINE_PROFILE = "sqlite-desktop"

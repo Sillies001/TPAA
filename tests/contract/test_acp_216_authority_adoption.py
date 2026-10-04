@@ -29,5 +29,7 @@ def test_acp_216_gate_retires_when_successor_authority_candidate_is_active() -> 
     assert len(set(jobs)) == 14
     assert "Review ACP-216 DB 1.7.0 authority adoption gate" not in workflow
     assert "Execute ACP-216 PostgreSQL 1.6.0 to 1.7.0 migration qualification" not in workflow
-    assert "Review ACP-219 DB 1.8.0 authority adoption gate" in workflow
-    assert "Execute ACP-219 PostgreSQL 1.7.0 to 1.8.0 migration qualification" in workflow
+    assert "Review ACP-219 DB 1.8.0 authority adoption gate" not in workflow
+    assert "Execute ACP-219 PostgreSQL 1.7.0 to 1.8.0 migration qualification" not in workflow
+    assert "Review ACP-221 DB 1.9.0 authority adoption gate" in workflow
+    assert "Execute ACP-221 PostgreSQL 1.8.0 to 1.9.0 migration qualification" in workflow

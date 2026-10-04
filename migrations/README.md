@@ -1,6 +1,6 @@
 # M0 Migration Harness
 
-The current governed DB schema target is **1.8.0**.
+The current governed DB schema target is **1.9.0**.
 
 ACP-216 is the first real approved schema transition in the repository:
 
@@ -40,3 +40,8 @@ authority adoption and must update `pyproject.toml` and `uv.lock` together.
 ## ACP-219 / DB 1.8.0
 
 `0002_acp219_db_1_8_0` is an additive correction from DB 1.7.0. It adds only the two ordered-text M8 persistence relations approved by Issue #219. The exact DB 1.7.0 CORE bytes are retained under `migrations/authority/CORE_LOGICAL_MODEL_DB_1_7_0.json`. Downgrade is fail-closed whenever either new relation is non-empty.
+
+
+## ACP-221 / DB 1.9.0
+
+`0003_acp221_db_1_9_0` is the minimal additive correction from DB 1.8.0 for Issue #221. It adds only `assessment.annotation_subject_context`, preserving the exact standalone M8 annotation `subject_context_id`. The exact DB 1.8.0 CORE bytes are retained under `migrations/authority/CORE_LOGICAL_MODEL_DB_1_8_0.json`. Downgrade is fail-closed whenever the new relation is non-empty.

@@ -41,6 +41,15 @@ from tools.storage.acp219_migration import (  # noqa: E402
 from tools.storage.acp219_migration import (  # noqa: E402
     verify_historical_sqlite as verify_1_7,
 )
+from tools.storage.acp221_migration import (  # noqa: E402
+    downgrade_sqlite as downgrade_1_9_to_1_8,
+)
+from tools.storage.acp221_migration import (  # noqa: E402
+    upgrade_sqlite as upgrade_1_8_to_1_9,
+)
+from tools.storage.acp221_migration import (  # noqa: E402
+    verify_historical_sqlite as verify_1_8,
+)
 from tpaa_storage.bootstrap import (  # noqa: E402
     BOOTSTRAP_MANIFEST_TABLE,
     BootstrapError,
@@ -140,7 +149,7 @@ def run() -> dict[str, object]:
         historical = root / "historical.sqlite3"
 
         clean = bootstrap_sqlite(current)
-        checks["clean_bootstrap"] = clean.schema_version == "1.8.0"
+        checks["clean_bootstrap"] = clean.schema_version == "1.9.0"
         checks["readiness_verify"] = verify_sqlite(current) == clean
 
         _backup_database(current, recovery)
@@ -151,7 +160,7 @@ def run() -> dict[str, object]:
                 ("rollback-probe",),
             )
             connection.rollback()
-        checks["rollback"] = verify_sqlite(current).schema_version == "1.8.0"
+        checks["rollback"] = verify_sqlite(current).schema_version == "1.9.0"
 
         with closing(sqlite3.connect(current)) as connection:
             connection.execute(
@@ -172,9 +181,9 @@ def run() -> dict[str, object]:
             if sidecar.exists():
                 sidecar.unlink()
         _restore_database(recovery, current)
-        checks["forward_recovery"] = verify_sqlite(current).schema_version == "1.8.0"
+        checks["forward_recovery"] = verify_sqlite(current).schema_version == "1.9.0"
         checks["repository_conformance"] = (
-            sqlite_repository_smoke(current)["schema_version"] == "1.8.0"
+            sqlite_repository_smoke(current)["schema_version"] == "1.9.0"
         )
 
         source_1_6 = bootstrap_1_6(historical)
@@ -193,7 +202,21 @@ def run() -> dict[str, object]:
         step_1_8 = upgrade_1_7_to_1_8(historical)
         checks["upgrade_1_7_to_1_8"] = step_1_8.schema_version == "1.8.0"
         checks["historical_row_exact_at_1_8"] = (
+            verify_1_8(historical).schema_version == "1.8.0"
+            and _read_historical_probe(historical) == PROBE_ROW
+        )
+
+        step_1_9 = upgrade_1_8_to_1_9(historical)
+        checks["upgrade_1_8_to_1_9"] = step_1_9.schema_version == "1.9.0"
+        checks["historical_row_exact_at_1_9"] = (
             _read_historical_probe(historical) == PROBE_ROW
+        )
+
+        back_1_8 = downgrade_1_9_to_1_8(historical)
+        checks["empty_downgrade_to_1_8"] = back_1_8.schema_version == "1.8.0"
+        checks["historical_row_exact_after_1_9_downgrade"] = (
+            verify_1_8(historical).schema_version == "1.8.0"
+            and _read_historical_probe(historical) == PROBE_ROW
         )
 
         _insert_acp219_nonempty_probe(historical)
@@ -204,7 +227,7 @@ def run() -> dict[str, object]:
             downgrade_blocked = exc.reason == "DOWNGRADE_BLOCKED_NONEMPTY_RELATION"
         checks["acp219_nonempty_downgrade_fail_closed"] = downgrade_blocked
         checks["failed_downgrade_preserves_1_8"] = (
-            verify_sqlite(historical).schema_version == "1.8.0"
+            verify_1_8(historical).schema_version == "1.8.0"
         )
 
         with closing(sqlite3.connect(historical)) as connection:
@@ -228,9 +251,11 @@ def run() -> dict[str, object]:
 
         re_1_7 = upgrade_1_6_to_1_7(historical)
         re_1_8 = upgrade_1_7_to_1_8(historical)
-        checks["forward_reupgrade_to_1_8"] = (
+        re_1_9 = upgrade_1_8_to_1_9(historical)
+        checks["forward_reupgrade_to_1_9"] = (
             re_1_7.schema_version == "1.7.0"
             and re_1_8.schema_version == "1.8.0"
+            and re_1_9.schema_version == "1.9.0"
         )
         checks["historical_row_exact_after_reupgrade"] = (
             _read_historical_probe(historical) == PROBE_ROW
@@ -251,16 +276,16 @@ def run() -> dict[str, object]:
 
     status = "PASS" if all(checks.values()) else "FAIL"
     return {
-        "schema": "TPAA_M0_MIGRATION_HARNESS_V3",
+        "schema": "TPAA_M0_MIGRATION_HARNESS_V4",
         "task": "M0-STO-005",
-        "proposal_chain": ["ACP-216", "ACP-219"],
+        "proposal_chain": ["ACP-216", "ACP-219", "ACP-221"],
         "status": status,
-        "schema_target": "1.8.0",
-        "schema_transition": "1.6.0->1.7.0->1.8.0",
+        "schema_target": "1.9.0",
+        "schema_transition": "1.6.0->1.7.0->1.8.0->1.9.0",
         "checks": checks,
         "note": (
             "Historical DB authority snapshots remain immutable migration sources; "
-            "DB 1.8.0 is the current physical authority candidate."
+            "DB 1.9.0 is the current physical authority candidate."
         ),
     }
 

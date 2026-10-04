@@ -4,9 +4,9 @@
     "methodology": "TPAA V8.0 Training Evaluation Methodology",
     "engineering": "ED-2.0",
     "core": "CB-1.4.0",
-    "db_schema": "1.8.0",
-    "date": "2026-10-03",
-    "rebaseline": "R5.3_ACP_219_DB_1_8_0_ORDERED_TEXT_REF_AUTHORITY_CORRECTION",
+    "db_schema": "1.9.0",
+    "date": "2026-10-04",
+    "rebaseline": "R5.4_ACP_221_DB_1_9_0_ANNOTATION_SUBJECT_CONTEXT_AUTHORITY_CORRECTION",
     "lock_lineage_sha256": [
       "ba4f152a09206bcbaf06a1882d08763b332e95068ada0404a969073a7dc13a08",
       "d7073279fd5e8b1438fab3481f8654841b4e9445244d3b0369c5cad2cfe8111a",
@@ -18,7 +18,8 @@
       "8bc1834502561992e9aef64d73186c7854ef293e4ec57f658b4e9f72828e0cab",
       "d6ebab2b5402cf81a0b5f73a2da4ed2aaa2d530bc7445c7f6132dcf7fa72224d",
       "9920b59601d8441f883879e813164f33ee5c02db81aa5e1b759e3a1772469e51",
-      "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6"
+      "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6",
+      "2f3690d5e74e585a34ae35fdef9fb1e0cccb5504c6983d0c97417bb6a106b389"
     ]
   },
   "artifacts": [
@@ -29,8 +30,8 @@
     },
     {
       "file": "CORE_LOGICAL_MODEL.json",
-      "sha256": "cbb15c1e0029be45213e4d7ab57a78fac47d7cc09c4627a9c388fafdadd2d44e",
-      "bytes": 210910
+      "sha256": "7799895d706051f6d4c169da9ba2b73c14003922bed327558737712a64c49d1e",
+      "bytes": 211555
     },
     {
       "file": "CORE_RULES.json",

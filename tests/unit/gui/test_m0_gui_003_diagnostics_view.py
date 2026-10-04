@@ -15,7 +15,7 @@ from tpaa_gui.diagnostics import (
 from tpaa_gui.local_backend import LocalBackendController, LocalBackendError
 
 
-def _identity(version: str = "1.8.0") -> dict[str, str]:
+def _identity(version: str = "1.9.0") -> dict[str, str]:
     return {
         "product_build_version": "0.0.0",
         "core_baseline": "CB-1.4.0",
@@ -29,7 +29,7 @@ def _snapshot(*, readiness: str = "READY", failure_code: str | None = None) -> D
         product_build_version="0.0.0",
         core_baseline="CB-1.4.0",
         p1_metric_catalog_version="P1-METRIC-CATALOG-1.0",
-        db_schema_version="1.8.0",
+        db_schema_version="1.9.0",
     )
     return DiagnosticsSnapshot(
         readiness=readiness,
@@ -61,7 +61,7 @@ def test_lines_cover_readiness_build_core_catalog_schema_and_mismatch() -> None:
     assert "Build: expected=0.0.0 observed=0.0.0" == lines["tpaaDiagnosticsBuild"]
     assert "Core baseline: expected=CB-1.4.0 observed=CB-1.4.0" == lines["tpaaDiagnosticsCore"]
     assert "P1 Catalog:" in lines["tpaaDiagnosticsCatalog"]
-    assert "DB schema: expected=1.8.0 observed=1.8.0" == lines["tpaaDiagnosticsSchema"]
+    assert "DB schema: expected=1.9.0 observed=1.9.0" == lines["tpaaDiagnosticsSchema"]
     assert lines["tpaaDiagnosticsMismatches"] == "Mismatches: NONE"
 
 
@@ -75,7 +75,7 @@ def test_real_backend_exposes_sanitized_ready_diagnostics() -> None:
         assert snapshot.failure_code is None
         assert snapshot.expected is not None
         assert snapshot.expected.core_baseline == "CB-1.4.0"
-        assert snapshot.expected.db_schema_version == "1.8.0"
+        assert snapshot.expected.db_schema_version == "1.9.0"
         assert snapshot.expected.product_build_version == "0.0.0"
     finally:
         controller.shutdown()

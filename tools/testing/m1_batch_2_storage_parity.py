@@ -219,10 +219,10 @@ def run(
     postgres_hash = _hash(postgres_membership)
 
     acceptance = {
-        "current_core_schema_is_1_8_0": (
-            bootstrap.schema_version == "1.8.0"
+        "current_core_schema_is_1_9_0": (
+            bootstrap.schema_version == "1.9.0"
             and bootstrap.core_baseline == "CB-1.4.0"
-            and bootstrap.table_count == 94
+            and bootstrap.table_count == 95
         ),
         "sqlite_publish_pass": (
             sqlite_receipt["reused"] is False
