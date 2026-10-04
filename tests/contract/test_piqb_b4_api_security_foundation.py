@@ -62,19 +62,20 @@ def test_b4_task_baseline_freezes_exact_scope_and_eight_tasks() -> None:
     assert scope["exact_fourteen_job_topology_preserved"] is True
 
 
-def test_b4_foundation_state_does_not_claim_candidate_completion_before_ci() -> None:
+def test_b4_state_is_complete_candidate_but_not_formally_qualified() -> None:
     state = _load("B4_IMPLEMENTATION_STATE.json")
 
+    assert state["candidate_complete"] is True
+    assert state["candidate_qualification_pending"] is True
     assert state["b4_qualified"] is False
     assert state["b5_blocked"] is True
+
     entry = state["entry_qualification"]
     assert isinstance(entry, dict)
     assert entry["protected_main_sha"] == B3_SHA
     assert entry["run_number"] == 618
     assert entry["qualification"] == "PIQB_B3_QUALIFIED"
 
-    task_state = state["task_state"]
-    assert isinstance(task_state, dict)
     foundation = state["api_security_foundation_qualification"]
     assert isinstance(foundation, dict)
     assert foundation["exact_head"] == (
@@ -84,16 +85,20 @@ def test_b4_foundation_state_does_not_claim_candidate_completion_before_ci() -> 
     assert foundation["required_jobs_success"] == 14
     assert foundation["required_jobs_total"] == 14
 
-    for index in range(1, 4):
-        assert task_state[f"PIQB-B4-{index:03d}"]["state"] == (
-            "COMPLETE_CANDIDATE"
-        )
-    for index in range(4, 6):
-        assert task_state[f"PIQB-B4-{index:03d}"]["state"] == (
-            "IMPLEMENTED_PENDING_CI"
-        )
-    for index in range(6, 9):
-        assert task_state[f"PIQB-B4-{index:03d}"]["state"] == "NOT_STARTED"
+    failed = state["last_failed_candidate_run"]
+    assert isinstance(failed, dict)
+    assert failed["run_number"] == 621
+    assert failed["root_cause"] == (
+        "Ruff I001 import-order in src/tpaa_api/product_v1.py"
+    )
+    assert failed["product_v1_functional_tests_passed"] is True
+
+    task_state = state["task_state"]
+    assert isinstance(task_state, dict)
+    assert {
+        task_state[f"PIQB-B4-{index:03d}"]["state"]
+        for index in range(1, 9)
+    } == {"COMPLETE_CANDIDATE"}
 
 
 def test_b4_unified_factory_has_no_transport_authorization_bypass() -> None:
@@ -121,12 +126,14 @@ def test_b4_unified_factory_has_no_transport_authorization_bypass() -> None:
     assert "actor_resolver(request)" in base
 
 
-def test_b4_first_block_does_not_change_db_or_required_job_topology() -> None:
+def test_b4_does_not_change_db_or_required_job_topology() -> None:
     workflow = (
         ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
     ).read_text(encoding="utf-8")
     assert workflow.count("\n  m0-cross-platform:") == 1
     assert "\n  piqb-b4-review:" not in workflow
+    assert "Execute PIQB B4 API security observability qualification" in workflow
+    assert "Review PIQB B4 unified API security and observability" in workflow
 
     model = json.loads(
         (

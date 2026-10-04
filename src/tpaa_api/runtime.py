@@ -31,4 +31,38 @@ def register_product_runtime_routes(
             )
         return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
 
+    @app.get("/runtime/qualification")
+    def runtime_qualification() -> JSONResponse:
+        try:
+            payload = application.qualification_status()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "QUALIFICATION_STATUS_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
+    @app.get("/runtime/observability")
+    def runtime_observability() -> JSONResponse:
+        try:
+            payload = application.operational_status()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "OPERATIONAL_STATUS_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
     return app

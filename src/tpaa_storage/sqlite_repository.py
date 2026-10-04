@@ -18,6 +18,7 @@ from .bootstrap import (
     BootstrapError,
     verify_sqlite,
 )
+from .audit_ledger import PersistentAuditLedger
 from .canonical_rows import SQLiteCanonicalRowRepository
 from .core_publication_ledger import SQLiteCorePublicationLedger
 from .ports import RepositoryBaselineMetadata
@@ -116,6 +117,7 @@ class SQLiteDesktopUnitOfWork:
         self.publication: SQLiteCorePublicationLedger
         self.product_publication: SQLiteProductPublicationLedger
         self.canonical_rows: SQLiteCanonicalRowRepository
+        self.audit_log: PersistentAuditLedger
 
     @property
     def write(self) -> bool:
@@ -157,6 +159,7 @@ class SQLiteDesktopUnitOfWork:
             self.publication = SQLiteCorePublicationLedger(connection)
             self.product_publication = SQLiteProductPublicationLedger(connection)
             self.canonical_rows = SQLiteCanonicalRowRepository(connection)
+            self.audit_log = PersistentAuditLedger(self.canonical_rows)
             return self
         except Exception:
             if connection is not None:

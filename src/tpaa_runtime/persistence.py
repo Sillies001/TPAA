@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+from tpaa_application import SecurityAuditSink
 from tpaa_storage import (
     LocalObjectStore,
     LocalSealedObjectFlow,
@@ -23,6 +24,8 @@ from tpaa_storage import (
     recover_staging_orphans,
     verify_sqlite,
 )
+
+from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 
 
 class _ProductPublicationReadUnitOfWork(Protocol):
@@ -41,7 +44,7 @@ class DesktopPersistenceConfig:
 
     def __post_init__(self) -> None:
         if not self.database_path.is_file():
-            raise ValueError("Desktop database_path must be an existing DB 1.7.0 file")
+            raise ValueError("Desktop database_path must be an existing governed DB 1.9.0 file")
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,6 +65,7 @@ class ProductPersistenceRuntime:
     object_store: LocalObjectStore
     _publication: ProductPublicationCoordinator
     _read_uow_factory: Callable[[], _ProductPublicationReadUnitOfWork]
+    security_audit_sink: SecurityAuditSink
 
     def publish(
         self,
@@ -127,6 +131,7 @@ def build_desktop_persistence(
             unit_of_work_factory=write_uow,
         ),
         _read_uow_factory=read_uow,
+        security_audit_sink=SQLiteSecurityAuditSink(config.database_path),
     )
 
 
@@ -153,4 +158,5 @@ def build_service_persistence(
             unit_of_work_factory=write_uow,
         ),
         _read_uow_factory=read_uow,
+        security_audit_sink=PostgreSQLSecurityAuditSink(config.conninfo),
     )

@@ -31,6 +31,7 @@ from tpaa_application import (
     M7WorkspaceService,
     M8WorkspaceService,
     M9WorkspaceService,
+    SecurityAuditSink,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_application.m1_repository import InMemorySessionPublicationRepository
@@ -41,6 +42,7 @@ from tpaa_longitudinal import (
 
 from .admission import ProductAdmissionResolver, ProductFeatureAvailability
 from .config import ProductRuntimeConfig, RuntimeProfile
+from .observability import ProductOperationalStatus, ProductQualificationStatus
 
 
 class _UnavailableStorageBaseline:
@@ -60,7 +62,11 @@ class ProductRuntime:
     application: ApplicationService
 
 
-def _build(config: ProductRuntimeConfig) -> ProductRuntime:
+def _build(
+    config: ProductRuntimeConfig,
+    *,
+    security_audit_sink: SecurityAuditSink | None = None,
+) -> ProductRuntime:
     admission = ProductAdmissionResolver()
 
     m1_publication = (
@@ -92,10 +98,12 @@ def _build(config: ProductRuntimeConfig) -> ProductRuntime:
         InMemoryM8AssessmentRepository(),
         admission_evidence=admission.m8_evidence(),
         aircraft_context=M7AircraftContextAdapter(m7_workspace),
+        security_audit_sink=security_audit_sink,
     )
     m9_workspace = M9WorkspaceService(
         InMemoryM9P6Repository(),
         admission_evidence=admission.p6_evidence(),
+        security_audit_sink=security_audit_sink,
     )
 
     configured = {
@@ -110,6 +118,12 @@ def _build(config: ProductRuntimeConfig) -> ProductRuntime:
         admission,
         configured=configured,
     )
+    qualification_status = ProductQualificationStatus(
+        feature_availability=feature_availability,
+        profile=config.profile,
+        product_build_version=config.product_build_version,
+    )
+    operational_status = ProductOperationalStatus(qualification_status)
     application = ApplicationService(
         get_storage_baseline_status=_UnavailableStorageBaseline(),
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
@@ -123,6 +137,8 @@ def _build(config: ProductRuntimeConfig) -> ProductRuntime:
         m8_workspace=m8_workspace,
         m9_workspace=m9_workspace,
         feature_availability=feature_availability,
+        qualification_status=qualification_status,
+        operational_status=operational_status,
     )
     return ProductRuntime(
         config=config,
@@ -132,20 +148,28 @@ def _build(config: ProductRuntimeConfig) -> ProductRuntime:
     )
 
 
-def build_desktop_application(config: ProductRuntimeConfig) -> ProductRuntime:
-    """Compose the Desktop Application graph without direct GUI/DB coupling."""
+def build_desktop_application(
+    config: ProductRuntimeConfig,
+    *,
+    security_audit_sink: SecurityAuditSink | None = None,
+) -> ProductRuntime:
+    """Compose Desktop Application with optional DB-backed security audit."""
 
     if config.profile is not RuntimeProfile.DESKTOP:
         raise ValueError("Desktop composition requires RuntimeProfile.DESKTOP")
-    return _build(config)
+    return _build(config, security_audit_sink=security_audit_sink)
 
 
-def build_service_application(config: ProductRuntimeConfig) -> ProductRuntime:
-    """Compose the Service Application graph with the same business core."""
+def build_service_application(
+    config: ProductRuntimeConfig,
+    *,
+    security_audit_sink: SecurityAuditSink | None = None,
+) -> ProductRuntime:
+    """Compose Service Application with optional DB-backed security audit."""
 
     if config.profile is not RuntimeProfile.SERVICE:
         raise ValueError("Service composition requires RuntimeProfile.SERVICE")
-    return _build(config)
+    return _build(config, security_audit_sink=security_audit_sink)
 
 
 def create_full_desktop_app(

@@ -22,6 +22,7 @@ from .bootstrap import (
     _postgres_expected_tables,
     _schema_fingerprint,
 )
+from .audit_ledger import PersistentAuditLedger
 from .canonical_rows import PostgreSQLCanonicalRowRepository
 from .core_publication_ledger import PostgreSQLCorePublicationLedger
 from .ports import RepositoryBaselineMetadata
@@ -181,6 +182,7 @@ class PostgreSQLServiceUnitOfWork:
         self.publication: PostgreSQLCorePublicationLedger
         self.product_publication: PostgreSQLProductPublicationLedger
         self.canonical_rows: PostgreSQLCanonicalRowRepository
+        self.audit_log: PersistentAuditLedger
 
     @property
     def active(self) -> bool:
@@ -205,6 +207,7 @@ class PostgreSQLServiceUnitOfWork:
                 connection
             )
             self.canonical_rows = PostgreSQLCanonicalRowRepository(connection)
+            self.audit_log = PersistentAuditLedger(self.canonical_rows)
             return self
         except Exception:
             try:

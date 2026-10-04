@@ -14,6 +14,7 @@ from .composition import (
     create_full_service_app,
 )
 from .config import ProductRuntimeConfig, RuntimeProfile
+from .observability import ProductOperationalStatus, ProductQualificationStatus
 from .persistence import (
     DesktopPersistenceConfig,
     ProductPersistenceRuntime,
@@ -21,8 +22,13 @@ from .persistence import (
     build_desktop_persistence,
     build_service_persistence,
 )
+from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 
 __all__ = [
+    "ProductOperationalStatus",
+    "ProductQualificationStatus",
+    "PostgreSQLSecurityAuditSink",
+    "SQLiteSecurityAuditSink",
     "AdmissionRecord",
     "DesktopPersistenceConfig",
     "FeatureAvailabilityState",

@@ -67,6 +67,22 @@ class FeatureAvailabilityUseCase(Protocol):
         ...
 
 
+class QualificationStatusUseCase(Protocol):
+    """Runtime-composition dependency for product qualification status."""
+
+    def execute(self) -> dict[str, object]:
+        """Return explicit machine-readable qualification state."""
+        ...
+
+
+class OperationalStatusUseCase(Protocol):
+    """Runtime-composition dependency for secret-safe operational status."""
+
+    def execute(self) -> dict[str, object]:
+        """Return one structured operational status record."""
+        ...
+
+
 class ApplicationService:
     """Typed facade that is the transport-facing business-entry boundary."""
 
@@ -84,6 +100,8 @@ class ApplicationService:
         m8_workspace: M8WorkspaceService | None = None,
         m9_workspace: M9WorkspaceService | None = None,
         feature_availability: FeatureAvailabilityUseCase | None = None,
+        qualification_status: QualificationStatusUseCase | None = None,
+        operational_status: OperationalStatusUseCase | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -96,6 +114,8 @@ class ApplicationService:
         self._m8_workspace = m8_workspace
         self._m9_workspace = m9_workspace
         self._feature_availability = feature_availability
+        self._qualification_status = qualification_status
+        self._operational_status = operational_status
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -118,6 +138,20 @@ class ApplicationService:
         if self._feature_availability is None:
             raise RuntimeError("feature availability use case is not configured")
         return dict(self._feature_availability.execute())
+
+    def qualification_status(self) -> dict[str, object]:
+        """Return explicit protected-main product qualification state."""
+
+        if self._qualification_status is None:
+            raise RuntimeError("qualification status use case is not configured")
+        return dict(self._qualification_status.execute())
+
+    def operational_status(self) -> dict[str, object]:
+        """Return one secret-safe structured operational status record."""
+
+        if self._operational_status is None:
+            raise RuntimeError("operational status use case is not configured")
+        return dict(self._operational_status.execute())
 
     def submit_job(
         self,

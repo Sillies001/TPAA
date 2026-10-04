@@ -140,6 +140,11 @@ from .runtime import (
     RuntimeBaselineStatus,
     build_trusted_runtime_status_use_case,
 )
+from .security_audit import (
+    InMemorySecurityAuditSink,
+    SecurityAuditRecord,
+    SecurityAuditSink,
+)
 from .service import ApplicationService
 from .source_import import (
     ProductionImportError,
@@ -151,6 +156,9 @@ from .source_import import (
 from .use_cases import GetStorageBaselineStatus
 
 __all__ = [
+    "InMemorySecurityAuditSink",
+    "SecurityAuditRecord",
+    "SecurityAuditSink",
     "ApplicationService",
     "B3_JOB_COMPONENT_VERSION",
     "DurableJobControl",
