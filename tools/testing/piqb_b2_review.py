@@ -217,9 +217,9 @@ def review(
         ).is_file(),
         "real_postgres_restart_parity_gate_present": (
             isinstance(task_state.get("PIQB-B2-006"), dict)
-            and task_state["PIQB-B2-006"].get("state") in IN_PROGRESS_STATES
+            and task_state["PIQB-B2-006"].get("state") in COMPLETE_STATES
             and isinstance(task_state.get("PIQB-B2-008"), dict)
-            and task_state["PIQB-B2-008"].get("state") in IN_PROGRESS_STATES
+            and task_state["PIQB-B2-008"].get("state") in COMPLETE_STATES
             and all(
                 token in workflow
                 for token in (
