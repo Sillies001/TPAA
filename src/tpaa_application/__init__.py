@@ -3,6 +3,12 @@
 M0-API-001 establishes the only business-entry layer for GUI and REST transports.
 """
 
+from .durable_job_control import (
+    B3_JOB_COMPONENT_VERSION,
+    DurableJobControl,
+    DurableJobControlError,
+    DurableJobSubmission,
+)
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -146,6 +152,10 @@ from .use_cases import GetStorageBaselineStatus
 
 __all__ = [
     "ApplicationService",
+    "B3_JOB_COMPONENT_VERSION",
+    "DurableJobControl",
+    "DurableJobControlError",
+    "DurableJobSubmission",
     "BusinessStatus",
     "IdempotencyConflict",
     "JobAudit",

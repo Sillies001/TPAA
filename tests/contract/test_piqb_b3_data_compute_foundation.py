@@ -8,6 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_ROOT = REPO_ROOT / "docs" / "baseline" / "PIQB-1.0"
 B2_SHA = "4b6e7c1e40d857b859b7fd322af9943706e79354"
 FOUNDATION_SHA = "3edefce018af7bf75a1af319994f5f59b6ec4c28"
+DATA_PLANE_SHA = "900e712fe000058db68184a9d7c1cee2c6b8c34d"
 
 
 def _load(name: str) -> dict[str, object]:
@@ -62,7 +63,7 @@ def test_b3_task_baseline_freezes_exact_scope_and_entry_authority() -> None:
     assert scope["proprietary_decoder_is_external_adapter"] is True
 
 
-def test_b3_foundation_run_612_is_preserved_and_compute_plane_is_not_complete() -> None:
+def test_b3_foundation_and_data_plane_qualification_are_preserved() -> None:
     state = _load("B3_IMPLEMENTATION_STATE.json")
 
     assert state["b3_qualified"] is False
@@ -73,14 +74,19 @@ def test_b3_foundation_run_612_is_preserved_and_compute_plane_is_not_complete() 
     assert foundation["required_jobs_success"] == 14
     assert foundation["required_jobs_total"] == 14
 
+    data_plane = state["data_plane_qualification"]
+    assert isinstance(data_plane, dict)
+    assert data_plane["exact_head"] == DATA_PLANE_SHA
+    assert data_plane["run_number"] == 614
+    assert data_plane["required_jobs_success"] == 14
+    assert data_plane["required_jobs_total"] == 14
+
     task_state = state["task_state"]
     assert isinstance(task_state, dict)
-    assert task_state["PIQB-B3-001"]["state"] == "COMPLETE_CANDIDATE"
-    assert task_state["PIQB-B3-002"]["state"] == "COMPLETE_CANDIDATE"
-    assert task_state["PIQB-B3-003"]["state"] == "COMPLETE_CANDIDATE"
-    assert task_state["PIQB-B3-004"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-005"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-006"]["state"] == "NOT_STARTED"
+    for index in range(1, 6):
+        assert task_state[f"PIQB-B3-{index:03d}"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-006"]["state"] == "IMPLEMENTED_PENDING_CI"
+    assert task_state["PIQB-B3-007"]["state"] == "IMPLEMENTED_PENDING_CI"
     assert task_state["PIQB-B3-008"]["state"] == "NOT_STARTED"
 
 
@@ -98,6 +104,49 @@ def test_b3_polars_runtime_dependency_and_lock_are_exact() -> None:
     }
     assert ("polars", "1.44.2") in packages
     assert ("polars-runtime-32", "1.44.2") in packages
-
     polars = packages[("polars", "1.44.2")]
     assert polars["dependencies"] == [{"name": "polars-runtime-32"}]
+
+
+def test_b3_compute_job_uses_existing_db_1_9_authority_without_schema_change() -> None:
+    model = json.loads(
+        (
+            REPO_ROOT
+            / "baseline"
+            / "CB-1.4.0"
+            / "canonical"
+            / "CORE_LOGICAL_MODEL.json"
+        ).read_text(encoding="utf-8")
+    )
+    table = model["tables"]["registry.compute_job"]
+    fields = {item["name"] for item in table["fields"]}
+
+    assert table["schema_version"] == "1.9.0"
+    assert {
+        "job_id",
+        "job_type",
+        "job_key",
+        "status",
+        "component_version",
+        "input_hash",
+        "progress",
+        "reason_codes",
+        "error_detail",
+        "created_at",
+        "started_at",
+        "finished_at",
+    } <= fields
+
+
+def test_b3_worker_boundary_has_no_shell_or_driver_dependency() -> None:
+    worker = (REPO_ROOT / "src" / "tpaa_platform" / "worker.py").read_text(
+        encoding="utf-8"
+    )
+    assert "subprocess" not in worker
+    assert "shell=True" not in worker
+    assert "sqlite3" not in worker
+    assert "psycopg" not in worker
+    assert "PySide6" not in worker
+    assert 'command == "ECHO"' in worker
+    assert 'command == "SHA256_TEXT"' in worker
+    assert 'command == "SLEEP_MS"' in worker

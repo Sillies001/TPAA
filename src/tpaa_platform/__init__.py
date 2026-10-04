@@ -13,7 +13,18 @@ from .polars_runtime import (
     PolarsRuntimeError,
     PolarsRuntimeIdentity,
 )
-from .worker import WorkerPayload, run_spawn_echo
+from .worker import (
+    SpawnWorkerDispatcher,
+    WorkerAdmissionController,
+    WorkerBackpressureError,
+    WorkerCancelledError,
+    WorkerClosedError,
+    WorkerDispatchError,
+    WorkerPayload,
+    WorkerResult,
+    WorkerTimeoutError,
+    run_spawn_echo,
+)
 
 __all__ = [
     "EXPECTED_POLARS_VERSION",
@@ -24,6 +35,14 @@ __all__ = [
     "LockUnavailable",
     "PlatformFilesystem",
     "PlatformPathError",
+    "SpawnWorkerDispatcher",
+    "WorkerAdmissionController",
+    "WorkerBackpressureError",
+    "WorkerCancelledError",
+    "WorkerClosedError",
+    "WorkerDispatchError",
+    "WorkerResult",
+    "WorkerTimeoutError",
     "WorkerPayload",
     "atomic_replace_bytes",
     "casefold_name_key",

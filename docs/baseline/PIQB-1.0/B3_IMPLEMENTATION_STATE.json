@@ -40,7 +40,7 @@
       ]
     },
     "PIQB-B3-004": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "polars==1.44.2 frozen project dependency",
         "polars-runtime-32==1.44.2 exact uv lock",
@@ -48,11 +48,12 @@
         "typed frame construction",
         "zstd Parquet write/read",
         "streaming lazy scan/collect",
-        "no business semantics in platform adapter"
+        "no business semantics in platform adapter",
+        "Run #614 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-005": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "PolarsParquetPlane",
         "tpaa-parquet logical URI identity",
@@ -60,16 +61,34 @@
         "partition contract",
         "LocalSealedObjectFlow stage/verify/seal",
         "artifact SHA-256 distinct from logical content hash",
-        "restart read and streaming scan exactness"
+        "restart read and streaming scan exactness",
+        "Run #614 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-006": {
-      "state": "NOT_STARTED",
-      "evidence": []
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "ComputeJobRepository over DB 1.9 registry.compute_job",
+        "SUBMITTED/QUEUED/RUNNING/SUCCEEDED/FAILED/CANCELLED lifecycle",
+        "CAS transition guarded by job_id + current status",
+        "durable idempotency and monotonic progress",
+        "fresh multiprocessing spawn WorkerPayload/WorkerResult commands",
+        "bounded WorkerAdmissionController",
+        "timeout/cancel/drain dispatcher controls",
+        "no shell command execution"
+      ]
     },
     "PIQB-B3-007": {
-      "state": "NOT_STARTED",
-      "evidence": []
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "active durable compute job IDs protect staging operations",
+        "existing recover_staging_orphans reused without new GC authority",
+        "cancelled/terminal jobs release staging for deterministic cleanup",
+        "sealed registered objects remain outside staging reclamation",
+        "bounded admission/backpressure",
+        "worker timeout termination",
+        "dispatcher close/drain resource safety"
+      ]
     },
     "PIQB-B3-008": {
       "state": "NOT_STARTED",
@@ -82,6 +101,14 @@
     "exact_head": "3edefce018af7bf75a1af319994f5f59b6ec4c28",
     "run_number": 612,
     "actions_run_id": 37183618797,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "conclusion": "SUCCESS"
+  },
+  "data_plane_qualification": {
+    "exact_head": "900e712fe000058db68184a9d7c1cee2c6b8c34d",
+    "run_number": 614,
+    "actions_run_id": 37188533514,
     "required_jobs_success": 14,
     "required_jobs_total": 14,
     "conclusion": "SUCCESS"
