@@ -741,8 +741,8 @@ class P3PersistenceRepository:
                     expected_uri,
                 )
             return
-        stored = self._object_store.put_bytes(expected_uri, data)
-        if stored.artifact_sha256 != expected_hash:
+        stored_object = self._object_store.put_bytes(expected_uri, data)
+        if stored_object.artifact_sha256 != expected_hash:
             raise P3PersistenceError(
                 "P3_MANAGED_OBJECT_HASH_MISMATCH",
                 expected_uri,

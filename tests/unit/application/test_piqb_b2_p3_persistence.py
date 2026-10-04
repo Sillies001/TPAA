@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from tools.testing.piqb_b2_p3_fixture import build_fixture, seed_upstream
+
 from tpaa_application import (
     CanonicalP3WorkspaceLayerResolver,
     DurableM7P3WorkspaceRepository,
@@ -18,7 +20,6 @@ from tpaa_storage import (
     SQLiteDesktopUnitOfWork,
     bootstrap_sqlite,
 )
-from tools.testing.piqb_b2_p3_fixture import build_fixture, seed_upstream
 
 
 def _register(
