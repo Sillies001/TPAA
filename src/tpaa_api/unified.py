@@ -70,7 +70,7 @@ class UnifiedPrincipal:
         )
 
 
-UnifiedPrincipalResolver = Callable[[Request], UnifiedPrincipal]
+UnifiedPrincipalResolver = Callable[[Request], object]
 
 
 def _request_principal(request: Request) -> UnifiedPrincipal:

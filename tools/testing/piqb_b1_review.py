@@ -62,6 +62,7 @@ def review(
     app_service = _text("src/tpaa_application/service.py")
     api_base = _text("src/tpaa_api/app.py")
     api_runtime = _text("src/tpaa_api/runtime.py")
+    unified_api = _text("src/tpaa_api/unified.py")
 
     acceptance = {
         "b0_entry_exact": (
@@ -101,17 +102,25 @@ def review(
                 "ApplicationService(",
             )
         ),
-        "desktop_full_route_composition": all(
-            token in desktop
-            for token in (
-                '"/m1/"',
-                '"/m3/"',
-                '"/m4/"',
-                '"/m6/"',
-                '"/m7/"',
-                '"/m8/"',
-                '"/m9/"',
-                "register_m9_routes",
+        "desktop_full_route_composition": (
+            all(
+                token in desktop
+                for token in (
+                    '"/m1/"',
+                    '"/m3/"',
+                    '"/m4/"',
+                    '"/m6/"',
+                    '"/m7/"',
+                    '"/m8/"',
+                    '"/m9/"',
+                )
+            )
+            and (
+                "register_m9_routes" in desktop
+                or (
+                    "register_unified_routes" in desktop
+                    and "register_m9_routes" in unified_api
+                )
             )
         ),
         "local_child_uses_composition_root": (
@@ -144,7 +153,13 @@ def review(
         "feature_availability_application_boundary": (
             "feature_availability" in app_service
             and '"/runtime/features"' in api_runtime
-            and "register_product_runtime_routes" in desktop
+            and (
+                "register_product_runtime_routes" in desktop
+                or (
+                    "register_unified_routes" in desktop
+                    and "register_product_runtime_routes" in unified_api
+                )
+            )
             and "ProductFeatureAvailability" in admission
         ),
         "legacy_base_api_surface_not_extended_by_piqb": (

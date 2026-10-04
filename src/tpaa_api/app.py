@@ -22,7 +22,6 @@ from tpaa_application import (
     RuntimeBaselineStatus,
 )
 
-
 ActorResolver = Callable[[Request], str]
 
 
