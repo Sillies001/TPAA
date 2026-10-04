@@ -6,23 +6,10 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
-
-from tpaa_gui.diagnostics import EMPTY_DIAGNOSTICS
-from tpaa_gui.product_shell import (
-    PRODUCT_NAVIGATION,
-    PRODUCT_SPINE,
-    SEMANTIC_LAYERS,
-    create_product_workspace,
-    validate_product_navigation,
-)
-from tpaa_gui.visualization import (
-    build_2d_polyline,
-    build_cesium_trajectory_packets,
-    build_trajectory_presentation,
-)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -155,6 +142,23 @@ def _trajectory_fixture() -> dict[str, object]:
 
 
 def qualify(*, platform: str, source_revision: str) -> dict[str, object]:
+    source_root = str(ROOT / "src")
+    if source_root not in sys.path:
+        sys.path.insert(0, source_root)
+
+    from tpaa_gui.diagnostics import EMPTY_DIAGNOSTICS
+    from tpaa_gui.product_shell import (
+        PRODUCT_NAVIGATION,
+        PRODUCT_SPINE,
+        SEMANTIC_LAYERS,
+        create_product_workspace,
+        validate_product_navigation,
+    )
+    from tpaa_gui.visualization import (
+        build_2d_polyline,
+        build_cesium_trajectory_packets,
+        build_trajectory_presentation,
+    )
     if platform not in {"linux", "windows"}:
         raise ValueError("platform must be linux or windows")
     if len(source_revision) != 40:
