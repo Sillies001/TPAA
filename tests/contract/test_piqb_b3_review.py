@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import importlib.util
 from pathlib import Path
 
@@ -114,3 +115,13 @@ def test_b3_workflow_keeps_exact_fourteen_job_topology() -> None:
     assert "piqb_b3_review.py" in workflow
     assert "--required-jobs-success 14" in workflow
     assert "--required-jobs-total 14" in workflow
+
+
+
+def test_b3_governance_scripts_are_python_syntax_valid() -> None:
+    for relative in (
+        "tools/testing/piqb_b3_production_pipeline.py",
+        "tools/testing/piqb_b3_review.py",
+    ):
+        path = ROOT / relative
+        ast.parse(path.read_text(encoding="utf-8"), filename=str(path))

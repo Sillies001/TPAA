@@ -132,7 +132,7 @@ def review(
         "polars_and_parquet_governed": (
             '"polars==1.44.2"' in pyproject
             and 'EXPECTED_POLARS_VERSION = "1.44.2"' in polars_runtime
-            and "collect(engine="streaming")" in polars_runtime
+            and 'collect(engine="streaming")' in polars_runtime
             and "tpaa-parquet://" in parquet
             and "logical_content_hash" in parquet
             and "artifact_sha256" in parquet

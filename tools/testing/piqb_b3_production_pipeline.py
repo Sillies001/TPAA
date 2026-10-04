@@ -717,7 +717,10 @@ def run(
             ),
             "sqlite_full_pipeline_exact": _accept_engine(sqlite_result),
             "postgres_full_pipeline_exact": _accept_engine(postgres_result),
-            "sqlite_postgres_logical_parity": (\n                _logical_parity_projection(sqlite_result)\n                == _logical_parity_projection(postgres_result)\n            ),
+            "sqlite_postgres_logical_parity": (
+                _logical_parity_projection(sqlite_result)
+                == _logical_parity_projection(postgres_result)
+            ),
             "source_byte_identity_exact": (
                 sqlite_result["worker"] == postgres_result["worker"]
             ),
