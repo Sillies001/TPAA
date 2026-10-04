@@ -372,7 +372,14 @@ def create_product_workspace(
 
     m4_tabs = qt_widgets.QTabWidget(stack)
     m4_tabs.setObjectName("tpaaB5LongitudinalVisualTabs")
-    m4_tabs.addTab(create_m4_workspace(qt_widgets=qt_widgets, transport=transport, parent=m4_tabs), "Debrief")
+    m4_tabs.addTab(
+        create_m4_workspace(
+            qt_widgets=qt_widgets,
+            transport=transport,
+            parent=m4_tabs,
+        ),
+        "Debrief",
+    )
     m4_tabs.addTab(_create_visualization_page(qt_widgets, m4_tabs), "Trajectory / Media")
 
     m6 = create_m6_workspace(qt_widgets=qt_widgets, transport=transport, parent=stack)

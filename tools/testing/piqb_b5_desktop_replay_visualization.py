@@ -216,6 +216,8 @@ def qualify(*, platform: str, source_revision: str) -> dict[str, object]:
             "cesium": cesium,
         },
     }
+    document_properties = cesium[0].get("properties") if cesium else None
+    trajectory_properties = cesium[1].get("properties") if len(cesium) > 1 else None
     acceptance = {
         "real_qt_product_workspace_created": workspace.objectName() == "tpaaB5ProductWorkspace",
         "navigation_exact_13": navigation is not None and navigation.count() == 13,
@@ -233,11 +235,11 @@ def qualify(*, platform: str, source_revision: str) -> dict[str, object]:
         "trajectory_2d_projection_exact": polyline == ((-117.0, 34.0), (-116.9, 34.1)),
         "cesium_relative_time_guard": (
             len(cesium) == 2
-            and isinstance(cesium[0].get("properties"), dict)
-            and cesium[0]["properties"].get("tpaaTimeSemantics")
+            and isinstance(document_properties, dict)
+            and document_properties.get("tpaaTimeSemantics")
             == "SESSION_TIME_RELATIVE_ONLY"
-            and isinstance(cesium[1].get("properties"), dict)
-            and cesium[1]["properties"].get("tpaaRelativeEpochIsNotUtcFact") is True
+            and isinstance(trajectory_properties, dict)
+            and trajectory_properties.get("tpaaRelativeEpochIsNotUtcFact") is True
         ),
         "presentation_has_no_business_authority": (
             presentation.business_recompute is False
