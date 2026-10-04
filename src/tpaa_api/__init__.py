@@ -11,11 +11,19 @@ from .m7_app import create_m7_app, register_m7_routes
 from .m8_app import M8PrincipalResolver, create_m8_app, register_m8_routes
 from .m9_app import M9PrincipalResolver, create_m9_app, register_m9_routes
 from .runtime import register_product_runtime_routes
+from .unified import (
+    UnifiedPrincipal,
+    UnifiedPrincipalResolver,
+    create_unified_service_app,
+    register_unified_routes,
+)
 
 __all__ = [
     "M5ServiceSecurityError",
     "M8PrincipalResolver",
     "M9PrincipalResolver",
+    "UnifiedPrincipal",
+    "UnifiedPrincipalResolver",
     "create_app",
     "create_desktop_app",
     "create_m1_app",
@@ -26,6 +34,7 @@ __all__ = [
     "create_m7_app",
     "create_m8_app",
     "create_m9_app",
+    "create_unified_service_app",
     "register_base_routes",
     "register_m1_routes",
     "register_m3_routes",
@@ -35,4 +44,5 @@ __all__ = [
     "register_m8_routes",
     "register_m9_routes",
     "register_product_runtime_routes",
+    "register_unified_routes",
 ]

@@ -1,0 +1,73 @@
+{
+  "schema": "TPAA_PIQB_B4_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B4",
+  "source_b3_protected_main_sha": "08e223c8137eb261b43ed7c2ca3612e22770d8ba",
+  "source_b3_qualification": "PIQB_B3_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "task_state": {
+    "PIQB-B4-001": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "Run #618 protected-main 14/14 SUCCESS",
+        "TPAA_PIQB_B3_REVIEW_V1 PASS/GO",
+        "PIQB_B3_QUALIFIED",
+        "B3 issue #210 closed completed"
+      ]
+    },
+    "PIQB-B4-002": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "register_unified_routes shared P1-P6 route graph",
+        "Desktop delegates route registration to unified graph",
+        "Service unified factory",
+        "legacy Service m8/m9 resolver compatibility preserved"
+      ]
+    },
+    "PIQB-B4-003": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "UnifiedPrincipal envelope",
+        "single pluggable Service principal resolver",
+        "M8ViewerContext exact projection",
+        "M9/P6SecurityViewer exact projection",
+        "Service default-deny principal middleware",
+        "Service job actor derived from principal rather than X-TPAA-Actor"
+      ]
+    },
+    "PIQB-B4-004": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    },
+    "PIQB-B4-005": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    },
+    "PIQB-B4-006": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    },
+    "PIQB-B4-007": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    },
+    "PIQB-B4-008": {
+      "state": "NOT_STARTED",
+      "evidence": []
+    }
+  },
+  "b4_qualified": false,
+  "b5_blocked": true,
+  "entry_qualification": {
+    "protected_main_sha": "08e223c8137eb261b43ed7c2ca3612e22770d8ba",
+    "run_number": 618,
+    "actions_run_id": 37196871134,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B3_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B3_QUALIFIED",
+    "data_compute_plane_qualified": true
+  }
+}

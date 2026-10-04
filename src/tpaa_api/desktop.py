@@ -11,15 +11,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from tpaa_application import ApplicationService
 
-from .app import register_base_routes
-from .m1_app import register_m1_routes
-from .m3_app import register_m3_routes
-from .m4_app import register_m4_routes
-from .m6_app import register_m6_routes
-from .m7_app import register_m7_routes
-from .m8_app import M8PrincipalResolver, register_m8_routes
-from .m9_app import M9PrincipalResolver, register_m9_routes
-from .runtime import register_product_runtime_routes
+from .m8_app import M8PrincipalResolver
+from .m9_app import M9PrincipalResolver
+from .unified import register_unified_routes
 
 _bearer = HTTPBearer(auto_error=False)
 _DESKTOP_ALLOWED_PATHS = frozenset(
@@ -104,27 +98,15 @@ def create_desktop_app(
             )
         return await call_next(request)
 
-    register_base_routes(app, application)
-    register_product_runtime_routes(app, application)
-    register_m1_routes(app, application)
-    register_m3_routes(app, application)
-    register_m4_routes(app, application)
-    register_m6_routes(app, application)
-    register_m7_routes(app, application)
-    register_m8_routes(
+    return register_unified_routes(
         app,
         application,
-        principal_resolver=(
+        m8_principal_resolver=(
             m8_principal_resolver
             or cast(M8PrincipalResolver, _deny_principal)
         ),
-    )
-    register_m9_routes(
-        app,
-        application,
-        principal_resolver=(
+        m9_principal_resolver=(
             m9_principal_resolver
             or cast(M9PrincipalResolver, _deny_principal)
         ),
     )
-    return app

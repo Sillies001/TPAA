@@ -1,0 +1,108 @@
+{
+  "schema": "TPAA_PIQB_B4_TASK_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B4",
+  "source_b3_protected_main_sha": "08e223c8137eb261b43ed7c2ca3612e22770d8ba",
+  "source_b3_qualification": "PIQB_B3_QUALIFIED",
+  "source_b3_run_number": 618,
+  "source_b3_actions_run_id": 37196871134,
+  "umbrella_issue": 206,
+  "batch_issue": 211,
+  "db_schema_version": "1.9.0",
+  "task_count": 8,
+  "tasks": [
+    {
+      "task_id": "PIQB-B4-001",
+      "title": "B3 Qualification Closure and B4 Entry Freeze",
+      "workstream": "WS-GOV",
+      "dependencies": [],
+      "minimum_acceptance": "Run #618 protected-main 14/14 and PIQB_B3_QUALIFIED are frozen as the only B4 entry authority; B3 tasks are recorded COMPLETE without rewriting historical candidate evidence."
+    },
+    {
+      "task_id": "PIQB-B4-002",
+      "title": "Unified Desktop and Service API Factory",
+      "workstream": "WS-API",
+      "dependencies": [
+        "PIQB-B4-001"
+      ],
+      "minimum_acceptance": "Desktop and Service profiles register one governed P1-P6 route graph from shared registration code while preserving profile-specific transport controls and existing compatibility surfaces."
+    },
+    {
+      "task_id": "PIQB-B4-003",
+      "title": "Unified Principal Resolution and RBAC Boundary",
+      "workstream": "WS-SEC",
+      "dependencies": [
+        "PIQB-B4-002"
+      ],
+      "minimum_acceptance": "Service identity is resolved through one injected principal resolver, default-deny has no development fallback, actor identity cannot be client-spoofed, and M8/P6 authorization remains delegated to frozen domain role policies without transport privilege bypass."
+    },
+    {
+      "task_id": "PIQB-B4-004",
+      "title": "Versioned Exact-ID Product API",
+      "workstream": "WS-API",
+      "dependencies": [
+        "PIQB-B4-002",
+        "PIQB-B4-003"
+      ],
+      "minimum_acceptance": "A versioned product API exposes exact immutable identifiers for admitted P1-P6 products without alias resolution, hidden recomputation, or mutable-latest semantics."
+    },
+    {
+      "task_id": "PIQB-B4-005",
+      "title": "DTO OpenAPI and Client Contract Pipeline",
+      "workstream": "WS-API",
+      "dependencies": [
+        "PIQB-B4-004"
+      ],
+      "minimum_acceptance": "Unified API DTO/OpenAPI output is deterministic, frozen-authority traceable, profile-compatible, and sufficient for generated client contract verification without weakening the existing canonical DTO authority."
+    },
+    {
+      "task_id": "PIQB-B4-006",
+      "title": "Persistent Audit Ledger",
+      "workstream": "WS-STORAGE",
+      "dependencies": [
+        "PIQB-B4-003"
+      ],
+      "minimum_acceptance": "Security-sensitive and mutation actions persist through existing DB 1.9 audit.audit_log with exact request/principal/object/reason provenance and SQLite/PostgreSQL restart parity; no shadow audit store is authoritative."
+    },
+    {
+      "task_id": "PIQB-B4-007",
+      "title": "Structured Observability and Qualification State",
+      "workstream": "WS-OPS",
+      "dependencies": [
+        "PIQB-B4-002",
+        "PIQB-B4-003",
+        "PIQB-B4-006"
+      ],
+      "minimum_acceptance": "Health/readiness/version/product-qualification and structured operational records expose machine-readable fail-closed state without secrets, mutable aliases, or business-claim recomputation."
+    },
+    {
+      "task_id": "PIQB-B4-008",
+      "title": "Unified API Security and Observability Qualification",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B4-001",
+        "PIQB-B4-002",
+        "PIQB-B4-003",
+        "PIQB-B4-004",
+        "PIQB-B4-005",
+        "PIQB-B4-006",
+        "PIQB-B4-007"
+      ],
+      "minimum_acceptance": "Desktop and Service unified surfaces pass exact route/DTO/security/RBAC/audit/observability/restart qualification on SQLite and real PostgreSQL under the unchanged exactly-14-job Hosted CI topology."
+    }
+  ],
+  "scope": {
+    "no_db_schema_change": true,
+    "no_shadow_schema": true,
+    "no_canonical_mutation": true,
+    "existing_audit_relation_required": "audit.audit_log",
+    "service_identity_resolver_pluggable": true,
+    "default_deny_required": true,
+    "client_actor_header_not_authoritative_in_service": true,
+    "frozen_m8_p6_role_policies_remain_authoritative": true,
+    "desktop_loopback_bearer_preserved": true,
+    "exact_fourteen_job_topology_preserved": true,
+    "no_b5_packaging_work": true,
+    "no_m10_p7": true
+  }
+}

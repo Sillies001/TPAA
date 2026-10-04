@@ -7,28 +7,30 @@
   "db_schema_version": "1.9.0",
   "task_state": {
     "PIQB-B3-001": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "SourceFamily exact six-family enum",
         "SourceAdapterDescriptor",
         "SourceAdapterRegistry exact immutable registration",
         "SourceArtifactEnvelope byte identity",
         "external decoder metadata boundary",
-        "Run #612 exact-head 14/14 SUCCESS"
+        "Run #612 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-002": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "SourceImportCommand",
         "ProductionImportService",
         "adapter/family/media/hash validation before projection",
         "no tpaa_platform dependency from Application",
-        "Run #612 exact-head 14/14 SUCCESS"
+        "Run #612 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-003": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "SourceProvenanceRepository",
         "registry.data_source",
@@ -36,11 +38,12 @@
         "registry.source_artifact",
         "SQLite restart exact reconstruction",
         "immutable source/stream/artifact conflict checks",
-        "Run #612 exact-head 14/14 SUCCESS"
+        "Run #612 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-004": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "polars==1.44.2 frozen project dependency",
         "polars-runtime-32==1.44.2 exact uv lock",
@@ -49,11 +52,12 @@
         "zstd Parquet write/read",
         "streaming lazy scan/collect",
         "no business semantics in platform adapter",
-        "Run #614 exact-head 14/14 SUCCESS"
+        "Run #614 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-005": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "PolarsParquetPlane",
         "tpaa-parquet logical URI identity",
@@ -62,11 +66,12 @@
         "LocalSealedObjectFlow stage/verify/seal",
         "artifact SHA-256 distinct from logical content hash",
         "restart read and streaming scan exactness",
-        "Run #614 exact-head 14/14 SUCCESS"
+        "Run #614 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-006": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "ComputeJobRepository over DB 1.9 registry.compute_job",
         "SUBMITTED/QUEUED/RUNNING/SUCCEEDED/FAILED/CANCELLED lifecycle",
@@ -76,11 +81,12 @@
         "bounded WorkerAdmissionController",
         "timeout/cancel/drain dispatcher controls",
         "no shell command execution",
-        "Run #615 exact-head 14/14 SUCCESS"
+        "Run #615 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-007": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "active durable compute job IDs protect staging operations",
         "existing recover_staging_orphans reused without new GC authority",
@@ -89,11 +95,12 @@
         "bounded admission/backpressure",
         "worker timeout termination",
         "dispatcher close/drain resource safety",
-        "Run #615 exact-head 14/14 SUCCESS"
+        "Run #615 exact-head 14/14 SUCCESS",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-008": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "real SQLite + real PostgreSQL production pipeline qualification tool",
         "ProductionImportService source/stream/artifact provenance",
@@ -105,12 +112,13 @@
         "SQLite/PostgreSQL logical parity",
         "B3 reviewer integrated inside existing M0 Exit Review job",
         "exact 14 required jobs topology preserved",
-        "candidate exact-head CI pending"
+        "candidate exact-head CI pending",
+        "Run #618 protected-main 14/14 SUCCESS"
       ]
     }
   },
-  "b3_qualified": false,
-  "b4_blocked": true,
+  "b3_qualified": true,
+  "b4_blocked": false,
   "foundation_qualification": {
     "exact_head": "3edefce018af7bf75a1af319994f5f59b6ec4c28",
     "run_number": 612,
@@ -134,5 +142,18 @@
     "required_jobs_success": 14,
     "required_jobs_total": 14,
     "conclusion": "SUCCESS"
+  },
+  "qualification": {
+    "protected_main_sha": "08e223c8137eb261b43ed7c2ca3612e22770d8ba",
+    "run_number": 618,
+    "actions_run_id": 37196871134,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B3_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B3_QUALIFIED",
+    "production_pipeline_qualified": true,
+    "data_compute_plane_qualified": true
   }
 }

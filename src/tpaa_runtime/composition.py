@@ -7,16 +7,14 @@ from typing import Never
 
 from fastapi import FastAPI
 
-from tpaa_api.app import create_app
 from tpaa_api.desktop import create_desktop_app
-from tpaa_api.m1_app import register_m1_routes
-from tpaa_api.m3_app import register_m3_routes
-from tpaa_api.m4_app import register_m4_routes
-from tpaa_api.m6_app import register_m6_routes
-from tpaa_api.m7_app import register_m7_routes
-from tpaa_api.m8_app import M8PrincipalResolver, register_m8_routes
-from tpaa_api.m9_app import M9PrincipalResolver, register_m9_routes
-from tpaa_api.runtime import register_product_runtime_routes
+from tpaa_api.m8_app import M8PrincipalResolver
+from tpaa_api.m9_app import M9PrincipalResolver
+from tpaa_api.unified import (
+    UnifiedPrincipalResolver,
+    create_unified_service_app,
+    register_unified_routes,
+)
 from tpaa_application import (
     ApplicationService,
     InMemoryM3ReleasePublicationRepository,
@@ -170,26 +168,30 @@ def create_full_desktop_app(
 def create_full_service_app(
     runtime: ProductRuntime,
     *,
-    m8_principal_resolver: M8PrincipalResolver,
-    m9_principal_resolver: M9PrincipalResolver,
+    principal_resolver: UnifiedPrincipalResolver | None = None,
+    m8_principal_resolver: M8PrincipalResolver | None = None,
+    m9_principal_resolver: M9PrincipalResolver | None = None,
 ) -> FastAPI:
-    """Expose the same P1-P6 Application graph through one Service process."""
+    """Expose one P1-P6 Service surface with unified identity or legacy resolvers."""
 
-    app = create_app(runtime.application)
-    register_product_runtime_routes(app, runtime.application)
-    register_m1_routes(app, runtime.application)
-    register_m3_routes(app, runtime.application)
-    register_m4_routes(app, runtime.application)
-    register_m6_routes(app, runtime.application)
-    register_m7_routes(app, runtime.application)
-    register_m8_routes(
+    if principal_resolver is not None:
+        if m8_principal_resolver is not None or m9_principal_resolver is not None:
+            raise ValueError(
+                "unified principal_resolver cannot be combined with legacy resolvers"
+            )
+        return create_unified_service_app(
+            application=runtime.application,
+            principal_resolver=principal_resolver,
+        )
+
+    if m8_principal_resolver is None or m9_principal_resolver is None:
+        raise ValueError(
+            "service identity resolver is required; no development fallback is allowed"
+        )
+    app = FastAPI(title="TPAA Service API", version="0.0.0")
+    return register_unified_routes(
         app,
         runtime.application,
-        principal_resolver=m8_principal_resolver,
+        m8_principal_resolver=m8_principal_resolver,
+        m9_principal_resolver=m9_principal_resolver,
     )
-    register_m9_routes(
-        app,
-        runtime.application,
-        principal_resolver=m9_principal_resolver,
-    )
-    return app
