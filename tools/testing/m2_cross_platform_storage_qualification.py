@@ -120,7 +120,7 @@ def qualify(
             value is True for value in storage_acceptance.values()
         ),
         "current_core_schema_1_7_0": (
-            storage_acceptance.get("current_core_schema_is_1_8_0") is True
+            storage_acceptance.get("current_core_schema_is_1_9_0") is True
         ),
         "sqlite_publish_pass": (
             storage_acceptance.get("sqlite_publish_pass") is True
@@ -169,7 +169,7 @@ def qualify(
             "windows_linux_m2_logical_evidence_aggregated": True,
             "sqlite_postgres_frozen_core_adapter_parity_executed": True,
             "storage_adapter_parity_reuses_frozen_core_release_fixture": True,
-            "storage_schema_version": "1.8.0",
+            "storage_schema_version": "1.9.0",
             "m2_business_metric_semantics_recomputed": False,
             "p1_remainder_84_executed": False,
         },

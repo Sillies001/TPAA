@@ -13,15 +13,15 @@ TASK_BASELINE = BASE / "B2_TASK_BASELINE.json"
 FIT_BASELINE = BASE / "B2_SCHEMA_PERSISTENCE_FIT.json"
 STATE = BASE / "B2_IMPLEMENTATION_STATE.json"
 AUTHORITY_REBASE = BASE / "B2_AUTHORITY_REBASE.json"
-CURRENT_ADOPTION = BASE / "ACP_219_DB_1_8_0_ADOPTION.json"
+CURRENT_ADOPTION = BASE / "ACP_221_DB_1_9_0_ADOPTION.json"
 HISTORICAL_ADOPTION = BASE / "ACP_216_DB_1_7_0_ADOPTION.json"
+HISTORICAL_DB_1_8_ADOPTION = BASE / "ACP_219_DB_1_8_0_ADOPTION.json"
 LOCK = ROOT / "baseline" / "CB-1.4.0" / "BASELINE_LOCK.json"
 SOURCE_B1_SHA = "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8"
-ADOPTED_MAIN_SHA = "a17eb1e5a0b961c7c555c6d900839df47165e245"
-ADOPTION_RUN = 583
+ADOPTED_MAIN_SHA = "24f504b9be762fa78618632f25c3f6cbc290c6c8"
+ADOPTION_RUN = 607
 EXPECTED_TASKS = tuple(f"PIQB-B2-{index:03d}" for index in range(1, 9))
 COMPLETE_STATES = frozenset({"COMPLETE_CANDIDATE", "COMPLETE"})
-IN_PROGRESS_STATES = frozenset({"IN_PROGRESS_DB_1_8_ADAPTERS"})
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -51,6 +51,7 @@ def review(
     rebase = _json(AUTHORITY_REBASE)
     current_adoption = _json(CURRENT_ADOPTION)
     historical_adoption = _json(HISTORICAL_ADOPTION)
+    historical_db_1_8_adoption = _json(HISTORICAL_DB_1_8_ADOPTION)
     lock = _json(LOCK)
     tasks = baseline.get("tasks")
     task_ids = (
@@ -89,6 +90,9 @@ def review(
     p4_p5_adapter = _text("src/tpaa_application/p4_p5_persistence.py")
     p6_adapter = _text("src/tpaa_application/p6_persistence.py")
     live_p4_p5 = _text("tools/testing/piqb_b2_postgres_p4_p5_persistence.py")
+    p3_adapter = _text("src/tpaa_application/p3_persistence.py")
+    live_p3 = _text("tools/testing/piqb_b2_postgres_p3_persistence.py")
+    live_p6 = _text("tools/testing/piqb_b2_postgres_p6_persistence.py")
     lock_baseline = lock.get("baseline")
     adopted = rebase.get("adopted_authority")
     lineage = rebase.get("authority_lineage")
@@ -110,6 +114,22 @@ def review(
         and historical_adoption.get("target_db_schema_version") == "1.7.0"
     )
 
+    historical_1_8 = (
+        isinstance(lineage, list)
+        and any(
+            isinstance(item, dict)
+            and item.get("proposal_id") == "ACP-219"
+            and item.get("db_schema_version") == "1.8.0"
+            and item.get("protected_main_sha")
+            == "a17eb1e5a0b961c7c555c6d900839df47165e245"
+            and item.get("qualification") == "ACP219_DB_1_8_0_ADOPTED"
+            and item.get("historical") is True
+            for item in lineage
+        )
+        and historical_db_1_8_adoption.get("target_db_schema_version") == "1.8.0"
+    )
+
+
     acceptance = {
         "b1_entry_exact": (
             baseline.get("source_b1_protected_main_sha") == SOURCE_B1_SHA
@@ -129,23 +149,24 @@ def review(
             and historical_fit.get("preserved_as_pre_adoption_evidence") is True
         ),
         "historical_db_1_7_adoption_preserved": historical_1_7,
-        "db_schema_1_8_authority_adopted": (
-            state.get("db_schema_version") == "1.8.0"
-            and state.get("authority_change_proposal_issue") == 219
+        "historical_db_1_8_adoption_preserved": historical_1_8,
+        "db_schema_1_9_authority_adopted": (
+            state.get("db_schema_version") == "1.9.0"
+            and state.get("authority_change_proposal_issue") == 221
             and state.get("authority_change_proposal_status") == "ADOPTED_PROTECTED_MAIN"
             and isinstance(state_adoption, dict)
             and state_adoption.get("protected_main_sha") == ADOPTED_MAIN_SHA
             and state_adoption.get("run_number") == ADOPTION_RUN
-            and state_adoption.get("qualification") == "ACP219_DB_1_8_0_ADOPTED"
+            and state_adoption.get("qualification") == "ACP221_DB_1_9_0_ADOPTED"
             and isinstance(adopted, dict)
-            and adopted.get("proposal_id") == "ACP-219"
-            and adopted.get("db_schema_version") == "1.8.0"
+            and adopted.get("proposal_id") == "ACP-221"
+            and adopted.get("db_schema_version") == "1.9.0"
             and adopted.get("protected_main_sha") == ADOPTED_MAIN_SHA
             and adopted.get("run_number") == ADOPTION_RUN
-            and adopted.get("qualification") == "ACP219_DB_1_8_0_ADOPTED"
-            and current_adoption.get("target_db_schema_version") == "1.8.0"
+            and adopted.get("qualification") == "ACP221_DB_1_9_0_ADOPTED"
+            and current_adoption.get("target_db_schema_version") == "1.9.0"
             and isinstance(lock_baseline, dict)
-            and lock_baseline.get("db_schema") == "1.8.0"
+            and lock_baseline.get("db_schema") == "1.9.0"
         ),
         "repository_ports_engine_neutral": all(
             token in ports
@@ -214,7 +235,7 @@ def review(
                     "build_service_persistence",
                     "PUBLISH_CAS_CONFLICT",
                     "ADOPTED_PROTECTED_MAIN",
-                    "current_db_1_8",
+                    "current_db_1_9",
                     "shadow_schema_created",
                 )
             )
@@ -225,6 +246,13 @@ def review(
                 "P4P5PersistenceRepository",
                 "assessment.actor_assessment_machine_evidence_ref",
                 "assessment.mission_assessment_objective_ref",
+                "assessment.annotation_subject_context",
+                "def register_annotation(",
+                "def exact_annotation(",
+                "def register_p4(",
+                "def exact_p4(",
+                "def register_p5(",
+                "def exact_p5(",
                 "P4_P5_IMMUTABLE_CONFLICT",
             )
         ),
@@ -239,7 +267,51 @@ def review(
                     "SQLiteDesktopUnitOfWork",
                     "ordered_machine_evidence_refs_preserved",
                     "ordered_objective_refs_preserved",
+                    "standalone_annotation_subject_context_restart_exact",
+                    "m8_repository_port_exact",
                     "P4_P5_IMMUTABLE_CONFLICT",
+                )
+            )
+        ),
+        "p3_durable_adapter_and_postgres_gate_present": (
+            all(
+                token in p3_adapter
+                for token in (
+                    "P3PersistenceRepository",
+                    "DurableM7P3WorkspaceRepository",
+                    "exact_capability_estimate",
+                    "exact_twin_revision",
+                )
+            )
+            and "Execute PIQB B2 P3 real PostgreSQL exact persistence qualification"
+            in workflow
+            and all(
+                token in live_p3
+                for token in (
+                    "sqlite_current_db_1_9",
+                    "postgres_current_db_1_9",
+                    "sqlite_restart_exact",
+                    "postgres_restart_exact",
+                    "sqlite_postgres_logical_parity",
+                    "immutable_replay_fail_closed",
+                    "model_object_hash_exact",
+                )
+            )
+        ),
+        "p6_durable_resolver_postgres_gate_present": (
+            "Execute PIQB B2 P6 real PostgreSQL exact persistence qualification"
+            in workflow
+            and all(
+                token in live_p6
+                for token in (
+                    "sqlite_current_db_1_9",
+                    "postgres_current_db_1_9",
+                    "sqlite_restart_exact",
+                    "postgres_restart_exact",
+                    "sqlite_postgres_logical_parity",
+                    "immutable_replay_fail_closed",
+                    "model_artifact_hash_exact",
+                    "model_build_durable_resolver_exact",
                 )
             )
         ),
@@ -272,9 +344,9 @@ def review(
                 "P6_RECOMMENDATION_IDENTITY_MISMATCH",
             )
         ),
-        "adapter_tasks_not_prematurely_complete": all(
+        "adapter_tasks_complete_candidate": all(
             isinstance(task_state.get(task), dict)
-            and task_state[task].get("state") in IN_PROGRESS_STATES
+            and task_state[task].get("state") in COMPLETE_STATES
             for task in ("PIQB-B2-002", "PIQB-B2-003", "PIQB-B2-006", "PIQB-B2-008")
         ),
         "candidate_revision_exact": expected_revision == checked_out_revision,
@@ -333,7 +405,7 @@ def review(
         },
         "historical_blocked_families": historical_blocked,
         "historical_dependency_blocked_families": historical_dependency,
-        "authority_change_proposal_issue": 219,
+        "authority_change_proposal_issue": 221,
         "authority_change_resolved": True,
         "implementation_complete": implementation_complete,
         "formal_completion_blocked_by_authority_change": False,

@@ -156,7 +156,7 @@ def verify() -> dict[str, object]:
             profile["scope"]["db_schema_change"] is False
             and profile["scope"]["db_schema_version"] == "1.6.0"
             and profile["scope"]["shadow_schema_permitted"] is False
-            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0", "1.8.0"}
+            and lock["baseline"]["db_schema"] in {"1.6.0", "1.7.0", "1.8.0", "1.9.0"}
         ),
         "runtime_binding_exact": (
             profile["runtime_binding"]["model_spec_id"]

@@ -527,8 +527,8 @@ def run(
     sqlite_hash = _hash(sqlite_membership)
     postgres_hash = _hash(postgres_membership)
     acceptance = {
-        "sqlite_current_core_1_8_0": sqlite_bootstrap.schema_version == "1.8.0" and sqlite_bootstrap.table_count == 94,
-        "postgres_current_core_1_8_0": postgres_bootstrap.schema_version == "1.8.0" and postgres_bootstrap.table_count == 94,
+        "sqlite_current_core_1_9_0": sqlite_bootstrap.schema_version == "1.9.0" and sqlite_bootstrap.table_count == 95,
+        "postgres_current_core_1_9_0": postgres_bootstrap.schema_version == "1.9.0" and postgres_bootstrap.table_count == 95,
         "logical_membership_equal": sqlite_membership == postgres_membership,
         "logical_membership_hash_equal": sqlite_hash == postgres_hash,
         "longitudinal_release_scope_exact": cast(
@@ -562,7 +562,7 @@ def run(
         "scope": {
             "real_sqlite_executed": True,
             "real_postgresql_executed": True,
-            "db_schema_version": "1.8.0",
+            "db_schema_version": "1.9.0",
             "existing_core_tables_only": True,
             "shadow_schema_created": False,
         },

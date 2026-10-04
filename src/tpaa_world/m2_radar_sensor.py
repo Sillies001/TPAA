@@ -26,7 +26,7 @@ from tpaa_ingest import (
 
 from .m2_reference_time import CORE_WORLD_MANIFEST_FIELDS, CoreWorldManifest
 
-CORE_SCHEMA_VERSION = "1.8.0"
+CORE_SCHEMA_VERSION = "1.9.0"
 CORE_WORLD_TABLE = "world.world_product_manifest"
 WORLD_POLICY_ID = "WORLD_CAPABILITY_REGISTRY"
 WORLD_POLICY_VERSION = "1.0.0"

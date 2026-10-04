@@ -25,30 +25,36 @@ def _review(**overrides: object) -> dict[str, object]:
     return REVIEW.review(**values)
 
 
-def test_b2_authority_resolved_exact_adapters_in_progress() -> None:
+def test_b2_candidate_complete_pending_protected_main() -> None:
     result = _review()
     assert result["status"] == "PASS"
-    assert result["decision"] == "IN_PROGRESS"
-    assert result["qualification"] == "PIQB_B2_IN_PROGRESS"
+    assert result["decision"] == "PENDING_PROTECTED_MAIN"
+    assert result["qualification"] == "PIQB_B2_CANDIDATE"
     assert result["authority_change_resolved"] is True
-    assert result["implementation_complete"] is False
+    assert result["implementation_complete"] is True
     assert result["formal_completion_blocked_by_authority_change"] is False
+    assert result["formal_completion_blocked_by_protected_main"] is True
     acceptance = result["acceptance"]
     assert isinstance(acceptance, dict)
-    assert acceptance["db_schema_1_8_authority_adopted"] is True
+    assert acceptance["db_schema_1_9_authority_adopted"] is True
     assert acceptance["historical_db_1_7_adoption_preserved"] is True
+    assert acceptance["historical_db_1_8_adoption_preserved"] is True
     assert acceptance["real_postgres_restart_parity_gate_present"] is True
     assert acceptance["p4_p5_exact_adapter_present"] is True
     assert acceptance["real_postgres_p4_p5_gate_present"] is True
+    assert acceptance["p3_durable_adapter_and_postgres_gate_present"] is True
     assert acceptance["p6_durable_substrate_present"] is True
     assert acceptance["p6_result_adapter_present"] is True
+    assert acceptance["p6_durable_resolver_postgres_gate_present"] is True
+    assert acceptance["adapter_tasks_complete_candidate"] is True
 
 
-def test_b2_protected_main_not_qualified_before_adapter_completion() -> None:
+def test_b2_protected_main_qualifies_complete_candidate() -> None:
     result = _review(event_name="push", git_ref="refs/heads/main")
     assert result["status"] == "PASS"
-    assert result["decision"] == "IN_PROGRESS"
-    assert result["qualification"] != "PIQB_B2_QUALIFIED"
+    assert result["decision"] == "GO"
+    assert result["qualification"] == "PIQB_B2_QUALIFIED"
+    assert result["implementation_complete"] is True
 
 
 def test_b2_review_fails_exact_head_or_job_count_drift() -> None:
@@ -67,7 +73,7 @@ def test_b2_workflow_keeps_exact_fourteen_job_topology() -> None:
     assert "Review PIQB B2 persistence and recovery state" in workflow
     assert "Execute PIQB B2 PostgreSQL restart/parity qualification" in workflow
     assert "Execute PIQB B2 P4/P5 real PostgreSQL exact persistence qualification" in workflow
-    assert "Review ACP-219 DB 1.8.0 authority adoption gate" in workflow
+    assert "Review ACP-221 DB 1.9.0 authority adoption gate" in workflow
     assert "run_platform_parallel_lanes.py" in workflow
     runner = (ROOT / "tools/ci/run_platform_parallel_lanes.py").read_text(
         encoding="utf-8"

@@ -46,7 +46,7 @@ def _postgres_bootstrap_ok(payload: dict[str, Any]) -> bool:
         and payload.get("ddl_tamper_fail_closed") == "PASS"
         and payload.get("unexpected_index_fail_closed") == "PASS"
         and isinstance(verification, dict)
-        and verification.get("schema_version") == "1.8.0"
+        and verification.get("schema_version") == "1.9.0"
         and verification.get("engine_profile") == "postgresql-service"
     )
 
@@ -58,7 +58,7 @@ def _postgres_repository_ok(payload: dict[str, Any]) -> bool:
         and payload.get("repository_conformance") == "PASS"
         and payload.get("transaction_smoke") == "PASS"
         and isinstance(bootstrap, dict)
-        and bootstrap.get("schema_version") == "1.8.0"
+        and bootstrap.get("schema_version") == "1.9.0"
         and bootstrap.get("engine_profile") == "postgresql-service"
     )
 
@@ -134,7 +134,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         ),
         _check(
             3,
-            "Schema 1.8.0 clean bootstrap passes for SQLite and PostgreSQL.",
+            "Schema 1.9.0 clean bootstrap passes for SQLite and PostgreSQL.",
             both("sqlite-repository-acceptance")
             and both("sqlite-bootstrap-verify")
             and _postgres_bootstrap_ok(postgres_bootstrap)

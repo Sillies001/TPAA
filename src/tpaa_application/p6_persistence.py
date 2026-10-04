@@ -1,4 +1,4 @@
-"""PIQB B2 durable P6 substrate over adopted DB 1.8 canonical relations."""
+"""PIQB B2 durable P6 substrate over adopted DB 1.9 canonical relations."""
 
 from __future__ import annotations
 
@@ -701,7 +701,7 @@ class DurableP6ModelBuildResolver:
 
 
 class P6PersistenceRepository:
-    """DB 1.8 exact P6 substrate shared by SQLite and PostgreSQL."""
+    """DB 1.9 exact P6 substrate shared by SQLite and PostgreSQL."""
 
     def __init__(
         self,

@@ -4,8 +4,8 @@
   "batch": "B2",
   "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
   "source_b1_qualification": "PIQB_B1_QUALIFIED",
-  "db_schema_version": "1.8.0",
-  "authority_change_proposal_issue": 219,
+  "db_schema_version": "1.9.0",
+  "authority_change_proposal_issue": 221,
   "authority_change_proposal_status": "ADOPTED_PROTECTED_MAIN",
   "no_shadow_schema": true,
   "task_state": {
@@ -19,32 +19,32 @@
       ]
     },
     "PIQB-B2-002": {
-      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "SQLiteProductPublicationLedger",
         "SQLiteDesktopUnitOfWork.product_publication",
-        "Desktop persistence runtime",
         "P2PersistenceRepository exact canonical-row mapping",
-        "P4P5PersistenceRepository exact DB 1.8 canonical mapping",
-        "P4/P5 real PostgreSQL restart/parity qualification gate",
-        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests",
-        "P6 exact forecast/counterfactual/recommendation DB 1.8 mapping candidate"
-      ],
-      "remaining_work": "Qualify P6 exact results against real PostgreSQL and complete P3-dependent model-build reconstruction."
+        "P3PersistenceRepository exact durable mapping",
+        "P4P5PersistenceRepository DB 1.9 exact M8 repository port",
+        "assessment.annotation_subject_context standalone annotation authority",
+        "P6PersistenceRepository exact forecast/counterfactual/recommendation mapping",
+        "DurableP6ModelBuildResolver exact P3/P4 reconstruction",
+        "real SQLite/PostgreSQL restart and logical parity qualification"
+      ]
     },
     "PIQB-B2-003": {
-      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "PostgreSQLProductPublicationLedger",
         "PostgreSQLServiceUnitOfWork.product_publication",
-        "Service persistence runtime",
         "P2PersistenceRepository shared engine-neutral mapping",
-        "P4P5PersistenceRepository exact DB 1.8 canonical mapping",
-        "P4/P5 real PostgreSQL restart/parity qualification gate",
-        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests",
-        "P6 exact forecast/counterfactual/recommendation DB 1.8 mapping candidate"
-      ],
-      "remaining_work": "Qualify P6 exact results against real PostgreSQL and complete P3-dependent model-build reconstruction."
+        "P3PersistenceRepository exact durable mapping",
+        "P4P5PersistenceRepository DB 1.9 exact M8 repository port",
+        "assessment.annotation_subject_context standalone annotation authority",
+        "P6PersistenceRepository exact forecast/counterfactual/recommendation mapping",
+        "DurableP6ModelBuildResolver exact P3/P4 reconstruction",
+        "real PostgreSQL restart and parity qualification"
+      ]
     },
     "PIQB-B2-004": {
       "state": "COMPLETE_CANDIDATE",
@@ -63,19 +63,15 @@
       ]
     },
     "PIQB-B2-006": {
-      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
-        "SQLite close/reopen exact registration test",
-        "Desktop persistence reconstruction",
-        "real PostgreSQL service runtime reconstruction across new connections",
-        "real PostgreSQL exact read and idempotent replay after reconnect",
-        "P2 exact durable restart mapping",
-        "P4/P5 SQLite restart exactness candidate",
-        "P4/P5 real PostgreSQL restart/parity qualification gate",
-        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests",
-        "P6 SQLite result restart exactness candidate"
-      ],
-      "remaining_work": "Qualify P6 real PostgreSQL result restart/parity and complete P3-dependent model-build reconstruction."
+        "SQLite close/reopen exact registration",
+        "real PostgreSQL reconstruction across new connections",
+        "P2/P3/P4/P5/P6 exact durable restart",
+        "standalone M8 annotation subject_context_id exact after restart",
+        "P6 durable model-build reconstruction",
+        "immutable/idempotent replay fail-closed"
+      ]
     },
     "PIQB-B2-007": {
       "state": "COMPLETE_CANDIDATE",
@@ -86,18 +82,16 @@
       ]
     },
     "PIQB-B2-008": {
-      "state": "IN_PROGRESS_DB_1_8_ADAPTERS",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "shared identity derivation",
         "SQLite/PostgreSQL ledger contract parity",
-        "real SQLite/PostgreSQL publication restart/CAS/recovery parity",
-        "DB 1.8 current-authority parity gate",
-        "P4/P5 ordered-text DB 1.8 exact mapping candidate",
-        "P4/P5 real PostgreSQL restart/parity qualification gate",
-        "P6 DB 1.8 durable substrate: input/model datasets/model metadata/requests",
-        "P6 result SQLite exact replay candidate"
-      ],
-      "remaining_work": "Qualify P6 SQLite/PostgreSQL logical parity, then P3 dependency closure and final B2 qualification."
+        "DB 1.9 current-authority parity gate",
+        "P3 durable resolver parity",
+        "P4/P5 ordered-text and standalone annotation parity",
+        "P6 SQLite/PostgreSQL logical parity",
+        "no shadow schema"
+      ]
     }
   },
   "production_activation": {
@@ -105,26 +99,24 @@
       "P1_SESSION_RELEASE",
       "LONGITUDINAL_RELEASE"
     ],
-    "dependency_blocked": [
-      "P3_TWIN_CAPABILITY"
-    ],
+    "dependency_blocked": [],
     "implemented_not_b2_qualified": [
       "P2_ATTRIBUTION",
-      "P4_P5_ASSESSMENT"
-    ],
-    "adapter_pending": [
+      "P3_TWIN_CAPABILITY",
+      "P4_P5_ASSESSMENT",
       "P6_MODEL_PROJECTION_ADVISORY"
     ],
+    "adapter_pending": [],
     "authority_blocked": []
   },
   "b2_qualified": false,
   "authority_adoption": {
-    "proposal_id": "ACP-219",
-    "issue": 219,
-    "protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
-    "run_number": 583,
-    "actions_run_id": 37119777187,
-    "qualification": "ACP219_DB_1_8_0_ADOPTED"
+    "proposal_id": "ACP-221",
+    "issue": 221,
+    "protected_main_sha": "24f504b9be762fa78618632f25c3f6cbc290c6c8",
+    "run_number": 607,
+    "actions_run_id": 37176660981,
+    "qualification": "ACP221_DB_1_9_0_ADOPTED"
   },
   "historical_authority_adoptions": [
     {
@@ -135,12 +127,21 @@
       "run_number": 576,
       "actions_run_id": 37105587377,
       "qualification": "ACP216_DB_1_7_0_ADOPTED"
+    },
+    {
+      "proposal_id": "ACP-219",
+      "issue": 219,
+      "db_schema_version": "1.8.0",
+      "protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+      "run_number": 583,
+      "actions_run_id": 37119777187,
+      "qualification": "ACP219_DB_1_8_0_ADOPTED"
     }
   ],
   "domain_adapter_progress": {
-    "P2_ATTRIBUTION": "EXACT_IMPLEMENTED_CI_STABLE",
-    "P3_TWIN_CAPABILITY": "DEPENDENCY_BLOCKED",
-    "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
-    "P6_MODEL_PROJECTION_ADVISORY": "EXACT_RESULT_MAPPING_SQLITE_CANDIDATE"
+    "P2_ATTRIBUTION": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
+    "P3_TWIN_CAPABILITY": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
+    "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_DB_1_9_STANDALONE_ANNOTATION_QUALIFIED",
+    "P6_MODEL_PROJECTION_ADVISORY": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED"
   }
 }

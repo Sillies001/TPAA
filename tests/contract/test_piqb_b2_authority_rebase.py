@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_b2_authority_rebase_preserves_history_and_anchors_db_1_8() -> None:
+def test_b2_authority_rebase_preserves_history_and_anchors_db_1_9() -> None:
     base = ROOT / "docs" / "baseline" / "PIQB-1.0"
     rebase = json.loads((base / "B2_AUTHORITY_REBASE.json").read_text(encoding="utf-8"))
     state = json.loads((base / "B2_IMPLEMENTATION_STATE.json").read_text(encoding="utf-8"))
@@ -29,17 +29,26 @@ def test_b2_authority_rebase_preserves_history_and_anchors_db_1_8() -> None:
     assert lineage[0]["qualification"] == "ACP216_DB_1_7_0_ADOPTED"
     assert lineage[0]["historical"] is True
 
-    current = rebase["adopted_authority"]
-    assert current["proposal_id"] == "ACP-219"
-    assert current["db_schema_version"] == "1.8.0"
-    assert current["protected_main_sha"] == (
+    lineage_1_8 = lineage[1]
+    assert lineage_1_8["proposal_id"] == "ACP-219"
+    assert lineage_1_8["db_schema_version"] == "1.8.0"
+    assert lineage_1_8["protected_main_sha"] == (
         "a17eb1e5a0b961c7c555c6d900839df47165e245"
     )
-    assert current["run_number"] == 583
-    assert current["qualification"] == "ACP219_DB_1_8_0_ADOPTED"
+    assert lineage_1_8["qualification"] == "ACP219_DB_1_8_0_ADOPTED"
+    assert lineage_1_8["historical"] is True
 
-    assert state["db_schema_version"] == "1.8.0"
-    assert state["authority_change_proposal_issue"] == 219
+    current = rebase["adopted_authority"]
+    assert current["proposal_id"] == "ACP-221"
+    assert current["db_schema_version"] == "1.9.0"
+    assert current["protected_main_sha"] == (
+        "24f504b9be762fa78618632f25c3f6cbc290c6c8"
+    )
+    assert current["run_number"] == 607
+    assert current["qualification"] == "ACP221_DB_1_9_0_ADOPTED"
+
+    assert state["db_schema_version"] == "1.9.0"
+    assert state["authority_change_proposal_issue"] == 221
     assert state["authority_change_proposal_status"] == "ADOPTED_PROTECTED_MAIN"
     assert state["production_activation"]["authority_blocked"] == []
-    assert lock["baseline"]["db_schema"] == "1.8.0"
+    assert lock["baseline"]["db_schema"] == "1.9.0"

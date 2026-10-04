@@ -1,0 +1,22 @@
+{
+  "schema": "TPAA_ACP221_DB_1_9_0_ADOPTION_V1",
+  "proposal_id": "ACP-221",
+  "source_protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+  "source_db_schema_version": "1.8.0",
+  "target_db_schema_version": "1.9.0",
+  "source_core_sha256": "cbb15c1e0029be45213e4d7ab57a78fac47d7cc09c4627a9c388fafdadd2d44e",
+  "target_core_sha256": "7799895d706051f6d4c169da9ba2b73c14003922bed327558737712a64c49d1e",
+  "source_baseline_lock_sha256": "2f3690d5e74e585a34ae35fdef9fb1e0cccb5504c6983d0c97417bb6a106b389",
+  "target_baseline_lock_sha256": "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437",
+  "additive_relation_count": 1,
+  "additive_relations": [
+    "assessment.annotation_subject_context"
+  ],
+  "exact_preserved_field": "InstructorAnnotationRevision.subject_context_id",
+  "shadow_schema_created": false,
+  "formal_adoption_claimed": false,
+  "candidate_gate": "PENDING_EXACT_HEAD_HOSTED_CI",
+  "protected_main_gate": "PENDING_GUARDED_MERGE_AND_EXACT_MERGE_SHA_CI",
+  "b2_unblocked_by_candidate_pr": false,
+  "b3_activated": false
+}

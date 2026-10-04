@@ -1,0 +1,64 @@
+{
+  "proposal_id": "ACP-221",
+  "title": "Preserve standalone M8 annotation subject context beyond DB 1.8.0",
+  "status": "PROPOSED_NOT_ADOPTED",
+  "linked_issue": 221,
+  "blocked_batch": 209,
+  "predecessor_authority_change": "ACP-219",
+  "current_authority": {
+    "db_schema_version": "1.8.0",
+    "protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+    "core_sha256": "cbb15c1e0029be45213e4d7ab57a78fac47d7cc09c4627a9c388fafdadd2d44e",
+    "baseline_lock_sha256": "2f3690d5e74e585a34ae35fdef9fb1e0cccb5504c6983d0c97417bb6a106b389"
+  },
+  "candidate_authority": {
+    "db_schema_version": "1.9.0",
+    "adoption_state": "NONE",
+    "core_sha256": "7799895d706051f6d4c169da9ba2b73c14003922bed327558737712a64c49d1e",
+    "baseline_lock_sha256": "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437"
+  },
+  "rationale": "M8WorkspaceService.annotate_p4 persists InstructorAnnotationRevision independently. DB 1.8.0 debrief.annotation has no canonical carrier for subject_context_id, so exact restart reconstruction is impossible without a dedicated relation.",
+  "changes": [
+    {
+      "relation": "assessment.annotation_subject_context",
+      "purpose": "Preserve exact standalone InstructorAnnotationRevision.subject_context_id.",
+      "fields": [
+        {
+          "name": "annotation_id",
+          "type": "uuid",
+          "nullable": false,
+          "reference": "debrief.annotation(annotation_id)",
+          "identity": "PRIMARY_KEY"
+        },
+        {
+          "name": "subject_context_id",
+          "type": "text",
+          "nullable": false,
+          "reference": "assessment.p4_subject_context(subject_context_id)"
+        }
+      ]
+    }
+  ],
+  "blocker_coverage": {
+    "expected": [
+      "standalone_m8_annotation_subject_context_exact_restart"
+    ],
+    "uncovered": []
+  },
+  "forbidden_workarounds": [
+    "Do not store subject_context_id in audit JSON, evidence JSON, annotation body, object payloads, hashes, or UUID projections.",
+    "Do not mutate historical DB 1.8.0 authority bytes.",
+    "Do not broaden this ACP to unrelated P4/P5/P6 semantics."
+  ],
+  "separate_runtime_work": [
+    "Extend the M8 repository port/adapter to register and exactly read P4SubjectContext and P5CompositionSnapshot.",
+    "Use assessment.annotation_subject_context when persisting or reading standalone annotations."
+  ],
+  "gate": {
+    "candidate_exact_head_required_jobs": "14/14 SUCCESS",
+    "guarded_merge_expected_head_sha": true,
+    "protected_main_exact_merge_sha_required_jobs": "14/14 SUCCESS",
+    "protected_main_reviewer_decision": "GO",
+    "b3_issue_210_remains_blocked": true
+  }
+}

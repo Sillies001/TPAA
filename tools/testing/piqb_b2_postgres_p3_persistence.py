@@ -338,13 +338,13 @@ def run(
 
         profile = P3ModelExecutionProfile.from_canonical()
         acceptance = {
-            "sqlite_current_db_1_8": (
-                sqlite_bootstrap.schema_version == "1.8.0"
-                and sqlite_after.schema_version == "1.8.0"
+            "sqlite_current_db_1_9": (
+                sqlite_bootstrap.schema_version == "1.9.0"
+                and sqlite_after.schema_version == "1.9.0"
             ),
-            "postgres_current_db_1_8": (
-                postgres_bootstrap.schema_version == "1.8.0"
-                and postgres_after.schema_version == "1.8.0"
+            "postgres_current_db_1_9": (
+                postgres_bootstrap.schema_version == "1.9.0"
+                and postgres_after.schema_version == "1.9.0"
             ),
             "sqlite_restart_exact": (
                 sqlite_result["first_restart"]
@@ -416,7 +416,7 @@ def run(
             "sqlite": sqlite_result,
             "postgres": postgres_result,
             "scope": {
-                "db_schema_version": "1.8.0",
+                "db_schema_version": "1.9.0",
                 "real_sqlite_executed": True,
                 "real_postgresql_executed": True,
                 "p3_owned_state_only": True,
@@ -512,7 +512,7 @@ def main() -> int:
             ),
             "error": f"{type(exc).__name__}: {exc}",
             "scope": {
-                "db_schema_version": "1.8.0",
+                "db_schema_version": "1.9.0",
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },

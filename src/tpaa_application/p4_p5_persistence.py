@@ -1,4 +1,4 @@
-"""PIQB B2 exact P4/P5 mapping over adopted DB 1.8 canonical relations."""
+"""PIQB B2 exact P4/P5 mapping over adopted DB 1.9 canonical relations."""
 
 from __future__ import annotations
 
@@ -351,26 +351,13 @@ class P4P5PersistenceRepository:
             content_hash=canonical_hash(payload),
         )
 
-    def _register_annotation(
+    def _annotation_row(
         self,
-        value: InstructorAnnotationRevision,
-        *,
-        subject_context_id: str,
-    ) -> None:
-        if value.subject_context_id != subject_context_id:
-            raise P4P5PersistenceError(
-                "P4_ANNOTATION_CONTEXT_MISMATCH",
-                value.annotation_id,
-            )
-        expected_author = pseudonymous_subject_key(value.author_id)
-        if value.author_subject_key != expected_author:
-            raise P4P5PersistenceError(
-                "P4_ANNOTATION_AUTHOR_KEY_MISMATCH",
-                value.annotation_id,
-            )
-        current_row = self._rows.one(
+        annotation_id: str,
+    ) -> dict[str, object] | None:
+        return self._rows.one(
             "debrief.annotation",
-            where={"annotation_id": value.annotation_id},
+            where={"annotation_id": annotation_id},
             columns=(
                 "annotation_id",
                 "base_release_id",
@@ -390,17 +377,60 @@ class P4P5PersistenceRepository:
                 "created_at",
             ),
         )
-        if current_row is not None:
-            current = self._annotation_from_row(
-                current_row,
-                subject_context_id=subject_context_id,
-            )
-            if current != value:
+
+    def _annotation_subject_context(
+        self,
+        annotation_id: str,
+    ) -> str | None:
+        row = self._rows.one(
+            "assessment.annotation_subject_context",
+            where={"annotation_id": annotation_id},
+            columns=("annotation_id", "subject_context_id"),
+        )
+        if row is None:
+            return None
+        return str(row["subject_context_id"])
+
+    def _ensure_annotation_subject_context(
+        self,
+        annotation_id: str,
+        subject_context_id: str,
+    ) -> None:
+        # DB 1.9 makes this standalone association canonical authority.
+        self.exact_p4_subject(subject_context_id)
+        current = self._annotation_subject_context(annotation_id)
+        if current is not None:
+            if current != subject_context_id:
                 raise P4P5PersistenceError(
-                    "P4_P5_IMMUTABLE_CONFLICT",
-                    value.annotation_id,
+                    "P4_ANNOTATION_CONTEXT_MISMATCH",
+                    annotation_id,
                 )
             return
+        self._rows.insert(
+            "assessment.annotation_subject_context",
+            {
+                "annotation_id": annotation_id,
+                "subject_context_id": subject_context_id,
+            },
+        )
+
+    def _register_annotation(
+        self,
+        value: InstructorAnnotationRevision,
+        *,
+        subject_context_id: str,
+    ) -> None:
+        if value.subject_context_id != subject_context_id:
+            raise P4P5PersistenceError(
+                "P4_ANNOTATION_CONTEXT_MISMATCH",
+                value.annotation_id,
+            )
+        expected_author = pseudonymous_subject_key(value.author_id)
+        if value.author_subject_key != expected_author:
+            raise P4P5PersistenceError(
+                "P4_ANNOTATION_AUTHOR_KEY_MISMATCH",
+                value.annotation_id,
+            )
         payload_hash = canonical_hash(
             {
                 "base_release_id": value.base_release_id,
@@ -427,6 +457,22 @@ class P4P5PersistenceRepository:
                 "P4_ANNOTATION_CONTENT_HASH_MISMATCH",
                 value.annotation_id,
             )
+        current_row = self._annotation_row(value.annotation_id)
+        if current_row is not None:
+            current = self._annotation_from_row(
+                current_row,
+                subject_context_id=subject_context_id,
+            )
+            if current != value:
+                raise P4P5PersistenceError(
+                    "P4_P5_IMMUTABLE_CONFLICT",
+                    value.annotation_id,
+                )
+            self._ensure_annotation_subject_context(
+                value.annotation_id,
+                subject_context_id,
+            )
+            return
         self._rows.insert(
             "debrief.annotation",
             {
@@ -447,6 +493,36 @@ class P4P5PersistenceRepository:
                 "evidence_set_id": value.evidence_set_id,
                 "created_at": value.created_at_utc,
             },
+        )
+        self._ensure_annotation_subject_context(
+            value.annotation_id,
+            subject_context_id,
+        )
+
+    def register_annotation(self, value: InstructorAnnotationRevision) -> None:
+        """Persist one standalone M8 annotation with exact DB 1.9 subject context."""
+        self._register_annotation(
+            value,
+            subject_context_id=value.subject_context_id,
+        )
+
+    def exact_annotation(
+        self,
+        annotation_id: str,
+    ) -> InstructorAnnotationRevision:
+        """Return one standalone M8 annotation from DB 1.9 canonical authority."""
+        subject_context_id = self._annotation_subject_context(annotation_id)
+        if subject_context_id is None:
+            raise P4P5PersistenceError(
+                "P4_ANNOTATION_SUBJECT_CONTEXT_NOT_FOUND",
+                annotation_id,
+            )
+        row = self._annotation_row(annotation_id)
+        if row is None:
+            raise P4P5PersistenceError("P4_ANNOTATION_NOT_FOUND", annotation_id)
+        return self._annotation_from_row(
+            row,
+            subject_context_id=subject_context_id,
         )
 
     def register_p4_revision(
@@ -513,7 +589,7 @@ class P4P5PersistenceRepository:
         capability_refs = (
             () if value.p3_estimate_id is None else (value.p3_estimate_id,)
         )
-        # DB 1.8 keeps the exact logical text world refs in p4_subject_context.
+        # DB 1.9 keeps the exact logical text world refs in p4_subject_context.
         # The legacy UUID[] base columns are not overloaded with hashed text identities.
         self._rows.insert(
             "assessment.actor_assessment",
@@ -717,6 +793,23 @@ class P4P5PersistenceRepository:
             raise P4P5PersistenceError("P4_REVISION_NOT_FOUND", actor_assessment_id)
         return value
 
+    def register_p4(self, revision: P4AssessmentRevision) -> None:
+        """M8AssessmentRepository port: persist an immutable P4 revision."""
+        subject = self.exact_p4_subject(revision.subject_context_id)
+        annotations = tuple(
+            self.exact_annotation(annotation_id)
+            for annotation_id in revision.instructor_annotation_ids
+        )
+        self.register_p4_revision(
+            subject,
+            revision,
+            annotations=annotations,
+        )
+
+    def exact_p4(self, revision_id: str) -> P4AssessmentRevision:
+        """M8AssessmentRepository port: return an exact P4 revision."""
+        return self.exact_p4_revision(revision_id)
+
     def exact_p4_annotation(
         self,
         actor_assessment_id: str,
@@ -728,34 +821,13 @@ class P4P5PersistenceRepository:
                 "P4_ANNOTATION_NOT_BOUND",
                 annotation_id,
             )
-        row = self._rows.one(
-            "debrief.annotation",
-            where={"annotation_id": annotation_id},
-            columns=(
-                "annotation_id",
-                "base_release_id",
-                "session_id",
-                "episode_id",
-                "stage_id",
-                "author_id",
-                "annotation_type",
-                "start_session_time_us",
-                "end_session_time_us",
-                "body_text",
-                "visibility",
-                "status",
-                "revision_no",
-                "supersedes_annotation_id",
-                "evidence_set_id",
-                "created_at",
-            ),
-        )
-        if row is None:
-            raise P4P5PersistenceError("P4_ANNOTATION_NOT_FOUND", annotation_id)
-        return self._annotation_from_row(
-            row,
-            subject_context_id=revision.subject_context_id,
-        )
+        annotation = self.exact_annotation(annotation_id)
+        if annotation.subject_context_id != revision.subject_context_id:
+            raise P4P5PersistenceError(
+                "P4_ANNOTATION_CONTEXT_MISMATCH",
+                annotation_id,
+            )
+        return annotation
 
     def register_p5_composition(self, value: P5CompositionSnapshot) -> None:
         assert_composition_identity(value)
@@ -926,7 +998,7 @@ class P4P5PersistenceRepository:
                     participant.subject_key,
                 )
             participant_ids.append(p4.actor_id)
-        # Exact text world/objective identities live in the DB 1.8 companion
+        # Exact text world/objective identities live in the DB 1.9 companion
         # relations. Legacy UUID[] columns retain only genuine UUID projections.
         self._rows.insert(
             "assessment.mission_assessment",
@@ -1103,3 +1175,13 @@ class P4P5PersistenceRepository:
         if value is None:
             raise P4P5PersistenceError("P5_REVISION_NOT_FOUND", mission_assessment_id)
         return value
+
+    def register_p5(self, revision: P5AssessmentRevision) -> None:
+        """M8AssessmentRepository port: persist an immutable P5 revision."""
+        composition = self.exact_p5_composition(revision.composition_id)
+        self.register_p5_revision(composition, revision)
+
+    def exact_p5(self, revision_id: str) -> P5AssessmentRevision:
+        """M8AssessmentRepository port: return an exact P5 revision."""
+        return self.exact_p5_revision(revision_id)
+

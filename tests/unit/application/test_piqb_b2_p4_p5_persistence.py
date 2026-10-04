@@ -33,6 +33,7 @@ ROLE_ARTIFACT = "99999999-9999-4999-8999-999999999999"
 RELEASE = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
 P4_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 ANNOTATION_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+STANDALONE_ANNOTATION_ID = "cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd"
 TEAM = "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
 SCENARIO = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
 P5_ID = "ffffffff-ffff-4fff-8fff-ffffffffffff"
@@ -80,6 +81,10 @@ def _schema(connection: sqlite3.Connection) -> None:
             supersedes_annotation_id TEXT NULL,
             evidence_set_id TEXT NULL,
             created_at TEXT NOT NULL
+        );
+        CREATE TABLE "assessment.annotation_subject_context" (
+            annotation_id TEXT PRIMARY KEY,
+            subject_context_id TEXT NOT NULL
         );
         CREATE TABLE "assessment.actor_assessment" (
             actor_assessment_id TEXT PRIMARY KEY,
@@ -270,6 +275,52 @@ def _annotation(subject: P4SubjectContext) -> InstructorAnnotationRevision:
     )
 
 
+def _standalone_annotation(
+    subject: P4SubjectContext,
+) -> InstructorAnnotationRevision:
+    author_subject_key = pseudonymous_subject_key(AUTHOR)
+    payload = {
+        "base_release_id": RELEASE,
+        "session_id": SESSION,
+        "episode_id": EPISODE,
+        "stage_id": STAGE,
+        "author_subject_key": author_subject_key,
+        "author_id": AUTHOR,
+        "annotation_type": "INSTRUCTOR_NOTE",
+        "start_session_time_us": 300,
+        "end_session_time_us": 400,
+        "body_text": "Standalone exact instructor note.",
+        "visibility": "EVALUATOR",
+        "status": "ACTIVE",
+        "revision_no": 1,
+        "supersedes_annotation_id": None,
+        "evidence_set_id": EVIDENCE,
+        "subject_context_id": subject.subject_context_id,
+        "created_at_utc": "2026-09-20T12:25:00Z",
+    }
+    return InstructorAnnotationRevision(
+        annotation_id=STANDALONE_ANNOTATION_ID,
+        base_release_id=RELEASE,
+        session_id=SESSION,
+        episode_id=EPISODE,
+        stage_id=STAGE,
+        author_subject_key=author_subject_key,
+        author_id=AUTHOR,
+        annotation_type="INSTRUCTOR_NOTE",
+        start_session_time_us=300,
+        end_session_time_us=400,
+        body_text="Standalone exact instructor note.",
+        visibility="EVALUATOR",
+        status="ACTIVE",
+        revision_no=1,
+        supersedes_annotation_id=None,
+        evidence_set_id=EVIDENCE,
+        subject_context_id=subject.subject_context_id,
+        created_at_utc="2026-09-20T12:25:00Z",
+        content_hash=canonical_hash(payload),
+    )
+
+
 def _p4(
     subject: P4SubjectContext,
     annotation: InstructorAnnotationRevision,
@@ -445,7 +496,7 @@ def _repository(connection: sqlite3.Connection) -> P4P5PersistenceRepository:
     return P4P5PersistenceRepository(SQLiteCanonicalRowRepository(connection))
 
 
-def test_db_1_8_p4_p5_exact_restart_round_trip(tmp_path: Path) -> None:
+def test_db_1_9_p4_p5_exact_restart_round_trip(tmp_path: Path) -> None:
     database = tmp_path / "p4-p5.sqlite"
     connection = sqlite3.connect(database)
     _schema(connection)
@@ -458,6 +509,8 @@ def test_db_1_8_p4_p5_exact_restart_round_trip(tmp_path: Path) -> None:
     repository = _repository(connection)
     repository.register_p4_revision(subject, p4, annotations=(annotation,))
     repository.register_p5_revision(composition, p5)
+    repository.register_p4(p4)
+    repository.register_p5(p5)
     connection.commit()
     connection.close()
 
@@ -465,16 +518,40 @@ def test_db_1_8_p4_p5_exact_restart_round_trip(tmp_path: Path) -> None:
     restarted = _repository(reopened)
     assert restarted.exact_p4_subject(subject.subject_context_id) == subject
     assert restarted.exact_p4_revision(p4.actor_assessment_id) == p4
+    assert restarted.exact_p4(p4.actor_assessment_id) == p4
     assert restarted.exact_p4_annotation(
         p4.actor_assessment_id,
         annotation.annotation_id,
     ) == annotation
+    assert restarted.exact_annotation(annotation.annotation_id) == annotation
     assert restarted.exact_p5_composition(composition.composition_id) == composition
     assert restarted.exact_p5_revision(p5.mission_assessment_id) == p5
+    assert restarted.exact_p5(p5.mission_assessment_id) == p5
     reopened.close()
 
 
-def test_db_1_8_ordered_text_refs_and_immutable_replay(tmp_path: Path) -> None:
+def test_db_1_9_standalone_annotation_m8_port_restart(tmp_path: Path) -> None:
+    database = tmp_path / "standalone-annotation.sqlite"
+    connection = sqlite3.connect(database)
+    _schema(connection)
+    subject = _subject()
+    annotation = _standalone_annotation(subject)
+    repository = _repository(connection)
+    repository.register_p4_subject(subject)
+    repository.register_annotation(annotation)
+    connection.commit()
+    connection.close()
+
+    reopened = sqlite3.connect(database)
+    restarted = _repository(reopened)
+    assert restarted.exact_annotation(annotation.annotation_id) == annotation
+    restarted.register_annotation(annotation)
+    with pytest.raises(P4P5PersistenceError, match="P4_P5_IMMUTABLE_CONFLICT"):
+        restarted.register_annotation(replace(annotation, body_text="drift"))
+    reopened.close()
+
+
+def test_db_1_9_ordered_text_refs_and_immutable_replay(tmp_path: Path) -> None:
     database = tmp_path / "ordered.sqlite"
     connection = sqlite3.connect(database)
     _schema(connection)

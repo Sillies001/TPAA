@@ -29,6 +29,7 @@ from tools.storage.postgres_db import (  # noqa: E402
 )
 from tpaa_application import P4P5PersistenceError, P4P5PersistenceRepository  # noqa: E402
 from tpaa_assessment import (  # noqa: E402
+    InstructorAnnotationRevision,
     P4AssessmentRevision,
     P4SubjectContext,
     P5AssessmentRevision,
@@ -59,6 +60,7 @@ RELEASE = "94100000-0000-4000-8000-000000000009"
 EVIDENCE = "94100000-0000-4000-8000-00000000000a"
 ACTOR = "94100000-0000-4000-8000-00000000000b"
 P4_ID = "94100000-0000-4000-8000-00000000000c"
+ANNOTATION_ID = "94100000-0000-4000-8000-00000000000f"
 TEAM = "94100000-0000-4000-8000-00000000000d"
 P5_ID = "94100000-0000-4000-8000-00000000000e"
 AS_OF = "2026-09-20T12:00:00Z"
@@ -104,6 +106,50 @@ def _subject() -> P4SubjectContext:
         evidence_set_id=EVIDENCE,
         as_of_utc=AS_OF,
         knowledge_time_utc="2026-09-20T11:59:59Z",
+    )
+
+
+def _annotation(subject: P4SubjectContext) -> InstructorAnnotationRevision:
+    author_subject_key = pseudonymous_subject_key(ACTOR)
+    payload = {
+        "base_release_id": RELEASE,
+        "session_id": SESSION,
+        "episode_id": EPISODE,
+        "stage_id": None,
+        "author_subject_key": author_subject_key,
+        "author_id": ACTOR,
+        "annotation_type": "INSTRUCTOR_NOTE",
+        "start_session_time_us": 100,
+        "end_session_time_us": 200,
+        "body_text": "PIQB B2 standalone durable annotation.",
+        "visibility": "EVALUATOR",
+        "status": "ACTIVE",
+        "revision_no": 1,
+        "supersedes_annotation_id": None,
+        "evidence_set_id": EVIDENCE,
+        "subject_context_id": subject.subject_context_id,
+        "created_at_utc": "2026-09-20T12:20:00Z",
+    }
+    return InstructorAnnotationRevision(
+        annotation_id=ANNOTATION_ID,
+        base_release_id=RELEASE,
+        session_id=SESSION,
+        episode_id=EPISODE,
+        stage_id=None,
+        author_subject_key=author_subject_key,
+        author_id=ACTOR,
+        annotation_type="INSTRUCTOR_NOTE",
+        start_session_time_us=100,
+        end_session_time_us=200,
+        body_text="PIQB B2 standalone durable annotation.",
+        visibility="EVALUATOR",
+        status="ACTIVE",
+        revision_no=1,
+        supersedes_annotation_id=None,
+        evidence_set_id=EVIDENCE,
+        subject_context_id=subject.subject_context_id,
+        created_at_utc="2026-09-20T12:20:00Z",
+        content_hash=canonical_hash(payload),
     )
 
 
@@ -328,7 +374,7 @@ def _seed(rows: CanonicalRowRepository) -> None:
             "training_type_set": ("QUALIFICATION",),
             "data_status": "READY",
             "source_count": 1,
-            "schema_version": "1.8.0",
+            "schema_version": "1.9.0",
         },
         field_kinds={"training_type_set": "text_array"},
     )
@@ -433,12 +479,14 @@ def _projection(repo: P4P5PersistenceRepository) -> dict[str, object]:
     subject = _subject()
     composition = _composition(subject)
     exact_subject = repo.exact_p4_subject(subject.subject_context_id)
-    exact_p4 = repo.exact_p4_revision(P4_ID)
+    exact_p4 = repo.exact_p4(P4_ID)
+    exact_annotation = repo.exact_annotation(ANNOTATION_ID)
     exact_composition = repo.exact_p5_composition(composition.composition_id)
-    exact_p5 = repo.exact_p5_revision(P5_ID)
+    exact_p5 = repo.exact_p5(P5_ID)
     return {
         "subject": asdict(exact_subject),
         "p4": asdict(exact_p4),
+        "standalone_annotation": asdict(exact_annotation),
         "composition": asdict(exact_composition),
         "p5": asdict(exact_p5),
         "ordered_machine_evidence_refs": list(exact_p4.machine_evidence_ids),
@@ -449,10 +497,16 @@ def _projection(repo: P4P5PersistenceRepository) -> dict[str, object]:
 def _register(repo: P4P5PersistenceRepository) -> None:
     subject = _subject()
     p4 = _p4(subject)
+    annotation = _annotation(subject)
     composition = _composition(subject)
     p5 = _p5(composition)
     repo.register_p4_revision(subject, p4)
+    repo.register_annotation(annotation)
     repo.register_p5_revision(composition, p5)
+    # Exercise the exact M8 repository port methods on replay.
+    repo.register_p4(p4)
+    repo.register_p5(p5)
+    repo.register_annotation(annotation)
 
 
 def _conflict_code(repo: P4P5PersistenceRepository) -> str:
@@ -553,13 +607,13 @@ def run(
         sqlite_first = cast(dict[str, object], sqlite_result["first_restart"])
         postgres_first = cast(dict[str, object], postgres_result["first_restart"])
         acceptance = {
-            "sqlite_current_db_1_8": (
-                sqlite_bootstrap.schema_version == "1.8.0"
-                and sqlite_after.schema_version == "1.8.0"
+            "sqlite_current_db_1_9": (
+                sqlite_bootstrap.schema_version == "1.9.0"
+                and sqlite_after.schema_version == "1.9.0"
             ),
-            "postgres_current_db_1_8": (
-                postgres_bootstrap.schema_version == "1.8.0"
-                and postgres_after.schema_version == "1.8.0"
+            "postgres_current_db_1_9": (
+                postgres_bootstrap.schema_version == "1.9.0"
+                and postgres_after.schema_version == "1.9.0"
             ),
             "sqlite_postgres_logical_parity": sqlite_result == postgres_result,
             "sqlite_restart_exact": (
@@ -575,6 +629,20 @@ def run(
             "ordered_objective_refs_preserved": (
                 sqlite_first["ordered_objective_refs"] == expected_objectives
                 and postgres_first["ordered_objective_refs"] == expected_objectives
+            ),
+            "standalone_annotation_subject_context_restart_exact": (
+                cast(dict[str, object], sqlite_first["standalone_annotation"])[
+                    "subject_context_id"
+                ] == _subject().subject_context_id
+                and cast(dict[str, object], postgres_first["standalone_annotation"])[
+                    "subject_context_id"
+                ] == _subject().subject_context_id
+            ),
+            "m8_repository_port_exact": (
+                sqlite_first["p4"] == postgres_first["p4"]
+                and sqlite_first["p5"] == postgres_first["p5"]
+                and sqlite_first["standalone_annotation"]
+                == postgres_first["standalone_annotation"]
             ),
             "immutable_conflict_fail_closed": (
                 sqlite_result["immutable_conflict_code"] == "P4_P5_IMMUTABLE_CONFLICT"
@@ -592,18 +660,19 @@ def run(
             "status": "PASS" if not failed else "FAIL",
             "implementation_complete": False,
             "task_complete": False,
-            "completion_gate": "P6_AND_P3_DEPENDENCY_PENDING",
+            "completion_gate": "B2_CANDIDATE_REVIEW_PENDING",
             "acceptance": acceptance,
             "failed_acceptance": failed,
             "sqlite": sqlite_result,
             "postgres": postgres_result,
             "scope": {
-                "db_schema_version": "1.8.0",
+                "db_schema_version": "1.9.0",
                 "real_sqlite_executed": True,
                 "real_postgresql_executed": True,
                 "ordered_text_relations": [
                     "assessment.actor_assessment_machine_evidence_ref",
                     "assessment.mission_assessment_objective_ref",
+                    "assessment.annotation_subject_context",
                 ],
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
@@ -658,10 +727,10 @@ def main() -> int:
             "status": "FAIL",
             "implementation_complete": False,
             "task_complete": False,
-            "completion_gate": "P6_AND_P3_DEPENDENCY_PENDING",
+            "completion_gate": "B2_CANDIDATE_REVIEW_PENDING",
             "error": f"{type(exc).__name__}: {exc}",
             "scope": {
-                "db_schema_version": "1.8.0",
+                "db_schema_version": "1.9.0",
                 "shadow_schema_created": False,
                 "formal_b2_qualification_claimed": False,
             },
