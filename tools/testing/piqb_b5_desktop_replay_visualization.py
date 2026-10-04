@@ -188,10 +188,14 @@ def qualify(*, platform: str, source_revision: str) -> dict[str, object]:
     polyline = build_2d_polyline(presentation)
     cesium = build_cesium_trajectory_packets(presentation)
 
-    navigation_rows = [] if navigation is None else [
-        navigation.item(index).text()
-        for index in range(navigation.count())
-    ]
+    navigation_rows = (
+        []
+        if navigation is None
+        else [
+            navigation.item(index).text()
+            for index in range(navigation.count())
+        ]
+    )
     logical_product = {
         "navigation": [
             {
