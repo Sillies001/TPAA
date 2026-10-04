@@ -19,9 +19,9 @@ def test_clean_file_bootstrap_and_verify(tmp_path: Path) -> None:
     verified = verify_sqlite(database)
 
     assert created == verified
-    assert created.schema_version == "1.8.0"
+    assert created.schema_version == "1.9.0"
     assert created.core_baseline == "CB-1.4.0"
-    assert created.table_count == 94
+    assert created.table_count == 95
     assert created.journal_mode == "wal"
     assert len(created.authority_sha256) == 64
     assert len(created.baseline_lock_sha256) == 64
@@ -97,7 +97,7 @@ def test_unified_developer_cli_bootstrap_and_verify(tmp_path: Path) -> None:
         text=True,
     )
     assert verified.returncode == 0, verified.stderr
-    assert '"schema_version": "1.8.0"' in verified.stdout
+    assert '"schema_version": "1.9.0"' in verified.stdout
 
 
 def test_verify_missing_database_does_not_create_file(tmp_path: Path) -> None:
