@@ -9,9 +9,21 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[3]
 VERIFY_PATH = REPO_ROOT / "tools" / "ci" / "verify_ci.py"
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
+PLATFORM_RUNNER = REPO_ROOT / "tools" / "ci" / "run_platform_parallel_lanes.py"
 DISPATCHER = REPO_ROOT / "tools" / "dev" / "tpaa_dev.py"
 GATE_RUNNER = REPO_ROOT / "tools" / "ci" / "run_gate.py"
 SOURCE_REVISION = "${{ github.event.pull_request.head.sha || github.sha }}"
+
+
+def _orchestration_text() -> str:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    runner = PLATFORM_RUNNER.read_text(encoding="utf-8")
+    runner = (
+        runner.replace("{platform}", "${{ matrix.platform }}")
+        .replace("{source_revision}", SOURCE_REVISION)
+        .replace("{desktop_profile}", "${{ matrix.desktop_profile }}")
+    )
+    return workflow + "\n" + runner
 
 
 def _load_verifier() -> Any:
@@ -29,7 +41,7 @@ def test_ci_orchestration_contract_passes() -> None:
 
 
 def test_workflow_is_real_windows_and_linux_matrix() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "runner: ubuntu-24.04" in text
     assert "runner: windows-2025" in text
     assert "fail-fast: false" in text
@@ -37,15 +49,17 @@ def test_workflow_is_real_windows_and_linux_matrix() -> None:
 
 
 def test_workflow_calls_one_governed_ci_gate_command() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "python tools/dev/tpaa_dev.py ci-check" in text
-    assert "--expected-platform ${{ matrix.platform }}" in text
-    assert "continue-on-error" not in text
-    assert "|| true" not in text
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    orchestration = _orchestration_text()
+    assert "python tools/dev/tpaa_dev.py ci-check" in workflow
+    assert "--expected-platform ${{ matrix.platform }}" in workflow
+    assert "continue-on-error" not in workflow
+    assert "|| true" not in workflow
+    assert "run_platform_parallel_lanes.py" in orchestration
 
 
 def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert text.count(f"ref: {SOURCE_REVISION}") == 13
     assert "${{ github.sha }}" not in text
     assert f"pattern: tpaa-ci-*-{SOURCE_REVISION}" in text
@@ -101,7 +115,7 @@ def test_ci_gate_dispatches_step10_package_and_cold_start_fail_closed() -> None:
 
 
 def test_linux_runner_installs_required_qt_egl_runtime() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "if: ${{ matrix.platform == 'linux' }}" in text
     assert "sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1" in text
 
@@ -117,7 +131,7 @@ def test_pytest_and_mypy_resolve_repository_tool_packages() -> None:
 
 
 def test_step9_fixture_and_logical_equivalence_are_fail_closed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py fixture-check" in text
     assert "--evidence evidence/tests/framework-${{ matrix.platform }}.json" in text
     assert "python tools/dev/tpaa_dev.py platform-logical-product" in text
@@ -137,7 +151,7 @@ def test_step9_fixture_and_logical_equivalence_are_fail_closed_in_ci() -> None:
 
 
 def test_step10_workflow_archives_build_evidence_and_packages() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py manifest" in text
     assert "python tools/dev/tpaa_dev.py package" in text
     assert "evidence/devops/${{ matrix.platform }}" in text
@@ -145,7 +159,7 @@ def test_step10_workflow_archives_build_evidence_and_packages() -> None:
 
 
 def test_m1_entry_preparation_is_fail_closed_and_archived() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py verify-m1-entry-preparation" in text
     assert "python tools/dev/tpaa_dev.py m1-entry-manifest" in text
     assert "--profile ${{ matrix.desktop_profile }}" in text
@@ -154,19 +168,17 @@ def test_m1_entry_preparation_is_fail_closed_and_archived() -> None:
 
 
 def test_m1_entry_gate_state_is_verified_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py verify-m1-entry-gate-state" in text
 
 
 def test_m1_detailed_design_is_verified_on_both_platforms() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Verify M1 detailed-design runway" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py verify-m1-detailed-design" in text
 
 
 def test_m1_tst_001_fixture_evidence_is_archived_on_both_platforms() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-TST-001 fixture evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-fixture-check" in text
     assert (
         "--evidence evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json"
@@ -179,7 +191,7 @@ def test_m1_tst_001_fixture_evidence_is_archived_on_both_platforms() -> None:
 
 
 def test_m1_entry_activation_is_inside_required_exit_review_check() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "m0-exit-review:" in text
     assert "- name: Verify or activate M1 Entry" in text
     assert "python tools/dev/tpaa_dev.py m1-entry-activation" in text
@@ -195,7 +207,7 @@ def test_m1_entry_activation_is_inside_required_exit_review_check() -> None:
 
 
 def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "m0-exit-postgres:" in text
     assert "image: postgres:16" in text
     assert "python tools/dev/tpaa_dev.py db-postgres-acceptance" in text
@@ -209,8 +221,7 @@ def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
 
 
 def test_m1_data_001_source_adapter_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-001 source-adapter evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-source-adapter-check" in text
     assert "--evidence evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json" in text
     assert "evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json" in text
@@ -219,8 +230,7 @@ def test_m1_data_001_source_adapter_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_data_002_source_registry_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-002 source-registry evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-source-registry-check" in text
     assert (
         "--evidence evidence/m1-data-002/${{ matrix.platform }}/source-registry.json"
@@ -235,8 +245,7 @@ def test_m1_data_002_source_registry_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_data_003_session_time_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-003 Session Time evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-session-time-check" in text
     assert (
         "--evidence evidence/m1-data-003/${{ matrix.platform }}/session-time.json"
@@ -252,8 +261,7 @@ def test_m1_data_003_session_time_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_data_004_aircraft_identity_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-004 aircraft-identity evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-aircraft-identity-check" in text
     assert (
         "--evidence evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json"
@@ -269,8 +277,7 @@ def test_m1_data_004_aircraft_identity_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_data_005_canonical_flight_channel_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-005 Canonical-flight-channel evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-canonical-flight-channels-check" in text
     assert (
         "--evidence evidence/m1-data-005/${{ matrix.platform }}/canonical-flight-channels.json"
@@ -285,8 +292,7 @@ def test_m1_data_005_canonical_flight_channel_evidence_is_governed_in_ci() -> No
 
 
 def test_m1_data_006_evaluation_context_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-006 Evaluation Context evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-evaluation-context-check" in text
     assert (
         "--evidence evidence/m1-data-006/${{ matrix.platform }}/evaluation-context.json"
@@ -301,8 +307,7 @@ def test_m1_data_006_evaluation_context_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_data_007_lineage_quality_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-DATA-007 lineage-quality evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-lineage-quality-check" in text
     assert (
         "--evidence evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json"
@@ -317,8 +322,7 @@ def test_m1_data_007_lineage_quality_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_world_002_basic_stage_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-WORLD-002 BASIC_FLIGHT_V1 Stage evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-basic-stage-check" in text
     assert (
         "--evidence evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json"
@@ -333,8 +337,7 @@ def test_m1_world_002_basic_stage_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_world_003_stage_quality_evidence_is_governed_in_ci() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1-WORLD-003 Stage quality/status evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-stage-quality-check" in text
     assert (
         "--evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json"
@@ -349,8 +352,7 @@ def test_m1_world_003_stage_quality_evidence_is_governed_in_ci() -> None:
 
 
 def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit consolidated M1 Batch 1 core evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-batch-1-core-check" in text
     assert (
         "--evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json"
@@ -374,8 +376,7 @@ def test_m1_batch_1_core_evidence_is_consolidated_and_cross_platform_compared() 
 
 
 def test_m2_met_003_air_formal_delivery_is_cross_platform_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M2-MET-003 AIR formal-delivery evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m2-air-formal-delivery-check" in text
     assert (
         "--evidence evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json"
@@ -398,8 +399,7 @@ def test_m2_met_003_air_formal_delivery_is_cross_platform_compared() -> None:
 
 
 def test_m2_met_004_sns_detection_is_cross_platform_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M2-MET-004 SNS detection evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m2-sns-detection-check" in text
     assert "evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json" in text
     assert "- name: Compare Windows and Linux M2-MET-004 SNS detection" in text
@@ -425,8 +425,7 @@ def test_m2_met_004_sns_detection_is_cross_platform_compared() -> None:
 
 
 def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1 Batch 2 service smoke evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-batch-2-service-smoke" in text
     assert "--expected-platform ${{ matrix.platform }}" in text
     assert f"--source-revision {SOURCE_REVISION}" in text
@@ -453,7 +452,7 @@ def test_m1_batch_2_service_smoke_is_cross_platform_and_logically_compared() -> 
 
 
 def test_m1_batch_2_storage_parity_is_real_postgres_hosted_evidence() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "- name: Emit M1 Batch 2 SQLite PostgreSQL parity evidence" in text
     assert "python tools/dev/tpaa_dev.py m1-batch-2-storage-parity" in text
     assert "--database tpaa_m1_batch_2_parity" in text
@@ -465,8 +464,7 @@ def test_m1_batch_2_storage_parity_is_real_postgres_hosted_evidence() -> None:
 
 
 def test_m1_batch_2_backend_acceptance_is_emitted_on_both_platforms() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit consolidated M1 Batch 2 backend evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-batch-2-backend-check" in text
     assert "--platform ${{ matrix.platform }}" in text
     assert f"--source-revision {SOURCE_REVISION}" in text
@@ -475,7 +473,7 @@ def test_m1_batch_2_backend_acceptance_is_emitted_on_both_platforms() -> None:
 
 
 def test_m1_batch_2_review_aggregates_exact_revision_evidence() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "m1-batch-2-review:" in text
     assert "name: M1 Batch 2 Review" in text
     assert "python tools/dev/tpaa_dev.py m1-batch-2-review" in text
@@ -506,8 +504,7 @@ def test_m1_batch_2_review_aggregates_exact_revision_evidence() -> None:
 
 
 def test_m1_batch_3_desktop_e2e_is_cross_platform_compared_and_reviewed() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M1 Batch 3 Desktop E2E evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m1-batch-3-desktop-e2e" in text
     assert "--expected-platform ${{ matrix.platform }}" in text
     assert f"--source-revision {SOURCE_REVISION}" in text
@@ -529,8 +526,7 @@ def test_m1_batch_3_desktop_e2e_is_cross_platform_compared_and_reviewed() -> Non
 
 
 def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit incremental M2-MET-006 runtime-contract evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check" in text
     assert (
         text.count(
@@ -561,8 +557,7 @@ def test_m2_met_006_runtime_contract_increment_is_cross_platform_compared() -> N
 
 
 def test_m2_met_007_batch_replay_increment_is_cross_platform_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit incremental M2-MET-007 batch/replay evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m2-batch-replay-incremental-check" in text
     assert (
         text.count(
@@ -593,8 +588,7 @@ def test_m2_met_007_batch_replay_increment_is_cross_platform_compared() -> None:
 
 
 def test_m2_batch_2_authority_gap_sentinel_is_cross_platform_compared() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "- name: Emit M2 Batch 2 authority-gap sentinel evidence" in text
+    text = _orchestration_text()
     assert "python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-check" in text
     assert (
         text.count(
@@ -614,7 +608,7 @@ def test_m2_batch_2_authority_gap_sentinel_is_cross_platform_compared() -> None:
 
 
 def test_m2_batch_2_review_aggregates_exact_revision_without_unblocking() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
+    text = _orchestration_text()
     assert "- name: Review M2 Batch 2 exact-revision gate" in text
     assert "python tools/dev/tpaa_dev.py m2-batch-2-review" in text
     assert "--platform-root downloaded/evidence" in text
@@ -633,3 +627,28 @@ def test_m2_batch_2_review_aggregates_exact_revision_without_unblocking() -> Non
         in review_upload
     )
     assert "path: evidence/m2-batch-2/review.json" in review_upload
+
+
+def test_piqb_b2_p6_postgres_persistence_is_governed_in_required_job() -> None:
+    text = _orchestration_text()
+    assert "Execute PIQB B2 P6 real PostgreSQL exact persistence qualification" in text
+    assert "python tools/testing/piqb_b2_postgres_p6_persistence.py" in text
+    assert "--database tpaa_piqb_b2_p6_persistence" in text
+    assert (
+        "--evidence evidence/piqb-b2/postgres-p6-persistence.json"
+        in text
+    )
+    assert "evidence/piqb-b2/postgres-p4-p5-persistence.json" in text
+    assert "evidence/piqb-b2/postgres-product-persistence.json" in text
+
+
+def test_piqb_b2_p3_postgres_persistence_is_governed_in_required_job() -> None:
+    text = _orchestration_text()
+    assert "Execute PIQB B2 P3 real PostgreSQL exact persistence qualification" in text
+    assert "python tools/testing/piqb_b2_postgres_p3_persistence.py" in text
+    assert "--database tpaa_piqb_b2_p3_persistence" in text
+    assert (
+        "--evidence evidence/piqb-b2/postgres-p3-persistence.json"
+        in text
+    )
+    assert "evidence/piqb-b2/postgres-p3-persistence.json" in text

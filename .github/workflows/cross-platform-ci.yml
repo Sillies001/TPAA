@@ -70,438 +70,11 @@ jobs:
           uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.desktop_profile }} --output evidence/devops/${{ matrix.platform }}/desktop
           uv run --locked python tools/dev/tpaa_dev.py manifest --profile ${{ matrix.service_profile }} --output evidence/devops/${{ matrix.platform }}/service
 
-      - name: Verify M1 Entry preparation contracts
-        run: uv run --locked python tools/dev/tpaa_dev.py verify-m1-entry-preparation
-
-      - name: Verify M1 Entry Gate review state
-        run: uv run --locked python tools/dev/tpaa_dev.py verify-m1-entry-gate-state
-
-      - name: Verify M1 detailed-design runway
-        run: uv run --locked python tools/dev/tpaa_dev.py verify-m1-detailed-design
-
-      - name: Emit M1-TST-001 fixture evidence
+      - name: Execute milestone evidence lanes in parallel
         run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-fixture-check
-          --evidence evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json
-
-      - name: Emit M1-DATA-001 source-adapter evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-source-adapter-check
-          --evidence evidence/m1-data-001/${{ matrix.platform }}/source-adapter.json
-
-      - name: Emit M2-DATA-001 reference-truth evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-reference-truth-check
-          --evidence evidence/m2-data-001/${{ matrix.platform }}/reference-truth.json
-
-      - name: Emit M2-DATA-002 time-alignment evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-time-alignment-check
-          --evidence evidence/m2-data-002/${{ matrix.platform }}/time-alignment.json
-
-      - name: Emit M2-DATA-003 mission-system evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-mission-system-check
-          --evidence evidence/m2-data-003/${{ matrix.platform }}/mission-system.json
-
-      - name: Emit M2-DATA-004 measurement-alignment evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-measurement-alignment-check
-          --evidence evidence/m2-data-004/${{ matrix.platform }}/measurement-alignment.json
-
-      - name: Emit M2-DATA-005 fixture-family evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-fixture-family-check
-          --evidence evidence/m2-data-005/${{ matrix.platform }}/fixture-family.json
-
-      - name: Emit M2-WORLD-001 reference/time World evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-reference-time-world-check
-          --evidence evidence/m2-world-001/${{ matrix.platform }}/reference-time-world.json
-
-      - name: Emit M2-WORLD-002 RADAR sensor World evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-radar-sensor-world-check
-          --evidence evidence/m2-world-002/${{ matrix.platform }}/radar-sensor-world.json
-
-      - name: Emit M2-WORLD-003 Stage/World lineage evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-stage-world-lineage-check
-          --evidence evidence/m2-world-003/${{ matrix.platform }}/stage-world-lineage.json
-
-      - name: Emit M3-WORLD-001 WVR Stage/World/Event evidence
-        run: >-
-          uv run --locked python tools/testing/m3_wvr_world_check.py
-          --evidence evidence/m3-world-001/${{ matrix.platform }}/wvr-stage-world-event.json
-
-      - name: Emit M3-WORLD-002 BVR Stage/World/Event evidence
-        run: >-
-          uv run --locked python tools/testing/m3_bvr_world_check.py
-          --evidence evidence/m3-world-002/${{ matrix.platform }}/bvr-stage-world-event.json
-
-      - name: Emit M3-WORLD-003 Strike Stage/World/Event evidence
-        run: >-
-          uv run --locked python tools/testing/m3_strike_world_check.py
-          --evidence evidence/m3-world-003/${{ matrix.platform }}/strike-stage-world-event.json
-
-      - name: Emit M3-WORLD-004 mission-product applicability evidence
-        run: >-
-          uv run --locked python tools/testing/m3_mission_product_applicability_check.py
-          --evidence evidence/m3-world-004/${{ matrix.platform }}/mission-product-applicability.json
-
-      - name: Emit M3-WORLD-005 four-training fixture-family evidence
-        run: >-
-          uv run --locked python tools/testing/m3_fixture_family_check.py check
-          --evidence evidence/m3-world-005/${{ matrix.platform }}/fixture-family.json
-
-      - name: Emit M3-MET-001 integrated general Metric Engine evidence
-        run: >-
-          uv run --locked python tools/testing/m3_general_metric_engine_check.py check
-          --evidence evidence/m3-met-001/${{ matrix.platform }}/general-engine.json
-
-      - name: Emit M3-MET-002 AIR remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_air_remainder_check.py check
-          --evidence evidence/m3-met-002/${{ matrix.platform }}/air-remainder.json
-
-      - name: Emit M3-MET-003 TRK remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_track_remainder_check.py check
-          --evidence evidence/m3-met-003/${{ matrix.platform }}/track-remainder.json
-
-      - name: Emit M3-MET-004 ID remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_identification_remainder_check.py check
-          --evidence evidence/m3-met-004/${{ matrix.platform }}/identification-remainder.json
-
-      - name: Emit M3-MET-005 passive remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_passive_remainder_check.py check
-          --evidence evidence/m3-met-005/${{ matrix.platform }}/passive-remainder.json
-
-      - name: Emit M3-MET-006 ESM remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_esm_remainder_check.py check
-          --evidence evidence/m3-met-006/${{ matrix.platform }}/esm-remainder.json
-
-      - name: Emit M3-MET-007 datalink remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_datalink_remainder_check.py check
-          --evidence evidence/m3-met-007/${{ matrix.platform }}/datalink-remainder.json
-
-      - name: Emit M3-MET-008 fusion remainder evidence
-        run: >-
-          uv run --locked python tools/testing/m3_fusion_remainder_check.py check
-          --evidence evidence/m3-met-008/${{ matrix.platform }}/fusion-remainder.json
-
-      - name: Emit M3-MET-009 runtime closure evidence
-        run: >-
-          uv run --locked python tools/testing/m3_runtime_closure_check.py check
-          --evidence evidence/m3-met-009/${{ matrix.platform }}/runtime-closure.json
-
-      - name: Emit M3-OBS-001 publication routing evidence
-        run: >-
-          uv run --locked python tools/testing/m3_publication_routing_check.py check
-          --evidence evidence/m3-obs-001/${{ matrix.platform }}/publication-routing.json
-
-      - name: Emit M3-OBS-002 immutable Release evidence
-        run: >-
-          uv run --locked python tools/testing/m3_immutable_release_check.py check
-          --evidence evidence/m3-obs-002/${{ matrix.platform }}/immutable-release.json
-
-      - name: Emit M3-OBS-003 idempotent publication/replay evidence
-        run: >-
-          uv run --locked python tools/testing/m3_idempotent_publication_check.py check
-          --evidence evidence/m3-obs-003/${{ matrix.platform }}/publication-replay.json
-
-      - name: Emit M3-API-001 release-bound Metric/Evidence evidence
-        run: >-
-          uv run --locked python tools/testing/m3_api_release_query_check.py check
-          --evidence evidence/m3-api-001/${{ matrix.platform }}/release-query.json
-
-      - name: Emit M3-API-002 four-training workspace evidence
-        run: >-
-          uv run --locked python tools/testing/m3_api_workspace_check.py check
-          --evidence evidence/m3-api-002/${{ matrix.platform }}/workspace.json
-      - name: Emit M3-GUI-001 four-training Desktop navigation evidence
-        run: >-
-          uv run --locked python tools/testing/m3_gui_workspace_navigation_check.py check
-          --evidence evidence/m3-gui-001/${{ matrix.platform }}/workspace-navigation.json
-
-      - name: Emit M3-GUI-002 family/applicability presentation evidence
-        run: >-
-          uv run --locked python tools/testing/m3_gui_family_applicability_check.py check
-          --evidence evidence/m3-gui-002/${{ matrix.platform }}/family-applicability.json
-
-      - name: Emit M3-GUI-003 status/Evidence/historical replay evidence
-        run: >-
-          uv run --locked python tools/testing/m3_gui_status_evidence_replay_check.py check
-          --evidence evidence/m3-gui-003/${{ matrix.platform }}/status-evidence-replay.json
-
-      - name: Emit M3-TST-001 Catalog coverage evidence
-        run: >-
-          uv run --locked python tools/testing/m3_catalog_coverage_check.py check
-          --evidence evidence/m3-tst-001/${{ matrix.platform }}/catalog-coverage.json
-
-      - name: Emit M3-TST-002 four-training Golden evidence
-        run: >-
-          uv run --locked python tools/testing/m3_four_training_golden_check.py check
-          --evidence evidence/m3-tst-002/${{ matrix.platform }}/four-training-golden.json
-
-      - name: Emit M3-TST-003 AIR remainder Golden evidence
-        run: >-
-          uv run --locked python tools/testing/m3_air_golden_check.py check
-          --evidence evidence/m3-tst-003/${{ matrix.platform }}/air-golden.json
-
-      - name: Emit M3-TST-004 product-layer 48 Golden evidence
-        run: >-
-          uv run --locked python tools/testing/m3_product_layer_golden_check.py check
-          --evidence evidence/m3-tst-004/${{ matrix.platform }}/product-layer-golden.json
-
-      - name: Emit M3-TST-005 Release/API/GUI platform qualification
-        run: >-
-          uv run --locked python tools/testing/m3_release_api_gui_storage_qualification.py check
-          --evidence-root evidence
-          --platform ${{ matrix.platform }}
-          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m3-tst-005/${{ matrix.platform }}/release-api-gui.json
-
-      - name: Emit M4 Batch 1 longitudinal sample evidence
-        run: >-
-          uv run --locked python tools/testing/m4_batch_1_longitudinal_sample_check.py
-          --evidence evidence/m4-batch-1/${{ matrix.platform }}/longitudinal-sample.json
-
-      - name: Emit M4 Batch 2 trend Release replay evidence
-        run: >-
-          uv run --locked python tools/testing/m4_batch_2_trend_release_check.py
-          --evidence evidence/m4-batch-2/${{ matrix.platform }}/trend-release.json
-
-      - name: Emit M4 Batch 3 API GUI Debrief evidence
-        run: >-
-          uv run --locked python tools/testing/m4_batch_3_api_gui_debrief_check.py
-          --evidence evidence/m4-batch-3/${{ matrix.platform }}/api-gui-debrief.json
-
-      - name: Emit M4-TST-004 exact 104/12 longitudinal coverage
-        run: >-
-          uv run --locked python tools/testing/m4_longitudinal_coverage_check.py
-          --evidence evidence/m4-tst-004/${{ matrix.platform }}/coverage.json
-
-      - name: Emit M4-TST-005 platform qualification
-        run: >-
-          uv run --locked python tools/testing/m4_release_api_gui_storage_qualification.py check
-          --evidence-root evidence
-          --platform ${{ matrix.platform }}
-          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m4-tst-005/${{ matrix.platform }}/platform.json
-
-      - name: Emit M5 Batch 1 qualification profile substrate
-        run: >-
-          uv run --locked python tools/testing/m5_batch_1_qualification_profile_check.py
-          --platform ${{ matrix.platform }}
-          --evidence evidence/m5-batch-1/${{ matrix.platform }}/qualification-profile.json
-
-      - name: Execute M5 Batch 2 offline package performance security qualification
-        env:
-          TPAA_M5_STORAGE_CLASS: SSD
-        run: >-
-          uv run --locked python tools/testing/m5_batch_2_qualification.py
-          --platform ${{ matrix.platform }}
-          --package-output dist/m5/${{ matrix.platform }}
-          --evidence evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
-
-      - name: Execute M5 Batch 3 platform upgrade rollback recovery qualification
-        run: >-
-          uv run --locked python tools/testing/m5_batch_3_platform_qualification.py
-          --platform ${{ matrix.platform }}
-          --batch2 evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
-          --evidence evidence/m5-batch-3/${{ matrix.platform }}/platform-recovery.json
-
-      - name: Execute M5 Batch 4 clean formal package reconstruction
-        run: >-
-          uv run --locked python tools/testing/m5_batch_4_cold_reconstruction.py
-          --platform ${{ matrix.platform }}
-          --batch2 evidence/m5-batch-2/${{ matrix.platform }}/qualification.json
-          --batch3 evidence/m5-batch-3/${{ matrix.platform }}/platform-recovery.json
-          --cold-start evidence/devops/${{ matrix.platform }}/cold-start.json
-          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m5-batch-4/${{ matrix.platform }}/cold-reconstruction.json
-
-      - name: Emit M2-MET-001 general Metric Engine evidence
-        run: >-
-          uv run --locked python tools/testing/m2_general_metric_engine_check.py
-          --evidence evidence/m2-met-001/${{ matrix.platform }}/general-engine.json
-
-      - name: Emit M2-MET-002 incremental QA foundation evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-qa-foundation-incremental-check
-          --evidence evidence/m2-met-002/${{ matrix.platform }}/qa-incremental.json
-
-      - name: Emit M2-MET-003 AIR formal-delivery evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-air-formal-delivery-check
-          --evidence evidence/m2-met-003/${{ matrix.platform }}/air-formal-delivery.json
-
-      - name: Emit M2-MET-004 SNS detection evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-sns-detection-check
-          --evidence evidence/m2-met-004/${{ matrix.platform }}/sns-detection.json
-
-      - name: Emit incremental M2-MET-005 SNS accuracy evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-sns-accuracy-incremental-check
-          --evidence evidence/m2-met-005/${{ matrix.platform }}/sns-accuracy-incremental.json
-
-      - name: Emit incremental M2-MET-006 runtime-contract evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-runtime-contract-incremental-check
-          --evidence evidence/m2-met-006/${{ matrix.platform }}/runtime-contract-incremental.json
-
-      - name: Emit incremental M2-MET-007 batch/replay evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-batch-replay-incremental-check
-          --evidence evidence/m2-met-007/${{ matrix.platform }}/batch-replay-incremental.json
-
-      - name: Emit M2 Batch 2 authority-gap sentinel evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-authority-gap-sentinel-check
-          --evidence evidence/m2-authority-gap/${{ matrix.platform }}/sentinel.json
-
-      - name: Emit M2-OBS-001 publication-routing evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-publication-routing-check
-          --evidence evidence/m2-obs-001/${{ matrix.platform }}/publication-routing.json
-
-      - name: Emit M2-OBS-002 immutable Release evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-immutable-release-check
-          --evidence evidence/m2-obs-002/${{ matrix.platform }}/immutable-release.json
-
-      - name: Emit M2-OBS-003 idempotent publication/replay evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-idempotent-publication-check
-          --evidence evidence/m2-obs-003/${{ matrix.platform }}/publication-replay.json
-
-      - name: Emit M2-GUI-001 foundation-navigation evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-gui-foundation-navigation-check
-          --evidence evidence/m2-gui-001/${{ matrix.platform }}/foundation-navigation.json
-
-      - name: Emit M2-GUI-002 observation-lane presentation evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-gui-observation-lane-check
-          --evidence evidence/m2-gui-002/${{ matrix.platform }}/observation-lane.json
-
-      - name: Emit M2-GUI-003 state UX evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-gui-state-ux-check
-          --evidence evidence/m2-gui-003/${{ matrix.platform }}/state-ux.json
-
-      - name: Emit M2-TST-001 Catalog coverage evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-catalog-coverage-check
-          --evidence evidence/m2-tst-001/${{ matrix.platform }}/catalog-coverage.json
-
-      - name: Emit M2-TST-002 QA/AIR Golden-negative evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-qa-air-golden-check
-          --evidence evidence/m2-tst-002/${{ matrix.platform }}/qa-air-golden-negative.json
-
-      - name: Emit M2-TST-003 SNS Golden-applicability evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-sns-golden-check
-          --evidence evidence/m2-tst-003/${{ matrix.platform }}/sns-golden-applicability.json
-
-      - name: Emit M2-TST-004 Release-history-replay evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m2-release-history-replay-check
-          --evidence evidence/m2-tst-004/${{ matrix.platform }}/release-history-replay.json
-
-      - name: Emit M1-DATA-002 source-registry evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-source-registry-check
-          --evidence evidence/m1-data-002/${{ matrix.platform }}/source-registry.json
-
-      - name: Emit M1-DATA-003 Session Time evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-session-time-check
-          --evidence evidence/m1-data-003/${{ matrix.platform }}/session-time.json
-
-      - name: Emit M1-DATA-004 aircraft-identity evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-aircraft-identity-check
-          --evidence evidence/m1-data-004/${{ matrix.platform }}/aircraft-identity.json
-
-      - name: Emit M1-DATA-005 Canonical-flight-channel evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-canonical-flight-channels-check
-          --evidence evidence/m1-data-005/${{ matrix.platform }}/canonical-flight-channels.json
-
-      - name: Emit M1-DATA-006 Evaluation Context evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-evaluation-context-check
-          --evidence evidence/m1-data-006/${{ matrix.platform }}/evaluation-context.json
-
-      - name: Emit M1-DATA-007 lineage-quality evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-lineage-quality-check
-          --evidence evidence/m1-data-007/${{ matrix.platform }}/lineage-quality.json
-
-      - name: Emit M1-WORLD-001 Basic Episode evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-basic-episode-check
-          --evidence evidence/m1-world-001/${{ matrix.platform }}/basic-episode.json
-
-      - name: Emit M1-WORLD-002 BASIC_FLIGHT_V1 Stage evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-basic-stage-check
-          --evidence evidence/m1-world-002/${{ matrix.platform }}/basic-stage.json
-
-      - name: Emit M1-WORLD-003 Stage quality/status evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-stage-quality-check
-          --evidence evidence/m1-world-003/${{ matrix.platform }}/stage-quality.json
-
-      - name: Emit consolidated M1 Batch 1 core evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-batch-1-core-check
-          --evidence evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
-
-      - name: Emit M1 Batch 2 service smoke evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-service-smoke
-          --expected-platform ${{ matrix.platform }}
-          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
-
-      - name: Emit consolidated M1 Batch 2 backend evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-backend-check
+          uv run --locked python tools/ci/run_platform_parallel_lanes.py
           --platform ${{ matrix.platform }}
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m1-batch-2/${{ matrix.platform }}/backend.json
-
-      - name: Emit M1 Batch 3 Desktop E2E evidence
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-batch-3-desktop-e2e
-          --expected-platform ${{ matrix.platform }}
-          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
-
-      - name: Emit integrated M1 Batch 4 platform qualification
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-batch-4-platform-check
-          --batch1 evidence/m1-batch-1/${{ matrix.platform }}/core-product.json
-          --batch2-service evidence/m1-batch-2/${{ matrix.platform }}/service-smoke.json
-          --batch3-desktop evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
-          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m1-batch-4/${{ matrix.platform }}/platform.json
-
-      - name: Emit M1 Entry build-manifest candidate
-        run: >-
-          uv run --locked python tools/dev/tpaa_dev.py m1-entry-manifest
-          --profile ${{ matrix.desktop_profile }}
-          --output evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
-
       - name: Build M0 development packages
         run: |
           uv run --locked python tools/dev/tpaa_dev.py package --profile ${{ matrix.desktop_profile }} --output dist
@@ -1441,6 +1014,54 @@ jobs:
           --admin-database postgres
           --evidence evidence/m5-batch-3/postgres/postgres-recovery.json
 
+      - name: Execute PIQB B2 PostgreSQL restart/parity qualification
+        run: >-
+          uv run --locked python tools/testing/piqb_b2_postgres_product_persistence.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_piqb_b2_product_persistence
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b2/postgres-product-persistence.json
+
+      - name: Execute PIQB B2 P4/P5 real PostgreSQL exact persistence qualification
+        run: >-
+          uv run --locked python tools/testing/piqb_b2_postgres_p4_p5_persistence.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_piqb_b2_p4_p5_persistence
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b2/postgres-p4-p5-persistence.json
+
+      - name: Execute PIQB B2 P3 real PostgreSQL exact persistence qualification
+        run: >-
+          uv run --locked python tools/testing/piqb_b2_postgres_p3_persistence.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_piqb_b2_p3_persistence
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b2/postgres-p3-persistence.json
+
+      - name: Execute PIQB B2 P6 real PostgreSQL exact persistence qualification
+        run: >-
+          uv run --locked python tools/testing/piqb_b2_postgres_p6_persistence.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_piqb_b2_p6_persistence
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b2/postgres-p6-persistence.json
+
       - name: Execute ACP-221 PostgreSQL 1.8.0 to 1.9.0 migration qualification
         run: >-
           uv run --locked python tools/testing/acp_221_postgres_migration.py
@@ -1471,6 +1092,19 @@ jobs:
           path: evidence/m0-exit/
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload PIQB B2 PostgreSQL persistence evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-piqb-b2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/piqb-b2/postgres-product-persistence.json
+            evidence/piqb-b2/postgres-p3-persistence.json
+            evidence/piqb-b2/postgres-p4-p5-persistence.json
+            evidence/piqb-b2/postgres-p6-persistence.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload M1 Batch 2 PostgreSQL parity evidence
         if: ${{ always() }}
@@ -2451,6 +2085,19 @@ jobs:
             --required-jobs-success 14 \
             --required-jobs-total 14 \
             --output evidence/piqb-b1/review.json
+      - name: Review PIQB B2 persistence and recovery state
+        shell: bash
+        run: |
+          python tools/testing/piqb_b2_review.py \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --output evidence/piqb-b2/review.json
+
       - name: Review ACP-221 DB 1.9.0 authority adoption gate
         shell: bash
         run: |

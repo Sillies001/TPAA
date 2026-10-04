@@ -1,0 +1,147 @@
+{
+  "schema": "TPAA_PIQB_B2_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B2",
+  "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
+  "source_b1_qualification": "PIQB_B1_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "authority_change_proposal_issue": 221,
+  "authority_change_proposal_status": "ADOPTED_PROTECTED_MAIN",
+  "no_shadow_schema": true,
+  "task_state": {
+    "PIQB-B2-001": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "M6P2WorkspaceRepository",
+        "M7P3WorkspaceRepository",
+        "M8AssessmentRepository",
+        "M9P6Repository"
+      ]
+    },
+    "PIQB-B2-002": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "SQLiteProductPublicationLedger",
+        "SQLiteDesktopUnitOfWork.product_publication",
+        "P2PersistenceRepository exact canonical-row mapping",
+        "P3PersistenceRepository exact durable mapping",
+        "P4P5PersistenceRepository DB 1.9 exact M8 repository port",
+        "assessment.annotation_subject_context standalone annotation authority",
+        "P6PersistenceRepository exact forecast/counterfactual/recommendation mapping",
+        "DurableP6ModelBuildResolver exact P3/P4 reconstruction",
+        "real SQLite/PostgreSQL restart and logical parity qualification"
+      ]
+    },
+    "PIQB-B2-003": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "PostgreSQLProductPublicationLedger",
+        "PostgreSQLServiceUnitOfWork.product_publication",
+        "P2PersistenceRepository shared engine-neutral mapping",
+        "P3PersistenceRepository exact durable mapping",
+        "P4P5PersistenceRepository DB 1.9 exact M8 repository port",
+        "assessment.annotation_subject_context standalone annotation authority",
+        "P6PersistenceRepository exact forecast/counterfactual/recommendation mapping",
+        "DurableP6ModelBuildResolver exact P3/P4 reconstruction",
+        "real PostgreSQL restart and parity qualification"
+      ]
+    },
+    "PIQB-B2-004": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "LocalObjectStore logical tpaa-object/tpaa-parquet namespaces",
+        "LocalSealedObjectFlow stage/verify/seal",
+        "enumeration and hash-guarded delete for recovery"
+      ]
+    },
+    "PIQB-B2-005": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "ProductPublicationCoordinator",
+        "ProductPublicationLedger",
+        "DB analysis_release/object_reference/object_binding/compute_job/release_scope_pointer CAS"
+      ]
+    },
+    "PIQB-B2-006": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "SQLite close/reopen exact registration",
+        "real PostgreSQL reconstruction across new connections",
+        "P2/P3/P4/P5/P6 exact durable restart",
+        "standalone M8 annotation subject_context_id exact after restart",
+        "P6 durable model-build reconstruction",
+        "immutable/idempotent replay fail-closed"
+      ]
+    },
+    "PIQB-B2-007": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "staging orphan recovery",
+        "sealed-but-unregistered orphan recovery",
+        "DB-referenced immutable objects preserved"
+      ]
+    },
+    "PIQB-B2-008": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "shared identity derivation",
+        "SQLite/PostgreSQL ledger contract parity",
+        "DB 1.9 current-authority parity gate",
+        "P3 durable resolver parity",
+        "P4/P5 ordered-text and standalone annotation parity",
+        "P6 SQLite/PostgreSQL logical parity",
+        "no shadow schema"
+      ]
+    }
+  },
+  "production_activation": {
+    "allowed": [
+      "P1_SESSION_RELEASE",
+      "LONGITUDINAL_RELEASE"
+    ],
+    "dependency_blocked": [],
+    "implemented_not_b2_qualified": [
+      "P2_ATTRIBUTION",
+      "P3_TWIN_CAPABILITY",
+      "P4_P5_ASSESSMENT",
+      "P6_MODEL_PROJECTION_ADVISORY"
+    ],
+    "adapter_pending": [],
+    "authority_blocked": []
+  },
+  "b2_qualified": false,
+  "authority_adoption": {
+    "proposal_id": "ACP-221",
+    "issue": 221,
+    "protected_main_sha": "24f504b9be762fa78618632f25c3f6cbc290c6c8",
+    "run_number": 607,
+    "actions_run_id": 37176660981,
+    "qualification": "ACP221_DB_1_9_0_ADOPTED"
+  },
+  "historical_authority_adoptions": [
+    {
+      "proposal_id": "ACP-216",
+      "issue": 216,
+      "db_schema_version": "1.7.0",
+      "protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+      "run_number": 576,
+      "actions_run_id": 37105587377,
+      "qualification": "ACP216_DB_1_7_0_ADOPTED"
+    },
+    {
+      "proposal_id": "ACP-219",
+      "issue": 219,
+      "db_schema_version": "1.8.0",
+      "protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+      "run_number": 583,
+      "actions_run_id": 37119777187,
+      "qualification": "ACP219_DB_1_8_0_ADOPTED"
+    }
+  ],
+  "domain_adapter_progress": {
+    "P2_ATTRIBUTION": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
+    "P3_TWIN_CAPABILITY": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
+    "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_DB_1_9_STANDALONE_ANNOTATION_QUALIFIED",
+    "P6_MODEL_PROJECTION_ADVISORY": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED"
+  }
+}

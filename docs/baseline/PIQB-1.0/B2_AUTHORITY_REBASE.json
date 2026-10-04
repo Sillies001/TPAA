@@ -1,0 +1,72 @@
+{
+  "schema": "TPAA_PIQB_B2_AUTHORITY_REBASE_V3",
+  "baseline": "PIQB-1.0",
+  "batch": "B2",
+  "source_b1_protected_main_sha": "1ae7fccd6b61f570e22b7622c74fe41a4a7fe6c8",
+  "historical_fit_audit": {
+    "file": "B2_SCHEMA_PERSISTENCE_FIT.json",
+    "db_schema_version": "1.6.0",
+    "preserved_as_pre_adoption_evidence": true
+  },
+  "authority_lineage": [
+    {
+      "proposal_id": "ACP-216",
+      "issue": 216,
+      "db_schema_version": "1.7.0",
+      "protected_main_sha": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+      "run_number": 576,
+      "actions_run_id": 37105587377,
+      "reviewer_schema": "TPAA_ACP216_AUTHORITY_ADOPTION_REVIEW_V1",
+      "qualification": "ACP216_DB_1_7_0_ADOPTED",
+      "historical": true
+    },
+    {
+      "proposal_id": "ACP-219",
+      "issue": 219,
+      "db_schema_version": "1.8.0",
+      "protected_main_sha": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+      "run_number": 583,
+      "actions_run_id": 37119777187,
+      "reviewer_schema": "TPAA_ACP219_AUTHORITY_ADOPTION_REVIEW_V1",
+      "qualification": "ACP219_DB_1_8_0_ADOPTED",
+      "historical": true
+    },
+    {
+      "proposal_id": "ACP-221",
+      "issue": 221,
+      "db_schema_version": "1.9.0",
+      "protected_main_sha": "24f504b9be762fa78618632f25c3f6cbc290c6c8",
+      "run_number": 607,
+      "actions_run_id": 37176660981,
+      "reviewer_schema": "TPAA_ACP221_AUTHORITY_ADOPTION_REVIEW_V1",
+      "qualification": "ACP221_DB_1_9_0_ADOPTED",
+      "historical": false
+    }
+  ],
+  "adopted_authority": {
+    "proposal_id": "ACP-221",
+    "issue": 221,
+    "db_schema_version": "1.9.0",
+    "protected_main_sha": "24f504b9be762fa78618632f25c3f6cbc290c6c8",
+    "run_number": 607,
+    "actions_run_id": 37176660981,
+    "reviewer_schema": "TPAA_ACP221_AUTHORITY_ADOPTION_REVIEW_V1",
+    "qualification": "ACP221_DB_1_9_0_ADOPTED"
+  },
+  "branch_sync_history": [
+    {
+      "strategy": "TRUE_MERGE_NO_FORCE_PUSH",
+      "b2_pre_merge_head": "f960ed520e40d9179a450bdeba10a16c4266c2dd",
+      "adopted_main_parent": "d5be58189d7fbd81f7fb3e49506eb0a61544db46",
+      "resulting_merge_commit": "85e985583fe9c9306430cdacea06747aecba1fba"
+    },
+    {
+      "strategy": "TRUE_MERGE_NO_FORCE_PUSH",
+      "b2_pre_merge_head": "42f15f09f3a1684d7b19dd8541fef7dbe6922aa9",
+      "adopted_main_parent": "a17eb1e5a0b961c7c555c6d900839df47165e245",
+      "resulting_merge_commit": "e302882d41e69bebc0004af235374cd948b7f165"
+    }
+  ],
+  "no_shadow_schema": true,
+  "b3_activated": false
+}

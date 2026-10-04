@@ -686,6 +686,25 @@ def _row_id(payload: Mapping[str, object]) -> str:
     return f"P6_MODEL_ROW_SHA256:{canonical_hash(dict(payload))}"
 
 
+def p6_capability_training_row_id(
+    row: P6CapabilityTrainingRow,
+    *,
+    as_of_utc: str,
+    policy: P6AuthorityPolicy | None = None,
+    profile: P6ForecastExecutionProfile | None = None,
+) -> str:
+    """Return the canonical row identity without rebuilding a model product."""
+    p = policy or P6AuthorityPolicy.from_canonical()
+    q = profile or P6ForecastExecutionProfile.from_canonical()
+    payload, _ = _row_projection(
+        row,
+        policy=p,
+        profile=q,
+        as_of_utc=as_of_utc,
+    )
+    return _row_id(payload)
+
+
 def assess_p6_training_applicability(
     rows: Sequence[P6CapabilityTrainingRow],
     *,

@@ -6,6 +6,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Protocol
 from uuid import UUID
 
 from tpaa_capability import (
@@ -158,6 +159,16 @@ def _validate_snapshot(value: M7P3WorkspaceSnapshot) -> None:
         )
 
 
+class M7P3WorkspaceRepository(Protocol):
+    """Engine-neutral exact P3 twin/estimate repository port."""
+
+    def exact_twin(self, twin_revision_id: str) -> M7P3WorkspaceSnapshot:
+        """Return one immutable exact twin revision snapshot."""
+
+    def exact_estimate(self, estimate_id: str) -> M7P3WorkspaceSnapshot:
+        """Return one immutable exact estimate snapshot."""
+
+
 class InMemoryM7P3WorkspaceRepository:
     """Immutable exact-identity M7 read repository used by Application/API tests."""
 
@@ -210,7 +221,7 @@ class M7WorkspaceService:
 
     def __init__(
         self,
-        repository: InMemoryM7P3WorkspaceRepository,
+        repository: M7P3WorkspaceRepository,
         *,
         admission_evidence: P3AdmissionEvidence | None = None,
     ) -> None:
