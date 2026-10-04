@@ -66,7 +66,7 @@
       ]
     },
     "PIQB-B3-006": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "ComputeJobRepository over DB 1.9 registry.compute_job",
         "SUBMITTED/QUEUED/RUNNING/SUCCEEDED/FAILED/CANCELLED lifecycle",
@@ -75,11 +75,12 @@
         "fresh multiprocessing spawn WorkerPayload/WorkerResult commands",
         "bounded WorkerAdmissionController",
         "timeout/cancel/drain dispatcher controls",
-        "no shell command execution"
+        "no shell command execution",
+        "Run #615 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-007": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "active durable compute job IDs protect staging operations",
         "existing recover_staging_orphans reused without new GC authority",
@@ -87,12 +88,25 @@
         "sealed registered objects remain outside staging reclamation",
         "bounded admission/backpressure",
         "worker timeout termination",
-        "dispatcher close/drain resource safety"
+        "dispatcher close/drain resource safety",
+        "Run #615 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B3-008": {
-      "state": "NOT_STARTED",
-      "evidence": []
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "real SQLite + real PostgreSQL production pipeline qualification tool",
+        "ProductionImportService source/stream/artifact provenance",
+        "fresh spawn Worker executes before qualified Canonical/World/Metric/Release recompute",
+        "CorePublicationLedger durable Release publication",
+        "PolarsParquetPlane canonical series persistence and streaming restart scan",
+        "restart exact Release membership",
+        "replay exact logical Release and World",
+        "SQLite/PostgreSQL logical parity",
+        "B3 reviewer integrated inside existing M0 Exit Review job",
+        "exact 14 required jobs topology preserved",
+        "candidate exact-head CI pending"
+      ]
     }
   },
   "b3_qualified": false,
@@ -109,6 +123,14 @@
     "exact_head": "900e712fe000058db68184a9d7c1cee2c6b8c34d",
     "run_number": 614,
     "actions_run_id": 37188533514,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "conclusion": "SUCCESS"
+  },
+  "runtime_safety_qualification": {
+    "exact_head": "b261f571c81533aab84e428974e7ff97c1f7ba23",
+    "run_number": 615,
+    "actions_run_id": 37191174495,
     "required_jobs_success": 14,
     "required_jobs_total": 14,
     "conclusion": "SUCCESS"

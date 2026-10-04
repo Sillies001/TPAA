@@ -85,9 +85,18 @@ def test_b3_foundation_and_data_plane_qualification_are_preserved() -> None:
     assert isinstance(task_state, dict)
     for index in range(1, 6):
         assert task_state[f"PIQB-B3-{index:03d}"]["state"] == "COMPLETE_CANDIDATE"
-    assert task_state["PIQB-B3-006"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-007"]["state"] == "IMPLEMENTED_PENDING_CI"
-    assert task_state["PIQB-B3-008"]["state"] == "NOT_STARTED"
+    runtime_safety = state["runtime_safety_qualification"]
+    assert isinstance(runtime_safety, dict)
+    assert runtime_safety["exact_head"] == (
+        "b261f571c81533aab84e428974e7ff97c1f7ba23"
+    )
+    assert runtime_safety["run_number"] == 615
+    assert runtime_safety["required_jobs_success"] == 14
+    assert runtime_safety["required_jobs_total"] == 14
+
+    assert task_state["PIQB-B3-006"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-007"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-008"]["state"] == "COMPLETE_CANDIDATE"
 
 
 def test_b3_polars_runtime_dependency_and_lock_are_exact() -> None:
