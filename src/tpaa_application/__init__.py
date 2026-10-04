@@ -115,6 +115,13 @@ from .m9_workspace import (
 )
 from .models import StorageBaselineStatus
 from .p2_persistence import P2PersistenceError, P2PersistenceRepository
+from .p3_persistence import (
+    CanonicalP3WorkspaceLayerResolver,
+    DurableM7P3WorkspaceRepository,
+    P3PersistenceError,
+    P3PersistenceRepository,
+    P3WorkspaceLayerResolver,
+)
 from .p4_p5_persistence import P4P5PersistenceError, P4P5PersistenceRepository
 from .p6_persistence import P6PersistenceError, P6PersistenceRepository
 from .runtime import (
@@ -153,6 +160,11 @@ __all__ = [
     "M2ReplayComparison",
     "P2PersistenceError",
     "P2PersistenceRepository",
+    "CanonicalP3WorkspaceLayerResolver",
+    "DurableM7P3WorkspaceRepository",
+    "P3PersistenceError",
+    "P3PersistenceRepository",
+    "P3WorkspaceLayerResolver",
     "P4P5PersistenceError",
     "P4P5PersistenceRepository",
     "P6PersistenceError",

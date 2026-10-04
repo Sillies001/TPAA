@@ -144,6 +144,8 @@ def verify() -> dict[str, object]:
         "sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1",
         "uv sync --locked --python 3.13.5",
         "uv lock --check",
+        "python tools/testing/piqb_b2_postgres_p3_persistence.py",
+        "--evidence evidence/piqb-b2/postgres-p3-persistence.json",
         "python tools/testing/piqb_b2_postgres_p6_persistence.py",
         "--evidence evidence/piqb-b2/postgres-p6-persistence.json",
         "python tools/dev/tpaa_dev.py verify-ci",

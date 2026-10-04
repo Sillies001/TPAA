@@ -640,3 +640,15 @@ def test_piqb_b2_p6_postgres_persistence_is_governed_in_required_job() -> None:
     )
     assert "evidence/piqb-b2/postgres-p4-p5-persistence.json" in text
     assert "evidence/piqb-b2/postgres-product-persistence.json" in text
+
+
+def test_piqb_b2_p3_postgres_persistence_is_governed_in_required_job() -> None:
+    text = _orchestration_text()
+    assert "Execute PIQB B2 P3 real PostgreSQL exact persistence qualification" in text
+    assert "python tools/testing/piqb_b2_postgres_p3_persistence.py" in text
+    assert "--database tpaa_piqb_b2_p3_persistence" in text
+    assert (
+        "--evidence evidence/piqb-b2/postgres-p3-persistence.json"
+        in text
+    )
+    assert "evidence/piqb-b2/postgres-p3-persistence.json" in text
