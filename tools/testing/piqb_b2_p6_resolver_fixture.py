@@ -100,10 +100,17 @@ def _subject_and_revision(
     uncertainty = dict(estimate.uncertainty)
     lower_raw = uncertainty.get("lower")
     upper_raw = uncertainty.get("upper")
-    lower = None if lower_raw is None else float(lower_raw)
-    upper = None if upper_raw is None else float(upper_raw)
+    if (
+        isinstance(lower_raw, bool)
+        or not isinstance(lower_raw, (int, float))
+        or isinstance(upper_raw, bool)
+        or not isinstance(upper_raw, (int, float))
+    ):
+        raise RuntimeError("PIQB P6 resolver uncertainty fixture drift")
+    lower = float(lower_raw)
+    upper = float(upper_raw)
     created_at = f"2026-09-10T06:{order:02d}:00Z"
-    revision_values = {
+    revision_values: dict[str, object] = {
         "subject_context_id": subject.subject_context_id,
         "subject_key": subject.subject_key,
         "actor_id": subject.actor_id,
