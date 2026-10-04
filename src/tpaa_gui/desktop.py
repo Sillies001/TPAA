@@ -33,6 +33,7 @@ def run_desktop(
             show=show,
             diagnostics_provider=lambda: controller.diagnostics,
             m1_transport=controller,
+            product_transport=controller,
         )
     finally:
         controller.shutdown()
