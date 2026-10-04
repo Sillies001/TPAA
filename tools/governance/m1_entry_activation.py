@@ -28,7 +28,7 @@ EXPECTED_FROZEN = {
     "core_baseline": "CB-1.4.0",
     "db_schema_version": "1.9.0",
     "baseline_lock_sha256": EXPECTED_BASELINE_LOCK_SHA256,
-    "dependency_lock_sha256": "302ab51a013c713af6ece61113526eb411f6edf302b70c7a924224701387257e",
+    "dependency_lock_sha256": "5c9f7290449b48098199cb1b9b86ea7f1ef7e79536a4563fefb0639ae92dd355",
     "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
     "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
     "dto_authority_sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",

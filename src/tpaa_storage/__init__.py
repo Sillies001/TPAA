@@ -14,8 +14,26 @@ from .canonical_rows import (
     PostgreSQLCanonicalRowRepository,
     SQLiteCanonicalRowRepository,
 )
+from .compute_job import (
+    ACTIVE_COMPUTE_JOB_STATES,
+    TERMINAL_COMPUTE_JOB_STATES,
+    ComputeJobPersistenceError,
+    ComputeJobRecord,
+    ComputeJobRepository,
+    ComputeJobState,
+)
 from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
 from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
+from .parquet_plane import (
+    ParquetColumn,
+    ParquetDatasetArtifact,
+    ParquetPartition,
+    ParquetPlaneError,
+    ParquetScalarType,
+    ParquetSchema,
+    ParquetWriteRequest,
+    PolarsParquetPlane,
+)
 from .persistence_fit import (
     PersistenceFitError,
     PersistenceFitRecord,
@@ -61,12 +79,26 @@ __all__ = [
     "ObjectStoreError",
     "StagedObject",
     "StoredObject",
+    "ACTIVE_COMPUTE_JOB_STATES",
+    "TERMINAL_COMPUTE_JOB_STATES",
+    "ComputeJobPersistenceError",
+    "ComputeJobRecord",
+    "ComputeJobRepository",
+    "ComputeJobState",
     "BootstrapError",
     "BootstrapVerification",
     "RepositoryBaselineMetadata",
     "RepositoryUnitOfWork",
     "CanonicalRowRepository",
     "CanonicalRowRepositoryError",
+    "ParquetColumn",
+    "ParquetDatasetArtifact",
+    "ParquetPartition",
+    "ParquetPlaneError",
+    "ParquetScalarType",
+    "ParquetSchema",
+    "ParquetWriteRequest",
+    "PolarsParquetPlane",
     "OrphanRecoveryReport",
     "PostgreSQLBaselineMetadataRepository",
     "PostgreSQLCanonicalRowRepository",

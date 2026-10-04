@@ -3,6 +3,12 @@
 M0-API-001 establishes the only business-entry layer for GUI and REST transports.
 """
 
+from .durable_job_control import (
+    B3_JOB_COMPONENT_VERSION,
+    DurableJobControl,
+    DurableJobControlError,
+    DurableJobSubmission,
+)
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -135,10 +141,21 @@ from .runtime import (
     build_trusted_runtime_status_use_case,
 )
 from .service import ApplicationService
+from .source_import import (
+    ProductionImportError,
+    ProductionImportService,
+    SourceImportCommand,
+    SourceProvenanceRecord,
+    SourceProvenanceRepository,
+)
 from .use_cases import GetStorageBaselineStatus
 
 __all__ = [
     "ApplicationService",
+    "B3_JOB_COMPONENT_VERSION",
+    "DurableJobControl",
+    "DurableJobControlError",
+    "DurableJobSubmission",
     "BusinessStatus",
     "IdempotencyConflict",
     "JobAudit",
@@ -174,6 +191,8 @@ __all__ = [
     "DurableP6ModelBuildResolver",
     "P6PersistenceError",
     "P6PersistenceRepository",
+    "ProductionImportError",
+    "ProductionImportService",
     "compare_m2_release_replay",
     "InMemoryM3ReleasePublicationRepository",
     "M3MetricNotFound",
@@ -246,5 +265,8 @@ __all__ = [
     "RuntimeBaselineStatus",
     "build_trusted_runtime_status_use_case",
     "business_outcome",
+    "SourceImportCommand",
+    "SourceProvenanceRecord",
+    "SourceProvenanceRepository",
     "StorageBaselineStatus",
 ]

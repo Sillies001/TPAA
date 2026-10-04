@@ -7,13 +7,42 @@ from .filesystem import (
     casefold_name_key,
     ensure_no_case_collisions,
 )
-from .worker import WorkerPayload, run_spawn_echo
+from .polars_runtime import (
+    EXPECTED_POLARS_VERSION,
+    GovernedPolarsRuntime,
+    PolarsRuntimeError,
+    PolarsRuntimeIdentity,
+)
+from .worker import (
+    SpawnWorkerDispatcher,
+    WorkerAdmissionController,
+    WorkerBackpressureError,
+    WorkerCancelledError,
+    WorkerClosedError,
+    WorkerDispatchError,
+    WorkerPayload,
+    WorkerResult,
+    WorkerTimeoutError,
+    run_spawn_echo,
+)
 
 __all__ = [
+    "EXPECTED_POLARS_VERSION",
+    "GovernedPolarsRuntime",
+    "PolarsRuntimeError",
+    "PolarsRuntimeIdentity",
     "InterProcessFileLock",
     "LockUnavailable",
     "PlatformFilesystem",
     "PlatformPathError",
+    "SpawnWorkerDispatcher",
+    "WorkerAdmissionController",
+    "WorkerBackpressureError",
+    "WorkerCancelledError",
+    "WorkerClosedError",
+    "WorkerDispatchError",
+    "WorkerResult",
+    "WorkerTimeoutError",
     "WorkerPayload",
     "atomic_replace_bytes",
     "casefold_name_key",
