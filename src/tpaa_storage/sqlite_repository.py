@@ -12,13 +12,13 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from .audit_ledger import PersistentAuditLedger
 from .bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     SQLITE_ENGINE_PROFILE,
     BootstrapError,
     verify_sqlite,
 )
-from .audit_ledger import PersistentAuditLedger
 from .canonical_rows import SQLiteCanonicalRowRepository
 from .core_publication_ledger import SQLiteCorePublicationLedger
 from .ports import RepositoryBaselineMetadata

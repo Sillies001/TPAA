@@ -12,6 +12,7 @@ from dataclasses import asdict
 from importlib import import_module
 from typing import Any
 
+from .audit_ledger import PersistentAuditLedger
 from .bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     CORE_MODEL_ARTIFACT_ID,
@@ -22,7 +23,6 @@ from .bootstrap import (
     _postgres_expected_tables,
     _schema_fingerprint,
 )
-from .audit_ledger import PersistentAuditLedger
 from .canonical_rows import PostgreSQLCanonicalRowRepository
 from .core_publication_ledger import PostgreSQLCorePublicationLedger
 from .ports import RepositoryBaselineMetadata

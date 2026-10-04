@@ -71,6 +71,25 @@ def semantic_rows(rows: tuple[AuditLogRow, ...]) -> list[dict[str, object]]:
     return result
 
 
+def expected_security_rows(
+    events: tuple[SecurityAuditRecord, ...],
+) -> list[dict[str, object]]:
+    return [
+        {
+            "actor_id": event.actor_id,
+            "principal_key": event.principal_key,
+            "action": event.action,
+            "object_type": event.object_type,
+            "object_id": event.object_id,
+            "outcome": event.outcome,
+            "request_id": event.request_id,
+            "reason": event.reason,
+            "details": dict(event.details or {}),
+        }
+        for event in events
+    ]
+
+
 def exercise_sqlite(database: Path) -> dict[str, object]:
     sink = SQLiteSecurityAuditSink(database)
     for event in qualification_events():

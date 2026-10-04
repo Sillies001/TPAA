@@ -25,7 +25,7 @@ def _qualification(revision: str = "a" * 40) -> dict[str, object]:
         "product_exact_id_only": True,
         "observability_exact": True,
         "no_shadow_schema": True,
-        "required_job_topology_changed": False,
+        "required_job_topology_preserved": True,
     }
     return {
         "schema": "TPAA_PIQB_B4_API_SECURITY_OBSERVABILITY_QUALIFICATION_V1",

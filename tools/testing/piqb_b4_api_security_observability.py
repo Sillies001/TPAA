@@ -29,9 +29,9 @@ from tools.testing.piqb_b4_qualification_support import (  # noqa: E402
     contract_checks,
     exercise_postgres,
     exercise_sqlite,
+    expected_security_rows,
     observability_checks,
     qualification_events,
-    semantic_rows,
 )
 from tpaa_storage import bootstrap_sqlite, verify_sqlite  # noqa: E402
 
@@ -76,7 +76,7 @@ def run(
 
         contracts = contract_checks()
         observability = observability_checks()
-        expected = semantic_rows(qualification_events())
+        expected = expected_security_rows(qualification_events())
         sqlite_rows = sqlite_result.get("rows")
         postgres_rows = postgres_result.get("rows")
         acceptance = {
@@ -117,7 +117,7 @@ def run(
                 value is True for value in observability.values()
             ),
             "no_shadow_schema": True,
-            "required_job_topology_changed": False,
+            "required_job_topology_preserved": True,
         }
         failed = sorted(key for key, ok in acceptance.items() if ok is not True)
         payload = {

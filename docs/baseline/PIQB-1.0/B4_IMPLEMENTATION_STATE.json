@@ -122,13 +122,50 @@
     "conclusion": "SUCCESS"
   },
   "last_failed_candidate_run": {
-    "exact_head": "299dc973e7f61dd423c14db8d27421d95bd2d60a",
-    "run_number": 621,
-    "actions_run_id": 37203286483,
+    "exact_head": "d0c33e9510a82f3afd8e27664b637c33d7456175",
+    "run_number": 622,
+    "actions_run_id": 37207308258,
     "conclusion": "FAILURE",
-    "root_cause": "Ruff I001 import-order in src/tpaa_api/product_v1.py",
-    "product_v1_functional_tests_passed": true,
-    "postgres_b2_b3_db19_qualifications_passed": true,
-    "superseded_by_final_b4_candidate": false
-  }
+    "root_causes": [
+      "Ruff I001 import-order in SQLite/PostgreSQL repository imports",
+      "mypy expected-row type mismatch in B4 qualification runner",
+      "negative topology scope flag incorrectly included in all-true acceptance map",
+      "B4 reviewer fixture inherited the same negative-acceptance design error"
+    ],
+    "b4_product_functional_tests_passed": true,
+    "sqlite_postgres_audit_restart_parity_passed": true,
+    "product_openapi_client_exact_passed": true,
+    "observability_exact_passed": true,
+    "postgres_b2_b3_db19_qualifications_passed": true
+  },
+  "failure_history": [
+    {
+      "exact_head": "299dc973e7f61dd423c14db8d27421d95bd2d60a",
+      "run_number": 621,
+      "actions_run_id": 37203286483,
+      "conclusion": "FAILURE",
+      "root_causes": [
+        "Ruff I001 import-order in src/tpaa_api/product_v1.py"
+      ],
+      "product_v1_functional_tests_passed": true,
+      "postgres_b2_b3_db19_qualifications_passed": true
+    },
+    {
+      "exact_head": "d0c33e9510a82f3afd8e27664b637c33d7456175",
+      "run_number": 622,
+      "actions_run_id": 37207308258,
+      "conclusion": "FAILURE",
+      "root_causes": [
+        "Ruff I001 import-order in SQLite/PostgreSQL repository imports",
+        "mypy expected-row type mismatch in B4 qualification runner",
+        "negative topology scope flag incorrectly included in all-true acceptance map",
+        "B4 reviewer fixture inherited the same negative-acceptance design error"
+      ],
+      "b4_product_functional_tests_passed": true,
+      "sqlite_postgres_audit_restart_parity_passed": true,
+      "product_openapi_client_exact_passed": true,
+      "observability_exact_passed": true,
+      "postgres_b2_b3_db19_qualifications_passed": true
+    }
+  ]
 }

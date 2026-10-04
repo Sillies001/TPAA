@@ -87,11 +87,15 @@ def test_b4_state_is_complete_candidate_but_not_formally_qualified() -> None:
 
     failed = state["last_failed_candidate_run"]
     assert isinstance(failed, dict)
-    assert failed["run_number"] == 621
-    assert failed["root_cause"] == (
-        "Ruff I001 import-order in src/tpaa_api/product_v1.py"
+    assert failed["run_number"] == 622
+    assert failed["exact_head"] == (
+        "d0c33e9510a82f3afd8e27664b637c33d7456175"
     )
-    assert failed["product_v1_functional_tests_passed"] is True
+    assert "negative topology scope flag incorrectly included" in (
+        " ".join(failed["root_causes"])
+    )
+    assert failed["b4_product_functional_tests_passed"] is True
+    assert failed["sqlite_postgres_audit_restart_parity_passed"] is True
 
     task_state = state["task_state"]
     assert isinstance(task_state, dict)
