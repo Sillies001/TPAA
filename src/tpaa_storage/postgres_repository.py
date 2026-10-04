@@ -12,6 +12,7 @@ from dataclasses import asdict
 from importlib import import_module
 from typing import Any
 
+from .audit_ledger import PersistentAuditLedger
 from .bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     CORE_MODEL_ARTIFACT_ID,
@@ -181,6 +182,7 @@ class PostgreSQLServiceUnitOfWork:
         self.publication: PostgreSQLCorePublicationLedger
         self.product_publication: PostgreSQLProductPublicationLedger
         self.canonical_rows: PostgreSQLCanonicalRowRepository
+        self.audit_log: PersistentAuditLedger
 
     @property
     def active(self) -> bool:
@@ -205,6 +207,7 @@ class PostgreSQLServiceUnitOfWork:
                 connection
             )
             self.canonical_rows = PostgreSQLCanonicalRowRepository(connection)
+            self.audit_log = PersistentAuditLedger(self.canonical_rows)
             return self
         except Exception:
             try:

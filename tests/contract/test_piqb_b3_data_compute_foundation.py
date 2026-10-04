@@ -66,7 +66,7 @@ def test_b3_task_baseline_freezes_exact_scope_and_entry_authority() -> None:
 def test_b3_foundation_and_data_plane_qualification_are_preserved() -> None:
     state = _load("B3_IMPLEMENTATION_STATE.json")
 
-    assert state["b3_qualified"] is False
+    assert state["b3_qualified"] is True
     foundation = state["foundation_qualification"]
     assert isinstance(foundation, dict)
     assert foundation["exact_head"] == FOUNDATION_SHA
@@ -84,7 +84,7 @@ def test_b3_foundation_and_data_plane_qualification_are_preserved() -> None:
     task_state = state["task_state"]
     assert isinstance(task_state, dict)
     for index in range(1, 6):
-        assert task_state[f"PIQB-B3-{index:03d}"]["state"] == "COMPLETE_CANDIDATE"
+        assert task_state[f"PIQB-B3-{index:03d}"]["state"] == "COMPLETE"
     runtime_safety = state["runtime_safety_qualification"]
     assert isinstance(runtime_safety, dict)
     assert runtime_safety["exact_head"] == (
@@ -94,9 +94,20 @@ def test_b3_foundation_and_data_plane_qualification_are_preserved() -> None:
     assert runtime_safety["required_jobs_success"] == 14
     assert runtime_safety["required_jobs_total"] == 14
 
-    assert task_state["PIQB-B3-006"]["state"] == "COMPLETE_CANDIDATE"
-    assert task_state["PIQB-B3-007"]["state"] == "COMPLETE_CANDIDATE"
-    assert task_state["PIQB-B3-008"]["state"] == "COMPLETE_CANDIDATE"
+    assert task_state["PIQB-B3-006"]["state"] == "COMPLETE"
+    assert task_state["PIQB-B3-007"]["state"] == "COMPLETE"
+    assert task_state["PIQB-B3-008"]["state"] == "COMPLETE"
+
+    qualification = state["qualification"]
+    assert isinstance(qualification, dict)
+    assert qualification["protected_main_sha"] == (
+        "08e223c8137eb261b43ed7c2ca3612e22770d8ba"
+    )
+    assert qualification["run_number"] == 618
+    assert qualification["required_jobs_success"] == 14
+    assert qualification["required_jobs_total"] == 14
+    assert qualification["decision"] == "GO"
+    assert qualification["qualification"] == "PIQB_B3_QUALIFIED"
 
 
 def test_b3_polars_runtime_dependency_and_lock_are_exact() -> None:

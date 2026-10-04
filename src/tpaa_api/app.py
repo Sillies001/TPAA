@@ -7,10 +7,11 @@ READY semantics.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import FastAPI, Header, status
+from fastapi import FastAPI, Header, Request, status
 from fastapi.responses import JSONResponse
 
 from tpaa_application import (
@@ -20,6 +21,8 @@ from tpaa_application import (
     JobRecord,
     RuntimeBaselineStatus,
 )
+
+ActorResolver = Callable[[Request], str]
 
 
 def _readiness_payload(runtime: RuntimeBaselineStatus) -> dict[str, object]:
@@ -64,6 +67,8 @@ def _system_error(code: str, detail: str, http_status: int) -> JSONResponse:
 def register_base_routes(
     app: FastAPI,
     application: ApplicationService,
+    *,
+    actor_resolver: ActorResolver | None = None,
 ) -> FastAPI:
     """Register process/runtime/job routes on an existing governed FastAPI app."""
 
@@ -96,6 +101,7 @@ def register_base_routes(
 
     @app.post("/jobs")
     def submit_job(
+        request: Request,
         body: dict[str, object],
         idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
         actor: Annotated[str, Header(alias="X-TPAA-Actor")] = "development",
@@ -127,7 +133,11 @@ def register_base_routes(
                 idempotency_key=idempotency_key,
                 command=command,
                 payload=payload,
-                actor=actor,
+                actor=(
+                    actor_resolver(request)
+                    if actor_resolver is not None
+                    else actor
+                ),
             )
         except IdempotencyConflict as exc:
             return _system_error("IDEMPOTENCY_KEY_CONFLICT", str(exc), 409)
@@ -147,6 +157,7 @@ def register_base_routes(
     @app.post("/jobs/{job_id}/cancel")
     def cancel_job(
         job_id: str,
+        request: Request,
         body: dict[str, object],
         actor: Annotated[str, Header(alias="X-TPAA-Actor")] = "development",
     ) -> JSONResponse:
@@ -160,7 +171,11 @@ def register_base_routes(
         try:
             record = application.cancel_job(
                 job_id=job_id,
-                actor=actor,
+                actor=(
+                    actor_resolver(request)
+                    if actor_resolver is not None
+                    else actor
+                ),
                 reason=reason,
             )
         except JobNotFound as exc:

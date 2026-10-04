@@ -27,6 +27,7 @@ from tpaa_context import (
 )
 
 from .m7_workspace import M7WorkspaceQuery, M7WorkspaceService
+from .security_audit import SecurityAuditRecord, SecurityAuditSink
 
 
 class M8ApplicationError(RuntimeError):
@@ -236,6 +237,7 @@ class M8WorkspaceService:
         p4_workflow: P4InstructorWorkflow | None = None,
         p5_workflow: P5ApprovalWorkflow | None = None,
         policy: M8AuthorityPolicy | None = None,
+        security_audit_sink: SecurityAuditSink | None = None,
     ) -> None:
         self._repository = repository
         self._admission_evidence = admission_evidence
@@ -244,6 +246,7 @@ class M8WorkspaceService:
         self._p4_workflow = p4_workflow or P4InstructorWorkflow(self._policy)
         self._p5_workflow = p5_workflow or P5ApprovalWorkflow(self._policy)
         self._security_events: list[M8SecurityAuditEvent] = []
+        self._security_audit_sink = security_audit_sink
 
     def _assert_admitted(self, phase: str) -> None:
         try:
@@ -273,15 +276,40 @@ class M8WorkspaceService:
         action: str,
         object_ref: str,
         outcome: str,
+        request_id: str | None = None,
+        reason: str | None = None,
     ) -> None:
+        principal_key = self._principal_key(viewer)
         self._security_events.append(
             M8SecurityAuditEvent(
-                principal_key=self._principal_key(viewer),
+                principal_key=principal_key,
                 action=action,
                 object_ref=object_ref,
                 outcome=outcome,
             )
         )
+        if self._security_audit_sink is not None:
+            self._security_audit_sink.record(
+                SecurityAuditRecord(
+                    actor_id=viewer.viewer_actor_id,
+                    principal_key=principal_key,
+                    action=action,
+                    object_type="M8_SECURITY_EVENT",
+                    object_id=object_ref,
+                    outcome=outcome,
+                    request_id=request_id,
+                    reason=reason or action,
+                    details={
+                        "viewer_role": viewer.viewer_role,
+                        "scope_match": viewer.scope_match,
+                        "privileged_identity_authorized": (
+                            viewer.privileged_identity_authorized
+                        ),
+                        "visibility_authorized": viewer.visibility_authorized,
+                        "export_authorized": viewer.export_authorized,
+                    },
+                )
+            )
 
     def security_events(self) -> tuple[M8SecurityAuditEvent, ...]:
         return tuple(self._security_events)
@@ -486,6 +514,8 @@ class M8WorkspaceService:
                 action="P4_ANNOTATION_WRITE",
                 object_ref=target.actor_assessment_id,
                 outcome="DENY",
+                request_id=mutation.request_id,
+                reason=mutation.reason,
             )
             raise M8ApplicationError(exc.code, exc.detail) from exc
         self._repository.register_annotation(result.revision)
@@ -494,6 +524,8 @@ class M8WorkspaceService:
             action="P4_ANNOTATION_WRITE",
             object_ref=result.revision.annotation_id,
             outcome="ALLOW",
+            request_id=mutation.request_id,
+            reason=mutation.reason,
         )
         return {
             "annotation_id": result.revision.annotation_id,
@@ -529,8 +561,24 @@ class M8WorkspaceService:
                 ),
             )
         except M8GovernanceError as exc:
+            self._audit(
+                mutation.viewer,
+                action="P4_APPROVAL_WRITE",
+                object_ref=previous.actor_assessment_id,
+                outcome="DENY",
+                request_id=mutation.request_id,
+                reason=mutation.reason,
+            )
             raise M8ApplicationError(exc.code, exc.detail) from exc
         self._repository.register_p4(result.revision)
+        self._audit(
+            mutation.viewer,
+            action="P4_APPROVAL_WRITE",
+            object_ref=result.revision.actor_assessment_id,
+            outcome="ALLOW",
+            request_id=mutation.request_id,
+            reason=mutation.reason,
+        )
         return {
             "actor_assessment_id": result.revision.actor_assessment_id,
             "approval_state": result.revision.approval_state,
@@ -562,8 +610,24 @@ class M8WorkspaceService:
                 ),
             )
         except M8GovernanceError as exc:
+            self._audit(
+                mutation.viewer,
+                action="P5_APPROVAL_WRITE",
+                object_ref=previous.mission_assessment_id,
+                outcome="DENY",
+                request_id=mutation.request_id,
+                reason=mutation.reason,
+            )
             raise M8ApplicationError(exc.code, exc.detail) from exc
         self._repository.register_p5(result.revision)
+        self._audit(
+            mutation.viewer,
+            action="P5_APPROVAL_WRITE",
+            object_ref=result.revision.mission_assessment_id,
+            outcome="ALLOW",
+            request_id=mutation.request_id,
+            reason=mutation.reason,
+        )
         return {
             "mission_assessment_id": result.revision.mission_assessment_id,
             "approval_state": result.revision.approval_state,

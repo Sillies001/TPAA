@@ -1,0 +1,133 @@
+{
+  "schema": "TPAA_PRODUCT_API_V1_CONTRACT_V1",
+  "api_version": "v1",
+  "base_path": "/api/v1/products",
+  "canonical_dto_authority": {
+    "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
+    "artifact_version": "UNVERSIONED_BY_AUTHORITY",
+    "core_baseline": "CB-1.4.0",
+    "sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
+  },
+  "invariants": {
+    "exact_ids_only": true,
+    "mutable_latest_routes_forbidden": true,
+    "aliases_forbidden": true,
+    "hidden_recomputation_forbidden": true,
+    "existing_stage_routes_remain_compatibility_surface": true,
+    "m8_p6_security_policies_remain_authoritative": true
+  },
+  "routes": [
+    {
+      "phase": "P1",
+      "product_kind": "P1_SESSION_RELEASE",
+      "method": "GET",
+      "path": "/api/v1/products/p1/releases/{release_id}",
+      "operation_id": "getProductV1P1Release",
+      "exact_id_params": [
+        "release_id"
+      ],
+      "delegates_to": "ApplicationService.m1_release"
+    },
+    {
+      "phase": "P2",
+      "product_kind": "P2_ADJUSTED_ESTIMATE",
+      "method": "GET",
+      "path": "/api/v1/products/p2/releases/{p2_release_id}/estimates/{estimate_id}",
+      "operation_id": "getProductV1P2Estimate",
+      "exact_id_params": [
+        "p2_release_id",
+        "estimate_id"
+      ],
+      "delegates_to": "ApplicationService.m6_p2_comparison"
+    },
+    {
+      "phase": "P3",
+      "product_kind": "P3_TWIN_REVISION",
+      "method": "GET",
+      "path": "/api/v1/products/p3/twins/{twin_revision_id}",
+      "operation_id": "getProductV1P3Twin",
+      "exact_id_params": [
+        "twin_revision_id"
+      ],
+      "delegates_to": "ApplicationService.m7_p3_twin"
+    },
+    {
+      "phase": "P3",
+      "product_kind": "P3_CAPABILITY_ESTIMATE",
+      "method": "GET",
+      "path": "/api/v1/products/p3/twins/{twin_revision_id}/estimates/{estimate_id}",
+      "operation_id": "getProductV1P3Estimate",
+      "exact_id_params": [
+        "twin_revision_id",
+        "estimate_id"
+      ],
+      "delegates_to": "ApplicationService.m7_p3_estimate"
+    },
+    {
+      "phase": "P4",
+      "product_kind": "P4_ACTOR_ASSESSMENT",
+      "method": "GET",
+      "path": "/api/v1/products/p4/assessments/{actor_assessment_id}",
+      "operation_id": "getProductV1P4Assessment",
+      "exact_id_params": [
+        "actor_assessment_id"
+      ],
+      "delegates_to": "ApplicationService.m8_p4"
+    },
+    {
+      "phase": "P5",
+      "product_kind": "P5_MISSION_ASSESSMENT",
+      "method": "GET",
+      "path": "/api/v1/products/p5/assessments/{mission_assessment_id}",
+      "operation_id": "getProductV1P5Assessment",
+      "exact_id_params": [
+        "mission_assessment_id"
+      ],
+      "delegates_to": "ApplicationService.m8_p5"
+    },
+    {
+      "phase": "P6",
+      "product_kind": "P6_CAPABILITY_MODEL",
+      "method": "GET",
+      "path": "/api/v1/products/p6/models/{capability_model_id}",
+      "operation_id": "getProductV1P6Model",
+      "exact_id_params": [
+        "capability_model_id"
+      ],
+      "delegates_to": "ApplicationService.m9_model"
+    },
+    {
+      "phase": "P6",
+      "product_kind": "P6_FORECAST",
+      "method": "GET",
+      "path": "/api/v1/products/p6/forecasts/{forecast_result_id}",
+      "operation_id": "getProductV1P6Forecast",
+      "exact_id_params": [
+        "forecast_result_id"
+      ],
+      "delegates_to": "ApplicationService.m9_forecast"
+    },
+    {
+      "phase": "P6",
+      "product_kind": "P6_COUNTERFACTUAL",
+      "method": "GET",
+      "path": "/api/v1/products/p6/counterfactuals/{counterfactual_run_id}",
+      "operation_id": "getProductV1P6Counterfactual",
+      "exact_id_params": [
+        "counterfactual_run_id"
+      ],
+      "delegates_to": "ApplicationService.m9_counterfactual"
+    },
+    {
+      "phase": "P6",
+      "product_kind": "P6_RECOMMENDATION",
+      "method": "GET",
+      "path": "/api/v1/products/p6/recommendations/{recommendation_id}",
+      "operation_id": "getProductV1P6Recommendation",
+      "exact_id_params": [
+        "recommendation_id"
+      ],
+      "delegates_to": "ApplicationService.m9_recommendation"
+    }
+  ]
+}

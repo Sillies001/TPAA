@@ -1,5 +1,11 @@
 """TPAA storage bootstrap and Repository boundary primitives."""
 
+from .audit_ledger import (
+    AuditLogRow,
+    AuditLogWrite,
+    PersistentAuditError,
+    PersistentAuditLedger,
+)
 from .bootstrap import (
     EXPECTED_DB_SCHEMA_VERSION,
     BootstrapError,
@@ -71,6 +77,10 @@ from .sqlite_repository import (
 )
 
 __all__ = [
+    "AuditLogRow",
+    "AuditLogWrite",
+    "PersistentAuditError",
+    "PersistentAuditLedger",
     "EXPECTED_DB_SCHEMA_VERSION",
     "BaselineMetadataRepository",
     "LocalObjectStore",

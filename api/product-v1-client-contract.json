@@ -1,0 +1,132 @@
+{
+  "api_version": "v1",
+  "authority": {
+    "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
+    "artifact_version": "UNVERSIONED_BY_AUTHORITY",
+    "core_baseline": "CB-1.4.0",
+    "sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
+  },
+  "invariants": {
+    "aliases_forbidden": true,
+    "exact_ids_only": true,
+    "existing_stage_routes_remain_compatibility_surface": true,
+    "hidden_recomputation_forbidden": true,
+    "m8_p6_security_policies_remain_authoritative": true,
+    "mutable_latest_routes_forbidden": true
+  },
+  "operations": [
+    {
+      "exact_id_params": [
+        "release_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P1Release",
+      "path": "/api/v1/products/p1/releases/{release_id}",
+      "phase": "P1",
+      "product_kind": "P1_SESSION_RELEASE",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "p2_release_id",
+        "estimate_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P2Estimate",
+      "path": "/api/v1/products/p2/releases/{p2_release_id}/estimates/{estimate_id}",
+      "phase": "P2",
+      "product_kind": "P2_ADJUSTED_ESTIMATE",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "twin_revision_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P3Twin",
+      "path": "/api/v1/products/p3/twins/{twin_revision_id}",
+      "phase": "P3",
+      "product_kind": "P3_TWIN_REVISION",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "twin_revision_id",
+        "estimate_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P3Estimate",
+      "path": "/api/v1/products/p3/twins/{twin_revision_id}/estimates/{estimate_id}",
+      "phase": "P3",
+      "product_kind": "P3_CAPABILITY_ESTIMATE",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "actor_assessment_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P4Assessment",
+      "path": "/api/v1/products/p4/assessments/{actor_assessment_id}",
+      "phase": "P4",
+      "product_kind": "P4_ACTOR_ASSESSMENT",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "mission_assessment_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P5Assessment",
+      "path": "/api/v1/products/p5/assessments/{mission_assessment_id}",
+      "phase": "P5",
+      "product_kind": "P5_MISSION_ASSESSMENT",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "capability_model_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P6Model",
+      "path": "/api/v1/products/p6/models/{capability_model_id}",
+      "phase": "P6",
+      "product_kind": "P6_CAPABILITY_MODEL",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "forecast_result_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P6Forecast",
+      "path": "/api/v1/products/p6/forecasts/{forecast_result_id}",
+      "phase": "P6",
+      "product_kind": "P6_FORECAST",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "counterfactual_run_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P6Counterfactual",
+      "path": "/api/v1/products/p6/counterfactuals/{counterfactual_run_id}",
+      "phase": "P6",
+      "product_kind": "P6_COUNTERFACTUAL",
+      "response_schema": "ProductV1Envelope"
+    },
+    {
+      "exact_id_params": [
+        "recommendation_id"
+      ],
+      "method": "GET",
+      "operation_id": "getProductV1P6Recommendation",
+      "path": "/api/v1/products/p6/recommendations/{recommendation_id}",
+      "phase": "P6",
+      "product_kind": "P6_RECOMMENDATION",
+      "response_schema": "ProductV1Envelope"
+    }
+  ],
+  "schema": "TPAA_PRODUCT_V1_CLIENT_CONTRACT_V1"
+}

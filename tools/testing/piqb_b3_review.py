@@ -105,7 +105,10 @@ def review(
         ),
         "all_tasks_complete_candidate": (
             len(state_items) == 8
-            and set(state_items) == {"COMPLETE_CANDIDATE"}
+            and all(
+                item in {"COMPLETE_CANDIDATE", "COMPLETE"}
+                for item in state_items
+            )
         ),
         "six_family_source_registry_present": all(
             token in source

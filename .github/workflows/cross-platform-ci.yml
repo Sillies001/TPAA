@@ -1074,6 +1074,18 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/piqb-b3/postgres-production-pipeline.json
 
+      - name: Execute PIQB B4 API security observability qualification
+        run: >-
+          uv run --locked python tools/testing/piqb_b4_api_security_observability.py
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_piqb_b4_api_security
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b4/postgres-api-security-observability.json
+
       - name: Execute ACP-221 PostgreSQL 1.8.0 to 1.9.0 migration qualification
         run: >-
           uv run --locked python tools/testing/acp_221_postgres_migration.py
@@ -1124,6 +1136,15 @@ jobs:
         with:
           name: tpaa-piqb-b3-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/piqb-b3/postgres-production-pipeline.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload PIQB B4 PostgreSQL qualification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-piqb-b4-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/piqb-b4/postgres-api-security-observability.json
           if-no-files-found: error
           retention-days: 30
 
@@ -1810,6 +1831,12 @@ jobs:
           name: tpaa-piqb-b3-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/piqb-b3
 
+      - name: Download PIQB B4 PostgreSQL qualification evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-piqb-b4-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/piqb-b4
+
       - name: Aggregate all 14 M0 Exit Gates
         run: >-
           python tools/ci/m0_exit_review.py
@@ -2145,6 +2172,29 @@ jobs:
         with:
           name: tpaa-piqb-b3-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/piqb-b3/review.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Review PIQB B4 unified API security and observability
+        shell: bash
+        run: |
+          python tools/testing/piqb_b4_review.py \
+            --qualification downloaded/piqb-b4/postgres-api-security-observability.json \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --output evidence/piqb-b4/review.json
+
+      - name: Upload PIQB B4 review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-piqb-b4-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/piqb-b4/review.json
           if-no-files-found: error
           retention-days: 30
 

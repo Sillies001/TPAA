@@ -1,0 +1,171 @@
+{
+  "schema": "TPAA_PIQB_B4_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B4",
+  "source_b3_protected_main_sha": "08e223c8137eb261b43ed7c2ca3612e22770d8ba",
+  "source_b3_qualification": "PIQB_B3_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "task_state": {
+    "PIQB-B4-001": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "Run #618 protected-main 14/14 SUCCESS",
+        "TPAA_PIQB_B3_REVIEW_V1 PASS/GO",
+        "PIQB_B3_QUALIFIED",
+        "B3 issue #210 closed completed",
+        "Run #620 exact-head 14/14 SUCCESS"
+      ]
+    },
+    "PIQB-B4-002": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "register_unified_routes shared P1-P6 route graph",
+        "Desktop delegates route registration to unified graph",
+        "Service unified factory",
+        "legacy Service m8/m9 resolver compatibility preserved",
+        "Run #620 exact-head 14/14 SUCCESS"
+      ]
+    },
+    "PIQB-B4-003": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "UnifiedPrincipal envelope",
+        "single pluggable Service principal resolver",
+        "M8ViewerContext exact projection",
+        "M9/P6SecurityViewer exact projection",
+        "Service default-deny principal middleware",
+        "Service job actor derived from principal rather than X-TPAA-Actor",
+        "Run #620 exact-head 14/14 SUCCESS"
+      ]
+    },
+    "PIQB-B4-004": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "TPAA Product API v1 exact-ID read facade",
+        "10 frozen GET routes covering P1-P6 product types",
+        "canonical UUID path parameters",
+        "no alias/latest routes",
+        "P4/P5/P6 reuse frozen domain viewer authorization",
+        "existing stage routes preserved as compatibility surface",
+        "no hidden compute/run mutation endpoint in Product API v1",
+        "Run #621 Product v1 unit/contract/OpenAPI/client tests PASS before Ruff I001 stopped gate"
+      ]
+    },
+    "PIQB-B4-005": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "B4_PRODUCT_API_V1_CONTRACT.json",
+        "api/openapi-product-v1.json",
+        "api/product-v1-client-contract.json",
+        "product_v1_contract.py deterministic generator/checker",
+        "existing CROSS_LAYER_DTO_CONTRACTS authority and schemas reused",
+        "operationId/method/path/exact-id client contract frozen",
+        "Run #621 Product v1 contract tests PASS before Ruff I001 stopped gate"
+      ]
+    },
+    "PIQB-B4-006": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "SecurityAuditRecord/SecurityAuditSink Application port",
+        "PersistentAuditLedger over existing DB 1.9 audit.audit_log",
+        "SQLite/PostgreSQL UnitOfWork expose audit_log adapter",
+        "Desktop/Service persistence runtimes expose DB-backed security_audit_sink",
+        "M8/P6 emit security events through injected sink",
+        "canonical UUID actor separated from pseudonymous/role principal_key",
+        "no DB schema change and no shadow audit store"
+      ]
+    },
+    "PIQB-B4-007": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "ProductQualificationStatus explicit protected-main qualification projection",
+        "ProductOperationalStatus secret-safe structured record",
+        "/runtime/qualification endpoint",
+        "/runtime/observability endpoint",
+        "P1-P6 availability retained through Application use case",
+        "API does not import tpaa_audit/storage/platform"
+      ]
+    },
+    "PIQB-B4-008": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "real SQLite/PostgreSQL audit restart/parity qualification runner",
+        "Product API v1 OpenAPI/client exact regeneration checks",
+        "runtime qualification/observability checks",
+        "B4 reviewer candidate/protected-main split",
+        "unchanged exactly-14-job workflow topology"
+      ]
+    }
+  },
+  "candidate_complete": true,
+  "candidate_qualification_pending": true,
+  "b4_qualified": false,
+  "b5_blocked": true,
+  "entry_qualification": {
+    "protected_main_sha": "08e223c8137eb261b43ed7c2ca3612e22770d8ba",
+    "run_number": 618,
+    "actions_run_id": 37196871134,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B3_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B3_QUALIFIED",
+    "data_compute_plane_qualified": true
+  },
+  "api_security_foundation_qualification": {
+    "exact_head": "0d39f73e1ba43b0d272ba4bd262041b2bceed1d8",
+    "run_number": 620,
+    "actions_run_id": 37200511852,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "conclusion": "SUCCESS"
+  },
+  "last_failed_candidate_run": {
+    "exact_head": "d0c33e9510a82f3afd8e27664b637c33d7456175",
+    "run_number": 622,
+    "actions_run_id": 37207308258,
+    "conclusion": "FAILURE",
+    "root_causes": [
+      "Ruff I001 import-order in SQLite/PostgreSQL repository imports",
+      "mypy expected-row type mismatch in B4 qualification runner",
+      "negative topology scope flag incorrectly included in all-true acceptance map",
+      "B4 reviewer fixture inherited the same negative-acceptance design error"
+    ],
+    "b4_product_functional_tests_passed": true,
+    "sqlite_postgres_audit_restart_parity_passed": true,
+    "product_openapi_client_exact_passed": true,
+    "observability_exact_passed": true,
+    "postgres_b2_b3_db19_qualifications_passed": true
+  },
+  "failure_history": [
+    {
+      "exact_head": "299dc973e7f61dd423c14db8d27421d95bd2d60a",
+      "run_number": 621,
+      "actions_run_id": 37203286483,
+      "conclusion": "FAILURE",
+      "root_causes": [
+        "Ruff I001 import-order in src/tpaa_api/product_v1.py"
+      ],
+      "product_v1_functional_tests_passed": true,
+      "postgres_b2_b3_db19_qualifications_passed": true
+    },
+    {
+      "exact_head": "d0c33e9510a82f3afd8e27664b637c33d7456175",
+      "run_number": 622,
+      "actions_run_id": 37207308258,
+      "conclusion": "FAILURE",
+      "root_causes": [
+        "Ruff I001 import-order in SQLite/PostgreSQL repository imports",
+        "mypy expected-row type mismatch in B4 qualification runner",
+        "negative topology scope flag incorrectly included in all-true acceptance map",
+        "B4 reviewer fixture inherited the same negative-acceptance design error"
+      ],
+      "b4_product_functional_tests_passed": true,
+      "sqlite_postgres_audit_restart_parity_passed": true,
+      "product_openapi_client_exact_passed": true,
+      "observability_exact_passed": true,
+      "postgres_b2_b3_db19_qualifications_passed": true
+    }
+  ]
+}

@@ -12,6 +12,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from .audit_ledger import PersistentAuditLedger
 from .bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     SQLITE_ENGINE_PROFILE,
@@ -116,6 +117,7 @@ class SQLiteDesktopUnitOfWork:
         self.publication: SQLiteCorePublicationLedger
         self.product_publication: SQLiteProductPublicationLedger
         self.canonical_rows: SQLiteCanonicalRowRepository
+        self.audit_log: PersistentAuditLedger
 
     @property
     def write(self) -> bool:
@@ -157,6 +159,7 @@ class SQLiteDesktopUnitOfWork:
             self.publication = SQLiteCorePublicationLedger(connection)
             self.product_publication = SQLiteProductPublicationLedger(connection)
             self.canonical_rows = SQLiteCanonicalRowRepository(connection)
+            self.audit_log = PersistentAuditLedger(self.canonical_rows)
             return self
         except Exception:
             if connection is not None:

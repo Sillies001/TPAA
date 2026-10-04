@@ -43,6 +43,8 @@ from tpaa_context import (
     utc,
 )
 
+from .security_audit import SecurityAuditRecord, SecurityAuditSink
+
 _T = TypeVar("_T")
 M9ViewerContext = P6SecurityViewer
 
@@ -346,6 +348,7 @@ class M9WorkspaceService:
         admission_evidence: P6AdmissionEvidence | None = None,
         security_policy: P6RuntimeSecurityPolicy | None = None,
         recommendation_workflow: P6RecommendationWorkflow | None = None,
+        security_audit_sink: SecurityAuditSink | None = None,
     ) -> None:
         self._repo = repository
         self._p6_admission_evidence = admission_evidence
@@ -363,6 +366,7 @@ class M9WorkspaceService:
             or P6RecommendationWorkflow(self._security)
         )
         self._audit: list[P6SecurityAuditEvent] = []
+        self._security_audit_sink = security_audit_sink
         self._mutation_requests: dict[str, tuple[str, dict[str, object]]] = {}
 
     def security_events(self) -> tuple[P6SecurityAuditEvent, ...]:
@@ -376,19 +380,43 @@ class M9WorkspaceService:
         object_ref: str,
         outcome: str,
         request_id: str | None = None,
+        reason: str | None = None,
     ) -> None:
+        principal_key = p6_principal_key(
+            viewer,
+            policy=self._security,
+        )
         self._audit.append(
             P6SecurityAuditEvent(
-                principal_key=p6_principal_key(
-                    viewer,
-                    policy=self._security,
-                ),
+                principal_key=principal_key,
                 action=action,
                 object_ref=object_ref,
                 outcome=outcome,
                 request_id=request_id,
             )
         )
+        if self._security_audit_sink is not None:
+            self._security_audit_sink.record(
+                SecurityAuditRecord(
+                    actor_id=viewer.actor_id,
+                    principal_key=principal_key,
+                    action=action,
+                    object_type="P6_SECURITY_EVENT",
+                    object_id=object_ref,
+                    outcome=outcome,
+                    request_id=request_id,
+                    reason=reason or action,
+                    details={
+                        "viewer_role": viewer.role,
+                        "scope_match": viewer.scope_match,
+                        "validation_only": viewer.validation_only,
+                        "privileged_identity_authorized": (
+                            viewer.privileged_identity_authorized
+                        ),
+                        "export_authorized": viewer.export_authorized,
+                    },
+                )
+            )
 
     def _read_allowed(
         self,
@@ -919,6 +947,7 @@ class M9WorkspaceService:
                 object_ref=mutation.recommendation_id,
                 outcome="DENY",
                 request_id=mutation.request_id,
+                reason=mutation.reason,
             )
             raise M9ApplicationError(exc.code, exc.detail) from exc
         self._repo.register_recommendation(result.revision)
@@ -928,6 +957,7 @@ class M9WorkspaceService:
             object_ref=result.revision.recommendation_id,
             outcome="ALLOW",
             request_id=mutation.request_id,
+            reason=mutation.reason,
         )
         return {
             "recommendation_id": result.revision.recommendation_id,
