@@ -23,7 +23,6 @@ from tpaa_storage.bootstrap import (
     BootstrapVerification,
     _bootstrap_connection,
     _configure_sqlite,
-    _load_authority,
     _postgres_catalog_hash_query,
     _postgres_create_statements,
     _postgres_manifest_create_statement,
@@ -39,8 +38,11 @@ from tpaa_storage.bootstrap import (
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_7_0.json"
+TARGET_CORE = ROOT / "migrations" / "authority" / "CORE_LOGICAL_MODEL_DB_1_8_0.json"
 SOURCE_CORE_SHA256 = "dd8461ff572338006455f7b6eac5325900c60640f5d163c3b61c3f5bd5767f74"
 SOURCE_LOCK_SHA256 = "a55ccc5f75d128c4dc3c3208064596eeb2dda7ffaf340d87726a22d4b62f93c6"
+TARGET_CORE_SHA256 = "cbb15c1e0029be45213e4d7ab57a78fac47d7cc09c4627a9c388fafdadd2d44e"
+TARGET_LOCK_SHA256 = "2f3690d5e74e585a34ae35fdef9fb1e0cccb5504c6983d0c97417bb6a106b389"
 SOURCE_DB_SCHEMA_VERSION = "1.7.0"
 TARGET_DB_SCHEMA_VERSION = "1.8.0"
 NEW_RELATIONS: tuple[str, ...] = (
@@ -99,13 +101,39 @@ def historical_authority() -> _SchemaAuthority:
 
 
 def target_authority() -> _SchemaAuthority:
-    authority = _load_authority()
-    if authority.schema_version != TARGET_DB_SCHEMA_VERSION:
+    raw = TARGET_CORE.read_bytes()
+    actual_hash = _sha256_bytes(raw)
+    if actual_hash != TARGET_CORE_SHA256:
+        raise MigrationError(
+            "TARGET_AUTHORITY_HASH_MISMATCH",
+            f"expected={TARGET_CORE_SHA256} actual={actual_hash}",
+        )
+    payload = json.loads(raw.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise MigrationError("TARGET_AUTHORITY_INVALID", "root must be an object")
+    if payload.get("db_schema_version") != TARGET_DB_SCHEMA_VERSION:
         raise MigrationError(
             "TARGET_SCHEMA_VERSION_MISMATCH",
-            f"actual={authority.schema_version}",
+            f"actual={payload.get('db_schema_version')!r}",
         )
-    return authority
+    tables_raw = payload.get("tables")
+    if not isinstance(tables_raw, dict) or not tables_raw:
+        raise MigrationError("TARGET_TABLES_INVALID", "tables must be non-empty")
+    tables: dict[str, Mapping[str, Any]] = {}
+    for name, raw_table in tables_raw.items():
+        if not isinstance(name, str) or not isinstance(raw_table, dict):
+            raise MigrationError("TARGET_TABLE_INVALID", f"table={name!r}")
+        tables[name] = raw_table
+    core_baseline = payload.get("core_baseline")
+    if not isinstance(core_baseline, str) or not core_baseline:
+        raise MigrationError("TARGET_CORE_BASELINE_INVALID", f"actual={core_baseline!r}")
+    return _SchemaAuthority(
+        schema_version=TARGET_DB_SCHEMA_VERSION,
+        core_baseline=core_baseline,
+        authority_sha256=TARGET_CORE_SHA256,
+        baseline_lock_sha256=TARGET_LOCK_SHA256,
+        tables=tables,
+    )
 
 
 def new_relation_names() -> tuple[str, ...]:
