@@ -12,7 +12,7 @@ def test_authority_is_exact_schema_1_7_0_and_all_tables_agree() -> None:
     authority = bootstrap_module._load_authority()
     assert authority.schema_version == EXPECTED_DB_SCHEMA_VERSION
     assert authority.core_baseline == "CB-1.4.0"
-    assert len(authority.tables) == 94
+    assert len(authority.tables) == 95
     assert all(
         table["schema_version"] == EXPECTED_DB_SCHEMA_VERSION
         for table in authority.tables.values()
@@ -24,8 +24,8 @@ def test_sqlite_projection_is_deterministic_and_complete() -> None:
     first = bootstrap_module._sqlite_create_statements(authority)
     second = bootstrap_module._sqlite_create_statements(authority)
     assert first == second
-    assert len(first) == len(authority.tables) == 94
-    assert len(set(first)) == 94
+    assert len(first) == len(authority.tables) == 95
+    assert len(set(first)) == 95
     assert all(statement.startswith('CREATE TABLE "') for statement in first)
 
 
