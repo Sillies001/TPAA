@@ -54,7 +54,7 @@ def test_postgres_bootstrap_script_is_transactional_and_records_provenance() -> 
     assert "CORE_LOGICAL_MODEL" in script
     assert "1.9.0" in script
     assert "CB-1.4.0" in script
-    assert script.count("CREATE TABLE") == 95  # 92 Canonical + bootstrap manifest
+    assert script.count("CREATE TABLE") == 96  # 95 Canonical + bootstrap manifest
 
 
 def test_postgres_fault_script_injects_failure_inside_transaction() -> None:

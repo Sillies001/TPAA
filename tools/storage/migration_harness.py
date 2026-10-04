@@ -227,7 +227,7 @@ def run() -> dict[str, object]:
             downgrade_blocked = exc.reason == "DOWNGRADE_BLOCKED_NONEMPTY_RELATION"
         checks["acp219_nonempty_downgrade_fail_closed"] = downgrade_blocked
         checks["failed_downgrade_preserves_1_8"] = (
-            verify_sqlite(historical).schema_version == "1.8.0"
+            verify_1_8(historical).schema_version == "1.8.0"
         )
 
         with closing(sqlite3.connect(historical)) as connection:
