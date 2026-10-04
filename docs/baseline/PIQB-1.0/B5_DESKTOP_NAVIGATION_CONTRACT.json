@@ -133,6 +133,18 @@
     "business_recompute": false,
     "persistence_access": false,
     "p6_projection_must_not_be_presented_as_fact": true,
-    "unsupported_visualization_must_be_explicit": true
+    "unsupported_visualization_must_be_explicit": true,
+    "semantic_layers": [
+      "C",
+      "W",
+      "P",
+      "A",
+      "J",
+      "M",
+      "ASSESSMENT",
+      "P2",
+      "P3",
+      "P6"
+    ]
   }
 }

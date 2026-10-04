@@ -87,9 +87,22 @@ def review(
             and all(item in {"COMPLETE_CANDIDATE", "COMPLETE"} for item in states)
             and state.get("candidate_complete") is True
         ),
-        "formal_state_still_blocked": (
-            state.get("b4_qualified") is False
-            and state.get("b5_blocked") is True
+        "formal_state_consistent": (
+            (
+                state.get("b4_qualified") is False
+                and state.get("b5_blocked") is True
+            )
+            or (
+                state.get("b4_qualified") is True
+                and state.get("b5_blocked") is False
+                and isinstance(state.get("protected_main_qualification"), dict)
+                and state["protected_main_qualification"].get("protected_main_sha")
+                == "7130978fc14c2714a9135de285a2c74aeaa33804"
+                and state["protected_main_qualification"].get("run_number") == 624
+                and state["protected_main_qualification"].get("required_jobs_success") == 14
+                and state["protected_main_qualification"].get("qualification")
+                == "PIQB_B4_QUALIFIED"
+            )
         ),
         "db_1_9_no_authority_change": (
             baseline.get("db_schema_version") == "1.9.0"
