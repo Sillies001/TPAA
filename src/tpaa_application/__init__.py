@@ -135,6 +135,13 @@ from .runtime import (
     build_trusted_runtime_status_use_case,
 )
 from .service import ApplicationService
+from .source_import import (
+    ProductionImportError,
+    ProductionImportService,
+    SourceImportCommand,
+    SourceProvenanceRecord,
+    SourceProvenanceRepository,
+)
 from .use_cases import GetStorageBaselineStatus
 
 __all__ = [
@@ -174,6 +181,8 @@ __all__ = [
     "DurableP6ModelBuildResolver",
     "P6PersistenceError",
     "P6PersistenceRepository",
+    "ProductionImportError",
+    "ProductionImportService",
     "compare_m2_release_replay",
     "InMemoryM3ReleasePublicationRepository",
     "M3MetricNotFound",
@@ -246,5 +255,8 @@ __all__ = [
     "RuntimeBaselineStatus",
     "build_trusted_runtime_status_use_case",
     "business_outcome",
+    "SourceImportCommand",
+    "SourceProvenanceRecord",
+    "SourceProvenanceRepository",
     "StorageBaselineStatus",
 ]

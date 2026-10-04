@@ -38,6 +38,15 @@ from tpaa_ingest.p6_interop import (
     assert_p6_interop_snapshot_identity,
     build_p6_interop_snapshot,
 )
+from tpaa_ingest.production_source import (
+    FROZEN_SOURCE_FAMILIES,
+    ProductionSourceAdapterError,
+    SourceAdapter,
+    SourceAdapterDescriptor,
+    SourceAdapterRegistry,
+    SourceArtifactEnvelope,
+    SourceFamily,
+)
 from tpaa_ingest.source_adapter import (
     GOVERNED_FIXTURE_IDS,
     SourceArtifactIdentity,
@@ -53,6 +62,7 @@ from tpaa_ingest.source_adapter import (
 __all__ = [
     "ClockAlignmentSample",
     "ClockSegment",
+    "FROZEN_SOURCE_FAMILIES",
     "GOVERNED_FIXTURE_IDS",
     "InterpolationInput",
     "LatencyInput",
@@ -73,7 +83,13 @@ __all__ = [
     "ReferenceIdentity",
     "P6InteropArtifactRef",
     "P6InteropSnapshot",
+    "ProductionSourceAdapterError",
     "ReferenceTruthRow",
+    "SourceAdapter",
+    "SourceAdapterDescriptor",
+    "SourceAdapterRegistry",
+    "SourceArtifactEnvelope",
+    "SourceFamily",
     "SourceArtifactIdentity",
     "SyntheticAircraftSource",
     "SyntheticSessionSource",

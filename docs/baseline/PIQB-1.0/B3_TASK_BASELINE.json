@@ -1,0 +1,83 @@
+{
+  "schema": "TPAA_PIQB_B3_TASK_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B3",
+  "source_b2_protected_main_sha": "4b6e7c1e40d857b859b7fd322af9943706e79354",
+  "source_b2_qualification": "PIQB_B2_QUALIFIED",
+  "source_b2_run_number": 611,
+  "source_b2_actions_run_id": 37180955197,
+  "umbrella_issue": 206,
+  "batch_issue": 210,
+  "db_schema_version": "1.9.0",
+  "task_count": 8,
+  "tasks": [
+    {
+      "task_id": "PIQB-B3-001",
+      "title": "Governed Source Adapter Registry",
+      "workstream": "WS-DATA",
+      "dependencies": [],
+      "minimum_acceptance": "Exactly the six frozen source families are registered through explicit adapter identity/version/media contracts with no format guessing or implicit proprietary decoder dependency."
+    },
+    {
+      "task_id": "PIQB-B3-002",
+      "title": "Production Import Boundary",
+      "workstream": "WS-APP",
+      "dependencies": ["PIQB-B3-001"],
+      "minimum_acceptance": "Application accepts immutable source byte-identity envelopes through engine-neutral contracts and validates adapter/family/media identity before Canonical or metric projection."
+    },
+    {
+      "task_id": "PIQB-B3-003",
+      "title": "Source Provenance Registry",
+      "workstream": "WS-STORAGE",
+      "dependencies": ["PIQB-B3-001", "PIQB-B3-002"],
+      "minimum_acceptance": "Source, stream, and artifact provenance persist exactly in existing DB 1.9 registry.data_source/source_stream/source_artifact relations with restart durability and immutable conflicts."
+    },
+    {
+      "task_id": "PIQB-B3-004",
+      "title": "Governed Polars Compute Runtime",
+      "workstream": "WS-COMPUTE",
+      "dependencies": ["PIQB-B3-002"],
+      "minimum_acceptance": "Polars becomes an explicit frozen runtime dependency behind governed compute contracts; pandas is not a hidden default and business semantics remain engine-independent."
+    },
+    {
+      "task_id": "PIQB-B3-005",
+      "title": "Parquet Data Plane",
+      "workstream": "WS-STORAGE",
+      "dependencies": ["PIQB-B3-003", "PIQB-B3-004"],
+      "minimum_acceptance": "Typed datasets use governed schema/partition/write/scan contracts over logical tpaa-parquet identities with artifact and logical-content hashes."
+    },
+    {
+      "task_id": "PIQB-B3-006",
+      "title": "Real Job Lifecycle and Worker Commands",
+      "workstream": "WS-RUNTIME",
+      "dependencies": ["PIQB-B3-004", "PIQB-B3-005"],
+      "minimum_acceptance": "Job lifecycle extends beyond SUBMITTED/CANCELLED and spawn workers execute governed serializable commands without inherited Qt or live DB connections."
+    },
+    {
+      "task_id": "PIQB-B3-007",
+      "title": "Resource Safety Backpressure and Orphan Cleanup",
+      "workstream": "WS-RUNTIME",
+      "dependencies": ["PIQB-B3-005", "PIQB-B3-006"],
+      "minimum_acceptance": "Bounded worker admission, cancellation/drain, timeout/failure handling, staging cleanup, and deterministic orphan recovery fail closed without deleting registered immutable products."
+    },
+    {
+      "task_id": "PIQB-B3-008",
+      "title": "Production Import to Persistent Release Qualification",
+      "workstream": "WS-TEST",
+      "dependencies": ["PIQB-B3-001", "PIQB-B3-002", "PIQB-B3-003", "PIQB-B3-004", "PIQB-B3-005", "PIQB-B3-006", "PIQB-B3-007"],
+      "minimum_acceptance": "A production-source import executes Worker -> Canonical -> World -> Metric -> Release -> durable storage with restart/replay parity under the unchanged exactly-14-job Hosted CI topology."
+    }
+  ],
+  "scope": {
+    "source_families": ["FLIGHT", "MISSION_AVIONICS", "TDL", "RANGE_ACMI", "SCENARIO", "AUDIO_VIDEO"],
+    "no_db_schema_change": true,
+    "no_shadow_schema": true,
+    "no_canonical_mutation": true,
+    "db_1_9_existing_source_relations_required": true,
+    "proprietary_decoder_is_external_adapter": true,
+    "worker_live_qt_connection_forbidden": true,
+    "worker_live_db_connection_forbidden": true,
+    "no_b4_api_security_work": true,
+    "no_m10_p7": true
+  }
+}

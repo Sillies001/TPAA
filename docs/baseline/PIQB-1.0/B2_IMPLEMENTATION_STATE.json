@@ -10,7 +10,7 @@
   "no_shadow_schema": true,
   "task_state": {
     "PIQB-B2-001": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "M6P2WorkspaceRepository",
         "M7P3WorkspaceRepository",
@@ -19,7 +19,7 @@
       ]
     },
     "PIQB-B2-002": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "SQLiteProductPublicationLedger",
         "SQLiteDesktopUnitOfWork.product_publication",
@@ -33,7 +33,7 @@
       ]
     },
     "PIQB-B2-003": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "PostgreSQLProductPublicationLedger",
         "PostgreSQLServiceUnitOfWork.product_publication",
@@ -47,7 +47,7 @@
       ]
     },
     "PIQB-B2-004": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "LocalObjectStore logical tpaa-object/tpaa-parquet namespaces",
         "LocalSealedObjectFlow stage/verify/seal",
@@ -55,7 +55,7 @@
       ]
     },
     "PIQB-B2-005": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "ProductPublicationCoordinator",
         "ProductPublicationLedger",
@@ -63,7 +63,7 @@
       ]
     },
     "PIQB-B2-006": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "SQLite close/reopen exact registration",
         "real PostgreSQL reconstruction across new connections",
@@ -74,7 +74,7 @@
       ]
     },
     "PIQB-B2-007": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "staging orphan recovery",
         "sealed-but-unregistered orphan recovery",
@@ -82,7 +82,7 @@
       ]
     },
     "PIQB-B2-008": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "shared identity derivation",
         "SQLite/PostgreSQL ledger contract parity",
@@ -100,16 +100,17 @@
       "LONGITUDINAL_RELEASE"
     ],
     "dependency_blocked": [],
-    "implemented_not_b2_qualified": [
+    "implemented_not_b2_qualified": [],
+    "adapter_pending": [],
+    "authority_blocked": [],
+    "persistence_qualified": [
       "P2_ATTRIBUTION",
       "P3_TWIN_CAPABILITY",
       "P4_P5_ASSESSMENT",
       "P6_MODEL_PROJECTION_ADVISORY"
-    ],
-    "adapter_pending": [],
-    "authority_blocked": []
+    ]
   },
-  "b2_qualified": false,
+  "b2_qualified": true,
   "authority_adoption": {
     "proposal_id": "ACP-221",
     "issue": 221,
@@ -143,5 +144,18 @@
     "P3_TWIN_CAPABILITY": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED",
     "P4_P5_ASSESSMENT": "EXACT_IMPLEMENTED_DB_1_9_STANDALONE_ANNOTATION_QUALIFIED",
     "P6_MODEL_PROJECTION_ADVISORY": "EXACT_IMPLEMENTED_POSTGRES_QUALIFIED"
+  },
+  "b3_entry_authorized": true,
+  "qualification": {
+    "protected_main_sha": "4b6e7c1e40d857b859b7fd322af9943706e79354",
+    "run_number": 611,
+    "actions_run_id": 37180955197,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B2_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B2_QUALIFIED",
+    "persistence_recovery_qualified": true
   }
 }

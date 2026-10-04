@@ -1,0 +1,29 @@
+{
+  "schema": "TPAA_PIQB_B3_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B3",
+  "source_b2_protected_main_sha": "4b6e7c1e40d857b859b7fd322af9943706e79354",
+  "source_b2_qualification": "PIQB_B2_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "task_state": {
+    "PIQB-B3-001": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": ["SourceFamily exact six-family enum", "SourceAdapterDescriptor", "SourceAdapterRegistry exact immutable registration", "SourceArtifactEnvelope byte identity", "external decoder metadata boundary"]
+    },
+    "PIQB-B3-002": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": ["SourceImportCommand", "ProductionImportService", "adapter/family/media/hash validation before projection", "no tpaa_platform dependency from Application"]
+    },
+    "PIQB-B3-003": {
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": ["SourceProvenanceRepository", "registry.data_source", "registry.source_stream", "registry.source_artifact", "SQLite restart exact reconstruction", "immutable source/stream/artifact conflict checks"]
+    },
+    "PIQB-B3-004": {"state": "NOT_STARTED", "evidence": []},
+    "PIQB-B3-005": {"state": "NOT_STARTED", "evidence": []},
+    "PIQB-B3-006": {"state": "NOT_STARTED", "evidence": []},
+    "PIQB-B3-007": {"state": "NOT_STARTED", "evidence": []},
+    "PIQB-B3-008": {"state": "NOT_STARTED", "evidence": []}
+  },
+  "b3_qualified": false,
+  "b4_blocked": true
+}
