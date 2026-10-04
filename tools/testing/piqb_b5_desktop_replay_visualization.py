@@ -252,7 +252,7 @@ def qualify(*, platform: str, source_revision: str) -> dict[str, object]:
         ),
     }
     failed = sorted(key for key, value in acceptance.items() if value is not True)
-    result = {
+    result: dict[str, object] = {
         "schema": "TPAA_PIQB_B5_DESKTOP_REPLAY_VISUALIZATION_QUALIFICATION_V1",
         "platform": platform,
         "source_revision": source_revision,

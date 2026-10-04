@@ -62,13 +62,13 @@ def test_b4_task_baseline_freezes_exact_scope_and_eight_tasks() -> None:
     assert scope["exact_fourteen_job_topology_preserved"] is True
 
 
-def test_b4_state_is_complete_candidate_but_not_formally_qualified() -> None:
+def test_b4_state_records_protected_main_qualification_after_run_624() -> None:
     state = _load("B4_IMPLEMENTATION_STATE.json")
 
     assert state["candidate_complete"] is True
-    assert state["candidate_qualification_pending"] is True
-    assert state["b4_qualified"] is False
-    assert state["b5_blocked"] is True
+    assert state["candidate_qualification_pending"] is False
+    assert state["b4_qualified"] is True
+    assert state["b5_blocked"] is False
 
     entry = state["entry_qualification"]
     assert isinstance(entry, dict)
@@ -97,12 +97,28 @@ def test_b4_state_is_complete_candidate_but_not_formally_qualified() -> None:
     assert failed["b4_product_functional_tests_passed"] is True
     assert failed["sqlite_postgres_audit_restart_parity_passed"] is True
 
+    qualification = state["protected_main_qualification"]
+    assert isinstance(qualification, dict)
+    assert qualification["protected_main_sha"] == (
+        "7130978fc14c2714a9135de285a2c74aeaa33804"
+    )
+    assert qualification["run_number"] == 624
+    assert qualification["actions_run_id"] == 37210152519
+    assert qualification["required_jobs_success"] == 14
+    assert qualification["required_jobs_total"] == 14
+    assert qualification["status"] == "PASS"
+    assert qualification["decision"] == "GO"
+    assert qualification["qualification"] == "PIQB_B4_QUALIFIED"
+    assert qualification["api_security_observability_qualified"] is True
+    assert qualification["implementation_complete"] is True
+    assert qualification["failed_acceptance"] == []
+
     task_state = state["task_state"]
     assert isinstance(task_state, dict)
     assert {
         task_state[f"PIQB-B4-{index:03d}"]["state"]
         for index in range(1, 9)
-    } == {"COMPLETE_CANDIDATE"}
+    } == {"COMPLETE"}
 
 
 def test_b4_unified_factory_has_no_transport_authorization_bypass() -> None:
