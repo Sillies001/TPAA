@@ -7,41 +7,59 @@
   "db_schema_version": "1.9.0",
   "task_state": {
     "PIQB-B4-001": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "Run #618 protected-main 14/14 SUCCESS",
         "TPAA_PIQB_B3_REVIEW_V1 PASS/GO",
         "PIQB_B3_QUALIFIED",
-        "B3 issue #210 closed completed"
+        "B3 issue #210 closed completed",
+        "Run #620 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B4-002": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "register_unified_routes shared P1-P6 route graph",
         "Desktop delegates route registration to unified graph",
         "Service unified factory",
-        "legacy Service m8/m9 resolver compatibility preserved"
+        "legacy Service m8/m9 resolver compatibility preserved",
+        "Run #620 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B4-003": {
-      "state": "IMPLEMENTED_PENDING_CI",
+      "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "UnifiedPrincipal envelope",
         "single pluggable Service principal resolver",
         "M8ViewerContext exact projection",
         "M9/P6SecurityViewer exact projection",
         "Service default-deny principal middleware",
-        "Service job actor derived from principal rather than X-TPAA-Actor"
+        "Service job actor derived from principal rather than X-TPAA-Actor",
+        "Run #620 exact-head 14/14 SUCCESS"
       ]
     },
     "PIQB-B4-004": {
-      "state": "NOT_STARTED",
-      "evidence": []
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "TPAA Product API v1 exact-ID read facade",
+        "10 frozen GET routes covering P1-P6 product types",
+        "canonical UUID path parameters",
+        "no alias/latest routes",
+        "P4/P5/P6 reuse frozen domain viewer authorization",
+        "existing stage routes preserved as compatibility surface",
+        "no hidden compute/run mutation endpoint in Product API v1"
+      ]
     },
     "PIQB-B4-005": {
-      "state": "NOT_STARTED",
-      "evidence": []
+      "state": "IMPLEMENTED_PENDING_CI",
+      "evidence": [
+        "B4_PRODUCT_API_V1_CONTRACT.json",
+        "api/openapi-product-v1.json",
+        "api/product-v1-client-contract.json",
+        "product_v1_contract.py deterministic generator/checker",
+        "existing CROSS_LAYER_DTO_CONTRACTS authority and schemas reused",
+        "operationId/method/path/exact-id client contract frozen"
+      ]
     },
     "PIQB-B4-006": {
       "state": "NOT_STARTED",
@@ -69,5 +87,13 @@
     "decision": "GO",
     "qualification": "PIQB_B3_QUALIFIED",
     "data_compute_plane_qualified": true
+  },
+  "api_security_foundation_qualification": {
+    "exact_head": "0d39f73e1ba43b0d272ba4bd262041b2bceed1d8",
+    "run_number": 620,
+    "actions_run_id": 37200511852,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "conclusion": "SUCCESS"
   }
 }

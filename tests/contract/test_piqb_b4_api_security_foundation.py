@@ -75,11 +75,24 @@ def test_b4_foundation_state_does_not_claim_candidate_completion_before_ci() -> 
 
     task_state = state["task_state"]
     assert isinstance(task_state, dict)
+    foundation = state["api_security_foundation_qualification"]
+    assert isinstance(foundation, dict)
+    assert foundation["exact_head"] == (
+        "0d39f73e1ba43b0d272ba4bd262041b2bceed1d8"
+    )
+    assert foundation["run_number"] == 620
+    assert foundation["required_jobs_success"] == 14
+    assert foundation["required_jobs_total"] == 14
+
     for index in range(1, 4):
+        assert task_state[f"PIQB-B4-{index:03d}"]["state"] == (
+            "COMPLETE_CANDIDATE"
+        )
+    for index in range(4, 6):
         assert task_state[f"PIQB-B4-{index:03d}"]["state"] == (
             "IMPLEMENTED_PENDING_CI"
         )
-    for index in range(4, 9):
+    for index in range(6, 9):
         assert task_state[f"PIQB-B4-{index:03d}"]["state"] == "NOT_STARTED"
 
 

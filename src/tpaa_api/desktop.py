@@ -34,6 +34,7 @@ _DESKTOP_ALLOWED_PREFIXES = (
     "/m7/",
     "/m8/",
     "/m9/",
+    "/api/v1/",
 )
 
 
