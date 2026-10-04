@@ -359,7 +359,7 @@ def _projection(
     }
 
 
-def _expected_error_code(action: Callable[[], None]) -> str:
+def _expected_error_code(action: Callable[[], object]) -> str:
     try:
         action()
     except P6PersistenceError as exc:
