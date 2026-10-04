@@ -32,14 +32,14 @@ def _verification_line() -> str:
     return "|".join(
         (
             POSTGRES_ENGINE_PROFILE,
-            "1.8.0",
+            "1.9.0",
             "CB-1.4.0",
             "CORE_LOGICAL_MODEL",
             "a" * 64,
             "b" * 64,
             "c" * 64,
             "d" * 64,
-            "94",
+            "95",
         )
     )
 
@@ -52,7 +52,7 @@ def test_postgres_bootstrap_script_is_transactional_and_records_provenance() -> 
     assert f'"public"."{BOOTSTRAP_MANIFEST_TABLE}"' in script
     assert "catalog_schema_sha256" in script
     assert "CORE_LOGICAL_MODEL" in script
-    assert "1.8.0" in script
+    assert "1.9.0" in script
     assert "CB-1.4.0" in script
     assert script.count("CREATE TABLE") == 95  # 92 Canonical + bootstrap manifest
 
@@ -96,8 +96,8 @@ def test_repository_controlled_bootstrap_executes_then_verifies() -> None:
     result = postgres_tool.bootstrap_postgres(client, "tpaa")
 
     assert result.engine_profile == POSTGRES_ENGINE_PROFILE
-    assert result.schema_version == "1.8.0"
-    assert result.table_count == 94
+    assert result.schema_version == "1.9.0"
+    assert result.table_count == 95
     assert result.catalog_schema_sha256 == "d" * 64
     assert len(client.calls) == 2
     assert "BEGIN" in client.calls[0][1]
