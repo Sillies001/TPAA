@@ -1441,16 +1441,16 @@ jobs:
           --admin-database postgres
           --evidence evidence/m5-batch-3/postgres/postgres-recovery.json
 
-      - name: Execute ACP-219 PostgreSQL 1.7.0 to 1.8.0 migration qualification
+      - name: Execute ACP-221 PostgreSQL 1.8.0 to 1.9.0 migration qualification
         run: >-
-          uv run --locked python tools/testing/acp_219_postgres_migration.py
+          uv run --locked python tools/testing/acp_221_postgres_migration.py
           --user tpaa
           --host 127.0.0.1
           --port 5432
           --admin-database postgres
-          --database tpaa_acp219_migration
+          --database tpaa_acp221_migration
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
-          --evidence evidence/m0-exit/acp219-postgres-migration.json
+          --evidence evidence/m0-exit/acp221-postgres-migration.json
 
       - name: Cold-start full M0 with live PostgreSQL
         run: >-
@@ -2451,11 +2451,11 @@ jobs:
             --required-jobs-success 14 \
             --required-jobs-total 14 \
             --output evidence/piqb-b1/review.json
-      - name: Review ACP-219 DB 1.8.0 authority adoption gate
+      - name: Review ACP-221 DB 1.9.0 authority adoption gate
         shell: bash
         run: |
-          python tools/testing/acp_219_authority_adoption.py \
-            --postgres-migration downloaded/postgres/acp219-postgres-migration.json \
+          python tools/testing/acp_221_authority_adoption.py \
+            --postgres-migration downloaded/postgres/acp221-postgres-migration.json \
             --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
             --checked-out-revision "$(git rev-parse HEAD)" \
             --event-name ${{ github.event_name }} \
@@ -2463,13 +2463,13 @@ jobs:
             --run-conclusion success \
             --required-jobs-success 14 \
             --required-jobs-total 14 \
-            --output evidence/acp219-adoption/review.json
+            --output evidence/acp221-adoption/review.json
 
-      - name: Upload ACP-219 adoption review evidence
+      - name: Upload ACP-221 adoption review evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: tpaa-acp219-adoption-${{ github.event.pull_request.head.sha || github.sha }}
-          path: evidence/acp219-adoption/review.json
+          name: tpaa-acp221-adoption-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/acp221-adoption/review.json
           if-no-files-found: error
           retention-days: 30
