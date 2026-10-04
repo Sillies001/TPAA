@@ -431,6 +431,22 @@ class P4P5PersistenceRepository:
                 "P4_ANNOTATION_AUTHOR_KEY_MISMATCH",
                 value.annotation_id,
             )
+        current_row = self._annotation_row(value.annotation_id)
+        if current_row is not None:
+            current = self._annotation_from_row(
+                current_row,
+                subject_context_id=subject_context_id,
+            )
+            if current != value:
+                raise P4P5PersistenceError(
+                    "P4_P5_IMMUTABLE_CONFLICT",
+                    value.annotation_id,
+                )
+            self._ensure_annotation_subject_context(
+                value.annotation_id,
+                subject_context_id,
+            )
+            return
         payload_hash = canonical_hash(
             {
                 "base_release_id": value.base_release_id,
@@ -457,22 +473,6 @@ class P4P5PersistenceRepository:
                 "P4_ANNOTATION_CONTENT_HASH_MISMATCH",
                 value.annotation_id,
             )
-        current_row = self._annotation_row(value.annotation_id)
-        if current_row is not None:
-            current = self._annotation_from_row(
-                current_row,
-                subject_context_id=subject_context_id,
-            )
-            if current != value:
-                raise P4P5PersistenceError(
-                    "P4_P5_IMMUTABLE_CONFLICT",
-                    value.annotation_id,
-                )
-            self._ensure_annotation_subject_context(
-                value.annotation_id,
-                subject_context_id,
-            )
-            return
         self._rows.insert(
             "debrief.annotation",
             {
