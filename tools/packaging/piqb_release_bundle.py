@@ -8,7 +8,7 @@ import gzip
 import hashlib
 import io
 import json
-import stat
+import shutil
 import tarfile
 import tempfile
 import zipfile
@@ -24,6 +24,7 @@ from tools.packaging.m5_runtime_bundle import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RELEASE_CONTRACT = REPO_ROOT / "docs" / "baseline" / "PIQB-1.0" / "B6_RELEASE_CONTRACT.json"
+PIQB_RUNTIME_ENTRY = REPO_ROOT / "tools" / "packaging" / "piqb_runtime_entry.py"
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -87,6 +88,64 @@ def _tar_gz(stage: Path, output: Path) -> None:
                     info.uname = ""
                     info.gname = ""
                     archive.addfile(info, io.BytesIO(data))
+
+
+def _install_piqb_runtime(stage: Path, profile: str) -> None:
+    """Overlay the qualified M5 runtime substrate with the current PIQB product entry."""
+
+    target_entry = stage / "app" / "tools" / "packaging" / PIQB_RUNTIME_ENTRY.name
+    target_entry.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(PIQB_RUNTIME_ENTRY, target_entry)
+
+    fixture_source = REPO_ROOT / "tests" / "fixtures" / "m1"
+    if not fixture_source.is_dir():
+        raise RuntimeError("M1 qualification fixture source missing")
+    shutil.copytree(
+        fixture_source,
+        stage / "app" / "tests" / "fixtures" / "m1",
+        dirs_exist_ok=True,
+    )
+
+    default_command = "desktop" if profile.endswith("_DESKTOP_X64") else "service"
+    if profile in WINDOWS_PROFILES:
+        launcher = stage / "run.cmd"
+        launcher.write_text(
+            "@echo off\r\n"
+            "setlocal\r\n"
+            "set \"ROOT=%~dp0\"\r\n"
+            "set \"PYTHONHOME=%ROOT%runtime\"\r\n"
+            "set \"PYTHONPATH=%ROOT%app\\src\"\r\n"
+            "if \"%~1\"==\"\" goto default\r\n"
+            "\"%ROOT%runtime\\python.exe\" "
+            "\"%ROOT%app\\tools\\packaging\\piqb_runtime_entry.py\" "
+            f"--profile {profile} %*\r\n"
+            "goto end\r\n"
+            ":default\r\n"
+            "\"%ROOT%runtime\\python.exe\" "
+            "\"%ROOT%app\\tools\\packaging\\piqb_runtime_entry.py\" "
+            f"--profile {profile} {default_command}\r\n"
+            ":end\r\n",
+            encoding="utf-8",
+            newline="",
+        )
+    else:
+        launcher = stage / "run.sh"
+        launcher.write_text(
+            "#!/bin/sh\n"
+            "SCRIPT=$0\n"
+            "case \"$SCRIPT\" in /*) ;; *) SCRIPT=\"$PWD/$SCRIPT\" ;; esac\n"
+            "ROOT=\${SCRIPT%/*}\n"
+            "export PYTHONHOME=\"$ROOT/runtime\"\n"
+            "export PYTHONPATH=\"$ROOT/app/src\"\n"
+            "export LD_LIBRARY_PATH=\"$ROOT/runtime/lib\${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n"
+            f"if [ \"$#\" -eq 0 ]; then set -- {default_command}; fi\n"
+            "exec \"$ROOT/runtime/bin/python\" "
+            "\"$ROOT/app/tools/packaging/piqb_runtime_entry.py\" "
+            f"--profile {profile} \"$@\"\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        launcher.chmod(0o755)
 
 
 def _canonical_hash(payload: object) -> str:
@@ -176,6 +235,7 @@ def build_piqb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
         with tempfile.TemporaryDirectory(prefix="tpaa-piqb-release-stage-") as stage_raw:
             stage = Path(stage_raw)
             _extract(base_package, stage)
+            _install_piqb_runtime(stage, profile)
 
             m5_manifest_path = stage / "build-evidence" / "package-manifest.json"
             m5_manifest = _json(m5_manifest_path)
@@ -204,7 +264,7 @@ def build_piqb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
                 "dependency_lock_sha256": dependency_lock_hash,
                 "sbom_sha256": sha256_file(spdx_path),
                 "file_inventory_sha256": inventory_hash,
-                "retained_m5_package_manifest_sha256": sha256_file(m5_manifest_path),
+                "retained_m5_substrate_manifest_sha256": sha256_file(m5_manifest_path),
                 "admitted_capabilities": ["P1", "P2", "P3", "P4", "P5", "P6"],
             }
             build_manifest = {
@@ -214,6 +274,7 @@ def build_piqb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
                 **common,
                 "runtime_substrate": "M5_OFFLINE_RUNTIME_BUNDLE",
                 "historical_m5_qualification_semantics_rewritten": False,
+                "m5_substrate_manifest_is_final_package_manifest": False,
             }
             _write_json(release_root / "build-manifest.json", build_manifest)
             release_manifest = {
