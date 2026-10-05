@@ -13,12 +13,8 @@ from typing import cast
 from uuid import UUID, uuid5
 
 from tpaa_application.m1_publication import to_core_publication_bundle
-from tpaa_capability.p6_counterfactual import (
-    P6CounterfactualRevision,
-    execute_p6_counterfactual,
-)
+from tpaa_capability.p6_counterfactual import execute_p6_counterfactual
 from tpaa_capability.p6_forecast import (
-    P6ForecastRevision,
     P6ManagedModelObject,
     P6ModelBuild,
     P6ModelRevision,

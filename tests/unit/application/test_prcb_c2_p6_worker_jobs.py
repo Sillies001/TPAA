@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from tools.testing.piqb_b2_p6_resolver_fixture import (
+    AIRCRAFT,
     AS_OF,
     seed_p6_model_resolver_case,
 )
@@ -26,7 +27,6 @@ from tpaa_storage import LocalObjectStore, SQLiteDesktopUnitOfWork, bootstrap_sq
 
 ROOT = Path(__file__).resolve().parents[3]
 AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
-SUBJECT = "95100000-0000-4000-8000-000000000001"
 P4 = "95100000-0000-4000-8000-000000000002"
 CONTEXT = "95100000-0000-4000-8000-000000000003"
 
@@ -58,7 +58,7 @@ def test_prcb_c2_p6_forecast_and_counterfactual_use_durable_jobs_and_worker(
                 ),
             ),
             target_scope="SUBJECT",
-            subject_or_composition_ref=SUBJECT,
+            subject_or_composition_ref=AIRCRAFT,
             forecast_origin_utc="2026-09-10T11:00:00Z",
             as_of_utc=AS_OF,
         )
