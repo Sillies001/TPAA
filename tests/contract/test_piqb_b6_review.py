@@ -24,6 +24,12 @@ assert SPEC is not None and SPEC.loader is not None
 REVIEW = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REVIEW)
 
+M0_EXIT_REVIEW_PATH = ROOT / "tools" / "ci" / "m0_exit_review.py"
+M0_SPEC = importlib.util.spec_from_file_location("m0_exit_review", M0_EXIT_REVIEW_PATH)
+assert M0_SPEC is not None and M0_SPEC.loader is not None
+M0_EXIT_REVIEW = importlib.util.module_from_spec(M0_SPEC)
+M0_SPEC.loader.exec_module(M0_EXIT_REVIEW)
+
 REVISION = "a" * 40
 LOGICAL_PRODUCT = {
     "schema": "TPAA_PIQB_B6_LOGICAL_PRODUCT_V1",
@@ -127,6 +133,18 @@ def _review(tmp_path: Path, **overrides: object) -> dict[str, object]:
     }
     values.update(overrides)
     return REVIEW.review(**values)
+
+
+def test_m0_exit_review_tracks_current_product_version_for_packages(
+    tmp_path: Path,
+) -> None:
+    summaries = M0_EXIT_REVIEW._development_package_summaries(tmp_path)
+    assert [path.name for path in summaries] == [
+        "tpaa-1.0.0-WINDOWS_DESKTOP_X64.zip.summary.json",
+        "tpaa-1.0.0-WINDOWS_SERVICE_X64.zip.summary.json",
+        "tpaa-1.0.0-LINUX_DESKTOP_X64.tar.gz.summary.json",
+        "tpaa-1.0.0-LINUX_SERVICE_X64.tar.gz.summary.json",
+    ]
 
 
 def test_b6_baseline_and_product_identity_are_exact() -> None:

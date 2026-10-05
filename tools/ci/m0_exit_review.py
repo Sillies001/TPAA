@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,28 @@ def _load(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"JSON root must be object: {path}")
     return payload
+
+
+def _project_version() -> str:
+    project = tomllib.loads(
+        (Path(__file__).resolve().parents[2] / "pyproject.toml").read_text(
+            encoding="utf-8"
+        )
+    )
+    version = project["project"]["version"]
+    if not isinstance(version, str) or not version:
+        raise ValueError("pyproject project.version must be a non-empty string")
+    return version
+
+
+def _development_package_summaries(artifact_root: Path) -> list[Path]:
+    version = _project_version()
+    return [
+        artifact_root / "dist" / f"tpaa-{version}-WINDOWS_DESKTOP_X64.zip.summary.json",
+        artifact_root / "dist" / f"tpaa-{version}-WINDOWS_SERVICE_X64.zip.summary.json",
+        artifact_root / "dist" / f"tpaa-{version}-LINUX_DESKTOP_X64.tar.gz.summary.json",
+        artifact_root / "dist" / f"tpaa-{version}-LINUX_SERVICE_X64.tar.gz.summary.json",
+    ]
 
 
 def _gate(ci: dict[str, Any], name: str) -> bool:
@@ -101,12 +124,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     def both(name: str) -> bool:
         return _gate(windows, name) and _gate(linux, name)
 
-    summaries = [
-        args.artifact_root / "dist" / "tpaa-0.0.0-WINDOWS_DESKTOP_X64.zip.summary.json",
-        args.artifact_root / "dist" / "tpaa-0.0.0-WINDOWS_SERVICE_X64.zip.summary.json",
-        args.artifact_root / "dist" / "tpaa-0.0.0-LINUX_DESKTOP_X64.tar.gz.summary.json",
-        args.artifact_root / "dist" / "tpaa-0.0.0-LINUX_SERVICE_X64.tar.gz.summary.json",
-    ]
+    summaries = _development_package_summaries(args.artifact_root)
     manifests = [
         args.artifact_root / "evidence" / "devops" / platform / profile / filename
         for platform in ("windows", "linux")
