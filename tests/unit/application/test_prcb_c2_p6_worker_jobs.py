@@ -4,7 +4,6 @@ from pathlib import Path
 
 from tools.testing.piqb_b2_p6_resolver_fixture import (
     AIRCRAFT,
-    AS_OF,
     seed_p6_model_resolver_case,
 )
 from tpaa_application import JobStatus, P6PersistenceRepository
