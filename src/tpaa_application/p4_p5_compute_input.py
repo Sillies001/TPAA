@@ -82,14 +82,58 @@ def _optional_text(value: object, field: str) -> str | None:
 
 
 def _strings(value: object, field: str) -> tuple[str, ...]:
-    if not isinstance(value, (list, tuple)) or not all(
-        isinstance(item, str) and item for item in value
-    ):
+    decoded: object = value
+    if isinstance(value, str):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise P4P5ComputeInputError(
+                "P4_P5_COMPUTE_INPUT_ARRAY_INVALID",
+                field,
+            ) from exc
+    if not isinstance(decoded, (list, tuple)):
         raise P4P5ComputeInputError(
             "P4_P5_COMPUTE_INPUT_ARRAY_INVALID",
             field,
         )
-    return tuple(value)
+    result: list[str] = []
+    for item in decoded:
+        if not isinstance(item, str) or not item:
+            raise P4P5ComputeInputError(
+                "P4_P5_COMPUTE_INPUT_ARRAY_INVALID",
+                field,
+            )
+        result.append(item)
+    return tuple(result)
+
+
+def _uuid_array(value: object, field: str) -> tuple[str, ...]:
+    decoded: object = value
+    if isinstance(value, str):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise P4P5ComputeInputError(
+                "P4_P5_COMPUTE_INPUT_ARRAY_INVALID",
+                field,
+            ) from exc
+    if not isinstance(decoded, (list, tuple)):
+        raise P4P5ComputeInputError(
+            "P4_P5_COMPUTE_INPUT_ARRAY_INVALID",
+            field,
+        )
+    result: list[str] = []
+    for item in decoded:
+        if isinstance(item, UUID):
+            result.append(str(item))
+        elif isinstance(item, str):
+            result.append(_uuid(item, field))
+        else:
+            raise P4P5ComputeInputError(
+                "P4_P5_COMPUTE_INPUT_ARRAY_INVALID",
+                field,
+            )
+    return tuple(result)
 
 
 def _uuid(value: str, field: str) -> str:
@@ -204,7 +248,10 @@ class P4P5ComputeInputRepository:
             current["query_or_manifest"],
             "dataset_snapshot.query_or_manifest",
         )
-        refs = _strings(current["input_refs"], "dataset_snapshot.input_refs")
+        refs = _uuid_array(
+            current["input_refs"],
+            "dataset_snapshot.input_refs",
+        )
         frozen = current["frozen"]
         if isinstance(frozen, int) and not isinstance(frozen, bool):
             frozen = bool(frozen)
@@ -271,6 +318,19 @@ class P4P5ComputeInputRepository:
         self,
         scope: P4InteractionScopeSnapshot,
     ) -> str:
+        rebuilt = build_p4_interaction_scope_snapshot(
+            subject_context_id=scope.subject_context_id,
+            episode_id=scope.episode_id,
+            as_of_utc=scope.as_of_utc,
+            fact_refs=scope.fact_refs,
+            machine_evidence=scope.machine_evidence,
+            instructor_evidence=scope.instructor_evidence,
+        )
+        if rebuilt != scope:
+            raise P4P5ComputeInputError(
+                "P4_COMPUTE_INPUT_SCOPE_IDENTITY_DRIFT",
+                scope.interaction_scope_id,
+            )
         subject = self._products.exact_p4_subject(scope.subject_context_id)
         if (
             subject.episode_id != scope.episode_id
