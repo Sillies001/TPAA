@@ -175,6 +175,44 @@ def test_b6_baseline_and_product_identity_are_exact() -> None:
     assert tpaa[0]["version"] == "1.0.0"
 
 
+def test_b6_formal_state_records_run_634_release_qualification() -> None:
+    state = json.loads(
+        (ROOT / "docs" / "baseline" / "PIQB-1.0" / "B6_IMPLEMENTATION_STATE.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert state["formal_state"] == "COMPLETE"
+    assert state["candidate_complete"] is True
+    assert state["candidate_qualification_pending"] is False
+    assert state["b6_qualified"] is True
+    assert state["piqb_exit_qualified"] is True
+    assert all(
+        row["state"] == "COMPLETE"
+        for row in state["task_state"].values()
+    )
+    qualification = state["protected_main_qualification"]
+    assert qualification["protected_main_sha"] == (
+        "8f2581f2c990531eaecb49f9dc5826885e0c18a4"
+    )
+    assert qualification["run_number"] == 634
+    assert qualification["actions_run_id"] == 37265802397
+    assert qualification["required_jobs_success"] == 14
+    assert qualification["required_jobs_total"] == 14
+    assert qualification["reviewer_schema"] == "TPAA_PIQB_EXIT_REVIEW_V1"
+    assert qualification["status"] == "PASS"
+    assert qualification["decision"] == "GO"
+    assert qualification["qualification"] == "PIQB_1_0_QUALIFIED"
+    assert qualification["formal_release_claimed"] is True
+    assert qualification["protected_main_exact"] is True
+    assert qualification["failed_acceptance"] == []
+    assert set(qualification["package_sha256_by_profile"]) == {
+        "WINDOWS_DESKTOP_X64",
+        "WINDOWS_SERVICE_X64",
+        "LINUX_DESKTOP_X64",
+        "LINUX_SERVICE_X64",
+    }
+
+
 def test_full_product_apps_use_runtime_product_version() -> None:
     authority_root = ROOT / "baseline" / "CB-1.4.0" / "canonical"
     fixture_root = ROOT / "tests" / "fixtures" / "m1"
