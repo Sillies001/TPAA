@@ -13,7 +13,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -26,7 +26,15 @@ STARTUP_TIMEOUT_SECONDS = 10.0
 GRACEFUL_SHUTDOWN_SECONDS = 5.0
 TERMINATE_WAIT_SECONDS = 2.0
 _LOCAL_HTTP_ALLOWED_PATHS = frozenset(
-    {"/health", "/readiness", "/version", "/runtime/features", "/jobs"}
+    {
+        "/health",
+        "/readiness",
+        "/version",
+        "/runtime/features",
+        "/runtime/qualification",
+        "/runtime/observability",
+        "/jobs",
+    }
 )
 _LOCAL_HTTP_ALLOWED_PREFIXES = (
     "/jobs/",
@@ -368,6 +376,107 @@ class LocalBackendController:
             body=body,
             headers=headers,
         )
+
+    def _surface_request_json(
+        self,
+        surface: str,
+        method: str,
+        path: str,
+        *,
+        body: Mapping[str, object] | None = None,
+        headers: Mapping[str, str] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        normalized_method = method.upper()
+        if normalized_method not in {"GET", "POST"}:
+            raise LocalBackendError(f"{surface.upper()}_HTTP_METHOD_FORBIDDEN")
+        if not path.startswith(f"/{surface}/"):
+            raise LocalBackendError(f"{surface.upper()}_HTTP_PATH_FORBIDDEN")
+        return self.request_json(
+            normalized_method,
+            path,
+            body=None if body is None else dict(body),
+            headers=None if headers is None else dict(headers),
+        )
+
+    def m3_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        """Scoped transport for the existing M3 workspace."""
+
+        return self._surface_request_json(
+            "m3",
+            method,
+            path,
+            body=body,
+            headers=headers,
+        )
+
+    def m4_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        """Scoped transport for the existing M4 longitudinal/debrief workspace."""
+
+        return self._surface_request_json("m4", method, path, body=body)
+
+    def m6_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: Mapping[str, object] | None = None,
+    ) -> tuple[int, Mapping[str, object]]:
+        """Scoped transport for the admitted P2 workspace."""
+
+        return self._surface_request_json("m6", method, path, body=body)
+
+    def m7_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, Mapping[str, object]]:
+        """Scoped transport for the admitted P3 workspace."""
+
+        return self._surface_request_json("m7", method, path)
+
+    def m8_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, Mapping[str, object]]:
+        """Scoped transport for the admitted P4/P5 workspace."""
+
+        return self._surface_request_json("m8", method, path)
+
+    def m9_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, Mapping[str, object]]:
+        """Scoped transport for the admitted P6 workspace."""
+
+        return self._surface_request_json("m9", method, path)
+
+    def runtime_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, Mapping[str, object]]:
+        """Read the explicit product qualification/observability runtime state."""
+
+        if method.upper() != "GET":
+            raise LocalBackendError("RUNTIME_HTTP_METHOD_FORBIDDEN")
+        if path not in {"/runtime/features", "/runtime/qualification", "/runtime/observability"}:
+            raise LocalBackendError("RUNTIME_HTTP_PATH_FORBIDDEN")
+        return self.request_json("GET", path)
 
     def _get_json(self, path: str) -> tuple[int, dict[str, Any]]:
         if self._port is None or self._token is None:

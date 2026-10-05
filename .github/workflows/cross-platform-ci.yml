@@ -75,6 +75,15 @@ jobs:
           uv run --locked python tools/ci/run_platform_parallel_lanes.py
           --platform ${{ matrix.platform }}
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Execute PIQB B5 Desktop replay visualization qualification
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: >-
+          uv run --locked python tools/testing/piqb_b5_desktop_replay_visualization.py
+          --platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/piqb-b5/${{ matrix.platform }}/desktop-replay-visualization.json
+
       - name: Build M0 development packages
         run: |
           uv run --locked python tools/dev/tpaa_dev.py package --profile ${{ matrix.desktop_profile }} --output dist
@@ -99,6 +108,7 @@ jobs:
             evidence/ci/${{ matrix.platform }}.json
             evidence/tests/framework-${{ matrix.platform }}.json
             evidence/cross-platform/${{ matrix.platform }}.json
+            evidence/piqb-b5/${{ matrix.platform }}/desktop-replay-visualization.json
             evidence/devops/${{ matrix.platform }}
             evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
             evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json
@@ -2195,6 +2205,30 @@ jobs:
         with:
           name: tpaa-piqb-b4-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/piqb-b4/review.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Review PIQB B5 Desktop replay and visualization
+        shell: bash
+        run: |
+          python tools/testing/piqb_b5_review.py \
+            --windows-qualification downloaded/platform/evidence/piqb-b5/windows/desktop-replay-visualization.json \
+            --linux-qualification downloaded/platform/evidence/piqb-b5/linux/desktop-replay-visualization.json \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --output evidence/piqb-b5/review.json
+
+      - name: Upload PIQB B5 review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-piqb-b5-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/piqb-b5/review.json
           if-no-files-found: error
           retention-days: 30
 

@@ -1,0 +1,97 @@
+{
+  "schema": "TPAA_PIQB_B5_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B5",
+  "source_b4_protected_main_sha": "7130978fc14c2714a9135de285a2c74aeaa33804",
+  "source_b4_qualification": "PIQB_B4_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "task_state": {
+    "PIQB-B5-001": {
+      "state": "COMPLETE",
+      "evidence": [
+        "Run #624 protected-main 14/14 SUCCESS",
+        "TPAA_PIQB_B4_REVIEW_V1 PASS/GO",
+        "PIQB_B4_QUALIFIED",
+        "B4 issue #211 closed completed"
+      ]
+    },
+    "PIQB-B5-002": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "production shell composes M1/M3/M4/M6/M7/M8/M9 surfaces",
+        "LocalBackendController scoped M3/M4/M6/M7/M8/M9/runtime transport",
+        "Desktop selects Product workspace while preserving M1 compatibility"
+      ]
+    },
+    "PIQB-B5-003": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "B5_DESKTOP_NAVIGATION_CONTRACT.json",
+        "exact P01-P13 navigation",
+        "Session/Episode/Stage/Scope/Subject/Time/Release product spine",
+        "no mutable-latest navigation semantics"
+      ]
+    },
+    "PIQB-B5-004": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "production Product shell reuses M1 metric/evidence drill-down",
+        "production Product shell reuses M3 exact-release training workspace",
+        "GUI remains presentation/transport only"
+      ]
+    },
+    "PIQB-B5-005": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "M1 Master Timeline/Stage lane/release replay composed in production shell",
+        "M4 original-as-known/retrospective longitudinal Debrief composed",
+        "exact Release binding preserved"
+      ]
+    },
+    "PIQB-B5-006": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "governed exact-release 2D trajectory adapter",
+        "Cesium-ready session-relative 3D packet adapter with non-UTC-fact guard",
+        "media references remain exact-release evidence references",
+        "M4 BOOKMARK/Debrief and M8/M9 semantic separation reused",
+        "unsupported trajectory source remains explicit rather than inferred"
+      ]
+    },
+    "PIQB-B5-007": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "piqb_b5_desktop_replay_visualization.py real PySide6 qualification",
+        "Windows/Linux qualification inserted into existing m0-cross-platform matrix",
+        "cross-platform logical fingerprint checked by B5 reviewer",
+        "no 15th Hosted CI job introduced"
+      ]
+    },
+    "PIQB-B5-008": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "piqb_b5_review.py candidate/protected-main split",
+        "TPAA_PIQB_B5_REVIEW_V1",
+        "candidate PASS remains PENDING_PROTECTED_MAIN",
+        "protected-main PASS may become PIQB_B5_QUALIFIED"
+      ]
+    }
+  },
+  "candidate_complete": true,
+  "candidate_qualification_pending": true,
+  "b5_qualified": false,
+  "b6_blocked": true,
+  "entry_qualification": {
+    "protected_main_sha": "7130978fc14c2714a9135de285a2c74aeaa33804",
+    "run_number": 624,
+    "actions_run_id": 37210152519,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B4_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B4_QUALIFIED",
+    "api_security_observability_qualified": true
+  },
+  "ci_cadence": "BATCH_CONSOLIDATED"
+}

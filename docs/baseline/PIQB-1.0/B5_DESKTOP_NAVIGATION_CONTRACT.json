@@ -1,0 +1,150 @@
+{
+  "schema": "TPAA_PIQB_B5_DESKTOP_NAVIGATION_CONTRACT_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B5",
+  "authority_note": "Integration-only Desktop navigation mapping. It composes already-qualified capability surfaces and does not redefine P1-P6 domain semantics.",
+  "slots": [
+    {
+      "slot": "P01",
+      "key": "SESSION_RELEASE",
+      "title": "Session / Release",
+      "surface": "M1",
+      "route_prefix": "/m1/",
+      "semantic_class": "C"
+    },
+    {
+      "slot": "P02",
+      "key": "DATA_QUALITY",
+      "title": "Data Quality",
+      "surface": "M1/M3",
+      "route_prefix": "/m1/|/m3/",
+      "semantic_class": "C"
+    },
+    {
+      "slot": "P03",
+      "key": "METRIC_EVIDENCE",
+      "title": "Metric / Evidence",
+      "surface": "M1/M3",
+      "route_prefix": "/m1/|/m3/",
+      "semantic_class": "P"
+    },
+    {
+      "slot": "P04",
+      "key": "TRAINING_WORKSPACE",
+      "title": "Training Workspace",
+      "surface": "M3",
+      "route_prefix": "/m3/",
+      "semantic_class": "W"
+    },
+    {
+      "slot": "P05",
+      "key": "LONGITUDINAL_DEBRIEF",
+      "title": "Longitudinal / Debrief",
+      "surface": "M4",
+      "route_prefix": "/m4/",
+      "semantic_class": "J"
+    },
+    {
+      "slot": "P06",
+      "key": "P2_ATTRIBUTION",
+      "title": "P2 Adjusted / Attribution",
+      "surface": "M6",
+      "route_prefix": "/m6/",
+      "semantic_class": "P2"
+    },
+    {
+      "slot": "P07",
+      "key": "P3_TWIN_CAPABILITY",
+      "title": "P3 Twin / Capability",
+      "surface": "M7",
+      "route_prefix": "/m7/",
+      "semantic_class": "P3"
+    },
+    {
+      "slot": "P08",
+      "key": "P4_ACTOR_ASSESSMENT",
+      "title": "P4 Actor Assessment",
+      "surface": "M8",
+      "route_prefix": "/m8/",
+      "semantic_class": "ASSESSMENT"
+    },
+    {
+      "slot": "P09",
+      "key": "P5_MISSION_ASSESSMENT",
+      "title": "P5 Mission Assessment",
+      "surface": "M8",
+      "route_prefix": "/m8/",
+      "semantic_class": "ASSESSMENT"
+    },
+    {
+      "slot": "P10",
+      "key": "P6_FORECAST",
+      "title": "P6 Forecast",
+      "surface": "M9",
+      "route_prefix": "/m9/",
+      "semantic_class": "P6"
+    },
+    {
+      "slot": "P11",
+      "key": "P6_COUNTERFACTUAL",
+      "title": "P6 Counterfactual",
+      "surface": "M9",
+      "route_prefix": "/m9/",
+      "semantic_class": "P6"
+    },
+    {
+      "slot": "P12",
+      "key": "P6_RECOMMENDATION",
+      "title": "P6 Recommendation",
+      "surface": "M9",
+      "route_prefix": "/m9/",
+      "semantic_class": "P6"
+    },
+    {
+      "slot": "P13",
+      "key": "GOVERNANCE_DIAGNOSTICS",
+      "title": "Governance / Diagnostics",
+      "surface": "Runtime",
+      "route_prefix": "/runtime/",
+      "semantic_class": "M"
+    }
+  ],
+  "spine": [
+    "session_id",
+    "episode_id",
+    "stage_id",
+    "scope",
+    "subject",
+    "session_time",
+    "release_id"
+  ],
+  "cross_cutting_views": [
+    "MASTER_TIMELINE",
+    "REPLAY",
+    "TRAJECTORY_2D_3D",
+    "MEDIA",
+    "BOOKMARK",
+    "DEBRIEF"
+  ],
+  "rules": {
+    "exact_revision_only": true,
+    "latest_alias_forbidden": true,
+    "presentation_only": true,
+    "business_recompute": false,
+    "persistence_access": false,
+    "p6_projection_must_not_be_presented_as_fact": true,
+    "unsupported_visualization_must_be_explicit": true,
+    "semantic_layers": [
+      "C",
+      "W",
+      "P",
+      "A",
+      "J",
+      "M",
+      "ASSESSMENT",
+      "P2",
+      "P3",
+      "P6"
+    ]
+  }
+}

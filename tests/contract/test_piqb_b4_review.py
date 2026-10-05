@@ -75,6 +75,7 @@ def test_b4_candidate_complete_pending_protected_main() -> None:
     assert isinstance(acceptance, dict)
     assert acceptance["qualification_passed"] is True
     assert acceptance["all_tasks_complete_candidate"] is True
+    assert acceptance["formal_state_consistent"] is True
     assert acceptance["workflow_keeps_fourteen_job_topology"] is True
 
 

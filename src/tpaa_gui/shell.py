@@ -15,6 +15,7 @@ from typing import Any
 
 from .diagnostics import DiagnosticsSnapshot, diagnostics_lines
 from .m1_workspace import M1DesktopTransport, create_m1_workspace
+from .product_shell import ProductDesktopTransport, create_product_workspace
 
 
 class GuiShellError(RuntimeError):
@@ -53,6 +54,7 @@ def _create_window(
     config: GuiShellConfig,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
     m1_transport: M1DesktopTransport | None = None,
+    product_transport: ProductDesktopTransport | None = None,
 ) -> Any:
     window = qt_widgets.QMainWindow()
     window.setObjectName("tpaaMainWindow")
@@ -92,7 +94,17 @@ def _create_window(
         window._tpaa_diagnostics_timer = refresh_timer
         window._tpaa_diagnostics_labels = diagnostic_labels
 
-    if m1_transport is not None and diagnostics_provider is not None:
+    if product_transport is not None and diagnostics_provider is not None:
+        product_workspace = create_product_workspace(
+            qt_core,
+            qt_widgets,
+            central,
+            transport=product_transport,
+            diagnostics_provider=diagnostics_provider,
+        )
+        layout.addWidget(product_workspace)
+        window._tpaa_product_workspace = product_workspace
+    elif m1_transport is not None and diagnostics_provider is not None:
         workspace = create_m1_workspace(
             qt_core,
             qt_widgets,
@@ -116,6 +128,7 @@ def run_gui(
     show: bool = True,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
     m1_transport: M1DesktopTransport | None = None,
+    product_transport: ProductDesktopTransport | None = None,
 ) -> int:
     """Start the PySide6 event loop and return its process exit code.
 
@@ -140,6 +153,7 @@ def run_gui(
         shell_config,
         diagnostics_provider,
         m1_transport,
+        product_transport,
     )
     if show:
         window.show()

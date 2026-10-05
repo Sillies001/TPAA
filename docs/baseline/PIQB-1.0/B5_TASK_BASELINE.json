@@ -1,0 +1,123 @@
+{
+  "schema": "TPAA_PIQB_B5_TASK_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B5",
+  "source_b4_protected_main_sha": "7130978fc14c2714a9135de285a2c74aeaa33804",
+  "source_b4_qualification": "PIQB_B4_QUALIFIED",
+  "source_b4_run_number": 624,
+  "source_b4_actions_run_id": 37210152519,
+  "umbrella_issue": 206,
+  "batch_issue": 212,
+  "db_schema_version": "1.9.0",
+  "task_count": 8,
+  "tasks": [
+    {
+      "task_id": "PIQB-B5-001",
+      "title": "B4 Qualification Closure and B5 Entry Freeze",
+      "workstream": "WS-GOV",
+      "dependencies": [],
+      "minimum_acceptance": "Run #624 protected-main 14/14 and PIQB_B4_QUALIFIED are frozen as the only B5 entry authority; B4 tasks are recorded COMPLETE without a closure-only PR."
+    },
+    {
+      "task_id": "PIQB-B5-002",
+      "title": "Production Desktop Shell and Unified Local Transport",
+      "workstream": "WS-GUI",
+      "dependencies": [
+        "PIQB-B5-001"
+      ],
+      "minimum_acceptance": "The real PySide6 Desktop composes admitted M1/M3/M4/M6/M7/M8/M9 presentation surfaces through the authenticated loopback backend, with one generic fail-closed transport and no GUI database/domain imports."
+    },
+    {
+      "task_id": "PIQB-B5-003",
+      "title": "P01-P13 Product Navigation and Product Spine",
+      "workstream": "WS-GUI",
+      "dependencies": [
+        "PIQB-B5-002"
+      ],
+      "minimum_acceptance": "A deterministic P01-P13 Desktop navigation contract exposes Session/Episode/Stage/Scope/Subject/Time/Release identity and exact-revision product workspaces without mutable-latest or hidden recomputation."
+    },
+    {
+      "task_id": "PIQB-B5-004",
+      "title": "Evidence and Metric Drill-down Composition",
+      "workstream": "WS-GUI",
+      "dependencies": [
+        "PIQB-B5-002",
+        "PIQB-B5-003"
+      ],
+      "minimum_acceptance": "Existing M1/M3 release-bound metric, applicability, evidence and quality-state views are reachable from the production Desktop and preserve exact Release/metric identities."
+    },
+    {
+      "task_id": "PIQB-B5-005",
+      "title": "Master Timeline and Historical Replay Composition",
+      "workstream": "WS-GUI",
+      "dependencies": [
+        "PIQB-B5-003",
+        "PIQB-B5-004"
+      ],
+      "minimum_acceptance": "One presentation-only master timeline coordinates exact historical Release/Stage/replay navigation without changing Stage authority, recomputing products, or using current/latest fallback."
+    },
+    {
+      "task_id": "PIQB-B5-006",
+      "title": "Governed 2D/3D Trajectory, Media, Bookmark and Debrief Presentation",
+      "workstream": "WS-GUI",
+      "dependencies": [
+        "PIQB-B5-005"
+      ],
+      "minimum_acceptance": "Desktop exposes a presentation-adapter contract for 2D/3D trajectory and media/bookmark/debrief references, with explicit unsupported/unavailable states, no embedded business authority, and semantic separation for C/W/P/A/J/M, Assessment, P2/P3 and P6."
+    },
+    {
+      "task_id": "PIQB-B5-007",
+      "title": "Cross-capability Desktop Integration Qualification",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B5-002",
+        "PIQB-B5-003",
+        "PIQB-B5-004",
+        "PIQB-B5-005",
+        "PIQB-B5-006"
+      ],
+      "minimum_acceptance": "Deterministic contract/unit/E2E-style Desktop checks prove P01-P13 navigation, transport confinement, exact-ID semantics, replay/visual separation and absence of GUI DB/domain authority under the unchanged 14-job Hosted CI topology."
+    },
+    {
+      "task_id": "PIQB-B5-008",
+      "title": "Desktop Replay and Visualization Qualification Review",
+      "workstream": "WS-GOV",
+      "dependencies": [
+        "PIQB-B5-001",
+        "PIQB-B5-002",
+        "PIQB-B5-003",
+        "PIQB-B5-004",
+        "PIQB-B5-005",
+        "PIQB-B5-006",
+        "PIQB-B5-007"
+      ],
+      "minimum_acceptance": "Candidate reviewer returns PASS/PENDING_PROTECTED_MAIN only at the exact B5 candidate head; protected-main reviewer may return PASS/GO/PIQB_B5_QUALIFIED only after exactly 14 required jobs succeed at the merged main revision."
+    }
+  ],
+  "scope": {
+    "no_db_schema_change": true,
+    "no_shadow_schema": true,
+    "no_canonical_mutation": true,
+    "gui_direct_database_write_forbidden": true,
+    "gui_business_recompute_forbidden": true,
+    "exact_id_history_required": true,
+    "mutable_latest_fallback_forbidden": true,
+    "existing_m1_m3_m4_m6_m7_m8_m9_surfaces_reused": true,
+    "desktop_loopback_bearer_preserved": true,
+    "semantic_layer_separation_required": [
+      "C",
+      "W",
+      "P",
+      "A",
+      "J",
+      "M",
+      "ASSESSMENT",
+      "P2",
+      "P3",
+      "P6"
+    ],
+    "exact_fourteen_job_topology_preserved": true,
+    "no_b6_packaging_work": true,
+    "no_m10_p7": true
+  }
+}
