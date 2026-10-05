@@ -6,12 +6,12 @@ TPAA V8.0 / ED-2.0 implementation monorepo governed by the frozen Canonical busi
 
 - Overall design input: **TPAA V8.0 / ED-2.0 Rebaseline R3.3**.
 - Machine business authority remains **CB-1.4.0** under `baseline/CB-1.4.0/`.
-- Product integration/qualification authority is **PIQB-1.0**; B0-B5 are formally protected-main qualified and B6 is the active final-product batch.
+- Product integration/qualification authority is **PIQB-1.0**; B0-B6 are formally protected-main qualified and PIQB-1.0 is complete.
 - Product version is **1.0.0**.
 - Current physical database schema authority is **1.9.0**, adopted through ACP-216 -> ACP-219 -> ACP-221; historical M0-M9/M5 evidence that records 1.6.0 remains immutable historical evidence rather than current authority.
 - P1-P6 capability qualification from M5-M9 is retained. PIQB does not create M10 or P7.
-- B5 protected-main qualification is **PIQB_B5_QUALIFIED** at `eb3f03f8baeb1bfc56b8bc138848636de1d15776`; Run #628 / `37252494254` passed all 14 required jobs.
-- B6 closes full-product Desktop/Service E2E, packaging, SBOM/build manifests, performance/resource, restart/recovery, cross-platform logical equivalence and `TPAA_PIQB_EXIT_REVIEW_V1`.
+- B6 / PIQB Exit protected-main qualification is **PIQB_1_0_QUALIFIED** at `8f2581f2c990531eaecb49f9dc5826885e0c18a4`; Run #634 / `37265802397` passed all 14 required jobs.
+- `TPAA_PIQB_EXIT_REVIEW_V1` returned **PASS / GO**, `failed_acceptance=[]`, and formally qualified Windows/Linux Desktop+Service release profiles with P1-P6 unified product scope.
 - Exact-head Hosted CI remains the only merge/formal-release authority.
 
 ## Machine authority rule
@@ -76,5 +76,5 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-M0-M9 and P1-P6 capability implementation are complete inputs to PIQB-1.0. PIQB B0-B5 are formally qualified; B6 is the final product qualification/release batch. B6 must preserve the frozen Canonical semantics, current DB 1.9.0 authority, exact-release history, fail-closed security/recovery rules, and the existing 14 required Hosted CI checks. PIQB completion does not imply M10 or P7.
+M0-M9 and P1-P6 capability implementation are complete inputs to PIQB-1.0. PIQB B0-B6 are formally qualified, and PIQB-1.0 reached protected-main final-product qualification at Run #634. The qualified product preserves the frozen Canonical semantics, current DB 1.9.0 authority, exact-release history, fail-closed security/recovery rules, and the existing 14 required Hosted CI checks. PIQB completion does not imply M10 or P7.
 

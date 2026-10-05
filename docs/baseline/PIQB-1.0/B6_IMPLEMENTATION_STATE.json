@@ -17,7 +17,7 @@
       ]
     },
     "PIQB-B6-002": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "piqb_runtime_entry.py full P1-P6 runtime probe",
         "piqb_b6_final_product_qualification.py Desktop/Service clean-install runtime qualification",
@@ -25,7 +25,7 @@
       ]
     },
     "PIQB-B6-003": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "retained M5 frozen workload/hardware measurement substrate",
         "validate_performance_measurements per mandatory profile",
@@ -35,7 +35,7 @@
       ]
     },
     "PIQB-B6-004": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "package hold/start-stop/restart qualification",
         "failed-install rollback injection before commit",
@@ -44,7 +44,7 @@
       ]
     },
     "PIQB-B6-005": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "piqb_release_bundle.py",
         "TPAA 1.0.0 exact-head Windows/Linux Desktop/Service packages",
@@ -54,7 +54,7 @@
       ]
     },
     "PIQB-B6-006": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "TPAA_PIQB_B6_LOGICAL_PRODUCT_V1",
         "Windows/Linux logical_product equality and hash gate in final reviewer",
@@ -62,7 +62,7 @@
       ]
     },
     "PIQB-B6-007": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "README reconciled to PIQB/DB 1.9/P1-P6 state",
         "pyproject and uv.lock product identity 1.0.0",
@@ -70,18 +70,23 @@
       ]
     },
     "PIQB-B6-008": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "piqb_exit_review.py",
         "TPAA_PIQB_EXIT_REVIEW_V1 candidate/protected-main split",
-        "formal release authority requires exact-head 14/14 protected main"
+        "formal release authority requires exact-head 14/14 protected main",
+        "Run #633 candidate exact-head 14/14 SUCCESS and PIQB_B6_CANDIDATE",
+        "Run #634 protected-main exact-head 14/14 SUCCESS",
+        "TPAA_PIQB_EXIT_REVIEW_V1 PASS/GO",
+        "PIQB_1_0_QUALIFIED",
+        "failed_acceptance=[] and formal_release_claimed=true"
       ]
     }
   },
   "candidate_complete": true,
-  "candidate_qualification_pending": true,
-  "b6_qualified": false,
-  "piqb_exit_qualified": false,
+  "candidate_qualification_pending": false,
+  "b6_qualified": true,
+  "piqb_exit_qualified": true,
   "entry_qualification": {
     "protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
     "run_number": 628,
@@ -101,5 +106,49 @@
     "platform_qualification": "tools/testing/piqb_b6_final_product_qualification.py",
     "exit_reviewer": "tools/testing/piqb_exit_review.py",
     "workflow": ".github/workflows/cross-platform-ci.yml"
+  },
+  "formal_state": "COMPLETE",
+  "candidate_qualification": {
+    "exact_head_sha": "cf09fd9902bed216c8aaeca843447e81483dc8d7",
+    "run_number": 633,
+    "actions_run_id": 37262321197,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_EXIT_REVIEW_V1",
+    "status": "PASS",
+    "decision": "PENDING_PROTECTED_MAIN",
+    "qualification": "PIQB_B6_CANDIDATE",
+    "formal_release_claimed": false,
+    "failed_acceptance": []
+  },
+  "protected_main_qualification": {
+    "protected_main_sha": "8f2581f2c990531eaecb49f9dc5826885e0c18a4",
+    "run_number": 634,
+    "actions_run_id": 37265802397,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_EXIT_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_1_0_QUALIFIED",
+    "formal_release_claimed": true,
+    "implementation_complete": true,
+    "protected_main_exact": true,
+    "failed_acceptance": [],
+    "package_sha256_by_profile": {
+      "LINUX_DESKTOP_X64": "7530503b8b10c92bb29987847f781c207dc35a07ddac29e01ef1b0fd6aae73ea",
+      "LINUX_SERVICE_X64": "692444dd96c02b8208ad976158aeffc775dac71a3d55dbb23f4f771d3d639de4",
+      "WINDOWS_DESKTOP_X64": "f27c645b82676c85e4e302618756b00b73360ba8cf8d5edd0059d3b41cf24d04",
+      "WINDOWS_SERVICE_X64": "d7ebb034f8f070e18be8e35d86701493915fdd8d323901ed5b42c967a0f5651b"
+    }
+  },
+  "post_qualification_governance_closure": {
+    "source_protected_main_sha": "8f2581f2c990531eaecb49f9dc5826885e0c18a4",
+    "source_run_number": 634,
+    "change_class": "GOVERNANCE_ONLY",
+    "runtime_modified": false,
+    "canonical_modified": false,
+    "db_authority_modified": false,
+    "ci_topology_modified": false
   }
 }
