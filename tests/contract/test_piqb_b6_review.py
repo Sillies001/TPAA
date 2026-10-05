@@ -84,6 +84,26 @@ def _postgres() -> dict[str, object]:
     }
 
 
+def _b4() -> dict[str, object]:
+    return {
+        "schema": "TPAA_PIQB_B4_API_SECURITY_OBSERVABILITY_V1",
+        "status": "PASS",
+        "source_revision": REVISION,
+        "failed_acceptance": [],
+        "acceptance": {
+            "sqlite_db_1_9": True,
+            "postgres_db_1_9": True,
+            "product_openapi_exact": True,
+            "product_client_exact": True,
+            "product_route_count_exact_10": True,
+            "product_exact_id_only": True,
+            "audit_semantic_parity": True,
+            "observability_exact": True,
+        },
+        "scope": {"db_schema_version": "1.9.0"},
+    }
+
+
 def _write(path: Path, payload: dict[str, object]) -> Path:
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
@@ -94,6 +114,7 @@ def _review(tmp_path: Path, **overrides: object) -> dict[str, object]:
         "windows_path": _write(tmp_path / "windows.json", _platform("windows")),
         "linux_path": _write(tmp_path / "linux.json", _platform("linux")),
         "postgres_path": _write(tmp_path / "postgres.json", _postgres()),
+        "b4_path": _write(tmp_path / "b4.json", _b4()),
         "expected_revision": REVISION,
         "checked_out_revision": REVISION,
         "event_name": "pull_request",
@@ -216,6 +237,20 @@ def test_piqb_exit_rejects_stale_head_jobs_and_db_recovery(tmp_path: Path) -> No
     assert "current_db_restart_recovery_pass" in failed_pg["failed_acceptance"]
 
 
+    b4 = _b4()
+    b4_acceptance = b4["acceptance"]
+    assert isinstance(b4_acceptance, dict)
+    b4_acceptance["product_exact_id_only"] = False
+    failed_b4 = _review(
+        tmp_path,
+        b4_path=_write(tmp_path / "failed-b4.json", b4),
+    )
+    assert (
+        "same_run_product_api_security_observability_pass"
+        in failed_b4["failed_acceptance"]
+    )
+
+
 def test_b6_workflow_reuses_existing_fourteen_check_topology() -> None:
     workflow = (ROOT / ".github" / "workflows" / "cross-platform-ci.yml").read_text(
         encoding="utf-8"
@@ -227,5 +262,6 @@ def test_b6_workflow_reuses_existing_fourteen_check_topology() -> None:
     assert "Review PIQB B6 final product and release qualification" in workflow
     assert "piqb_b6_final_product_qualification.py" in workflow
     assert "piqb_exit_review.py" in workflow
+    assert "--b4-qualification downloaded/piqb-b4/postgres-api-security-observability.json" in workflow
     assert "--required-jobs-success 14" in workflow
     assert "--required-jobs-total 14" in workflow

@@ -2290,6 +2290,7 @@ jobs:
             --windows-qualification downloaded/platform/evidence/piqb-b6/windows/final-product.json \
             --linux-qualification downloaded/platform/evidence/piqb-b6/linux/final-product.json \
             --postgres-recovery downloaded/piqb-b2/postgres-product-persistence.json \
+            --b4-qualification downloaded/piqb-b4/postgres-api-security-observability.json \
             --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
             --checked-out-revision "$(git rev-parse HEAD)" \
             --event-name ${{ github.event_name }} \

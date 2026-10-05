@@ -20,7 +20,8 @@
       "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "piqb_runtime_entry.py full P1-P6 runtime probe",
-        "piqb_b6_final_product_qualification.py Desktop/Service clean-install runtime qualification"
+        "piqb_b6_final_product_qualification.py Desktop/Service clean-install runtime qualification",
+        "same-run PIQB B4 real DB 1.9 product API/security/observability qualification"
       ]
     },
     "PIQB-B6-003": {
@@ -54,7 +55,8 @@
       "state": "COMPLETE_CANDIDATE",
       "evidence": [
         "TPAA_PIQB_B6_LOGICAL_PRODUCT_V1",
-        "Windows/Linux logical_product equality and hash gate in final reviewer"
+        "Windows/Linux logical_product equality and hash gate in final reviewer",
+        "Exit reviewer requires same-run unified Product API exact-ID/no-latest/no-hidden-recompute evidence"
       ]
     },
     "PIQB-B6-007": {

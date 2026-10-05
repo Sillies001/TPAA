@@ -79,6 +79,7 @@ def review(
     windows_path: Path,
     linux_path: Path,
     postgres_path: Path,
+    b4_path: Path,
     expected_revision: str,
     checked_out_revision: str,
     event_name: str,
@@ -93,6 +94,7 @@ def review(
     windows = _json(windows_path)
     linux = _json(linux_path)
     postgres = _json(postgres_path)
+    b4 = _json(b4_path)
 
     state_rows = state.get("task_state")
     if not isinstance(state_rows, dict):
@@ -132,6 +134,7 @@ def review(
             and windows.get("source_revision") == expected_revision
             and linux.get("source_revision") == expected_revision
             and postgres.get("source_revision") == expected_revision
+            and b4.get("source_revision") == expected_revision
         ),
         "product_version_1_0_0": (
             _project_version() == "1.0.0"
@@ -177,6 +180,46 @@ def review(
             and pg_acceptance.get("sqlite_postgres_logical_parity") is True
             and pg_acceptance.get(
                 "orphan_recovery_preserves_registered_both_engines"
+            )
+            is True
+        ),
+        "same_run_product_api_security_observability_pass": (
+            b4.get("status") == "PASS"
+            and b4.get("failed_acceptance") == []
+            and cast(dict[str, Any], b4.get("scope", {})).get(
+                "db_schema_version"
+            )
+            == "1.9.0"
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "sqlite_db_1_9"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "postgres_db_1_9"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "product_openapi_exact"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "product_client_exact"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "product_route_count_exact_10"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "product_exact_id_only"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "audit_semantic_parity"
+            )
+            is True
+            and cast(dict[str, Any], b4.get("acceptance", {})).get(
+                "observability_exact"
             )
             is True
         ),
@@ -264,6 +307,7 @@ def main() -> int:
     parser.add_argument("--windows-qualification", type=Path, required=True)
     parser.add_argument("--linux-qualification", type=Path, required=True)
     parser.add_argument("--postgres-recovery", type=Path, required=True)
+    parser.add_argument("--b4-qualification", type=Path, required=True)
     parser.add_argument("--expected-revision", required=True)
     parser.add_argument("--checked-out-revision", required=True)
     parser.add_argument("--event-name", required=True)
@@ -278,6 +322,7 @@ def main() -> int:
             windows_path=args.windows_qualification,
             linux_path=args.linux_qualification,
             postgres_path=args.postgres_recovery,
+            b4_path=args.b4_qualification,
             expected_revision=args.expected_revision,
             checked_out_revision=args.checked_out_revision,
             event_name=args.event_name,
