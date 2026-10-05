@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import replace
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Protocol, cast
 
@@ -91,9 +92,24 @@ def _integer(value: object, *, field: str) -> int:
 
 
 def _number(value: object, *, field: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
+    if isinstance(value, bool):
         raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
-    return float(value)
+    if isinstance(value, str):
+        if not value or value.strip() != value:
+            raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
+        try:
+            decimal = Decimal(value)
+        except InvalidOperation as exc:
+            raise ProductionJobExecutionError(
+                "PRCB_C2_JOB_PAYLOAD_INVALID",
+                field,
+            ) from exc
+        if not decimal.is_finite():
+            raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
+        return float(decimal)
+    if isinstance(value, (int, float)):
+        return float(value)
+    raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
 
 
 def _job_record(record: object) -> JobRecord:

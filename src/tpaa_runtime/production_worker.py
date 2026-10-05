@@ -7,6 +7,7 @@ import json
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import cast
 from uuid import UUID, uuid5
@@ -108,12 +109,53 @@ def _integer(value: object, *, field: str) -> int:
 
 
 def _number(value: object, *, field: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
+    if isinstance(value, bool):
         raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", field)
-    result = float(value)
+    if isinstance(value, str):
+        if not value or value.strip() != value:
+            raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", field)
+        try:
+            decimal = Decimal(value)
+        except InvalidOperation as exc:
+            raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", field) from exc
+        if not decimal.is_finite():
+            raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", field)
+        result = float(decimal)
+    elif isinstance(value, (int, float)):
+        result = float(value)
+    else:
+        raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", field)
     if not math.isfinite(result):
         raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", field)
     return result
+
+
+def _authority_text(
+    item: Mapping[str, object],
+    *,
+    code: str,
+    name: str,
+) -> str:
+    return _text(item.get(name), field=f"{code}.{name}")
+
+
+def _optional_number(
+    row: dict[str, object],
+    *,
+    name: str,
+) -> float | None:
+    value = row.get(name)
+    return None if value is None else _number(value, field=name)
+
+
+def _session_type(value: object) -> str:
+    session_type = _text(value, field="source_import.session_type")
+    if session_type not in {"LIVE", "SIM", "LVC"}:
+        raise ProductionWorkerError(
+            "PRCB_C2_SESSION_TYPE_INVALID",
+            session_type,
+        )
+    return session_type
 
 
 def _hash(value: object) -> str:
@@ -149,10 +191,6 @@ def _authorities() -> tuple[MetricAuthority, ...]:
         if len(matches) != 1:
             raise ProductionWorkerError("PRCB_C2_METRIC_AUTHORITY_DRIFT", code)
         item = matches[0]
-
-        def required(name: str) -> str:
-            return _text(item.get(name), field=f"{code}.{name}")
-
         semantic_version = item.get("semantic_version")
         if isinstance(semantic_version, bool) or not isinstance(semantic_version, int):
             raise ProductionWorkerError(
@@ -168,15 +206,15 @@ def _authorities() -> tuple[MetricAuthority, ...]:
         selected.append(
             MetricAuthority(
                 metric_code=code,
-                semantic_id=required("semantic_id"),
+                semantic_id=_authority_text(item, code=code, name="semantic_id"),
                 semantic_version=semantic_version,
-                subject_type=required("subject_type"),
-                unit=required("unit"),
-                value_kind=required("value_kind"),
-                algorithm_id=required("algorithm_id"),
-                algorithm_version=required("algorithm_version"),
-                observation_lane=required("observation_lane"),
-                publication_route=required("publication_route"),
+                subject_type=_authority_text(item, code=code, name="subject_type"),
+                unit=_authority_text(item, code=code, name="unit"),
+                value_kind=_authority_text(item, code=code, name="value_kind"),
+                algorithm_id=_authority_text(item, code=code, name="algorithm_id"),
+                algorithm_version=_authority_text(item, code=code, name="algorithm_version"),
+                observation_lane=_authority_text(item, code=code, name="observation_lane"),
+                publication_route=_authority_text(item, code=code, name="publication_route"),
                 structured_output_schema_id=structured,
             )
         )
@@ -200,10 +238,6 @@ def _canonical_rows(document: dict[str, object]) -> tuple[CanonicalFlightRow, ..
             raise ProductionWorkerError("PRCB_C2_SESSION_TIME_INVALID", str(ordinal))
         prior = session_time
 
-        def optional(name: str) -> float | None:
-            value = row.get(name)
-            return None if value is None else _number(value, field=name)
-
         quality = _integer(row.get("quality"), field="quality")
         if quality < 0:
             raise ProductionWorkerError("PRCB_C2_PAYLOAD_INVALID", "quality")
@@ -211,11 +245,11 @@ def _canonical_rows(document: dict[str, object]) -> tuple[CanonicalFlightRow, ..
             CanonicalFlightRow(
                 source_stream_ordinal=ordinal,
                 session_time_us=session_time,
-                body_p_rad_s=optional("p"),
-                nz_g=optional("nz"),
-                heading_true_rad=optional("heading"),
-                tas_mps=optional("tas"),
-                mach=optional("mach"),
+                body_p_rad_s=_optional_number(row, name="p"),
+                nz_g=_optional_number(row, name="nz"),
+                heading_true_rad=_optional_number(row, name="heading"),
+                tas_mps=_optional_number(row, name="tas"),
+                mach=_optional_number(row, name="mach"),
                 quality_mask=quality,
             )
         )
@@ -518,9 +552,8 @@ def build_p1_worker_product(
                     source_import.get("session_code"),
                     field="source_import.session_code",
                 ),
-                "session_type": _text(
+                "session_type": _session_type(
                     source_import.get("session_type"),
-                    field="source_import.session_type",
                 ),
                 "start_session_time_us": start,
                 "end_session_time_us": end,

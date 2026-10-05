@@ -57,8 +57,8 @@ def _payload() -> dict[str, object]:
             "schema_name": "TPAA_PRODUCTION_FLIGHT_SOURCE_V1",
             "schema_version": "1.0.0",
             "time_basis": "SOURCE_US",
-            "nominal_rate_hz": 10.0,
-            "source_quality": 1.0,
+            "nominal_rate_hz": "10.0",
+            "source_quality": "1.0",
             "source_stream_id": STREAM_ID,
             "stream_code": "FLIGHT_PRIMARY",
             "ordinal_basis": "SOURCE_SEQUENCE",
@@ -73,7 +73,7 @@ def _payload() -> dict[str, object]:
             "media_type": PRODUCTION_FLIGHT_MEDIA_TYPE,
             "classification_label": "UNCLASSIFIED",
             "session_code": "PRCB-C2-NOMINAL",
-            "session_type": "PRODUCTION_QUALIFICATION",
+            "session_type": "SIM",
         },
         "evaluation_context": {
             "context_id": CONTEXT_ID,
@@ -86,10 +86,10 @@ def _payload() -> dict[str, object]:
         },
         "metric_profile": {
             "profile_id": "PRCB_C2_P1_PROFILE_V1",
-            "min_coverage": 0.8,
+            "min_coverage": "0.8",
             "max_gap_us": 200000,
-            "derivative_window_s": 0.3,
-            "sustain_duration_s": 0.5,
+            "derivative_window_s": "0.3",
+            "sustain_duration_s": "0.5",
         },
         "publication_identity": {
             "aircraft_model_id": MODEL_ID,
@@ -197,7 +197,7 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
     changed = copy.deepcopy(payload)
     profile = changed["metric_profile"]
     assert isinstance(profile, dict)
-    profile["min_coverage"] = 0.75
+    profile["min_coverage"] = "0.75"
     with pytest.raises(IdempotencyConflict):
         restarted.application.submit_job(
             idempotency_key="prcb-c2-production-p1",
