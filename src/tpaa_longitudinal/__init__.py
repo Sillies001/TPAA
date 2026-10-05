@@ -3,6 +3,7 @@
 from .m4_release import (
     InMemoryM4LongitudinalReleaseRepository,
     M4LongitudinalPublicationService,
+    M4LongitudinalReleaseRepository,
     M4LongitudinalReleaseInput,
     M4LongitudinalReleaseSnapshot,
     M4PublishedLongitudinalRelease,
@@ -76,6 +77,7 @@ __all__ = [
     "M4LongitudinalEligibility",
     "M4LongitudinalError",
     "M4LongitudinalPublicationService",
+    "M4LongitudinalReleaseRepository",
     "M4LongitudinalReleaseInput",
     "M4LongitudinalReleaseSnapshot",
     "M4LongitudinalSample",

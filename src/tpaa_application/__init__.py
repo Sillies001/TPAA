@@ -62,6 +62,7 @@ from .m3_workspace import (
 )
 from .m4_workspace import (
     InMemoryM4DebriefRepository,
+    M4DebriefRepository,
     M4AnnotationCommand,
     M4ApplicationError,
     M4DebriefAnnotation,
@@ -219,6 +220,7 @@ __all__ = [
     "M3WorkspaceProjectionError",
     "project_m3_workspace",
     "InMemoryM4DebriefRepository",
+    "M4DebriefRepository",
     "M4AnnotationCommand",
     "M4ApplicationError",
     "M4DebriefAnnotation",

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Callable, Sequence
+from typing import Protocol, runtime_checkable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid5
@@ -290,6 +291,29 @@ def _points_dto(
         point.projection()
         for point in published.release.trend_series.points
     ]
+
+
+@runtime_checkable
+class M4DebriefRepository(Protocol):
+    """Engine-neutral exact-release Debrief repository port."""
+
+    def register_timeline(
+        self,
+        release_id: str,
+        items: Sequence[M4DebriefTimelineItem],
+    ) -> None: ...
+
+    def timeline(self, release_id: str) -> tuple[M4DebriefTimelineItem, ...]: ...
+
+    def apply_annotation(
+        self,
+        command: M4AnnotationCommand,
+    ) -> M4DebriefAnnotation: ...
+
+    def annotations_for(
+        self,
+        query: M4DebriefQuery,
+    ) -> tuple[M4DebriefAnnotation, ...]: ...
 
 
 class InMemoryM4DebriefRepository:
@@ -598,7 +622,7 @@ class M4WorkspaceService:
         self,
         *,
         longitudinal: M4LongitudinalPublicationService,
-        debrief: InMemoryM4DebriefRepository,
+        debrief: M4DebriefRepository,
     ) -> None:
         self._longitudinal = longitudinal
         self._debrief = debrief
