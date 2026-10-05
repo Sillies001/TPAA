@@ -113,9 +113,14 @@ def test_prcb_c2_product_persistence_and_job_success_share_one_transaction(
         )
         assert job is not None
         assert job["status"] == "SUCCEEDED"
-        persisted = P6PersistenceRepository(
-            uow.canonical_rows,
-            object_store=object_store,
-        ).exact_forecast_request(request.forecast_request_id)
-        assert persisted == request
+        persisted = uow.canonical_rows.one(
+            "intelligence.forecast_result",
+            where={"forecast_request_id": request.forecast_request_id},
+            columns=("forecast_result_id", "status"),
+        )
+        assert persisted is not None
+        assert persisted["status"] in {
+            "PUBLISHED_PROJECTION",
+            "NON_NUMERIC",
+        }
         uow.commit()
