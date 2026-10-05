@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -15,6 +16,7 @@ from tpaa_assessment import (
     P2ArtifactBinding,
     P2AttributionRunProduct,
     P2AttributionSpec,
+    P2CohortRow,
     P2CohortSnapshot,
     P2ExecutionProfile,
     P2FactorFeatureSet,
@@ -126,6 +128,17 @@ def _required_float(value: object, field: str) -> float:
     return result
 
 
+def _decimal_text(value: object, field: str) -> str:
+    if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
+        raise P2PersistenceError("P2_DB_NUMERIC_INVALID", field)
+    decimal = Decimal(str(value))
+    if not decimal.is_finite():
+        raise P2PersistenceError("P2_DB_NUMERIC_INVALID", field)
+    if decimal == 0:
+        return "0"
+    return format(decimal.normalize(), "f")
+
+
 def _estimate_logical_hash(
     estimate: P2AdjustedCapabilityEstimate,
     *,
@@ -201,6 +214,16 @@ class P2DurableWorkspaceMaterial:
     attribution_run: P2AttributionRunProduct
     adjusted_estimate: P2AdjustedCapabilityEstimate
     model_artifact_json: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class P2DurableComputeInput:
+    """Exact frozen P2 inputs that can be reconstructed before attribution."""
+
+    input_bundle: P2InputBundle
+    target_feature_set: P2FactorFeatureSet
+    cohort_rows: tuple[P2CohortRow, ...]
+    reference_factor_values: dict[str, float]
 
 
 def _required_int(value: object, field: str) -> int:
@@ -800,13 +823,59 @@ class P2PersistenceRepository:
             knowledge_time_utc=_time_text(row["created_at"]),
         )
 
+    def _register_factor_feature_set(
+        self,
+        value: P2FactorFeatureSet,
+    ) -> None:
+        feature_row = self._rows.one(
+            "assessment.factor_feature_set",
+            where={"factor_feature_set_id": value.factor_feature_set_id},
+            columns=(
+                "factor_feature_set_id",
+                "feature_spec_id",
+                "feature_spec_version",
+                "source_observation_id",
+                "reference_condition_id",
+                "feature_values",
+                "missing_mask",
+                "world_refs",
+                "coverage",
+                "confidence",
+                "input_hash",
+                "created_at",
+            ),
+        )
+        if feature_row is None:
+            self._rows.insert(
+                "assessment.factor_feature_set",
+                value.as_record(),
+                field_kinds={
+                    "feature_values": "json",
+                    "missing_mask": "json",
+                    "world_refs": "uuid_array",
+                },
+            )
+        elif self.exact_factor_feature_set(value.factor_feature_set_id) != value:
+            raise P2PersistenceError(
+                "P2_WORKSPACE_FEATURE_IMMUTABLE_CONFLICT",
+                value.factor_feature_set_id,
+            )
+
     def register_workspace_inputs(
         self,
         bundle: P2InputBundle,
         target_feature_set: P2FactorFeatureSet,
+        *,
+        cohort_rows: Sequence[P2CohortRow] | None = None,
+        reference_factor_values: Mapping[str, int | float] | None = None,
     ) -> None:
-        """Persist P2 workspace membership using existing DB 1.9 authorities."""
+        """Persist P2 workspace and optional frozen pre-compute inputs."""
 
+        if (cohort_rows is None) != (reference_factor_values is None):
+            raise P2PersistenceError(
+                "P2_COMPUTE_INPUT_INCOMPLETE",
+                bundle.cohort.dataset_snapshot_id,
+            )
         if self._p1_observation(bundle.target.observation_id) != bundle.target:
             raise P2PersistenceError(
                 "P2_WORKSPACE_TARGET_MISMATCH",
@@ -827,43 +896,67 @@ class P2PersistenceRepository:
                 "P2_WORKSPACE_FEATURE_SOURCE_MISMATCH",
                 target_feature_set.factor_feature_set_id,
             )
-        feature_row = self._rows.one(
-            "assessment.factor_feature_set",
-            where={"factor_feature_set_id": target_feature_set.factor_feature_set_id},
-            columns=(
-                "factor_feature_set_id",
-                "feature_spec_id",
-                "feature_spec_version",
-                "source_observation_id",
-                "reference_condition_id",
-                "feature_values",
-                "missing_mask",
-                "world_refs",
-                "coverage",
-                "confidence",
-                "input_hash",
-                "created_at",
-            ),
-        )
-        if feature_row is None:
-            self._rows.insert(
-                "assessment.factor_feature_set",
-                target_feature_set.as_record(),
-                field_kinds={
-                    "feature_values": "json",
-                    "missing_mask": "json",
-                    "world_refs": "uuid_array",
-                },
-            )
-        elif self.exact_factor_feature_set(
-            target_feature_set.factor_feature_set_id
-        ) != target_feature_set:
-            raise P2PersistenceError(
-                "P2_WORKSPACE_FEATURE_IMMUTABLE_CONFLICT",
-                target_feature_set.factor_feature_set_id,
-            )
+        self._register_factor_feature_set(target_feature_set)
 
-        manifest = {
+        compute_inputs: dict[str, object] | None = None
+        if cohort_rows is not None and reference_factor_values is not None:
+            rows = tuple(cohort_rows)
+            observation_ids = tuple(
+                row.observation.observation_id for row in rows
+            )
+            if observation_ids != bundle.cohort.observation_ids:
+                raise P2PersistenceError(
+                    "P2_COMPUTE_COHORT_IDENTITY_MISMATCH",
+                    bundle.cohort.dataset_snapshot_id,
+                )
+            if set(reference_factor_values) != set(target_feature_set.factor_order):
+                raise P2PersistenceError(
+                    "P2_COMPUTE_REFERENCE_FACTOR_MISMATCH",
+                    bundle.cohort.dataset_snapshot_id,
+                )
+            cohort_bindings: list[dict[str, str]] = []
+            for row in rows:
+                if self._p1_observation(row.observation.observation_id) != row.observation:
+                    raise P2PersistenceError(
+                        "P2_COMPUTE_COHORT_OBSERVATION_MISMATCH",
+                        row.observation.observation_id,
+                    )
+                feature = row.feature_set
+                if (
+                    feature.source_observation_id != row.observation.observation_id
+                    or feature.feature_spec_id != bundle.feature_spec.logical_key
+                    or feature.feature_spec_version
+                    != bundle.feature_spec.artifact_version
+                    or feature.reference_condition_id
+                    != bundle.reference_condition.reference_condition_id
+                ):
+                    raise P2PersistenceError(
+                        "P2_COMPUTE_COHORT_FEATURE_MISMATCH",
+                        feature.factor_feature_set_id,
+                    )
+                self._register_factor_feature_set(feature)
+                cohort_bindings.append(
+                    {
+                        "observation_id": row.observation.observation_id,
+                        "factor_feature_set_id": feature.factor_feature_set_id,
+                    }
+                )
+            compute_inputs = {
+                "schema": "TPAA_P2_DURABLE_COMPUTE_INPUT_V1",
+                "cohort_feature_sets": cohort_bindings,
+                "reference_factor_values": [
+                    {
+                        "factor": factor,
+                        "value": _decimal_text(
+                            reference_factor_values[factor],
+                            f"reference_factor_values.{factor}",
+                        ),
+                    }
+                    for factor in target_feature_set.factor_order
+                ],
+            }
+
+        manifest: dict[str, object] = {
             "schema": _P2_COHORT_WORKSPACE_SCHEMA,
             "cohort_spec_id": bundle.cohort.cohort_spec_id,
             "cohort_spec_version": bundle.cohort.cohort_spec_version,
@@ -893,6 +986,9 @@ class P2PersistenceRepository:
                 "input_hash": bundle.input_hash,
             },
         }
+        if compute_inputs is not None:
+            manifest["compute_inputs"] = compute_inputs
+
         existing = self._rows.one(
             "registry.dataset_snapshot",
             where={"dataset_snapshot_id": bundle.cohort.dataset_snapshot_id},
@@ -923,28 +1019,33 @@ class P2PersistenceRepository:
                     "input_refs": "uuid_array",
                 },
             )
-        else:
-            if (
-                str(existing["snapshot_type"]) != bundle.cohort.snapshot_type
-                or _json_object(
-                    existing["query_or_manifest"],
-                    "dataset_snapshot.query_or_manifest",
-                )
-                != manifest
-                or _text_array(
-                    existing["input_refs"],
-                    "dataset_snapshot.input_refs",
-                )
-                != bundle.cohort.observation_ids
-                or str(existing["data_hash"]) != bundle.cohort.data_hash
-                or str(existing["schema_version"]) != bundle.cohort.schema_version
-                or _bool_value(existing["frozen"], "dataset_snapshot.frozen")
-                != bundle.cohort.frozen
-            ):
-                raise P2PersistenceError(
-                    "P2_WORKSPACE_COHORT_IMMUTABLE_CONFLICT",
-                    bundle.cohort.dataset_snapshot_id,
-                )
+            return
+
+        existing_manifest = _json_object(
+            existing["query_or_manifest"],
+            "dataset_snapshot.query_or_manifest",
+        )
+        expected_manifest = manifest
+        if compute_inputs is None and "compute_inputs" in existing_manifest:
+            existing_manifest = dict(existing_manifest)
+            existing_manifest.pop("compute_inputs")
+        if (
+            str(existing["snapshot_type"]) != bundle.cohort.snapshot_type
+            or existing_manifest != expected_manifest
+            or _text_array(
+                existing["input_refs"],
+                "dataset_snapshot.input_refs",
+            )
+            != bundle.cohort.observation_ids
+            or str(existing["data_hash"]) != bundle.cohort.data_hash
+            or str(existing["schema_version"]) != bundle.cohort.schema_version
+            or _bool_value(existing["frozen"], "dataset_snapshot.frozen")
+            != bundle.cohort.frozen
+        ):
+            raise P2PersistenceError(
+                "P2_WORKSPACE_COHORT_IMMUTABLE_CONFLICT",
+                bundle.cohort.dataset_snapshot_id,
+            )
 
     def exact_factor_feature_set(
         self,
@@ -1121,6 +1222,220 @@ class P2PersistenceRepository:
                 "workspace",
             )
         return cohort, {str(key): value for key, value in workspace.items()}
+
+    def _precompute_workspace(
+        self,
+        dataset_snapshot_id: str,
+    ) -> tuple[P2InputBundle, P2FactorFeatureSet, dict[str, object]]:
+        cohort, workspace = self._cohort_and_workspace(dataset_snapshot_id)
+        target_id = workspace.get("target_observation_id")
+        feature_set_id = workspace.get("target_feature_set_id")
+        feature_artifact_id = workspace.get("feature_spec_context_artifact_id")
+        reference_id = workspace.get("reference_condition_id")
+        attribution_artifact_id = workspace.get(
+            "attribution_spec_context_artifact_id"
+        )
+        as_of_utc = workspace.get("as_of_utc")
+        input_hash = workspace.get("input_hash")
+        if not all(
+            isinstance(item, str) and item
+            for item in (
+                target_id,
+                feature_set_id,
+                feature_artifact_id,
+                reference_id,
+                attribution_artifact_id,
+                as_of_utc,
+                input_hash,
+            )
+        ):
+            raise P2PersistenceError(
+                "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                dataset_snapshot_id,
+            )
+        assert isinstance(target_id, str)
+        assert isinstance(feature_set_id, str)
+        assert isinstance(feature_artifact_id, str)
+        assert isinstance(reference_id, str)
+        assert isinstance(attribution_artifact_id, str)
+        assert isinstance(as_of_utc, str)
+        assert isinstance(input_hash, str)
+
+        target = self._p1_observation(target_id)
+        feature_spec = self._artifact_binding(feature_artifact_id)
+        reference_binding = self._artifact_binding(reference_id)
+        attribution_binding = self._artifact_binding(attribution_artifact_id)
+        profile = P2ExecutionProfile.from_canonical()
+        if (
+            attribution_binding.logical_key != profile.attribution_spec_id
+            or attribution_binding.artifact_version
+            != profile.attribution_spec_version
+        ):
+            raise P2PersistenceError(
+                "P2_COMPUTE_ATTRIBUTION_PROFILE_MISMATCH",
+                attribution_artifact_id,
+            )
+        bundle = build_p2_input_bundle(
+            target=target,
+            feature_spec=feature_spec,
+            reference_condition=P2ReferenceCondition(
+                reference_condition_id=reference_id,
+                binding=reference_binding,
+            ),
+            cohort=cohort,
+            attribution_spec=P2AttributionSpec(
+                attribution_spec_id=profile.attribution_spec_id,
+                attribution_spec_version=profile.attribution_spec_version,
+                model_plugin=profile.model_plugin,
+                model_plugin_version=profile.model_plugin_version,
+                uncertainty_method=profile.uncertainty_method,
+                uncertainty_level=profile.uncertainty_level,
+                binding=attribution_binding,
+            ),
+            as_of_utc=as_of_utc,
+        )
+        if bundle.input_hash != input_hash:
+            raise P2PersistenceError(
+                "P2_WORKSPACE_INPUT_HASH_MISMATCH",
+                dataset_snapshot_id,
+            )
+        feature = self.exact_factor_feature_set(feature_set_id)
+        if (
+            feature.source_observation_id != target.observation_id
+            or feature.feature_spec_id != feature_spec.logical_key
+            or feature.feature_spec_version != feature_spec.artifact_version
+            or feature.reference_condition_id != reference_id
+        ):
+            raise P2PersistenceError(
+                "P2_WORKSPACE_FEATURE_BINDING_MISMATCH",
+                dataset_snapshot_id,
+            )
+        row = self._rows.one(
+            "registry.dataset_snapshot",
+            where={"dataset_snapshot_id": dataset_snapshot_id},
+            columns=("query_or_manifest",),
+        )
+        if row is None:
+            raise P2PersistenceError(
+                "P2_COHORT_SNAPSHOT_NOT_FOUND",
+                dataset_snapshot_id,
+            )
+        return (
+            bundle,
+            feature,
+            _json_object(
+                row["query_or_manifest"],
+                "dataset_snapshot.query_or_manifest",
+            ),
+        )
+
+    def exact_compute_input(
+        self,
+        dataset_snapshot_id: str,
+    ) -> P2DurableComputeInput:
+        bundle, target_feature, manifest = self._precompute_workspace(
+            dataset_snapshot_id
+        )
+        raw_compute = manifest.get("compute_inputs")
+        if not isinstance(raw_compute, dict):
+            raise P2PersistenceError(
+                "P2_COMPUTE_INPUT_SNAPSHOT_MISSING",
+                dataset_snapshot_id,
+            )
+        compute = {str(key): value for key, value in raw_compute.items()}
+        if compute.get("schema") != "TPAA_P2_DURABLE_COMPUTE_INPUT_V1":
+            raise P2PersistenceError(
+                "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                dataset_snapshot_id,
+            )
+        raw_bindings = compute.get("cohort_feature_sets")
+        if not isinstance(raw_bindings, list):
+            raise P2PersistenceError(
+                "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                "cohort_feature_sets",
+            )
+        cohort_rows: list[P2CohortRow] = []
+        observed_ids: list[str] = []
+        for raw in raw_bindings:
+            if not isinstance(raw, dict):
+                raise P2PersistenceError(
+                    "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                    "cohort_feature_sets",
+                )
+            observation_id = raw.get("observation_id")
+            feature_id = raw.get("factor_feature_set_id")
+            if not isinstance(observation_id, str) or not isinstance(
+                feature_id,
+                str,
+            ):
+                raise P2PersistenceError(
+                    "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                    "cohort_feature_sets",
+                )
+            observation = self._p1_observation(observation_id)
+            feature = self.exact_factor_feature_set(feature_id)
+            if (
+                feature.source_observation_id != observation_id
+                or feature.feature_spec_id != bundle.feature_spec.logical_key
+                or feature.feature_spec_version
+                != bundle.feature_spec.artifact_version
+                or feature.reference_condition_id
+                != bundle.reference_condition.reference_condition_id
+            ):
+                raise P2PersistenceError(
+                    "P2_COMPUTE_COHORT_FEATURE_MISMATCH",
+                    feature_id,
+                )
+            cohort_rows.append(
+                P2CohortRow(observation=observation, feature_set=feature)
+            )
+            observed_ids.append(observation_id)
+        if tuple(observed_ids) != bundle.cohort.observation_ids:
+            raise P2PersistenceError(
+                "P2_COMPUTE_COHORT_IDENTITY_MISMATCH",
+                dataset_snapshot_id,
+            )
+
+        raw_reference = compute.get("reference_factor_values")
+        if not isinstance(raw_reference, list):
+            raise P2PersistenceError(
+                "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                "reference_factor_values",
+            )
+        reference: dict[str, float] = {}
+        order: list[str] = []
+        for raw in raw_reference:
+            if not isinstance(raw, dict):
+                raise P2PersistenceError(
+                    "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                    "reference_factor_values",
+                )
+            factor = raw.get("factor")
+            value = raw.get("value")
+            if not isinstance(factor, str) or not isinstance(value, str):
+                raise P2PersistenceError(
+                    "P2_COMPUTE_INPUT_SNAPSHOT_INVALID",
+                    "reference_factor_values",
+                )
+            decimal = Decimal(value)
+            if not decimal.is_finite():
+                raise P2PersistenceError(
+                    "P2_DB_NUMERIC_INVALID",
+                    f"reference_factor_values.{factor}",
+                )
+            reference[factor] = float(decimal)
+            order.append(factor)
+        if tuple(order) != target_feature.factor_order:
+            raise P2PersistenceError(
+                "P2_COMPUTE_REFERENCE_FACTOR_MISMATCH",
+                dataset_snapshot_id,
+            )
+        return P2DurableComputeInput(
+            input_bundle=bundle,
+            target_feature_set=target_feature,
+            cohort_rows=tuple(cohort_rows),
+            reference_factor_values=reference,
+        )
 
     def exact_workspace_material(
         self,

@@ -477,15 +477,26 @@ def test_prcb_p2_workspace_rebuilds_from_durable_authority() -> None:
     repository = P2PersistenceRepository(
         SQLiteCanonicalRowRepository(connection)
     )
-    repository.register_workspace_inputs(bundle, feature)
+    repository.register_workspace_inputs(
+        bundle,
+        feature,
+        cohort_rows=(),
+        reference_factor_values={"x": 1.5},
+    )
     repository.register_attribution_run(run)
     repository.register_adjusted_estimate(estimate)
     connection.commit()
 
-    restarted = P2PersistenceRepository(
+    restarted_repository = P2PersistenceRepository(
         SQLiteCanonicalRowRepository(connection)
-    ).exact_workspace_material(ESTIMATE)
+    )
+    compute_input = restarted_repository.exact_compute_input(COHORT)
+    restarted = restarted_repository.exact_workspace_material(ESTIMATE)
 
+    assert compute_input.input_bundle == bundle
+    assert compute_input.target_feature_set == feature
+    assert compute_input.cohort_rows == ()
+    assert compute_input.reference_factor_values == {"x": 1.5}
     assert restarted.input_bundle == bundle
     assert restarted.target_feature_set == feature
     assert restarted.attribution_run == run

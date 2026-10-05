@@ -13,6 +13,18 @@ from typing import cast
 from uuid import UUID, uuid5
 
 from tpaa_application.m1_publication import to_core_publication_bundle
+from tpaa_capability.p6_counterfactual import execute_p6_counterfactual
+from tpaa_capability.p6_forecast import (
+    P6ManagedModelObject,
+    P6ModelBuild,
+    P6ModelRevision,
+    execute_p6_forecast,
+)
+from tpaa_capability.p6_input import (
+    P6CounterfactualRequestBinding,
+    P6ForecastRequestBinding,
+    P6InputSnapshot,
+)
 from tpaa_generated.dto import EvaluationContextDTO
 from tpaa_generated.metric_registry import P1_METRICS
 from tpaa_ingest.canonical_flight_channels import CanonicalFlightRow
@@ -31,6 +43,8 @@ from tpaa_world import AircraftObservedWorld, WorldEvidenceRef
 
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_PRCB_C2_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
+P6_FORECAST_COMMAND = "P6_FORECAST"
+P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
 _REPRESENTATIVE_CODES = (
     "P1-AIR-001",
     "P1-AIR-002",
@@ -77,6 +91,29 @@ class ProductionP1WorkerProduct:
     metric_batch_hash: str
     source_sha256: str
     prerequisites: tuple[ProductionPrerequisiteRow, ...]
+
+
+@dataclass(frozen=True)
+class ProductionP6ForecastWorkerInput:
+    """Exact durable P6 inputs plus canonical Job payload for worker verification."""
+
+    job_payload: dict[str, object]
+    request: P6ForecastRequestBinding
+    input_snapshot: P6InputSnapshot
+    model_build: P6ModelBuild
+    managed_object: P6ManagedModelObject
+    published_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP6CounterfactualWorkerInput:
+    """Exact durable P6 counterfactual inputs for governed worker execution."""
+
+    job_payload: dict[str, object]
+    request: P6CounterfactualRequestBinding
+    input_snapshot: P6InputSnapshot
+    models: tuple[P6ModelRevision, ...]
+    created_at_utc: str
 
 
 def _mapping(value: object, *, field: str) -> dict[str, object]:
@@ -694,48 +731,112 @@ def build_p1_worker_product(
     )
 
 
+def _verify_job_request(
+    payload: WorkerPayload,
+    job_payload: dict[str, object],
+) -> None:
+    expected = canonical_request_hash(
+        {"job_type": payload.command, "payload": job_payload}
+    )
+    if expected != payload.request_hash:
+        raise ProductionWorkerError(
+            "PRCB_C2_REQUEST_HASH_MISMATCH",
+            payload.job_id,
+        )
+
+
+def _execute_p1(payload: WorkerPayload) -> WorkerResult:
+    body = _mapping(payload.domain_payload, field="domain_payload")
+    authority_root = Path(_text(body.get("authority_root"), field="authority_root"))
+    request_payload = _mapping(body.get("job_payload"), field="job_payload")
+    _verify_job_request(payload, request_payload)
+    product = build_p1_worker_product(
+        request_payload,
+        request_hash=payload.request_hash,
+        authority_root=authority_root,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(
+            product.schema,
+            product.release.release_id,
+            product.release.manifest_hash,
+            product.canonical_logical_hash,
+            product.world_logical_hash,
+            product.metric_batch_hash,
+        ),
+        domain_payload=product,
+    )
+
+
+def _execute_p6_forecast(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP6ForecastWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    value = execute_p6_forecast(
+        request=body.request,
+        input_snapshot=body.input_snapshot,
+        model_build=body.model_build,
+        managed_object=body.managed_object,
+        published_at_utc=body.published_at_utc,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(value.forecast_result_id, value.logical_content_hash),
+        domain_payload=value,
+    )
+
+
+def _execute_p6_counterfactual(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP6CounterfactualWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    value = execute_p6_counterfactual(
+        request=body.request,
+        input_snapshot=body.input_snapshot,
+        models=body.models,
+        created_at_utc=body.created_at_utc,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(value.counterfactual_run_id, value.logical_content_hash),
+        domain_payload=value,
+    )
+
+
 def execute(payload: WorkerPayload) -> WorkerResult:
     """Governed runtime worker handler. Unknown commands fail closed."""
 
-    if payload.command != P1_BUILD_COMMAND:
+    try:
+        if payload.command == P1_BUILD_COMMAND:
+            return _execute_p1(payload)
+        if payload.command == P6_FORECAST_COMMAND:
+            return _execute_p6_forecast(payload)
+        if payload.command == P6_COUNTERFACTUAL_COMMAND:
+            return _execute_p6_counterfactual(payload)
         return WorkerResult(
             job_id=payload.job_id,
             request_hash=payload.request_hash,
             command=payload.command,
             status="FAILED",
             error_code="PRCB_C2_DOMAIN_COMMAND_UNSUPPORTED",
-        )
-    try:
-        body = _mapping(payload.domain_payload, field="domain_payload")
-        authority_root = Path(_text(body.get("authority_root"), field="authority_root"))
-        request_payload = _mapping(body.get("job_payload"), field="job_payload")
-        expected = canonical_request_hash(
-            {"job_type": payload.command, "payload": request_payload}
-        )
-        if expected != payload.request_hash:
-            raise ProductionWorkerError(
-                "PRCB_C2_REQUEST_HASH_MISMATCH",
-                payload.job_id,
-            )
-        product = build_p1_worker_product(
-            request_payload,
-            request_hash=payload.request_hash,
-            authority_root=authority_root,
-        )
-        return WorkerResult(
-            job_id=payload.job_id,
-            request_hash=payload.request_hash,
-            command=payload.command,
-            status="SUCCEEDED",
-            output=(
-                product.schema,
-                product.release.release_id,
-                product.release.manifest_hash,
-                product.canonical_logical_hash,
-                product.world_logical_hash,
-                product.metric_batch_hash,
-            ),
-            domain_payload=product,
         )
     except Exception as exc:
         code = getattr(exc, "code", "PRCB_C2_DOMAIN_EXECUTION_FAILED")
