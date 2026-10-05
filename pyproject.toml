@@ -1,7 +1,7 @@
 [project]
 name = "tpaa"
-version = "0.0.0"
-description = "TPAA airborne-data assessment system engineering bootstrap"
+version = "1.0.0"
+description = "TPAA production airborne-data assessment and qualification system"
 requires-python = ">=3.13,<3.14"
 license = "Proprietary"
 dependencies = [
