@@ -53,14 +53,24 @@ from tpaa_capability.p6_input import (
     P6InputSnapshot,
 )
 from tpaa_storage.canonical_rows import CanonicalRowRepository
+from tpaa_storage.core_publication_ledger import CorePublishReceipt
 from tpaa_storage.object_store import LocalObjectStore
 from tpaa_storage.ports import RepositoryUnitOfWork
+from tpaa_storage.publication_bundle import CorePublicationBundle
 
 _T = TypeVar("_T")
 
 
 class RuntimePublicationLedger(Protocol):
-    """Exact Core Release membership read surface shared by SQLite/PostgreSQL."""
+    """Exact Core Release publication/read surface shared by SQLite/PostgreSQL."""
+
+    def publish(
+        self,
+        release: CorePublicationBundle,
+        *,
+        idempotency_key: str,
+        expected_version_token: int,
+    ) -> CorePublishReceipt: ...
 
     def logical_membership(self, release_id: str) -> dict[str, object]: ...
 

@@ -68,7 +68,7 @@ def test_prcb_c1_p1_exact_release_reads_survive_runtime_restart(
 
     assert release_before["release_id"] == receipt.release_id
     assert release_before["durable_authority"] == "DB_1_9_CORE_PUBLICATION_LEDGER"
-    assert release_before["production_compute_configured"] is False
+    assert release_before["production_compute_configured"] is True
     assert len(metrics_before) == 5
     assert len(observations_before) == 5
     assert context_before["context_id"] == products.release.context_id
@@ -80,7 +80,7 @@ def test_prcb_c1_p1_exact_release_reads_survive_runtime_restart(
     assert restarted.application.m1_context(receipt.release_id) == context_before
 
 
-def test_prcb_c1_p1_compute_commands_remain_fail_closed_until_c2(
+def test_prcb_c2_fixture_specific_commands_remain_fail_closed(
     tmp_path: Path,
 ) -> None:
     database = tmp_path / "tpaa.db"
@@ -98,4 +98,4 @@ def test_prcb_c1_p1_compute_commands_remain_fail_closed_until_c2(
         item["phase"]: item["state"]
         for item in runtime.application.feature_availability()["items"]
     }
-    assert states["P1"] == "NOT_CONFIGURED"
+    assert states["P1"] == "AVAILABLE"

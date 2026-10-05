@@ -38,6 +38,16 @@ from tpaa_ingest.p6_interop import (
     assert_p6_interop_snapshot_identity,
     build_p6_interop_snapshot,
 )
+from tpaa_ingest.production_flight_json import (
+    PRODUCTION_FLIGHT_ADAPTER_ID,
+    PRODUCTION_FLIGHT_ADAPTER_VERSION,
+    PRODUCTION_FLIGHT_MEDIA_TYPE,
+    PRODUCTION_FLIGHT_SCHEMA,
+    PRODUCTION_FLIGHT_SCHEMA_VERSION,
+    ProductionFlightJsonAdapter,
+    build_production_source_registry,
+    validate_production_flight_document,
+)
 from tpaa_ingest.production_source import (
     FROZEN_SOURCE_FAMILIES,
     ProductionSourceAdapterError,
@@ -83,6 +93,12 @@ __all__ = [
     "ReferenceIdentity",
     "P6InteropArtifactRef",
     "P6InteropSnapshot",
+    "PRODUCTION_FLIGHT_ADAPTER_ID",
+    "PRODUCTION_FLIGHT_ADAPTER_VERSION",
+    "PRODUCTION_FLIGHT_MEDIA_TYPE",
+    "PRODUCTION_FLIGHT_SCHEMA",
+    "PRODUCTION_FLIGHT_SCHEMA_VERSION",
+    "ProductionFlightJsonAdapter",
     "ProductionSourceAdapterError",
     "ReferenceTruthRow",
     "SourceAdapter",
@@ -99,9 +115,11 @@ __all__ = [
     "SyntheticSourceRow",
     "assert_p6_interop_snapshot_identity",
     "build_p6_interop_snapshot",
+    "build_production_source_registry",
     "load_m2_measurement_alignment",
     "load_m2_mission_system",
     "load_m2_reference_truth",
     "load_m2_time_alignment",
     "load_synthetic_fixture_bundle",
+    "validate_production_flight_document",
 ]

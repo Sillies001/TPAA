@@ -3,30 +3,30 @@
   "baseline": "PRCB-1.0",
   "source_piqb_protected_main_sha": "0ed48a85944699e0bbac1fe76b84c88a319121c1",
   "target_product_version": "1.0.1",
-  "active_batch": "C0/C1",
+  "active_batch": "C2",
   "task_state": {
     "C0": {
-      "state": "ACTIVE",
+      "state": "COMPLETE",
       "issue": 229
     },
     "C1": {
-      "state": "ACTIVE",
+      "state": "COMPLETE",
       "issue": 230
     },
     "C2": {
-      "state": "BLOCKED_BY_C1",
+      "state": "ACTIVE",
       "issue": 231
     },
     "C3": {
-      "state": "BLOCKED_BY_C1_C2",
+      "state": "BLOCKED_BY_C2",
       "issue": 232
     },
     "C4": {
-      "state": "BLOCKED_BY_C1_C2",
+      "state": "BLOCKED_BY_C2",
       "issue": 233
     },
     "C5": {
-      "state": "BLOCKED_BY_C1_C2_C3_C4",
+      "state": "BLOCKED_BY_C2_C3_C4",
       "issue": 234
     }
   },

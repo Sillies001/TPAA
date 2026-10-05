@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import multiprocessing
 import pickle
 import threading
@@ -20,6 +21,8 @@ class WorkerPayload:
     request_hash: str
     command: str
     arguments: tuple[str, ...] = ()
+    handler: str | None = None
+    domain_payload: object | None = None
 
 
 @dataclass(frozen=True)
@@ -30,6 +33,12 @@ class WorkerResult:
     status: str
     output: tuple[str, ...] = ()
     error_code: str | None = None
+    domain_payload: object | None = None
+
+
+GOVERNED_WORKER_HANDLERS = frozenset(
+    {"tpaa_runtime.production_worker:execute"}
+)
 
 
 class WorkerDispatchError(RuntimeError):
@@ -111,6 +120,37 @@ def _worker_echo(child: Connection, payload: WorkerPayload) -> None:
 
 def _execute_command(payload: WorkerPayload) -> WorkerResult:
     command = payload.command
+    if payload.handler is not None:
+        if payload.handler not in GOVERNED_WORKER_HANDLERS:
+            return WorkerResult(
+                job_id=payload.job_id,
+                request_hash=payload.request_hash,
+                command=command,
+                status="FAILED",
+                error_code="B3_WORKER_HANDLER_NOT_GOVERNED",
+            )
+        module_name, function_name = payload.handler.split(":", 1)
+        try:
+            module = importlib.import_module(module_name)
+            callback = getattr(module, function_name)
+            result = callback(payload)
+        except Exception:
+            return WorkerResult(
+                job_id=payload.job_id,
+                request_hash=payload.request_hash,
+                command=command,
+                status="FAILED",
+                error_code="B3_WORKER_HANDLER_FAILED",
+            )
+        if not isinstance(result, WorkerResult):
+            return WorkerResult(
+                job_id=payload.job_id,
+                request_hash=payload.request_hash,
+                command=command,
+                status="FAILED",
+                error_code="B3_WORKER_RESULT_INVALID",
+            )
+        return result
     if command == "ECHO":
         return WorkerResult(
             job_id=payload.job_id,
