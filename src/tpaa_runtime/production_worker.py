@@ -23,6 +23,7 @@ from tpaa_observation import (
     build_session_release,
 )
 from tpaa_platform.worker import WorkerPayload, WorkerResult
+from tpaa_storage.canonical_rows import FieldKind
 from tpaa_storage.hashing import canonical_request_hash
 from tpaa_storage.publication_bundle import CorePublicationBundle
 from tpaa_world import AircraftObservedWorld, WorldEvidenceRef
@@ -53,6 +54,15 @@ class ProductionWorkerError(RuntimeError):
 
 
 @dataclass(frozen=True)
+class ProductionPrerequisiteRow:
+    """One explicit DB 1.9 prerequisite row decided from governed production input."""
+
+    table: str
+    values: dict[str, object]
+    field_kinds: dict[str, FieldKind]
+
+
+@dataclass(frozen=True)
 class ProductionP1WorkerProduct:
     """Serializable worker-decided P1 product; parent only persists this result."""
 
@@ -65,6 +75,7 @@ class ProductionP1WorkerProduct:
     world_logical_hash: str
     metric_batch_hash: str
     source_sha256: str
+    prerequisites: tuple[ProductionPrerequisiteRow, ...]
 
 
 def _mapping(value: object, *, field: str) -> dict[str, object]:
@@ -466,10 +477,10 @@ def build_p1_worker_product(
         body.get("expected_version_token"),
         field="expected_version_token",
     )
-    if expected_version_token < 0:
+    if expected_version_token != 0:
         raise ProductionWorkerError(
-            "PRCB_C2_PAYLOAD_INVALID",
-            "expected_version_token",
+            "PRCB_C2_RELEASE_REVISION_NOT_CONFIGURED",
+            str(expected_version_token),
         )
     parent_raw = body.get("parent_release_id")
     parent_release_id = (
@@ -498,6 +509,144 @@ def build_p1_worker_product(
         batch=metric_batch,
         identity=identity,
     )
+    prerequisites: list[ProductionPrerequisiteRow] = [
+        ProductionPrerequisiteRow(
+            table="registry.training_session",
+            values={
+                "session_id": session_id,
+                "session_code": _text(
+                    source_import.get("session_code"),
+                    field="source_import.session_code",
+                ),
+                "session_type": _text(
+                    source_import.get("session_type"),
+                    field="source_import.session_type",
+                ),
+                "start_session_time_us": start,
+                "end_session_time_us": end,
+                "training_type_set": [],
+                "data_status": "READY",
+                "source_count": 1,
+                "schema_version": "1.9.0",
+            },
+            field_kinds={"training_type_set": "text_array"},
+        ),
+        ProductionPrerequisiteRow(
+            table="master.aircraft_model",
+            values={
+                "aircraft_model_id": identity.aircraft_model_id,
+                "type_code": _text(
+                    identity_raw.get("aircraft_type_code"),
+                    field="publication_identity.aircraft_type_code",
+                ),
+                "model_name": _text(
+                    identity_raw.get("aircraft_model_name"),
+                    field="publication_identity.aircraft_model_name",
+                ),
+            },
+            field_kinds={},
+        ),
+        ProductionPrerequisiteRow(
+            table="master.aircraft",
+            values={
+                "aircraft_id": aircraft_id,
+                "aircraft_model_id": identity.aircraft_model_id,
+                "internal_code": _text(
+                    identity_raw.get("aircraft_internal_code"),
+                    field="publication_identity.aircraft_internal_code",
+                ),
+                "master_data_status": "ACTIVE",
+            },
+            field_kinds={},
+        ),
+        ProductionPrerequisiteRow(
+            table="master.entity",
+            values={
+                "entity_id": identity.subject_entity_id,
+                "session_id": session_id,
+                "entity_type": "AIRCRAFT",
+                "alias": _text(
+                    identity_raw.get("entity_alias"),
+                    field="publication_identity.entity_alias",
+                ),
+            },
+            field_kinds={},
+        ),
+        ProductionPrerequisiteRow(
+            table="master.aircraft_instance",
+            values={
+                "aircraft_instance_id": identity.aircraft_instance_id,
+                "session_id": session_id,
+                "aircraft_id": aircraft_id,
+                "entity_id": identity.subject_entity_id,
+                "instance_seq": 0,
+                "start_session_time_us": start,
+                "end_session_time_us": end,
+                "start_reason": "PRODUCTION_IMPORT",
+                "identity_scope": "SESSION_ONLY",
+                "identity_confidence": 1.0,
+            },
+            field_kinds={},
+        ),
+        ProductionPrerequisiteRow(
+            table="context.evaluation_context",
+            values=dict(context_projection),
+            field_kinds={},
+        ),
+        ProductionPrerequisiteRow(
+            table="episode.training_episode",
+            values={
+                "episode_id": episode_id,
+                "session_id": session_id,
+                "episode_type": "PRODUCTION_FLIGHT",
+                "context_id": context_id,
+                "start_session_time_us": start,
+                "end_session_time_us": end,
+                "subject_scope": "AIRCRAFT",
+                "primary_aircraft_id": aircraft_id,
+                "world_capability_code": world.capability_code,
+                "episode_status": world.status,
+                "detector_version": world.world_version,
+                "coverage": world.coverage,
+                "confidence": world.confidence,
+            },
+            field_kinds={},
+        ),
+    ]
+    for definition in release.definitions:
+        prerequisites.append(
+            ProductionPrerequisiteRow(
+                table="metric.metric_definition",
+                values={
+                    "metric_definition_id": definition.metric_definition_id,
+                    "metric_code": definition.metric_code,
+                    "version": definition.algorithm_version,
+                    "catalog_version": definition.catalog_version,
+                    "catalog_hash": definition.catalog_hash,
+                    "metric_semantic_id": definition.semantic_id,
+                    "metric_semantic_version": definition.semantic_version,
+                    "name": definition.metric_code,
+                    "subject_type": definition.subject_type,
+                    "observation_lane": definition.observation_lane,
+                    "publication_route": definition.publication_route,
+                    "category": "AIRCRAFT_FLIGHT",
+                    "calculation_layer": "METRIC",
+                    "capability_level": "CAP_L1_OBSERVED",
+                    "capability_dimension": identity.capability_dimension,
+                    "required_world_products": [world.world_product_id],
+                    "scope": "EPISODE",
+                    "spec_uri": (
+                        f"canonical://P1_METRIC_CATALOG/{definition.metric_code}"
+                    ),
+                    "spec_hash": definition.definition_hash,
+                    "definition_hash": definition.definition_hash,
+                    "plugin_name": definition.algorithm_id,
+                    "plugin_version": definition.algorithm_version,
+                    "status": "ACTIVE",
+                },
+                field_kinds={"required_world_products": "json"},
+            )
+        )
     return ProductionP1WorkerProduct(
         schema=PRODUCTION_P1_WORKER_SCHEMA,
         release=to_core_publication_bundle(release),
@@ -508,6 +657,7 @@ def build_p1_worker_product(
         world_logical_hash=world_hash,
         metric_batch_hash=metric_batch.logical_hash,
         source_sha256=source_sha,
+        prerequisites=tuple(prerequisites),
     )
 
 

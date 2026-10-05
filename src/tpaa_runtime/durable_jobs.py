@@ -363,7 +363,18 @@ class ProductionJobExecutor:
             payload.get("expected_version_token"),
             field="expected_version_token",
         )
+        if expected_version != 0:
+            raise ProductionJobExecutionError(
+                "PRCB_C2_RELEASE_REVISION_NOT_CONFIGURED",
+                str(expected_version),
+            )
         with self._write_uow_factory() as uow:
+            for prerequisite in product.prerequisites:
+                uow.canonical_rows.insert(
+                    prerequisite.table,
+                    prerequisite.values,
+                    field_kinds=prerequisite.field_kinds,
+                )
             ProductionImportService(
                 adapters=self._adapters,
                 provenance=SourceProvenanceRepository(uow.canonical_rows),
