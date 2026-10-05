@@ -11,12 +11,17 @@ import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Protocol
 
 from tpaa_storage.hashing import canonical_request_hash
 
 
 class JobStatus(StrEnum):
     SUBMITTED = "SUBMITTED"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
     CANCELLED = "CANCELLED"
 
 
@@ -64,6 +69,29 @@ class JobAudit:
 
 
 AuditCallback = Callable[[JobAudit], None]
+
+
+class JobControl(Protocol):
+    """Transport-facing Job lifecycle port independent of persistence engine."""
+
+    def submit(
+        self,
+        *,
+        idempotency_key: str,
+        command: str,
+        payload: dict[str, object],
+        actor: str,
+    ) -> JobSubmission: ...
+
+    def get(self, job_id: str) -> JobRecord: ...
+
+    def cancel(
+        self,
+        *,
+        job_id: str,
+        actor: str,
+        reason: str,
+    ) -> JobRecord: ...
 
 
 class M0JobControl:

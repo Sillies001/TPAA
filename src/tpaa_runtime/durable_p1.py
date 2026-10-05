@@ -74,16 +74,22 @@ def _required_float(row: dict[str, object], field: str) -> float:
 
 
 class DurableP1ReleaseReadService:
-    """Exact P1 DB reads while C2 production ingest/compute remains fail-closed."""
+    """Exact P1 DB reads; fixture-specific commands never become production authority."""
 
-    def __init__(self, read_uow_factory: RuntimeUnitOfWorkFactory) -> None:
+    def __init__(
+        self,
+        read_uow_factory: RuntimeUnitOfWorkFactory,
+        *,
+        production_compute_configured: bool = False,
+    ) -> None:
         self._read_uow_factory = read_uow_factory
+        self._production_compute_configured = production_compute_configured
 
     @staticmethod
     def _c2_required(action: str) -> M1ApplicationError:
         return M1ApplicationError(
             "P1_PRODUCTION_COMMAND_NOT_CONFIGURED",
-            f"{action} requires PRCB C2 production ingest/worker wiring",
+            f"{action} is fixture-specific; use the durable production Job API",
         )
 
     def import_session(
@@ -174,7 +180,7 @@ class DurableP1ReleaseReadService:
             "context_version": _required_text(context_ref, "context_version"),
             "metric_count": len(metrics),
             "durable_authority": "DB_1_9_CORE_PUBLICATION_LEDGER",
-            "production_compute_configured": False,
+            "production_compute_configured": self._production_compute_configured,
         }
 
     def observations(self, release_id: str) -> list[CapabilityObservationDTO]:

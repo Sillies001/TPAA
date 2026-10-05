@@ -88,7 +88,22 @@ def _compose(
     _validate_storage_status(storage_status)
 
     admission = ProductAdmissionResolver()
-    p1_release_reads = DurableP1ReleaseReadService(read_uow_factory)
+    from .durable_jobs import DurableApplicationJobControl, ProductionJobExecutor
+
+    job_executor = ProductionJobExecutor(
+        authority_root=config.authority_root,
+        write_uow_factory=write_uow_factory,
+        object_store=object_store,
+    )
+    job_control = DurableApplicationJobControl(
+        read_uow_factory=read_uow_factory,
+        write_uow_factory=write_uow_factory,
+        executor=job_executor,
+    )
+    p1_release_reads = DurableP1ReleaseReadService(
+        read_uow_factory,
+        production_compute_configured=True,
+    )
     m4_workspace = M4WorkspaceService(
         longitudinal=M4LongitudinalPublicationService(
             DurableM4LongitudinalReleaseRepository(
@@ -142,7 +157,7 @@ def _compose(
     )
 
     configured = {
-        "P1": False,
+        "P1": True,
         "P2": True,
         "P3": True,
         "P4": True,
@@ -150,7 +165,7 @@ def _compose(
         "P6": True,
     }
     dependency_ready = {
-        "P1": False,
+        "P1": True,
         "P2": True,
         "P3": True,
         "P4": True,
@@ -169,6 +184,7 @@ def _compose(
     )
     application = ApplicationService(
         get_storage_baseline_status=storage_status,
+        job_control=job_control,
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=config.product_build_version
         ),

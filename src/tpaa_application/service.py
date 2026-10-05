@@ -6,7 +6,7 @@ from typing import Protocol
 
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
 
-from .job_control import JobRecord, JobSubmission, M0JobControl
+from .job_control import JobControl, JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
     M1PublishSessionCommand,
     M1PublishSessionResult,
@@ -183,7 +183,7 @@ class ApplicationService:
         *,
         get_storage_baseline_status: StorageBaselineStatusUseCase,
         get_runtime_baseline_status: GetRuntimeBaselineStatus | None = None,
-        job_control: M0JobControl | None = None,
+        job_control: JobControl | None = None,
         m1_publication: P1PublicationUseCase | None = None,
         m3_publication: M3PublicationUseCase | None = None,
         m4_workspace: M4WorkspaceUseCase | None = None,
@@ -253,7 +253,7 @@ class ApplicationService:
         payload: dict[str, object],
         actor: str,
     ) -> JobSubmission:
-        """Submit an M0 control-plane job skeleton with canonical request identity."""
+        """Submit one formal Application job through the configured lifecycle port."""
 
         return self._job_control.submit(
             idempotency_key=idempotency_key,
@@ -263,12 +263,12 @@ class ApplicationService:
         )
 
     def job(self, job_id: str) -> JobRecord:
-        """Return an M0 job record without transport-specific behavior."""
+        """Return one formal job record without transport-specific behavior."""
 
         return self._job_control.get(job_id)
 
     def cancel_job(self, *, job_id: str, actor: str, reason: str) -> JobRecord:
-        """Cancel an M0 job skeleton; this does not implement M1 compute cancellation."""
+        """Cancel one formal job through the configured lifecycle port."""
 
         return self._job_control.cancel(job_id=job_id, actor=actor, reason=reason)
 

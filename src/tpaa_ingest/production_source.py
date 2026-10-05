@@ -150,6 +150,17 @@ class SourceAdapterRegistry:
             )
         )
 
+    def require_family(
+        self,
+        family: SourceFamily,
+    ) -> tuple[SourceAdapterDescriptor, ...]:
+        """Resolve an explicitly configured family or fail without fallback."""
+
+        descriptors = self.for_family(family)
+        if not descriptors:
+            raise ProductionSourceAdapterError("UNSUPPORTED_ADAPTER", family.value)
+        return descriptors
+
     def inventory(self) -> tuple[SourceAdapterDescriptor, ...]:
         return tuple(
             sorted(
