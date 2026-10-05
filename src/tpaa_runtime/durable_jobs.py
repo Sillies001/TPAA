@@ -11,17 +11,19 @@ from typing import Protocol, cast
 from tpaa_application import (
     DurableJobControl,
     DurableJobControlError,
+    DurableP6ModelBuildResolver,
     IdempotencyConflict,
     JobNotFound,
     JobRecord,
     JobStatus,
     JobSubmission,
-    DurableP6ModelBuildResolver,
     P6PersistenceRepository,
     ProductionImportService,
     SourceImportCommand,
     SourceProvenanceRepository,
 )
+from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
+from tpaa_capability.p6_forecast import P6ForecastRevision
 from tpaa_ingest import (
     PRODUCTION_FLIGHT_ADAPTER_ID,
     PRODUCTION_FLIGHT_ADAPTER_VERSION,
@@ -32,8 +34,6 @@ from tpaa_ingest import (
     build_production_source_registry,
     validate_production_flight_document,
 )
-from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
-from tpaa_capability.p6_forecast import P6ForecastRevision
 from tpaa_platform import SpawnWorkerDispatcher, WorkerPayload
 from tpaa_storage import (
     ComputeJobRepository,
