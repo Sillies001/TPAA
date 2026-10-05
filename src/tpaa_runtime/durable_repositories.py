@@ -54,6 +54,7 @@ from tpaa_capability.p6_input import (
 )
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 from tpaa_storage.object_store import LocalObjectStore
+from tpaa_storage.ports import BaselineMetadataRepository
 
 _T = TypeVar("_T")
 
@@ -62,10 +63,13 @@ class RuntimeCanonicalUnitOfWork(Protocol):
     """Minimal transaction boundary needed by production repository adapters."""
 
     canonical_rows: CanonicalRowRepository
+    metadata: BaselineMetadataRepository
 
     def __enter__(self) -> Self: ...
 
     def commit(self) -> None: ...
+
+    def rollback(self) -> None: ...
 
     def __exit__(
         self,
