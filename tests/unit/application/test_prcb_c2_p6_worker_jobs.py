@@ -59,8 +59,8 @@ def test_prcb_c2_p6_forecast_and_counterfactual_use_durable_jobs_and_worker(
             ),
             target_scope="SUBJECT",
             subject_or_composition_ref=AIRCRAFT,
-            forecast_origin_utc="2026-09-10T11:00:00Z",
-            as_of_utc=AS_OF,
+            forecast_origin_utc="2026-09-10T13:00:00Z",
+            as_of_utc="2026-09-10T13:00:00Z",
         )
         profile = P6ForecastExecutionProfile.from_canonical()
         forecast_request = build_p6_forecast_request_binding(
@@ -115,7 +115,7 @@ def test_prcb_c2_p6_forecast_and_counterfactual_use_durable_jobs_and_worker(
     )
     forecast_payload = {
         "forecast_request_id": forecast_request.forecast_request_id,
-        "published_at_utc": "2026-09-10T12:30:00Z",
+        "published_at_utc": "2026-09-10T13:30:00Z",
     }
     forecast_job = runtime.application.submit_job(
         idempotency_key="prcb-c2-p6-forecast",
@@ -123,11 +123,19 @@ def test_prcb_c2_p6_forecast_and_counterfactual_use_durable_jobs_and_worker(
         payload=forecast_payload,
         actor="PRCB-C2-TEST",
     )
-    assert forecast_job.record.status is JobStatus.SUCCEEDED
+    if forecast_job.record.status is not JobStatus.SUCCEEDED:
+        with SQLiteDesktopUnitOfWork(database) as uow:
+            durable = uow.canonical_rows.one(
+                "registry.compute_job",
+                where={"job_id": forecast_job.record.job_id},
+                columns=("reason_codes", "error_detail"),
+            )
+            uow.commit()
+        raise AssertionError(f"forecast job failed: {durable!r}")
 
     counterfactual_payload = {
         "counterfactual_request_id": counterfactual_request.counterfactual_request_id,
-        "created_at_utc": "2026-09-10T12:40:00Z",
+        "created_at_utc": "2026-09-10T13:40:00Z",
     }
     counterfactual_job = runtime.application.submit_job(
         idempotency_key="prcb-c2-p6-counterfactual",
@@ -135,20 +143,28 @@ def test_prcb_c2_p6_forecast_and_counterfactual_use_durable_jobs_and_worker(
         payload=counterfactual_payload,
         actor="PRCB-C2-TEST",
     )
-    assert counterfactual_job.record.status is JobStatus.SUCCEEDED
+    if counterfactual_job.record.status is not JobStatus.SUCCEEDED:
+        with SQLiteDesktopUnitOfWork(database) as uow:
+            durable = uow.canonical_rows.one(
+                "registry.compute_job",
+                where={"job_id": counterfactual_job.record.job_id},
+                columns=("reason_codes", "error_detail"),
+            )
+            uow.commit()
+        raise AssertionError(f"counterfactual job failed: {durable!r}")
 
     expected_forecast = execute_p6_forecast(
         request=forecast_request,
         input_snapshot=snapshot,
         model_build=fixture.build,
         managed_object=fixture.managed,
-        published_at_utc="2026-09-10T12:30:00Z",
+        published_at_utc="2026-09-10T13:30:00Z",
     )
     expected_counterfactual = execute_p6_counterfactual(
         request=counterfactual_request,
         input_snapshot=snapshot,
         models=(fixture.build.model,),
-        created_at_utc="2026-09-10T12:40:00Z",
+        created_at_utc="2026-09-10T13:40:00Z",
     )
 
     with SQLiteDesktopUnitOfWork(database) as uow:
