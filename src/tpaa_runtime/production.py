@@ -35,7 +35,7 @@ from .durable_repositories import (
     DurableM9P6RuntimeRepository,
     RuntimeUnitOfWorkFactory,
 )
-from .observability import ProductOperationalStatus, ProductQualificationStatus
+from .observability import PRCBOperationalStatus, PRCBQualificationStatus
 from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 
 
@@ -138,7 +138,7 @@ def _compose(
         configured=configured,
         dependency_ready=dependency_ready,
     )
-    qualification_status = ProductQualificationStatus(
+    qualification_status = PRCBQualificationStatus(
         feature_availability=feature_availability,
         profile=config.profile,
         product_build_version=config.product_build_version,
@@ -154,7 +154,7 @@ def _compose(
         m9_workspace=m9_workspace,
         feature_availability=feature_availability,
         qualification_status=qualification_status,
-        operational_status=ProductOperationalStatus(qualification_status),
+        operational_status=PRCBOperationalStatus(qualification_status),
     )
     return ProductionRuntime(
         config=config,
