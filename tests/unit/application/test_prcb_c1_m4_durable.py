@@ -23,7 +23,7 @@ from tpaa_runtime.durable_longitudinal import (
 )
 from tpaa_storage.canonical_rows import SQLiteCanonicalRowRepository
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 AUTHORITY = ROOT / "baseline" / "CB-1.4.0"
 
 

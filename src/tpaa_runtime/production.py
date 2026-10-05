@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 
 from fastapi import FastAPI
 
@@ -19,6 +20,7 @@ from tpaa_application import (
     M7WorkspaceService,
     M8WorkspaceService,
     M9WorkspaceService,
+    SecurityAuditSink,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_longitudinal import M4LongitudinalPublicationService
@@ -39,6 +41,7 @@ from .durable_repositories import (
     DurableM7P3RuntimeRepository,
     DurableM8AssessmentRuntimeRepository,
     DurableM9P6RuntimeRepository,
+    RuntimeCanonicalUnitOfWork,
     RuntimeUnitOfWorkFactory,
 )
 from .observability import PRCBOperationalStatus, PRCBQualificationStatus
@@ -109,6 +112,7 @@ def _compose(
         ),
         admission_evidence=admission.p3_evidence(),
     )
+    audit_sink: SecurityAuditSink
     if config.profile is RuntimeProfile.DESKTOP:
         assert config.desktop_database_path is not None
         audit_sink = SQLiteSecurityAuditSink(config.desktop_database_path)
@@ -193,11 +197,17 @@ def build_desktop_production_runtime(
     assert config.desktop_database_path is not None
     database = config.desktop_database_path
 
-    def read_uow() -> SQLiteDesktopUnitOfWork:
-        return SQLiteDesktopUnitOfWork(database)
+    def read_uow() -> RuntimeCanonicalUnitOfWork:
+        return cast(
+            RuntimeCanonicalUnitOfWork,
+            SQLiteDesktopUnitOfWork(database),
+        )
 
-    def write_uow() -> SQLiteDesktopUnitOfWork:
-        return SQLiteDesktopUnitOfWork(database, write=True)
+    def write_uow() -> RuntimeCanonicalUnitOfWork:
+        return cast(
+            RuntimeCanonicalUnitOfWork,
+            SQLiteDesktopUnitOfWork(database, write=True),
+        )
 
     return _compose(
         config,
@@ -216,11 +226,17 @@ def build_service_production_runtime(
     assert config.service_conninfo is not None
     conninfo = config.service_conninfo
 
-    def read_uow() -> PostgreSQLServiceUnitOfWork:
-        return PostgreSQLServiceUnitOfWork(conninfo, read_only=True)
+    def read_uow() -> RuntimeCanonicalUnitOfWork:
+        return cast(
+            RuntimeCanonicalUnitOfWork,
+            PostgreSQLServiceUnitOfWork(conninfo, read_only=True),
+        )
 
-    def write_uow() -> PostgreSQLServiceUnitOfWork:
-        return PostgreSQLServiceUnitOfWork(conninfo)
+    def write_uow() -> RuntimeCanonicalUnitOfWork:
+        return cast(
+            RuntimeCanonicalUnitOfWork,
+            PostgreSQLServiceUnitOfWork(conninfo),
+        )
 
     return _compose(
         config,

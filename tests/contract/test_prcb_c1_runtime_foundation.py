@@ -86,7 +86,8 @@ def test_prcb_durable_runtime_adapters_do_not_use_inmemory_or_test_fixtures() ->
     root = Path(__file__).resolve().parents[2]
     sources = [
         root / "src" / "tpaa_runtime" / "durable_repositories.py",
-        root / "src" / "tpaa_runtime" / "config.py",
+        root / "src" / "tpaa_runtime" / "durable_longitudinal.py",
+        root / "src" / "tpaa_runtime" / "production.py",
     ]
     text = "\n".join(path.read_text(encoding="utf-8") for path in sources)
     assert "InMemory" not in text

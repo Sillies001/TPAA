@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from .job_control import JobRecord, JobSubmission, M0JobControl
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
 
+from .job_control import JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
     M1PublishSessionCommand,
     M1PublishSessionResult,

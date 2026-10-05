@@ -44,7 +44,7 @@ def test_prcb_runtime_reports_historical_1_0_and_pending_1_0_1(
     }
     operational = runtime.application.operational_status()
     assert operational["reason_code"] == "PRCB_RUNTIME_STATUS"
-    assert operational["fields"]["formal_release_claimed"] is False
+    assert operational["formal_release_claimed"] is False
 
 
 def test_prcb_production_does_not_reuse_legacy_b3_qualification_status() -> None:

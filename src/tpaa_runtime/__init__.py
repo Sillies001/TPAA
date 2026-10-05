@@ -15,19 +15,19 @@ from .composition import (
 )
 from .config import ProductionRuntimeConfig, ProductRuntimeConfig, RuntimeProfile
 from .observability import ProductOperationalStatus, ProductQualificationStatus
-from .production import (
-    ProductionRuntime,
-    build_desktop_production_runtime,
-    build_service_production_runtime,
-    create_production_desktop_app,
-    create_production_service_app,
-)
 from .persistence import (
     DesktopPersistenceConfig,
     ProductPersistenceRuntime,
     ServicePersistenceConfig,
     build_desktop_persistence,
     build_service_persistence,
+)
+from .production import (
+    ProductionRuntime,
+    build_desktop_production_runtime,
+    build_service_production_runtime,
+    create_production_desktop_app,
+    create_production_service_app,
 )
 from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 

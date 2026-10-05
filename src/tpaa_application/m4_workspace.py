@@ -5,9 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Callable, Sequence
-from typing import Protocol, runtime_checkable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
+from typing import Protocol, runtime_checkable
 from uuid import UUID, uuid5
 
 from tpaa_longitudinal import (

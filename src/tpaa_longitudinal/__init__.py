@@ -3,8 +3,8 @@
 from .m4_release import (
     InMemoryM4LongitudinalReleaseRepository,
     M4LongitudinalPublicationService,
-    M4LongitudinalReleaseRepository,
     M4LongitudinalReleaseInput,
+    M4LongitudinalReleaseRepository,
     M4LongitudinalReleaseSnapshot,
     M4PublishedLongitudinalRelease,
     M4PublishResult,

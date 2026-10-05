@@ -62,11 +62,11 @@ from .m3_workspace import (
 )
 from .m4_workspace import (
     InMemoryM4DebriefRepository,
-    M4DebriefRepository,
     M4AnnotationCommand,
     M4ApplicationError,
     M4DebriefAnnotation,
     M4DebriefQuery,
+    M4DebriefRepository,
     M4DebriefTimelineItem,
     M4TrendQuery,
     M4WorkspaceService,
