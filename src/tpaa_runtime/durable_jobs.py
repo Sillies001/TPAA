@@ -414,6 +414,9 @@ class ProductionJobExecutor:
                 idempotency_key=f"{job_key}:P1_RELEASE",
                 expected_version_token=expected_version,
             )
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
 
@@ -488,6 +491,9 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p3_repository(uow).register_estimate(value)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
     def _p6_repository(
@@ -548,6 +554,9 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_forecast(value)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
     def _execute_p6_counterfactual(
@@ -602,6 +611,9 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_counterfactual(value)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
     def execute(
@@ -749,9 +761,19 @@ class DurableApplicationJobControl:
             return JobSubmission(record=_job_record(current), reused=False)
 
         with self._write_uow_factory() as uow:
-            terminal = DurableJobControl(
+            control = DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
-            ).succeed(running.job_id)
+            )
+            current = control.get(running.job_id)
+            if current.status is ComputeJobState.RUNNING:
+                terminal = control.succeed(running.job_id)
+            elif current.status is ComputeJobState.SUCCEEDED:
+                terminal = current
+            else:
+                raise DurableJobControlError(
+                    "B3_JOB_TERMINAL_STATE_INVALID",
+                    f"{running.job_id}:{current.status.value}",
+                )
             uow.commit()
         return JobSubmission(record=_job_record(terminal), reused=False)
 
