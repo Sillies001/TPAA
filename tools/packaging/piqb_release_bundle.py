@@ -126,12 +126,12 @@ def _install_piqb_runtime(stage: Path, profile: str) -> None:
             "\"%ROOT%runtime\\python.exe\" "
             "\"%ROOT%app\\tools\\packaging\\piqb_runtime_entry.py\" "
             f"--profile {profile} %*\r\n"
-            "goto end\r\n"
+            "exit /b %ERRORLEVEL%\r\n"
             ":default\r\n"
             "\"%ROOT%runtime\\python.exe\" "
             "\"%ROOT%app\\tools\\packaging\\piqb_runtime_entry.py\" "
             f"--profile {profile} {default_command}\r\n"
-            ":end\r\n",
+            "exit /b %ERRORLEVEL%\r\n",
             encoding="utf-8",
             newline="",
         )

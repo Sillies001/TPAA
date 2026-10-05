@@ -5,6 +5,8 @@ import json
 import tomllib
 from pathlib import Path
 
+from fastapi.testclient import TestClient
+
 from tpaa_api.unified import UnifiedPrincipal
 from tpaa_runtime import (
     ProductRuntimeConfig,
@@ -172,6 +174,14 @@ def test_full_product_apps_use_runtime_product_version() -> None:
         bearer_token="contract-test-desktop-token",
     )
     assert desktop_app.version == "1.0.0"
+    with TestClient(desktop_app) as client:
+        headers = {"Authorization": "Bearer contract-test-desktop-token"}
+        qualification = client.get("/runtime/qualification", headers=headers)
+        observability = client.get("/runtime/observability", headers=headers)
+    assert qualification.status_code == 200
+    assert qualification.json()["product_build_version"] == "1.0.0"
+    assert qualification.json()["db_schema_version"] == "1.9.0"
+    assert observability.status_code == 200
 
     service = build_service_application(
         ProductRuntimeConfig(

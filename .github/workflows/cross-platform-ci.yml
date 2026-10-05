@@ -203,6 +203,7 @@ jobs:
             evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
             evidence/m1-batch-4/${{ matrix.platform }}/platform.json
             dist/
+            !dist/piqb-b6/**
           if-no-files-found: error
           retention-days: 14
 

@@ -186,14 +186,26 @@ def _runtime_probe(profile_id: str) -> dict[str, Any]:
         raise RuntimeError(f"P1-P6 availability invalid phases={phases} states={states}")
 
     qualification_payload = _payload(qualification)
+    if qualification.status_code != 200:
+        raise RuntimeError(
+            "product qualification probe failed "
+            f"status={qualification.status_code} payload={qualification_payload}"
+        )
     if (
         qualification_payload.get("product_build_version") != _project_version()
         or qualification_payload.get("db_schema_version") != "1.9.0"
     ):
-        raise RuntimeError("product qualification identity mismatch")
+        raise RuntimeError(
+            "product qualification identity mismatch "
+            f"payload={qualification_payload}"
+        )
 
+    observability_payload = _payload(observability)
     if observability.status_code != 200:
-        raise RuntimeError("product observability probe failed")
+        raise RuntimeError(
+            "product observability probe failed "
+            f"status={observability.status_code} payload={observability_payload}"
+        )
 
     route_paths = _route_paths(app)
     for marker in _REQUIRED_PRODUCT_ROUTE_MARKERS:
