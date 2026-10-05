@@ -24,6 +24,7 @@ from tools.manifest.build_artifacts import git_revision, sha256_file  # noqa: E4
 from tools.packaging.piqb_release_bundle import build_piqb_release_bundle  # noqa: E402
 from tools.testing.m5_batch_2_qualification import (  # noqa: E402
     _extract,
+    _hardware_identity,
     _hold_cycle,
     _profiles,
     _run_bundle,
@@ -178,6 +179,7 @@ def _profile(
             raise RuntimeError("retained governed workload failed")
         measurements = cast(dict[str, object], workload.get("measurements", {}))
         validate_performance_measurements(authority, profile_id, measurements)
+        hardware_identity = _hardware_identity(authority, profile_id)
 
         rollback_target = Path(raw) / "committed-install"
         before, after = exercise_failed_install_rollback(
@@ -208,6 +210,9 @@ def _profile(
             "graceful_stop_seconds": stop_seconds,
             "performance_qualification": "PASS",
             "performance_measurements": measurements,
+            "hardware_qualification": "PASS",
+            "hardware_identity": hardware_identity,
+            "hardware_manifest_sha256": _hash(hardware_identity),
             "workload_manifest_sha256": workload["workload_manifest_sha256"],
             "failed_install_rollback": "PASS",
             "upgrade_result": "NOT_APPLICABLE_FIRST_PIQB_RELEASE",
@@ -249,6 +254,7 @@ def qualify(platform_name: str, *, package_output: Path) -> dict[str, Any]:
         "full_product_smoke_pass": all(report["product_p1_p6_smoke"] == "PASS" for report in reports),
         "restart_pass": all(report["restart_ready"] == "PASS" for report in reports),
         "performance_pass": all(report["performance_qualification"] == "PASS" for report in reports),
+        "target_hardware_pass": all(report["hardware_qualification"] == "PASS" for report in reports),
         "failed_install_rollback_pass": all(report["failed_install_rollback"] == "PASS" for report in reports),
         "same_governed_workload": len(workload_hashes) == 1,
         "formal_release_not_claimed": all(report["formal_release_claimed"] is False for report in reports),

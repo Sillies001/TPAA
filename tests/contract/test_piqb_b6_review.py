@@ -261,6 +261,7 @@ def test_b6_workflow_reuses_existing_fourteen_check_topology() -> None:
     assert "Upload PIQB B6 release packages" in workflow
     assert "Review PIQB B6 final product and release qualification" in workflow
     assert "piqb_b6_final_product_qualification.py" in workflow
+    assert "TPAA_M5_STORAGE_CLASS: SSD" in workflow
     assert "piqb_exit_review.py" in workflow
     assert "--b4-qualification downloaded/piqb-b4/postgres-api-security-observability.json" in workflow
     assert "--required-jobs-success 14" in workflow

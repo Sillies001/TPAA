@@ -187,7 +187,9 @@ def _spdx(stage: Path, *, profile: str, version: str, revision: str) -> dict[str
             "downloadLocation": "NOASSERTION",
             "filesAnalyzed": False,
             "licenseConcluded": "NOASSERTION",
-            "licenseDeclared": "Proprietary",
+            "licenseDeclared": "NOASSERTION",
+            "copyrightText": "NOASSERTION",
+            "comment": "Project metadata declares a proprietary license.",
         }
     ]
     for index, row in enumerate(raw_packages, start=1):
@@ -206,6 +208,7 @@ def _spdx(stage: Path, *, profile: str, version: str, revision: str) -> dict[str
                 "filesAnalyzed": False,
                 "licenseConcluded": "NOASSERTION",
                 "licenseDeclared": "NOASSERTION",
+                "copyrightText": "NOASSERTION",
             }
         )
     return {

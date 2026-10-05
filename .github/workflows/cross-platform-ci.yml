@@ -87,6 +87,7 @@ jobs:
       - name: Execute PIQB B6 final product qualification
         env:
           QT_QPA_PLATFORM: offscreen
+          TPAA_M5_STORAGE_CLASS: SSD
         run: >-
           uv run --locked python tools/testing/piqb_b6_final_product_qualification.py
           --platform ${{ matrix.platform }}

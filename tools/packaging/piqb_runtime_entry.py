@@ -245,7 +245,10 @@ def _component_smoke(profile_id: str) -> dict[str, object]:
 
 
 def _hold(profile_id: str, stop_file: Path) -> int:
-    print(json.dumps(_runtime_probe(profile_id), sort_keys=True), flush=True)
+    payload = _runtime_probe(profile_id)
+    payload["product_probe_status"] = payload["status"]
+    payload["status"] = "READY"
+    print(json.dumps(payload, sort_keys=True), flush=True)
     while not stop_file.exists():
         time.sleep(0.05)
     return 0

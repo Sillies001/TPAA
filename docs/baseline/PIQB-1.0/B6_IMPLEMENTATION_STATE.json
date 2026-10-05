@@ -29,7 +29,9 @@
       "evidence": [
         "retained M5 frozen workload/hardware measurement substrate",
         "validate_performance_measurements per mandatory profile",
-        "historical M5 qualification semantics remain immutable"
+        "historical M5 qualification semantics remain immutable",
+        "M5 target hardware identity validator reused per profile",
+        "X86_64/CPU/memory/free-storage/SSD hardware identity retained in B6 evidence"
       ]
     },
     "PIQB-B6-004": {
