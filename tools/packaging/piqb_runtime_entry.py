@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import tomllib
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
@@ -18,9 +19,9 @@ SRC_ROOT = APP_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
+import uvicorn  # noqa: E402
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
-import uvicorn  # noqa: E402
 
 from tpaa_api.unified import UnifiedPrincipal  # noqa: E402
 from tpaa_runtime import (  # noqa: E402
@@ -92,7 +93,7 @@ def _service_token() -> str:
     return token
 
 
-def _service_principal(token: str):
+def _service_principal(token: str) -> Callable[[Request], object]:
     def resolve(request: Request) -> object:
         supplied = request.headers.get("authorization", "")
         expected = f"Bearer {token}"

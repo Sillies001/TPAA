@@ -9,20 +9,27 @@ import hashlib
 import io
 import json
 import shutil
+import sys
 import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
 from typing import Any, cast
 
-from tools.manifest.build_artifacts import git_revision, project_version, sha256_file
-from tools.packaging.m5_runtime_bundle import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+from tools.manifest.build_artifacts import git_revision, project_version, sha256_file  # noqa: E402
+from tools.packaging.m5_runtime_bundle import (  # noqa: E402
     LINUX_PROFILES,
     WINDOWS_PROFILES,
     build_m5_runtime_bundle,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 RELEASE_CONTRACT = REPO_ROOT / "docs" / "baseline" / "PIQB-1.0" / "B6_RELEASE_CONTRACT.json"
 PIQB_RUNTIME_ENTRY = REPO_ROOT / "tools" / "packaging" / "piqb_runtime_entry.py"
 
@@ -134,10 +141,10 @@ def _install_piqb_runtime(stage: Path, profile: str) -> None:
             "#!/bin/sh\n"
             "SCRIPT=$0\n"
             "case \"$SCRIPT\" in /*) ;; *) SCRIPT=\"$PWD/$SCRIPT\" ;; esac\n"
-            "ROOT=\${SCRIPT%/*}\n"
+            "ROOT=${SCRIPT%/*}\n"
             "export PYTHONHOME=\"$ROOT/runtime\"\n"
             "export PYTHONPATH=\"$ROOT/app/src\"\n"
-            "export LD_LIBRARY_PATH=\"$ROOT/runtime/lib\${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n"
+            "export LD_LIBRARY_PATH=\"$ROOT/runtime/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n"
             f"if [ \"$#\" -eq 0 ]; then set -- {default_command}; fi\n"
             "exec \"$ROOT/runtime/bin/python\" "
             "\"$ROOT/app/tools/packaging/piqb_runtime_entry.py\" "
