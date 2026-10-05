@@ -70,3 +70,14 @@ def test_prcb_production_composition_has_no_fixture_or_inmemory_fallback() -> No
     assert "InMemory" not in source
     assert "tests/fixtures" not in source
     assert "m1_fixture_root" not in source
+
+
+def test_prcb_production_composes_durable_m4_without_claiming_p1_available() -> None:
+    root = Path(__file__).resolve().parents[2]
+    source = (root / "src" / "tpaa_runtime" / "production.py").read_text(
+        encoding="utf-8"
+    )
+    assert "DurableM4LongitudinalReleaseRepository" in source
+    assert "DurableM4DebriefRepository" in source
+    assert "m4_workspace=m4_workspace" in source
+    assert '"P1": False' in source

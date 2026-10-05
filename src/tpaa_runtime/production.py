@@ -13,6 +13,7 @@ from tpaa_api.unified import UnifiedPrincipalResolver, create_unified_service_ap
 from tpaa_application import (
     ApplicationService,
     GetStorageBaselineStatus,
+    M4WorkspaceService,
     M6WorkspaceService,
     M7AircraftContextAdapter,
     M7WorkspaceService,
@@ -20,6 +21,7 @@ from tpaa_application import (
     M9WorkspaceService,
     build_trusted_runtime_status_use_case,
 )
+from tpaa_longitudinal import M4LongitudinalPublicationService
 from tpaa_storage import (
     LocalObjectStore,
     PostgreSQLServiceUnitOfWork,
@@ -28,6 +30,10 @@ from tpaa_storage import (
 
 from .admission import ProductAdmissionResolver, ProductFeatureAvailability
 from .config import ProductionRuntimeConfig, RuntimeProfile
+from .durable_longitudinal import (
+    DurableM4DebriefRepository,
+    DurableM4LongitudinalReleaseRepository,
+)
 from .durable_repositories import (
     DurableM6P2RuntimeRepository,
     DurableM7P3RuntimeRepository,
@@ -78,6 +84,18 @@ def _compose(
     _validate_storage_status(storage_status)
 
     admission = ProductAdmissionResolver()
+    m4_workspace = M4WorkspaceService(
+        longitudinal=M4LongitudinalPublicationService(
+            DurableM4LongitudinalReleaseRepository(
+                read_uow_factory,
+                authority_root=config.authority_root,
+            )
+        ),
+        debrief=DurableM4DebriefRepository(
+            read_uow_factory,
+            write_uow_factory,
+        ),
+    )
     m6_workspace = M6WorkspaceService(
         DurableM6P2RuntimeRepository(
             read_uow_factory,
@@ -148,6 +166,7 @@ def _compose(
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=config.product_build_version
         ),
+        m4_workspace=m4_workspace,
         m6_workspace=m6_workspace,
         m7_workspace=m7_workspace,
         m8_workspace=m8_workspace,
