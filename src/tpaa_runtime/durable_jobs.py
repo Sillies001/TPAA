@@ -439,13 +439,6 @@ class DurableApplicationJobControl:
         actor: str,
     ) -> JobSubmission:
         del actor
-        metadata = payload.get("source_import")
-        session_id = (
-            metadata.get("session_id")
-            if isinstance(metadata, dict)
-            and isinstance(metadata.get("session_id"), str)
-            else None
-        )
         try:
             with self._write_uow_factory() as uow:
                 control = DurableJobControl(
@@ -455,7 +448,11 @@ class DurableApplicationJobControl:
                     job_key=idempotency_key,
                     job_type=command,
                     payload=payload,
-                    session_id=session_id,
+                    # The production source is worker-governed and may describe a
+                    # Session that is not durable yet. Keep this nullable until
+                    # prerequisites are persisted so fresh-DB submission cannot
+                    # violate the DB 1.9 training_session foreign key.
+                    session_id=None,
                 )
                 if submission.reused:
                     uow.commit()
