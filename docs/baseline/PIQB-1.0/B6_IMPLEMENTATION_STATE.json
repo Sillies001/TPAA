@@ -1,0 +1,65 @@
+{
+  "schema": "TPAA_PIQB_B6_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B6",
+  "source_b5_protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
+  "source_b5_qualification": "PIQB_B5_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "product_version": "1.0.0",
+  "task_state": {
+    "PIQB-B6-001": {
+      "state": "COMPLETE",
+      "evidence": [
+        "Run #628 protected-main 14/14 SUCCESS",
+        "TPAA_PIQB_B5_REVIEW_V1 PASS/GO",
+        "PIQB_B5_QUALIFIED",
+        "B5 issue #212 closed completed"
+      ]
+    },
+    "PIQB-B6-002": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    },
+    "PIQB-B6-003": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    },
+    "PIQB-B6-004": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    },
+    "PIQB-B6-005": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    },
+    "PIQB-B6-006": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    },
+    "PIQB-B6-007": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    },
+    "PIQB-B6-008": {
+      "state": "IN_PROGRESS",
+      "evidence": []
+    }
+  },
+  "candidate_complete": false,
+  "candidate_qualification_pending": false,
+  "b6_qualified": false,
+  "piqb_exit_qualified": false,
+  "entry_qualification": {
+    "protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
+    "run_number": 628,
+    "actions_run_id": 37252494254,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B5_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B5_QUALIFIED",
+    "failed_acceptance": []
+  },
+  "ci_cadence": "BATCH_CONSOLIDATED"
+}

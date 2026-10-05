@@ -16,7 +16,7 @@
       ]
     },
     "PIQB-B5-002": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "production shell composes M1/M3/M4/M6/M7/M8/M9 surfaces",
         "LocalBackendController scoped M3/M4/M6/M7/M8/M9/runtime transport",
@@ -24,7 +24,7 @@
       ]
     },
     "PIQB-B5-003": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "B5_DESKTOP_NAVIGATION_CONTRACT.json",
         "exact P01-P13 navigation",
@@ -33,7 +33,7 @@
       ]
     },
     "PIQB-B5-004": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "production Product shell reuses M1 metric/evidence drill-down",
         "production Product shell reuses M3 exact-release training workspace",
@@ -41,7 +41,7 @@
       ]
     },
     "PIQB-B5-005": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "M1 Master Timeline/Stage lane/release replay composed in production shell",
         "M4 original-as-known/retrospective longitudinal Debrief composed",
@@ -49,7 +49,7 @@
       ]
     },
     "PIQB-B5-006": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "governed exact-release 2D trajectory adapter",
         "Cesium-ready session-relative 3D packet adapter with non-UTC-fact guard",
@@ -59,7 +59,7 @@
       ]
     },
     "PIQB-B5-007": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "piqb_b5_desktop_replay_visualization.py real PySide6 qualification",
         "Windows/Linux qualification inserted into existing m0-cross-platform matrix",
@@ -68,7 +68,7 @@
       ]
     },
     "PIQB-B5-008": {
-      "state": "COMPLETE_CANDIDATE",
+      "state": "COMPLETE",
       "evidence": [
         "piqb_b5_review.py candidate/protected-main split",
         "TPAA_PIQB_B5_REVIEW_V1",
@@ -78,9 +78,9 @@
     }
   },
   "candidate_complete": true,
-  "candidate_qualification_pending": true,
-  "b5_qualified": false,
-  "b6_blocked": true,
+  "candidate_qualification_pending": false,
+  "b5_qualified": true,
+  "b6_blocked": false,
   "entry_qualification": {
     "protected_main_sha": "7130978fc14c2714a9135de285a2c74aeaa33804",
     "run_number": 624,
@@ -93,5 +93,18 @@
     "qualification": "PIQB_B4_QUALIFIED",
     "api_security_observability_qualified": true
   },
-  "ci_cadence": "BATCH_CONSOLIDATED"
+  "ci_cadence": "BATCH_CONSOLIDATED",
+  "protected_main_qualification": {
+    "protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
+    "run_number": 628,
+    "actions_run_id": 37252494254,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B5_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B5_QUALIFIED",
+    "desktop_replay_visualization_qualified": true,
+    "failed_acceptance": []
+  }
 }

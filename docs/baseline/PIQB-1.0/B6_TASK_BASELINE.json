@@ -1,0 +1,119 @@
+{
+  "schema": "TPAA_PIQB_B6_TASK_BASELINE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B6",
+  "source_b5_protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
+  "source_b5_qualification": "PIQB_B5_QUALIFIED",
+  "source_b5_run_number": 628,
+  "source_b5_actions_run_id": 37252494254,
+  "umbrella_issue": 206,
+  "batch_issue": 213,
+  "db_schema_version": "1.9.0",
+  "product_version": "1.0.0",
+  "task_count": 8,
+  "tasks": [
+    {
+      "task_id": "PIQB-B6-001",
+      "title": "B5 Qualification Closure and B6 Entry Freeze",
+      "workstream": "WS-GOV",
+      "dependencies": [],
+      "minimum_acceptance": "Run #628 protected-main 14/14 and PIQB_B5_QUALIFIED are frozen as B6 entry authority; B5 is COMPLETE and B6 is ACTIVE."
+    },
+    {
+      "task_id": "PIQB-B6-002",
+      "title": "Full Product Desktop Service Restart History and P1-P6 E2E Qualification",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B6-001"
+      ],
+      "minimum_acceptance": "Windows/Linux Desktop and Service release packages exercise clean install, startup, component smoke, deterministic workload, exact historical replay and admitted P1-P6 surfaces without mutable-latest fallback."
+    },
+    {
+      "task_id": "PIQB-B6-003",
+      "title": "Frozen Workload Performance and Resource Qualification",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B6-002"
+      ],
+      "minimum_acceptance": "Reuse the governed M5 workload/hardware measurement substrate while binding PIQB results to product 1.0.0, DB 1.9.0 and the exact candidate revision; historical M5 authority remains immutable."
+    },
+    {
+      "task_id": "PIQB-B6-004",
+      "title": "Install Restart Upgrade Rollback and Recovery Qualification",
+      "workstream": "WS-STORAGE",
+      "dependencies": [
+        "PIQB-B6-002"
+      ],
+      "minimum_acceptance": "Clean install/start/compute/restart plus rollback and SQLite/PostgreSQL recovery remain fail-closed and preserve exact Release history under DB 1.9.0 authority."
+    },
+    {
+      "task_id": "PIQB-B6-005",
+      "title": "Windows Linux Production Packaging SBOM and Build Manifest",
+      "workstream": "WS-DEV",
+      "dependencies": [
+        "PIQB-B6-001"
+      ],
+      "minimum_acceptance": "Four Windows/Linux Desktop/Service profiles produce deterministic PIQB release envelopes with product version, exact revision, DB 1.9.0, SPDX SBOM, file inventory and retained M5 runtime-substrate provenance."
+    },
+    {
+      "task_id": "PIQB-B6-006",
+      "title": "Cross-platform Full Product Logical Equivalence",
+      "workstream": "WS-TEST",
+      "dependencies": [
+        "PIQB-B6-002",
+        "PIQB-B6-003",
+        "PIQB-B6-004",
+        "PIQB-B6-005"
+      ],
+      "minimum_acceptance": "Windows/Linux logical products agree on product identity, release contract, admitted P1-P6 scope, workload identity and qualification semantics while platform archive bytes may differ."
+    },
+    {
+      "task_id": "PIQB-B6-007",
+      "title": "Release Candidate Evidence Manifest and Documentation Reconciliation",
+      "workstream": "WS-GOV",
+      "dependencies": [
+        "PIQB-B6-002",
+        "PIQB-B6-003",
+        "PIQB-B6-004",
+        "PIQB-B6-005",
+        "PIQB-B6-006"
+      ],
+      "minimum_acceptance": "One exact-head evidence manifest reconciles product metadata, DB 1.9.0, PIQB B0-B6 chain, package/SBOM identities and qualification evidence without claiming formal release on a PR candidate."
+    },
+    {
+      "task_id": "PIQB-B6-008",
+      "title": "PIQB Final Product Qualification and Release Review",
+      "workstream": "WS-GOV",
+      "dependencies": [
+        "PIQB-B6-001",
+        "PIQB-B6-002",
+        "PIQB-B6-003",
+        "PIQB-B6-004",
+        "PIQB-B6-005",
+        "PIQB-B6-006",
+        "PIQB-B6-007"
+      ],
+      "minimum_acceptance": "TPAA_PIQB_EXIT_REVIEW_V1 returns PASS/PENDING_PROTECTED_MAIN on the exact candidate after 14/14; protected main may return PASS/GO/PIQB_1_0_QUALIFIED only with failed_acceptance=[]."
+    }
+  ],
+  "scope": {
+    "no_m10_p7": true,
+    "no_canonical_mutation": true,
+    "no_shadow_schema": true,
+    "current_db_schema_exact": "1.9.0",
+    "historical_m5_db_1_6_semantics_immutable": true,
+    "p1_p6_semantics_immutable": true,
+    "exact_release_history_required": true,
+    "mutable_latest_fallback_forbidden": true,
+    "four_profiles": [
+      "WINDOWS_DESKTOP_X64",
+      "WINDOWS_SERVICE_X64",
+      "LINUX_DESKTOP_X64",
+      "LINUX_SERVICE_X64"
+    ],
+    "sbom_required": true,
+    "deterministic_build_manifest_required": true,
+    "exact_fourteen_job_topology_preserved": true,
+    "consolidated_ci_cadence": true
+  }
+}
