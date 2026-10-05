@@ -5,13 +5,20 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Protocol, Self, TypeVar
 
+from tpaa_application.m6_workspace import (
+    M6ApplicationError,
+    M6P2WorkspaceSnapshot,
+)
 from tpaa_application.m7_workspace import (
     M7ApplicationError,
     M7P3WorkspaceSnapshot,
 )
 from tpaa_application.m8_workspace import M8ApplicationError
 from tpaa_application.m9_workspace import M9ApplicationError
-from tpaa_application.p2_persistence import P2PersistenceRepository
+from tpaa_application.p2_persistence import (
+    P2PersistenceError,
+    P2PersistenceRepository,
+)
 from tpaa_application.p3_persistence import (
     CanonicalP3WorkspaceLayerResolver,
     DurableM7P3WorkspaceRepository,
@@ -69,6 +76,41 @@ class RuntimeCanonicalUnitOfWork(Protocol):
 
 
 RuntimeUnitOfWorkFactory = Callable[[], RuntimeCanonicalUnitOfWork]
+
+
+class DurableM6P2RuntimeRepository:
+    """M6 port backed by exact durable P2 and Core DB 1.9 authorities."""
+
+    def __init__(
+        self,
+        read_uow_factory: RuntimeUnitOfWorkFactory,
+        *,
+        object_store: LocalObjectStore,
+    ) -> None:
+        self._read_uow_factory = read_uow_factory
+        self._object_store = object_store
+
+    def exact(self, estimate_id: str) -> M6P2WorkspaceSnapshot:
+        try:
+            with self._read_uow_factory() as uow:
+                material = P2PersistenceRepository(
+                    uow.canonical_rows,
+                    object_store=self._object_store,
+                ).exact_workspace_material(estimate_id)
+                uow.commit()
+        except P2PersistenceError as exc:
+            raise M6ApplicationError(exc.code, exc.detail) from exc
+        return M6P2WorkspaceSnapshot(
+            p2_release_id=material.p2_release_id,
+            p2_release_status=material.p2_release_status,
+            p2_release_sealed=material.p2_release_sealed,
+            p2_published_at_utc=material.p2_published_at_utc,
+            input_bundle=material.input_bundle,
+            target_feature_set=material.target_feature_set,
+            attribution_run=material.attribution_run,
+            adjusted_estimate=material.adjusted_estimate,
+            model_artifact_json=material.model_artifact_json,
+        )
 
 
 class DurableM7P3RuntimeRepository:
