@@ -499,3 +499,11 @@ class M3PublicationService:
                 "provenance_hash": release.bindings.provenance_hash,
             },
         }
+
+
+    def workspace(self, release_id: str) -> dict[str, object]:
+        """Project the four-training M3 workspace from one exact historical Release."""
+
+        from .m3_workspace import project_m3_workspace
+
+        return project_m3_workspace(self.historical_release(release_id).release)

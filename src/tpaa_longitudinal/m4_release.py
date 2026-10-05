@@ -6,6 +6,7 @@ import hashlib
 import json
 import threading
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 from uuid import UUID, uuid5
 
 from .m4_sample import M4LongitudinalError, M4LongitudinalScope
@@ -331,6 +332,29 @@ def compare_m4_longitudinal_replay(
     )
 
 
+@runtime_checkable
+class M4LongitudinalReleaseRepository(Protocol):
+    """Engine-neutral exact longitudinal Release repository port."""
+
+    def publish(
+        self,
+        release: M4LongitudinalReleaseSnapshot,
+        *,
+        idempotency_key: str,
+        expected_version_token: int,
+        published_at_utc: str,
+    ) -> M4PublishResult: ...
+
+    def get_release(self, release_id: str) -> M4PublishedLongitudinalRelease: ...
+
+    def current(
+        self,
+        longitudinal_scope_key: str,
+    ) -> M4PublishedLongitudinalRelease | None: ...
+
+    def version_token(self, longitudinal_scope_key: str) -> int: ...
+
+
 class InMemoryM4LongitudinalReleaseRepository:
     """Executable immutable/CAS reference semantics for M4 Batch 2."""
 
@@ -476,7 +500,7 @@ class M4LongitudinalPublicationService:
 
     def __init__(
         self,
-        repository: InMemoryM4LongitudinalReleaseRepository,
+        repository: M4LongitudinalReleaseRepository,
     ) -> None:
         self._repository = repository
 

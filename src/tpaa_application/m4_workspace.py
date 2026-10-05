@@ -7,6 +7,7 @@ import json
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
+from typing import Protocol, runtime_checkable
 from uuid import UUID, uuid5
 
 from tpaa_longitudinal import (
@@ -290,6 +291,29 @@ def _points_dto(
         point.projection()
         for point in published.release.trend_series.points
     ]
+
+
+@runtime_checkable
+class M4DebriefRepository(Protocol):
+    """Engine-neutral exact-release Debrief repository port."""
+
+    def register_timeline(
+        self,
+        release_id: str,
+        items: Sequence[M4DebriefTimelineItem],
+    ) -> None: ...
+
+    def timeline(self, release_id: str) -> tuple[M4DebriefTimelineItem, ...]: ...
+
+    def apply_annotation(
+        self,
+        command: M4AnnotationCommand,
+    ) -> M4DebriefAnnotation: ...
+
+    def annotations_for(
+        self,
+        query: M4DebriefQuery,
+    ) -> tuple[M4DebriefAnnotation, ...]: ...
 
 
 class InMemoryM4DebriefRepository:
@@ -591,6 +615,12 @@ def _validate_debrief_query(query: M4DebriefQuery) -> None:
         _uuid(annotation_id, field="annotation_ids")
 
 
+def validate_m4_annotation_command(command: M4AnnotationCommand) -> None:
+    """Expose the single governed annotation validator to durable adapters."""
+
+    _validate_annotation_command(command)
+
+
 class M4WorkspaceService:
     """Application-only M4 projections; transport and GUI consume these DTOs."""
 
@@ -598,7 +628,7 @@ class M4WorkspaceService:
         self,
         *,
         longitudinal: M4LongitudinalPublicationService,
-        debrief: InMemoryM4DebriefRepository,
+        debrief: M4DebriefRepository,
     ) -> None:
         self._longitudinal = longitudinal
         self._debrief = debrief

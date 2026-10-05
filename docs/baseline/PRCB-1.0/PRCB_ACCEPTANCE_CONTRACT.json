@@ -1,0 +1,77 @@
+{
+  "schema": "TPAA_PRCB_ACCEPTANCE_CONTRACT_V1",
+  "baseline": "PRCB-1.0",
+  "target_product_version": "1.0.1",
+  "blockers": [
+    {
+      "id": "PRCB-BLK-001",
+      "title": "Production composition uses InMemory product repositories",
+      "must_prove": [
+        "Desktop and Service production composition construct durable DB-backed repositories",
+        "process restart preserves exact product reads/mutations",
+        "no production composition import or construction of InMemory product repositories"
+      ]
+    },
+    {
+      "id": "PRCB-BLK-002",
+      "title": "Formal Job API is M0 skeleton and worker does not execute domain work",
+      "must_prove": [
+        "Application Job API is backed by DurableJobControl",
+        "governed worker commands execute domain pipeline work",
+        "durable state reaches QUEUED/RUNNING/SUCCEEDED or fail-closed terminal states"
+      ]
+    },
+    {
+      "id": "PRCB-BLK-003",
+      "title": "Production runtime requires synthetic qualification fixtures",
+      "must_prove": [
+        "installed runtime starts without tests/fixtures",
+        "production adapters exist for governed source families or explicitly report unsupported adapters",
+        "qualification source data is production-format and outside test fixture package"
+      ]
+    },
+    {
+      "id": "PRCB-BLK-004",
+      "title": "Full-product E2E aggregates component evidence rather than one installed production chain",
+      "must_prove": [
+        "one installed-package scenario crosses import, worker, canonical, world, metric, release, DB/object persistence, P1-P6 API and restart/replay",
+        "SQLite Desktop and PostgreSQL Service both execute the chain",
+        "Windows/Linux logical equivalence is checked"
+      ]
+    }
+  ],
+  "high_priority": [
+    "Runtime feature availability derives from configured and live dependencies rather than admitted=true defaults.",
+    "Service identity provider is configurable and least-privilege; one all-powerful bearer token is not the production identity model.",
+    "Security audit sink is persistent in formal Desktop and Service composition.",
+    "Backup/restore is production-qualified for Desktop SQLite/object store and Service PostgreSQL/object store.",
+    "Desktop exact-ID governance is preserved while discovery removes manual UUID/JSON operator workflows.",
+    "Final qualification is represented by detached attestation bound to immutable package SHA256 values.",
+    "Runtime qualification reports final product qualification, not only B3 data/compute qualification."
+  ],
+  "installed_package_e2e_order": [
+    "INSTALL",
+    "START",
+    "AUTHENTICATE",
+    "IMPORT_PRODUCTION_SOURCE",
+    "SUBMIT_DURABLE_JOB",
+    "WORKER_COMPUTE",
+    "CANONICAL",
+    "WORLD",
+    "METRIC",
+    "P1_RELEASE",
+    "P2",
+    "P3",
+    "P4_P5",
+    "P6",
+    "PERSIST",
+    "API_EXACT_READ",
+    "DESKTOP_DISCOVERY",
+    "STOP",
+    "RESTART",
+    "HISTORICAL_REPLAY",
+    "BACKUP",
+    "RESTORE",
+    "AUDIT_VERIFY"
+  ]
+}

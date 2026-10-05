@@ -4,13 +4,23 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+from uuid import UUID
 
 from tpaa_assessment import (
+    P1ObservationInput,
     P2AdjustedCapabilityEstimate,
+    P2ArtifactBinding,
     P2AttributionRunProduct,
+    P2AttributionSpec,
+    P2CohortSnapshot,
     P2ExecutionProfile,
+    P2FactorFeatureSet,
+    P2InputBundle,
+    P2ReferenceCondition,
+    build_p2_input_bundle,
 )
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 from tpaa_storage.object_store import LocalObjectStore
@@ -67,6 +77,22 @@ def _text_array(value: object, field: str) -> tuple[str, ...]:
         result.append(item)
     return tuple(result)
 
+
+def _id_array(value: object, field: str) -> tuple[str, ...]:
+    decoded: object = value
+    if isinstance(value, str):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise P2PersistenceError("P2_DB_ARRAY_INVALID", field) from exc
+    if not isinstance(decoded, (list, tuple)):
+        raise P2PersistenceError("P2_DB_ARRAY_INVALID", field)
+    result: list[str] = []
+    for item in decoded:
+        if not isinstance(item, (str, UUID)):
+            raise P2PersistenceError("P2_DB_ARRAY_INVALID", field)
+        result.append(str(item))
+    return tuple(result)
 
 def _time_text(value: object) -> str:
     if isinstance(value, str):
@@ -157,6 +183,38 @@ def _estimate_logical_hash(
             "model_artifact_hash": model_artifact_hash,
         }
     )
+
+
+_P2_COHORT_WORKSPACE_SCHEMA = "TPAA_P2_COHORT_WORKSPACE_V1"
+
+
+@dataclass(frozen=True, slots=True)
+class P2DurableWorkspaceMaterial:
+    """Exact DB/object material required to rebuild one M6 read workspace."""
+
+    p2_release_id: str
+    p2_release_status: str
+    p2_release_sealed: bool
+    p2_published_at_utc: str
+    input_bundle: P2InputBundle
+    target_feature_set: P2FactorFeatureSet
+    attribution_run: P2AttributionRunProduct
+    adjusted_estimate: P2AdjustedCapabilityEstimate
+    model_artifact_json: str | None
+
+
+def _required_int(value: object, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise P2PersistenceError("P2_DB_INTEGER_INVALID", field)
+    return value
+
+
+def _bool_value(value: object, field: str) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in {0, 1}:
+        return bool(value)
+    raise P2PersistenceError("P2_DB_BOOLEAN_INVALID", field)
 
 
 class P2PersistenceRepository:
@@ -554,3 +612,668 @@ class P2PersistenceRepository:
         if value is None:
             raise P2PersistenceError("P2_ADJUSTED_ESTIMATE_NOT_FOUND", estimate_id)
         return value
+
+    def _artifact_binding(
+        self,
+        context_artifact_id: str,
+    ) -> P2ArtifactBinding:
+        row = self._rows.one(
+            "registry.context_artifact",
+            where={"context_artifact_id": context_artifact_id},
+            columns=(
+                "context_artifact_id",
+                "artifact_kind",
+                "logical_key",
+                "artifact_version",
+                "object_ref_id",
+                "artifact_sha256",
+                "schema_version",
+                "status",
+            ),
+        )
+        if row is None:
+            raise P2PersistenceError(
+                "P2_CONTEXT_ARTIFACT_NOT_FOUND",
+                context_artifact_id,
+            )
+        object_ref_id = str(row["object_ref_id"])
+        object_row = self._rows.one(
+            "registry.object_reference",
+            where={"object_ref_id": object_ref_id},
+            columns=(
+                "object_ref_id",
+                "artifact_sha256",
+                "sealed",
+                "gc_state",
+                "deleted_at",
+            ),
+        )
+        if object_row is None:
+            raise P2PersistenceError(
+                "P2_CONTEXT_OBJECT_NOT_FOUND",
+                object_ref_id,
+            )
+        artifact_sha256 = str(row["artifact_sha256"])
+        if (
+            str(object_row["artifact_sha256"]) != artifact_sha256
+            or not _bool_value(object_row["sealed"], "object_reference.sealed")
+            or str(object_row["gc_state"]) != "ACTIVE"
+            or object_row["deleted_at"] is not None
+        ):
+            raise P2PersistenceError(
+                "P2_CONTEXT_OBJECT_INVALID",
+                object_ref_id,
+            )
+        return P2ArtifactBinding(
+            context_artifact_id=str(row["context_artifact_id"]),
+            object_ref_id=object_ref_id,
+            artifact_kind=str(row["artifact_kind"]),
+            logical_key=str(row["logical_key"]),
+            artifact_version=str(row["artifact_version"]),
+            schema_version=str(row["schema_version"]),
+            artifact_sha256=artifact_sha256,
+            status=str(row["status"]),
+            sealed=True,
+        )
+
+    def _artifact_binding_by_logical_key(
+        self,
+        logical_key: str,
+        artifact_version: str,
+    ) -> P2ArtifactBinding:
+        rows = self._rows.many(
+            "registry.context_artifact",
+            where={
+                "logical_key": logical_key,
+                "artifact_version": artifact_version,
+            },
+            columns=("context_artifact_id",),
+            order_by=("context_artifact_id",),
+        )
+        if len(rows) != 1:
+            raise P2PersistenceError(
+                "P2_CONTEXT_ARTIFACT_CARDINALITY",
+                f"{logical_key}:{artifact_version}:{len(rows)}",
+            )
+        return self._artifact_binding(str(rows[0]["context_artifact_id"]))
+
+    def _p1_observation(self, observation_id: str) -> P1ObservationInput:
+        row = self._rows.one(
+            "metric.capability_observation",
+            where={"observation_id": observation_id},
+            columns=(
+                "observation_id",
+                "release_id",
+                "episode_id",
+                "subject_entity_id",
+                "aircraft_id",
+                "aircraft_model_id",
+                "aircraft_configuration_snapshot_id",
+                "context_id",
+                "capability_type",
+                "observed_metric_instance_id",
+                "observed_value_numeric",
+                "unit",
+                "evidence_set_id",
+                "coverage",
+                "confidence",
+                "eligibility_status",
+                "comparison_key_hash",
+                "created_at",
+            ),
+        )
+        if row is None:
+            raise P2PersistenceError(
+                "P2_SOURCE_OBSERVATION_NOT_FOUND",
+                observation_id,
+            )
+        metric_instance_id = str(row["observed_metric_instance_id"])
+        instance = self._rows.one(
+            "metric.metric_instance",
+            where={"metric_instance_id": metric_instance_id},
+            columns=("metric_definition_id",),
+        )
+        if instance is None:
+            raise P2PersistenceError(
+                "P2_SOURCE_METRIC_INSTANCE_NOT_FOUND",
+                metric_instance_id,
+            )
+        definition = self._rows.one(
+            "metric.metric_definition",
+            where={"metric_definition_id": str(instance["metric_definition_id"])},
+            columns=("metric_semantic_id", "metric_semantic_version"),
+        )
+        if definition is None:
+            raise P2PersistenceError(
+                "P2_SOURCE_METRIC_DEFINITION_NOT_FOUND",
+                metric_instance_id,
+            )
+        release_id = str(row["release_id"])
+        release = self._rows.one(
+            "registry.analysis_release",
+            where={"release_id": release_id},
+            columns=("status", "manifest_hash", "published_at"),
+        )
+        if release is None or release["published_at"] is None:
+            raise P2PersistenceError(
+                "P2_SOURCE_RELEASE_NOT_FOUND",
+                release_id,
+            )
+        manifest_hash = str(release["manifest_hash"])
+        observed_value = _required_float(
+            row["observed_value_numeric"],
+            "capability_observation.observed_value_numeric",
+        )
+        return P1ObservationInput(
+            observation_id=str(row["observation_id"]),
+            release_id=release_id,
+            release_status=str(release["status"]),
+            release_sealed=(
+                str(release["status"]) == "PUBLISHED"
+                and len(manifest_hash) == 64
+                and all(ch in "0123456789abcdef" for ch in manifest_hash)
+            ),
+            episode_id=str(row["episode_id"]),
+            subject_entity_id=str(row["subject_entity_id"]),
+            aircraft_id=str(row["aircraft_id"]),
+            aircraft_model_id=str(row["aircraft_model_id"]),
+            aircraft_configuration_snapshot_id=_optional_text(
+                row["aircraft_configuration_snapshot_id"]
+            ),
+            context_id=str(row["context_id"]),
+            capability_type=str(row["capability_type"]),
+            metric_semantic_id=str(definition["metric_semantic_id"]),
+            metric_semantic_version=_required_int(
+                definition["metric_semantic_version"],
+                "metric_definition.metric_semantic_version",
+            ),
+            comparison_key_hash=str(row["comparison_key_hash"]),
+            evidence_set_id=str(row["evidence_set_id"]),
+            observed_value=observed_value,
+            unit=str(row["unit"]),
+            coverage=_required_float(row["coverage"], "capability_observation.coverage"),
+            confidence=_required_float(
+                row["confidence"],
+                "capability_observation.confidence",
+            ),
+            eligibility_status=str(row["eligibility_status"]),
+            knowledge_time_utc=_time_text(row["created_at"]),
+        )
+
+    def register_workspace_inputs(
+        self,
+        bundle: P2InputBundle,
+        target_feature_set: P2FactorFeatureSet,
+    ) -> None:
+        """Persist P2 workspace membership using existing DB 1.9 authorities."""
+
+        if self._p1_observation(bundle.target.observation_id) != bundle.target:
+            raise P2PersistenceError(
+                "P2_WORKSPACE_TARGET_MISMATCH",
+                bundle.target.observation_id,
+            )
+        for binding in (
+            bundle.feature_spec,
+            bundle.reference_condition.binding,
+            bundle.attribution_spec.binding,
+        ):
+            if self._artifact_binding(binding.context_artifact_id) != binding:
+                raise P2PersistenceError(
+                    "P2_WORKSPACE_ARTIFACT_MISMATCH",
+                    binding.context_artifact_id,
+                )
+        if target_feature_set.source_observation_id != bundle.target.observation_id:
+            raise P2PersistenceError(
+                "P2_WORKSPACE_FEATURE_SOURCE_MISMATCH",
+                target_feature_set.factor_feature_set_id,
+            )
+        feature_row = self._rows.one(
+            "assessment.factor_feature_set",
+            where={"factor_feature_set_id": target_feature_set.factor_feature_set_id},
+            columns=(
+                "factor_feature_set_id",
+                "feature_spec_id",
+                "feature_spec_version",
+                "source_observation_id",
+                "reference_condition_id",
+                "feature_values",
+                "missing_mask",
+                "world_refs",
+                "coverage",
+                "confidence",
+                "input_hash",
+                "created_at",
+            ),
+        )
+        if feature_row is None:
+            self._rows.insert(
+                "assessment.factor_feature_set",
+                target_feature_set.as_record(),
+                field_kinds={
+                    "feature_values": "json",
+                    "missing_mask": "json",
+                    "world_refs": "uuid_array",
+                },
+            )
+        elif self.exact_factor_feature_set(
+            target_feature_set.factor_feature_set_id
+        ) != target_feature_set:
+            raise P2PersistenceError(
+                "P2_WORKSPACE_FEATURE_IMMUTABLE_CONFLICT",
+                target_feature_set.factor_feature_set_id,
+            )
+
+        manifest = {
+            "schema": _P2_COHORT_WORKSPACE_SCHEMA,
+            "cohort_spec_id": bundle.cohort.cohort_spec_id,
+            "cohort_spec_version": bundle.cohort.cohort_spec_version,
+            "comparability_dimensions": [
+                {"name": name, "value": value}
+                for name, value in bundle.cohort.comparability_dimensions
+            ],
+            "knowledge_cutoff_utc": bundle.cohort.knowledge_cutoff_utc,
+            "raw_record_count": bundle.cohort.raw_record_count,
+            "observation_count": bundle.cohort.observation_count,
+            "independent_subject_count": bundle.cohort.independent_subject_count,
+            "effective_evidence_count": bundle.cohort.effective_evidence_count,
+            "observation_ids": list(bundle.cohort.observation_ids),
+            "episode_ids": list(bundle.cohort.episode_ids),
+            "subject_ids": list(bundle.cohort.subject_ids),
+            "workspace": {
+                "target_observation_id": bundle.target.observation_id,
+                "target_feature_set_id": target_feature_set.factor_feature_set_id,
+                "feature_spec_context_artifact_id": bundle.feature_spec.context_artifact_id,
+                "reference_condition_id": (
+                    bundle.reference_condition.reference_condition_id
+                ),
+                "attribution_spec_context_artifact_id": (
+                    bundle.attribution_spec.binding.context_artifact_id
+                ),
+                "as_of_utc": bundle.as_of_utc,
+                "input_hash": bundle.input_hash,
+            },
+        }
+        existing = self._rows.one(
+            "registry.dataset_snapshot",
+            where={"dataset_snapshot_id": bundle.cohort.dataset_snapshot_id},
+            columns=(
+                "snapshot_type",
+                "query_or_manifest",
+                "input_refs",
+                "data_hash",
+                "schema_version",
+                "frozen",
+            ),
+        )
+        if existing is None:
+            self._rows.insert(
+                "registry.dataset_snapshot",
+                {
+                    "dataset_snapshot_id": bundle.cohort.dataset_snapshot_id,
+                    "snapshot_type": bundle.cohort.snapshot_type,
+                    "query_or_manifest": manifest,
+                    "input_refs": bundle.cohort.observation_ids,
+                    "data_hash": bundle.cohort.data_hash,
+                    "schema_version": bundle.cohort.schema_version,
+                    "created_at": bundle.cohort.knowledge_cutoff_utc,
+                    "frozen": bundle.cohort.frozen,
+                },
+                field_kinds={
+                    "query_or_manifest": "json",
+                    "input_refs": "uuid_array",
+                },
+            )
+        else:
+            if (
+                str(existing["snapshot_type"]) != bundle.cohort.snapshot_type
+                or _json_object(
+                    existing["query_or_manifest"],
+                    "dataset_snapshot.query_or_manifest",
+                )
+                != manifest
+                or _text_array(
+                    existing["input_refs"],
+                    "dataset_snapshot.input_refs",
+                )
+                != bundle.cohort.observation_ids
+                or str(existing["data_hash"]) != bundle.cohort.data_hash
+                or str(existing["schema_version"]) != bundle.cohort.schema_version
+                or _bool_value(existing["frozen"], "dataset_snapshot.frozen")
+                != bundle.cohort.frozen
+            ):
+                raise P2PersistenceError(
+                    "P2_WORKSPACE_COHORT_IMMUTABLE_CONFLICT",
+                    bundle.cohort.dataset_snapshot_id,
+                )
+
+    def exact_factor_feature_set(
+        self,
+        factor_feature_set_id: str,
+    ) -> P2FactorFeatureSet:
+        row = self._rows.one(
+            "assessment.factor_feature_set",
+            where={"factor_feature_set_id": factor_feature_set_id},
+            columns=(
+                "factor_feature_set_id",
+                "feature_spec_id",
+                "feature_spec_version",
+                "source_observation_id",
+                "reference_condition_id",
+                "feature_values",
+                "missing_mask",
+                "world_refs",
+                "coverage",
+                "confidence",
+                "input_hash",
+                "created_at",
+            ),
+        )
+        if row is None:
+            raise P2PersistenceError(
+                "P2_FACTOR_FEATURE_SET_NOT_FOUND",
+                factor_feature_set_id,
+            )
+        features = _json_object(
+            row["feature_values"],
+            "factor_feature_set.feature_values",
+        )
+        missing = _json_object(
+            row["missing_mask"],
+            "factor_feature_set.missing_mask",
+        )
+        if tuple(features) != tuple(missing):
+            raise P2PersistenceError(
+                "P2_FACTOR_FEATURE_SHAPE_MISMATCH",
+                factor_feature_set_id,
+            )
+        feature_values: list[tuple[str, float | None]] = []
+        missing_mask: list[tuple[str, bool]] = []
+        for name, raw in features.items():
+            feature_values.append((name, _optional_float(raw)))
+            flag = missing[name]
+            if not isinstance(flag, bool):
+                raise P2PersistenceError(
+                    "P2_FACTOR_FEATURE_MASK_INVALID",
+                    name,
+                )
+            missing_mask.append((name, flag))
+        return P2FactorFeatureSet(
+            factor_feature_set_id=str(row["factor_feature_set_id"]),
+            feature_spec_id=str(row["feature_spec_id"]),
+            feature_spec_version=str(row["feature_spec_version"]),
+            source_observation_id=str(row["source_observation_id"]),
+            reference_condition_id=_optional_text(row["reference_condition_id"]),
+            feature_values=tuple(feature_values),
+            missing_mask=tuple(missing_mask),
+            world_refs=_id_array(row["world_refs"], "factor_feature_set.world_refs"),
+            coverage=_required_float(row["coverage"], "factor_feature_set.coverage"),
+            confidence=_required_float(
+                row["confidence"],
+                "factor_feature_set.confidence",
+            ),
+            input_hash=str(row["input_hash"]),
+            created_at=_time_text(row["created_at"]),
+        )
+
+    def _cohort_and_workspace(
+        self,
+        dataset_snapshot_id: str,
+    ) -> tuple[P2CohortSnapshot, dict[str, object]]:
+        row = self._rows.one(
+            "registry.dataset_snapshot",
+            where={"dataset_snapshot_id": dataset_snapshot_id},
+            columns=(
+                "dataset_snapshot_id",
+                "snapshot_type",
+                "query_or_manifest",
+                "input_refs",
+                "data_hash",
+                "schema_version",
+                "frozen",
+            ),
+        )
+        if row is None:
+            raise P2PersistenceError(
+                "P2_COHORT_SNAPSHOT_NOT_FOUND",
+                dataset_snapshot_id,
+            )
+        manifest = _json_object(
+            row["query_or_manifest"],
+            "dataset_snapshot.query_or_manifest",
+        )
+        if manifest.get("schema") != _P2_COHORT_WORKSPACE_SCHEMA:
+            raise P2PersistenceError(
+                "P2_COHORT_WORKSPACE_MANIFEST_MISSING",
+                dataset_snapshot_id,
+            )
+        raw_dimensions = manifest.get("comparability_dimensions")
+        if not isinstance(raw_dimensions, list):
+            raise P2PersistenceError(
+                "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                "comparability_dimensions",
+            )
+        dimensions: list[tuple[str, str | int]] = []
+        for raw in raw_dimensions:
+            if not isinstance(raw, dict):
+                raise P2PersistenceError(
+                    "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                    "comparability_dimensions",
+                )
+            name = raw.get("name")
+            value = raw.get("value")
+            if (
+                not isinstance(name, str)
+                or not isinstance(value, (str, int))
+                or isinstance(value, bool)
+            ):
+                raise P2PersistenceError(
+                    "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                    "comparability_dimensions",
+                )
+            dimensions.append((name, value))
+        def strings(field: str) -> tuple[str, ...]:
+            raw = manifest.get(field)
+            if not isinstance(raw, list) or not all(isinstance(item, str) for item in raw):
+                raise P2PersistenceError(
+                    "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                    field,
+                )
+            return tuple(raw)
+        cohort = P2CohortSnapshot(
+            dataset_snapshot_id=str(row["dataset_snapshot_id"]),
+            snapshot_type=str(row["snapshot_type"]),
+            data_hash=str(row["data_hash"]),
+            schema_version=str(row["schema_version"]),
+            frozen=_bool_value(row["frozen"], "dataset_snapshot.frozen"),
+            cohort_spec_id=str(manifest["cohort_spec_id"]),
+            cohort_spec_version=str(manifest["cohort_spec_version"]),
+            comparability_dimensions=tuple(dimensions),
+            knowledge_cutoff_utc=str(manifest["knowledge_cutoff_utc"]),
+            raw_record_count=_required_int(
+                manifest["raw_record_count"],
+                "cohort.raw_record_count",
+            ),
+            observation_count=_required_int(
+                manifest["observation_count"],
+                "cohort.observation_count",
+            ),
+            independent_subject_count=_required_int(
+                manifest["independent_subject_count"],
+                "cohort.independent_subject_count",
+            ),
+            effective_evidence_count=_required_float(
+                manifest["effective_evidence_count"],
+                "cohort.effective_evidence_count",
+            ),
+            observation_ids=strings("observation_ids"),
+            episode_ids=strings("episode_ids"),
+            subject_ids=strings("subject_ids"),
+        )
+        if _id_array(row["input_refs"], "dataset_snapshot.input_refs") != cohort.observation_ids:
+            raise P2PersistenceError(
+                "P2_COHORT_INPUT_REFS_MISMATCH",
+                dataset_snapshot_id,
+            )
+        workspace = manifest.get("workspace")
+        if not isinstance(workspace, dict):
+            raise P2PersistenceError(
+                "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                "workspace",
+            )
+        return cohort, {str(key): value for key, value in workspace.items()}
+
+    def exact_workspace_material(
+        self,
+        estimate_id: str,
+    ) -> P2DurableWorkspaceMaterial:
+        estimate = self.exact_adjusted_estimate(estimate_id)
+        run = self.exact_attribution_run(estimate.attribution_run_id)
+        cohort, workspace = self._cohort_and_workspace(
+            run.training_dataset_snapshot_id
+        )
+        target_id = workspace.get("target_observation_id")
+        feature_set_id = workspace.get("target_feature_set_id")
+        feature_artifact_id = workspace.get("feature_spec_context_artifact_id")
+        reference_id = workspace.get("reference_condition_id")
+        attribution_artifact_id = workspace.get(
+            "attribution_spec_context_artifact_id"
+        )
+        as_of_utc = workspace.get("as_of_utc")
+        input_hash = workspace.get("input_hash")
+        if not all(
+            isinstance(item, str) and item
+            for item in (
+                target_id,
+                feature_set_id,
+                feature_artifact_id,
+                reference_id,
+                attribution_artifact_id,
+                as_of_utc,
+                input_hash,
+            )
+        ):
+            raise P2PersistenceError(
+                "P2_COHORT_WORKSPACE_MANIFEST_INVALID",
+                estimate_id,
+            )
+        assert isinstance(target_id, str)
+        assert isinstance(feature_set_id, str)
+        assert isinstance(feature_artifact_id, str)
+        assert isinstance(reference_id, str)
+        assert isinstance(attribution_artifact_id, str)
+        assert isinstance(as_of_utc, str)
+        assert isinstance(input_hash, str)
+
+        target = self._p1_observation(target_id)
+        if (
+            target.observation_id != estimate.source_observation_id
+            or target.release_id != estimate.source_release_id
+        ):
+            raise P2PersistenceError(
+                "P2_WORKSPACE_TARGET_MISMATCH",
+                estimate_id,
+            )
+        feature_spec = self._artifact_binding(feature_artifact_id)
+        reference_binding = self._artifact_binding(reference_id)
+        attribution_binding = self._artifact_binding(attribution_artifact_id)
+        diagnostics = run.diagnostics()
+        uncertainty_method = diagnostics.get("uncertainty_method")
+        uncertainty_level = diagnostics.get("uncertainty_level")
+        if not isinstance(uncertainty_method, str) or not isinstance(
+            uncertainty_level,
+            str,
+        ):
+            raise P2PersistenceError(
+                "P2_RUN_DIAGNOSTICS_INCOMPLETE",
+                run.attribution_run_id,
+            )
+        attribution_spec = P2AttributionSpec(
+            attribution_spec_id=run.attribution_spec_id,
+            attribution_spec_version=run.attribution_spec_version,
+            model_plugin=run.model_plugin,
+            model_plugin_version=run.model_plugin_version,
+            uncertainty_method=uncertainty_method,
+            uncertainty_level=uncertainty_level,
+            binding=attribution_binding,
+        )
+        bundle = build_p2_input_bundle(
+            target=target,
+            feature_spec=feature_spec,
+            reference_condition=P2ReferenceCondition(
+                reference_condition_id=reference_id,
+                binding=reference_binding,
+            ),
+            cohort=cohort,
+            attribution_spec=attribution_spec,
+            as_of_utc=as_of_utc,
+        )
+        if bundle.input_hash != input_hash:
+            raise P2PersistenceError(
+                "P2_WORKSPACE_INPUT_HASH_MISMATCH",
+                estimate_id,
+            )
+        feature = self.exact_factor_feature_set(feature_set_id)
+        if (
+            feature.feature_spec_id != feature_spec.logical_key
+            or feature.feature_spec_version != feature_spec.artifact_version
+            or feature.reference_condition_id != reference_id
+        ):
+            raise P2PersistenceError(
+                "P2_WORKSPACE_FEATURE_BINDING_MISMATCH",
+                estimate_id,
+            )
+        release = self._rows.one(
+            "registry.analysis_release",
+            where={"release_id": estimate.p2_release_id},
+            columns=("status", "manifest_hash", "published_at"),
+        )
+        if release is None or release["published_at"] is None:
+            raise P2PersistenceError(
+                "P2_RELEASE_NOT_FOUND",
+                estimate.p2_release_id,
+            )
+        release_manifest = str(release["manifest_hash"])
+        release_sealed = (
+            str(release["status"]) == "PUBLISHED"
+            and len(release_manifest) == 64
+            and all(ch in "0123456789abcdef" for ch in release_manifest)
+        )
+
+        model_artifact_json: str | None = None
+        if run.model_artifact_hash is not None:
+            if run.model_artifact_uri is None or self._object_store is None:
+                raise P2PersistenceError(
+                    "P2_MODEL_ARTIFACT_REQUIRED",
+                    run.attribution_run_id,
+                )
+            data = self._object_store.read_bytes(run.model_artifact_uri)
+            if hashlib.sha256(data).hexdigest() != run.model_artifact_hash:
+                raise P2PersistenceError(
+                    "P2_MODEL_ARTIFACT_HASH_MISMATCH",
+                    run.attribution_run_id,
+                )
+            try:
+                model_artifact_json = data.decode("ascii")
+                decoded: object = json.loads(model_artifact_json)
+            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise P2PersistenceError(
+                    "P2_MODEL_ARTIFACT_INVALID",
+                    run.attribution_run_id,
+                ) from exc
+            if not isinstance(decoded, dict) or _canonical_json(decoded) != model_artifact_json:
+                raise P2PersistenceError(
+                    "P2_MODEL_ARTIFACT_INVALID",
+                    run.attribution_run_id,
+                )
+
+        return P2DurableWorkspaceMaterial(
+            p2_release_id=estimate.p2_release_id,
+            p2_release_status=str(release["status"]),
+            p2_release_sealed=release_sealed,
+            p2_published_at_utc=_time_text(release["published_at"]),
+            input_bundle=bundle,
+            target_feature_set=feature,
+            attribution_run=run,
+            adjusted_estimate=estimate,
+            model_artifact_json=model_artifact_json,
+        )

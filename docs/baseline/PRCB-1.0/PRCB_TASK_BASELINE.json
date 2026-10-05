@@ -1,0 +1,82 @@
+{
+  "schema": "TPAA_PRCB_TASK_BASELINE_V1",
+  "baseline": "PRCB-1.0",
+  "source_piqb_protected_main_sha": "0ed48a85944699e0bbac1fe76b84c88a319121c1",
+  "source_piqb_qualification": "PIQB_1_0_QUALIFIED",
+  "historical_product_version": "1.0.0",
+  "target_product_version": "1.0.1",
+  "canonical_baseline": "CB-1.4.0",
+  "db_schema_version": "1.9.0",
+  "umbrella_issue": 228,
+  "batches": [
+    {
+      "batch": "C0",
+      "issue": 229,
+      "title": "Governance freeze and production-closure acceptance contract",
+      "dependencies": [],
+      "exit": "Scope, defects, acceptance contract and target 1.0.1 are frozen without rewriting PIQB history."
+    },
+    {
+      "batch": "C1",
+      "issue": 230,
+      "title": "Production composition and durable repository wiring",
+      "dependencies": [
+        "C0"
+      ],
+      "exit": "Formal Desktop/Service composition uses DB-backed product repositories, persistent audit, explicit persistence configuration and dependency-aware readiness; no InMemory product authority in production composition."
+    },
+    {
+      "batch": "C2",
+      "issue": 231,
+      "title": "Production ingest, durable jobs and governed worker execution",
+      "dependencies": [
+        "C1"
+      ],
+      "exit": "Production source adapters feed durable jobs and governed workers that execute Canonical→World→Metric→Release and later-phase compute; production runtime does not require tests/fixtures."
+    },
+    {
+      "batch": "C3",
+      "issue": 232,
+      "title": "Runtime identity, readiness, audit and production backup/recovery",
+      "dependencies": [
+        "C1",
+        "C2"
+      ],
+      "exit": "Identity provider, least-privilege principal mapping, persistent audit, runtime qualification/readiness and Desktop/Service backup/recovery are production-configurable and fail closed."
+    },
+    {
+      "batch": "C4",
+      "issue": 233,
+      "title": "Product UX discovery and release-bound visualization",
+      "dependencies": [
+        "C1",
+        "C2"
+      ],
+      "exit": "Desktop discovers immutable Sessions/Releases/revisions and loads persisted exact-release trajectory/media without manual UUID/JSON engineering-console workflows."
+    },
+    {
+      "batch": "C5",
+      "issue": 234,
+      "title": "Installed-package full E2E and TPAA 1.0.1 final qualification",
+      "dependencies": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "exit": "All four installed release profiles execute production-format import→worker compute→durable persistence→P1-P6→restart/replay→backup/restore→security/audit and bind immutable package hashes to detached protected-main 1.0.1 qualification attestation."
+    }
+  ],
+  "invariants": {
+    "no_m10_p7": true,
+    "no_piqb_history_rewrite": true,
+    "no_canonical_mutation_without_authority_change": true,
+    "current_db_schema_exact": "1.9.0",
+    "exact_fourteen_required_job_topology": true,
+    "no_force_push": true,
+    "no_gate_weakening": true,
+    "mutable_latest_fallback_forbidden": true,
+    "production_test_fixture_dependency_forbidden": true,
+    "production_inmemory_authority_forbidden": true
+  }
+}

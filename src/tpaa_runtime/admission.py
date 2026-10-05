@@ -211,11 +211,42 @@ class ProductFeatureAvailability:
         resolver: ProductAdmissionResolver,
         *,
         configured: Mapping[str, bool],
+        dependency_ready: Mapping[str, bool] | None = None,
+        supported_profile: Mapping[str, bool] | None = None,
+        available: Mapping[str, bool] | None = None,
     ) -> None:
         if tuple(configured) != _PHASES:
             raise ValueError("configured feature map must contain ordered P1-P6")
         self._resolver = resolver
         self._configured = dict(configured)
+        self._dependency_ready = self._phase_flags(
+            dependency_ready,
+            default=True,
+            field="dependency_ready",
+        )
+        self._supported_profile = self._phase_flags(
+            supported_profile,
+            default=True,
+            field="supported_profile",
+        )
+        self._available = self._phase_flags(
+            available,
+            default=True,
+            field="available",
+        )
+
+    @staticmethod
+    def _phase_flags(
+        values: Mapping[str, bool] | None,
+        *,
+        default: bool,
+        field: str,
+    ) -> dict[str, bool]:
+        if values is None:
+            return {phase: default for phase in _PHASES}
+        if tuple(values) != _PHASES:
+            raise ValueError(f"{field} map must contain ordered P1-P6")
+        return dict(values)
 
     def execute(self) -> dict[str, object]:
         items: list[dict[str, object]] = []
@@ -224,6 +255,9 @@ class ProductFeatureAvailability:
             state = self._resolver.feature_state(
                 phase,
                 configured=self._configured[phase],
+                dependency_ready=self._dependency_ready[phase],
+                supported_profile=self._supported_profile[phase],
+                available=self._available[phase],
             )
             items.append(
                 {

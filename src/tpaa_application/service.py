@@ -4,19 +4,18 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
+
 from .job_control import JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
-    M1PublicationService,
     M1PublishSessionCommand,
     M1PublishSessionResult,
+    M1SessionEpisodeStageProjection,
 )
-from .m3_publication import M3PublicationService
-from .m3_workspace import project_m3_workspace
 from .m4_workspace import (
     M4AnnotationCommand,
     M4DebriefQuery,
     M4TrendQuery,
-    M4WorkspaceService,
 )
 from .m6_workspace import (
     M6P2ComparisonQuery,
@@ -49,6 +48,99 @@ from .m9_workspace import (
 )
 from .models import StorageBaselineStatus
 from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
+
+
+class P1PublicationUseCase(Protocol):
+    """Production-neutral P1 publication/read boundary."""
+
+    def import_session(
+        self,
+        *,
+        fixture_id: str,
+        idempotency_key: str,
+    ) -> dict[str, object]: ...
+
+    def compute_session(
+        self,
+        *,
+        fixture_id: str,
+        idempotency_key: str,
+    ) -> dict[str, object]: ...
+
+    def publish_session(
+        self,
+        command: M1PublishSessionCommand,
+        *,
+        idempotency_key: str,
+    ) -> M1PublishSessionResult: ...
+
+    def release_summary(self, release_id: str) -> dict[str, object]: ...
+
+    def observations(self, release_id: str) -> list[CapabilityObservationDTO]: ...
+
+    def metric_list(self, release_id: str) -> list[dict[str, object]]: ...
+
+    def metric_detail(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]: ...
+
+    def metric_evidence(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]: ...
+
+    def context_projection(self, release_id: str) -> EvaluationContextDTO: ...
+
+    def session_episode_stage_projection(
+        self,
+        release_id: str,
+    ) -> M1SessionEpisodeStageProjection: ...
+
+    def replay(self, release_id: str) -> dict[str, object]: ...
+
+    def series_range(
+        self,
+        release_id: str,
+        *,
+        start_session_time_us: int,
+        end_session_time_us: int,
+        limit: int,
+    ) -> dict[str, object]: ...
+
+
+class M3PublicationUseCase(Protocol):
+    """Release-bound P1/M3 read boundary independent of repository engine."""
+
+    def release_summary(self, release_id: str) -> dict[str, object]: ...
+
+    def metric_list(self, release_id: str) -> list[dict[str, object]]: ...
+
+    def metric_detail(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]: ...
+
+    def metric_evidence(
+        self,
+        release_id: str,
+        metric_code: str,
+    ) -> dict[str, object]: ...
+
+    def workspace(self, release_id: str) -> dict[str, object]: ...
+
+
+class M4WorkspaceUseCase(Protocol):
+    """Longitudinal/debrief boundary independent of persistence engine."""
+
+    def trend(self, query: M4TrendQuery) -> dict[str, object]: ...
+
+    def annotation(self, command: M4AnnotationCommand) -> dict[str, object]: ...
+
+    def debrief(self, query: M4DebriefQuery) -> dict[str, object]: ...
 
 
 class StorageBaselineStatusUseCase(Protocol):
@@ -92,9 +184,9 @@ class ApplicationService:
         get_storage_baseline_status: StorageBaselineStatusUseCase,
         get_runtime_baseline_status: GetRuntimeBaselineStatus | None = None,
         job_control: M0JobControl | None = None,
-        m1_publication: M1PublicationService | None = None,
-        m3_publication: M3PublicationService | None = None,
-        m4_workspace: M4WorkspaceService | None = None,
+        m1_publication: P1PublicationUseCase | None = None,
+        m3_publication: M3PublicationUseCase | None = None,
+        m4_workspace: M4WorkspaceUseCase | None = None,
         m6_workspace: M6WorkspaceService | None = None,
         m7_workspace: M7WorkspaceService | None = None,
         m8_workspace: M8WorkspaceService | None = None,
@@ -181,7 +273,7 @@ class ApplicationService:
         return self._job_control.cancel(job_id=job_id, actor=actor, reason=reason)
 
 
-    def _m1(self) -> M1PublicationService:
+    def _m1(self) -> P1PublicationUseCase:
         if self._m1_publication is None:
             raise RuntimeError("M1 publication service is not configured")
         return self._m1_publication
@@ -262,7 +354,7 @@ class ApplicationService:
         )
 
 
-    def _m3(self) -> M3PublicationService:
+    def _m3(self) -> M3PublicationUseCase:
         if self._m3_publication is None:
             raise RuntimeError("M3 publication service is not configured")
         return self._m3_publication
@@ -284,10 +376,9 @@ class ApplicationService:
         return self._m3().metric_evidence(release_id, metric_code)
 
     def m3_workspace(self, release_id: str) -> dict[str, object]:
-        release = self._m3().historical_release(release_id).release
-        return project_m3_workspace(release)
+        return self._m3().workspace(release_id)
 
-    def _m4(self) -> M4WorkspaceService:
+    def _m4(self) -> M4WorkspaceUseCase:
         if self._m4_workspace is None:
             raise RuntimeError("M4 workspace service is not configured")
         return self._m4_workspace
