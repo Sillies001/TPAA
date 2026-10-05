@@ -615,6 +615,12 @@ def _validate_debrief_query(query: M4DebriefQuery) -> None:
         _uuid(annotation_id, field="annotation_ids")
 
 
+def validate_m4_annotation_command(command: M4AnnotationCommand) -> None:
+    """Expose the single governed annotation validator to durable adapters."""
+
+    _validate_annotation_command(command)
+
+
 class M4WorkspaceService:
     """Application-only M4 projections; transport and GUI consume these DTOs."""
 
