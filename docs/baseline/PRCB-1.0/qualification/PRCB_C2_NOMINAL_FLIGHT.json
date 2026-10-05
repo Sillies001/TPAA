@@ -1,0 +1,29 @@
+{
+  "aircraft_id": "c2000000-0000-4000-8000-000000000002",
+  "rows": [
+    {"heading": 0.0, "mach": 0.6, "nz": 1.0, "p": 0.0, "quality": 0, "source_time_us": 0, "tas": 180.0},
+    {"heading": 0.02, "mach": 0.602, "nz": 1.05, "p": 0.02, "quality": 0, "source_time_us": 100000, "tas": 181.0},
+    {"heading": 0.04, "mach": 0.604, "nz": 1.1, "p": 0.04, "quality": 0, "source_time_us": 200000, "tas": 182.0},
+    {"heading": 0.06, "mach": 0.606, "nz": 1.15, "p": 0.06, "quality": 0, "source_time_us": 300000, "tas": 183.0},
+    {"heading": 0.08, "mach": 0.608, "nz": 1.2, "p": 0.08, "quality": 0, "source_time_us": 400000, "tas": 184.0},
+    {"heading": 0.1, "mach": 0.61, "nz": 1.0, "p": 0.1, "quality": 0, "source_time_us": 500000, "tas": 185.0},
+    {"heading": 0.12, "mach": 0.612, "nz": 1.05, "p": 0.12, "quality": 0, "source_time_us": 600000, "tas": 186.0},
+    {"heading": 0.14, "mach": 0.614, "nz": 1.1, "p": 0.14, "quality": 0, "source_time_us": 700000, "tas": 187.0},
+    {"heading": 0.16, "mach": 0.616, "nz": 1.15, "p": 0.16, "quality": 0, "source_time_us": 800000, "tas": 188.0},
+    {"heading": 0.18, "mach": 0.618, "nz": 1.2, "p": 0.18, "quality": 0, "source_time_us": 900000, "tas": 189.0},
+    {"heading": 0.2, "mach": 0.62, "nz": 1.0, "p": 0.2, "quality": 0, "source_time_us": 1000000, "tas": 190.0},
+    {"heading": 0.22, "mach": 0.622, "nz": 1.05, "p": 0.22, "quality": 0, "source_time_us": 1100000, "tas": 191.0},
+    {"heading": 0.24, "mach": 0.624, "nz": 1.1, "p": 0.24, "quality": 0, "source_time_us": 1200000, "tas": 192.0},
+    {"heading": 0.26, "mach": 0.626, "nz": 1.15, "p": 0.26, "quality": 0, "source_time_us": 1300000, "tas": 193.0},
+    {"heading": 0.28, "mach": 0.628, "nz": 1.2, "p": 0.28, "quality": 0, "source_time_us": 1400000, "tas": 194.0},
+    {"heading": 0.3, "mach": 0.63, "nz": 1.0, "p": 0.3, "quality": 0, "source_time_us": 1500000, "tas": 195.0},
+    {"heading": 0.32, "mach": 0.632, "nz": 1.05, "p": 0.32, "quality": 0, "source_time_us": 1600000, "tas": 196.0},
+    {"heading": 0.34, "mach": 0.634, "nz": 1.1, "p": 0.34, "quality": 0, "source_time_us": 1700000, "tas": 197.0},
+    {"heading": 0.36, "mach": 0.636, "nz": 1.15, "p": 0.36, "quality": 0, "source_time_us": 1800000, "tas": 198.0},
+    {"heading": 0.38, "mach": 0.638, "nz": 1.2, "p": 0.38, "quality": 0, "source_time_us": 1900000, "tas": 199.0}
+  ],
+  "schema": "TPAA_PRODUCTION_FLIGHT_SOURCE_V1",
+  "schema_version": "1.0.0",
+  "session_id": "c2000000-0000-4000-8000-000000000001",
+  "time_transform": {"offset_us": 0, "scale": 1.0}
+}

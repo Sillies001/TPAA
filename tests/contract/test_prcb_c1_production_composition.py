@@ -43,7 +43,7 @@ def test_prcb_desktop_production_composition_uses_db_1_9(
         for item in availability["items"]
     }
     assert states == {
-        "P1": "NOT_CONFIGURED",
+        "P1": "AVAILABLE",
         "P2": "AVAILABLE",
         "P3": "AVAILABLE",
         "P4": "AVAILABLE",
@@ -73,7 +73,7 @@ def test_prcb_production_composition_has_no_fixture_or_inmemory_fallback() -> No
     assert "m1_fixture_root" not in source
 
 
-def test_prcb_production_composes_durable_m4_without_claiming_p1_available() -> None:
+def test_prcb_production_composes_durable_m4_and_c2_p1_job_runtime() -> None:
     root = Path(__file__).resolve().parents[2]
     source = (root / "src" / "tpaa_runtime" / "production.py").read_text(
         encoding="utf-8"
@@ -83,4 +83,6 @@ def test_prcb_production_composes_durable_m4_without_claiming_p1_available() -> 
     assert "m4_workspace=m4_workspace" in source
     assert "DurableP1ReleaseReadService" in source
     assert "m1_publication=p1_release_reads" in source
-    assert '"P1": False' in source
+    assert '"P1": True' in source
+    assert "DurableApplicationJobControl" in source
+    assert "ProductionJobExecutor" in source
