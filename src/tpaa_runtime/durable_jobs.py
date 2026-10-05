@@ -16,6 +16,8 @@ from tpaa_application import (
     JobRecord,
     JobStatus,
     JobSubmission,
+    DurableP6ModelBuildResolver,
+    P6PersistenceRepository,
     ProductionImportService,
     SourceImportCommand,
     SourceProvenanceRepository,
@@ -30,6 +32,8 @@ from tpaa_ingest import (
     build_production_source_registry,
     validate_production_flight_document,
 )
+from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
+from tpaa_capability.p6_forecast import P6ForecastRevision
 from tpaa_platform import SpawnWorkerDispatcher, WorkerPayload
 from tpaa_storage import (
     ComputeJobRepository,
@@ -43,8 +47,14 @@ from tpaa_storage import (
     PolarsParquetPlane,
 )
 
-from .durable_repositories import RuntimeUnitOfWorkFactory
-from .production_worker import ProductionP1WorkerProduct
+from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
+from .production_worker import (
+    P6_COUNTERFACTUAL_COMMAND,
+    P6_FORECAST_COMMAND,
+    ProductionP1WorkerProduct,
+    ProductionP6CounterfactualWorkerInput,
+    ProductionP6ForecastWorkerInput,
+)
 
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
 _P1_COMMAND = "BUILD_P1_RELEASE"
@@ -307,7 +317,7 @@ class ProductionJobExecutor:
             release=replace(product.release, evidence_sets=evidence),
         )
 
-    def execute(
+    def _execute_p1(
         self,
         *,
         job_id: str,
@@ -401,6 +411,158 @@ class ProductionJobExecutor:
                 expected_version_token=expected_version,
             )
             uow.commit()
+
+
+    def _p6_repository(
+        self,
+        uow: RuntimeCanonicalUnitOfWork,
+    ) -> P6PersistenceRepository:
+        return P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=self._object_store,
+            model_build_resolver=DurableP6ModelBuildResolver(uow.canonical_rows),
+        )
+
+    def _execute_p6_forecast(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        request_id = _text(
+            payload.get("forecast_request_id"),
+            field="forecast_request_id",
+        )
+        published_at = _text(
+            payload.get("published_at_utc"),
+            field="published_at_utc",
+        )
+        with self._write_uow_factory() as uow:
+            repository = self._p6_repository(uow)
+            request = repository.exact_forecast_request(request_id)
+            input_snapshot = repository.exact_input(request.input_snapshot_id)
+            model_build = repository.exact_model_build(request.capability_model_id)
+            managed = repository.exact_managed_object(request.capability_model_id)
+            uow.commit()
+
+        result = self._dispatcher.dispatch(
+            WorkerPayload(
+                job_id=job_id,
+                request_hash=request_hash,
+                command=P6_FORECAST_COMMAND,
+                handler=_GOVERNED_HANDLER,
+                domain_payload=ProductionP6ForecastWorkerInput(
+                    job_payload=dict(payload),
+                    request=request,
+                    input_snapshot=input_snapshot,
+                    model_build=model_build,
+                    managed_object=managed,
+                    published_at_utc=published_at,
+                ),
+            ),
+            timeout_seconds=120.0,
+        )
+        value = result.domain_payload
+        if result.status != "SUCCEEDED" or not isinstance(value, P6ForecastRevision):
+            raise ProductionJobExecutionError(
+                result.error_code or "PRCB_C2_WORKER_FAILED",
+                job_id,
+            )
+        with self._write_uow_factory() as uow:
+            self._p6_repository(uow).register_forecast(value)
+            uow.commit()
+
+    def _execute_p6_counterfactual(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        request_id = _text(
+            payload.get("counterfactual_request_id"),
+            field="counterfactual_request_id",
+        )
+        created_at = _text(
+            payload.get("created_at_utc"),
+            field="created_at_utc",
+        )
+        with self._write_uow_factory() as uow:
+            repository = self._p6_repository(uow)
+            request = repository.exact_counterfactual_request(request_id)
+            input_snapshot = repository.exact_input(request.input_snapshot_id)
+            models = tuple(
+                repository.exact_model_revision(model_id)
+                for model_id in request.model_refs
+            )
+            uow.commit()
+
+        result = self._dispatcher.dispatch(
+            WorkerPayload(
+                job_id=job_id,
+                request_hash=request_hash,
+                command=P6_COUNTERFACTUAL_COMMAND,
+                handler=_GOVERNED_HANDLER,
+                domain_payload=ProductionP6CounterfactualWorkerInput(
+                    job_payload=dict(payload),
+                    request=request,
+                    input_snapshot=input_snapshot,
+                    models=models,
+                    created_at_utc=created_at,
+                ),
+            ),
+            timeout_seconds=120.0,
+        )
+        value = result.domain_payload
+        if (
+            result.status != "SUCCEEDED"
+            or not isinstance(value, P6CounterfactualRevision)
+        ):
+            raise ProductionJobExecutionError(
+                result.error_code or "PRCB_C2_WORKER_FAILED",
+                job_id,
+            )
+        with self._write_uow_factory() as uow:
+            self._p6_repository(uow).register_counterfactual(value)
+            uow.commit()
+
+    def execute(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        job_key: str,
+        command: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        if command == _P1_COMMAND:
+            self._execute_p1(
+                job_id=job_id,
+                request_hash=request_hash,
+                job_key=job_key,
+                command=command,
+                payload=payload,
+            )
+            return
+        if command == P6_FORECAST_COMMAND:
+            self._execute_p6_forecast(
+                job_id=job_id,
+                request_hash=request_hash,
+                payload=payload,
+            )
+            return
+        if command == P6_COUNTERFACTUAL_COMMAND:
+            self._execute_p6_counterfactual(
+                job_id=job_id,
+                request_hash=request_hash,
+                payload=payload,
+            )
+            return
+        raise ProductionJobExecutionError(
+            "PRCB_C2_DOMAIN_COMMAND_UNSUPPORTED",
+            command,
+        )
 
 
 class DurableApplicationJobControl:
