@@ -85,6 +85,7 @@ def test_prcb_production_service_config_requires_conninfo(
 def test_prcb_durable_runtime_adapters_do_not_use_inmemory_or_test_fixtures() -> None:
     root = Path(__file__).resolve().parents[2]
     sources = [
+        root / "src" / "tpaa_runtime" / "durable_p1.py",
         root / "src" / "tpaa_runtime" / "durable_repositories.py",
         root / "src" / "tpaa_runtime" / "durable_longitudinal.py",
         root / "src" / "tpaa_runtime" / "production.py",

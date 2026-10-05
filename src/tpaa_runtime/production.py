@@ -36,6 +36,7 @@ from .durable_longitudinal import (
     DurableM4DebriefRepository,
     DurableM4LongitudinalReleaseRepository,
 )
+from .durable_p1 import DurableP1ReleaseReadService
 from .durable_repositories import (
     DurableM6P2RuntimeRepository,
     DurableM7P3RuntimeRepository,
@@ -87,6 +88,7 @@ def _compose(
     _validate_storage_status(storage_status)
 
     admission = ProductAdmissionResolver()
+    p1_release_reads = DurableP1ReleaseReadService(read_uow_factory)
     m4_workspace = M4WorkspaceService(
         longitudinal=M4LongitudinalPublicationService(
             DurableM4LongitudinalReleaseRepository(
@@ -170,6 +172,7 @@ def _compose(
         get_runtime_baseline_status=build_trusted_runtime_status_use_case(
             product_build_version=config.product_build_version
         ),
+        m1_publication=p1_release_reads,
         m4_workspace=m4_workspace,
         m6_workspace=m6_workspace,
         m7_workspace=m7_workspace,

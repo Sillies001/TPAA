@@ -59,10 +59,17 @@ from tpaa_storage.ports import RepositoryUnitOfWork
 _T = TypeVar("_T")
 
 
+class RuntimePublicationLedger(Protocol):
+    """Exact Core Release membership read surface shared by SQLite/PostgreSQL."""
+
+    def logical_membership(self, release_id: str) -> dict[str, object]: ...
+
+
 class RuntimeCanonicalUnitOfWork(RepositoryUnitOfWork, Protocol):
-    """Existing Repository UoW contract plus DB 1.9 canonical-row access."""
+    """Existing Repository UoW plus DB 1.9 canonical/publication access."""
 
     canonical_rows: CanonicalRowRepository
+    publication: RuntimePublicationLedger
 
     def __enter__(self) -> Self: ...
 

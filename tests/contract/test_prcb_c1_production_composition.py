@@ -64,6 +64,7 @@ def test_prcb_production_composition_has_no_fixture_or_inmemory_fallback() -> No
     root = Path(__file__).resolve().parents[2]
     paths = [
         root / "src" / "tpaa_runtime" / "production.py",
+        root / "src" / "tpaa_runtime" / "durable_p1.py",
         root / "src" / "tpaa_runtime" / "durable_repositories.py",
     ]
     source = "\n".join(path.read_text(encoding="utf-8") for path in paths)
@@ -80,4 +81,6 @@ def test_prcb_production_composes_durable_m4_without_claiming_p1_available() -> 
     assert "DurableM4LongitudinalReleaseRepository" in source
     assert "DurableM4DebriefRepository" in source
     assert "m4_workspace=m4_workspace" in source
+    assert "DurableP1ReleaseReadService" in source
+    assert "m1_publication=p1_release_reads" in source
     assert '"P1": False' in source
