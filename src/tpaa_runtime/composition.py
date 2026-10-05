@@ -181,12 +181,14 @@ def create_full_desktop_app(
 ) -> FastAPI:
     """Expose every currently admitted Application surface on the Desktop backend."""
 
-    return create_desktop_app(
+    app = create_desktop_app(
         application=runtime.application,
         bearer_token=bearer_token,
         m8_principal_resolver=m8_principal_resolver,
         m9_principal_resolver=m9_principal_resolver,
     )
+    app.version = runtime.config.product_build_version
+    return app
 
 
 def create_full_service_app(
@@ -203,16 +205,18 @@ def create_full_service_app(
             raise ValueError(
                 "unified principal_resolver cannot be combined with legacy resolvers"
             )
-        return create_unified_service_app(
+        app = create_unified_service_app(
             application=runtime.application,
             principal_resolver=principal_resolver,
         )
+        app.version = runtime.config.product_build_version
+        return app
 
     if m8_principal_resolver is None or m9_principal_resolver is None:
         raise ValueError(
             "service identity resolver is required; no development fallback is allowed"
         )
-    app = FastAPI(title="TPAA Service API", version="0.0.0")
+    app = FastAPI(title="TPAA Service API", version=runtime.config.product_build_version)
     return register_unified_routes(
         app,
         runtime.application,

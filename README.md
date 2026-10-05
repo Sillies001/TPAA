@@ -5,14 +5,14 @@ TPAA V8.0 / ED-2.0 implementation monorepo governed by the frozen Canonical busi
 ## Current implementation state
 
 - Overall design input: **TPAA V8.0 / ED-2.0 Rebaseline R3.3**.
-- Machine business authority: **CB-1.4.0** under `baseline/CB-1.4.0/`.
-- Adopted implementation baseline: **SDIB-1.4**. See `docs/reviews/SDIB-1.4_ADOPTION_REVIEW.md`.
-- Database schema authority remains exactly **1.6.0**; no shadow schema is admitted.
-- M5 contains exactly **23 tasks** and remains **P1-only**; P2-P6 are inactive.
-- M5 formal qualification authority is `M5_FORMAL_QUALIFICATION_AUTHORITY` v1.0.0, SHA-256 `e3dd1fafa9c65d6c9a85dfb7172d60adef3e9c17893e3b546b962275c42c01b1`. See `docs/reviews/M5_C3_FORMAL_QUALIFICATION_AUTHORITY_REVIEW.md`.
-- Protected-main M5 Exit is **GO** at `68767397c028f7aa6ad3a22a49302710481951c6`; Cross-platform CI Run #470 / `36549239360` passed all 14 required jobs.
-- Formal qualification at that protected-main revision is **P1_M5_QUALIFIED**. The four mandatory certification profiles, package/performance/security gates, recovery/rollback evidence, cold reconstruction, and exact-release signoff contract are all part of the M5 qualification boundary.
-- No M6 scope and no P2-P6 capability is implied by the M5 qualification state.
+- Machine business authority remains **CB-1.4.0** under `baseline/CB-1.4.0/`.
+- Product integration/qualification authority is **PIQB-1.0**; B0-B5 are formally protected-main qualified and B6 is the active final-product batch.
+- Product version is **1.0.0**.
+- Current physical database schema authority is **1.9.0**, adopted through ACP-216 -> ACP-219 -> ACP-221; historical M0-M9/M5 evidence that records 1.6.0 remains immutable historical evidence rather than current authority.
+- P1-P6 capability qualification from M5-M9 is retained. PIQB does not create M10 or P7.
+- B5 protected-main qualification is **PIQB_B5_QUALIFIED** at `eb3f03f8baeb1bfc56b8bc138848636de1d15776`; Run #628 / `37252494254` passed all 14 required jobs.
+- B6 closes full-product Desktop/Service E2E, packaging, SBOM/build manifests, performance/resource, restart/recovery, cross-platform logical equivalence and `TPAA_PIQB_EXIT_REVIEW_V1`.
+- Exact-head Hosted CI remains the only merge/formal-release authority.
 
 ## Machine authority rule
 
@@ -76,5 +76,5 @@ This checks the Python minor, resolver/lock authority, frozen static-tool pins, 
 
 ## Repository sequencing
 
-M0-M5 implementation sequencing has completed through the protected-main M5 Exit GO revision above. Any subsequent implementation work must come from an explicitly adopted authority/baseline or tracked corrective scope; do not infer a new milestone, activate P2-P6, change DB schema 1.6.0, or redefine frozen Canonical/M5 qualification semantics from this README.
+M0-M9 and P1-P6 capability implementation are complete inputs to PIQB-1.0. PIQB B0-B5 are formally qualified; B6 is the final product qualification/release batch. B6 must preserve the frozen Canonical semantics, current DB 1.9.0 authority, exact-release history, fail-closed security/recovery rules, and the existing 14 required Hosted CI checks. PIQB completion does not imply M10 or P7.
 

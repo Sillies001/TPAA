@@ -84,6 +84,27 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/piqb-b5/${{ matrix.platform }}/desktop-replay-visualization.json
 
+      - name: Execute PIQB B6 final product qualification
+        env:
+          QT_QPA_PLATFORM: offscreen
+          TPAA_M5_STORAGE_CLASS: SSD
+        run: >-
+          uv run --locked python tools/testing/piqb_b6_final_product_qualification.py
+          --platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --package-output dist/piqb-b6/${{ matrix.platform }}
+          --evidence evidence/piqb-b6/${{ matrix.platform }}/final-product.json
+
+      - name: Upload PIQB B6 release packages
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-piqb-b6-release-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dist/piqb-b6/${{ matrix.platform }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
       - name: Build M0 development packages
         run: |
           uv run --locked python tools/dev/tpaa_dev.py package --profile ${{ matrix.desktop_profile }} --output dist
@@ -109,6 +130,7 @@ jobs:
             evidence/tests/framework-${{ matrix.platform }}.json
             evidence/cross-platform/${{ matrix.platform }}.json
             evidence/piqb-b5/${{ matrix.platform }}/desktop-replay-visualization.json
+            evidence/piqb-b6/${{ matrix.platform }}/final-product.json
             evidence/devops/${{ matrix.platform }}
             evidence/m1-entry/${{ matrix.platform }}/build-manifest.json
             evidence/m1-fixtures/${{ matrix.platform }}/fixture-evidence.json
@@ -181,6 +203,7 @@ jobs:
             evidence/m1-batch-3/${{ matrix.platform }}/desktop-e2e.json
             evidence/m1-batch-4/${{ matrix.platform }}/platform.json
             dist/
+            !dist/piqb-b6/**
           if-no-files-found: error
           retention-days: 14
 
@@ -1847,6 +1870,12 @@ jobs:
           name: tpaa-piqb-b4-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/piqb-b4
 
+      - name: Download PIQB B2 PostgreSQL restart recovery evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-piqb-b2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/piqb-b2
+
       - name: Aggregate all 14 M0 Exit Gates
         run: >-
           python tools/ci/m0_exit_review.py
@@ -2254,3 +2283,30 @@ jobs:
           path: evidence/acp221-adoption/review.json
           if-no-files-found: error
           retention-days: 30
+
+
+      - name: Review PIQB B6 final product and release qualification
+        shell: bash
+        run: |
+          python tools/testing/piqb_exit_review.py \
+            --windows-qualification downloaded/platform/evidence/piqb-b6/windows/final-product.json \
+            --linux-qualification downloaded/platform/evidence/piqb-b6/linux/final-product.json \
+            --postgres-recovery downloaded/piqb-b2/postgres-product-persistence.json \
+            --b4-qualification downloaded/piqb-b4/postgres-api-security-observability.json \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --output evidence/piqb-exit/review.json
+
+      - name: Upload PIQB Exit review evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-piqb-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/piqb-exit/review.json
+          if-no-files-found: error
+          retention-days: 90

@@ -148,7 +148,10 @@ def test_codegen_and_devops_commands_are_implemented_and_run_api_remains_reserve
         str(tmp_path / "dist"),
     )
     assert package.returncode == 0, package.stderr
-    assert any((tmp_path / "dist").glob("tpaa-0.0.0-*"))
+    project = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+    version = project["project"]["version"]
+    assert isinstance(version, str)
+    assert any((tmp_path / "dist").glob(f"tpaa-{version}-*"))
 
     run_api = _run("run-api")
     assert run_api.returncode == 3

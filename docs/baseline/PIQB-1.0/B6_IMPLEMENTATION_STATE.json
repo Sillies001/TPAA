@@ -1,0 +1,105 @@
+{
+  "schema": "TPAA_PIQB_B6_IMPLEMENTATION_STATE_V1",
+  "baseline": "PIQB-1.0",
+  "batch": "B6",
+  "source_b5_protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
+  "source_b5_qualification": "PIQB_B5_QUALIFIED",
+  "db_schema_version": "1.9.0",
+  "product_version": "1.0.0",
+  "task_state": {
+    "PIQB-B6-001": {
+      "state": "COMPLETE",
+      "evidence": [
+        "Run #628 protected-main 14/14 SUCCESS",
+        "TPAA_PIQB_B5_REVIEW_V1 PASS/GO",
+        "PIQB_B5_QUALIFIED",
+        "B5 issue #212 closed completed"
+      ]
+    },
+    "PIQB-B6-002": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "piqb_runtime_entry.py full P1-P6 runtime probe",
+        "piqb_b6_final_product_qualification.py Desktop/Service clean-install runtime qualification",
+        "same-run PIQB B4 real DB 1.9 product API/security/observability qualification"
+      ]
+    },
+    "PIQB-B6-003": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "retained M5 frozen workload/hardware measurement substrate",
+        "validate_performance_measurements per mandatory profile",
+        "historical M5 qualification semantics remain immutable",
+        "M5 target hardware identity validator reused per profile",
+        "X86_64/CPU/memory/free-storage/SSD hardware identity retained in B6 evidence"
+      ]
+    },
+    "PIQB-B6-004": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "package hold/start-stop/restart qualification",
+        "failed-install rollback injection before commit",
+        "same-run PIQB B2 SQLite/PostgreSQL DB 1.9 restart/recovery evidence",
+        "first PIQB release upgrade marked NOT_APPLICABLE_FIRST_PIQB_RELEASE"
+      ]
+    },
+    "PIQB-B6-005": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "piqb_release_bundle.py",
+        "TPAA 1.0.0 exact-head Windows/Linux Desktop/Service packages",
+        "SPDX-2.3 SBOM",
+        "TPAA_PIQB_BUILD_MANIFEST_V1",
+        "TPAA_PIQB_RELEASE_MANIFEST_V1"
+      ]
+    },
+    "PIQB-B6-006": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "TPAA_PIQB_B6_LOGICAL_PRODUCT_V1",
+        "Windows/Linux logical_product equality and hash gate in final reviewer",
+        "Exit reviewer requires same-run unified Product API exact-ID/no-latest/no-hidden-recompute evidence"
+      ]
+    },
+    "PIQB-B6-007": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "README reconciled to PIQB/DB 1.9/P1-P6 state",
+        "pyproject and uv.lock product identity 1.0.0",
+        "exact package hashes projected into PIQB Exit review"
+      ]
+    },
+    "PIQB-B6-008": {
+      "state": "COMPLETE_CANDIDATE",
+      "evidence": [
+        "piqb_exit_review.py",
+        "TPAA_PIQB_EXIT_REVIEW_V1 candidate/protected-main split",
+        "formal release authority requires exact-head 14/14 protected main"
+      ]
+    }
+  },
+  "candidate_complete": true,
+  "candidate_qualification_pending": true,
+  "b6_qualified": false,
+  "piqb_exit_qualified": false,
+  "entry_qualification": {
+    "protected_main_sha": "eb3f03f8baeb1bfc56b8bc138848636de1d15776",
+    "run_number": 628,
+    "actions_run_id": 37252494254,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PIQB_B5_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "PIQB_B5_QUALIFIED",
+    "failed_acceptance": []
+  },
+  "ci_cadence": "BATCH_CONSOLIDATED",
+  "candidate_outputs": {
+    "runtime_entry": "tools/packaging/piqb_runtime_entry.py",
+    "release_packager": "tools/packaging/piqb_release_bundle.py",
+    "platform_qualification": "tools/testing/piqb_b6_final_product_qualification.py",
+    "exit_reviewer": "tools/testing/piqb_exit_review.py",
+    "workflow": ".github/workflows/cross-platform-ci.yml"
+  }
+}

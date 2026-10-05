@@ -1,0 +1,51 @@
+{
+  "schema": "TPAA_PIQB_B6_RELEASE_CONTRACT_V1",
+  "baseline": "PIQB-1.0",
+  "product_name": "TPAA",
+  "product_version": "1.0.0",
+  "db_schema_version": "1.9.0",
+  "canonical_baseline": "CB-1.4.0",
+  "piqb_exit_qualification": "PIQB_1_0_QUALIFIED",
+  "mandatory_profiles": [
+    "WINDOWS_DESKTOP_X64",
+    "WINDOWS_SERVICE_X64",
+    "LINUX_DESKTOP_X64",
+    "LINUX_SERVICE_X64"
+  ],
+  "package_rules": {
+    "windows_extension": ".zip",
+    "linux_extension": ".tar.gz",
+    "deterministic_archive_metadata": true,
+    "exact_archive_bytes_cross_platform_required": false,
+    "logical_manifest_equivalence_required": true,
+    "embedded_runtime_required": true,
+    "sbom_schema": "SPDX-2.3",
+    "build_manifest_schema": "TPAA_PIQB_BUILD_MANIFEST_V1",
+    "release_manifest_schema": "TPAA_PIQB_RELEASE_MANIFEST_V1"
+  },
+  "release_identity_fields": [
+    "product_version",
+    "source_revision",
+    "profile_id",
+    "db_schema_version",
+    "canonical_baseline",
+    "dependency_lock_sha256",
+    "sbom_sha256",
+    "file_inventory_sha256"
+  ],
+  "provenance": {
+    "runtime_substrate": "M5 offline runtime bundle implementation",
+    "historical_m5_qualification_semantics_rewritten": false,
+    "acp_221_db_1_9_authority_required": true,
+    "p1_p6_prior_qualification_retained": true
+  },
+  "formal_release_rules": {
+    "pull_request_decision": "PENDING_PROTECTED_MAIN",
+    "pull_request_formal_release_claimed": false,
+    "protected_main_required": true,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "failed_acceptance_must_equal": [],
+    "protected_main_decision": "GO"
+  }
+}
