@@ -35,28 +35,6 @@ class PRCBC5P2QualificationSeed:
     target_observation_id: str
 
 
-def _required_text(value: object, field: str) -> str:
-    if not isinstance(value, str) or not value:
-        raise RuntimeError(f"PRCB_C5_P2_SEED_INVALID:{field}")
-    return value
-
-
-def _required_float(value: object, field: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise RuntimeError(f"PRCB_C5_P2_SEED_INVALID:{field}")
-    return float(value)
-
-
-def _required_int(value: object, field: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise RuntimeError(f"PRCB_C5_P2_SEED_INVALID:{field}")
-    return value
-
-
-def _optional_text(value: object) -> str | None:
-    return None if value is None else str(value)
-
-
 def _binding(
     *,
     artifact_id: str,
@@ -127,125 +105,6 @@ def _ensure_artifact(
     )
 
 
-def _p1_observation(
-    rows: CanonicalRowRepository,
-    observation_id: str,
-) -> P1ObservationInput:
-    row = rows.one(
-        "metric.capability_observation",
-        where={"observation_id": observation_id},
-        columns=(
-            "observation_id",
-            "release_id",
-            "episode_id",
-            "subject_entity_id",
-            "aircraft_id",
-            "aircraft_model_id",
-            "aircraft_configuration_snapshot_id",
-            "context_id",
-            "capability_type",
-            "observed_metric_instance_id",
-            "observed_value_numeric",
-            "unit",
-            "evidence_set_id",
-            "coverage",
-            "confidence",
-            "eligibility_status",
-            "comparison_key_hash",
-            "created_at",
-        ),
-    )
-    if row is None:
-        raise RuntimeError("PRCB_C5_P2_SOURCE_OBSERVATION_MISSING")
-    instance_id = _required_text(
-        row["observed_metric_instance_id"],
-        "observed_metric_instance_id",
-    )
-    instance = rows.one(
-        "metric.metric_instance",
-        where={"metric_instance_id": instance_id},
-        columns=("metric_definition_id",),
-    )
-    if instance is None:
-        raise RuntimeError("PRCB_C5_P2_METRIC_INSTANCE_MISSING")
-    definition_id = _required_text(
-        instance["metric_definition_id"],
-        "metric_definition_id",
-    )
-    definition = rows.one(
-        "metric.metric_definition",
-        where={"metric_definition_id": definition_id},
-        columns=("metric_semantic_id", "metric_semantic_version"),
-    )
-    if definition is None:
-        raise RuntimeError("PRCB_C5_P2_METRIC_DEFINITION_MISSING")
-    release_id = _required_text(row["release_id"], "release_id")
-    release = rows.one(
-        "registry.analysis_release",
-        where={"release_id": release_id},
-        columns=("status", "manifest_hash", "published_at"),
-    )
-    if release is None or release["published_at"] is None:
-        raise RuntimeError("PRCB_C5_P2_SOURCE_RELEASE_MISSING")
-    manifest_hash = _required_text(release["manifest_hash"], "manifest_hash")
-    return P1ObservationInput(
-        observation_id=_required_text(row["observation_id"], "observation_id"),
-        release_id=release_id,
-        release_status=_required_text(release["status"], "release_status"),
-        release_sealed=(
-            str(release["status"]) == "PUBLISHED"
-            and len(manifest_hash) == 64
-            and all(ch in "0123456789abcdef" for ch in manifest_hash)
-        ),
-        episode_id=_required_text(row["episode_id"], "episode_id"),
-        subject_entity_id=_required_text(
-            row["subject_entity_id"],
-            "subject_entity_id",
-        ),
-        aircraft_id=_required_text(row["aircraft_id"], "aircraft_id"),
-        aircraft_model_id=_required_text(
-            row["aircraft_model_id"],
-            "aircraft_model_id",
-        ),
-        aircraft_configuration_snapshot_id=_optional_text(
-            row["aircraft_configuration_snapshot_id"]
-        ),
-        context_id=_required_text(row["context_id"], "context_id"),
-        capability_type=_required_text(
-            row["capability_type"],
-            "capability_type",
-        ),
-        metric_semantic_id=_required_text(
-            definition["metric_semantic_id"],
-            "metric_semantic_id",
-        ),
-        metric_semantic_version=_required_int(
-            definition["metric_semantic_version"],
-            "metric_semantic_version",
-        ),
-        comparison_key_hash=_required_text(
-            row["comparison_key_hash"],
-            "comparison_key_hash",
-        ),
-        evidence_set_id=_required_text(
-            row["evidence_set_id"],
-            "evidence_set_id",
-        ),
-        observed_value=_required_float(
-            row["observed_value_numeric"],
-            "observed_value_numeric",
-        ),
-        unit=_required_text(row["unit"], "unit"),
-        coverage=_required_float(row["coverage"], "coverage"),
-        confidence=_required_float(row["confidence"], "confidence"),
-        eligibility_status=_required_text(
-            row["eligibility_status"],
-            "eligibility_status",
-        ),
-        knowledge_time_utc=_required_text(row["created_at"], "created_at"),
-    )
-
-
 def prepare_prcb_c5_p2_workspace(
     rows: CanonicalRowRepository,
     *,
@@ -253,7 +112,8 @@ def prepare_prcb_c5_p2_workspace(
 ) -> PRCBC5P2QualificationSeed:
     policy = P2AuthorityPolicy.from_canonical()
     profile = P2ExecutionProfile.from_canonical()
-    target = _p1_observation(rows, observation_id)
+    repository = P2PersistenceRepository(rows)
+    target = repository.exact_source_observation(observation_id)
     if target.eligibility_status != policy.required_eligibility_status:
         raise RuntimeError("PRCB_C5_P2_TARGET_NOT_ELIGIBLE")
 
@@ -342,7 +202,6 @@ def prepare_prcb_c5_p2_workspace(
         input_hash="8" * 64,
         created_at=AS_OF,
     )
-    repository = P2PersistenceRepository(rows)
     repository.register_workspace_inputs(
         bundle,
         feature,
