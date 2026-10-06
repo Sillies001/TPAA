@@ -43,6 +43,8 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "build_service_production_runtime" in runtime
     assert "m1_fixture_root" not in runtime
     assert "desktop-p1-e2e" in runtime
+    assert "P2_ATTRIBUTION" in runtime
+    assert "prepare_prcb_c5_p2_workspace" in runtime
     assert "bootstrap_sqlite" in runtime
     assert "create_desktop_production_backup" in runtime
     assert "restore_desktop_production_backup" in runtime
@@ -75,3 +77,15 @@ def test_prcb_c5_installed_desktop_qualification_runs_inside_existing_jobs() -> 
     assert "logical_product_sha256" in tool
     assert "app/tests/" in tool
     assert "/fixtures/" in tool
+
+
+def test_prcb_c5_p2_qualification_seed_is_product_code_not_test_fixture() -> None:
+    source = (
+        ROOT / "src" / "tpaa_qualification" / "prcb_c5_p2.py"
+    ).read_text(encoding="utf-8")
+    assert "prepare_prcb_c5_p2_workspace" in source
+    assert "P2PersistenceRepository" in source
+    assert "register_workspace_inputs" in source
+    assert "exact_compute_input" in source
+    assert "tests/fixtures" not in source
+    assert "tools.testing" not in source

@@ -14,9 +14,10 @@ SRC_ROOT = APP_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from tpaa_application import JobStatus  # noqa: E402
+from tpaa_application import JobStatus, P2PersistenceRepository  # noqa: E402
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
+from tpaa_qualification import prepare_prcb_c5_p2_workspace  # noqa: E402
 from tpaa_runtime import (  # noqa: E402
     ProductionRuntime,
     ProductionRuntimeConfig,
@@ -217,14 +218,90 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     if release.get("release_id") != release_id or len(metrics) != 5:
         raise RuntimeError("installed P1 release identity/metric count mismatch")
 
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        observation_rows = uow.canonical_rows.many(
+            "metric.capability_observation",
+            where={"release_id": release_id},
+            columns=("observation_id",),
+            order_by=("observation_id",),
+        )
+        if not observation_rows:
+            raise RuntimeError("installed P1 capability observation missing")
+        observation_id = str(observation_rows[0]["observation_id"])
+        p2_seed = prepare_prcb_c5_p2_workspace(
+            uow.canonical_rows,
+            observation_id=observation_id,
+        )
+        uow.commit()
+
+    p2_submission = runtime.application.submit_job(
+        idempotency_key="prcb-c5-installed-p2",
+        command="P2_ATTRIBUTION",
+        payload={
+            "dataset_snapshot_id": p2_seed.dataset_snapshot_id,
+            "execution_time_utc": "2026-10-05T12:30:00Z",
+            "expected_version_token": 0,
+            "supersedes_estimate_id": None,
+        },
+        actor="PRCB-C5-INSTALLED",
+    )
+    if (
+        p2_submission.reused
+        or p2_submission.record.status is not JobStatus.SUCCEEDED
+    ):
+        raise RuntimeError("installed P2 attribution did not succeed")
+
+    with SQLiteDesktopUnitOfWork(database) as uow:
+        p2_release_rows = uow.canonical_rows.many(
+            "registry.analysis_release",
+            where={"compute_job_id": p2_submission.record.job_id},
+            columns=("release_id", "status"),
+            order_by=("release_id",),
+        )
+        if len(p2_release_rows) != 1:
+            raise RuntimeError("installed P2 release cardinality mismatch")
+        p2_release_id = str(p2_release_rows[0]["release_id"])
+        if str(p2_release_rows[0]["status"]) != "PUBLISHED":
+            raise RuntimeError("installed P2 release is not published")
+        run_binding = uow.canonical_rows.one(
+            "assessment.attribution_run_request_binding",
+            where={"compute_job_id": p2_submission.record.job_id},
+            columns=("attribution_run_id",),
+        )
+        if run_binding is None:
+            raise RuntimeError("installed P2 attribution binding missing")
+        attribution_run_id = str(run_binding["attribution_run_id"])
+        estimate_rows = uow.canonical_rows.many(
+            "capability.adjusted_capability_estimate",
+            where={"attribution_run_id": attribution_run_id},
+            columns=("estimate_id",),
+            order_by=("estimate_id",),
+        )
+        if len(estimate_rows) != 1:
+            raise RuntimeError("installed P2 estimate cardinality mismatch")
+        p2_estimate_id = str(estimate_rows[0]["estimate_id"])
+        p2_estimate = P2PersistenceRepository(
+            uow.canonical_rows
+        ).exact_adjusted_estimate(p2_estimate_id)
+        uow.commit()
+
     restarted = build_desktop_production_runtime(config)
     restarted_job = restarted.application.job(submission.record.job_id)
     restarted_release = restarted.application.m1_release(release_id)
     if (
         restarted_job.status is not JobStatus.SUCCEEDED
         or restarted_release != release
+        or restarted.application.job(p2_submission.record.job_id).status
+        is not JobStatus.SUCCEEDED
     ):
         raise RuntimeError("installed restart/replay verification failed")
+    with SQLiteDesktopUnitOfWork(database) as uow:
+        restarted_p2 = P2PersistenceRepository(
+            uow.canonical_rows
+        ).exact_adjusted_estimate(p2_estimate_id)
+        uow.commit()
+    if restarted_p2 != p2_estimate:
+        raise RuntimeError("installed P2 restart exact replay failed")
 
     with SQLiteDesktopUnitOfWork(database) as uow:
         audit_rows = uow.audit_log.rows()
@@ -233,10 +310,11 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         row
         for row in audit_rows
         if row.action == "JOB_SUBMIT"
-        and row.object_id == submission.record.job_id
+        and row.object_id
+        in {submission.record.job_id, p2_submission.record.job_id}
         and row.principal_key == "PRCB-C5-INSTALLED"
     )
-    if len(job_audit) != 1:
+    if len(job_audit) != 2:
         raise RuntimeError("installed durable job audit verification failed")
 
     backup = work_root / "backup"
@@ -259,13 +337,20 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     if (
         restored.application.job(submission.record.job_id).status
         is not JobStatus.SUCCEEDED
+        or restored.application.job(p2_submission.record.job_id).status
+        is not JobStatus.SUCCEEDED
         or restored.application.m1_release(release_id) != release
     ):
         raise RuntimeError("installed backup/restore historical replay failed")
 
     with SQLiteDesktopUnitOfWork(restored_database) as uow:
+        restored_p2 = P2PersistenceRepository(
+            uow.canonical_rows
+        ).exact_adjusted_estimate(p2_estimate_id)
         restored_audit = uow.audit_log.rows()
         uow.commit()
+    if restored_p2 != p2_estimate:
+        raise RuntimeError("installed P2 backup/restore exact replay failed")
     if not any(
         row.action == "JOB_SUBMIT"
         and row.object_id == submission.record.job_id
@@ -275,7 +360,7 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         raise RuntimeError("installed backup/restore audit persistence failed")
 
     return {
-        "schema": "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_E2E_V1",
+        "schema": "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P2_E2E_V1",
         "status": "PASS",
         "product_version": PRODUCT_VERSION,
         "runtime_profile": "DESKTOP",
@@ -285,6 +370,13 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "job_status": submission.record.status.value,
         "release_id": release_id,
         "metric_count": len(metrics),
+        "p2_job_id": p2_submission.record.job_id,
+        "p2_job_status": p2_submission.record.status.value,
+        "p2_release_id": p2_release_id,
+        "p2_estimate_id": p2_estimate_id,
+        "p2_estimate_status": p2_estimate.status,
+        "p2_restart_exact_replay": True,
+        "p2_backup_restore_exact_replay": True,
         "restart_exact_replay": True,
         "backup_restore_exact_replay": True,
         "persistent_audit_verified": True,

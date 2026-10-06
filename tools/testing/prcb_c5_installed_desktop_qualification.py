@@ -100,13 +100,17 @@ def _forbidden_runtime_material(stage: Path) -> tuple[str, ...]:
 
 def _logical_product(report: dict[str, Any]) -> tuple[dict[str, object], str]:
     product = {
-        "schema": "TPAA_PRCB_C5_DESKTOP_P1_LOGICAL_PRODUCT_V1",
+        "schema": "TPAA_PRCB_C5_DESKTOP_P1_P2_LOGICAL_PRODUCT_V1",
         "product_version": report.get("product_version"),
         "db_schema_version": report.get("db_schema_version"),
         "canonical_baseline": report.get("canonical_baseline"),
         "release_id": report.get("release_id"),
         "metric_count": report.get("metric_count"),
         "job_status": report.get("job_status"),
+        "p2_job_status": report.get("p2_job_status"),
+        "p2_release_id": report.get("p2_release_id"),
+        "p2_estimate_id": report.get("p2_estimate_id"),
+        "p2_estimate_status": report.get("p2_estimate_status"),
         "restart_exact_replay": report.get("restart_exact_replay"),
         "backup_restore_exact_replay": report.get("backup_restore_exact_replay"),
         "persistent_audit_verified": report.get("persistent_audit_verified"),
@@ -187,11 +191,18 @@ def qualify(
         installed = _json_stdout(completed.stdout)
         if (
             installed.get("schema")
-            != "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_E2E_V1"
+            != "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P2_E2E_V1"
             or installed.get("status") != "PASS"
             or installed.get("product_version") != "1.0.1"
             or installed.get("db_schema_version") != "1.9.0"
             or installed.get("metric_count") != 5
+            or installed.get("p2_job_status") != "SUCCEEDED"
+            or installed.get("p2_estimate_status") not in {
+                "IDENTIFIABLE",
+                "NOT_IDENTIFIABLE",
+            }
+            or installed.get("p2_restart_exact_replay") is not True
+            or installed.get("p2_backup_restore_exact_replay") is not True
             or installed.get("restart_exact_replay") is not True
             or installed.get("backup_restore_exact_replay") is not True
             or installed.get("persistent_audit_verified") is not True
