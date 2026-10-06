@@ -222,12 +222,25 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         observation_rows = uow.canonical_rows.many(
             "metric.capability_observation",
             where={"release_id": release_id},
-            columns=("observation_id",),
+            columns=(
+                "observation_id",
+                "observed_value_numeric",
+                "eligibility_status",
+            ),
             order_by=("observation_id",),
         )
-        if not observation_rows:
-            raise RuntimeError("installed P1 capability observation missing")
-        observation_id = str(observation_rows[0]["observation_id"])
+        numeric_eligible = [
+            row
+            for row in observation_rows
+            if row["eligibility_status"] == "ELIGIBLE"
+            and isinstance(row["observed_value_numeric"], (int, float))
+            and not isinstance(row["observed_value_numeric"], bool)
+        ]
+        if not numeric_eligible:
+            raise RuntimeError(
+                "installed P1 numeric eligible capability observation missing"
+            )
+        observation_id = str(numeric_eligible[0]["observation_id"])
         p2_seed = prepare_prcb_c5_p2_workspace(
             uow.canonical_rows,
             observation_id=observation_id,
@@ -351,12 +364,18 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         uow.commit()
     if restored_p2 != p2_estimate:
         raise RuntimeError("installed P2 backup/restore exact replay failed")
-    if not any(
-        row.action == "JOB_SUBMIT"
-        and row.object_id == submission.record.job_id
-        and row.principal_key == "PRCB-C5-INSTALLED"
+    restored_submit_ids = {
+        row.object_id
         for row in restored_audit
-    ):
+        if row.action == "JOB_SUBMIT"
+        and row.principal_key == "PRCB-C5-INSTALLED"
+        and row.object_id
+        in {submission.record.job_id, p2_submission.record.job_id}
+    }
+    if restored_submit_ids != {
+        submission.record.job_id,
+        p2_submission.record.job_id,
+    }:
         raise RuntimeError("installed backup/restore audit persistence failed")
 
     return {

@@ -1,9 +1,5 @@
 """M5/PRCB formal qualification substrate."""
 
-from .prcb_c5_p2 import (
-    PRCBC5P2QualificationSeed,
-    prepare_prcb_c5_p2_workspace,
-)
 from .m5_batch2 import (
     validate_four_profile_candidate,
     validate_package_qualification,
@@ -29,6 +25,10 @@ from .m5_profiles import (
     validate_m5_formal_claim_prerequisites,
     validate_result_binding,
     validate_target_hardware,
+)
+from .prcb_c5_p2 import (
+    PRCBC5P2QualificationSeed,
+    prepare_prcb_c5_p2_workspace,
 )
 
 __all__ = [
