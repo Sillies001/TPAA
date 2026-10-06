@@ -550,18 +550,22 @@ def create_product_workspace(
     body_layout.addWidget(stack)
     outer.addWidget(body)
 
+    m1_tabs = qt_widgets.QTabWidget(stack)
+    m1_tabs.setObjectName("tpaaC4SessionM1Tabs")
     discovery = _create_session_release_browser(
         qt_widgets,
-        stack,
+        m1_tabs,
         transport=transport,
     )
     m1 = create_m1_workspace(
         qt_core,
         qt_widgets,
-        stack,
+        m1_tabs,
         transport=transport,
         diagnostics_provider=diagnostics_provider,
     )
+    m1_tabs.addTab(discovery, "Session / Release")
+    m1_tabs.addTab(m1, "Data Quality / Metric Evidence")
     m3 = _create_m3_launcher(qt_core, qt_widgets, stack, transport=transport)
 
     m4_tabs = qt_widgets.QTabWidget(stack)
@@ -590,8 +594,7 @@ def create_product_workspace(
     runtime = _create_runtime_page(qt_widgets, stack, transport=transport)
 
     pages = {
-        "Discovery": discovery,
-        "M1": m1,
+        "M1": m1_tabs,
         "M3": m3,
         "M4": m4_tabs,
         "M6": m6,
@@ -605,7 +608,7 @@ def create_product_workspace(
         page_index[key] = stack.addWidget(page)
 
     slot_surface = {
-        "P01": "Discovery",
+        "P01": "M1",
         "P02": "M1",
         "P03": "M1",
         "P04": "M3",
@@ -629,6 +632,10 @@ def create_product_workspace(
     def change_page(row: int) -> None:
         if 0 <= row < len(row_to_page):
             stack.setCurrentIndex(row_to_page[row])
+            if row == 0:
+                m1_tabs.setCurrentIndex(0)
+            elif row in {1, 2}:
+                m1_tabs.setCurrentIndex(1)
 
     navigation.currentRowChanged.connect(change_page)
     navigation.setCurrentRow(0)
