@@ -547,7 +547,10 @@ class ProductionJobExecutor:
 
         run = value.attribution_run
         if value.model_artifact_json is None:
-            if run.model_artifact_uri is not None or run.model_artifact_hash is not None:
+            if (
+                run.model_artifact_uri is not None
+                or run.model_artifact_hash is not None
+            ):
                 raise ProductionJobExecutionError(
                     "PRCB_C2_P2_MODEL_ARTIFACT_DRIFT",
                     run.attribution_run_id,
