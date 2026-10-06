@@ -17,11 +17,13 @@ from tpaa_application import (
     JobRecord,
     JobStatus,
     JobSubmission,
+    P3PersistenceRepository,
     P6PersistenceRepository,
     ProductionImportService,
     SourceImportCommand,
     SourceProvenanceRepository,
 )
+from tpaa_capability.p3_twin import P3CapabilityEstimate
 from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
 from tpaa_capability.p6_forecast import P6ForecastRevision
 from tpaa_ingest import (
@@ -49,9 +51,11 @@ from tpaa_storage import (
 
 from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
 from .production_worker import (
+    P3_ESTIMATE_COMMAND,
     P6_COUNTERFACTUAL_COMMAND,
     P6_FORECAST_COMMAND,
     ProductionP1WorkerProduct,
+    ProductionP3EstimateWorkerInput,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
 )
@@ -410,8 +414,87 @@ class ProductionJobExecutor:
                 idempotency_key=f"{job_key}:P1_RELEASE",
                 expected_version_token=expected_version,
             )
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
+
+    def _p3_repository(
+        self,
+        uow: RuntimeCanonicalUnitOfWork,
+    ) -> P3PersistenceRepository:
+        return P3PersistenceRepository(
+            uow.canonical_rows,
+            object_store=self._object_store,
+        )
+
+    def _execute_p3_estimate(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        twin_revision_id = _text(
+            payload.get("twin_revision_id"),
+            field="twin_revision_id",
+        )
+        capability_type = _text(
+            payload.get("capability_type"),
+            field="capability_type",
+        )
+        condition_point = _mapping(
+            payload.get("condition_point"),
+            field="condition_point",
+        )
+        as_of_time_utc = _text(
+            payload.get("as_of_time_utc"),
+            field="as_of_time_utc",
+        )
+        created_at_utc = _text(
+            payload.get("created_at_utc"),
+            field="created_at_utc",
+        )
+        with self._write_uow_factory() as uow:
+            repository = self._p3_repository(uow)
+            twin = repository.exact_twin_revision(twin_revision_id)
+            components = repository.exact_twin_components(twin_revision_id)
+            uow.commit()
+
+        result = self._dispatcher.dispatch(
+            WorkerPayload(
+                job_id=job_id,
+                request_hash=request_hash,
+                command=P3_ESTIMATE_COMMAND,
+                handler=_GOVERNED_HANDLER,
+                domain_payload=ProductionP3EstimateWorkerInput(
+                    job_payload=dict(payload),
+                    twin=twin,
+                    components=components,
+                    capability_type=capability_type,
+                    condition_point=condition_point,
+                    as_of_time_utc=as_of_time_utc,
+                    created_at_utc=created_at_utc,
+                ),
+            ),
+            timeout_seconds=120.0,
+        )
+        value = result.domain_payload
+        if result.status != "SUCCEEDED" or not isinstance(
+            value,
+            P3CapabilityEstimate,
+        ):
+            raise ProductionJobExecutionError(
+                result.error_code or "PRCB_C2_WORKER_FAILED",
+                job_id,
+            )
+        with self._write_uow_factory() as uow:
+            self._p3_repository(uow).register_estimate(value)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
+            uow.commit()
 
     def _p6_repository(
         self,
@@ -471,6 +554,9 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_forecast(value)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
     def _execute_p6_counterfactual(
@@ -525,6 +611,9 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_counterfactual(value)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
             uow.commit()
 
     def execute(
@@ -542,6 +631,13 @@ class ProductionJobExecutor:
                 request_hash=request_hash,
                 job_key=job_key,
                 command=command,
+                payload=payload,
+            )
+            return
+        if command == P3_ESTIMATE_COMMAND:
+            self._execute_p3_estimate(
+                job_id=job_id,
+                request_hash=request_hash,
                 payload=payload,
             )
             return
@@ -665,9 +761,19 @@ class DurableApplicationJobControl:
             return JobSubmission(record=_job_record(current), reused=False)
 
         with self._write_uow_factory() as uow:
-            terminal = DurableJobControl(
+            control = DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
-            ).succeed(running.job_id)
+            )
+            current = control.get(running.job_id)
+            if current.status is ComputeJobState.RUNNING:
+                terminal = control.succeed(running.job_id)
+            elif current.status is ComputeJobState.SUCCEEDED:
+                terminal = current
+            else:
+                raise DurableJobControlError(
+                    "B3_JOB_TERMINAL_STATE_INVALID",
+                    f"{running.job_id}:{current.status.value}",
+                )
             uow.commit()
         return JobSubmission(record=_job_record(terminal), reused=False)
 

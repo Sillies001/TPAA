@@ -13,6 +13,11 @@ from typing import cast
 from uuid import UUID, uuid5
 
 from tpaa_application.m1_publication import to_core_publication_bundle
+from tpaa_capability.p3_twin import (
+    P3AircraftTwinRevision,
+    P3TwinComponentBinding,
+    evaluate_twin_capability_estimate,
+)
 from tpaa_capability.p6_counterfactual import execute_p6_counterfactual
 from tpaa_capability.p6_forecast import (
     P6ManagedModelObject,
@@ -43,6 +48,7 @@ from tpaa_world import AircraftObservedWorld, WorldEvidenceRef
 
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_PRCB_C2_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
+P3_ESTIMATE_COMMAND = "P3_ESTIMATE"
 P6_FORECAST_COMMAND = "P6_FORECAST"
 P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
 _REPRESENTATIVE_CODES = (
@@ -91,6 +97,19 @@ class ProductionP1WorkerProduct:
     metric_batch_hash: str
     source_sha256: str
     prerequisites: tuple[ProductionPrerequisiteRow, ...]
+
+
+@dataclass(frozen=True)
+class ProductionP3EstimateWorkerInput:
+    """Exact durable P3 inputs plus canonical Job payload for worker verification."""
+
+    job_payload: dict[str, object]
+    twin: P3AircraftTwinRevision
+    components: tuple[P3TwinComponentBinding, ...]
+    capability_type: str
+    condition_point: dict[str, object]
+    as_of_time_utc: str
+    created_at_utc: str
 
 
 @dataclass(frozen=True)
@@ -772,6 +791,32 @@ def _execute_p1(payload: WorkerPayload) -> WorkerResult:
     )
 
 
+def _execute_p3_estimate(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP3EstimateWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    value = evaluate_twin_capability_estimate(
+        twin=body.twin,
+        components=body.components,
+        capability_type=body.capability_type,
+        condition_point=body.condition_point,
+        as_of_time_utc=body.as_of_time_utc,
+        created_at_utc=body.created_at_utc,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(value.estimate_id,),
+        domain_payload=value,
+    )
+
+
 def _execute_p6_forecast(payload: WorkerPayload) -> WorkerResult:
     body = payload.domain_payload
     if not isinstance(body, ProductionP6ForecastWorkerInput):
@@ -827,6 +872,8 @@ def execute(payload: WorkerPayload) -> WorkerResult:
     try:
         if payload.command == P1_BUILD_COMMAND:
             return _execute_p1(payload)
+        if payload.command == P3_ESTIMATE_COMMAND:
+            return _execute_p3_estimate(payload)
         if payload.command == P6_FORECAST_COMMAND:
             return _execute_p6_forecast(payload)
         if payload.command == P6_COUNTERFACTUAL_COMMAND:

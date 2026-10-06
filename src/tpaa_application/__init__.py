@@ -130,6 +130,11 @@ from .p3_persistence import (
     P3PersistenceRepository,
     P3WorkspaceLayerResolver,
 )
+from .p4_p5_compute_input import (
+    P4P5ComputeInputError,
+    P4P5ComputeInputRepository,
+    P5DurableComputeInput,
+)
 from .p4_p5_persistence import P4P5PersistenceError, P4P5PersistenceRepository
 from .p6_persistence import (
     DurableP6ModelBuildResolver,
@@ -197,6 +202,9 @@ __all__ = [
     "P3PersistenceError",
     "P3PersistenceRepository",
     "P3WorkspaceLayerResolver",
+    "P4P5ComputeInputError",
+    "P4P5ComputeInputRepository",
+    "P5DurableComputeInput",
     "P4P5PersistenceError",
     "P4P5PersistenceRepository",
     "DurableP6ModelBuildResolver",
