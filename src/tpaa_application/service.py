@@ -159,6 +159,18 @@ class RuntimeBaselineStatusUseCase(Protocol):
         ...
 
 
+class ProductDiscoveryUseCase(Protocol):
+    """Immutable product-navigation index over durable exact identities."""
+
+    def sessions(self) -> dict[str, object]: ...
+
+    def releases(self, session_id: str) -> dict[str, object]: ...
+
+    def products(self, kind: str) -> dict[str, object]: ...
+
+    def release_presentation(self, release_id: str) -> dict[str, object]: ...
+
+
 class FeatureAvailabilityUseCase(Protocol):
     """Runtime-composition dependency for product feature availability."""
 
@@ -199,6 +211,7 @@ class ApplicationService:
         m7_workspace: M7WorkspaceService | None = None,
         m8_workspace: M8WorkspaceService | None = None,
         m9_workspace: M9WorkspaceService | None = None,
+        product_discovery: ProductDiscoveryUseCase | None = None,
         feature_availability: FeatureAvailabilityUseCase | None = None,
         qualification_status: QualificationStatusUseCase | None = None,
         operational_status: OperationalStatusUseCase | None = None,
@@ -213,6 +226,7 @@ class ApplicationService:
         self._m7_workspace = m7_workspace
         self._m8_workspace = m8_workspace
         self._m9_workspace = m9_workspace
+        self._product_discovery = product_discovery
         self._feature_availability = feature_availability
         self._qualification_status = qualification_status
         self._operational_status = operational_status
@@ -231,6 +245,26 @@ class ApplicationService:
         if self._get_runtime_baseline_status is None:
             raise RuntimeError("runtime baseline status use case is not configured")
         return self._get_runtime_baseline_status.execute()
+
+    def _discovery(self) -> ProductDiscoveryUseCase:
+        if self._product_discovery is None:
+            raise RuntimeError("product discovery use case is not configured")
+        return self._product_discovery
+
+    def discover_sessions(self) -> dict[str, object]:
+        return dict(self._discovery().sessions())
+
+    def discover_releases(self, session_id: str) -> dict[str, object]:
+        return dict(self._discovery().releases(session_id))
+
+    def discover_products(self, kind: str) -> dict[str, object]:
+        return dict(self._discovery().products(kind))
+
+    def discover_release_presentation(
+        self,
+        release_id: str,
+    ) -> dict[str, object]:
+        return dict(self._discovery().release_presentation(release_id))
 
     def feature_availability(self) -> dict[str, object]:
         """Return the PIQB runtime feature-availability projection."""

@@ -45,6 +45,7 @@ _LOCAL_HTTP_ALLOWED_PREFIXES = (
     "/m7/",
     "/m8/",
     "/m9/",
+    "/api/v1/",
 )
 
 
@@ -396,6 +397,27 @@ class LocalBackendController:
             path,
             body=None if body is None else dict(body),
             headers=None if headers is None else dict(headers),
+        )
+
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        """Scoped transport for immutable Product API v1/discovery reads."""
+
+        if method.upper() != "GET":
+            raise LocalBackendError("PRODUCT_HTTP_METHOD_FORBIDDEN")
+        if not path.startswith("/api/v1/"):
+            raise LocalBackendError("PRODUCT_HTTP_PATH_FORBIDDEN")
+        return self.request_json(
+            method,
+            path,
+            body=body,
+            headers=headers,
         )
 
     def m3_request_json(

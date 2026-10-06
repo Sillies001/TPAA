@@ -25,6 +25,13 @@ def test_product_surface_adapters_are_scoped_and_reuse_authenticated_transport(
         return 200, {"ok": True}
 
     monkeypatch.setattr(controller, "request_json", fake_request)
+    assert (
+        controller.product_request_json(
+            "GET",
+            "/api/v1/discovery/sessions",
+        )[0]
+        == 200
+    )
     assert controller.m3_request_json("GET", "/m3/workspace/x")[0] == 200
     assert controller.m4_request_json("POST", "/m4/debrief/annotations", body={"a": 1})[0] == 200
     assert controller.m6_request_json("GET", "/m6/p2/releases/x/estimates/y/comparison")[0] == 200
@@ -35,7 +42,7 @@ def test_product_surface_adapters_are_scoped_and_reuse_authenticated_transport(
         "/m9/workspace/forecast/x/counterfactual/y/recommendation/z",
     )[0] == 200
     assert controller.runtime_request_json("GET", "/runtime/qualification")[0] == 200
-    assert len(calls) == 7
+    assert len(calls) == 8
 
 
 def test_product_surface_adapters_fail_closed_on_cross_surface_or_runtime_mutation(
@@ -53,6 +60,11 @@ def test_product_surface_adapters_fail_closed_on_cross_surface_or_runtime_mutati
         raise AssertionError((method, path, body, headers))
 
     monkeypatch.setattr(controller, "request_json", unused)
+    with pytest.raises(LocalBackendError, match="PRODUCT_HTTP_METHOD_FORBIDDEN"):
+        controller.product_request_json(
+            "POST",
+            "/api/v1/discovery/sessions",
+        )
     with pytest.raises(LocalBackendError, match="M7_HTTP_PATH_FORBIDDEN"):
         controller.m7_request_json("GET", "/m8/workspace/p4/x/p5/y")
     with pytest.raises(LocalBackendError, match="RUNTIME_HTTP_METHOD_FORBIDDEN"):

@@ -10,6 +10,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
 
+from .discovery import ProductDiscoveryError, product_items
+
 
 class M4DesktopTransport(Protocol):
     """Narrow GUI-side M4 HTTP transport contract."""
@@ -22,6 +24,15 @@ class M4DesktopTransport(Protocol):
         body: dict[str, object] | None = None,
     ) -> tuple[int, dict[str, Any]]:
         ...
+
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, Mapping[str, object]]: ...
 
 
 class M4WorkspacePresentationError(RuntimeError):
@@ -632,11 +643,14 @@ def create_m4_workspace(
     root.setObjectName("tpaaM4Workspace")
     layout = qt_widgets.QVBoxLayout(root)
 
-    release_input = qt_widgets.QLineEdit(root)
+    release_input = qt_widgets.QComboBox(root)
     release_input.setObjectName("tpaaM4ReleaseInput")
+    release_refresh = qt_widgets.QPushButton("Refresh exact Release discovery", root)
+    release_refresh.setObjectName("tpaaM4ReleaseRefresh")
     trend_button = qt_widgets.QPushButton("Load longitudinal trend", root)
     trend_button.setObjectName("tpaaM4TrendLoad")
     layout.addWidget(release_input)
+    layout.addWidget(release_refresh)
     layout.addWidget(trend_button)
 
     trend_identity = qt_widgets.QLabel("Trend: unavailable", root)
@@ -670,7 +684,7 @@ def create_m4_workspace(
     view_mode = qt_widgets.QComboBox(root)
     view_mode.setObjectName("tpaaM4DebriefViewMode")
     view_mode.addItems(["ORIGINAL_AS_KNOWN", "RETROSPECTIVE"])
-    retrospective_input = qt_widgets.QLineEdit(root)
+    retrospective_input = qt_widgets.QComboBox(root)
     retrospective_input.setObjectName("tpaaM4RetrospectiveReleaseInput")
     debrief_button = qt_widgets.QPushButton("Load Debrief", root)
     debrief_button.setObjectName("tpaaM4DebriefLoad")
@@ -734,10 +748,54 @@ def create_m4_workspace(
 
     active_trend: M4TrendWorkspaceModel | None = None
     known_annotation_ids: list[str] = []
+    release_discovery: list[dict[str, object]] = []
+
+    def update_retrospective(_release_id: str = "") -> None:
+        base_id = release_input.currentText().strip()
+        base_scope: str | None = None
+        for item in release_discovery:
+            if item.get("exact_id") != base_id:
+                continue
+            metadata = item.get("metadata")
+            if isinstance(metadata, Mapping):
+                scope = metadata.get("scope_key")
+                if isinstance(scope, str):
+                    base_scope = scope
+            break
+        retrospective_input.clear()
+        retrospective_input.addItem("")
+        if base_scope is None:
+            return
+        for item in release_discovery:
+            metadata = item.get("metadata")
+            if not isinstance(metadata, Mapping):
+                continue
+            if metadata.get("scope_key") != base_scope:
+                continue
+            retrospective_input.addItem(str(item["exact_id"]))
+
+    def refresh_releases() -> None:
+        nonlocal release_discovery
+        try:
+            release_discovery = product_items(
+                transport,
+                "M4_RELEASE",
+            )
+        except ProductDiscoveryError as exc:
+            trend_status.setText(f"Discovery: ERROR · {exc}")
+            return
+        release_input.clear()
+        release_input.addItems(
+            [str(item["exact_id"]) for item in release_discovery]
+        )
+        update_retrospective()
+        trend_status.setText(
+            f"Discovery: {len(release_discovery)} immutable Releases"
+        )
 
     def load_trend() -> None:
         nonlocal active_trend
-        release_id = release_input.text().strip()
+        release_id = release_input.currentText().strip()
         status, payload = transport.m4_request_json(
             "GET",
             f"/m4/longitudinal/releases/{release_id}/trend",
@@ -780,12 +838,12 @@ def create_m4_workspace(
                 )
 
     def load_debrief() -> None:
-        release_id = release_input.text().strip()
+        release_id = release_input.currentText().strip()
         mode = view_mode.currentText()
         query = (
             f"?view_mode={mode}&annotation_view=NONE"
         )
-        retrospective = retrospective_input.text().strip()
+        retrospective = retrospective_input.currentText().strip()
         if mode == "RETROSPECTIVE":
             query += f"&retrospective_release_id={retrospective}"
         status, payload = transport.m4_request_json(
@@ -861,6 +919,8 @@ def create_m4_workspace(
             f"revision={result.get('revision_no')} · id={annotation_id}"
         )
 
+    release_input.currentTextChanged.connect(update_retrospective)
+    release_refresh.clicked.connect(refresh_releases)
     trend_button.clicked.connect(load_trend)
     debrief_button.clicked.connect(load_debrief)
     annotation_button.clicked.connect(apply_annotation)

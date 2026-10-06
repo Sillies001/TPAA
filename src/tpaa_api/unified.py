@@ -22,6 +22,7 @@ from .m6_app import register_m6_routes
 from .m7_app import register_m7_routes
 from .m8_app import M8PrincipalResolver, register_m8_routes
 from .m9_app import M9PrincipalResolver, register_m9_routes
+from .product_discovery import register_product_discovery_routes
 from .product_v1 import register_product_v1_routes
 from .runtime import register_product_runtime_routes
 
@@ -124,6 +125,7 @@ def register_unified_routes(
         application,
         principal_resolver=m9_principal_resolver,
     )
+    register_product_discovery_routes(app, application)
     register_product_v1_routes(
         app,
         application,

@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
 
+from .discovery import ProductDiscoveryError, product_items
+
 
 class M9WorkspacePresentationError(RuntimeError):
     """Fail-closed M9 GUI projection error."""
@@ -18,6 +20,15 @@ class M9DesktopTransport(Protocol):
         self,
         method: str,
         path: str,
+    ) -> tuple[int, Mapping[str, object]]: ...
+
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> tuple[int, Mapping[str, object]]: ...
 
 
@@ -303,17 +314,20 @@ def create_m9_workspace(
     root = qt_widgets.QWidget(parent)
     root.setObjectName("tpaaM9Workspace")
     layout = qt_widgets.QVBoxLayout(root)
-    forecast_input = qt_widgets.QLineEdit(root)
+    forecast_input = qt_widgets.QComboBox(root)
     forecast_input.setObjectName("tpaaM9ForecastRevisionInput")
-    counterfactual_input = qt_widgets.QLineEdit(root)
+    counterfactual_input = qt_widgets.QComboBox(root)
     counterfactual_input.setObjectName("tpaaM9CounterfactualRevisionInput")
-    recommendation_input = qt_widgets.QLineEdit(root)
+    recommendation_input = qt_widgets.QComboBox(root)
     recommendation_input.setObjectName("tpaaM9RecommendationRevisionInput")
+    refresh_button = qt_widgets.QPushButton("Refresh P6 discovery", root)
+    refresh_button.setObjectName("tpaaM9DiscoveryRefresh")
     load_button = qt_widgets.QPushButton("Load exact P6 workspace", root)
     for widget in (
+        recommendation_input,
         forecast_input,
         counterfactual_input,
-        recommendation_input,
+        refresh_button,
         load_button,
     ):
         layout.addWidget(widget)
@@ -335,10 +349,57 @@ def create_m9_workspace(
     ):
         layout.addWidget(widget)
 
+    recommendation_items: list[dict[str, object]] = []
+
+    def _metadata_strings(value: object) -> list[str]:
+        if not isinstance(value, list):
+            return []
+        return [str(item) for item in value if isinstance(item, str)]
+
+    def update_sources(_recommendation: str = "") -> None:
+        recommendation_id = recommendation_input.currentText().strip()
+        forecasts: list[str] = []
+        counterfactuals: list[str] = []
+        for item in recommendation_items:
+            if item.get("exact_id") != recommendation_id:
+                continue
+            metadata = item.get("metadata")
+            if isinstance(metadata, Mapping):
+                forecasts = _metadata_strings(
+                    metadata.get("source_forecast_result_ids")
+                )
+                counterfactuals = _metadata_strings(
+                    metadata.get("source_counterfactual_run_ids")
+                )
+            break
+        forecast_input.clear()
+        forecast_input.addItems(forecasts)
+        counterfactual_input.clear()
+        counterfactual_input.addItems(counterfactuals)
+
+    def refresh_discovery() -> None:
+        nonlocal recommendation_items
+        try:
+            recommendation_items = product_items(
+                transport,
+                "P6_RECOMMENDATION",
+            )
+        except ProductDiscoveryError as exc:
+            recommendation_label.setText(f"P6 discovery: ERROR · {exc}")
+            return
+        recommendation_input.clear()
+        recommendation_input.addItems(
+            [str(item["exact_id"]) for item in recommendation_items]
+        )
+        update_sources()
+        recommendation_label.setText(
+            f"P6 discovery: {len(recommendation_items)} recommendations"
+        )
+
     def load_workspace() -> None:
-        forecast_id = forecast_input.text().strip()
-        counterfactual_id = counterfactual_input.text().strip()
-        recommendation_id = recommendation_input.text().strip()
+        forecast_id = forecast_input.currentText().strip()
+        counterfactual_id = counterfactual_input.currentText().strip()
+        recommendation_id = recommendation_input.currentText().strip()
         path = (
             f"/m9/workspace/forecast/{forecast_id}"
             f"/counterfactual/{counterfactual_id}"
@@ -375,5 +436,7 @@ def create_m9_workspace(
             f"approval={model.recommendation.approval_state}"
         )
 
+    recommendation_input.currentTextChanged.connect(update_sources)
+    refresh_button.clicked.connect(refresh_discovery)
     load_button.clicked.connect(load_workspace)
     return root
