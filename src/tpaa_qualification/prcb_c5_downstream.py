@@ -49,15 +49,15 @@ from .prcb_c5_p3_seed import (
     build_prcb_c5_p3_fixture,
     seed_prcb_c5_p3_upstream,
 )
+from .prcb_c5_p4_p5_seed import AIRCRAFT as P45_AIRCRAFT
+from .prcb_c5_p4_p5_seed import AS_OF as P45_AS_OF
+from .prcb_c5_p4_p5_seed import EPISODE as P45_EPISODE
+from .prcb_c5_p4_p5_seed import EVIDENCE as P45_EVIDENCE
+from .prcb_c5_p4_p5_seed import ROLE_ARTIFACT as P45_ROLE_ARTIFACT
+from .prcb_c5_p4_p5_seed import SESSION as P45_SESSION
+from .prcb_c5_p4_p5_seed import TEAM as P45_TEAM
+from .prcb_c5_p4_p5_seed import TWIN as P45_TWIN
 from .prcb_c5_p4_p5_seed import (
-    AIRCRAFT as P45_AIRCRAFT,
-    AS_OF as P45_AS_OF,
-    EPISODE as P45_EPISODE,
-    EVIDENCE as P45_EVIDENCE,
-    ROLE_ARTIFACT as P45_ROLE_ARTIFACT,
-    SESSION as P45_SESSION,
-    TEAM as P45_TEAM,
-    TWIN as P45_TWIN,
     build_prcb_c5_p4_subject,
     seed_prcb_c5_p4_p5_upstream,
 )

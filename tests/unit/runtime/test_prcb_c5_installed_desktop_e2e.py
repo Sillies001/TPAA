@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tools.packaging.prcb_runtime_entry import _desktop_p1_e2e
+from tools.packaging.prcb_runtime_entry import _desktop_e2e
 
 ROOT = Path(__file__).resolve().parents[3]
 SOURCE = (
@@ -15,11 +15,11 @@ SOURCE = (
 )
 
 
-def test_prcb_c5_installed_desktop_p1_restart_recovery_audit(
+def test_prcb_c5_installed_desktop_p1_p6_restart_recovery_audit(
     tmp_path: Path,
 ) -> None:
-    result = _desktop_p1_e2e(tmp_path / "installed-e2e", SOURCE)
-    assert result["schema"] == "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P2_E2E_V1"
+    result = _desktop_e2e(tmp_path / "installed-e2e", SOURCE)
+    assert result["schema"] == "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P6_E2E_V1"
     assert result["status"] == "PASS"
     assert result["product_version"] == "1.0.1"
     assert result["db_schema_version"] == "1.9.0"
@@ -30,8 +30,15 @@ def test_prcb_c5_installed_desktop_p1_restart_recovery_audit(
     assert result["p2_qualification_as_of_utc"] == "2026-12-31T23:58:00Z"
     assert result["p2_execution_time_utc"] == "2026-12-31T23:59:00Z"
     assert result["p2_estimate_status"] in {"IDENTIFIABLE", "NOT_IDENTIFIABLE"}
+    assert result["p3_job_status"] == "SUCCEEDED"
+    assert result["p4_job_status"] == "SUCCEEDED"
+    assert result["p5_job_status"] == "SUCCEEDED"
+    assert result["p6_forecast_job_status"] == "SUCCEEDED"
+    assert result["p6_counterfactual_job_status"] == "SUCCEEDED"
     assert result["p2_restart_exact_replay"] is True
     assert result["p2_backup_restore_exact_replay"] is True
+    assert result["p3_p6_restart_exact_replay"] is True
+    assert result["p3_p6_backup_restore_exact_replay"] is True
     assert result["restart_exact_replay"] is True
     assert result["backup_restore_exact_replay"] is True
     assert result["persistent_audit_verified"] is True
