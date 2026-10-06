@@ -29,6 +29,14 @@ from tools.packaging.m5_runtime_bundle import (  # noqa: E402
 
 CONTRACT = REPO_ROOT / "docs" / "baseline" / "PRCB-1.0" / "C5_RELEASE_CONTRACT.json"
 RUNTIME_ENTRY = REPO_ROOT / "tools" / "packaging" / "prcb_runtime_entry.py"
+QUALIFICATION_SOURCE = (
+    REPO_ROOT
+    / "docs"
+    / "baseline"
+    / "PRCB-1.0"
+    / "qualification"
+    / "PRCB_C2_NOMINAL_FLIGHT.json"
+)
 TARGET_VERSION = "1.0.1"
 
 
@@ -53,6 +61,12 @@ def _install_runtime_entry(stage: Path, profile: str) -> None:
     app_packaging.mkdir(parents=True, exist_ok=True)
     (app_packaging / "m5_runtime_entry.py").unlink(missing_ok=True)
     shutil.copy2(RUNTIME_ENTRY, app_packaging / RUNTIME_ENTRY.name)
+    qualification_root = stage / "app" / "qualification"
+    qualification_root.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(
+        QUALIFICATION_SOURCE,
+        qualification_root / QUALIFICATION_SOURCE.name,
+    )
     default_command = "ready"
     if profile in WINDOWS_PROFILES:
         launcher = stage / "run.cmd"
@@ -144,6 +158,9 @@ def build_prcb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
             "tests_packaged": False,
             "fixtures_packaged": False,
             "runtime_entry": "tools/packaging/prcb_runtime_entry.py",
+            "production_qualification_source": (
+                "qualification/PRCB_C2_NOMINAL_FLIGHT.json"
+            ),
             "file_inventory_sha256": _canonical_hash(inventory),
         }
         _write_json(release_root / "build-manifest.json", build_manifest)

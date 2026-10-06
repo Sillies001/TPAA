@@ -42,4 +42,10 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "build_desktop_production_runtime" in runtime
     assert "build_service_production_runtime" in runtime
     assert "m1_fixture_root" not in runtime
+    assert "desktop-p1-e2e" in runtime
+    assert "bootstrap_sqlite" in runtime
+    assert "create_desktop_production_backup" in runtime
+    assert "restore_desktop_production_backup" in runtime
+    assert "SQLiteDesktopUnitOfWork" in runtime
     assert "formal_release_claimed" in runtime
+    assert "PRCB_C2_NOMINAL_FLIGHT.json" in packager
