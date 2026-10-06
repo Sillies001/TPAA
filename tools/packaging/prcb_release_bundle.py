@@ -7,14 +7,17 @@ import argparse
 import hashlib
 import json
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from tools.manifest.build_artifacts import git_revision, sha256_file
-from tools.packaging.m5_runtime_bundle import (
+from tools.manifest.build_artifacts import git_revision, sha256_file  # noqa: E402
+from tools.packaging.m5_runtime_bundle import (  # noqa: E402
     LINUX_PROFILES,
     WINDOWS_PROFILES,
     _copy_app,
