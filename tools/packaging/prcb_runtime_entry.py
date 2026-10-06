@@ -15,6 +15,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from tpaa_runtime import (  # noqa: E402
+    ProductionRuntime,
     ProductionRuntimeConfig,
     RuntimeProfile,
     build_desktop_production_runtime,
@@ -41,7 +42,7 @@ def _authority_root() -> Path:
     return root
 
 
-def _runtime(profile_id: str):
+def _runtime(profile_id: str) -> ProductionRuntime:
     object_root = Path(_required_env("TPAA_OBJECT_ROOT"))
     if profile_id in DESKTOP_PROFILES:
         database = Path(_required_env("TPAA_DESKTOP_DATABASE"))
