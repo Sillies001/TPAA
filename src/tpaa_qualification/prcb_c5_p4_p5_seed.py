@@ -24,6 +24,7 @@ P5_ID = "94100000-0000-4000-8000-00000000000e"
 AS_OF = "2026-09-20T12:00:00Z"
 CREATED = "2026-09-20T12:30:00Z"
 
+
 def build_prcb_c5_p4_subject() -> P4SubjectContext:
     subject_key = pseudonymous_subject_key(ACTOR)
     identity = {
