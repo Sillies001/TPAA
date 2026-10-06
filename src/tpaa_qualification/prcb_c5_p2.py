@@ -11,9 +11,9 @@ from tpaa_assessment import (
     P2AuthorityPolicy,
     P2CohortSnapshot,
     P2ExecutionProfile,
-    P2FactorFeatureSet,
     P2ReferenceCondition,
     build_p2_input_bundle,
+    materialize_factor_feature_set,
 )
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 
@@ -23,7 +23,6 @@ ATTRIBUTION_ARTIFACT = "97000000-0000-4000-8000-000000000014"
 FEATURE_OBJECT = "97000000-0000-4000-8000-000000000015"
 REFERENCE_OBJECT = "97000000-0000-4000-8000-000000000016"
 ATTRIBUTION_OBJECT = "97000000-0000-4000-8000-000000000017"
-FEATURE_SET = "97000000-0000-4000-8000-000000000018"
 COHORT = "97000000-0000-4000-8000-000000000019"
 QUALIFICATION_AS_OF_UTC = "2026-12-31T23:58:00Z"
 QUALIFICATION_EXECUTION_TIME_UTC = "2026-12-31T23:59:00Z"
@@ -190,19 +189,16 @@ def prepare_prcb_c5_p2_workspace(
         ),
         as_of_utc=QUALIFICATION_AS_OF_UTC,
     )
-    feature = P2FactorFeatureSet(
-        factor_feature_set_id=FEATURE_SET,
-        feature_spec_id=feature_spec.logical_key,
-        feature_spec_version=feature_spec.artifact_version,
-        source_observation_id=target.observation_id,
-        reference_condition_id=REFERENCE_ARTIFACT,
-        feature_values=(("x", 3.0),),
-        missing_mask=(("x", False),),
+    feature = materialize_factor_feature_set(
+        source=target,
+        feature_spec=feature_spec,
+        factor_order=("x",),
+        factor_values={"x": 3.0},
         world_refs=(),
-        coverage=target.coverage,
         confidence=target.confidence,
-        input_hash="8" * 64,
         created_at=QUALIFICATION_AS_OF_UTC,
+        reference_condition_id=REFERENCE_ARTIFACT,
+        profile=profile,
     )
     repository.register_workspace_inputs(
         bundle,

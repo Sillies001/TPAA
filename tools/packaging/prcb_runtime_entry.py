@@ -262,7 +262,17 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         p2_submission.reused
         or p2_submission.record.status is not JobStatus.SUCCEEDED
     ):
-        raise RuntimeError("installed P2 attribution did not succeed")
+        with SQLiteDesktopUnitOfWork(database) as uow:
+            durable_failure = uow.canonical_rows.one(
+                "registry.compute_job",
+                where={"job_id": p2_submission.record.job_id},
+                columns=("status", "reason_codes", "error_detail"),
+            )
+            uow.commit()
+        raise RuntimeError(
+            "installed P2 attribution did not succeed: "
+            f"{durable_failure!r}"
+        )
 
     with SQLiteDesktopUnitOfWork(database) as uow:
         p2_release_rows = uow.canonical_rows.many(

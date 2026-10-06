@@ -86,6 +86,8 @@ def test_prcb_c5_p2_qualification_seed_is_product_code_not_test_fixture() -> Non
     assert "prepare_prcb_c5_p2_workspace" in source
     assert "P2PersistenceRepository" in source
     assert "register_workspace_inputs" in source
+    assert "materialize_factor_feature_set" in source
+    assert 'input_hash="8" * 64' not in source
     assert "exact_compute_input" in source
     assert "QUALIFICATION_AS_OF_UTC" in source
     assert "QUALIFICATION_EXECUTION_TIME_UTC" in source
