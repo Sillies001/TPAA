@@ -13,7 +13,17 @@ from .composition import (
     create_full_desktop_app,
     create_full_service_app,
 )
-from .config import ProductionRuntimeConfig, ProductRuntimeConfig, RuntimeProfile
+from .config import (
+    ProductionPrincipalBinding,
+    ProductionRuntimeConfig,
+    ProductRuntimeConfig,
+    RuntimeProfile,
+)
+from .identity import (
+    ConfiguredBearerIdentityProvider,
+    ProductionIdentityError,
+    guard_production_principal_resolver,
+)
 from .observability import ProductOperationalStatus, ProductQualificationStatus
 from .persistence import (
     DesktopPersistenceConfig,
@@ -29,9 +39,18 @@ from .production import (
     create_production_desktop_app,
     create_production_service_app,
 )
+from .readiness import ProductionDependencyProbe, ProductionRuntimeReadiness
+from .recovery import (
+    ProductionRecoveryError,
+    create_desktop_production_backup,
+    create_service_production_backup,
+    restore_desktop_production_backup,
+    restore_service_production_backup,
+)
 from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 
 __all__ = [
+    "ConfiguredBearerIdentityProvider",
     "ProductOperationalStatus",
     "ProductQualificationStatus",
     "PostgreSQLSecurityAuditSink",
@@ -43,8 +62,13 @@ __all__ = [
     "ProductFeatureAvailability",
     "ProductPersistenceRuntime",
     "ProductRuntime",
+    "ProductionDependencyProbe",
+    "ProductionIdentityError",
+    "ProductionPrincipalBinding",
+    "ProductionRecoveryError",
     "ProductionRuntime",
     "ProductionRuntimeConfig",
+    "ProductionRuntimeReadiness",
     "ProductRuntimeConfig",
     "RuntimeProfile",
     "ServicePersistenceConfig",
@@ -56,6 +80,11 @@ __all__ = [
     "build_service_persistence",
     "create_full_desktop_app",
     "create_full_service_app",
+    "create_desktop_production_backup",
     "create_production_desktop_app",
     "create_production_service_app",
+    "create_service_production_backup",
+    "guard_production_principal_resolver",
+    "restore_desktop_production_backup",
+    "restore_service_production_backup",
 ]

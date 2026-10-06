@@ -47,7 +47,7 @@ from .m9_workspace import (
     M9WorkspaceService,
 )
 from .models import StorageBaselineStatus
-from .runtime import GetRuntimeBaselineStatus, RuntimeBaselineStatus
+from .runtime import RuntimeBaselineStatus
 
 
 class P1PublicationUseCase(Protocol):
@@ -151,6 +151,14 @@ class StorageBaselineStatusUseCase(Protocol):
         ...
 
 
+class RuntimeBaselineStatusUseCase(Protocol):
+    """Runtime identity/readiness boundary independent of concrete implementation."""
+
+    def execute(self) -> RuntimeBaselineStatus:
+        """Return one fail-closed runtime readiness projection."""
+        ...
+
+
 class FeatureAvailabilityUseCase(Protocol):
     """Runtime-composition dependency for product feature availability."""
 
@@ -182,7 +190,7 @@ class ApplicationService:
         self,
         *,
         get_storage_baseline_status: StorageBaselineStatusUseCase,
-        get_runtime_baseline_status: GetRuntimeBaselineStatus | None = None,
+        get_runtime_baseline_status: RuntimeBaselineStatusUseCase | None = None,
         job_control: JobControl | None = None,
         m1_publication: P1PublicationUseCase | None = None,
         m3_publication: M3PublicationUseCase | None = None,

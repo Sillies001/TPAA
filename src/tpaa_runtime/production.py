@@ -45,7 +45,12 @@ from .durable_repositories import (
     RuntimeCanonicalUnitOfWork,
     RuntimeUnitOfWorkFactory,
 )
+from .identity import (
+    configured_service_principal_resolver,
+    guard_production_principal_resolver,
+)
 from .observability import PRCBOperationalStatus, PRCBQualificationStatus
+from .readiness import ProductionDependencyProbe, ProductionRuntimeReadiness
 from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 
 
@@ -57,6 +62,7 @@ class ProductionRuntime:
     admission: ProductAdmissionResolver
     feature_availability: ProductFeatureAvailability
     application: ApplicationService
+    service_principal_resolver: UnifiedPrincipalResolver | None
 
 
 def _validate_storage_status(
@@ -156,6 +162,12 @@ def _compose(
         security_audit_sink=audit_sink,
     )
 
+    service_principal_resolver: UnifiedPrincipalResolver | None = None
+    if config.profile is RuntimeProfile.SERVICE and config.service_principals:
+        service_principal_resolver = configured_service_principal_resolver(
+            config.service_principals
+        )
+
     configured = {
         "P1": True,
         "P2": True,
@@ -164,29 +176,29 @@ def _compose(
         "P5": True,
         "P6": True,
     }
-    dependency_ready = {
-        "P1": True,
-        "P2": True,
-        "P3": True,
-        "P4": True,
-        "P5": True,
-        "P6": True,
-    }
+    dependency_probe = ProductionDependencyProbe(
+        storage_status=storage_status,
+        object_root=config.object_root,
+    )
     feature_availability = ProductFeatureAvailability(
         admission,
         configured=configured,
-        dependency_ready=dependency_ready,
+        dependency_ready=dependency_probe.phase_flags,
     )
     qualification_status = PRCBQualificationStatus(
         feature_availability=feature_availability,
         profile=config.profile,
         product_build_version=config.product_build_version,
     )
+    core_runtime_status = build_trusted_runtime_status_use_case(
+        product_build_version=config.product_build_version
+    )
     application = ApplicationService(
         get_storage_baseline_status=storage_status,
         job_control=job_control,
-        get_runtime_baseline_status=build_trusted_runtime_status_use_case(
-            product_build_version=config.product_build_version
+        get_runtime_baseline_status=ProductionRuntimeReadiness(
+            core_runtime_status,
+            feature_availability,
         ),
         m1_publication=p1_release_reads,
         m4_workspace=m4_workspace,
@@ -203,6 +215,7 @@ def _compose(
         admission=admission,
         feature_availability=feature_availability,
         application=application,
+        service_principal_resolver=service_principal_resolver,
     )
 
 
@@ -286,13 +299,16 @@ def create_production_desktop_app(
 def create_production_service_app(
     runtime: ProductionRuntime,
     *,
-    principal_resolver: UnifiedPrincipalResolver,
+    principal_resolver: UnifiedPrincipalResolver | None = None,
 ) -> FastAPI:
-    """Expose production Service through one injected authenticated principal resolver."""
+    """Expose Service through configured or injected least-privilege identity."""
 
+    selected = principal_resolver or runtime.service_principal_resolver
+    if selected is None:
+        raise ValueError("production Service identity provider is not configured")
     app = create_unified_service_app(
         application=runtime.application,
-        principal_resolver=principal_resolver,
+        principal_resolver=guard_production_principal_resolver(selected),
     )
     app.version = runtime.config.product_build_version
     return app
