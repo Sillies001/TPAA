@@ -9,8 +9,9 @@ import shutil
 import sqlite3
 import subprocess
 from collections.abc import Callable, Mapping
-from importlib import import_module
 from pathlib import Path, PurePosixPath
+
+from psycopg.conninfo import conninfo_to_dict
 
 from tpaa_storage import PostgreSQLServiceUnitOfWork, verify_sqlite
 
@@ -56,9 +57,7 @@ def _default_runner(
 
 def _service_environment(conninfo: str) -> tuple[dict[str, str], str]:
     try:
-        module = import_module("psycopg.conninfo")
-        parser = getattr(module, "conninfo_to_dict")
-        values = parser(conninfo)
+        values = conninfo_to_dict(conninfo)
     except Exception as exc:
         raise ProductionRecoveryError("PostgreSQL conninfo is invalid") from exc
     if not isinstance(values, dict):

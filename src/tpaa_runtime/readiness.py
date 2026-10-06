@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Protocol
 
-from tpaa_application import GetRuntimeBaselineStatus, RuntimeBaselineStatus
+from tpaa_application import RuntimeBaselineStatus
 
 from .admission import ProductFeatureAvailability
 
@@ -73,7 +73,7 @@ class ProductionDependencyProbe:
         return {phase: ready for phase in _PHASES}
 
 
-class ProductionRuntimeReadiness(GetRuntimeBaselineStatus):
+class ProductionRuntimeReadiness:
     """Combine Core identity readiness with live product dependency availability."""
 
     def __init__(
