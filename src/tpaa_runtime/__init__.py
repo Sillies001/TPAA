@@ -13,7 +13,17 @@ from .composition import (
     create_full_desktop_app,
     create_full_service_app,
 )
-from .config import ProductionRuntimeConfig, ProductRuntimeConfig, RuntimeProfile
+from .config import (
+    ProductionPrincipalBinding,
+    ProductionRuntimeConfig,
+    ProductRuntimeConfig,
+    RuntimeProfile,
+)
+from .identity import (
+    ConfiguredBearerIdentityProvider,
+    ProductionIdentityError,
+    guard_production_principal_resolver,
+)
 from .observability import ProductOperationalStatus, ProductQualificationStatus
 from .persistence import (
     DesktopPersistenceConfig,
@@ -22,6 +32,7 @@ from .persistence import (
     build_desktop_persistence,
     build_service_persistence,
 )
+from .readiness import ProductionDependencyProbe, ProductionRuntimeReadiness
 from .production import (
     ProductionRuntime,
     build_desktop_production_runtime,
@@ -32,6 +43,7 @@ from .production import (
 from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
 
 __all__ = [
+    "ConfiguredBearerIdentityProvider",
     "ProductOperationalStatus",
     "ProductQualificationStatus",
     "PostgreSQLSecurityAuditSink",
@@ -43,8 +55,12 @@ __all__ = [
     "ProductFeatureAvailability",
     "ProductPersistenceRuntime",
     "ProductRuntime",
+    "ProductionDependencyProbe",
+    "ProductionIdentityError",
+    "ProductionPrincipalBinding",
     "ProductionRuntime",
     "ProductionRuntimeConfig",
+    "ProductionRuntimeReadiness",
     "ProductRuntimeConfig",
     "RuntimeProfile",
     "ServicePersistenceConfig",
@@ -58,4 +74,5 @@ __all__ = [
     "create_full_service_app",
     "create_production_desktop_app",
     "create_production_service_app",
+    "guard_production_principal_resolver",
 ]

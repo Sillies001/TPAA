@@ -52,6 +52,7 @@ from tpaa_capability.p6_input import (
     P6ForecastRequestBinding,
     P6InputSnapshot,
 )
+from tpaa_storage.audit_ledger import PersistentAuditLedger
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 from tpaa_storage.core_publication_ledger import CorePublishReceipt
 from tpaa_storage.object_store import LocalObjectStore
@@ -80,6 +81,7 @@ class RuntimeCanonicalUnitOfWork(RepositoryUnitOfWork, Protocol):
 
     canonical_rows: CanonicalRowRepository
     publication: RuntimePublicationLedger
+    audit_log: PersistentAuditLedger
 
     def __enter__(self) -> Self: ...
 

@@ -9,6 +9,7 @@ from dataclasses import replace
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Protocol, cast
+from uuid import UUID
 
 from tpaa_application import (
     DurableJobControl,
@@ -51,6 +52,7 @@ from tpaa_ingest import (
 )
 from tpaa_platform import SpawnWorkerDispatcher, WorkerPayload
 from tpaa_storage import (
+    AuditLogWrite,
     ComputeJobRepository,
     ComputeJobState,
     LocalObjectStore,
@@ -143,6 +145,45 @@ def _number(value: object, *, field: str) -> float:
     if isinstance(value, (int, float)):
         return float(value)
     raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
+
+
+def _audit_actor_id(actor: str) -> str | None:
+    try:
+        parsed = UUID(actor)
+    except ValueError:
+        return None
+    return actor if str(parsed) == actor else None
+
+
+def _record_job_audit(
+    uow: RuntimeCanonicalUnitOfWork,
+    *,
+    actor: str,
+    action: str,
+    job_id: str,
+    request_id: str | None,
+    reason: str | None,
+    status: str,
+) -> None:
+    principal_key = actor.strip()
+    if not principal_key:
+        raise ProductionJobExecutionError(
+            "PRCB_C3_PRINCIPAL_KEY_REQUIRED",
+            action,
+        )
+    uow.audit_log.append(
+        AuditLogWrite(
+            actor_id=_audit_actor_id(principal_key),
+            principal_key=principal_key,
+            action=action,
+            object_type="COMPUTE_JOB",
+            object_id=job_id,
+            outcome="ALLOW",
+            request_id=request_id,
+            reason=reason,
+            details={"status": status},
+        )
+    )
 
 
 def _job_record(record: object) -> JobRecord:
@@ -1065,7 +1106,6 @@ class DurableApplicationJobControl:
         payload: dict[str, object],
         actor: str,
     ) -> JobSubmission:
-        del actor
         try:
             with self._write_uow_factory() as uow:
                 control = DurableJobControl(
@@ -1082,12 +1122,30 @@ class DurableApplicationJobControl:
                     session_id=None,
                 )
                 if submission.reused:
+                    _record_job_audit(
+                        uow,
+                        actor=actor,
+                        action="JOB_SUBMIT_REUSE",
+                        job_id=submission.record.job_id,
+                        request_id=idempotency_key,
+                        reason=None,
+                        status=submission.record.status.value,
+                    )
                     uow.commit()
                     return JobSubmission(
                         record=_job_record(submission.record),
                         reused=True,
                     )
                 queued = control.queue(submission.record.job_id)
+                _record_job_audit(
+                    uow,
+                    actor=actor,
+                    action="JOB_SUBMIT",
+                    job_id=queued.job_id,
+                    request_id=idempotency_key,
+                    reason=None,
+                    status=queued.status.value,
+                )
                 uow.commit()
         except DurableJobControlError as exc:
             if exc.code == "B3_JOB_IDEMPOTENCY_CONFLICT":
@@ -1150,7 +1208,6 @@ class DurableApplicationJobControl:
         return _job_record(self._get_durable(job_id))
 
     def cancel(self, *, job_id: str, actor: str, reason: str) -> JobRecord:
-        del actor
         if not reason.strip():
             raise ValueError("reason must be non-empty")
         self._executor.cancel(job_id)
@@ -1161,15 +1218,42 @@ class DurableApplicationJobControl:
                 )
                 current = control.get(job_id)
                 if current.status is ComputeJobState.CANCELLED:
+                    _record_job_audit(
+                        uow,
+                        actor=actor,
+                        action="JOB_CANCEL_NOOP",
+                        job_id=job_id,
+                        request_id=None,
+                        reason=reason,
+                        status=current.status.value,
+                    )
                     uow.commit()
                     return _job_record(current)
                 if current.status in {
                     ComputeJobState.SUCCEEDED,
                     ComputeJobState.FAILED,
                 }:
+                    _record_job_audit(
+                        uow,
+                        actor=actor,
+                        action="JOB_CANCEL_NOOP",
+                        job_id=job_id,
+                        request_id=None,
+                        reason=reason,
+                        status=current.status.value,
+                    )
                     uow.commit()
                     return _job_record(current)
                 cancelled = control.cancel(job_id, reason_code=reason)
+                _record_job_audit(
+                    uow,
+                    actor=actor,
+                    action="JOB_CANCEL",
+                    job_id=job_id,
+                    request_id=None,
+                    reason=reason,
+                    status=cancelled.status.value,
+                )
                 uow.commit()
                 return _job_record(cancelled)
         except Exception as exc:
