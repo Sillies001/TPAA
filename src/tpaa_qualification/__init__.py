@@ -26,14 +26,7 @@ from .m5_profiles import (
     validate_result_binding,
     validate_target_hardware,
 )
-from .prcb_c5_p2 import (
-    PRCBC5P2QualificationSeed,
-    prepare_prcb_c5_p2_workspace,
-)
-
 __all__ = [
-    "PRCBC5P2QualificationSeed",
-    "prepare_prcb_c5_p2_workspace",
     "M5CertificationProfile",
     "M5QualificationAuthority",
     "M5QualificationError",

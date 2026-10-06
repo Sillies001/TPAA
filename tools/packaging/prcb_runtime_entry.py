@@ -17,7 +17,9 @@ if str(SRC_ROOT) not in sys.path:
 from tpaa_application import JobStatus, P2PersistenceRepository  # noqa: E402
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
-from tpaa_qualification import prepare_prcb_c5_p2_workspace  # noqa: E402
+from tpaa_qualification.prcb_c5_p2 import (  # noqa: E402
+    prepare_prcb_c5_p2_workspace,
+)
 from tpaa_runtime import (  # noqa: E402
     ProductionRuntime,
     ProductionRuntimeConfig,

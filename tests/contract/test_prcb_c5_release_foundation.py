@@ -94,3 +94,16 @@ def test_prcb_c5_p2_qualification_seed_is_product_code_not_test_fixture() -> Non
     assert "datetime.now" not in source
     assert "tests/fixtures" not in source
     assert "tools.testing" not in source
+
+
+def test_prcb_c5_qualification_package_keeps_reviewer_import_lightweight() -> None:
+    package = (
+        ROOT / "src" / "tpaa_qualification" / "__init__.py"
+    ).read_text(encoding="utf-8")
+    runtime = (
+        ROOT / "tools" / "packaging" / "prcb_runtime_entry.py"
+    ).read_text(encoding="utf-8")
+    assert ".prcb_c5_p2 import" not in package
+    assert "PRCBC5P2QualificationSeed" not in package
+    assert "prepare_prcb_c5_p2_workspace" not in package
+    assert "from tpaa_qualification.prcb_c5_p2 import" in runtime
