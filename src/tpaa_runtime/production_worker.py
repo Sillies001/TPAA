@@ -13,6 +13,8 @@ from typing import cast
 from uuid import UUID, uuid5
 
 from tpaa_application.m1_publication import to_core_publication_bundle
+from tpaa_application.p2_persistence import P2DurableComputeInput
+from tpaa_assessment import execute_p2_attribution
 from tpaa_capability.p3_twin import (
     P3AircraftTwinRevision,
     P3TwinComponentBinding,
@@ -48,6 +50,7 @@ from tpaa_world import AircraftObservedWorld, WorldEvidenceRef
 
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_PRCB_C2_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
+P2_ATTRIBUTION_COMMAND = "P2_ATTRIBUTION"
 P3_ESTIMATE_COMMAND = "P3_ESTIMATE"
 P6_FORECAST_COMMAND = "P6_FORECAST"
 P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
@@ -97,6 +100,17 @@ class ProductionP1WorkerProduct:
     metric_batch_hash: str
     source_sha256: str
     prerequisites: tuple[ProductionPrerequisiteRow, ...]
+
+
+@dataclass(frozen=True)
+class ProductionP2AttributionWorkerInput:
+    """Exact durable P2 inputs plus canonical Job payload for worker verification."""
+
+    job_payload: dict[str, object]
+    compute_input: P2DurableComputeInput
+    p2_release_id: str
+    execution_time_utc: str
+    supersedes_estimate_id: str | None
 
 
 @dataclass(frozen=True)
@@ -791,6 +805,40 @@ def _execute_p1(payload: WorkerPayload) -> WorkerResult:
     )
 
 
+def _execute_p2_attribution(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP2AttributionWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    compute_input = body.compute_input
+    value = execute_p2_attribution(
+        bundle=compute_input.input_bundle,
+        target_feature_set=compute_input.target_feature_set,
+        cohort_rows=compute_input.cohort_rows,
+        reference_factor_values=compute_input.reference_factor_values,
+        p2_release_id=body.p2_release_id,
+        evidence_set_id=compute_input.input_bundle.target.evidence_set_id,
+        execution_time_utc=body.execution_time_utc,
+        created_by="PRCB_C2_PRODUCTION_WORKER",
+        supersedes_estimate_id=body.supersedes_estimate_id,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(
+            value.attribution_run.attribution_run_id,
+            value.adjusted_estimate.estimate_id,
+            value.adjusted_estimate.logical_hash,
+        ),
+        domain_payload=value,
+    )
+
+
 def _execute_p3_estimate(payload: WorkerPayload) -> WorkerResult:
     body = payload.domain_payload
     if not isinstance(body, ProductionP3EstimateWorkerInput):
@@ -872,6 +920,8 @@ def execute(payload: WorkerPayload) -> WorkerResult:
     try:
         if payload.command == P1_BUILD_COMMAND:
             return _execute_p1(payload)
+        if payload.command == P2_ATTRIBUTION_COMMAND:
+            return _execute_p2_attribution(payload)
         if payload.command == P3_ESTIMATE_COMMAND:
             return _execute_p3_estimate(payload)
         if payload.command == P6_FORECAST_COMMAND:
