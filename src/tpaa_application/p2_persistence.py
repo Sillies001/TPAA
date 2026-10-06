@@ -96,6 +96,7 @@ def _id_array(value: object, field: str) -> tuple[str, ...]:
         result.append(str(item))
     return tuple(result)
 
+
 def _time_text(value: object) -> str:
     parsed: datetime
     if isinstance(value, datetime):
@@ -105,9 +106,8 @@ def _time_text(value: object) -> str:
         if not raw:
             raise P2PersistenceError("P2_DB_TIME_INVALID", "empty string")
         try:
-            parsed = datetime.fromisoformat(
-                raw.removesuffix("Z") + ("+00:00" if raw.endswith("Z") else "")
-            )
+            suffix = "+00:00" if raw.endswith("Z") else ""
+            parsed = datetime.fromisoformat(raw.removesuffix("Z") + suffix)
         except ValueError as exc:
             raise P2PersistenceError("P2_DB_TIME_INVALID", raw) from exc
     else:

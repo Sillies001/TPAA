@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 from tpaa_application import P2PersistenceRepository
 from tpaa_assessment import (
-    P1ObservationInput,
     P2ArtifactBinding,
     P2AttributionSpec,
     P2AuthorityPolicy,
