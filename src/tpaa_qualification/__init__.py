@@ -26,6 +26,7 @@ from .m5_profiles import (
     validate_result_binding,
     validate_target_hardware,
 )
+
 __all__ = [
     "M5CertificationProfile",
     "M5QualificationAuthority",
