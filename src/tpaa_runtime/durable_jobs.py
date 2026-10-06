@@ -23,11 +23,11 @@ from tpaa_application import (
     P2ReleaseRepository,
     P3PersistenceRepository,
     P6PersistenceRepository,
-    allocate_p2_release_id,
-    p2_release_scope_key,
     ProductionImportService,
     SourceImportCommand,
     SourceProvenanceRepository,
+    allocate_p2_release_id,
+    p2_release_scope_key,
 )
 from tpaa_assessment import P2AttributionExecution
 from tpaa_capability.p3_twin import P3CapabilityEstimate
