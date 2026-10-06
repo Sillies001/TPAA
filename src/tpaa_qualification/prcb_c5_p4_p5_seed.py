@@ -72,8 +72,8 @@ def seed_prcb_c5_p4_p5_upstream(rows: CanonicalRowRepository) -> None:
         "master.aircraft_model",
         {
             "aircraft_model_id": AIRCRAFT_MODEL,
-            "type_code": "PRCB-C5",
-            "model_name": "PRCB C5 Qualification Model",
+            "type_code": "PRCB-C5-P45-TYPE",
+            "model_name": "PRCB C5 P4/P5 Qualification Model",
         },
     )
     rows.insert(
@@ -81,7 +81,7 @@ def seed_prcb_c5_p4_p5_upstream(rows: CanonicalRowRepository) -> None:
         {
             "aircraft_id": AIRCRAFT,
             "aircraft_model_id": AIRCRAFT_MODEL,
-            "internal_code": "PRCB-C5-AIRCRAFT",
+            "internal_code": "PRCB-C5-P45-AIRCRAFT",
             "master_data_status": "ACTIVE",
         },
     )

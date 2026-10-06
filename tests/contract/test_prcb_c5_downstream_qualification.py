@@ -30,6 +30,9 @@ def test_prcb_c5_downstream_qualification_is_product_owned_and_explicit() -> Non
     assert ".prcb_c5_p4_p5_seed import" not in package
     assert ".prcb_c5_p6_seed import" not in package
     assert "seed_p3_upstream: bool = True" in source
+    assert '"PRCB-C5-P45-AIRCRAFT"' in source
+    p45_seed = paths[1].read_text(encoding="utf-8")
+    assert '"PRCB-C5-AIRCRAFT"' not in p45_seed
 
     runtime = (
         ROOT / "tools" / "packaging" / "prcb_runtime_entry.py"
