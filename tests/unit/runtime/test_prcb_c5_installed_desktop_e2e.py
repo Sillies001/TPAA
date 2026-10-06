@@ -27,6 +27,8 @@ def test_prcb_c5_installed_desktop_p1_restart_recovery_audit(
     assert result["job_status"] == "SUCCEEDED"
     assert result["metric_count"] == 5
     assert result["p2_job_status"] == "SUCCEEDED"
+    assert result["p2_qualification_as_of_utc"] == "2026-12-31T23:58:00Z"
+    assert result["p2_execution_time_utc"] == "2026-12-31T23:59:00Z"
     assert result["p2_estimate_status"] in {"IDENTIFIABLE", "NOT_IDENTIFIABLE"}
     assert result["p2_restart_exact_replay"] is True
     assert result["p2_backup_restore_exact_replay"] is True

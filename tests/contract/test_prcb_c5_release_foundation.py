@@ -87,5 +87,8 @@ def test_prcb_c5_p2_qualification_seed_is_product_code_not_test_fixture() -> Non
     assert "P2PersistenceRepository" in source
     assert "register_workspace_inputs" in source
     assert "exact_compute_input" in source
+    assert "QUALIFICATION_AS_OF_UTC" in source
+    assert "QUALIFICATION_EXECUTION_TIME_UTC" in source
+    assert "datetime.now" not in source
     assert "tests/fixtures" not in source
     assert "tools.testing" not in source

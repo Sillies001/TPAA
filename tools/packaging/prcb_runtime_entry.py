@@ -252,7 +252,7 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         command="P2_ATTRIBUTION",
         payload={
             "dataset_snapshot_id": p2_seed.dataset_snapshot_id,
-            "execution_time_utc": "2026-10-05T12:30:00Z",
+            "execution_time_utc": p2_seed.execution_time_utc,
             "expected_version_token": 0,
             "supersedes_estimate_id": None,
         },
@@ -391,6 +391,8 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "metric_count": len(metrics),
         "p2_job_id": p2_submission.record.job_id,
         "p2_job_status": p2_submission.record.status.value,
+        "p2_qualification_as_of_utc": p2_seed.as_of_utc,
+        "p2_execution_time_utc": p2_seed.execution_time_utc,
         "p2_release_id": p2_release_id,
         "p2_estimate_id": p2_estimate_id,
         "p2_estimate_status": p2_estimate.status,

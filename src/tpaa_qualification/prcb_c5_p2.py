@@ -25,13 +25,16 @@ REFERENCE_OBJECT = "97000000-0000-4000-8000-000000000016"
 ATTRIBUTION_OBJECT = "97000000-0000-4000-8000-000000000017"
 FEATURE_SET = "97000000-0000-4000-8000-000000000018"
 COHORT = "97000000-0000-4000-8000-000000000019"
-AS_OF = "2026-10-05T12:00:00Z"
+QUALIFICATION_AS_OF_UTC = "2026-12-31T23:58:00Z"
+QUALIFICATION_EXECUTION_TIME_UTC = "2026-12-31T23:59:00Z"
 
 
 @dataclass(frozen=True, slots=True)
 class PRCBC5P2QualificationSeed:
     dataset_snapshot_id: str
     target_observation_id: str
+    as_of_utc: str
+    execution_time_utc: str
 
 
 def _binding(
@@ -185,7 +188,7 @@ def prepare_prcb_c5_p2_workspace(
             uncertainty_level=profile.uncertainty_level,
             binding=attribution_binding,
         ),
-        as_of_utc=AS_OF,
+        as_of_utc=QUALIFICATION_AS_OF_UTC,
     )
     feature = P2FactorFeatureSet(
         factor_feature_set_id=FEATURE_SET,
@@ -199,7 +202,7 @@ def prepare_prcb_c5_p2_workspace(
         coverage=target.coverage,
         confidence=target.confidence,
         input_hash="8" * 64,
-        created_at=AS_OF,
+        created_at=QUALIFICATION_AS_OF_UTC,
     )
     repository.register_workspace_inputs(
         bundle,
@@ -218,4 +221,6 @@ def prepare_prcb_c5_p2_workspace(
     return PRCBC5P2QualificationSeed(
         dataset_snapshot_id=COHORT,
         target_observation_id=target.observation_id,
+        as_of_utc=QUALIFICATION_AS_OF_UTC,
+        execution_time_utc=QUALIFICATION_EXECUTION_TIME_UTC,
     )
