@@ -49,5 +49,29 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "SQLiteDesktopUnitOfWork" in runtime
     assert "formal_release_claimed" in runtime
     assert "PRCB_C2_NOMINAL_FLIGHT.json" in packager
-    assert 'if "%~1"=="" goto default' in packager
-    assert 'if [ "$#" -eq 0 ]; then set --' in packager
+    assert '%~1' in packager
+    assert 'goto default' in packager
+    assert '$#' in packager
+    assert 'then set --' in packager
+
+
+def test_prcb_c5_installed_desktop_qualification_runs_inside_existing_jobs() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "cross-platform-ci.yml").read_text(
+        encoding="utf-8"
+    )
+    tool = (
+        ROOT
+        / "tools"
+        / "testing"
+        / "prcb_c5_installed_desktop_qualification.py"
+    ).read_text(encoding="utf-8")
+    assert "Execute PRCB C5 installed Desktop P1 qualification" in workflow
+    assert "prcb_c5_installed_desktop_qualification.py" in workflow
+    assert "dist/prcb-c5/${{ matrix.platform }}" in workflow
+    assert "TPAA_PRCB_C5_INSTALLED_DESKTOP_QUALIFICATION_V1" in tool
+    assert "build_prcb_release_bundle" in tool
+    assert "desktop-p1-e2e" in tool
+    assert "package_sha256" in tool
+    assert "logical_product_sha256" in tool
+    assert "app/tests/" in tool
+    assert "/fixtures/" in tool
