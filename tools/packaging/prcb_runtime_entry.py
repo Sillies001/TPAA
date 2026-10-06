@@ -323,7 +323,6 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         ).exact_adjusted_estimate(p2_estimate_id)
         uow.commit()
 
-
     qualification_store = LocalObjectStore(object_root)
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
