@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
 
+from .discovery import ProductDiscoveryError, product_items
+
 
 class M8WorkspacePresentationError(RuntimeError):
     """Fail-closed M8 GUI projection error."""
@@ -18,6 +20,15 @@ class M8DesktopTransport(Protocol):
         self,
         method: str,
         path: str,
+    ) -> tuple[int, Mapping[str, object]]: ...
+
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> tuple[int, Mapping[str, object]]: ...
 
 
@@ -231,13 +242,16 @@ def create_m8_workspace(
     root.setObjectName("tpaaM8Workspace")
     layout = qt_widgets.QVBoxLayout(root)
 
-    p4_input = qt_widgets.QLineEdit(root)
+    p4_input = qt_widgets.QComboBox(root)
     p4_input.setObjectName("tpaaM8P4RevisionInput")
-    p5_input = qt_widgets.QLineEdit(root)
+    p5_input = qt_widgets.QComboBox(root)
     p5_input.setObjectName("tpaaM8P5RevisionInput")
+    refresh_button = qt_widgets.QPushButton("Refresh P4/P5 discovery", root)
+    refresh_button.setObjectName("tpaaM8DiscoveryRefresh")
     load_button = qt_widgets.QPushButton("Load exact P4/P5 workspace", root)
     layout.addWidget(p4_input)
     layout.addWidget(p5_input)
+    layout.addWidget(refresh_button)
     layout.addWidget(load_button)
 
     aircraft_label = qt_widgets.QLabel(
@@ -249,9 +263,49 @@ def create_m8_workspace(
     for widget in (aircraft_label, p4_label, p5_label):
         layout.addWidget(widget)
 
+    p4_items: list[dict[str, object]] = []
+    p5_items: list[dict[str, object]] = []
+
+    def update_p5(_p4_id: str = "") -> None:
+        selected = p4_input.currentText().strip()
+        session_id: str | None = None
+        for item in p4_items:
+            if item.get("exact_id") != selected:
+                continue
+            metadata = item.get("metadata")
+            if isinstance(metadata, Mapping):
+                raw_session = metadata.get("session_id")
+                if isinstance(raw_session, str):
+                    session_id = raw_session
+            break
+        p5_input.clear()
+        for item in p5_items:
+            metadata = item.get("metadata")
+            if not isinstance(metadata, Mapping):
+                continue
+            if session_id is not None and metadata.get("session_id") != session_id:
+                continue
+            p5_input.addItem(str(item["exact_id"]))
+
+    def refresh_discovery() -> None:
+        nonlocal p4_items, p5_items
+        try:
+            p4_items = product_items(transport, "P4_ASSESSMENT")
+            p5_items = product_items(transport, "P5_ASSESSMENT")
+        except ProductDiscoveryError as exc:
+            p5_label.setText(f"P4/P5 discovery: ERROR · {exc}")
+            return
+        p4_input.clear()
+        p4_input.addItems([str(item["exact_id"]) for item in p4_items])
+        update_p5()
+        p5_label.setText(
+            f"P4/P5 discovery: {len(p4_items)} individual / "
+            f"{len(p5_items)} mission revisions"
+        )
+
     def load_workspace() -> None:
-        p4_id = p4_input.text().strip()
-        p5_id = p5_input.text().strip()
+        p4_id = p4_input.currentText().strip()
+        p5_id = p5_input.currentText().strip()
         status, payload = transport.m8_request_json(
             "GET",
             f"/m8/workspace/p4/{p4_id}/p5/{p5_id}",
@@ -283,5 +337,7 @@ def create_m8_workspace(
             f"validity={model.p5.validity_status}"
         )
 
+    p4_input.currentTextChanged.connect(update_p5)
+    refresh_button.clicked.connect(refresh_discovery)
     load_button.clicked.connect(load_workspace)
     return root

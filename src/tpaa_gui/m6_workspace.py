@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
 
+from .discovery import ProductDiscoveryError, product_items
+
 M6_P2_STATUS_STYLES = {
     "P2_IDENTIFIABLE": "QLabel { border: 2px solid; padding: 4px; }",
     "P2_NOT_IDENTIFIABLE": (
@@ -33,6 +35,15 @@ class M6DesktopTransport(Protocol):
     ) -> tuple[int, Mapping[str, object]]:
         """Return one local-backend JSON response."""
         ...
+
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, Mapping[str, object]]: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -508,14 +519,17 @@ def create_m6_workspace(
     root.setObjectName("tpaaM6Workspace")
     layout = qt_widgets.QVBoxLayout(root)
 
-    release_input = qt_widgets.QLineEdit(root)
+    release_input = qt_widgets.QComboBox(root)
     release_input.setObjectName("tpaaM6P2ReleaseInput")
-    estimate_input = qt_widgets.QLineEdit(root)
+    estimate_input = qt_widgets.QComboBox(root)
     estimate_input.setObjectName("tpaaM6EstimateInput")
+    refresh_button = qt_widgets.QPushButton("Refresh P2 discovery", root)
+    refresh_button.setObjectName("tpaaM6DiscoveryRefresh")
     comparison_button = qt_widgets.QPushButton("Load P2 comparison", root)
     diagnostics_button = qt_widgets.QPushButton("Load P2 diagnostics", root)
     layout.addWidget(release_input)
     layout.addWidget(estimate_input)
+    layout.addWidget(refresh_button)
     layout.addWidget(comparison_button)
     layout.addWidget(diagnostics_button)
 
@@ -538,6 +552,42 @@ def create_m6_workspace(
     ):
         layout.addWidget(widget)
 
+    discovery_items: list[dict[str, object]] = []
+
+    def update_estimates(_release: str = "") -> None:
+        release_id = release_input.currentText().strip()
+        estimate_input.clear()
+        for item in discovery_items:
+            metadata = item.get("metadata")
+            if not isinstance(metadata, Mapping):
+                continue
+            if str(metadata.get("p2_release_id", "")) != release_id:
+                continue
+            estimate_input.addItem(str(item["exact_id"]))
+
+    def refresh_discovery() -> None:
+        nonlocal discovery_items
+        try:
+            discovery_items = product_items(transport, "P2_ESTIMATE")
+        except ProductDiscoveryError as exc:
+            diagnostics_label.setText(f"Discovery: ERROR · {exc}")
+            return
+        release_ids: set[str] = set()
+        for item in discovery_items:
+            metadata = item.get("metadata")
+            if not isinstance(metadata, Mapping):
+                continue
+            p2_release_id = metadata.get("p2_release_id")
+            if isinstance(p2_release_id, str):
+                release_ids.add(p2_release_id)
+        releases = sorted(release_ids)
+        release_input.clear()
+        release_input.addItems(releases)
+        update_estimates()
+        diagnostics_label.setText(
+            f"Discovery: {len(discovery_items)} immutable P2 estimates"
+        )
+
     effects_table = qt_widgets.QTableWidget(root)
     effects_table.setObjectName("tpaaM6FactorEffects")
     effects_table.setColumnCount(2)
@@ -545,8 +595,8 @@ def create_m6_workspace(
     layout.addWidget(effects_table)
 
     def load_comparison() -> None:
-        release_id = release_input.text().strip()
-        estimate_id = estimate_input.text().strip()
+        release_id = release_input.currentText().strip()
+        estimate_id = estimate_input.currentText().strip()
         status, payload = transport.m6_request_json(
             "GET",
             f"/m6/p2/releases/{release_id}/estimates/{estimate_id}/comparison",
@@ -587,8 +637,8 @@ def create_m6_workspace(
             effects_table.setItem(row, 1, qt_widgets.QTableWidgetItem(str(effect)))
 
     def load_diagnostics() -> None:
-        release_id = release_input.text().strip()
-        estimate_id = estimate_input.text().strip()
+        release_id = release_input.currentText().strip()
+        estimate_id = estimate_input.currentText().strip()
         status, payload = transport.m6_request_json(
             "GET",
             f"/m6/p2/releases/{release_id}/estimates/{estimate_id}/diagnostics",
@@ -618,6 +668,8 @@ def create_m6_workspace(
             "claim=ASSOCIATION_ONLY"
         )
 
+    release_input.currentTextChanged.connect(update_estimates)
+    refresh_button.clicked.connect(refresh_discovery)
     comparison_button.clicked.connect(load_comparison)
     diagnostics_button.clicked.connect(load_diagnostics)
     return root

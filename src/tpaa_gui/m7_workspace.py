@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol, cast
 
+from .discovery import ProductDiscoveryError, product_items
+
 
 class M7WorkspacePresentationError(RuntimeError):
     """Fail-closed M7 GUI projection error."""
@@ -18,6 +20,15 @@ class M7DesktopTransport(Protocol):
         self,
         method: str,
         path: str,
+    ) -> tuple[int, Mapping[str, object]]: ...
+
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> tuple[int, Mapping[str, object]]: ...
 
 
@@ -288,13 +299,16 @@ def create_m7_workspace(
     root.setObjectName("tpaaM7Workspace")
     layout = qt_widgets.QVBoxLayout(root)
 
-    twin_input = qt_widgets.QLineEdit(root)
+    twin_input = qt_widgets.QComboBox(root)
     twin_input.setObjectName("tpaaM7TwinRevisionInput")
-    estimate_input = qt_widgets.QLineEdit(root)
+    estimate_input = qt_widgets.QComboBox(root)
     estimate_input.setObjectName("tpaaM7EstimateInput")
+    refresh_button = qt_widgets.QPushButton("Refresh P3 discovery", root)
+    refresh_button.setObjectName("tpaaM7DiscoveryRefresh")
     load_button = qt_widgets.QPushButton("Load exact P3 workspace", root)
     layout.addWidget(twin_input)
     layout.addWidget(estimate_input)
+    layout.addWidget(refresh_button)
     layout.addWidget(load_button)
 
     observed_label = qt_widgets.QLabel("P1 OBSERVED: unavailable", root)
@@ -309,9 +323,38 @@ def create_m7_workspace(
     for widget in (observed_label, adjusted_label, p3_label):
         layout.addWidget(widget)
 
+    estimate_items: list[dict[str, object]] = []
+
+    def update_estimates(_twin: str = "") -> None:
+        twin_id = twin_input.currentText().strip()
+        estimate_input.clear()
+        for item in estimate_items:
+            metadata = item.get("metadata")
+            if not isinstance(metadata, Mapping):
+                continue
+            if str(metadata.get("twin_revision_id", "")) != twin_id:
+                continue
+            estimate_input.addItem(str(item["exact_id"]))
+
+    def refresh_discovery() -> None:
+        nonlocal estimate_items
+        try:
+            twins = product_items(transport, "P3_TWIN")
+            estimate_items = product_items(transport, "P3_ESTIMATE")
+        except ProductDiscoveryError as exc:
+            p3_label.setText(f"P3 discovery: ERROR · {exc}")
+            return
+        twin_input.clear()
+        twin_input.addItems([str(item["exact_id"]) for item in twins])
+        update_estimates()
+        p3_label.setText(
+            f"P3 discovery: {len(twins)} twins / "
+            f"{len(estimate_items)} estimates"
+        )
+
     def load_workspace() -> None:
-        twin_revision_id = twin_input.text().strip()
-        estimate_id = estimate_input.text().strip()
+        twin_revision_id = twin_input.currentText().strip()
+        estimate_id = estimate_input.currentText().strip()
         status, payload = transport.m7_request_json(
             "GET",
             (
@@ -342,5 +385,7 @@ def create_m7_workspace(
             f"as-of={model.p3.as_of_time}"
         )
 
+    twin_input.currentTextChanged.connect(update_estimates)
+    refresh_button.clicked.connect(refresh_discovery)
     load_button.clicked.connect(load_workspace)
     return root

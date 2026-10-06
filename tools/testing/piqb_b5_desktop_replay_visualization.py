@@ -20,6 +20,17 @@ class _NoRequestTransport:
     def _unused(self, method: str, path: str) -> tuple[int, dict[str, Any]]:
         raise AssertionError(f"qualification construction performed HTTP:{method}:{path}")
 
+    def product_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, Mapping[str, object]]:
+        del body, headers
+        return self._unused(method, path)
+
     def m1_request_json(
         self,
         method: str,

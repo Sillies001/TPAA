@@ -32,6 +32,7 @@ from tpaa_storage import (
 
 from .admission import ProductAdmissionResolver, ProductFeatureAvailability
 from .config import ProductionRuntimeConfig, RuntimeProfile
+from .durable_discovery import DurableProductDiscovery
 from .durable_longitudinal import (
     DurableM4DebriefRepository,
     DurableM4LongitudinalReleaseRepository,
@@ -206,6 +207,7 @@ def _compose(
         m7_workspace=m7_workspace,
         m8_workspace=m8_workspace,
         m9_workspace=m9_workspace,
+        product_discovery=DurableProductDiscovery(read_uow_factory),
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=PRCBOperationalStatus(qualification_status),
