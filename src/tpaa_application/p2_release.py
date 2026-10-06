@@ -55,6 +55,12 @@ def _hash64(value: str, field: str) -> str:
     return value
 
 
+def _required_int(value: object, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise P2ReleaseError("P2_RELEASE_INTEGER_INVALID", field)
+    return value
+
+
 def _utc(value: str, field: str) -> str:
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
@@ -207,7 +213,10 @@ class P2ReleaseRepository:
                 release_id=release_id,
                 scope_key=scope_key,
                 session_id=lineage.session_id,
-                version_token=int(existing["release_no"]),
+                version_token=_required_int(
+                    existing["release_no"],
+                    "analysis_release.release_no",
+                ),
                 parent_release_id=(
                     None
                     if existing["parent_release_id"] is None
@@ -222,7 +231,14 @@ class P2ReleaseRepository:
             where={"scope_type": "SESSION", "scope_key": scope_key},
             columns=("current_release_id", "version_token"),
         )
-        actual_version = 0 if pointer is None else int(pointer["version_token"])
+        actual_version = (
+            0
+            if pointer is None
+            else _required_int(
+                pointer["version_token"],
+                "release_scope_pointer.version_token",
+            )
+        )
         if actual_version != expected_version_token:
             raise P2ReleaseError(
                 "P2_RELEASE_CAS_CONFLICT",
