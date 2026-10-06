@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping
 from dataclasses import replace
 from decimal import Decimal, InvalidOperation
@@ -17,12 +19,17 @@ from tpaa_application import (
     JobRecord,
     JobStatus,
     JobSubmission,
+    P2PersistenceRepository,
+    P2ReleaseRepository,
     P3PersistenceRepository,
     P6PersistenceRepository,
+    allocate_p2_release_id,
+    p2_release_scope_key,
     ProductionImportService,
     SourceImportCommand,
     SourceProvenanceRepository,
 )
+from tpaa_assessment import P2AttributionExecution
 from tpaa_capability.p3_twin import P3CapabilityEstimate
 from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
 from tpaa_capability.p6_forecast import P6ForecastRevision
@@ -51,10 +58,12 @@ from tpaa_storage import (
 
 from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
 from .production_worker import (
+    P2_ATTRIBUTION_COMMAND,
     P3_ESTIMATE_COMMAND,
     P6_COUNTERFACTUAL_COMMAND,
     P6_FORECAST_COMMAND,
     ProductionP1WorkerProduct,
+    ProductionP2AttributionWorkerInput,
     ProductionP3EstimateWorkerInput,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
@@ -420,6 +429,177 @@ class ProductionJobExecutor:
             uow.commit()
 
 
+    def _p2_repository(
+        self,
+        uow: RuntimeCanonicalUnitOfWork,
+    ) -> P2PersistenceRepository:
+        return P2PersistenceRepository(
+            uow.canonical_rows,
+            object_store=self._object_store,
+        )
+
+    @staticmethod
+    def _p2_manifest_hash(
+        *,
+        job_id: str,
+        request_hash: str,
+        dataset_snapshot_id: str,
+        release_id: str,
+        value: P2AttributionExecution,
+    ) -> str:
+        payload = {
+            "schema": "TPAA_PRCB_C2_P2_RELEASE_MANIFEST_V1",
+            "job_id": job_id,
+            "request_hash": request_hash,
+            "dataset_snapshot_id": dataset_snapshot_id,
+            "release_id": release_id,
+            "attribution_run_id": value.attribution_run.attribution_run_id,
+            "run_request_hash": value.attribution_run.run_request_hash,
+            "model_artifact_hash": value.attribution_run.model_artifact_hash,
+            "estimate_id": value.adjusted_estimate.estimate_id,
+            "estimate_logical_hash": value.adjusted_estimate.logical_hash,
+        }
+        encoded = json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+        return hashlib.sha256(encoded).hexdigest()
+
+    def _execute_p2_attribution(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        dataset_snapshot_id = _text(
+            payload.get("dataset_snapshot_id"),
+            field="dataset_snapshot_id",
+        )
+        execution_time_utc = _text(
+            payload.get("execution_time_utc"),
+            field="execution_time_utc",
+        )
+        expected_version_token = _integer(
+            payload.get("expected_version_token"),
+            field="expected_version_token",
+        )
+        if expected_version_token < 0:
+            raise ProductionJobExecutionError(
+                "PRCB_C2_P2_EXPECTED_VERSION_INVALID",
+                str(expected_version_token),
+            )
+        supersedes_raw = payload.get("supersedes_estimate_id")
+        supersedes_estimate_id = (
+            None
+            if supersedes_raw is None
+            else _text(
+                supersedes_raw,
+                field="supersedes_estimate_id",
+            )
+        )
+
+        with self._write_uow_factory() as uow:
+            repository = self._p2_repository(uow)
+            compute_input = repository.exact_compute_input(dataset_snapshot_id)
+            release_repository = P2ReleaseRepository(uow.canonical_rows)
+            lineage = release_repository.source_lineage(
+                compute_input.input_bundle.target.release_id
+            )
+            uow.commit()
+
+        scope_key = p2_release_scope_key(
+            compute_input.input_bundle.target.observation_id
+        )
+        release_id = allocate_p2_release_id(
+            job_id=job_id,
+            request_hash=request_hash,
+            scope_key=scope_key,
+        )
+        result = self._dispatcher.dispatch(
+            WorkerPayload(
+                job_id=job_id,
+                request_hash=request_hash,
+                command=P2_ATTRIBUTION_COMMAND,
+                handler=_GOVERNED_HANDLER,
+                domain_payload=ProductionP2AttributionWorkerInput(
+                    job_payload=dict(payload),
+                    compute_input=compute_input,
+                    p2_release_id=release_id,
+                    execution_time_utc=execution_time_utc,
+                    supersedes_estimate_id=supersedes_estimate_id,
+                ),
+            ),
+            timeout_seconds=120.0,
+        )
+        value = result.domain_payload
+        if result.status != "SUCCEEDED" or not isinstance(
+            value,
+            P2AttributionExecution,
+        ):
+            raise ProductionJobExecutionError(
+                result.error_code or "PRCB_C2_WORKER_FAILED",
+                job_id,
+            )
+
+        run = value.attribution_run
+        if value.model_artifact_json is None:
+            if run.model_artifact_uri is not None or run.model_artifact_hash is not None:
+                raise ProductionJobExecutionError(
+                    "PRCB_C2_P2_MODEL_ARTIFACT_DRIFT",
+                    run.attribution_run_id,
+                )
+        else:
+            if run.model_artifact_hash is None or run.model_artifact_uri is not None:
+                raise ProductionJobExecutionError(
+                    "PRCB_C2_P2_MODEL_ARTIFACT_DRIFT",
+                    run.attribution_run_id,
+                )
+            artifact_bytes = value.model_artifact_json.encode("ascii")
+            logical_uri = (
+                "tpaa-object://p2-attribution-model/"
+                f"{run.attribution_run_id}.json"
+            )
+            stored = self._object_store.put_bytes(logical_uri, artifact_bytes)
+            if stored.artifact_sha256 != run.model_artifact_hash:
+                raise ProductionJobExecutionError(
+                    "PRCB_C2_P2_MODEL_ARTIFACT_HASH_MISMATCH",
+                    run.attribution_run_id,
+                )
+            run = replace(run, model_artifact_uri=logical_uri)
+            value = replace(value, attribution_run=run)
+
+        manifest_hash = self._p2_manifest_hash(
+            job_id=job_id,
+            request_hash=request_hash,
+            dataset_snapshot_id=dataset_snapshot_id,
+            release_id=release_id,
+            value=value,
+        )
+        with self._write_uow_factory() as uow:
+            repository = self._p2_repository(uow)
+            repository.register_attribution_run(
+                value.attribution_run,
+                compute_job_id=job_id,
+            )
+            P2ReleaseRepository(uow.canonical_rows).publish(
+                job_id=job_id,
+                release_id=release_id,
+                scope_key=scope_key,
+                lineage=lineage,
+                expected_version_token=expected_version_token,
+                manifest_hash=manifest_hash,
+                published_at_utc=execution_time_utc,
+            )
+            repository.register_adjusted_estimate(value.adjusted_estimate)
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
+            uow.commit()
+
     def _p3_repository(
         self,
         uow: RuntimeCanonicalUnitOfWork,
@@ -631,6 +811,13 @@ class ProductionJobExecutor:
                 request_hash=request_hash,
                 job_key=job_key,
                 command=command,
+                payload=payload,
+            )
+            return
+        if command == P2_ATTRIBUTION_COMMAND:
+            self._execute_p2_attribution(
+                job_id=job_id,
+                request_hash=request_hash,
                 payload=payload,
             )
             return

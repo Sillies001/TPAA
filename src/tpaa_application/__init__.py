@@ -123,6 +123,14 @@ from .m9_workspace import (
 )
 from .models import StorageBaselineStatus
 from .p2_persistence import P2PersistenceError, P2PersistenceRepository
+from .p2_release import (
+    P2PublishedRelease,
+    P2ReleaseError,
+    P2ReleaseLineage,
+    P2ReleaseRepository,
+    allocate_p2_release_id,
+    p2_release_scope_key,
+)
 from .p3_persistence import (
     CanonicalP3WorkspaceLayerResolver,
     DurableM7P3WorkspaceRepository,
@@ -197,6 +205,12 @@ __all__ = [
     "M2ReplayComparison",
     "P2PersistenceError",
     "P2PersistenceRepository",
+    "P2PublishedRelease",
+    "P2ReleaseError",
+    "P2ReleaseLineage",
+    "P2ReleaseRepository",
+    "allocate_p2_release_id",
+    "p2_release_scope_key",
     "CanonicalP3WorkspaceLayerResolver",
     "DurableM7P3WorkspaceRepository",
     "P3PersistenceError",
