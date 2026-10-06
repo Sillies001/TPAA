@@ -4,8 +4,8 @@ from pathlib import Path
 
 from tools.testing.piqb_b2_postgres_p4_p5_persistence import (
     AS_OF,
-    EVIDENCE,
     EPISODE,
+    EVIDENCE,
     _composition,
     _p4,
     _seed,

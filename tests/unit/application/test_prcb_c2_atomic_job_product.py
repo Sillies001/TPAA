@@ -13,6 +13,7 @@ from tpaa_capability import (
     P6ForecastExecutionProfile,
     build_p6_forecast_request_binding,
     build_p6_input_snapshot,
+    execute_p6_forecast,
 )
 from tpaa_runtime import (
     ProductionRuntimeConfig,
@@ -85,6 +86,14 @@ def test_prcb_c2_product_persistence_and_job_success_share_one_transaction(
         repository.register_forecast_request(request)
         uow.commit()
 
+    expected_forecast = execute_p6_forecast(
+        request=request,
+        input_snapshot=snapshot,
+        model_build=fixture.build,
+        managed_object=fixture.managed,
+        published_at_utc="2026-09-10T13:30:00Z",
+    )
+
     runtime = build_desktop_production_runtime(
         ProductionRuntimeConfig(
             profile=RuntimeProfile.DESKTOP,
@@ -115,10 +124,11 @@ def test_prcb_c2_product_persistence_and_job_success_share_one_transaction(
         assert job["status"] == "SUCCEEDED"
         persisted = uow.canonical_rows.one(
             "intelligence.forecast_result",
-            where={"forecast_request_id": request.forecast_request_id},
+            where={"forecast_result_id": expected_forecast.forecast_result_id},
             columns=("forecast_result_id", "status"),
         )
         assert persisted is not None
+        assert persisted["forecast_result_id"] == expected_forecast.forecast_result_id
         assert persisted["status"] in {
             "PUBLISHED_PROJECTION",
             "NON_NUMERIC",

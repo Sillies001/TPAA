@@ -15,7 +15,6 @@ from uuid import UUID, uuid5
 from tpaa_application.m1_publication import to_core_publication_bundle
 from tpaa_capability.p3_twin import (
     P3AircraftTwinRevision,
-    P3CapabilityEstimate,
     P3TwinComponentBinding,
     evaluate_twin_capability_estimate,
 )
