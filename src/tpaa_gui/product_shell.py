@@ -116,7 +116,7 @@ PRODUCT_NAVIGATION = (
         "P01",
         "SESSION_RELEASE",
         "Session / Release",
-        "Discovery",
+        "M1",
         "C",
     ),
     ProductNavigationItem("P02", "DATA_QUALITY", "Data Quality", "M1/M3", "C"),

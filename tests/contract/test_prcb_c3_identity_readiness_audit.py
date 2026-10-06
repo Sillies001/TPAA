@@ -41,7 +41,7 @@ def test_prcb_c3_identity_readiness_and_job_audit_are_production_wired() -> None
     assert "uow.audit_log.append(" in jobs
 
 
-def test_prcb_c3_governance_state_unblocks_c4_without_claiming_c5() -> None:
+def test_prcb_c3_governance_state_records_completed_handoff_to_c4() -> None:
     state = json.loads(
         (
             ROOT
@@ -51,9 +51,9 @@ def test_prcb_c3_governance_state_unblocks_c4_without_claiming_c5() -> None:
             / "PRCB_IMPLEMENTATION_STATE.json"
         ).read_text(encoding="utf-8")
     )
-    assert state["active_batch"] == "C3"
+    assert state["active_batch"] == "C4"
     assert state["task_state"]["C2"]["state"] == "COMPLETE"
-    assert state["task_state"]["C3"]["state"] == "ACTIVE"
-    assert state["task_state"]["C4"]["state"] == "READY"
-    assert state["task_state"]["C5"]["state"] == "BLOCKED_BY_C3_C4"
+    assert state["task_state"]["C3"]["state"] == "COMPLETE"
+    assert state["task_state"]["C4"]["state"] == "ACTIVE"
+    assert state["task_state"]["C5"]["state"] == "BLOCKED_BY_C4"
     assert state["qualification"]["formal_release_claimed"] is False
