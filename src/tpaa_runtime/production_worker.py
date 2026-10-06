@@ -14,9 +14,21 @@ from uuid import UUID, uuid5
 
 from tpaa_application.m1_publication import to_core_publication_bundle
 from tpaa_application.p2_persistence import P2DurableComputeInput
-from tpaa_assessment import execute_p2_attribution
+from tpaa_application.p4_p5_compute_input import P5DurableComputeInput
+from tpaa_assessment import (
+    P4AssessmentRevision,
+    P4SubjectContext,
+    P5AssessmentRevision,
+    build_p4_assessment_revision,
+    build_p5_aggregation,
+    build_p5_assessment_revision,
+    execute_p2_attribution,
+    materialize_p4_human_machine_evidence,
+    materialize_p5_team_mission_evidence,
+)
 from tpaa_capability.p3_twin import (
     P3AircraftTwinRevision,
+    P3CapabilityEstimate,
     P3TwinComponentBinding,
     evaluate_twin_capability_estimate,
 )
@@ -32,6 +44,7 @@ from tpaa_capability.p6_input import (
     P6ForecastRequestBinding,
     P6InputSnapshot,
 )
+from tpaa_context import P3ClaimEnvelope
 from tpaa_generated.dto import EvaluationContextDTO
 from tpaa_generated.metric_registry import P1_METRICS
 from tpaa_ingest.canonical_flight_channels import CanonicalFlightRow
@@ -46,12 +59,18 @@ from tpaa_platform.worker import WorkerPayload, WorkerResult
 from tpaa_storage.canonical_rows import FieldKind
 from tpaa_storage.hashing import canonical_request_hash
 from tpaa_storage.publication_bundle import CorePublicationBundle
-from tpaa_world import AircraftObservedWorld, WorldEvidenceRef
+from tpaa_world import (
+    AircraftObservedWorld,
+    P4InteractionScopeSnapshot,
+    WorldEvidenceRef,
+)
 
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_PRCB_C2_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
 P2_ATTRIBUTION_COMMAND = "P2_ATTRIBUTION"
 P3_ESTIMATE_COMMAND = "P3_ESTIMATE"
+P4_ASSESSMENT_COMMAND = "P4_ASSESSMENT"
+P5_ASSESSMENT_COMMAND = "P5_ASSESSMENT"
 P6_FORECAST_COMMAND = "P6_FORECAST"
 P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
 _REPRESENTATIVE_CODES = (
@@ -123,6 +142,28 @@ class ProductionP3EstimateWorkerInput:
     capability_type: str
     condition_point: dict[str, object]
     as_of_time_utc: str
+    created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP4AssessmentWorkerInput:
+    """Frozen P4 scope plus exact upstream claim authority."""
+
+    job_payload: dict[str, object]
+    subject: P4SubjectContext
+    scope: P4InteractionScopeSnapshot
+    p3_estimate: P3CapabilityEstimate | None
+    confidence: float
+    created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP5AssessmentWorkerInput:
+    """Frozen P5 composition and exact member revisions."""
+
+    job_payload: dict[str, object]
+    compute_input: P5DurableComputeInput
+    confidence: float
     created_at_utc: str
 
 
@@ -865,6 +906,120 @@ def _execute_p3_estimate(payload: WorkerPayload) -> WorkerResult:
     )
 
 
+def _p3_claim_envelope(
+    subject: P4SubjectContext,
+    estimate: P3CapabilityEstimate | None,
+) -> P3ClaimEnvelope:
+    if estimate is None:
+        if subject.p3_estimate_id is not None:
+            raise ProductionWorkerError(
+                "PRCB_C2_P4_P3_ESTIMATE_MISSING",
+                subject.p3_estimate_id,
+            )
+        return P3ClaimEnvelope(
+            claim_level="P3_EVIDENCE_UNAVAILABLE",
+            validity_status="UNAVAILABLE",
+            as_of_utc=subject.as_of_utc,
+            uncertainty_lower=None,
+            uncertainty_upper=None,
+        )
+    if (
+        subject.p3_estimate_id != estimate.estimate_id
+        or subject.twin_revision_id != estimate.twin_revision_id
+    ):
+        raise ProductionWorkerError(
+            "PRCB_C2_P4_P3_IDENTITY_DRIFT",
+            estimate.estimate_id,
+        )
+    lower_raw = estimate.uncertainty.get("lower")
+    upper_raw = estimate.uncertainty.get("upper")
+    lower = (
+        None
+        if lower_raw is None
+        else _number(lower_raw, field="p3.uncertainty.lower")
+    )
+    upper = (
+        None
+        if upper_raw is None
+        else _number(upper_raw, field="p3.uncertainty.upper")
+    )
+    return P3ClaimEnvelope(
+        claim_level=estimate.claim_level,
+        validity_status=estimate.validity_domain_status,
+        as_of_utc=estimate.as_of_time,
+        uncertainty_lower=lower,
+        uncertainty_upper=upper,
+    )
+
+
+def _execute_p4_assessment(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP4AssessmentWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    evidence = materialize_p4_human_machine_evidence(
+        body.subject,
+        body.scope,
+    )
+    value = build_p4_assessment_revision(
+        body.subject,
+        evidence=evidence,
+        annotations=(),
+        p3_claim=_p3_claim_envelope(body.subject, body.p3_estimate),
+        confidence=body.confidence,
+        created_at_utc=body.created_at_utc,
+        approval_state="DRAFT",
+        supersedes_id=None,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(value.actor_assessment_id, value.logical_content_hash),
+        domain_payload=value,
+    )
+
+
+def _execute_p5_assessment(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP5AssessmentWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    compute_input = body.compute_input
+    evidence = materialize_p5_team_mission_evidence(
+        compute_input.composition,
+        p4_revisions=compute_input.p4_revisions,
+        evidence_set_id=compute_input.evidence_set_id,
+        objective_result_refs=compute_input.objective_result_refs,
+        as_of_utc=compute_input.as_of_utc,
+    )
+    aggregation = build_p5_aggregation(evidence)
+    value = build_p5_assessment_revision(
+        compute_input.composition,
+        evidence=evidence,
+        aggregation=aggregation,
+        confidence=body.confidence,
+        created_at_utc=body.created_at_utc,
+        approval_state="DRAFT",
+        supersedes=None,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(value.mission_assessment_id, value.logical_content_hash),
+        domain_payload=value,
+    )
+
+
 def _execute_p6_forecast(payload: WorkerPayload) -> WorkerResult:
     body = payload.domain_payload
     if not isinstance(body, ProductionP6ForecastWorkerInput):
@@ -924,6 +1079,10 @@ def execute(payload: WorkerPayload) -> WorkerResult:
             return _execute_p2_attribution(payload)
         if payload.command == P3_ESTIMATE_COMMAND:
             return _execute_p3_estimate(payload)
+        if payload.command == P4_ASSESSMENT_COMMAND:
+            return _execute_p4_assessment(payload)
+        if payload.command == P5_ASSESSMENT_COMMAND:
+            return _execute_p5_assessment(payload)
         if payload.command == P6_FORECAST_COMMAND:
             return _execute_p6_forecast(payload)
         if payload.command == P6_COUNTERFACTUAL_COMMAND:
