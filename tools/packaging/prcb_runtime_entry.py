@@ -14,9 +14,21 @@ SRC_ROOT = APP_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from tpaa_application import JobStatus, P2PersistenceRepository  # noqa: E402
+from tpaa_application import (  # noqa: E402
+    JobStatus,
+    P2PersistenceRepository,
+    P3PersistenceRepository,
+    P4P5PersistenceRepository,
+    P6PersistenceRepository,
+)
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
+from tpaa_qualification.prcb_c5_downstream import (  # noqa: E402
+    prepare_prcb_c5_p3,
+    prepare_prcb_c5_p4,
+    prepare_prcb_c5_p5,
+    prepare_prcb_c5_p6,
+)
 from tpaa_qualification.prcb_c5_p2 import (  # noqa: E402
     prepare_prcb_c5_p2_workspace,
 )
@@ -30,6 +42,7 @@ from tpaa_runtime import (  # noqa: E402
     restore_desktop_production_backup,
 )
 from tpaa_storage import (  # noqa: E402
+    LocalObjectStore,
     SQLiteDesktopUnitOfWork,
     bootstrap_sqlite,
     verify_sqlite,
@@ -189,7 +202,7 @@ def _assert_clean_work_root(work_root: Path) -> None:
     work_root.mkdir(parents=True, exist_ok=True)
 
 
-def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
+def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     _assert_clean_work_root(work_root)
     database = work_root / "primary.sqlite3"
     object_root = work_root / "primary-objects"
@@ -310,23 +323,195 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         ).exact_adjusted_estimate(p2_estimate_id)
         uow.commit()
 
+
+    qualification_store = LocalObjectStore(object_root)
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        p3_prepared = prepare_prcb_c5_p3(
+            uow.canonical_rows,
+            qualification_store,
+        )
+        uow.commit()
+    p3_expected = p3_prepared.fixture.estimate
+    p3_submission = runtime.application.submit_job(
+        idempotency_key="prcb-c5-installed-p3",
+        command="P3_ESTIMATE",
+        payload={
+            "twin_revision_id": p3_expected.twin_revision_id,
+            "capability_type": p3_expected.capability_type,
+            "condition_point": dict(p3_expected.condition_point),
+            "as_of_time_utc": p3_expected.as_of_time,
+            "created_at_utc": p3_expected.created_at,
+        },
+        actor="PRCB-C5-INSTALLED",
+    )
+    if p3_submission.reused or p3_submission.record.status is not JobStatus.SUCCEEDED:
+        raise RuntimeError("installed P3 estimate did not succeed")
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        p4_prepared = prepare_prcb_c5_p4(uow.canonical_rows)
+        uow.commit()
+    p4_expected = p4_prepared.expected
+    p4_submission = runtime.application.submit_job(
+        idempotency_key="prcb-c5-installed-p4",
+        command="P4_ASSESSMENT",
+        payload={
+            "scope_snapshot_id": p4_prepared.scope_snapshot_id,
+            "confidence": p4_expected.confidence,
+            "created_at_utc": p4_expected.created_at_utc,
+        },
+        actor="PRCB-C5-INSTALLED",
+    )
+    if p4_submission.reused or p4_submission.record.status is not JobStatus.SUCCEEDED:
+        raise RuntimeError("installed P4 assessment did not succeed")
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        p5_prepared = prepare_prcb_c5_p5(
+            uow.canonical_rows,
+            p4_revision_id=p4_expected.actor_assessment_id,
+        )
+        uow.commit()
+    p5_expected = p5_prepared.expected
+    p5_submission = runtime.application.submit_job(
+        idempotency_key="prcb-c5-installed-p5",
+        command="P5_ASSESSMENT",
+        payload={
+            "selection_snapshot_id": p5_prepared.selection_snapshot_id,
+            "confidence": p5_expected.confidence,
+            "created_at_utc": p5_expected.created_at_utc,
+        },
+        actor="PRCB-C5-INSTALLED",
+    )
+    if p5_submission.reused or p5_submission.record.status is not JobStatus.SUCCEEDED:
+        raise RuntimeError("installed P5 assessment did not succeed")
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        p6_prepared = prepare_prcb_c5_p6(
+            uow.canonical_rows,
+            qualification_store,
+        )
+        uow.commit()
+    p6_forecast_expected = p6_prepared.expected_forecast
+    p6_counterfactual_expected = p6_prepared.expected_counterfactual
+    p6_forecast_submission = runtime.application.submit_job(
+        idempotency_key="prcb-c5-installed-p6-forecast",
+        command="P6_FORECAST",
+        payload={
+            "forecast_request_id": p6_prepared.forecast_request.forecast_request_id,
+            "published_at_utc": p6_forecast_expected.published_at_utc,
+        },
+        actor="PRCB-C5-INSTALLED",
+    )
+    if (
+        p6_forecast_submission.reused
+        or p6_forecast_submission.record.status is not JobStatus.SUCCEEDED
+    ):
+        raise RuntimeError("installed P6 forecast did not succeed")
+    p6_counterfactual_submission = runtime.application.submit_job(
+        idempotency_key="prcb-c5-installed-p6-counterfactual",
+        command="P6_COUNTERFACTUAL",
+        payload={
+            "counterfactual_request_id": (
+                p6_prepared.counterfactual_request.counterfactual_request_id
+            ),
+            "created_at_utc": p6_counterfactual_expected.created_at_utc,
+        },
+        actor="PRCB-C5-INSTALLED",
+    )
+    if (
+        p6_counterfactual_submission.reused
+        or p6_counterfactual_submission.record.status is not JobStatus.SUCCEEDED
+    ):
+        raise RuntimeError("installed P6 counterfactual did not succeed")
+
+    with SQLiteDesktopUnitOfWork(database) as uow:
+        p3_actual = P3PersistenceRepository(
+            uow.canonical_rows,
+            object_store=qualification_store,
+        ).exact_capability_estimate(p3_expected.estimate_id)
+        products = P4P5PersistenceRepository(uow.canonical_rows)
+        p4_actual = products.exact_p4_revision(p4_expected.actor_assessment_id)
+        p5_actual = products.exact_p5_revision(p5_expected.mission_assessment_id)
+        p6_products = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=qualification_store,
+        )
+        p6_forecast_actual = p6_products.exact_forecast(
+            p6_forecast_expected.forecast_result_id
+        )
+        p6_counterfactual_actual = p6_products.exact_counterfactual(
+            p6_counterfactual_expected.counterfactual_run_id
+        )
+        uow.commit()
+    if (
+        p3_actual != p3_expected
+        or p4_actual != p4_expected
+        or p5_actual != p5_expected
+        or p6_forecast_actual != p6_forecast_expected
+        or p6_counterfactual_actual != p6_counterfactual_expected
+    ):
+        raise RuntimeError("installed P3-P6 exact persistence verification failed")
+
+    downstream_job_ids = (
+        p3_submission.record.job_id,
+        p4_submission.record.job_id,
+        p5_submission.record.job_id,
+        p6_forecast_submission.record.job_id,
+        p6_counterfactual_submission.record.job_id,
+    )
+    all_job_ids = (
+        submission.record.job_id,
+        p2_submission.record.job_id,
+        *downstream_job_ids,
+    )
+
     restarted = build_desktop_production_runtime(config)
     restarted_job = restarted.application.job(submission.record.job_id)
     restarted_release = restarted.application.m1_release(release_id)
     if (
         restarted_job.status is not JobStatus.SUCCEEDED
         or restarted_release != release
-        or restarted.application.job(p2_submission.record.job_id).status
-        is not JobStatus.SUCCEEDED
+        or any(
+            restarted.application.job(job_id).status is not JobStatus.SUCCEEDED
+            for job_id in all_job_ids[1:]
+        )
     ):
         raise RuntimeError("installed restart/replay verification failed")
     with SQLiteDesktopUnitOfWork(database) as uow:
         restarted_p2 = P2PersistenceRepository(
             uow.canonical_rows
         ).exact_adjusted_estimate(p2_estimate_id)
+        restarted_p3 = P3PersistenceRepository(
+            uow.canonical_rows,
+            object_store=qualification_store,
+        ).exact_capability_estimate(p3_expected.estimate_id)
+        restarted_assessments = P4P5PersistenceRepository(uow.canonical_rows)
+        restarted_p4 = restarted_assessments.exact_p4_revision(
+            p4_expected.actor_assessment_id
+        )
+        restarted_p5 = restarted_assessments.exact_p5_revision(
+            p5_expected.mission_assessment_id
+        )
+        restarted_p6 = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=qualification_store,
+        )
+        restarted_forecast = restarted_p6.exact_forecast(
+            p6_forecast_expected.forecast_result_id
+        )
+        restarted_counterfactual = restarted_p6.exact_counterfactual(
+            p6_counterfactual_expected.counterfactual_run_id
+        )
         uow.commit()
-    if restarted_p2 != p2_estimate:
-        raise RuntimeError("installed P2 restart exact replay failed")
+    if (
+        restarted_p2 != p2_estimate
+        or restarted_p3 != p3_expected
+        or restarted_p4 != p4_expected
+        or restarted_p5 != p5_expected
+        or restarted_forecast != p6_forecast_expected
+        or restarted_counterfactual != p6_counterfactual_expected
+    ):
+        raise RuntimeError("installed P2-P6 restart exact replay failed")
 
     with SQLiteDesktopUnitOfWork(database) as uow:
         audit_rows = uow.audit_log.rows()
@@ -335,11 +520,10 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         row
         for row in audit_rows
         if row.action == "JOB_SUBMIT"
-        and row.object_id
-        in {submission.record.job_id, p2_submission.record.job_id}
+        and row.object_id in set(all_job_ids)
         and row.principal_key == "PRCB-C5-INSTALLED"
     )
-    if len(job_audit) != 2:
+    if len(job_audit) != len(all_job_ids):
         raise RuntimeError("installed durable job audit verification failed")
 
     backup = work_root / "backup"
@@ -360,38 +544,63 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         _desktop_config(restored_database, restored_objects)
     )
     if (
-        restored.application.job(submission.record.job_id).status
-        is not JobStatus.SUCCEEDED
-        or restored.application.job(p2_submission.record.job_id).status
-        is not JobStatus.SUCCEEDED
+        any(
+            restored.application.job(job_id).status is not JobStatus.SUCCEEDED
+            for job_id in all_job_ids
+        )
         or restored.application.m1_release(release_id) != release
     ):
         raise RuntimeError("installed backup/restore historical replay failed")
 
+    restored_store = LocalObjectStore(restored_objects)
     with SQLiteDesktopUnitOfWork(restored_database) as uow:
         restored_p2 = P2PersistenceRepository(
             uow.canonical_rows
         ).exact_adjusted_estimate(p2_estimate_id)
+        restored_p3 = P3PersistenceRepository(
+            uow.canonical_rows,
+            object_store=restored_store,
+        ).exact_capability_estimate(p3_expected.estimate_id)
+        restored_assessments = P4P5PersistenceRepository(uow.canonical_rows)
+        restored_p4 = restored_assessments.exact_p4_revision(
+            p4_expected.actor_assessment_id
+        )
+        restored_p5 = restored_assessments.exact_p5_revision(
+            p5_expected.mission_assessment_id
+        )
+        restored_p6 = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=restored_store,
+        )
+        restored_forecast = restored_p6.exact_forecast(
+            p6_forecast_expected.forecast_result_id
+        )
+        restored_counterfactual = restored_p6.exact_counterfactual(
+            p6_counterfactual_expected.counterfactual_run_id
+        )
         restored_audit = uow.audit_log.rows()
         uow.commit()
-    if restored_p2 != p2_estimate:
-        raise RuntimeError("installed P2 backup/restore exact replay failed")
+    if (
+        restored_p2 != p2_estimate
+        or restored_p3 != p3_expected
+        or restored_p4 != p4_expected
+        or restored_p5 != p5_expected
+        or restored_forecast != p6_forecast_expected
+        or restored_counterfactual != p6_counterfactual_expected
+    ):
+        raise RuntimeError("installed P2-P6 backup/restore exact replay failed")
     restored_submit_ids = {
         row.object_id
         for row in restored_audit
         if row.action == "JOB_SUBMIT"
         and row.principal_key == "PRCB-C5-INSTALLED"
-        and row.object_id
-        in {submission.record.job_id, p2_submission.record.job_id}
+        and row.object_id in set(all_job_ids)
     }
-    if restored_submit_ids != {
-        submission.record.job_id,
-        p2_submission.record.job_id,
-    }:
+    if restored_submit_ids != set(all_job_ids):
         raise RuntimeError("installed backup/restore audit persistence failed")
 
     return {
-        "schema": "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P2_E2E_V1",
+        "schema": "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P6_E2E_V1",
         "status": "PASS",
         "product_version": PRODUCT_VERSION,
         "runtime_profile": "DESKTOP",
@@ -408,8 +617,29 @@ def _desktop_p1_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "p2_release_id": p2_release_id,
         "p2_estimate_id": p2_estimate_id,
         "p2_estimate_status": p2_estimate.status,
+        "p3_job_id": p3_submission.record.job_id,
+        "p3_job_status": p3_submission.record.status.value,
+        "p3_estimate_id": p3_expected.estimate_id,
+        "p4_job_id": p4_submission.record.job_id,
+        "p4_job_status": p4_submission.record.status.value,
+        "p4_revision_id": p4_expected.actor_assessment_id,
+        "p5_job_id": p5_submission.record.job_id,
+        "p5_job_status": p5_submission.record.status.value,
+        "p5_revision_id": p5_expected.mission_assessment_id,
+        "p6_forecast_job_id": p6_forecast_submission.record.job_id,
+        "p6_forecast_job_status": p6_forecast_submission.record.status.value,
+        "p6_forecast_result_id": p6_forecast_expected.forecast_result_id,
+        "p6_counterfactual_job_id": p6_counterfactual_submission.record.job_id,
+        "p6_counterfactual_job_status": (
+            p6_counterfactual_submission.record.status.value
+        ),
+        "p6_counterfactual_run_id": (
+            p6_counterfactual_expected.counterfactual_run_id
+        ),
         "p2_restart_exact_replay": True,
         "p2_backup_restore_exact_replay": True,
+        "p3_p6_restart_exact_replay": True,
+        "p3_p6_backup_restore_exact_replay": True,
         "restart_exact_replay": True,
         "backup_restore_exact_replay": True,
         "persistent_audit_verified": True,
@@ -426,17 +656,18 @@ def main() -> int:
     parser.add_argument("--profile", required=True, choices=sorted(ALL_PROFILES))
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("ready")
-    desktop = sub.add_parser("desktop-p1-e2e")
-    desktop.add_argument("--work-root", type=Path, required=True)
-    desktop.add_argument("--source", type=Path, default=QUALIFICATION_SOURCE)
+    for command_name in ("desktop-e2e", "desktop-p1-e2e"):
+        desktop = sub.add_parser(command_name)
+        desktop.add_argument("--work-root", type=Path, required=True)
+        desktop.add_argument("--source", type=Path, default=QUALIFICATION_SOURCE)
     args = parser.parse_args()
 
     if args.command == "ready":
         result = _ready(args.profile)
-    elif args.command == "desktop-p1-e2e":
+    elif args.command in {"desktop-e2e", "desktop-p1-e2e"}:
         if args.profile not in DESKTOP_PROFILES:
-            raise RuntimeError("desktop-p1-e2e requires a Desktop profile")
-        result = _desktop_p1_e2e(args.work_root, args.source)
+            raise RuntimeError("desktop-e2e requires a Desktop profile")
+        result = _desktop_e2e(args.work_root, args.source)
     else:
         raise AssertionError(args.command)
     print(json.dumps(result, indent=2, sort_keys=True))

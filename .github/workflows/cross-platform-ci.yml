@@ -95,13 +95,13 @@ jobs:
           --package-output dist/piqb-b6/${{ matrix.platform }}
           --evidence evidence/piqb-b6/${{ matrix.platform }}/final-product.json
 
-      - name: Execute PRCB C5 installed Desktop P1 qualification
+      - name: Execute PRCB C5 installed Desktop P1-P6 qualification
         run: >-
           uv run --locked python tools/testing/prcb_c5_installed_desktop_qualification.py
           --platform ${{ matrix.platform }}
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --package-output dist/prcb-c5/${{ matrix.platform }}
-          --evidence evidence/prcb-c5/${{ matrix.platform }}/desktop-installed-p1.json
+          --evidence evidence/prcb-c5/${{ matrix.platform }}/desktop-installed-p1-p6.json
 
       - name: Upload PRCB C5 installed Desktop candidate
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -109,7 +109,7 @@ jobs:
           name: tpaa-prcb-c5-desktop-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             dist/prcb-c5/${{ matrix.platform }}
-            evidence/prcb-c5/${{ matrix.platform }}/desktop-installed-p1.json
+            evidence/prcb-c5/${{ matrix.platform }}/desktop-installed-p1-p6.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0

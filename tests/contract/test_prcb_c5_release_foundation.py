@@ -42,8 +42,14 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "build_desktop_production_runtime" in runtime
     assert "build_service_production_runtime" in runtime
     assert "m1_fixture_root" not in runtime
+    assert "desktop-e2e" in runtime
     assert "desktop-p1-e2e" in runtime
     assert "P2_ATTRIBUTION" in runtime
+    assert "P3_ESTIMATE" in runtime
+    assert "P4_ASSESSMENT" in runtime
+    assert "P5_ASSESSMENT" in runtime
+    assert "P6_FORECAST" in runtime
+    assert "P6_COUNTERFACTUAL" in runtime
     assert "prepare_prcb_c5_p2_workspace" in runtime
     assert "bootstrap_sqlite" in runtime
     assert "create_desktop_production_backup" in runtime
@@ -67,12 +73,12 @@ def test_prcb_c5_installed_desktop_qualification_runs_inside_existing_jobs() -> 
         / "testing"
         / "prcb_c5_installed_desktop_qualification.py"
     ).read_text(encoding="utf-8")
-    assert "Execute PRCB C5 installed Desktop P1 qualification" in workflow
+    assert "Execute PRCB C5 installed Desktop P1-P6 qualification" in workflow
     assert "prcb_c5_installed_desktop_qualification.py" in workflow
     assert "dist/prcb-c5/${{ matrix.platform }}" in workflow
     assert "TPAA_PRCB_C5_INSTALLED_DESKTOP_QUALIFICATION_V1" in tool
     assert "build_prcb_release_bundle" in tool
-    assert "desktop-p1-e2e" in tool
+    assert "desktop-e2e" in tool
     assert "package_sha256" in tool
     assert "logical_product_sha256" in tool
     assert "app/tests/" in tool
