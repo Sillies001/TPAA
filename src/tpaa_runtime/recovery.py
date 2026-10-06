@@ -9,6 +9,7 @@ import shutil
 import sqlite3
 import subprocess
 from collections.abc import Callable, Mapping
+from contextlib import closing
 from pathlib import Path, PurePosixPath
 
 from psycopg.conninfo import conninfo_to_dict
@@ -234,8 +235,8 @@ def create_desktop_production_backup(
     staging = _staging_directory(destination)
     try:
         backup_database = staging / "database.sqlite3"
-        with sqlite3.connect(database) as source, sqlite3.connect(
-            backup_database
+        with closing(sqlite3.connect(database)) as source, closing(
+            sqlite3.connect(backup_database)
         ) as target:
             source.backup(target)
         objects = _copy_object_tree(object_root, staging / "objects")
