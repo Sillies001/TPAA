@@ -16,9 +16,7 @@ from tpaa_application.m1_publication import to_core_publication_bundle
 from tpaa_application.p2_persistence import P2DurableComputeInput
 from tpaa_application.p4_p5_compute_input import P5DurableComputeInput
 from tpaa_assessment import (
-    P4AssessmentRevision,
     P4SubjectContext,
-    P5AssessmentRevision,
     build_p4_assessment_revision,
     build_p5_aggregation,
     build_p5_assessment_revision,
