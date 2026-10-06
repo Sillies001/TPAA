@@ -76,9 +76,16 @@ def _install_runtime_entry(stage: Path, profile: str) -> None:
             "set \"ROOT=%~dp0\"\r\n"
             "set \"PYTHONHOME=%ROOT%runtime\"\r\n"
             "set \"PYTHONPATH=%ROOT%app\\src\"\r\n"
+            "if \"%~1\"==\"\" goto default\r\n"
             "\"%ROOT%runtime\\python.exe\" "
             "\"%ROOT%app\\tools\\packaging\\prcb_runtime_entry.py\" "
-            f"--profile {profile} {default_command}\r\n",
+            f"--profile {profile} %*\r\n"
+            "exit /b %ERRORLEVEL%\r\n"
+            ":default\r\n"
+            "\"%ROOT%runtime\\python.exe\" "
+            "\"%ROOT%app\\tools\\packaging\\prcb_runtime_entry.py\" "
+            f"--profile {profile} {default_command}\r\n"
+            "exit /b %ERRORLEVEL%\r\n",
             encoding="utf-8",
             newline="",
         )
@@ -92,9 +99,10 @@ def _install_runtime_entry(stage: Path, profile: str) -> None:
             "export PYTHONHOME=\"$ROOT/runtime\"\n"
             "export PYTHONPATH=\"$ROOT/app/src\"\n"
             "export LD_LIBRARY_PATH=\"$ROOT/runtime/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n"
+            f"if [ \"$#\" -eq 0 ]; then set -- {default_command}; fi\n"
             "exec \"$ROOT/runtime/bin/python\" "
             "\"$ROOT/app/tools/packaging/prcb_runtime_entry.py\" "
-            f"--profile {profile} {default_command}\n",
+            f"--profile {profile} \"$@\"\n",
             encoding="utf-8",
             newline="\n",
         )

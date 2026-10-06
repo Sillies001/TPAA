@@ -49,3 +49,5 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "SQLiteDesktopUnitOfWork" in runtime
     assert "formal_release_claimed" in runtime
     assert "PRCB_C2_NOMINAL_FLIGHT.json" in packager
+    assert 'if "%~1"=="" goto default' in packager
+    assert 'if [ "$#" -eq 0 ]; then set --' in packager
