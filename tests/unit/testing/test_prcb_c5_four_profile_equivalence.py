@@ -167,6 +167,16 @@ def test_prcb_c5_four_profile_review_preserves_p2_provenance_but_compares_semant
     )
     assert payload["status"] == "PASS"
     assert payload["failed_acceptance"] == []
+    evidence_hashes_raw = payload["installed_evidence_sha256_by_profile"]
+    assert isinstance(evidence_hashes_raw, dict)
+    evidence_hashes = cast(dict[str, str], evidence_hashes_raw)
+    assert set(evidence_hashes) == {
+        "LINUX_DESKTOP_X64",
+        "LINUX_SERVICE_X64",
+        "WINDOWS_DESKTOP_X64",
+        "WINDOWS_SERVICE_X64",
+    }
+    assert all(len(value) == 64 for value in evidence_hashes.values())
     provenance_raw = payload["p2_runtime_provenance_by_profile"]
     assert isinstance(provenance_raw, dict)
     provenance = cast(dict[str, dict[str, object]], provenance_raw)

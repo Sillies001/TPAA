@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, cast
@@ -21,6 +22,14 @@ def _json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise RuntimeError(f"{path}: root JSON object required")
     return cast(dict[str, Any], value)
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def _hex64(value: object) -> bool:
@@ -194,6 +203,12 @@ def review(
             expected_revision=expected_revision,
         ),
     }
+    evidence_sha256 = {
+        "LINUX_DESKTOP_X64": _sha256_file(linux_desktop),
+        "WINDOWS_DESKTOP_X64": _sha256_file(windows_desktop),
+        "LINUX_SERVICE_X64": _sha256_file(linux_service),
+        "WINDOWS_SERVICE_X64": _sha256_file(windows_service),
+    }
     desktop_semantics = {
         key: _p2_semantics(by_profile[key])
         for key in ("LINUX_DESKTOP_X64", "WINDOWS_DESKTOP_X64")
@@ -277,6 +292,7 @@ def review(
         "source_revision": expected_revision,
         "mandatory_profiles": list(MANDATORY_PROFILES),
         "package_sha256_by_profile": package_hashes,
+        "installed_evidence_sha256_by_profile": evidence_sha256,
         "postgres_server_version_by_service_profile": {
             profile: by_profile[profile].get("postgres_server_version")
             for profile in ("LINUX_SERVICE_X64", "WINDOWS_SERVICE_X64")

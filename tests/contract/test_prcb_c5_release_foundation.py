@@ -190,3 +190,34 @@ def test_prcb_c5_four_profile_logical_equivalence_is_gated_in_existing_job() -> 
     assert "p2_source_knowledge_time_utc" in runtime
     assert "tests/fixtures" not in compare
     assert "InMemory" not in compare
+
+
+def test_prcb_c5_exit_review_binds_detached_attestation_to_immutable_evidence() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "cross-platform-ci.yml").read_text(
+        encoding="utf-8"
+    )
+    equivalence = (
+        ROOT / "tools" / "testing" / "prcb_c5_four_profile_equivalence.py"
+    ).read_text(encoding="utf-8")
+    reviewer = (
+        ROOT / "tools" / "testing" / "prcb_c5_exit_review.py"
+    ).read_text(encoding="utf-8")
+
+    assert "installed_evidence_sha256_by_profile" in equivalence
+    assert "Review PRCB C5 final installed product and detached attestation" in workflow
+    assert "tpaa-prcb-c5-exit-review-" in workflow
+    assert "prcb_c5_exit_review.py" in workflow
+    assert "--required-jobs-success 14" in workflow
+    assert "--required-jobs-total 14" in workflow
+    assert "TPAA_PRCB_C5_EXIT_REVIEW_V1" in reviewer
+    assert "TPAA_PRCB_C5_DETACHED_ATTESTATION_V1" in reviewer
+    assert "TPAA_1_0_1_CANDIDATE_NOT_QUALIFIED" in reviewer
+    assert "TPAA_1_0_1_QUALIFIED" in reviewer
+    assert 'event_name == "push"' in reviewer
+    assert 'git_ref == "refs/heads/main"' in reviewer
+    assert "package_sha256_by_profile" in reviewer
+    assert "installed_evidence_sha256_by_profile" in reviewer
+    assert "attestation_payload_sha256" in reviewer
+    assert "tests/fixtures" not in reviewer
+    assert "InMemory" not in reviewer
+    assert "\n  prcb-c5" not in workflow

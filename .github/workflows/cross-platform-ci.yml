@@ -2025,6 +2025,12 @@ jobs:
           name: tpaa-piqb-b2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/piqb-b2
 
+      - name: Download PRCB C5 four-profile installed equivalence evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-prcb-c5-four-profile-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/prcb-c5/four-profile
+
       - name: Aggregate all 14 M0 Exit Gates
         run: >-
           python tools/ci/m0_exit_review.py
@@ -2457,5 +2463,31 @@ jobs:
         with:
           name: tpaa-piqb-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/piqb-exit/review.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Review PRCB C5 final installed product and detached attestation
+        shell: bash
+        run: |
+          python tools/testing/prcb_c5_exit_review.py \
+            --logical-equivalence downloaded/prcb-c5/four-profile/four-profile-logical-equivalence.json \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --review-output evidence/prcb-c5/exit-review.json \
+            --attestation-output evidence/prcb-c5/detached-attestation.json
+
+      - name: Upload PRCB C5 final review and detached attestation
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/prcb-c5/exit-review.json
+            evidence/prcb-c5/detached-attestation.json
           if-no-files-found: error
           retention-days: 90
