@@ -250,16 +250,20 @@ def seed_prcb_c5_p6_model_resolver_case(
     p4 = P4P5PersistenceRepository(rows)
     training_rows: list[P6CapabilityTrainingRow] = []
     for order in range(1, 5):
-        estimate = evaluate_twin_capability_estimate(
-            twin=source.twin,
-            components=(source.component,),
-            capability_type="KINEMATIC_ENERGY_CONTROL",
-            condition_point={
-                "session_order": order,
-                "reference_condition_id": source.segment.reference_condition_id,
-            },
-            as_of_time_utc=source.twin.as_of_data_time,
-            created_at_utc=f"2026-09-10T04:{order:02d}:00Z",
+        estimate = (
+            source.estimate
+            if order == 4
+            else evaluate_twin_capability_estimate(
+                twin=source.twin,
+                components=(source.component,),
+                capability_type="KINEMATIC_ENERGY_CONTROL",
+                condition_point={
+                    "session_order": order,
+                    "reference_condition_id": source.segment.reference_condition_id,
+                },
+                as_of_time_utc=source.twin.as_of_data_time,
+                created_at_utc=f"2026-09-10T04:{order:02d}:00Z",
+            )
         )
         p3.register_estimate(estimate)
         session_id = _uuid("96200000", order)
