@@ -36,6 +36,9 @@ from tpaa_qualification.prcb_c5_downstream import (  # noqa: E402
 from tpaa_qualification.prcb_c5_p2 import (  # noqa: E402
     prepare_prcb_c5_p2_workspace,
 )
+from tpaa_qualification.prcb_c5_service_e2e import (  # noqa: E402
+    run_installed_service_e2e,
+)
 from tpaa_runtime import (  # noqa: E402
     ProductionRuntime,
     ProductionRuntimeConfig,
@@ -710,6 +713,9 @@ def main() -> int:
         desktop = sub.add_parser(command_name)
         desktop.add_argument("--work-root", type=Path, required=True)
         desktop.add_argument("--source", type=Path, default=QUALIFICATION_SOURCE)
+    service = sub.add_parser("service-e2e")
+    service.add_argument("--work-root", type=Path, required=True)
+    service.add_argument("--source", type=Path, default=QUALIFICATION_SOURCE)
     args = parser.parse_args()
 
     if args.command == "ready":
@@ -718,6 +724,18 @@ def main() -> int:
         if args.profile not in DESKTOP_PROFILES:
             raise RuntimeError("desktop-e2e requires a Desktop profile")
         result = _desktop_e2e(args.work_root, args.source)
+    elif args.command == "service-e2e":
+        if args.profile not in SERVICE_PROFILES:
+            raise RuntimeError("service-e2e requires a Service profile")
+        result = run_installed_service_e2e(
+            authority_root=_authority_root(),
+            work_root=args.work_root,
+            source_path=args.source,
+            conninfo=_required_env("TPAA_SERVICE_CONNINFO"),
+            restore_conninfo=_required_env("TPAA_SERVICE_RESTORE_CONNINFO"),
+            instructor_token=_required_env("TPAA_C5_INSTRUCTOR_TOKEN"),
+            analyst_token=_required_env("TPAA_C5_ANALYST_TOKEN"),
+        )
     else:
         raise AssertionError(args.command)
     print(json.dumps(result, indent=2, sort_keys=True))

@@ -1138,6 +1138,32 @@ jobs:
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/piqb-b4/postgres-api-security-observability.json
 
+      - name: Execute PRCB C5 installed Service PostgreSQL qualification
+        run: >-
+          uv run --locked python tools/testing/prcb_c5_installed_service_qualification.py
+          --profile LINUX_SERVICE_X64
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_prcb_c5_service_primary
+          --restore-database tpaa_prcb_c5_service_restore
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --package-output dist/prcb-c5/service-linux
+          --evidence evidence/prcb-c5/service-linux/service-installed-p1-p6.json
+
+      - name: Upload PRCB C5 installed Service candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-service-linux-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            dist/prcb-c5/service-linux
+            evidence/prcb-c5/service-linux/service-installed-p1-p6.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
       - name: Execute ACP-221 PostgreSQL 1.8.0 to 1.9.0 migration qualification
         run: >-
           uv run --locked python tools/testing/acp_221_postgres_migration.py

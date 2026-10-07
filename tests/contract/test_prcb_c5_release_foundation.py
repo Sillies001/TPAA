@@ -44,6 +44,7 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "m1_fixture_root" not in runtime
     assert "desktop-e2e" in runtime
     assert "desktop-p1-e2e" in runtime
+    assert "service-e2e" in runtime
     assert "P2_ATTRIBUTION" in runtime
     assert "P3_ESTIMATE" in runtime
     assert "P4_ASSESSMENT" in runtime
@@ -113,3 +114,47 @@ def test_prcb_c5_qualification_package_keeps_reviewer_import_lightweight() -> No
     assert "PRCBC5P2QualificationSeed" not in package
     assert "prepare_prcb_c5_p2_workspace" not in package
     assert "from tpaa_qualification.prcb_c5_p2 import" in runtime
+
+
+def test_prcb_c5_installed_service_uses_postgres_and_frozen_roles() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "cross-platform-ci.yml").read_text(
+        encoding="utf-8"
+    )
+    runtime = (ROOT / "tools" / "packaging" / "prcb_runtime_entry.py").read_text(
+        encoding="utf-8"
+    )
+    service = (
+        ROOT / "src" / "tpaa_qualification" / "prcb_c5_service_e2e.py"
+    ).read_text(encoding="utf-8")
+    api = (
+        ROOT / "src" / "tpaa_qualification" / "prcb_c5_api_service.py"
+    ).read_text(encoding="utf-8")
+    tool = (
+        ROOT / "tools" / "testing" / "prcb_c5_installed_service_qualification.py"
+    ).read_text(encoding="utf-8")
+
+    assert "Execute PRCB C5 installed Service PostgreSQL qualification" in workflow
+    assert "prcb_c5_installed_service_qualification.py" in workflow
+    assert "--profile LINUX_SERVICE_X64" in workflow
+    assert "service-e2e" in runtime
+    assert "TPAA_SERVICE_RESTORE_CONNINFO" in runtime
+    assert "run_installed_service_e2e" in runtime
+    assert "PostgreSQLServiceUnitOfWork" in service
+    assert "build_service_production_runtime" in service
+    assert "create_service_production_backup" in service
+    assert "restore_service_production_backup" in service
+    assert "verify_prcb_c5_service_api" in service
+    assert "INSTRUCTOR_EVALUATOR" in service
+    assert 'role="ANALYST"' in service
+    assert 'role="MODEL_REVIEWER"' not in service
+    assert "create_production_service_app" in api
+    assert "PRCB_C5_SERVICE_MODEL_REVIEWER_ROLE_EXPANSION" in api
+    assert "app/tests/" in tool
+    assert "/fixtures/" in tool
+    assert "bootstrap_postgres" in tool
+    assert "verify_postgres" in tool
+    assert "real_postgresql_executed" in tool
+    assert "formal_release_claimed" in tool
+    assert "tools.testing" not in service
+    assert "tests/fixtures" not in service
+    assert "InMemory" not in service
