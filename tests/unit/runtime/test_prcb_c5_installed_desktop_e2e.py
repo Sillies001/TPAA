@@ -41,6 +41,16 @@ def test_prcb_c5_installed_desktop_p1_p6_restart_recovery_audit(
     assert result["p3_p6_backup_restore_exact_replay"] is True
     assert result["restart_exact_replay"] is True
     assert result["backup_restore_exact_replay"] is True
+    assert result["api_exact_read_verified"] is True
+    assert result["desktop_discovery_verified"] is True
+    assert result["desktop_authentication_verified"] is True
+    assert result["desktop_latest_alias_rejected"] is True
+    assert result["api_exact_read_restart_replay"] is True
+    assert result["desktop_discovery_restart_replay"] is True
+    assert result["api_exact_read_backup_restore_replay"] is True
+    assert result["desktop_discovery_backup_restore_replay"] is True
+    assert isinstance(result["api_discovery_fingerprint"], str)
+    assert len(result["api_discovery_fingerprint"]) == 64
     assert result["persistent_audit_verified"] is True
     assert result["tests_fixture_dependency"] is False
     assert result["formal_release_claimed"] is False

@@ -123,6 +123,27 @@ def _logical_product(report: dict[str, Any]) -> tuple[dict[str, object], str]:
         "p6_counterfactual_run_id": report.get("p6_counterfactual_run_id"),
         "restart_exact_replay": report.get("restart_exact_replay"),
         "backup_restore_exact_replay": report.get("backup_restore_exact_replay"),
+        "api_exact_read_verified": report.get("api_exact_read_verified"),
+        "desktop_discovery_verified": report.get("desktop_discovery_verified"),
+        "desktop_authentication_verified": report.get(
+            "desktop_authentication_verified"
+        ),
+        "desktop_latest_alias_rejected": report.get(
+            "desktop_latest_alias_rejected"
+        ),
+        "api_exact_read_restart_replay": report.get(
+            "api_exact_read_restart_replay"
+        ),
+        "desktop_discovery_restart_replay": report.get(
+            "desktop_discovery_restart_replay"
+        ),
+        "api_exact_read_backup_restore_replay": report.get(
+            "api_exact_read_backup_restore_replay"
+        ),
+        "desktop_discovery_backup_restore_replay": report.get(
+            "desktop_discovery_backup_restore_replay"
+        ),
+        "api_discovery_fingerprint": report.get("api_discovery_fingerprint"),
         "persistent_audit_verified": report.get("persistent_audit_verified"),
         "production_source": report.get("production_source"),
     }
@@ -222,6 +243,16 @@ def qualify(
             or installed.get("p3_p6_backup_restore_exact_replay") is not True
             or installed.get("restart_exact_replay") is not True
             or installed.get("backup_restore_exact_replay") is not True
+            or installed.get("api_exact_read_verified") is not True
+            or installed.get("desktop_discovery_verified") is not True
+            or installed.get("desktop_authentication_verified") is not True
+            or installed.get("desktop_latest_alias_rejected") is not True
+            or installed.get("api_exact_read_restart_replay") is not True
+            or installed.get("desktop_discovery_restart_replay") is not True
+            or installed.get("api_exact_read_backup_restore_replay") is not True
+            or installed.get("desktop_discovery_backup_restore_replay") is not True
+            or not isinstance(installed.get("api_discovery_fingerprint"), str)
+            or len(cast(str, installed.get("api_discovery_fingerprint"))) != 64
             or installed.get("persistent_audit_verified") is not True
             or installed.get("tests_fixture_dependency") is not False
             or installed.get("formal_release_claimed") is not False

@@ -11,6 +11,7 @@ def test_prcb_c5_downstream_qualification_is_product_owned_and_explicit() -> Non
         ROOT / "src" / "tpaa_qualification" / "prcb_c5_p4_p5_seed.py",
         ROOT / "src" / "tpaa_qualification" / "prcb_c5_p6_seed.py",
         ROOT / "src" / "tpaa_qualification" / "prcb_c5_downstream.py",
+        ROOT / "src" / "tpaa_qualification" / "prcb_c5_api_desktop.py",
     )
     source = "\n".join(path.read_text(encoding="utf-8") for path in paths)
     package = (
@@ -25,6 +26,10 @@ def test_prcb_c5_downstream_qualification_is_product_owned_and_explicit() -> Non
     assert "P3PersistenceRepository" in source
     assert "P4P5ComputeInputRepository" in source
     assert "P6PersistenceRepository" in source
+    assert "verify_prcb_c5_desktop_api_discovery" in source
+    assert "create_production_desktop_app" in source
+    assert "product_items" in source
+    assert "session_release_items" in source
     assert ".prcb_c5_downstream import" not in package
     assert ".prcb_c5_p3_seed import" not in package
     assert ".prcb_c5_p4_p5_seed import" not in package
@@ -42,6 +47,9 @@ def test_prcb_c5_downstream_qualification_is_product_owned_and_explicit() -> Non
     ).read_text(encoding="utf-8")
     assert "from tpaa_qualification.prcb_c5_downstream import" in runtime
     assert "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P6_E2E_V1" in runtime
+    assert "PRCBC5DesktopApiExpectation" in runtime
+    assert "api_exact_read_verified" in runtime
+    assert "desktop_discovery_verified" in runtime
     assert '"confidence": "0.9"' in runtime
     assert '"confidence": "0.8"' in runtime
     for command in (

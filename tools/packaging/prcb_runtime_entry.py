@@ -23,6 +23,10 @@ from tpaa_application import (  # noqa: E402
 )
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
+from tpaa_qualification.prcb_c5_api_desktop import (  # noqa: E402
+    PRCBC5DesktopApiExpectation,
+    verify_prcb_c5_desktop_api_discovery,
+)
 from tpaa_qualification.prcb_c5_downstream import (  # noqa: E402
     prepare_prcb_c5_p3,
     prepare_prcb_c5_p4,
@@ -451,6 +455,26 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     ):
         raise RuntimeError("installed P3-P6 exact persistence verification failed")
 
+    desktop_api_expectation = PRCBC5DesktopApiExpectation(
+        session_id=SESSION_ID,
+        p1_release_id=release_id,
+        p2_release_id=p2_release_id,
+        p2_estimate_id=p2_estimate_id,
+        p3_twin_revision_id=p3_expected.twin_revision_id,
+        p3_estimate_id=p3_expected.estimate_id,
+        p4_revision_id=p4_expected.actor_assessment_id,
+        p5_revision_id=p5_expected.mission_assessment_id,
+        p6_model_id=p6_prepared.seed.build.model.capability_model_id,
+        p6_forecast_result_id=p6_forecast_expected.forecast_result_id,
+        p6_counterfactual_run_id=p6_counterfactual_expected.counterfactual_run_id,
+    )
+    desktop_bearer = "prcb-c5-installed-desktop-qualification"
+    initial_api_discovery = verify_prcb_c5_desktop_api_discovery(
+        runtime,
+        desktop_api_expectation,
+        bearer_token=desktop_bearer,
+    )
+
     downstream_job_ids = (
         p3_submission.record.job_id,
         p4_submission.record.job_id,
@@ -512,6 +536,14 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     ):
         raise RuntimeError("installed P2-P6 restart exact replay failed")
 
+    restarted_api_discovery = verify_prcb_c5_desktop_api_discovery(
+        restarted,
+        desktop_api_expectation,
+        bearer_token=desktop_bearer,
+    )
+    if restarted_api_discovery != initial_api_discovery:
+        raise RuntimeError("installed API/Desktop discovery restart replay drift")
+
     with SQLiteDesktopUnitOfWork(database) as uow:
         audit_rows = uow.audit_log.rows()
         uow.commit()
@@ -550,6 +582,14 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         or restored.application.m1_release(release_id) != release
     ):
         raise RuntimeError("installed backup/restore historical replay failed")
+
+    restored_api_discovery = verify_prcb_c5_desktop_api_discovery(
+        restored,
+        desktop_api_expectation,
+        bearer_token=desktop_bearer,
+    )
+    if restored_api_discovery != initial_api_discovery:
+        raise RuntimeError("installed API/Desktop discovery backup/restore replay drift")
 
     restored_store = LocalObjectStore(restored_objects)
     with SQLiteDesktopUnitOfWork(restored_database) as uow:
@@ -641,6 +681,17 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "p3_p6_backup_restore_exact_replay": True,
         "restart_exact_replay": True,
         "backup_restore_exact_replay": True,
+        "api_exact_read_verified": True,
+        "desktop_discovery_verified": True,
+        "desktop_authentication_verified": True,
+        "desktop_latest_alias_rejected": True,
+        "api_exact_read_restart_replay": True,
+        "desktop_discovery_restart_replay": True,
+        "api_exact_read_backup_restore_replay": True,
+        "desktop_discovery_backup_restore_replay": True,
+        "api_discovery_fingerprint": str(
+            initial_api_discovery["logical_fingerprint"]
+        ),
         "persistent_audit_verified": True,
         "backup_manifest": manifest.relative_to(work_root).as_posix(),
         "restored_schema_version": restored_verification.schema_version,
