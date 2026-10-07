@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 from tools.testing.prcb_c5_exit_review import MANDATORY_PROFILES, review
 
