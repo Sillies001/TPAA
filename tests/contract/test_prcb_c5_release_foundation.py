@@ -154,7 +154,39 @@ def test_prcb_c5_installed_service_uses_postgres_and_frozen_roles() -> None:
     assert "bootstrap_postgres" in tool
     assert "verify_postgres" in tool
     assert "real_postgresql_executed" in tool
+    assert "postgres_server_version" in tool
     assert "formal_release_claimed" in tool
+    assert "Start Windows PostgreSQL for PRCB C5 Service qualification" in workflow
+    assert "--profile WINDOWS_SERVICE_X64" in workflow
+    assert "tpaa-prcb-c5-service-windows-" in workflow
     assert "tools.testing" not in service
     assert "tests/fixtures" not in service
     assert "InMemory" not in service
+
+
+def test_prcb_c5_four_profile_logical_equivalence_is_gated_in_existing_job() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "cross-platform-ci.yml").read_text(
+        encoding="utf-8"
+    )
+    compare = (
+        ROOT / "tools" / "testing" / "prcb_c5_four_profile_equivalence.py"
+    ).read_text(encoding="utf-8")
+    runtime = (
+        ROOT / "tools" / "packaging" / "prcb_runtime_entry.py"
+    ).read_text(encoding="utf-8")
+
+    assert "Review PRCB C5 four-profile installed logical equivalence" in workflow
+    assert "prcb_c5_four_profile_equivalence.py" in workflow
+    assert "evidence/prcb-c5/four-profile-logical-equivalence.json" in workflow
+    assert "LINUX_DESKTOP_X64" in compare
+    assert "WINDOWS_DESKTOP_X64" in compare
+    assert "LINUX_SERVICE_X64" in compare
+    assert "WINDOWS_SERVICE_X64" in compare
+    assert "desktop_windows_linux_p2_semantic_equivalence" in compare
+    assert "service_windows_linux_p2_semantic_equivalence" in compare
+    assert "p2_runtime_provenance_by_profile" in compare
+    assert "shared_p1_p3_p6_exact_identity_all_profiles" in compare
+    assert "formal_release_claimed" in compare
+    assert "p2_source_knowledge_time_utc" in runtime
+    assert "tests/fixtures" not in compare
+    assert "InMemory" not in compare

@@ -111,6 +111,14 @@ def _logical_product(report: dict[str, Any]) -> tuple[dict[str, object], str]:
         "p2_release_id": report.get("p2_release_id"),
         "p2_estimate_id": report.get("p2_estimate_id"),
         "p2_estimate_status": report.get("p2_estimate_status"),
+        "p2_source_observation_id": report.get("p2_source_observation_id"),
+        "p2_source_knowledge_time_utc": report.get(
+            "p2_source_knowledge_time_utc"
+        ),
+        "p2_reason_codes": report.get("p2_reason_codes"),
+        "p2_claim_level": report.get("p2_claim_level"),
+        "p2_adjusted_value": report.get("p2_adjusted_value"),
+        "p2_unit": report.get("p2_unit"),
         "p3_job_status": report.get("p3_job_status"),
         "p3_estimate_id": report.get("p3_estimate_id"),
         "p4_job_status": report.get("p4_job_status"),
@@ -232,6 +240,11 @@ def qualify(
                 "IDENTIFIABLE",
                 "NOT_IDENTIFIABLE",
             }
+            or not isinstance(installed.get("p2_source_observation_id"), str)
+            or not isinstance(installed.get("p2_source_knowledge_time_utc"), str)
+            or not isinstance(installed.get("p2_reason_codes"), list)
+            or not isinstance(installed.get("p2_claim_level"), str)
+            or not isinstance(installed.get("p2_unit"), str)
             or installed.get("p3_job_status") != "SUCCEEDED"
             or installed.get("p4_job_status") != "SUCCEEDED"
             or installed.get("p5_job_status") != "SUCCEEDED"

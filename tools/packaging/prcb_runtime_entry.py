@@ -325,9 +325,11 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         if len(estimate_rows) != 1:
             raise RuntimeError("installed P2 estimate cardinality mismatch")
         p2_estimate_id = str(estimate_rows[0]["estimate_id"])
-        p2_estimate = P2PersistenceRepository(
-            uow.canonical_rows
-        ).exact_adjusted_estimate(p2_estimate_id)
+        p2_repository = P2PersistenceRepository(uow.canonical_rows)
+        p2_estimate = p2_repository.exact_adjusted_estimate(p2_estimate_id)
+        p2_source = p2_repository.exact_source_observation(
+            p2_estimate.source_observation_id
+        )
         uow.commit()
 
     qualification_store = LocalObjectStore(object_root)
@@ -659,6 +661,12 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "p2_release_id": p2_release_id,
         "p2_estimate_id": p2_estimate_id,
         "p2_estimate_status": p2_estimate.status,
+        "p2_source_observation_id": p2_estimate.source_observation_id,
+        "p2_source_knowledge_time_utc": p2_source.knowledge_time_utc,
+        "p2_reason_codes": list(p2_estimate.reason_codes),
+        "p2_claim_level": p2_estimate.claim_level,
+        "p2_adjusted_value": p2_estimate.adjusted_value,
+        "p2_unit": p2_estimate.unit,
         "p3_job_id": p3_submission.record.job_id,
         "p3_job_status": p3_submission.record.status.value,
         "p3_estimate_id": p3_expected.estimate_id,
