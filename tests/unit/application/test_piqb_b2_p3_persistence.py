@@ -13,7 +13,8 @@ from tpaa_application import (
     P3PersistenceError,
     P3PersistenceRepository,
 )
-from tpaa_capability import P3ModelExecutionProfile
+from tpaa_capability import P3ModelExecutionProfile, evaluate_twin_capability_estimate
+from tpaa_longitudinal import P3AuthorityPolicy
 from tpaa_storage import (
     LocalObjectStore,
     SQLiteDesktopUnitOfWork,
@@ -226,6 +227,31 @@ def test_p3_durable_twin_read_is_exact_not_latest(
     fixture = build_fixture()
     _register(database, object_root)
 
+    second_estimate = evaluate_twin_capability_estimate(
+        twin=fixture.twin,
+        components=(fixture.component,),
+        capability_type=fixture.estimate.capability_type,
+        condition_point={
+            "session_order": 3,
+            "reference_condition_id": (
+                fixture.estimate.condition_point["reference_condition_id"]
+            ),
+        },
+        as_of_time_utc=fixture.estimate.as_of_time,
+        created_at_utc="2026-09-10T03:59:00Z",
+        profile=P3ModelExecutionProfile.from_canonical(),
+        policy=P3AuthorityPolicy.from_canonical(),
+    )
+    assert second_estimate.estimate_id != fixture.estimate.estimate_id
+
+    with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        p3 = P3PersistenceRepository(
+            uow.canonical_rows,
+            object_store=LocalObjectStore(object_root),
+        )
+        p3.register_estimate(second_estimate)
+        uow.commit()
+
     with SQLiteDesktopUnitOfWork(database) as uow:
         p3 = P3PersistenceRepository(
             uow.canonical_rows,
@@ -237,13 +263,22 @@ def test_p3_durable_twin_read_is_exact_not_latest(
             P2PersistenceRepository(uow.canonical_rows),
         )
         durable = DurableM7P3WorkspaceRepository(p3, resolver)
-        snapshot = durable.exact_twin(
+        twin_snapshot = durable.exact_twin(
             fixture.twin.twin_revision_id
         )
-        assert snapshot.twin.twin_revision_id == (
+        assert twin_snapshot.twin.twin_revision_id == (
             fixture.twin.twin_revision_id
         )
-        assert snapshot.estimate.estimate_id == (
+        assert twin_snapshot.components == (fixture.component,)
+        assert not hasattr(twin_snapshot, "estimate")
+
+        first_snapshot = durable.exact_estimate(
             fixture.estimate.estimate_id
         )
+        second_snapshot = durable.exact_estimate(
+            second_estimate.estimate_id
+        )
+        assert first_snapshot.estimate == fixture.estimate
+        assert second_snapshot.estimate == second_estimate
+        assert first_snapshot.twin == second_snapshot.twin
         uow.commit()
