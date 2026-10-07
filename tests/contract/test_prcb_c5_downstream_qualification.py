@@ -39,6 +39,8 @@ def test_prcb_c5_downstream_qualification_is_product_owned_and_explicit() -> Non
     ).read_text(encoding="utf-8")
     assert "from tpaa_qualification.prcb_c5_downstream import" in runtime
     assert "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P6_E2E_V1" in runtime
+    assert '"confidence": "0.9"' in runtime
+    assert '"confidence": "0.8"' in runtime
     for command in (
         "P3_ESTIMATE",
         "P4_ASSESSMENT",

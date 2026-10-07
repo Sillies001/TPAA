@@ -356,7 +356,7 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         command="P4_ASSESSMENT",
         payload={
             "scope_snapshot_id": p4_prepared.scope_snapshot_id,
-            "confidence": p4_expected.confidence,
+            "confidence": "0.9",
             "created_at_utc": p4_expected.created_at_utc,
         },
         actor="PRCB-C5-INSTALLED",
@@ -376,7 +376,7 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         command="P5_ASSESSMENT",
         payload={
             "selection_snapshot_id": p5_prepared.selection_snapshot_id,
-            "confidence": p5_expected.confidence,
+            "confidence": "0.8",
             "created_at_utc": p5_expected.created_at_utc,
         },
         actor="PRCB-C5-INSTALLED",
