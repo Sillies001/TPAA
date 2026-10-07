@@ -10,7 +10,11 @@ from decimal import Decimal
 from typing import Protocol
 from uuid import UUID
 
-from tpaa_application.m7_workspace import M7LayerEvidence, M7P3WorkspaceSnapshot
+from tpaa_application.m7_workspace import (
+    M7LayerEvidence,
+    M7P3TwinSnapshot,
+    M7P3WorkspaceSnapshot,
+)
 from tpaa_application.p2_persistence import P2PersistenceRepository
 from tpaa_capability import (
     P3AircraftTwinRevision,
@@ -1846,19 +1850,10 @@ class DurableM7P3WorkspaceRepository:
     def exact_twin(
         self,
         twin_revision_id: str,
-    ) -> M7P3WorkspaceSnapshot:
-        estimate_ids = self._persistence.estimate_ids_for_twin(
-            twin_revision_id
+    ) -> M7P3TwinSnapshot:
+        twin = self._persistence.exact_twin_revision(twin_revision_id)
+        components = self._persistence.exact_twin_components(twin_revision_id)
+        return M7P3TwinSnapshot(
+            twin=twin,
+            components=components,
         )
-        if len(estimate_ids) != 1:
-            raise P3PersistenceError(
-                "P3_M7_TWIN_ESTIMATE_AMBIGUOUS",
-                f"{twin_revision_id}:{len(estimate_ids)}",
-            )
-        snapshot = self._snapshot(estimate_ids[0])
-        if snapshot.twin.twin_revision_id != twin_revision_id:
-            raise P3PersistenceError(
-                "P3_M7_TWIN_ESTIMATE_MISMATCH",
-                twin_revision_id,
-            )
-        return snapshot

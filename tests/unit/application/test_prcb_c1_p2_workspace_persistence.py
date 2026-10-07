@@ -505,3 +505,57 @@ def test_prcb_p2_workspace_rebuilds_from_durable_authority() -> None:
     assert restarted.p2_release_status == "PUBLISHED"
     assert restarted.p2_release_sealed is True
     assert restarted.model_artifact_json is None
+
+
+
+def test_prcb_p2_normalizes_sqlite_current_timestamp_to_utc_z() -> None:
+    connection = _connection()
+    connection.execute(
+        'INSERT INTO "registry.analysis_release" '
+        "(release_id, status, manifest_hash, published_at) VALUES (?, ?, ?, ?)",
+        (SOURCE_RELEASE, "PUBLISHED", "1" * 64, "2026-10-06 16:16:59"),
+    )
+    connection.execute(
+        'INSERT INTO "metric.metric_definition" '
+        "(metric_definition_id, metric_semantic_id, metric_semantic_version) "
+        "VALUES (?, ?, 1)",
+        (METRIC_DEFINITION, "metric.prcb.p2"),
+    )
+    connection.execute(
+        'INSERT INTO "metric.metric_instance" '
+        "(metric_instance_id, metric_definition_id) VALUES (?, ?)",
+        (METRIC_INSTANCE, METRIC_DEFINITION),
+    )
+    connection.execute(
+        'INSERT INTO "metric.capability_observation" '
+        "(observation_id, release_id, episode_id, subject_entity_id, aircraft_id, "
+        "aircraft_model_id, aircraft_configuration_snapshot_id, context_id, "
+        "capability_type, observed_metric_instance_id, observed_value_numeric, "
+        "unit, evidence_set_id, coverage, confidence, eligibility_status, "
+        "comparison_key_hash, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            OBSERVATION,
+            SOURCE_RELEASE,
+            EPISODE,
+            SUBJECT,
+            AIRCRAFT,
+            AIRCRAFT_MODEL,
+            CONTEXT,
+            "KINEMATIC_ENERGY_CONTROL",
+            METRIC_INSTANCE,
+            17.0,
+            "1",
+            EVIDENCE,
+            1.0,
+            0.9,
+            "ELIGIBLE",
+            "3" * 64,
+            "2026-10-06 16:16:59",
+        ),
+    )
+    repository = P2PersistenceRepository(
+        SQLiteCanonicalRowRepository(connection)
+    )
+    observation = repository.exact_source_observation(OBSERVATION)
+    assert observation.knowledge_time_utc == "2026-10-06T16:16:59Z"

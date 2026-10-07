@@ -1,0 +1,53 @@
+{
+  "schema": "TPAA_PRCB_C5_RELEASE_CONTRACT_V1",
+  "baseline": "PRCB-1.0",
+  "product_name": "TPAA",
+  "target_product_version": "1.0.1",
+  "canonical_baseline": "CB-1.4.0",
+  "db_schema_version": "1.9.0",
+  "mandatory_profiles": [
+    "LINUX_DESKTOP_X64",
+    "LINUX_SERVICE_X64",
+    "WINDOWS_DESKTOP_X64",
+    "WINDOWS_SERVICE_X64"
+  ],
+  "package_policy": {
+    "production_runtime_entry": "tools/packaging/prcb_runtime_entry.py",
+    "tests_packaged": false,
+    "fixtures_packaged": false,
+    "mutable_latest_fallback": false,
+    "formal_release_claimed": false,
+    "candidate_qualification": "TPAA_1_0_1_CANDIDATE_NOT_QUALIFIED"
+  },
+  "final_qualification": {
+    "required_installed_e2e_order": [
+      "INSTALL",
+      "START",
+      "AUTHENTICATE",
+      "IMPORT_PRODUCTION_SOURCE",
+      "SUBMIT_DURABLE_JOB",
+      "WORKER_COMPUTE",
+      "CANONICAL",
+      "WORLD",
+      "METRIC",
+      "P1_RELEASE",
+      "P2",
+      "P3",
+      "P4_P5",
+      "P6",
+      "PERSIST",
+      "API_EXACT_READ",
+      "DESKTOP_DISCOVERY",
+      "STOP",
+      "RESTART",
+      "HISTORICAL_REPLAY",
+      "BACKUP",
+      "RESTORE",
+      "AUDIT_VERIFY"
+    ],
+    "detached_attestation_required": true,
+    "protected_main_required": true,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14
+  }
+}

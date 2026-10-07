@@ -1,4 +1,4 @@
-"""M5 P1 formal qualification substrate."""
+"""M5/PRCB formal qualification substrate."""
 
 from .m5_batch2 import (
     validate_four_profile_candidate,

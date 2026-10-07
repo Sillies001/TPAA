@@ -53,10 +53,10 @@ def test_prcb_state_does_not_claim_premature_qualification() -> None:
         "status": "NOT_YET_QUALIFIED",
         "formal_release_claimed": False,
     }
-    assert state["active_batch"] == "C4"
+    assert state["active_batch"] == "C5"
     assert state["task_state"]["C0"]["state"] == "COMPLETE"
     assert state["task_state"]["C1"]["state"] == "COMPLETE"
     assert state["task_state"]["C2"]["state"] == "COMPLETE"
     assert state["task_state"]["C3"]["state"] == "COMPLETE"
-    assert state["task_state"]["C4"]["state"] == "ACTIVE"
-    assert state["task_state"]["C5"]["state"] == "BLOCKED_BY_C4"
+    assert state["task_state"]["C4"]["state"] == "COMPLETE"
+    assert state["task_state"]["C5"]["state"] == "ACTIVE"

@@ -31,8 +31,9 @@ def test_prcb_c4_presentation_and_governance_remain_fail_closed() -> None:
     assert "source_counterfactual_run_ids" in discovery
     assert "/api/v1/discovery/releases/{release_id}/presentation" in api
 
-    assert state["active_batch"] == "C4"
+    assert state["active_batch"] == "C5"
     assert state["task_state"]["C3"]["state"] == "COMPLETE"
-    assert state["task_state"]["C4"]["state"] == "ACTIVE"
-    assert state["task_state"]["C5"]["state"] == "BLOCKED_BY_C4"
+    assert state["task_state"]["C4"]["state"] == "COMPLETE"
+    assert state["task_state"]["C5"]["state"] == "ACTIVE"
+    assert state["qualification"]["status"] == "NOT_YET_QUALIFIED"
     assert state["qualification"]["formal_release_claimed"] is False

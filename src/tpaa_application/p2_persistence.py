@@ -96,15 +96,26 @@ def _id_array(value: object, field: str) -> tuple[str, ...]:
         result.append(str(item))
     return tuple(result)
 
+
 def _time_text(value: object) -> str:
-    if isinstance(value, str):
-        return value
+    parsed: datetime
     if isinstance(value, datetime):
-        normalized = value
-        if normalized.tzinfo is not None:
-            normalized = normalized.astimezone(UTC)
-        return normalized.isoformat().replace("+00:00", "Z")
-    raise P2PersistenceError("P2_DB_TIME_INVALID", type(value).__name__)
+        parsed = value
+    elif isinstance(value, str):
+        raw = value.strip()
+        if not raw:
+            raise P2PersistenceError("P2_DB_TIME_INVALID", "empty string")
+        try:
+            suffix = "+00:00" if raw.endswith("Z") else ""
+            parsed = datetime.fromisoformat(raw.removesuffix("Z") + suffix)
+        except ValueError as exc:
+            raise P2PersistenceError("P2_DB_TIME_INVALID", raw) from exc
+    else:
+        raise P2PersistenceError("P2_DB_TIME_INVALID", type(value).__name__)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    normalized = parsed.astimezone(UTC)
+    return normalized.isoformat().replace("+00:00", "Z")
 
 
 def _optional_text(value: object) -> str | None:
@@ -822,6 +833,14 @@ class P2PersistenceRepository:
             eligibility_status=str(row["eligibility_status"]),
             knowledge_time_utc=_time_text(row["created_at"]),
         )
+
+    def exact_source_observation(
+        self,
+        observation_id: str,
+    ) -> P1ObservationInput:
+        """Rebuild one exact P1 observation using canonical DB time semantics."""
+
+        return self._p1_observation(observation_id)
 
     def _register_factor_feature_set(
         self,

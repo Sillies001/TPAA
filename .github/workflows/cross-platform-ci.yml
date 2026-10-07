@@ -95,6 +95,86 @@ jobs:
           --package-output dist/piqb-b6/${{ matrix.platform }}
           --evidence evidence/piqb-b6/${{ matrix.platform }}/final-product.json
 
+      - name: Execute PRCB C5 installed Desktop P1-P6 qualification
+        run: >-
+          uv run --locked python tools/testing/prcb_c5_installed_desktop_qualification.py
+          --platform ${{ matrix.platform }}
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --package-output dist/prcb-c5/${{ matrix.platform }}
+          --evidence evidence/prcb-c5/${{ matrix.platform }}/desktop-installed-p1-p6.json
+
+      - name: Upload PRCB C5 installed Desktop candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-desktop-${{ matrix.platform }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            dist/prcb-c5/${{ matrix.platform }}
+            evidence/prcb-c5/${{ matrix.platform }}/desktop-installed-p1-p6.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Start Windows PostgreSQL for PRCB C5 Service qualification
+        if: ${{ matrix.platform == 'windows' }}
+        shell: pwsh
+        run: |
+          if (-not $env:PGBIN) {
+            throw "windows-2025 PostgreSQL PGBIN is unavailable"
+          }
+          $psql = Join-Path $env:PGBIN "psql.exe"
+          $pgIsReady = Join-Path $env:PGBIN "pg_isready.exe"
+          if (-not (Test-Path $psql) -or -not (Test-Path $pgIsReady)) {
+            throw "windows-2025 PostgreSQL client binaries are unavailable"
+          }
+          $services = @(Get-Service -Name "postgresql-x64-*" -ErrorAction SilentlyContinue)
+          if ($services.Count -ne 1) {
+            throw "expected exactly one preinstalled PostgreSQL service"
+          }
+          Set-Service -Name $services[0].Name -StartupType Manual
+          Start-Service -Name $services[0].Name
+          $ready = $false
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            & $pgIsReady -h 127.0.0.1 -p 5432 -U postgres
+            if ($LASTEXITCODE -eq 0) {
+              $ready = $true
+              break
+            }
+            Start-Sleep -Seconds 1
+          }
+          if (-not $ready) {
+            throw "Windows PostgreSQL did not become ready"
+          }
+          $env:PGBIN | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "PGPASSWORD=root" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Execute PRCB C5 installed Windows Service PostgreSQL qualification
+        if: ${{ matrix.platform == 'windows' }}
+        run: >-
+          uv run --locked python tools/testing/prcb_c5_installed_service_qualification.py
+          --profile WINDOWS_SERVICE_X64
+          --user postgres
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_prcb_c5_service_primary
+          --restore-database tpaa_prcb_c5_service_restore
+          --conninfo-template "host=127.0.0.1 port=5432 user=postgres password=root dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --package-output dist/prcb-c5/service-windows
+          --evidence evidence/prcb-c5/service-windows/service-installed-p1-p6.json
+
+      - name: Upload PRCB C5 installed Windows Service candidate
+        if: ${{ matrix.platform == 'windows' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-service-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            dist/prcb-c5/service-windows
+            evidence/prcb-c5/service-windows/service-installed-p1-p6.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
       - name: Upload PIQB B6 release packages
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -277,6 +357,30 @@ jobs:
         with:
           python-version: "3.13.5"
           architecture: x64
+
+      - name: Download PRCB C5 Linux Desktop installed evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-prcb-c5-desktop-linux-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/prcb-c5/desktop/linux
+
+      - name: Download PRCB C5 Windows Desktop installed evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-prcb-c5-desktop-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/prcb-c5/desktop/windows
+
+      - name: Download PRCB C5 Linux Service installed evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-prcb-c5-service-linux-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/prcb-c5/service/linux
+
+      - name: Download PRCB C5 Windows Service installed evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-prcb-c5-service-windows-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/prcb-c5/service/windows
 
       - name: Download platform evidence
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
@@ -860,6 +964,16 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Review PRCB C5 four-profile installed logical equivalence
+        run: >-
+          python tools/testing/prcb_c5_four_profile_equivalence.py
+          --linux-desktop downloaded/prcb-c5/desktop/linux/evidence/prcb-c5/linux/desktop-installed-p1-p6.json
+          --windows-desktop downloaded/prcb-c5/desktop/windows/evidence/prcb-c5/windows/desktop-installed-p1-p6.json
+          --linux-service downloaded/prcb-c5/service/linux/evidence/prcb-c5/service-linux/service-installed-p1-p6.json
+          --windows-service downloaded/prcb-c5/service/windows/evidence/prcb-c5/service-windows/service-installed-p1-p6.json
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --evidence evidence/prcb-c5/four-profile-logical-equivalence.json
+
       - name: Upload logical-equivalence evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -922,6 +1036,15 @@ jobs:
             evidence/cross-platform/m1-batch-4-logical-equivalence.json
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload PRCB C5 four-profile logical-equivalence evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-four-profile-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/prcb-c5/four-profile-logical-equivalence.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload M2 Batch 2 review evidence
         if: ${{ always() }}
@@ -1118,6 +1241,32 @@ jobs:
           --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/piqb-b4/postgres-api-security-observability.json
+
+      - name: Execute PRCB C5 installed Service PostgreSQL qualification
+        run: >-
+          uv run --locked python tools/testing/prcb_c5_installed_service_qualification.py
+          --profile LINUX_SERVICE_X64
+          --user tpaa
+          --host 127.0.0.1
+          --port 5432
+          --admin-database postgres
+          --database tpaa_prcb_c5_service_primary
+          --restore-database tpaa_prcb_c5_service_restore
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
+          --package-output dist/prcb-c5/service-linux
+          --evidence evidence/prcb-c5/service-linux/service-installed-p1-p6.json
+
+      - name: Upload PRCB C5 installed Service candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-service-linux-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            dist/prcb-c5/service-linux
+            evidence/prcb-c5/service-linux/service-installed-p1-p6.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
 
       - name: Execute ACP-221 PostgreSQL 1.8.0 to 1.9.0 migration qualification
         run: >-
@@ -1876,6 +2025,12 @@ jobs:
           name: tpaa-piqb-b2-postgres-${{ github.event.pull_request.head.sha || github.sha }}
           path: downloaded/piqb-b2
 
+      - name: Download PRCB C5 four-profile installed equivalence evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: tpaa-prcb-c5-four-profile-${{ github.event.pull_request.head.sha || github.sha }}
+          path: downloaded/prcb-c5/four-profile
+
       - name: Aggregate all 14 M0 Exit Gates
         run: >-
           python tools/ci/m0_exit_review.py
@@ -2308,5 +2463,31 @@ jobs:
         with:
           name: tpaa-piqb-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/piqb-exit/review.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Review PRCB C5 final installed product and detached attestation
+        shell: bash
+        run: |
+          python tools/testing/prcb_c5_exit_review.py \
+            --logical-equivalence downloaded/prcb-c5/four-profile/four-profile-logical-equivalence.json \
+            --expected-revision ${{ github.event.pull_request.head.sha || github.sha }} \
+            --checked-out-revision "$(git rev-parse HEAD)" \
+            --event-name ${{ github.event_name }} \
+            --git-ref ${{ github.ref }} \
+            --run-conclusion success \
+            --required-jobs-success 14 \
+            --required-jobs-total 14 \
+            --review-output evidence/prcb-c5/exit-review.json \
+            --attestation-output evidence/prcb-c5/detached-attestation.json
+
+      - name: Upload PRCB C5 final review and detached attestation
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-prcb-c5-exit-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/prcb-c5/exit-review.json
+            evidence/prcb-c5/detached-attestation.json
           if-no-files-found: error
           retention-days: 90

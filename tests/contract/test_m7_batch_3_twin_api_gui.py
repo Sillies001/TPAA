@@ -13,6 +13,7 @@ from tpaa_application import (
     ApplicationService,
     InMemoryM7P3WorkspaceRepository,
     M7ApplicationError,
+    M7EstimateQuery,
     M7LayerEvidence,
     M7P3WorkspaceSnapshot,
     M7TwinQuery,
@@ -307,6 +308,35 @@ def test_m7_cap_004_twin_identity_is_ordered_immutable_and_exact() -> None:
     assert first.supersedes_twin_revision_id is None
     assert first.status == "PUBLISHED"
     assert first.as_of_data_time == "2026-09-10T00:00:00Z"
+
+
+def test_m7_cap_004_twin_exact_read_allows_multiple_explicit_estimates() -> None:
+    first = _snapshot(session_order=3)
+    second = _snapshot(session_order=4)
+    assert first.twin == second.twin
+    assert first.components == second.components
+    assert first.estimate.estimate_id != second.estimate.estimate_id
+
+    repository = InMemoryM7P3WorkspaceRepository()
+    repository.register(first)
+    repository.register(second)
+    service = M7WorkspaceService(repository, admission_evidence=_admission())
+
+    twin_product = service.twin(M7TwinQuery(EXPECTED_TWIN))
+    assert twin_product["twin"]["twin_revision_id"] == EXPECTED_TWIN
+    assert tuple(
+        item["capability_model_id"]
+        for item in twin_product["components"]
+    ) == (MODEL_1, MODEL_2)
+
+    first_product = service.estimate(
+        M7EstimateQuery(EXPECTED_TWIN, first.estimate.estimate_id)
+    )
+    second_product = service.estimate(
+        M7EstimateQuery(EXPECTED_TWIN, second.estimate.estimate_id)
+    )
+    assert first_product["estimate"]["estimate_id"] == first.estimate.estimate_id
+    assert second_product["estimate"]["estimate_id"] == second.estimate.estimate_id
 
 
 def test_m7_cap_004_supersession_is_new_revision_without_mutating_history() -> None:
