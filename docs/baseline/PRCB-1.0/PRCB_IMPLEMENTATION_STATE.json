@@ -3,7 +3,7 @@
   "baseline": "PRCB-1.0",
   "source_piqb_protected_main_sha": "0ed48a85944699e0bbac1fe76b84c88a319121c1",
   "target_product_version": "1.0.1",
-  "active_batch": "C5",
+  "active_batch": null,
   "task_state": {
     "C0": {
       "state": "COMPLETE",
@@ -26,12 +26,75 @@
       "issue": 233
     },
     "C5": {
-      "state": "ACTIVE",
+      "state": "COMPLETE",
       "issue": 234
     }
   },
   "qualification": {
-    "status": "NOT_YET_QUALIFIED",
-    "formal_release_claimed": false
+    "status": "TPAA_1_0_1_QUALIFIED",
+    "formal_release_claimed": true,
+    "implementation_complete": true,
+    "protected_main_exact": true,
+    "failed_acceptance": []
+  },
+  "candidate_qualification": {
+    "exact_head_sha": "4402f44780e330fe659b2a2014017ea4d231f519",
+    "run_number": 695,
+    "actions_run_id": 37612699340,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PRCB_C5_EXIT_REVIEW_V1",
+    "status": "PASS",
+    "decision": "PENDING_PROTECTED_MAIN",
+    "qualification": "TPAA_1_0_1_CANDIDATE_NOT_QUALIFIED",
+    "formal_release_claimed": false,
+    "implementation_complete": true,
+    "protected_main_exact": false,
+    "failed_acceptance": [],
+    "detached_attestation_schema": "TPAA_PRCB_C5_DETACHED_ATTESTATION_V1",
+    "detached_attestation_payload_sha256": "1cc5f0fef6318ef161145a59e854319bf0f8ef14fb04600d3d36f7a50d8db06a",
+    "detached_attestation_file_sha256": "d72f8c533b2b7cdf70f5432b2f9dd244385e08385f0ef96b31bac71fd7886b58"
+  },
+  "protected_main_qualification": {
+    "protected_main_sha": "abf00eb44316c4f4927b5e7399bfe0ebab3a3f77",
+    "run_number": 696,
+    "actions_run_id": 37619872063,
+    "required_jobs_success": 14,
+    "required_jobs_total": 14,
+    "reviewer_schema": "TPAA_PRCB_C5_EXIT_REVIEW_V1",
+    "status": "PASS",
+    "decision": "GO",
+    "qualification": "TPAA_1_0_1_QUALIFIED",
+    "formal_release_claimed": true,
+    "implementation_complete": true,
+    "protected_main_exact": true,
+    "failed_acceptance": [],
+    "detached_attestation_schema": "TPAA_PRCB_C5_DETACHED_ATTESTATION_V1",
+    "detached_attestation_payload_sha256": "4f1a4b5b40ad87913b88f572ab93c1070412637a26c3b916f2875bc6a3da2d2d",
+    "detached_attestation_file_sha256": "0d66cb5fc1935917a04c86124e360e6a6ce85f16404ab6189090400da19d2cc5",
+    "exit_review_artifact_id": 11483408361,
+    "package_sha256_by_profile": {
+      "LINUX_DESKTOP_X64": "bd28aa59ed715b4be8b29b3667e2b52d31ef2fa10599ea40cd3d4a514cbceffe",
+      "LINUX_SERVICE_X64": "006643f0838824494f0cf827e715167941008728258c9d9ee89a93b4a609d4e6",
+      "WINDOWS_DESKTOP_X64": "ef650138c359125fbc0fd94a7b2410c5c965c26ef7e21f327b22b3dd3d960965",
+      "WINDOWS_SERVICE_X64": "d9d1fe832c674af888c81b6271f94f5a35c8428f819ed7f2417f1d82fabb2e8c"
+    },
+    "installed_evidence_sha256_by_profile": {
+      "LINUX_DESKTOP_X64": "eba7fd5ff1617557b62d7ead6cf9f7259b26a6685327cf13c1a48f0be9e59b67",
+      "LINUX_SERVICE_X64": "593c58470a6e03a52fc50c063e2ac3b4627338be9a432ce02b7a5666d9c70152",
+      "WINDOWS_DESKTOP_X64": "0ef53ecc913a5ce072e0edeb16e1afa5b95a268fb831c8f8a7fa63961133d8b9",
+      "WINDOWS_SERVICE_X64": "db7f58424476ae256ef4dbae182d6a99ac6cee99d45c67a912ae189dcbf4a338"
+    }
+  },
+  "post_qualification_governance_closure": {
+    "source_protected_main_sha": "abf00eb44316c4f4927b5e7399bfe0ebab3a3f77",
+    "source_run_number": 696,
+    "source_actions_run_id": 37619872063,
+    "change_class": "GOVERNANCE_ONLY",
+    "runtime_modified": false,
+    "canonical_modified": false,
+    "db_authority_modified": false,
+    "ci_topology_modified": false,
+    "piqb_history_modified": false
   }
 }

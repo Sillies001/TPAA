@@ -41,7 +41,7 @@ def test_prcb_c3_identity_readiness_and_job_audit_are_production_wired() -> None
     assert "uow.audit_log.append(" in jobs
 
 
-def test_prcb_c3_governance_state_remains_complete_during_c5() -> None:
+def test_prcb_c3_governance_state_remains_complete_after_c5() -> None:
     state = json.loads(
         (
             ROOT
@@ -51,10 +51,12 @@ def test_prcb_c3_governance_state_remains_complete_during_c5() -> None:
             / "PRCB_IMPLEMENTATION_STATE.json"
         ).read_text(encoding="utf-8")
     )
-    assert state["active_batch"] == "C5"
+    assert state["active_batch"] is None
     assert state["task_state"]["C2"]["state"] == "COMPLETE"
     assert state["task_state"]["C3"]["state"] == "COMPLETE"
     assert state["task_state"]["C4"]["state"] == "COMPLETE"
-    assert state["task_state"]["C5"]["state"] == "ACTIVE"
-    assert state["qualification"]["status"] == "NOT_YET_QUALIFIED"
-    assert state["qualification"]["formal_release_claimed"] is False
+    assert state["task_state"]["C5"]["state"] == "COMPLETE"
+    assert state["qualification"]["status"] == "TPAA_1_0_1_QUALIFIED"
+    assert state["qualification"]["formal_release_claimed"] is True
+    assert state["qualification"]["protected_main_exact"] is True
+    assert state["qualification"]["failed_acceptance"] == []

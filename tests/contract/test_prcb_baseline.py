@@ -47,16 +47,68 @@ def test_prcb_acceptance_contract_captures_four_blockers() -> None:
     assert order[-1] == "AUDIT_VERIFY"
 
 
-def test_prcb_state_does_not_claim_premature_qualification() -> None:
+def test_prcb_state_records_final_protected_main_qualification() -> None:
     state = _load("PRCB_IMPLEMENTATION_STATE.json")
+    assert state["active_batch"] is None
+    assert all(
+        state["task_state"][f"C{i}"]["state"] == "COMPLETE"
+        for i in range(6)
+    )
     assert state["qualification"] == {
-        "status": "NOT_YET_QUALIFIED",
-        "formal_release_claimed": False,
+        "status": "TPAA_1_0_1_QUALIFIED",
+        "formal_release_claimed": True,
+        "implementation_complete": True,
+        "protected_main_exact": True,
+        "failed_acceptance": [],
     }
-    assert state["active_batch"] == "C5"
-    assert state["task_state"]["C0"]["state"] == "COMPLETE"
-    assert state["task_state"]["C1"]["state"] == "COMPLETE"
-    assert state["task_state"]["C2"]["state"] == "COMPLETE"
-    assert state["task_state"]["C3"]["state"] == "COMPLETE"
-    assert state["task_state"]["C4"]["state"] == "COMPLETE"
-    assert state["task_state"]["C5"]["state"] == "ACTIVE"
+
+    candidate = state["candidate_qualification"]
+    assert candidate["exact_head_sha"] == "4402f44780e330fe659b2a2014017ea4d231f519"
+    assert candidate["run_number"] == 695
+    assert candidate["actions_run_id"] == 37612699340
+    assert candidate["decision"] == "PENDING_PROTECTED_MAIN"
+    assert candidate["qualification"] == "TPAA_1_0_1_CANDIDATE_NOT_QUALIFIED"
+    assert candidate["formal_release_claimed"] is False
+
+    protected = state["protected_main_qualification"]
+    assert protected["protected_main_sha"] == "abf00eb44316c4f4927b5e7399bfe0ebab3a3f77"
+    assert protected["run_number"] == 696
+    assert protected["actions_run_id"] == 37619872063
+    assert protected["required_jobs_success"] == 14
+    assert protected["required_jobs_total"] == 14
+    assert protected["reviewer_schema"] == "TPAA_PRCB_C5_EXIT_REVIEW_V1"
+    assert protected["status"] == "PASS"
+    assert protected["decision"] == "GO"
+    assert protected["qualification"] == "TPAA_1_0_1_QUALIFIED"
+    assert protected["formal_release_claimed"] is True
+    assert protected["implementation_complete"] is True
+    assert protected["protected_main_exact"] is True
+    assert protected["failed_acceptance"] == []
+    assert protected["detached_attestation_schema"] == (
+        "TPAA_PRCB_C5_DETACHED_ATTESTATION_V1"
+    )
+    assert protected["detached_attestation_payload_sha256"] == (
+        "4f1a4b5b40ad87913b88f572ab93c1070412637a26c3b916f2875bc6a3da2d2d"
+    )
+    assert set(protected["package_sha256_by_profile"]) == {
+        "LINUX_DESKTOP_X64",
+        "LINUX_SERVICE_X64",
+        "WINDOWS_DESKTOP_X64",
+        "WINDOWS_SERVICE_X64",
+    }
+    assert set(protected["installed_evidence_sha256_by_profile"]) == {
+        "LINUX_DESKTOP_X64",
+        "LINUX_SERVICE_X64",
+        "WINDOWS_DESKTOP_X64",
+        "WINDOWS_SERVICE_X64",
+    }
+
+    closure = state["post_qualification_governance_closure"]
+    assert closure["source_protected_main_sha"] == protected["protected_main_sha"]
+    assert closure["source_run_number"] == 696
+    assert closure["change_class"] == "GOVERNANCE_ONLY"
+    assert closure["runtime_modified"] is False
+    assert closure["canonical_modified"] is False
+    assert closure["db_authority_modified"] is False
+    assert closure["ci_topology_modified"] is False
+    assert closure["piqb_history_modified"] is False
