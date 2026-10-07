@@ -272,13 +272,23 @@ def test_p3_durable_twin_read_is_exact_not_latest(
         assert twin_snapshot.components == (fixture.component,)
         assert not hasattr(twin_snapshot, "estimate")
 
+        estimate_ids = p3.estimate_ids_for_twin(
+            fixture.twin.twin_revision_id
+        )
+        assert set(estimate_ids) == {
+            fixture.estimate.estimate_id,
+            second_estimate.estimate_id,
+        }
+        assert p3.exact_capability_estimate(
+            fixture.estimate.estimate_id
+        ) == fixture.estimate
+        assert p3.exact_capability_estimate(
+            second_estimate.estimate_id
+        ) == second_estimate
+
         first_snapshot = durable.exact_estimate(
             fixture.estimate.estimate_id
         )
-        second_snapshot = durable.exact_estimate(
-            second_estimate.estimate_id
-        )
         assert first_snapshot.estimate == fixture.estimate
-        assert second_snapshot.estimate == second_estimate
-        assert first_snapshot.twin == second_snapshot.twin
+        assert first_snapshot.twin == twin_snapshot.twin
         uow.commit()
