@@ -57,6 +57,12 @@ class M7LayerEvidence:
 
 
 @dataclass(frozen=True, slots=True)
+class M7P3TwinSnapshot:
+    twin: P3AircraftTwinRevision
+    components: tuple[P3TwinComponentBinding, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class M7P3WorkspaceSnapshot:
     observed: M7LayerEvidence
     adjusted: M7LayerEvidence
@@ -118,25 +124,13 @@ def _validate_layer(
         )
 
 
-def _validate_snapshot(value: M7P3WorkspaceSnapshot) -> None:
-    _validate_layer(value.observed, expected_layer="P1_OBSERVED")
-    _validate_layer(value.adjusted, expected_layer="P2_ADJUSTED")
+def _validate_twin_snapshot(value: M7P3TwinSnapshot) -> None:
     _uuid(value.twin.twin_revision_id, field="twin_revision_id")
-    _uuid(value.estimate.estimate_id, field="estimate_id")
     if value.twin.status != "PUBLISHED":
         raise M7ApplicationError(
             "M7_TWIN_STATUS_INVALID",
             value.twin.twin_revision_id,
         )
-    if value.estimate.twin_revision_id != value.twin.twin_revision_id:
-        raise M7ApplicationError(
-            "M7_TWIN_ESTIMATE_MISMATCH",
-            value.estimate.estimate_id,
-        )
-    try:
-        assert_p3_claim_level(value.estimate.claim_level)
-    except P3GovernanceError as exc:
-        raise M7ApplicationError(exc.code, exc.detail) from exc
     component_ids = tuple(
         component.model_build.model.capability_model_id
         for component in value.components
@@ -146,6 +140,27 @@ def _validate_snapshot(value: M7P3WorkspaceSnapshot) -> None:
             "M7_TWIN_COMPONENT_ORDER_MISMATCH",
             value.twin.twin_revision_id,
         )
+
+
+def _validate_snapshot(value: M7P3WorkspaceSnapshot) -> None:
+    _validate_layer(value.observed, expected_layer="P1_OBSERVED")
+    _validate_layer(value.adjusted, expected_layer="P2_ADJUSTED")
+    _validate_twin_snapshot(
+        M7P3TwinSnapshot(
+            twin=value.twin,
+            components=value.components,
+        )
+    )
+    _uuid(value.estimate.estimate_id, field="estimate_id")
+    if value.estimate.twin_revision_id != value.twin.twin_revision_id:
+        raise M7ApplicationError(
+            "M7_TWIN_ESTIMATE_MISMATCH",
+            value.estimate.estimate_id,
+        )
+    try:
+        assert_p3_claim_level(value.estimate.claim_level)
+    except P3GovernanceError as exc:
+        raise M7ApplicationError(exc.code, exc.detail) from exc
     matching = [
         component
         for component in value.components
@@ -162,8 +177,8 @@ def _validate_snapshot(value: M7P3WorkspaceSnapshot) -> None:
 class M7P3WorkspaceRepository(Protocol):
     """Engine-neutral exact P3 twin/estimate repository port."""
 
-    def exact_twin(self, twin_revision_id: str) -> M7P3WorkspaceSnapshot:
-        """Return one immutable exact twin revision snapshot."""
+    def exact_twin(self, twin_revision_id: str) -> M7P3TwinSnapshot:
+        """Return one immutable exact twin revision plus ordered components."""
 
     def exact_estimate(self, estimate_id: str) -> M7P3WorkspaceSnapshot:
         """Return one immutable exact estimate snapshot."""
@@ -174,7 +189,7 @@ class InMemoryM7P3WorkspaceRepository:
 
     def __init__(self) -> None:
         self._snapshots_by_estimate: dict[str, M7P3WorkspaceSnapshot] = {}
-        self._snapshots_by_twin: dict[str, M7P3WorkspaceSnapshot] = {}
+        self._snapshots_by_twin: dict[str, M7P3TwinSnapshot] = {}
 
     def register(self, snapshot: M7P3WorkspaceSnapshot) -> None:
         _validate_snapshot(snapshot)
@@ -183,19 +198,20 @@ class InMemoryM7P3WorkspaceRepository:
         existing_estimate = self._snapshots_by_estimate.get(estimate_id)
         if existing_estimate is not None and existing_estimate != snapshot:
             raise M7ApplicationError("M7_P3_IMMUTABLE_CONFLICT", estimate_id)
+        twin_snapshot = M7P3TwinSnapshot(
+            twin=snapshot.twin,
+            components=snapshot.components,
+        )
         existing_twin = self._snapshots_by_twin.get(twin_revision_id)
-        if existing_twin is not None and (
-            existing_twin.twin != snapshot.twin
-            or existing_twin.components != snapshot.components
-        ):
+        if existing_twin is not None and existing_twin != twin_snapshot:
             raise M7ApplicationError(
                 "M7_P3_IMMUTABLE_CONFLICT",
                 twin_revision_id,
             )
         self._snapshots_by_estimate[estimate_id] = snapshot
-        self._snapshots_by_twin[twin_revision_id] = snapshot
+        self._snapshots_by_twin[twin_revision_id] = twin_snapshot
 
-    def exact_twin(self, twin_revision_id: str) -> M7P3WorkspaceSnapshot:
+    def exact_twin(self, twin_revision_id: str) -> M7P3TwinSnapshot:
         _uuid(twin_revision_id, field="twin_revision_id")
         try:
             return self._snapshots_by_twin[twin_revision_id]
@@ -237,18 +253,28 @@ class M7WorkspaceService:
         except P3GovernanceError as exc:
             raise M7ApplicationError("M7_P3_NOT_ADMITTED", exc.detail) from exc
 
-    def _exact(
+    def _exact_twin(
+        self,
+        twin_revision_id: str,
+    ) -> M7P3TwinSnapshot:
+        self._assert_admitted()
+        snapshot = self._repository.exact_twin(twin_revision_id)
+        if snapshot.twin.twin_revision_id != twin_revision_id:
+            raise M7ApplicationError(
+                "M7_TWIN_IDENTITY_MISMATCH",
+                twin_revision_id,
+            )
+        _validate_twin_snapshot(snapshot)
+        return snapshot
+
+    def _exact_estimate(
         self,
         *,
         twin_revision_id: str,
-        estimate_id: str | None = None,
+        estimate_id: str,
     ) -> M7P3WorkspaceSnapshot:
         self._assert_admitted()
-        snapshot = (
-            self._repository.exact_twin(twin_revision_id)
-            if estimate_id is None
-            else self._repository.exact_estimate(estimate_id)
-        )
+        snapshot = self._repository.exact_estimate(estimate_id)
         if snapshot.twin.twin_revision_id != twin_revision_id:
             raise M7ApplicationError(
                 "M7_TWIN_ESTIMATE_MISMATCH",
@@ -259,7 +285,7 @@ class M7WorkspaceService:
 
     @staticmethod
     def _components(
-        snapshot: M7P3WorkspaceSnapshot,
+        snapshot: M7P3TwinSnapshot | M7P3WorkspaceSnapshot,
     ) -> list[dict[str, object]]:
         return [
             {
@@ -271,7 +297,7 @@ class M7WorkspaceService:
         ]
 
     def twin(self, query: M7TwinQuery) -> dict[str, object]:
-        snapshot = self._exact(twin_revision_id=query.twin_revision_id)
+        snapshot = self._exact_twin(query.twin_revision_id)
         product = {
             "twin": snapshot.twin.projection(),
             "components": self._components(snapshot),
@@ -282,7 +308,7 @@ class M7WorkspaceService:
         }
 
     def estimate(self, query: M7EstimateQuery) -> dict[str, object]:
-        snapshot = self._exact(
+        snapshot = self._exact_estimate(
             twin_revision_id=query.twin_revision_id,
             estimate_id=query.estimate_id,
         )
@@ -301,7 +327,7 @@ class M7WorkspaceService:
         }
 
     def workspace(self, query: M7WorkspaceQuery) -> dict[str, object]:
-        snapshot = self._exact(
+        snapshot = self._exact_estimate(
             twin_revision_id=query.twin_revision_id,
             estimate_id=query.estimate_id,
         )

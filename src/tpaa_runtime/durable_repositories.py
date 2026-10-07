@@ -11,6 +11,7 @@ from tpaa_application.m6_workspace import (
 )
 from tpaa_application.m7_workspace import (
     M7ApplicationError,
+    M7P3TwinSnapshot,
     M7P3WorkspaceSnapshot,
 )
 from tpaa_application.m8_workspace import M8ApplicationError
@@ -153,7 +154,7 @@ class DurableM7P3RuntimeRepository:
             CanonicalP3WorkspaceLayerResolver(uow.canonical_rows, p3, p2),
         )
 
-    def exact_twin(self, twin_revision_id: str) -> M7P3WorkspaceSnapshot:
+    def exact_twin(self, twin_revision_id: str) -> M7P3TwinSnapshot:
         try:
             with self._read_uow_factory() as uow:
                 value = self._repository(uow).exact_twin(twin_revision_id)
