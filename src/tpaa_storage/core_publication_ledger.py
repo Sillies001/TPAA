@@ -179,7 +179,10 @@ class CorePublicationLedger:
             code="SESSION_PREREQUISITE_CARDINALITY",
         )
         if str(_value(session, 0)) != release.session_id:
-            raise CorePublicationLedgerError("SESSION_PREREQUISITE_MISMATCH", release.session_id)
+            raise CorePublicationLedgerError(
+                "SESSION_PREREQUISITE_MISMATCH",
+                release.session_id,
+            )
 
         q = "context_id = ?" if isinstance(d, _SQLiteExecutor) else "context_id = %s"
         context = self._one(
@@ -193,122 +196,496 @@ class CorePublicationLedger:
             or str(_value(context, 1)) != release.session_id
             or str(_value(context, 2)) != release.context_version
         ):
-            raise CorePublicationLedgerError("CONTEXT_PREREQUISITE_MISMATCH", release.context_id)
-
-        if not release.observations:
-            raise CorePublicationLedgerError("OBSERVATION_SET_EMPTY", release.release_id)
-        identity = release.observations[0]
-        expected_identity = (
-            identity.aircraft_id,
-            identity.aircraft_model_id,
-            identity.aircraft_instance_id,
-            identity.subject_entity_id,
-        )
-        for observation in release.observations:
-            actual_identity = (
-                observation.aircraft_id,
-                observation.aircraft_model_id,
-                observation.aircraft_instance_id,
-                observation.subject_entity_id,
+            raise CorePublicationLedgerError(
+                "CONTEXT_PREREQUISITE_MISMATCH",
+                release.context_id,
             )
-            if actual_identity != expected_identity:
+
+        if not release.observations and not release.system_observations:
+            raise CorePublicationLedgerError(
+                "OBSERVATION_SET_EMPTY",
+                release.release_id,
+            )
+
+        metric_instances = {
+            item.metric_instance_id: item
+            for item in release.metric_instances
+        }
+        if len(metric_instances) != len(release.metric_instances):
+            raise CorePublicationLedgerError(
+                "METRIC_INSTANCE_IDENTITY_DUPLICATE",
+                release.release_id,
+            )
+
+        aircraft_ids = {
+            observation.aircraft_id
+            for observation in release.observations
+        }
+        aircraft_ids.update(
+            observation.aircraft_id
+            for observation in release.system_observations
+        )
+        if len(aircraft_ids) != 1:
+            raise CorePublicationLedgerError(
+                "OBSERVATION_AIRCRAFT_SCOPE_DRIFT",
+                repr(sorted(aircraft_ids)),
+            )
+        aircraft_id = next(iter(aircraft_ids))
+
+        identity = release.observations[0] if release.observations else None
+        if identity is not None:
+            expected_identity = (
+                identity.aircraft_id,
+                identity.aircraft_model_id,
+                identity.aircraft_instance_id,
+                identity.subject_entity_id,
+            )
+            for observation in release.observations:
+                actual_identity = (
+                    observation.aircraft_id,
+                    observation.aircraft_model_id,
+                    observation.aircraft_instance_id,
+                    observation.subject_entity_id,
+                )
+                if actual_identity != expected_identity:
+                    raise CorePublicationLedgerError(
+                        "OBSERVATION_IDENTITY_DRIFT",
+                        observation.observation_id,
+                    )
+                instance = metric_instances.get(
+                    observation.observed_metric_instance_id
+                )
+                if (
+                    instance is None
+                    or instance.subject_entity_id != observation.subject_entity_id
+                    or instance.mission_system_instance_id is not None
+                ):
+                    raise CorePublicationLedgerError(
+                        "CAPABILITY_OBSERVATION_METRIC_IDENTITY_MISMATCH",
+                        observation.observation_id,
+                    )
+
+            p = (
+                "aircraft_model_id = ?"
+                if isinstance(d, _SQLiteExecutor)
+                else "aircraft_model_id = %s"
+            )
+            model = self._one(
+                "master.aircraft_model",
+                p,
+                (identity.aircraft_model_id,),
+                code="AIRCRAFT_MODEL_PREREQUISITE_CARDINALITY",
+            )
+            if str(_value(model, 0)) != identity.aircraft_model_id:
                 raise CorePublicationLedgerError(
-                    "OBSERVATION_IDENTITY_DRIFT",
-                    observation.observation_id,
+                    "AIRCRAFT_MODEL_PREREQUISITE_MISMATCH",
+                    identity.aircraft_model_id,
                 )
 
-        p = "aircraft_model_id = ?" if isinstance(d, _SQLiteExecutor) else "aircraft_model_id = %s"
-        model = self._one(
-            "master.aircraft_model",
-            p,
-            (identity.aircraft_model_id,),
-            code="AIRCRAFT_MODEL_PREREQUISITE_CARDINALITY",
+        p = (
+            "aircraft_id = ?"
+            if isinstance(d, _SQLiteExecutor)
+            else "aircraft_id = %s"
         )
-        if str(_value(model, 0)) != identity.aircraft_model_id:
-            raise CorePublicationLedgerError(
-                "AIRCRAFT_MODEL_PREREQUISITE_MISMATCH",
-                identity.aircraft_model_id,
-            )
-
-        p = "aircraft_id = ?" if isinstance(d, _SQLiteExecutor) else "aircraft_id = %s"
         aircraft = self._one(
             "master.aircraft",
             p,
-            (identity.aircraft_id,),
+            (aircraft_id,),
             code="AIRCRAFT_PREREQUISITE_CARDINALITY",
         )
-        if (
-            str(_value(aircraft, 0)) != identity.aircraft_id
-            or str(_value(aircraft, 1)) != identity.aircraft_model_id
-        ):
-            raise CorePublicationLedgerError("AIRCRAFT_PREREQUISITE_MISMATCH", identity.aircraft_id)
-
-        p = "entity_id = ?" if isinstance(d, _SQLiteExecutor) else "entity_id = %s"
-        entity = self._one(
-            "master.entity",
-            p,
-            (identity.subject_entity_id,),
-            code="SUBJECT_ENTITY_PREREQUISITE_CARDINALITY",
-        )
-        if str(_value(entity, 0)) != identity.subject_entity_id:
+        if str(_value(aircraft, 0)) != aircraft_id:
             raise CorePublicationLedgerError(
-                "SUBJECT_ENTITY_PREREQUISITE_MISMATCH",
-                identity.subject_entity_id,
+                "AIRCRAFT_PREREQUISITE_MISMATCH",
+                aircraft_id,
+            )
+        if identity is not None and str(_value(aircraft, 1)) != identity.aircraft_model_id:
+            raise CorePublicationLedgerError(
+                "AIRCRAFT_PREREQUISITE_MISMATCH",
+                aircraft_id,
             )
 
-        p = (
-            "aircraft_instance_id = ?"
-            if isinstance(d, _SQLiteExecutor)
-            else "aircraft_instance_id = %s"
-        )
-        instance = self._one(
-            "master.aircraft_instance",
-            p,
-            (identity.aircraft_instance_id,),
-            code="AIRCRAFT_INSTANCE_PREREQUISITE_CARDINALITY",
-        )
-        if (
-            str(_value(instance, 0)) != identity.aircraft_instance_id
-            or str(_value(instance, 1)) != release.session_id
-            or str(_value(instance, 2)) != identity.aircraft_id
-            or str(_value(instance, 3)) != identity.subject_entity_id
-        ):
-            raise CorePublicationLedgerError(
-                "AIRCRAFT_INSTANCE_PREREQUISITE_MISMATCH",
-                identity.aircraft_instance_id,
+        if identity is not None:
+            p = (
+                "entity_id = ?"
+                if isinstance(d, _SQLiteExecutor)
+                else "entity_id = %s"
             )
+            entity = self._one(
+                "master.entity",
+                p,
+                (identity.subject_entity_id,),
+                code="SUBJECT_ENTITY_PREREQUISITE_CARDINALITY",
+            )
+            if str(_value(entity, 0)) != identity.subject_entity_id:
+                raise CorePublicationLedgerError(
+                    "SUBJECT_ENTITY_PREREQUISITE_MISMATCH",
+                    identity.subject_entity_id,
+                )
 
-        episode_id = release.observations[0].episode_id
-        p = "episode_id = ?" if isinstance(d, _SQLiteExecutor) else "episode_id = %s"
-        episode = self._one(
-            "episode.training_episode",
-            p,
-            (episode_id,),
-            code="EPISODE_PREREQUISITE_CARDINALITY",
-        )
-        if (
-            str(_value(episode, 0)) != episode_id
-            or str(_value(episode, 1)) != release.session_id
-            or str(_value(episode, 4)) != release.context_id
-            or str(_value(episode, 8)) != identity.aircraft_id
-        ):
-            raise CorePublicationLedgerError("EPISODE_PREREQUISITE_MISMATCH", episode_id)
+            p = (
+                "aircraft_instance_id = ?"
+                if isinstance(d, _SQLiteExecutor)
+                else "aircraft_instance_id = %s"
+            )
+            instance = self._one(
+                "master.aircraft_instance",
+                p,
+                (identity.aircraft_instance_id,),
+                code="AIRCRAFT_INSTANCE_PREREQUISITE_CARDINALITY",
+            )
+            if (
+                str(_value(instance, 0)) != identity.aircraft_instance_id
+                or str(_value(instance, 1)) != release.session_id
+                or str(_value(instance, 2)) != identity.aircraft_id
+                or str(_value(instance, 3)) != identity.subject_entity_id
+            ):
+                raise CorePublicationLedgerError(
+                    "AIRCRAFT_INSTANCE_PREREQUISITE_MISMATCH",
+                    identity.aircraft_instance_id,
+                )
 
-        stage_ids = {
-            item.stage_id
-            for item in release.metric_instances
-            if item.stage_id is not None
+        for system_observation in release.system_observations:
+            instance = metric_instances.get(
+                system_observation.observed_metric_instance_id
+            )
+            if (
+                instance is None
+                or instance.mission_system_instance_id
+                != system_observation.mission_system_instance_id
+                or instance.subject_entity_id is not None
+            ):
+                raise CorePublicationLedgerError(
+                    "SYSTEM_OBSERVATION_METRIC_IDENTITY_MISMATCH",
+                    system_observation.system_observation_id,
+                )
+            p = (
+                "mission_system_instance_id = ?"
+                if isinstance(d, _SQLiteExecutor)
+                else "mission_system_instance_id = %s"
+            )
+            system = self._one(
+                "master.mission_system_instance",
+                p,
+                (system_observation.mission_system_instance_id,),
+                code="MISSION_SYSTEM_PREREQUISITE_CARDINALITY",
+            )
+            if (
+                str(_value(system, 0)) != system_observation.mission_system_instance_id
+                or str(_value(system, 1)) != system_observation.aircraft_id
+            ):
+                raise CorePublicationLedgerError(
+                    "MISSION_SYSTEM_PREREQUISITE_MISMATCH",
+                    system_observation.mission_system_instance_id,
+                )
+
+        world_products = {
+            item.world_product_id: item
+            for item in release.world_products
         }
-        for stage_id in stage_ids:
-            p = "stage_id = ?" if isinstance(d, _SQLiteExecutor) else "stage_id = %s"
+        if len(world_products) != len(release.world_products):
+            raise CorePublicationLedgerError(
+                "WORLD_PRODUCT_IDENTITY_DUPLICATE",
+                release.release_id,
+            )
+        relations = {
+            item.relation_id: item
+            for item in release.world_relations
+        }
+        if len(relations) != len(release.world_relations):
+            raise CorePublicationLedgerError(
+                "WORLD_RELATION_IDENTITY_DUPLICATE",
+                release.release_id,
+            )
+        chains = {
+            item.chain_id: item
+            for item in release.tpaa_m_chains
+        }
+        if len(chains) != len(release.tpaa_m_chains):
+            raise CorePublicationLedgerError(
+                "TPAA_M_CHAIN_IDENTITY_DUPLICATE",
+                release.release_id,
+            )
+        evidence_ids = {
+            item.evidence_set_id
+            for item in release.evidence_sets
+        }
+        if len(evidence_ids) != len(release.evidence_sets):
+            raise CorePublicationLedgerError(
+                "EVIDENCE_SET_IDENTITY_DUPLICATE",
+                release.release_id,
+            )
+
+        for world in release.world_products:
+            if world.stage_id is not None and world.episode_id is None:
+                raise CorePublicationLedgerError(
+                    "WORLD_STAGE_WITHOUT_EPISODE",
+                    world.world_product_id,
+                )
+            if (
+                world.aircraft_id is not None
+                and world.aircraft_id != aircraft_id
+            ):
+                raise CorePublicationLedgerError(
+                    "WORLD_AIRCRAFT_SCOPE_DRIFT",
+                    world.world_product_id,
+                )
+            if world.start_session_time_us >= world.end_session_time_us:
+                raise CorePublicationLedgerError(
+                    "WORLD_INTERVAL_INVALID",
+                    world.world_product_id,
+                )
+
+        for relation in release.world_relations:
+            if (
+                relation.start_session_time_us is None
+                and relation.end_session_time_us is not None
+            ) or (
+                relation.start_session_time_us is not None
+                and relation.end_session_time_us is None
+            ):
+                raise CorePublicationLedgerError(
+                    "RELATION_INTERVAL_INVALID",
+                    relation.relation_id,
+                )
+            if (
+                relation.start_session_time_us is not None
+                and relation.end_session_time_us is not None
+                and relation.start_session_time_us
+                >= relation.end_session_time_us
+            ):
+                raise CorePublicationLedgerError(
+                    "RELATION_INTERVAL_INVALID",
+                    relation.relation_id,
+                )
+
+        for chain in release.tpaa_m_chains:
+            if chain.start_session_time_us >= chain.end_session_time_us:
+                raise CorePublicationLedgerError(
+                    "TPAA_M_CHAIN_INTERVAL_INVALID",
+                    chain.chain_id,
+                )
+
+        def exact_ref_exists(table_name: str, field: str, value: str) -> bool:
+            table = d.table(table_name)
+            p_ref = "?" if isinstance(d, _SQLiteExecutor) else "%s"
+            rows = d.fetchall(
+                f"SELECT {field} FROM {table} WHERE {field} = {p_ref}",
+                (value,),
+            )
+            if len(rows) > 1:
+                raise CorePublicationLedgerError(
+                    "REFERENCE_CARDINALITY_INVALID",
+                    f"{table_name}:{value}:rows={len(rows)}",
+                )
+            return len(rows) == 1
+
+        for evidence_item in release.evidence_sets:
+            if len(set(evidence_item.world_product_ids)) != len(
+                evidence_item.world_product_ids
+            ):
+                raise CorePublicationLedgerError(
+                    "EVIDENCE_WORLD_REF_DUPLICATE",
+                    evidence_item.evidence_set_id,
+                )
+            if len(set(evidence_item.relation_ids)) != len(
+                evidence_item.relation_ids
+            ):
+                raise CorePublicationLedgerError(
+                    "EVIDENCE_RELATION_REF_DUPLICATE",
+                    evidence_item.evidence_set_id,
+                )
+            for world_product_id in evidence_item.world_product_ids:
+                if (
+                    world_product_id not in world_products
+                    and not exact_ref_exists(
+                        "world.world_product_manifest",
+                        "world_product_id",
+                        world_product_id,
+                    )
+                ):
+                    raise CorePublicationLedgerError(
+                        "EVIDENCE_WORLD_REF_MISSING",
+                        world_product_id,
+                    )
+            for relation_id in evidence_item.relation_ids:
+                if (
+                    relation_id not in relations
+                    and not exact_ref_exists(
+                        "world.world_relation",
+                        "relation_id",
+                        relation_id,
+                    )
+                ):
+                    raise CorePublicationLedgerError(
+                        "EVIDENCE_RELATION_REF_MISSING",
+                        relation_id,
+                    )
+
+        for metric in release.metric_instances:
+            if metric.tpaa_chain_id is None:
+                continue
+            if (
+                metric.tpaa_chain_id not in chains
+                and not exact_ref_exists(
+                    "world.tpaa_m_chain",
+                    "chain_id",
+                    metric.tpaa_chain_id,
+                )
+            ):
+                raise CorePublicationLedgerError(
+                    "METRIC_TPAA_M_CHAIN_REF_MISSING",
+                    metric.tpaa_chain_id,
+                )
+
+        episode_ids = {
+            observation.episode_id
+            for observation in release.observations
+        }
+        episode_ids.update(
+            observation.episode_id
+            for observation in release.system_observations
+            if observation.episode_id is not None
+        )
+        episode_ids.update(
+            item.episode_id
+            for item in release.metric_instances
+            if item.episode_id
+        )
+        episode_ids.update(
+            item.episode_id
+            for item in release.world_products
+            if item.episode_id is not None
+        )
+        episode_ids.update(
+            item.episode_id
+            for item in release.world_relations
+        )
+        episode_ids.update(
+            item.episode_id
+            for item in release.tpaa_m_chains
+        )
+        for episode_id in episode_ids:
+            p = (
+                "episode_id = ?"
+                if isinstance(d, _SQLiteExecutor)
+                else "episode_id = %s"
+            )
+            episode = self._one(
+                "episode.training_episode",
+                p,
+                (episode_id,),
+                code="EPISODE_PREREQUISITE_CARDINALITY",
+            )
+            if (
+                str(_value(episode, 0)) != episode_id
+                or str(_value(episode, 1)) != release.session_id
+                or str(_value(episode, 4)) != release.context_id
+                or (
+                    _value(episode, 8) is not None
+                    and str(_value(episode, 8)) != aircraft_id
+                )
+            ):
+                raise CorePublicationLedgerError(
+                    "EPISODE_PREREQUISITE_MISMATCH",
+                    episode_id,
+                )
+
+        stage_episode: dict[str, str] = {}
+        for item in release.metric_instances:
+            if item.stage_id is None:
+                continue
+            prior = stage_episode.setdefault(item.stage_id, item.episode_id)
+            if prior != item.episode_id:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    item.stage_id,
+                )
+        for observation in release.observations:
+            if observation.stage_id is None:
+                continue
+            prior = stage_episode.setdefault(
+                observation.stage_id,
+                observation.episode_id,
+            )
+            if prior != observation.episode_id:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    observation.stage_id,
+                )
+        for system_observation in release.system_observations:
+            if system_observation.stage_id is None:
+                continue
+            if system_observation.episode_id is None:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    system_observation.stage_id,
+                )
+            prior = stage_episode.setdefault(
+                system_observation.stage_id,
+                system_observation.episode_id,
+            )
+            if prior != system_observation.episode_id:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    system_observation.stage_id,
+                )
+
+        for world in release.world_products:
+            if world.stage_id is None:
+                continue
+            if world.episode_id is None:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    world.stage_id,
+                )
+            prior = stage_episode.setdefault(world.stage_id, world.episode_id)
+            if prior != world.episode_id:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    world.stage_id,
+                )
+        for relation in release.world_relations:
+            if relation.stage_id is None:
+                continue
+            prior = stage_episode.setdefault(
+                relation.stage_id,
+                relation.episode_id,
+            )
+            if prior != relation.episode_id:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    relation.stage_id,
+                )
+        for chain in release.tpaa_m_chains:
+            if chain.stage_id is None:
+                continue
+            prior = stage_episode.setdefault(chain.stage_id, chain.episode_id)
+            if prior != chain.episode_id:
+                raise CorePublicationLedgerError(
+                    "STAGE_EPISODE_SCOPE_DRIFT",
+                    chain.stage_id,
+                )
+
+        for stage_id, episode_id in stage_episode.items():
+            p = (
+                "stage_id = ?"
+                if isinstance(d, _SQLiteExecutor)
+                else "stage_id = %s"
+            )
             stage = self._one(
                 "episode.episode_stage",
                 p,
                 (stage_id,),
                 code="STAGE_PREREQUISITE_CARDINALITY",
             )
-            if str(_value(stage, 0)) != stage_id or str(_value(stage, 1)) != episode_id:
-                raise CorePublicationLedgerError("STAGE_PREREQUISITE_MISMATCH", str(stage_id))
+            if (
+                str(_value(stage, 0)) != stage_id
+                or str(_value(stage, 1)) != episode_id
+            ):
+                raise CorePublicationLedgerError(
+                    "STAGE_PREREQUISITE_MISMATCH",
+                    stage_id,
+                )
 
         definition_table = d.table("metric.metric_definition")
         placeholder = "?" if isinstance(d, _SQLiteExecutor) else "%s"
@@ -475,7 +852,30 @@ class CorePublicationLedger:
                 release.release_id,
             )
 
-        job_id = str(uuid5(COMPUTE_JOB_NAMESPACE, f"{idempotency_key}|{release.request_hash}"))
+        job_id = str(
+            uuid5(
+                COMPUTE_JOB_NAMESPACE,
+                f"{idempotency_key}|{release.request_hash}",
+            )
+        )
+        job_episode_id = next(
+            (item.episode_id for item in release.observations),
+            None,
+        )
+        if job_episode_id is None:
+            job_episode_id = next(
+                (
+                    item.episode_id
+                    for item in release.system_observations
+                    if item.episode_id is not None
+                ),
+                None,
+            )
+        if job_episode_id is None:
+            job_episode_id = next(
+                (item.episode_id for item in release.metric_instances),
+                None,
+            )
         job_table = d.table("registry.compute_job")
         now_expr = "CURRENT_TIMESTAMP"
         d.execute(
@@ -489,7 +889,7 @@ class CorePublicationLedger:
                 job_id,
                 "M1_SESSION_PUBLISH",
                 release.session_id,
-                release.observations[0].episode_id,
+                job_episode_id,
                 idempotency_key,
                 "SUCCEEDED",
                 PUBLICATION_COMPONENT_VERSION,
@@ -533,8 +933,24 @@ class CorePublicationLedger:
                 f"{release.release_id}|{release.context_id}|{release.context_version}",
             )
         )
-        start_us = min(item.observation_start_session_time_us for item in release.observations)
-        end_us = max(item.observation_end_session_time_us for item in release.observations)
+        observation_start_times = [
+            item.observation_start_session_time_us
+            for item in release.observations
+        ]
+        observation_start_times.extend(
+            item.observation_start_session_time_us
+            for item in release.system_observations
+        )
+        observation_end_times = [
+            item.observation_end_session_time_us
+            for item in release.observations
+        ]
+        observation_end_times.extend(
+            item.observation_end_session_time_us
+            for item in release.system_observations
+        )
+        start_us = min(observation_start_times)
+        end_us = max(observation_end_times)
         d.execute(
             f"""INSERT INTO {ref_table} (
                     release_context_ref_id, release_id, release_scope_type,
@@ -552,6 +968,112 @@ class CorePublicationLedger:
                 0,
             ),
         )
+
+        world_table = d.table("world.world_product_manifest")
+        for world in release.world_products:
+            d.execute(
+                f"""INSERT INTO {world_table} (
+                        world_product_id, release_id, session_id, episode_id,
+                        stage_id, world_kind, subject_id, observer_id, actor_id,
+                        aircraft_id, aircraft_instance_id, dataset_id,
+                        start_session_time_us, end_session_time_us, status,
+                        coverage, confidence, reason_codes,
+                        source_authority_signature, world_version, policy_version,
+                        artifact_sha256, logical_content_hash, request_hash,
+                        created_at, supersedes_id
+                    ) VALUES (
+                        {p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},
+                        {p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},
+                        {now_expr},{p}
+                    )""",
+                (
+                    world.world_product_id,
+                    release.release_id,
+                    release.session_id,
+                    world.episode_id,
+                    world.stage_id,
+                    world.world_kind,
+                    world.subject_id,
+                    world.observer_id,
+                    world.actor_id,
+                    world.aircraft_id,
+                    world.aircraft_instance_id,
+                    world.dataset_id,
+                    world.start_session_time_us,
+                    world.end_session_time_us,
+                    world.status,
+                    world.coverage,
+                    world.confidence,
+                    d.text_array(world.reason_codes),
+                    world.source_authority_signature,
+                    world.world_version,
+                    world.policy_version,
+                    world.artifact_sha256,
+                    world.logical_content_hash,
+                    world.request_hash,
+                    world.supersedes_id,
+                ),
+            )
+
+        relation_table = d.table("world.world_relation")
+        for relation in release.world_relations:
+            d.execute(
+                f"""INSERT INTO {relation_table} (
+                        relation_id, release_id, episode_id, stage_id,
+                        relation_type, subject_ref, object_ref,
+                        subject_series_id, object_series_id, cross_series,
+                        start_session_time_us, end_session_time_us, properties,
+                        confidence, relation_source, method_version
+                    ) VALUES (
+                        {p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},
+                        {p},{p},{p},{p}
+                    )""",
+                (
+                    relation.relation_id,
+                    release.release_id,
+                    relation.episode_id,
+                    relation.stage_id,
+                    relation.relation_type,
+                    relation.subject_ref,
+                    relation.object_ref,
+                    relation.subject_series_id,
+                    relation.object_series_id,
+                    relation.cross_series,
+                    relation.start_session_time_us,
+                    relation.end_session_time_us,
+                    d.json(relation.properties),
+                    relation.confidence,
+                    relation.relation_source,
+                    relation.method_version,
+                ),
+            )
+
+        chain_table = d.table("world.tpaa_m_chain")
+        for chain in release.tpaa_m_chains:
+            d.execute(
+                f"""INSERT INTO {chain_table} (
+                        chain_id, release_id, episode_id, stage_id, refs,
+                        start_session_time_us, end_session_time_us,
+                        chain_status, coverage, confidence, break_reason,
+                        chain_version
+                    ) VALUES (
+                        {p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p}
+                    )""",
+                (
+                    chain.chain_id,
+                    release.release_id,
+                    chain.episode_id,
+                    chain.stage_id,
+                    d.json(chain.refs),
+                    chain.start_session_time_us,
+                    chain.end_session_time_us,
+                    chain.chain_status,
+                    chain.coverage,
+                    chain.confidence,
+                    chain.break_reason,
+                    chain.chain_version,
+                ),
+            )
 
         evidence_table = d.table("metric.evidence_set")
         for evidence in release.evidence_sets:
@@ -572,6 +1094,24 @@ class CorePublicationLedger:
                     d.json(evidence.algorithm_versions),
                 ),
             )
+
+        evidence_world_ref = d.table("metric.evidence_world_ref")
+        evidence_relation_ref = d.table("metric.evidence_relation_ref")
+        for evidence in release.evidence_sets:
+            for world_product_id in evidence.world_product_ids:
+                d.execute(
+                    f"""INSERT INTO {evidence_world_ref} (
+                            evidence_set_id, world_product_id
+                        ) VALUES ({p},{p})""",
+                    (evidence.evidence_set_id, world_product_id),
+                )
+            for relation_id in evidence.relation_ids:
+                d.execute(
+                    f"""INSERT INTO {evidence_relation_ref} (
+                            evidence_set_id, relation_id
+                        ) VALUES ({p},{p})""",
+                    (evidence.evidence_set_id, relation_id),
+                )
 
         metric_table = d.table("metric.metric_instance")
         for instance in release.metric_instances:
@@ -598,12 +1138,16 @@ class CorePublicationLedger:
                     instance.episode_id,
                     instance.stage_id,
                     instance.subject_entity_id,
-                    None,
-                    None,
+                    instance.mission_system_instance_id,
+                    instance.tpaa_chain_id,
                     instance.value_numeric,
-                    None,
-                    None,
-                    None if instance.value_structured is None else d.json(instance.value_structured),
+                    instance.value_text,
+                    instance.value_boolean,
+                    (
+                        None
+                        if instance.value_structured is None
+                        else d.json(instance.value_structured)
+                    ),
                     instance.unit,
                     instance.status,
                     d.text_array(instance.reason_codes),
@@ -682,6 +1226,55 @@ class CorePublicationLedger:
                 ),
             )
 
+
+        system_observation_table = d.table(
+            "metric.system_performance_observation"
+        )
+        for system_observation in release.system_observations:
+            d.execute(
+                f"""INSERT INTO {system_observation_table} (
+                        system_observation_id, release_id, session_id, episode_id,
+                        stage_id, aircraft_id, mission_system_instance_id,
+                        observed_metric_instance_id,
+                        reference_truth_profile_version, reference_quality_status,
+                        reference_uncertainty_summary,
+                        alignment_uncertainty_summary,
+                        observation_start_session_time_us,
+                        observation_end_session_time_us, context_tags,
+                        evidence_set_id, coverage, confidence, eligibility_status,
+                        exclusion_reason_code, comparison_key_hash,
+                        observation_schema_version, created_at
+                    ) VALUES (
+                        {p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},
+                        {p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},
+                        {now_expr}
+                    )""",
+                (
+                    system_observation.system_observation_id,
+                    release.release_id,
+                    release.session_id,
+                    system_observation.episode_id,
+                    system_observation.stage_id,
+                    system_observation.aircraft_id,
+                    system_observation.mission_system_instance_id,
+                    system_observation.observed_metric_instance_id,
+                    system_observation.reference_truth_profile_version,
+                    system_observation.reference_quality_status,
+                    d.json(system_observation.reference_uncertainty_summary),
+                    d.json(system_observation.alignment_uncertainty_summary),
+                    system_observation.observation_start_session_time_us,
+                    system_observation.observation_end_session_time_us,
+                    d.json(system_observation.context_tags),
+                    system_observation.evidence_set_id,
+                    system_observation.coverage,
+                    system_observation.confidence,
+                    system_observation.eligibility_status,
+                    system_observation.exclusion_reason_code,
+                    system_observation.comparison_key_hash,
+                    system_observation.observation_schema_version,
+                ),
+            )
+
         next_token = actual_token + 1
         if pointer_rows:
             cursor = d.execute(
@@ -755,10 +1348,12 @@ class CorePublicationLedger:
         )
         metrics = d.fetchall(
             f"""SELECT metric_instance_id, metric_definition_id, metric_scope,
-                       episode_id, stage_id, subject_entity_id, value_numeric,
-                       value_structured, unit, status, reason_codes, coverage,
-                       confidence, evidence_set_id, context_id,
-                       world_product_versions, compute_version, input_hash
+                       episode_id, stage_id, subject_entity_id,
+                       mission_system_instance_id, tpaa_chain_id,
+                       value_numeric, value_text, value_boolean, value_structured,
+                       unit, status, reason_codes, coverage, confidence,
+                       evidence_set_id, context_id, world_product_versions,
+                       compute_version, input_hash
                 FROM {d.table('metric.metric_instance')}
                 WHERE release_id = {p}
                 ORDER BY metric_instance_id""",
@@ -788,6 +1383,75 @@ class CorePublicationLedger:
                 ORDER BY observation_id""",
             (release_id,),
         )
+        system_observations = d.fetchall(
+            f"""SELECT system_observation_id, episode_id, stage_id, aircraft_id,
+                       mission_system_instance_id, observed_metric_instance_id,
+                       reference_truth_profile_version, reference_quality_status,
+                       reference_uncertainty_summary,
+                       alignment_uncertainty_summary,
+                       observation_start_session_time_us,
+                       observation_end_session_time_us, context_tags,
+                       evidence_set_id, coverage, confidence, eligibility_status,
+                       exclusion_reason_code, comparison_key_hash,
+                       observation_schema_version
+                FROM {d.table('metric.system_performance_observation')}
+                WHERE release_id = {p}
+                ORDER BY system_observation_id""",
+            (release_id,),
+        )
+
+        worlds = d.fetchall(
+            f"""SELECT world_product_id, episode_id, stage_id, world_kind,
+                       subject_id, observer_id, actor_id, aircraft_id,
+                       aircraft_instance_id, dataset_id, start_session_time_us,
+                       end_session_time_us, status, coverage, confidence,
+                       reason_codes, source_authority_signature, world_version,
+                       policy_version, artifact_sha256, logical_content_hash,
+                       request_hash, supersedes_id
+                FROM {d.table('world.world_product_manifest')}
+                WHERE release_id = {p}
+                ORDER BY world_product_id""",
+            (release_id,),
+        )
+        relations = d.fetchall(
+            f"""SELECT relation_id, episode_id, stage_id, relation_type,
+                       subject_ref, object_ref, subject_series_id,
+                       object_series_id, cross_series, start_session_time_us,
+                       end_session_time_us, properties, confidence,
+                       relation_source, method_version
+                FROM {d.table('world.world_relation')}
+                WHERE release_id = {p}
+                ORDER BY relation_id""",
+            (release_id,),
+        )
+        chains = d.fetchall(
+            f"""SELECT chain_id, episode_id, stage_id, refs,
+                       start_session_time_us, end_session_time_us,
+                       chain_status, coverage, confidence, break_reason,
+                       chain_version
+                FROM {d.table('world.tpaa_m_chain')}
+                WHERE release_id = {p}
+                ORDER BY chain_id""",
+            (release_id,),
+        )
+        evidence_world_refs = d.fetchall(
+            f"""SELECT r.evidence_set_id, r.world_product_id
+                FROM {d.table('metric.evidence_world_ref')} AS r
+                JOIN {d.table('metric.evidence_set')} AS e
+                  ON e.evidence_set_id = r.evidence_set_id
+                WHERE e.release_id = {p}
+                ORDER BY r.evidence_set_id, r.world_product_id""",
+            (release_id,),
+        )
+        evidence_relation_refs = d.fetchall(
+            f"""SELECT r.evidence_set_id, r.relation_id
+                FROM {d.table('metric.evidence_relation_ref')} AS r
+                JOIN {d.table('metric.evidence_set')} AS e
+                  ON e.evidence_set_id = r.evidence_set_id
+                WHERE e.release_id = {p}
+                ORDER BY r.evidence_set_id, r.relation_id""",
+            (release_id,),
+        )
 
         def normalize_json(value: Any) -> Any:
             if isinstance(value, str):
@@ -805,7 +1469,71 @@ class CorePublicationLedger:
                 return [str(item) for item in parsed]
             return []
 
-        return {
+        metric_projection: list[dict[str, object]] = []
+        for row in metrics:
+            item: dict[str, object] = {
+                "metric_instance_id": str(row[0]),
+                "metric_definition_id": str(row[1]),
+                "metric_scope": str(row[2]),
+                "episode_id": None if row[3] is None else str(row[3]),
+                "stage_id": None if row[4] is None else str(row[4]),
+                "subject_entity_id": (
+                    None if row[5] is None else str(row[5])
+                ),
+                "value_numeric": row[8],
+                "value_structured": normalize_json(row[11]),
+                "unit": str(row[12]),
+                "status": str(row[13]),
+                "reason_codes": normalize_array(row[14]),
+                "coverage": float(row[15]),
+                "confidence": float(row[16]),
+                "evidence_set_id": str(row[17]),
+                "context_id": str(row[18]),
+                "world_product_versions": normalize_json(row[19]),
+                "compute_version": str(row[20]),
+                "input_hash": str(row[21]),
+            }
+            if row[6] is not None:
+                item["mission_system_instance_id"] = str(row[6])
+            if row[7] is not None:
+                item["tpaa_chain_id"] = str(row[7])
+            if row[9] is not None:
+                item["value_text"] = str(row[9])
+            if row[10] is not None:
+                item["value_boolean"] = bool(row[10])
+            metric_projection.append(item)
+
+        evidence_world_by_id: dict[str, list[str]] = {}
+        for row in evidence_world_refs:
+            evidence_world_by_id.setdefault(str(row[0]), []).append(str(row[1]))
+        evidence_relation_by_id: dict[str, list[str]] = {}
+        for row in evidence_relation_refs:
+            evidence_relation_by_id.setdefault(str(row[0]), []).append(str(row[1]))
+
+        evidence_projection: list[dict[str, object]] = []
+        for row in evidence:
+            evidence_id = str(row[0])
+            item = {
+                "evidence_set_id": evidence_id,
+                "episode_id": None if row[1] is None else str(row[1]),
+                "start_session_time_us": (
+                    None if row[2] is None else int(row[2])
+                ),
+                "end_session_time_us": (
+                    None if row[3] is None else int(row[3])
+                ),
+                "series_locator": normalize_json(row[4]),
+                "algorithm_versions": normalize_json(row[5]),
+            }
+            world_ids = evidence_world_by_id.get(evidence_id, [])
+            relation_ids = evidence_relation_by_id.get(evidence_id, [])
+            if world_ids:
+                item["world_product_ids"] = world_ids
+            if relation_ids:
+                item["relation_ids"] = relation_ids
+            evidence_projection.append(item)
+
+        result: dict[str, object] = {
             "release": {
                 "release_id": str(r[0]),
                 "scope_type": str(r[1]),
@@ -829,40 +1557,8 @@ class CorePublicationLedger:
                 }
                 for row in refs
             ],
-            "metric_instances": [
-                {
-                    "metric_instance_id": str(row[0]),
-                    "metric_definition_id": str(row[1]),
-                    "metric_scope": str(row[2]),
-                    "episode_id": None if row[3] is None else str(row[3]),
-                    "stage_id": None if row[4] is None else str(row[4]),
-                    "subject_entity_id": None if row[5] is None else str(row[5]),
-                    "value_numeric": row[6],
-                    "value_structured": normalize_json(row[7]),
-                    "unit": str(row[8]),
-                    "status": str(row[9]),
-                    "reason_codes": normalize_array(row[10]),
-                    "coverage": float(row[11]),
-                    "confidence": float(row[12]),
-                    "evidence_set_id": str(row[13]),
-                    "context_id": str(row[14]),
-                    "world_product_versions": normalize_json(row[15]),
-                    "compute_version": str(row[16]),
-                    "input_hash": str(row[17]),
-                }
-                for row in metrics
-            ],
-            "evidence_sets": [
-                {
-                    "evidence_set_id": str(row[0]),
-                    "episode_id": None if row[1] is None else str(row[1]),
-                    "start_session_time_us": None if row[2] is None else int(row[2]),
-                    "end_session_time_us": None if row[3] is None else int(row[3]),
-                    "series_locator": normalize_json(row[4]),
-                    "algorithm_versions": normalize_json(row[5]),
-                }
-                for row in evidence
-            ],
+            "metric_instances": metric_projection,
+            "evidence_sets": evidence_projection,
             "observations": [
                 {
                     "observation_id": str(row[0]),
@@ -886,13 +1582,129 @@ class CorePublicationLedger:
                     "coverage": float(row[18]),
                     "confidence": float(row[19]),
                     "eligibility_status": str(row[20]),
-                    "exclusion_reason_code": None if row[21] is None else str(row[21]),
+                    "exclusion_reason_code": (
+                        None if row[21] is None else str(row[21])
+                    ),
                     "comparison_key_hash": str(row[22]),
                     "observation_schema_version": str(row[23]),
                 }
                 for row in observations
             ],
         }
+        if system_observations:
+            result["system_observations"] = [
+                {
+                    "system_observation_id": str(row[0]),
+                    "episode_id": None if row[1] is None else str(row[1]),
+                    "stage_id": None if row[2] is None else str(row[2]),
+                    "aircraft_id": str(row[3]),
+                    "mission_system_instance_id": str(row[4]),
+                    "observed_metric_instance_id": str(row[5]),
+                    "reference_truth_profile_version": (
+                        None if row[6] is None else str(row[6])
+                    ),
+                    "reference_quality_status": str(row[7]),
+                    "reference_uncertainty_summary": normalize_json(row[8]),
+                    "alignment_uncertainty_summary": normalize_json(row[9]),
+                    "observation_start_session_time_us": int(row[10]),
+                    "observation_end_session_time_us": int(row[11]),
+                    "context_tags": normalize_json(row[12]),
+                    "evidence_set_id": str(row[13]),
+                    "coverage": float(row[14]),
+                    "confidence": float(row[15]),
+                    "eligibility_status": str(row[16]),
+                    "exclusion_reason_code": (
+                        None if row[17] is None else str(row[17])
+                    ),
+                    "comparison_key_hash": str(row[18]),
+                    "observation_schema_version": str(row[19]),
+                }
+                for row in system_observations
+            ]
+        if worlds:
+            result["world_products"] = [
+                {
+                    "world_product_id": str(row[0]),
+                    "episode_id": None if row[1] is None else str(row[1]),
+                    "stage_id": None if row[2] is None else str(row[2]),
+                    "world_kind": str(row[3]),
+                    "subject_id": None if row[4] is None else str(row[4]),
+                    "observer_id": None if row[5] is None else str(row[5]),
+                    "actor_id": None if row[6] is None else str(row[6]),
+                    "aircraft_id": None if row[7] is None else str(row[7]),
+                    "aircraft_instance_id": (
+                        None if row[8] is None else str(row[8])
+                    ),
+                    "dataset_id": None if row[9] is None else str(row[9]),
+                    "start_session_time_us": int(row[10]),
+                    "end_session_time_us": int(row[11]),
+                    "status": str(row[12]),
+                    "coverage": float(row[13]),
+                    "confidence": float(row[14]),
+                    "reason_codes": normalize_array(row[15]),
+                    "source_authority_signature": (
+                        None if row[16] is None else str(row[16])
+                    ),
+                    "world_version": str(row[17]),
+                    "policy_version": str(row[18]),
+                    "artifact_sha256": (
+                        None if row[19] is None else str(row[19])
+                    ),
+                    "logical_content_hash": str(row[20]),
+                    "request_hash": str(row[21]),
+                    "supersedes_id": (
+                        None if row[22] is None else str(row[22])
+                    ),
+                }
+                for row in worlds
+            ]
+        if relations:
+            result["world_relations"] = [
+                {
+                    "relation_id": str(row[0]),
+                    "episode_id": str(row[1]),
+                    "stage_id": None if row[2] is None else str(row[2]),
+                    "relation_type": str(row[3]),
+                    "subject_ref": str(row[4]),
+                    "object_ref": str(row[5]),
+                    "subject_series_id": (
+                        None if row[6] is None else str(row[6])
+                    ),
+                    "object_series_id": (
+                        None if row[7] is None else str(row[7])
+                    ),
+                    "cross_series": bool(row[8]),
+                    "start_session_time_us": (
+                        None if row[9] is None else int(row[9])
+                    ),
+                    "end_session_time_us": (
+                        None if row[10] is None else int(row[10])
+                    ),
+                    "properties": normalize_json(row[11]),
+                    "confidence": float(row[12]),
+                    "relation_source": str(row[13]),
+                    "method_version": str(row[14]),
+                }
+                for row in relations
+            ]
+        if chains:
+            result["tpaa_m_chains"] = [
+                {
+                    "chain_id": str(row[0]),
+                    "episode_id": str(row[1]),
+                    "stage_id": None if row[2] is None else str(row[2]),
+                    "refs": normalize_json(row[3]),
+                    "start_session_time_us": int(row[4]),
+                    "end_session_time_us": int(row[5]),
+                    "chain_status": str(row[6]),
+                    "coverage": float(row[7]),
+                    "confidence": float(row[8]),
+                    "break_reason": None if row[9] is None else str(row[9]),
+                    "chain_version": str(row[10]),
+                }
+                for row in chains
+            ]
+        return result
 
 
 class SQLiteCorePublicationLedger(CorePublicationLedger):

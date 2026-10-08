@@ -57,6 +57,9 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert "restore_desktop_production_backup" in runtime
     assert "SQLiteDesktopUnitOfWork" in runtime
     assert "formal_release_claimed" in runtime
+    assert 'release.get("world_product_count") != 4' in runtime
+    assert '"episode.episode_stage"' in runtime
+    assert '"world.world_relation"' in runtime
     assert "PRCB_C2_NOMINAL_FLIGHT.json" in packager
     assert '%~1' in packager
     assert 'goto default' in packager
@@ -156,6 +159,9 @@ def test_prcb_c5_installed_service_uses_postgres_and_frozen_roles() -> None:
     assert "real_postgresql_executed" in tool
     assert "postgres_server_version" in tool
     assert "formal_release_claimed" in tool
+    assert 'release.get("world_product_count") != 4' in service
+    assert '"episode.episode_stage"' in service
+    assert '"world.world_relation"' in service
     assert "Start Windows PostgreSQL for PRCB C5 Service qualification" in workflow
     assert "--profile WINDOWS_SERVICE_X64" in workflow
     assert "tpaa-prcb-c5-service-windows-" in workflow
@@ -185,6 +191,9 @@ def test_prcb_c5_four_profile_logical_equivalence_is_gated_in_existing_job() -> 
     assert "desktop_windows_linux_p2_semantic_equivalence" in compare
     assert "service_windows_linux_p2_semantic_equivalence" in compare
     assert "p2_runtime_provenance_by_profile" in compare
+    assert '"world_product_count"' in compare
+    assert '"stage_count"' in compare
+    assert '"world_relation_count"' in compare
     assert "shared_p1_p3_p6_exact_identity_all_profiles" in compare
     assert "formal_release_claimed" in compare
     assert "p2_source_knowledge_time_utc" in runtime

@@ -1,0 +1,47 @@
+{
+  "schema": "TPAA_ED2_P1_WORLD_AUTHORITY_POLICY_V1",
+  "policy_version": "1.0.0",
+  "world_capability_code": "BASIC_CORE",
+  "world_capability_registry": {
+    "registry_id": "WORLD_CAPABILITY_REGISTRY",
+    "version": "1.0.0",
+    "core_baseline": "CB-1.4.0",
+    "required_letters": ["C", "W", "A", "M"]
+  },
+  "world_products": {
+    "CONTEXT": {
+      "capability_letter": "C",
+      "authority": "PERSISTED_EVALUATION_CONTEXT_PLUS_SCENARIO_SOURCE",
+      "required_source_families": ["SCENARIO"]
+    },
+    "TRUTH": {
+      "capability_letter": "W",
+      "authority": "CANONICAL_REFERENCE_WORLD",
+      "required_source_families": ["FLIGHT", "RANGE_ACMI", "SCENARIO"]
+    },
+    "ACTION": {
+      "capability_letter": "A",
+      "authority": "FLIGHT_ACTION_PROJECTION",
+      "required_source_families": ["FLIGHT"],
+      "projection_schema": "TPAA_ED2_BASIC_FLIGHT_ACTION_PROJECTION_V1",
+      "profile_id": "BASIC_FLIGHT_ACTION_V1"
+    },
+    "MACHINE": {
+      "capability_letter": "M",
+      "authority": "MISSION_SYSTEM_AND_TDL_WORLD",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "TDL",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    }
+  },
+  "stage_authority": {
+    "source_family": "SCENARIO",
+    "stage_profile_id": "BASIC_FLIGHT_V1",
+    "precedence_source": "CONTEXT_OFFICIAL_MARKER",
+    "detection_method": "CONTEXT"
+  },
+  "missing_rule": "Missing mandatory world authority produces PARTIAL/MISSING World evidence and dependent business insufficiency; no other World may substitute."
+}

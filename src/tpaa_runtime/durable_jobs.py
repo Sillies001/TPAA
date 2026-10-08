@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -41,14 +41,14 @@ from tpaa_capability.p3_twin import P3CapabilityEstimate
 from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
 from tpaa_capability.p6_forecast import P6ForecastRevision
 from tpaa_ingest import (
-    PRODUCTION_FLIGHT_ADAPTER_ID,
-    PRODUCTION_FLIGHT_ADAPTER_VERSION,
-    PRODUCTION_FLIGHT_MEDIA_TYPE,
     ProductionFlightJsonAdapter,
+    ProductionInterchangeJsonAdapter,
     ProductionSourceAdapterError,
+    SourceAdapter,
     SourceFamily,
     build_production_source_registry,
     validate_production_flight_document,
+    validate_production_interchange_document,
 )
 from tpaa_platform import SpawnWorkerDispatcher, WorkerPayload
 from tpaa_storage import (
@@ -57,12 +57,14 @@ from tpaa_storage import (
     ComputeJobState,
     LocalObjectStore,
     ParquetColumn,
+    ParquetDatasetArtifact,
     ParquetPartition,
     ParquetScalarType,
     ParquetSchema,
     ParquetWriteRequest,
     PolarsParquetPlane,
 )
+from tpaa_storage.product_identity import product_object_ref_id
 
 from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
 from .production_worker import (
@@ -79,10 +81,12 @@ from .production_worker import (
     ProductionP5AssessmentWorkerInput,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
+    ProductionPrerequisiteRow,
 )
 
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
 _P1_COMMAND = "BUILD_P1_RELEASE"
+_P1_CANONICAL_DATASET_PRODUCER_VERSION = "ED2-B1-P1-CANONICAL-1.0.0"
 
 
 class ProductionJobExecutionError(RuntimeError):
@@ -145,6 +149,184 @@ def _number(value: object, *, field: str) -> float:
     if isinstance(value, (int, float)):
         return float(value)
     raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
+
+
+_PREREQUISITE_IDENTITY_COLUMNS: dict[str, str] = {
+    "registry.training_session": "session_id",
+    "registry.dataset_snapshot": "dataset_snapshot_id",
+    "registry.object_reference": "object_ref_id",
+    "registry.dataset_manifest": "dataset_id",
+    "master.aircraft_model": "aircraft_model_id",
+    "master.aircraft": "aircraft_id",
+    "master.entity": "entity_id",
+    "master.aircraft_instance": "aircraft_instance_id",
+    "context.evaluation_context": "context_id",
+    "episode.training_episode": "episode_id",
+    "episode.episode_stage": "stage_id",
+    "master.mission_system_instance": "mission_system_instance_id",
+    "metric.metric_definition": "metric_definition_id",
+}
+
+
+def _logical_prerequisite_value(
+    value: object,
+    *,
+    field_kind: str,
+) -> object:
+    if isinstance(value, Decimal):
+        return float(value)
+    if field_kind in {"json", "text_array", "uuid_array"}:
+        parsed = value
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError as exc:
+                raise ProductionJobExecutionError(
+                    "ED2_P1_PREREQUISITE_STORED_VALUE_INVALID",
+                    field_kind,
+                ) from exc
+        if field_kind in {"text_array", "uuid_array"}:
+            if isinstance(parsed, tuple):
+                return list(parsed)
+            if not isinstance(parsed, list):
+                raise ProductionJobExecutionError(
+                    "ED2_P1_PREREQUISITE_STORED_VALUE_INVALID",
+                    field_kind,
+                )
+        return parsed
+    return value
+
+
+def _persist_or_verify_prerequisite(
+    uow: RuntimeCanonicalUnitOfWork,
+    prerequisite: ProductionPrerequisiteRow,
+) -> None:
+    identity_column = _PREREQUISITE_IDENTITY_COLUMNS.get(prerequisite.table)
+    if identity_column is None:
+        raise ProductionJobExecutionError(
+            "ED2_P1_PREREQUISITE_TABLE_UNSUPPORTED",
+            prerequisite.table,
+        )
+    if identity_column not in prerequisite.values:
+        raise ProductionJobExecutionError(
+            "ED2_P1_PREREQUISITE_IDENTITY_MISSING",
+            f"{prerequisite.table}:{identity_column}",
+        )
+    identity = prerequisite.values[identity_column]
+    columns = tuple(prerequisite.values)
+    existing = uow.canonical_rows.one(
+        prerequisite.table,
+        where={identity_column: identity},
+        columns=columns,
+    )
+    if existing is None:
+        uow.canonical_rows.insert(
+            prerequisite.table,
+            prerequisite.values,
+            field_kinds=prerequisite.field_kinds,
+        )
+        return
+
+    mismatched: list[str] = []
+    for column, expected in prerequisite.values.items():
+        kind = prerequisite.field_kinds.get(column, "scalar")
+        actual_logical = _logical_prerequisite_value(
+            existing[column],
+            field_kind=kind,
+        )
+        expected_logical = _logical_prerequisite_value(
+            expected,
+            field_kind=kind,
+        )
+        if actual_logical != expected_logical:
+            mismatched.append(column)
+    if mismatched:
+        raise ProductionJobExecutionError(
+            "ED2_P1_PREREQUISITE_IDENTITY_DRIFT",
+            (
+                f"{prerequisite.table}:{identity_column}={identity}:"
+                f"fields={','.join(sorted(mismatched))}"
+            ),
+        )
+
+
+def _canonical_dataset_prerequisites(
+    product: ProductionP1WorkerProduct,
+    artifact: ParquetDatasetArtifact,
+    *,
+    request_hash: str,
+) -> tuple[ProductionPrerequisiteRow, ProductionPrerequisiteRow]:
+    """Bind the sealed canonical Parquet object to DB 1.9 dataset authority."""
+
+    if (
+        artifact.schema.schema_id != "CANONICAL_AIRCRAFT_STATE_V1"
+        or artifact.schema.schema_version != "1.0.0"
+        or artifact.row_count != len(product.canonical_rows)
+        or artifact.min_session_time_us is None
+        or artifact.max_session_time_us is None
+        or artifact.min_session_time_us >= artifact.max_session_time_us
+    ):
+        raise ProductionJobExecutionError(
+            "ED2_P1_CANONICAL_DATASET_ARTIFACT_INVALID",
+            artifact.logical_uri,
+        )
+
+    object_ref_id = product_object_ref_id(
+        artifact.logical_uri,
+        artifact.artifact_sha256,
+    )
+    object_reference = ProductionPrerequisiteRow(
+        table="registry.object_reference",
+        values={
+            "object_ref_id": object_ref_id,
+            "managed_uri": artifact.logical_uri,
+            "media_type": "application/vnd.apache.parquet",
+            "size_bytes": artifact.byte_size,
+            "artifact_sha256": artifact.artifact_sha256,
+            "logical_content_hash": artifact.logical_content_hash,
+            "storage_backend": "LOCAL_OBJECT_STORE",
+            "sealed": True,
+            "gc_state": "ACTIVE",
+            "gc_state_version": 0,
+            "gc_marked_at": None,
+            "deleted_at": None,
+        },
+        field_kinds={},
+    )
+    dataset_manifest = ProductionPrerequisiteRow(
+        table="registry.dataset_manifest",
+        values={
+            "dataset_id": product.dataset_id,
+            # The manifest must precede Release publication because World has an
+            # immediate dataset FK. Release ownership is therefore intentionally
+            # nullable here; immutable request/world lineage binds the dataset.
+            "release_id": None,
+            "scope_type": "SESSION",
+            "session_id": product.release.session_id,
+            "longitudinal_scope_id": None,
+            "dataset_kind": "CANONICAL_FLIGHT",
+            "logical_name": f"production/canonical-flight/{product.dataset_id}",
+            "object_ref_id": object_ref_id,
+            "storage_uri": artifact.logical_uri,
+            "partition_spec": [
+                {"key": key, "value": value}
+                for key, value in artifact.partition.values
+            ],
+            "schema_version": artifact.schema.schema_version,
+            "row_count": artifact.row_count,
+            "min_session_time_us": artifact.min_session_time_us,
+            "max_session_time_us": artifact.max_session_time_us,
+            "artifact_sha256": artifact.artifact_sha256,
+            "logical_content_hash": artifact.logical_content_hash,
+            "producer_component": "tpaa_runtime.production_p1",
+            "producer_version": _P1_CANONICAL_DATASET_PRODUCER_VERSION,
+            "input_hash": request_hash,
+            "status": "READY",
+            "supersedes_dataset_id": None,
+        },
+        field_kinds={"partition_spec": "json"},
+    )
+    return object_reference, dataset_manifest
 
 
 def _audit_actor_id(actor: str) -> str | None:
@@ -247,7 +429,6 @@ class ProductionJobExecutor:
     def _source_import(payload: Mapping[str, object]) -> SourceImportCommand:
         source_json = _text(payload.get("source_json"), field="source_json")
         source_bytes = source_json.encode("utf-8")
-        document = validate_production_flight_document(source_bytes)
         metadata = _mapping(payload.get("source_import"), field="source_import")
         family_text = _text(metadata.get("source_family"), field="source_family")
         try:
@@ -257,15 +438,26 @@ class ProductionJobExecutor:
                 "UNSUPPORTED_ADAPTER",
                 family_text,
             ) from exc
-        if family is not SourceFamily.FLIGHT:
-            raise ProductionJobExecutionError("UNSUPPORTED_ADAPTER", family.value)
+
+        adapter: SourceAdapter
+        if family is SourceFamily.FLIGHT:
+            document = validate_production_flight_document(source_bytes)
+            adapter = ProductionFlightJsonAdapter()
+            document_session_id = document.get("session_id")
+        else:
+            adapter = ProductionInterchangeJsonAdapter(family)
+            interchange = validate_production_interchange_document(
+                source_bytes,
+                expected_family=family,
+            )
+            document_session_id = interchange.session_id
+
         session_id = _text(metadata.get("session_id"), field="session_id")
-        if document.get("session_id") != session_id:
+        if document_session_id != session_id:
             raise ProductionJobExecutionError(
                 "PRCB_C2_SOURCE_SESSION_DRIFT",
                 session_id,
             )
-        adapter = ProductionFlightJsonAdapter()
         envelope = adapter.inspect(
             source_ref=_text(metadata.get("source_ref"), field="source_ref"),
             data=source_bytes,
@@ -279,10 +471,12 @@ class ProductionJobExecutor:
                 )
             ),
         )
+        descriptor = adapter.descriptor
         if (
-            envelope.adapter_id != PRODUCTION_FLIGHT_ADAPTER_ID
-            or envelope.adapter_version != PRODUCTION_FLIGHT_ADAPTER_VERSION
-            or envelope.media_type != PRODUCTION_FLIGHT_MEDIA_TYPE
+            envelope.adapter_id != descriptor.adapter_id
+            or envelope.adapter_version != descriptor.adapter_version
+            or envelope.media_type not in descriptor.media_types
+            or envelope.source_family is not family
         ):
             raise ProductionJobExecutionError(
                 "PRCB_C2_ADAPTER_IDENTITY_DRIFT",
@@ -358,6 +552,56 @@ class ProductionJobExecutor:
         )
 
     @staticmethod
+    def _source_imports(
+        payload: Mapping[str, object],
+    ) -> tuple[SourceImportCommand, ...]:
+        raw_documents = payload.get("source_documents")
+        if raw_documents is None:
+            return (ProductionJobExecutor._source_import(payload),)
+        if (
+            not isinstance(raw_documents, Sequence)
+            or isinstance(raw_documents, (str, bytes))
+            or not raw_documents
+        ):
+            raise ProductionJobExecutionError(
+                "ED2_SOURCE_SET_INVALID",
+                "source_documents",
+            )
+
+        commands: list[SourceImportCommand] = []
+        source_ids: set[str] = set()
+        artifact_ids: set[str] = set()
+        session_id: str | None = None
+        for index, raw in enumerate(raw_documents):
+            document = _mapping(
+                raw,
+                field=f"source_documents[{index}]",
+            )
+            command = ProductionJobExecutor._source_import(document)
+            if session_id is None:
+                session_id = command.session_id
+            elif command.session_id != session_id:
+                raise ProductionJobExecutionError(
+                    "ED2_SOURCE_SET_SESSION_DRIFT",
+                    command.session_id,
+                )
+            if command.source_id in source_ids:
+                raise ProductionJobExecutionError(
+                    "ED2_SOURCE_SET_IDENTITY_DUPLICATE",
+                    command.source_id,
+                )
+            if command.artifact_id in artifact_ids:
+                raise ProductionJobExecutionError(
+                    "ED2_SOURCE_SET_IDENTITY_DUPLICATE",
+                    command.artifact_id,
+                )
+            source_ids.add(command.source_id)
+            artifact_ids.add(command.artifact_id)
+            commands.append(command)
+        return tuple(commands)
+
+
+    @staticmethod
     def _bind_parquet(
         product: ProductionP1WorkerProduct,
         *,
@@ -395,11 +639,14 @@ class ProductionJobExecutor:
                 "PRCB_C2_DOMAIN_COMMAND_UNSUPPORTED",
                 command,
             )
-        source_command = self._source_import(payload)
-        try:
-            self._adapters.require_family(source_command.envelope.source_family)
-        except ProductionSourceAdapterError as exc:
-            raise ProductionJobExecutionError(exc.code, exc.detail) from exc
+        source_commands = self._source_imports(payload)
+        for source_command in source_commands:
+            try:
+                self._adapters.require_family(
+                    source_command.envelope.source_family
+                )
+            except ProductionSourceAdapterError as exc:
+                raise ProductionJobExecutionError(exc.code, exc.detail) from exc
 
         result = self._dispatcher.dispatch(
             WorkerPayload(
@@ -448,6 +695,11 @@ class ProductionJobExecutor:
             logical_uri=artifact.logical_uri,
             logical_content_hash=artifact.logical_content_hash,
         )
+        canonical_dataset_prerequisites = _canonical_dataset_prerequisites(
+            product,
+            artifact,
+            request_hash=request_hash,
+        )
 
         expected_version = _integer(
             payload.get("expected_version_token"),
@@ -460,15 +712,15 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             for prerequisite in product.prerequisites:
-                uow.canonical_rows.insert(
-                    prerequisite.table,
-                    prerequisite.values,
-                    field_kinds=prerequisite.field_kinds,
-                )
-            ProductionImportService(
+                _persist_or_verify_prerequisite(uow, prerequisite)
+            for prerequisite in canonical_dataset_prerequisites:
+                _persist_or_verify_prerequisite(uow, prerequisite)
+            import_service = ProductionImportService(
                 adapters=self._adapters,
                 provenance=SourceProvenanceRepository(uow.canonical_rows),
-            ).register(source_command)
+            )
+            for source_command in source_commands:
+                import_service.register(source_command)
             uow.publication.publish(
                 product.release,
                 idempotency_key=f"{job_key}:P1_RELEASE",

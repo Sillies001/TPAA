@@ -14,6 +14,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import cast
+from uuid import uuid5
 
 from tpaa_metric.catalog_engine import (
     CatalogMetricEngineError,
@@ -23,11 +24,14 @@ from tpaa_metric.catalog_engine import (
 )
 from tpaa_metric.context import MetricContext
 from tpaa_metric.engine import (
+    EVIDENCE_SET_NAMESPACE,
+    METRIC_RESULT_NAMESPACE,
     MetricBatch,
+    MetricEvidence,
     MetricResult,
     compute_representative_metrics,
 )
-from tpaa_world import AircraftObservedWorld
+from tpaa_world import AircraftObservedWorld, WorldEvidenceRef
 
 AIR_M2_FORMAL_CODES = (
     "P1-AIR-001",
@@ -58,13 +62,242 @@ def _canonical_hash(value: object) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def serialize_m1_air_result(
+    result: MetricResult,
+    *,
+    metric_context_id: str,
+    world_product_id: str,
+) -> dict[str, object]:
+    """Return a JSON-safe, self-verifying M1 result projection."""
+
+    return {
+        "metric_context_id": metric_context_id,
+        "world_product_id": world_product_id,
+        "metric_result_id": result.metric_result_id,
+        "metric_code": result.metric_code,
+        "semantic_id": result.semantic_id,
+        "semantic_version": result.semantic_version,
+        "algorithm_id": result.algorithm_id,
+        "algorithm_version": result.algorithm_version,
+        "subject_type": result.subject_type,
+        "subject_id": result.subject_id,
+        "stage_id": result.stage_id,
+        "status": result.status,
+        "reason_codes": list(result.reason_codes),
+        "unit": result.unit,
+        "value_kind": result.value_kind,
+        "value_numeric": result.value_numeric,
+        "value_structured": (
+            None
+            if result.value_structured is None
+            else result.value_structured.as_dict()
+        ),
+        "evidence": {
+            "evidence_set_id": result.evidence.evidence_set_id,
+            "logical_hash": result.evidence.logical_hash,
+            "refs": [
+                {
+                    "ref_class": ref.ref_class,
+                    "ref_id": ref.ref_id,
+                    "logical_hash": ref.logical_hash,
+                }
+                for ref in result.evidence.refs
+            ],
+            "details": [list(item) for item in result.evidence.details],
+        },
+        "logical_hash": result.logical_hash,
+    }
+
+
+def _string(value: object, *, field: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"M2_AIR_JSON_RESULT_INVALID:{field}")
+    return value
+
+
+def _json_result(value: Mapping[str, object]) -> MetricResult:
+    metric_context_id = _string(
+        value.get("metric_context_id"),
+        field="metric_context_id",
+    )
+    world_product_id = _string(
+        value.get("world_product_id"),
+        field="world_product_id",
+    )
+    evidence_raw = value.get("evidence")
+    if not isinstance(evidence_raw, Mapping):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:evidence")
+
+    refs_raw = evidence_raw.get("refs")
+    if not isinstance(refs_raw, list):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:evidence.refs")
+    refs: list[WorldEvidenceRef] = []
+    for index, raw in enumerate(refs_raw):
+        if not isinstance(raw, Mapping):
+            raise ValueError(
+                f"M2_AIR_JSON_RESULT_INVALID:evidence.refs[{index}]"
+            )
+        refs.append(
+            WorldEvidenceRef(
+                ref_class=_string(
+                    raw.get("ref_class"),
+                    field=f"evidence.refs[{index}].ref_class",
+                ),
+                ref_id=_string(
+                    raw.get("ref_id"),
+                    field=f"evidence.refs[{index}].ref_id",
+                ),
+                logical_hash=_string(
+                    raw.get("logical_hash"),
+                    field=f"evidence.refs[{index}].logical_hash",
+                ),
+            )
+        )
+
+    details_raw = evidence_raw.get("details")
+    if not isinstance(details_raw, list):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:evidence.details")
+    details: list[tuple[str, str]] = []
+    for index, raw in enumerate(details_raw):
+        if (
+            not isinstance(raw, list)
+            or len(raw) != 2
+            or not all(isinstance(item, str) for item in raw)
+        ):
+            raise ValueError(
+                f"M2_AIR_JSON_RESULT_INVALID:evidence.details[{index}]"
+            )
+        details.append((cast(str, raw[0]), cast(str, raw[1])))
+
+    metric_code = _string(value.get("metric_code"), field="metric_code")
+    stage_raw = value.get("stage_id")
+    if stage_raw is not None and not isinstance(stage_raw, str):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:stage_id")
+    stage_id = stage_raw
+    evidence_payload = {
+        "metric_code": metric_code,
+        "metric_context_id": metric_context_id,
+        "world_product_id": world_product_id,
+        "stage_id": stage_id,
+        "refs": [
+            {
+                "class": ref.ref_class,
+                "id": ref.ref_id,
+                "hash": ref.logical_hash,
+            }
+            for ref in refs
+        ],
+        "details": [list(item) for item in details],
+    }
+    evidence_hash = _canonical_hash(evidence_payload)
+    if evidence_raw.get("logical_hash") != evidence_hash:
+        raise ValueError("M2_AIR_JSON_EVIDENCE_HASH_DRIFT")
+    expected_evidence_id = str(
+        uuid5(EVIDENCE_SET_NAMESPACE, evidence_hash)
+    )
+    if evidence_raw.get("evidence_set_id") != expected_evidence_id:
+        raise ValueError("M2_AIR_JSON_EVIDENCE_ID_DRIFT")
+
+    semantic_version = value.get("semantic_version")
+    if isinstance(semantic_version, bool) or not isinstance(
+        semantic_version,
+        int,
+    ):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:semantic_version")
+    reasons_raw = value.get("reason_codes")
+    if not isinstance(reasons_raw, list) or not all(
+        isinstance(item, str) for item in reasons_raw
+    ):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:reason_codes")
+    status = _string(value.get("status"), field="status")
+    value_kind = _string(value.get("value_kind"), field="value_kind")
+    numeric_raw = value.get("value_numeric")
+    if numeric_raw is not None and (
+        isinstance(numeric_raw, bool)
+        or not isinstance(numeric_raw, (int, float))
+    ):
+        raise ValueError("M2_AIR_JSON_RESULT_INVALID:value_numeric")
+    if value.get("value_structured") is not None:
+        raise ValueError("M2_AIR_JSON_STRUCTURED_VALUE_FORBIDDEN")
+
+    evidence = MetricEvidence(
+        evidence_set_id=expected_evidence_id,
+        refs=tuple(refs),
+        details=tuple(details),
+        logical_hash=evidence_hash,
+    )
+    result_payload = {
+        "metric_code": metric_code,
+        "semantic_id": _string(value.get("semantic_id"), field="semantic_id"),
+        "semantic_version": semantic_version,
+        "algorithm_id": _string(
+            value.get("algorithm_id"),
+            field="algorithm_id",
+        ),
+        "algorithm_version": _string(
+            value.get("algorithm_version"),
+            field="algorithm_version",
+        ),
+        "subject_type": _string(
+            value.get("subject_type"),
+            field="subject_type",
+        ),
+        "subject_id": _string(value.get("subject_id"), field="subject_id"),
+        "stage_id": stage_id,
+        "status": status,
+        "reason_codes": list(cast(list[str], reasons_raw)),
+        "unit": _string(value.get("unit"), field="unit"),
+        "value_kind": value_kind,
+        "value": (
+            None if numeric_raw is None else float(numeric_raw)
+        ),
+        "evidence_hash": evidence_hash,
+    }
+    result_hash = _canonical_hash(result_payload)
+    if value.get("logical_hash") != result_hash:
+        raise ValueError("M2_AIR_JSON_RESULT_HASH_DRIFT")
+    expected_result_id = str(uuid5(METRIC_RESULT_NAMESPACE, result_hash))
+    if value.get("metric_result_id") != expected_result_id:
+        raise ValueError("M2_AIR_JSON_RESULT_ID_DRIFT")
+
+    return MetricResult(
+        metric_result_id=expected_result_id,
+        metric_code=metric_code,
+        semantic_id=cast(str, result_payload["semantic_id"]),
+        semantic_version=semantic_version,
+        algorithm_id=cast(str, result_payload["algorithm_id"]),
+        algorithm_version=cast(str, result_payload["algorithm_version"]),
+        subject_type=cast(str, result_payload["subject_type"]),
+        subject_id=cast(str, result_payload["subject_id"]),
+        stage_id=stage_id,
+        status=status,
+        reason_codes=tuple(cast(list[str], reasons_raw)),
+        unit=cast(str, result_payload["unit"]),
+        value_kind=value_kind,
+        value_numeric=(
+            None if numeric_raw is None else float(numeric_raw)
+        ),
+        value_structured=None,
+        evidence=evidence,
+        logical_hash=result_hash,
+    )
+
+
 def _result_from_request(request: M2MetricPluginRequest) -> MetricResult:
-    result = request.input_payload.get("m1_result")
-    if not isinstance(result, MetricResult):
-        raise ValueError(f"M2_AIR_M1_RESULT_MISSING:{request.definition.metric_code}")
+    raw = request.input_payload.get("m1_result")
+    if isinstance(raw, MetricResult):
+        result = raw
+    elif isinstance(raw, Mapping):
+        result = _json_result(cast(Mapping[str, object], raw))
+    else:
+        raise ValueError(
+            f"M2_AIR_M1_RESULT_MISSING:{request.definition.metric_code}"
+        )
     reuse = request.input_payload.get("implementation_reuse")
     if reuse != AIR_M1_IMPLEMENTATION:
-        raise ValueError(f"M2_AIR_IMPLEMENTATION_REUSE_DRIFT:{request.definition.metric_code}")
+        raise ValueError(
+            f"M2_AIR_IMPLEMENTATION_REUSE_DRIFT:{request.definition.metric_code}"
+        )
     return result
 
 

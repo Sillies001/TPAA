@@ -170,15 +170,63 @@ class DurableP1ReleaseReadService:
         return refs[0]
 
     def release_summary(self, release_id: str) -> dict[str, object]:
-        membership, _ = self._snapshot(release_id)
+        membership, definitions = self._snapshot(release_id)
         release = _mapping(membership.get("release"), field="release")
         context_ref = self._context_ref(membership)
         metrics = _rows(membership.get("metric_instances"), field="metric_instances")
+        capability_observations = _rows(
+            membership.get("observations"),
+            field="observations",
+        )
+        system_observations = _rows(
+            membership.get("system_observations", []),
+            field="system_observations",
+        )
+        world_products = _rows(
+            membership.get("world_products", []),
+            field="world_products",
+        )
+        catalog_hash = _required_text(release, "catalog_hash")
+        catalog_definition_count = sum(
+            1
+            for definition in definitions.values()
+            if _required_text(definition, "catalog_hash") == catalog_hash
+        )
+        metric_codes = {
+            _required_text(
+                self._definition(
+                    definitions,
+                    _required_text(metric, "metric_definition_id"),
+                ),
+                "metric_code",
+            )
+            for metric in metrics
+        }
+        observed_instance_ids = {
+            _required_text(item, "observed_metric_instance_id")
+            for item in capability_observations
+        } | {
+            _required_text(item, "observed_metric_instance_id")
+            for item in system_observations
+        }
+        evidence_only_count = sum(
+            1
+            for metric in metrics
+            if _required_text(metric, "metric_instance_id")
+            not in observed_instance_ids
+        )
         return {
             **release,
             "context_id": _required_text(context_ref, "context_id"),
             "context_version": _required_text(context_ref, "context_version"),
             "metric_count": len(metrics),
+            "catalog_definition_count": catalog_definition_count,
+            "metric_instance_count": len(metrics),
+            "metric_code_count": len(metric_codes),
+            "capability_observation_count": len(capability_observations),
+            "system_observation_count": len(system_observations),
+            "evidence_only_metric_instance_count": evidence_only_count,
+            "world_product_count": len(world_products),
             "durable_authority": "DB_1_9_CORE_PUBLICATION_LEDGER",
             "production_compute_configured": self._production_compute_configured,
         }
@@ -285,8 +333,28 @@ class DurableP1ReleaseReadService:
                         definition,
                         "definition_hash",
                     ),
+                    "subject_type": _required_text(
+                        definition,
+                        "subject_type",
+                    ),
+                    "observation_lane": _required_text(
+                        definition,
+                        "observation_lane",
+                    ),
+                    "publication_route": _required_text(
+                        definition,
+                        "publication_route",
+                    ),
                     "status": _required_text(row, "status"),
                     "unit": _required_text(row, "unit"),
+                    "subject_entity_id": _optional_text(
+                        row,
+                        "subject_entity_id",
+                    ),
+                    "mission_system_instance_id": _optional_text(
+                        row,
+                        "mission_system_instance_id",
+                    ),
                     "value_kind": (
                         "STRUCTURED"
                         if row.get("value_structured") is not None
@@ -309,6 +377,9 @@ class DurableP1ReleaseReadService:
                 field="evidence_sets",
             )
         }
+        matches: list[
+            tuple[dict[str, object], dict[str, object], dict[str, object]]
+        ] = []
         for row in _rows(
             membership.get("metric_instances"),
             field="metric_instances",
@@ -326,8 +397,15 @@ class DurableP1ReleaseReadService:
                     "P1_EVIDENCE_NOT_FOUND",
                     evidence_id,
                 )
-            return row, definition, evidence
-        raise M1ApplicationError("METRIC_NOT_FOUND", metric_code)
+            matches.append((row, definition, evidence))
+        if not matches:
+            raise M1ApplicationError("METRIC_NOT_FOUND", metric_code)
+        if len(matches) != 1:
+            raise M1ApplicationError(
+                "P1_METRIC_INSTANCE_CARDINALITY",
+                f"{metric_code}:instances={len(matches)}",
+            )
+        return matches[0]
 
     def metric_detail(
         self,
@@ -343,6 +421,14 @@ class DurableP1ReleaseReadService:
             "status": _required_text(row, "status"),
             "reason_codes": row.get("reason_codes", []),
             "unit": _required_text(row, "unit"),
+            "subject_entity_id": _optional_text(
+                row,
+                "subject_entity_id",
+            ),
+            "mission_system_instance_id": _optional_text(
+                row,
+                "mission_system_instance_id",
+            ),
             "value_kind": "STRUCTURED" if structured is not None else "NUMERIC",
             "value": structured if structured is not None else row.get("value_numeric"),
             "definition": {
@@ -362,6 +448,14 @@ class DurableP1ReleaseReadService:
                 "algorithm_version": _required_text(
                     definition,
                     "plugin_version",
+                ),
+                "subject_type": _required_text(
+                    definition,
+                    "subject_type",
+                ),
+                "observation_lane": _required_text(
+                    definition,
+                    "observation_lane",
                 ),
                 "publication_route": _required_text(
                     definition,

@@ -6,6 +6,7 @@ from .air_foundation import (
     M2AirFormalDelivery,
     build_m2_air_formal_delivery,
     register_m2_air_plugins,
+    serialize_m1_air_result,
 )
 from .catalog_engine import (
     CatalogMetricEngine,
@@ -14,6 +15,7 @@ from .catalog_engine import (
     M2MetricExecutionBatch,
     M2MetricExecutionPlan,
     M2MetricExecutionRecord,
+    M2MetricPlugin,
     M2MetricPluginRequest,
     MetricPluginRegistry,
     build_catalog_metric_execution_plan,
@@ -45,6 +47,7 @@ from .m3_runtime_closure import (
     M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
     build_m3_runtime_plugin_registry,
 )
+from .qa_foundation import build_m2_qa_inputs
 from .sns_accuracy import (
     M2_SNS_ACCURACY_PLUGINS,
     SNS_ACCURACY_CODES,
@@ -67,6 +70,7 @@ __all__ = [
     "M2MetricExecutionBatch",
     "M2MetricExecutionPlan",
     "M2MetricExecutionRecord",
+    "M2MetricPlugin",
     "M2MetricPluginRequest",
     "M2AirFormalDelivery",
     "MetricPluginRegistry",
@@ -94,6 +98,7 @@ __all__ = [
     "TasMachEnvelope",
     "build_catalog_metric_execution_plan",
     "build_m2_metric_execution_plan",
+    "build_m2_qa_inputs",
     "build_m3_metric_execution_plan",
     "build_m3_runtime_plugin_registry",
     "validate_m2_runtime_output",
@@ -103,6 +108,7 @@ __all__ = [
     "build_m2_sns_accuracy_inputs",
     "compute_representative_metrics",
     "register_m2_air_plugins",
+    "serialize_m1_air_result",
     "register_m2_sns_detection_plugins",
     "register_m2_sns_accuracy_plugins",
 ]

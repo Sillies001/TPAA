@@ -8,6 +8,7 @@ import math
 from typing import cast
 from uuid import UUID
 
+from .production_interchange_json import production_interchange_descriptors
 from .production_source import (
     ProductionSourceAdapterError,
     SourceAdapterDescriptor,
@@ -21,6 +22,8 @@ PRODUCTION_FLIGHT_SCHEMA_VERSION = "1.0.0"
 PRODUCTION_FLIGHT_ADAPTER_ID = "tpaa-production-flight-json"
 PRODUCTION_FLIGHT_ADAPTER_VERSION = "1.0.0"
 PRODUCTION_FLIGHT_MEDIA_TYPE = "application/vnd.tpaa.flight+json"
+PRODUCTION_FLIGHT_ACTION_SCHEMA = "TPAA_ED2_BASIC_FLIGHT_ACTION_PROJECTION_V1"
+PRODUCTION_FLIGHT_ACTION_PROFILE_ID = "BASIC_FLIGHT_ACTION_V1"
 _REQUIRED_ROW_FIELDS = frozenset(
     {"source_time_us", "p", "nz", "heading", "tas", "mach", "quality"}
 )
@@ -54,6 +57,91 @@ def _optional_number(value: object, *, field: str) -> float | None:
     if value is None:
         return None
     return _finite_number(value, field=field)
+
+
+def _validate_action_projection(value: object) -> None:
+    if value is None:
+        return
+    if not isinstance(value, dict) or not all(
+        isinstance(key, str) for key in value
+    ):
+        raise ProductionSourceAdapterError(
+            "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+            "action_projection",
+        )
+    if set(value) != {"schema", "profile_id", "events"}:
+        raise ProductionSourceAdapterError(
+            "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+            "action_projection_fields",
+        )
+    if (
+        value.get("schema") != PRODUCTION_FLIGHT_ACTION_SCHEMA
+        or value.get("profile_id") != PRODUCTION_FLIGHT_ACTION_PROFILE_ID
+    ):
+        raise ProductionSourceAdapterError(
+            "ED2_FLIGHT_ACTION_PROJECTION_UNSUPPORTED",
+            repr((value.get("schema"), value.get("profile_id"))),
+        )
+    events = value.get("events")
+    if not isinstance(events, list) or not events:
+        raise ProductionSourceAdapterError(
+            "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+            "events",
+        )
+    previous_end: int | None = None
+    event_ids: set[str] = set()
+    for index, raw in enumerate(events):
+        if not isinstance(raw, dict) or set(raw) != {
+            "action_event_id",
+            "action_type",
+            "start_session_time_us",
+            "end_session_time_us",
+            "evidence_ref",
+        }:
+            raise ProductionSourceAdapterError(
+                "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+                f"events[{index}]",
+            )
+        action_event_id = _uuid(
+            raw.get("action_event_id"),
+            field=f"events[{index}].action_event_id",
+        )
+        if action_event_id in event_ids:
+            raise ProductionSourceAdapterError(
+                "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+                f"events[{index}].action_event_id",
+            )
+        event_ids.add(action_event_id)
+        if raw.get("action_type") != "FLIGHT_CONTROL_ACTIVITY":
+            raise ProductionSourceAdapterError(
+                "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+                f"events[{index}].action_type",
+            )
+        start = raw.get("start_session_time_us")
+        end = raw.get("end_session_time_us")
+        if (
+            isinstance(start, bool)
+            or not isinstance(start, int)
+            or isinstance(end, bool)
+            or not isinstance(end, int)
+            or start >= end
+            or (previous_end is not None and start < previous_end)
+        ):
+            raise ProductionSourceAdapterError(
+                "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+                f"events[{index}].interval",
+            )
+        evidence_ref = raw.get("evidence_ref")
+        if (
+            not isinstance(evidence_ref, str)
+            or not evidence_ref
+            or evidence_ref.strip() != evidence_ref
+        ):
+            raise ProductionSourceAdapterError(
+                "ED2_FLIGHT_ACTION_PROJECTION_INVALID",
+                f"events[{index}].evidence_ref",
+            )
+        previous_end = end
 
 
 def validate_production_flight_document(data: bytes) -> dict[str, object]:
@@ -125,6 +213,7 @@ def validate_production_flight_document(data: bytes) -> dict[str, object]:
             )
         for field in ("p", "nz", "heading", "tas", "mach"):
             _optional_number(item.get(field), field=f"rows[{index}].{field}")
+    _validate_action_projection(document.get("action_projection"))
     return document
 
 
@@ -174,7 +263,9 @@ class ProductionFlightJsonAdapter:
 
 
 def build_production_source_registry() -> SourceAdapterRegistry:
-    """Return the production registry; unimplemented frozen families stay explicit."""
+    """Return exact production descriptors for all six frozen source families."""
 
-    adapter = ProductionFlightJsonAdapter()
-    return SourceAdapterRegistry((adapter.descriptor,))
+    flight = ProductionFlightJsonAdapter()
+    return SourceAdapterRegistry(
+        (flight.descriptor, *production_interchange_descriptors())
+    )

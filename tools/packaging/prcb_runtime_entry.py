@@ -23,6 +23,9 @@ from tpaa_application import (  # noqa: E402
 )
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
+from tpaa_qualification.ed2_p1_request_contract import (  # noqa: E402
+    load_ed2_p1_request_contract,
+)
 from tpaa_qualification.prcb_c5_api_desktop import (  # noqa: E402
     PRCBC5DesktopApiExpectation,
     verify_prcb_c5_desktop_api_discovery,
@@ -61,6 +64,9 @@ DESKTOP_PROFILES = {"WINDOWS_DESKTOP_X64", "LINUX_DESKTOP_X64"}
 SERVICE_PROFILES = {"WINDOWS_SERVICE_X64", "LINUX_SERVICE_X64"}
 ALL_PROFILES = DESKTOP_PROFILES | SERVICE_PROFILES
 QUALIFICATION_SOURCE = APP_ROOT / "qualification" / "PRCB_C2_NOMINAL_FLIGHT.json"
+QUALIFICATION_P1_CONTRACT = (
+    APP_ROOT / "qualification" / "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+)
 
 SESSION_ID = "c2000000-0000-4000-8000-000000000001"
 CONTEXT_ID = "c2000000-0000-4000-8000-000000000003"
@@ -128,11 +134,15 @@ def _ready(profile_id: str) -> dict[str, object]:
     }
 
 
-def _qualification_payload(source_path: Path) -> dict[str, object]:
+def _qualification_payload(
+    source_path: Path,
+    *,
+    p1_contract_path: Path = QUALIFICATION_P1_CONTRACT,
+) -> dict[str, object]:
     if not source_path.is_file():
         raise RuntimeError(f"production qualification source unavailable: {source_path}")
     source_json = source_path.read_text(encoding="utf-8")
-    return {
+    payload: dict[str, object] = {
         "source_json": source_json,
         "source_import": {
             "source_family": "FLIGHT",
@@ -170,13 +180,6 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
             "metric_profile_version": "PRCB_C5_P1_PROFILE_V1",
             "status": "ACTIVE",
         },
-        "metric_profile": {
-            "profile_id": "PRCB_C5_P1_PROFILE_V1",
-            "min_coverage": "0.8",
-            "max_gap_us": 200000,
-            "derivative_window_s": "0.3",
-            "sustain_duration_s": "0.5",
-        },
         "publication_identity": {
             "aircraft_model_id": MODEL_ID,
             "aircraft_instance_id": INSTANCE_ID,
@@ -191,6 +194,8 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
         "expected_version_token": 0,
         "parent_release_id": None,
     }
+    payload.update(load_ed2_p1_request_contract(p1_contract_path))
+    return payload
 
 
 def _desktop_config(database: Path, object_root: Path) -> ProductionRuntimeConfig:
@@ -209,12 +214,20 @@ def _assert_clean_work_root(work_root: Path) -> None:
     work_root.mkdir(parents=True, exist_ok=True)
 
 
-def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
+def _desktop_e2e(
+    work_root: Path,
+    source_path: Path,
+    *,
+    p1_contract_path: Path = QUALIFICATION_P1_CONTRACT,
+) -> dict[str, object]:
     _assert_clean_work_root(work_root)
     database = work_root / "primary.sqlite3"
     object_root = work_root / "primary-objects"
     bootstrap = bootstrap_sqlite(database)
-    payload = _qualification_payload(source_path)
+    payload = _qualification_payload(
+        source_path,
+        p1_contract_path=p1_contract_path,
+    )
     config = _desktop_config(database, object_root)
     runtime = build_desktop_production_runtime(config)
 
@@ -237,10 +250,78 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     )
     release = runtime.application.m1_release(release_id)
     metrics = runtime.application.m1_metrics(release_id)
-    if release.get("release_id") != release_id or len(metrics) != 5:
-        raise RuntimeError("installed P1 release identity/metric count mismatch")
+    metric_instance_count = release.get("metric_instance_count")
+    if (
+        release.get("release_id") != release_id
+        or release.get("catalog_definition_count") != 116
+        or release.get("metric_code_count") != 116
+        or release.get("world_product_count") != 4
+        or isinstance(metric_instance_count, bool)
+        or not isinstance(metric_instance_count, int)
+        or metric_instance_count < 116
+        or len(metrics) != metric_instance_count
+    ):
+        raise RuntimeError("installed P1 release identity/full-catalog mismatch")
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        episode_rows = uow.canonical_rows.many(
+            "episode.training_episode",
+            where={"session_id": SESSION_ID},
+            columns=("episode_id", "episode_type", "data_sufficiency_status"),
+            order_by=("episode_id",),
+        )
+        if (
+            len(episode_rows) != 1
+            or episode_rows[0]["episode_type"] != "BASIC_FLIGHT"
+            or episode_rows[0]["data_sufficiency_status"] != "SUFFICIENT"
+        ):
+            raise RuntimeError("installed P1 BASIC_FLIGHT Episode authority mismatch")
+        episode_id = str(episode_rows[0]["episode_id"])
+        stage_rows = uow.canonical_rows.many(
+            "episode.episode_stage",
+            where={"episode_id": episode_id},
+            columns=("stage_id", "stage_type", "stage_order", "stage_status"),
+            order_by=("stage_order",),
+        )
+        world_rows = uow.canonical_rows.many(
+            "world.world_product_manifest",
+            where={"release_id": release_id},
+            columns=("world_kind", "status", "coverage", "episode_id"),
+            order_by=("world_kind",),
+        )
+        relation_rows = uow.canonical_rows.many(
+            "world.world_relation",
+            where={"release_id": release_id},
+            columns=(
+                "relation_type",
+                "subject_ref",
+                "object_ref",
+                "relation_source",
+                "start_session_time_us",
+            ),
+            order_by=("start_session_time_us",),
+        )
+        if [row["stage_type"] for row in stage_rows] != [
+            "SETUP_ENTRY",
+            "EXECUTION",
+            "STABILIZATION_RECOVERY",
+            "COMPLETION",
+        ]:
+            raise RuntimeError("installed P1 Stage sequence mismatch")
+        if [row["world_kind"] for row in world_rows] != [
+            "ACTION",
+            "CONTEXT",
+            "MACHINE",
+            "TRUTH",
+        ] or any(row["status"] != "READY" for row in world_rows):
+            raise RuntimeError("installed P1 BASIC_CORE World authority mismatch")
+        if (
+            len(relation_rows) != 3
+            or any(row["relation_type"] != "PRECEDES" for row in relation_rows)
+            or any(row["relation_source"] != "OFFICIAL" for row in relation_rows)
+        ):
+            raise RuntimeError("installed P1 Stage relation authority mismatch")
+
         observation_rows = uow.canonical_rows.many(
             "metric.capability_observation",
             where={"release_id": release_id},
@@ -654,6 +735,18 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "job_status": submission.record.status.value,
         "release_id": release_id,
         "metric_count": len(metrics),
+        "catalog_definition_count": release["catalog_definition_count"],
+        "metric_code_count": release["metric_code_count"],
+        "capability_observation_count": release[
+            "capability_observation_count"
+        ],
+        "system_observation_count": release["system_observation_count"],
+        "evidence_only_metric_instance_count": release[
+            "evidence_only_metric_instance_count"
+        ],
+        "world_product_count": len(world_rows),
+        "stage_count": len(stage_rows),
+        "world_relation_count": len(relation_rows),
         "p2_job_id": p2_submission.record.job_id,
         "p2_job_status": p2_submission.record.status.value,
         "p2_qualification_as_of_utc": p2_seed.as_of_utc,
@@ -739,6 +832,7 @@ def main() -> int:
             authority_root=_authority_root(),
             work_root=args.work_root,
             source_path=args.source,
+            p1_contract_path=QUALIFICATION_P1_CONTRACT,
             conninfo=_required_env("TPAA_SERVICE_CONNINFO"),
             restore_conninfo=_required_env("TPAA_SERVICE_RESTORE_CONNINFO"),
             instructor_token=_required_env("TPAA_C5_INSTRUCTOR_TOKEN"),

@@ -13,7 +13,7 @@ import math
 import re
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Protocol, cast
@@ -203,6 +203,11 @@ class M2MetricExecutionRecord:
     upstream_result_hashes: tuple[tuple[str, str], ...]
     plugin_output_hash: str
     logical_hash: str
+    plugin_output: Mapping[str, object] | None = field(
+        default=None,
+        compare=False,
+        repr=False,
+    )
 
 
 @dataclass(frozen=True)
@@ -492,6 +497,7 @@ class CatalogMetricEngine:
                 upstream_result_hashes=upstream_hashes,
                 plugin_output_hash=output_hash,
                 logical_hash=logical_hash,
+                plugin_output=MappingProxyType(dict(output)),
             )
             records.append(record)
             result_hashes[definition.metric_code] = logical_hash

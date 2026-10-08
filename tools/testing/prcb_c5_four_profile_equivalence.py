@@ -126,7 +126,7 @@ def _p2_semantics(report: dict[str, Any]) -> dict[str, object]:
 
 def _shared_exact_projection(report: dict[str, Any]) -> dict[str, object]:
     installed = _installed(report)
-    fields = (
+    identity_fields = (
         "release_id",
         "p3_estimate_id",
         "p4_revision_id",
@@ -134,9 +134,43 @@ def _shared_exact_projection(report: dict[str, Any]) -> dict[str, object]:
         "p6_forecast_result_id",
         "p6_counterfactual_run_id",
     )
-    result = {field: installed.get(field) for field in fields}
-    if not all(isinstance(value, str) and value for value in result.values()):
+    count_fields = (
+        "metric_count",
+        "catalog_definition_count",
+        "metric_code_count",
+        "capability_observation_count",
+        "system_observation_count",
+        "evidence_only_metric_instance_count",
+        "world_product_count",
+        "stage_count",
+        "world_relation_count",
+    )
+    result = {
+        field: installed.get(field)
+        for field in (*identity_fields, *count_fields)
+    }
+    if not all(
+        isinstance(result[field], str) and bool(cast(str, result[field]))
+        for field in identity_fields
+    ):
         raise RuntimeError("shared exact product identity evidence invalid")
+    if not all(
+        isinstance(result[field], int)
+        and not isinstance(result[field], bool)
+        and cast(int, result[field]) > 0
+        for field in count_fields
+    ):
+        raise RuntimeError("shared exact P1 membership evidence invalid")
+    if (
+        result["catalog_definition_count"] != 116
+        or result["metric_code_count"] != 116
+        or result["world_product_count"] != 4
+        or result["stage_count"] != 4
+        or result["world_relation_count"] != 3
+    ):
+        raise RuntimeError(
+            "shared exact P1 Catalog/World/Stage membership drift"
+        )
     return result
 
 
