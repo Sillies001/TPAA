@@ -58,10 +58,21 @@ def _execution() -> tuple[
             plugin_id=f"ed2-materialization-probe:{definition.metric_code}:v1",
             plugin=probe,
         )
-    inputs = {
-        definition.metric_code: _positive_input(definition)
-        for definition in contract.plan.definitions
-    }
+    inputs = {}
+    for definition in contract.plan.definitions:
+        payload = _positive_input(definition)
+        payload["_source_lineage"] = [
+            {
+                "source_family": "FLIGHT",
+                "source_id": _id("source"),
+                "artifact_id": _id("artifact"),
+                "artifact_sha256": "e" * 64,
+                "adapter_id": "ed2-materialization-test",
+                "adapter_version": "1.0.0",
+                "source_ref": "test://ed2/materialization",
+            }
+        ]
+        inputs[definition.metric_code] = payload
     batch = CatalogMetricEngine(
         contract.plan,
         registry,

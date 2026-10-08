@@ -187,6 +187,15 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
         "tpaa-parquet://production/canonical-flight/"
     )
     assert len(str(locator["canonical_logical_content_hash"])) == 64
+    source_lineage = locator["source_lineage"]
+    assert isinstance(source_lineage, list)
+    assert source_lineage
+    assert all(
+        isinstance(item, dict)
+        and len(str(item.get("artifact_sha256"))) == 64
+        for item in source_lineage
+    )
+    assert len(str(locator["source_lineage_hash"])) == 64
 
     restarted = build_desktop_production_runtime(config)
     assert (

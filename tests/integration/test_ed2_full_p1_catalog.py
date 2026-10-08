@@ -13,7 +13,10 @@ from tpaa_runtime.production_p1_materialization import (
     ProductionP1ReleaseContext,
     materialize_production_p1_release,
 )
-from tpaa_runtime.production_p1_request import parse_production_p1_request
+from tpaa_runtime.production_p1_request import (
+    parse_production_p1_request,
+    select_production_p1_sources,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
@@ -24,16 +27,20 @@ def _id(name: str) -> str:
 
 
 def test_full_116_business_plugins_execute_and_materialize_one_release() -> None:
-    aircraft_id = _id("aircraft")
+    aircraft_id = "c2000000-0000-4000-8000-000000000002"
     contract = build_production_p1_catalog_contract(AUTHORITY)
     request_contract = build_full_p1_request_contract(
         aircraft_id=aircraft_id,
         authority_root=AUTHORITY,
     )
+    source_selection = select_production_p1_sources(request_contract)
+    assert source_selection.source_count == 6
+    assert len(source_selection.refs_by_family) == 6
     request = parse_production_p1_request(
         request_contract,
         contract=contract,
         aircraft_id=aircraft_id,
+        source_selection=source_selection,
     )
     execution_contract, batch = execute_production_p1_catalog(
         AUTHORITY,

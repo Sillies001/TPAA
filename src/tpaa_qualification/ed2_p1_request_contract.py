@@ -32,6 +32,7 @@ def load_ed2_p1_request_contract(path: Path) -> dict[str, object]:
     if payload.get("schema") != ED2_P1_REQUEST_CONTRACT_SCHEMA:
         raise RuntimeError("production P1 qualification contract schema drift")
     for field in (
+        "metric_input_source_families",
         "p1_catalog_inputs",
         "mission_system_instances",
         "metric_system_bindings",
@@ -40,4 +41,9 @@ def load_ed2_p1_request_contract(path: Path) -> dict[str, object]:
             raise RuntimeError(
                 f"production P1 qualification contract field invalid: {field}"
             )
+    sources = payload.get("source_documents")
+    if not isinstance(sources, list) or len(sources) != 6:
+        raise RuntimeError(
+            "production P1 qualification contract field invalid: source_documents"
+        )
     return payload

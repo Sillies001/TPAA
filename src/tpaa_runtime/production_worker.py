@@ -493,6 +493,7 @@ def build_p1_worker_product(
             body,
             contract=contract,
             aircraft_id=aircraft_id,
+            source_selection=source_selection,
         )
         execution_contract, metric_batch = execute_production_p1_catalog(
             authority_root,

@@ -24,6 +24,10 @@ def test_ed2_p1_request_contract_loads_exact_schema(tmp_path: Path) -> None:
         tmp_path / "p1-contract.json",
         {
             "schema": ED2_P1_REQUEST_CONTRACT_SCHEMA,
+            "source_documents": [{}, {}, {}, {}, {}, {}],
+            "metric_input_source_families": {
+                "P1-AIR-001": ["FLIGHT"],
+            },
             "p1_catalog_inputs": {"P1-AIR-001": {}},
             "mission_system_instances": {},
             "metric_system_bindings": {},
@@ -53,6 +57,8 @@ def test_ed2_p1_request_contract_schema_drift_fails_closed(
         tmp_path / "p1-contract.json",
         {
             "schema": "DRIFTED",
+            "source_documents": [{}, {}, {}, {}, {}, {}],
+            "metric_input_source_families": {},
             "p1_catalog_inputs": {},
             "mission_system_instances": {},
             "metric_system_bindings": {},
@@ -69,6 +75,7 @@ def test_ed2_p1_request_contract_schema_drift_fails_closed(
 @pytest.mark.parametrize(
     "field",
     (
+        "metric_input_source_families",
         "p1_catalog_inputs",
         "mission_system_instances",
         "metric_system_bindings",
@@ -80,6 +87,8 @@ def test_ed2_p1_request_contract_required_mapping_fails_closed(
 ) -> None:
     payload: dict[str, object] = {
         "schema": ED2_P1_REQUEST_CONTRACT_SCHEMA,
+        "source_documents": [{}, {}, {}, {}, {}, {}],
+        "metric_input_source_families": {},
         "p1_catalog_inputs": {},
         "mission_system_instances": {},
         "metric_system_bindings": {},
@@ -90,5 +99,28 @@ def test_ed2_p1_request_contract_required_mapping_fails_closed(
     with pytest.raises(
         RuntimeError,
         match=f"production P1 qualification contract field invalid: {field}",
+    ):
+        load_ed2_p1_request_contract(path)
+
+
+
+def test_ed2_p1_request_contract_requires_six_source_documents(
+    tmp_path: Path,
+) -> None:
+    path = _write(
+        tmp_path / "sources.json",
+        {
+            "schema": ED2_P1_REQUEST_CONTRACT_SCHEMA,
+            "source_documents": [{}],
+            "metric_input_source_families": {},
+            "p1_catalog_inputs": {},
+            "mission_system_instances": {},
+            "metric_system_bindings": {},
+        },
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="production P1 qualification contract field invalid: source_documents",
     ):
         load_ed2_p1_request_contract(path)

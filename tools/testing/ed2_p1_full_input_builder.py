@@ -11,7 +11,7 @@ import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import cast
-from uuid import NAMESPACE_URL, uuid5
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from tools.testing.m2_air_formal_delivery_check import _runtime as _air_runtime
 from tools.testing.m2_sns_detection_check import _contracts
@@ -26,6 +26,11 @@ from tools.testing.m3_identification_remainder_check import (
 )
 from tools.testing.m3_passive_remainder_check import _golden_inputs as _passive_inputs
 from tools.testing.m3_track_remainder_check import _golden_inputs as _track_inputs
+from tpaa_ingest import (
+    PRODUCTION_FLIGHT_MEDIA_TYPE,
+    SourceFamily,
+    descriptor_for_interchange_family,
+)
 from tpaa_metric import (
     AIR_M1_IMPLEMENTATION,
     M2MetricExecutionPlan,
@@ -263,12 +268,111 @@ def build_full_p1_system_authority(
     return systems, bindings
 
 
+_SOURCE_NAMESPACE = UUID("735bb395-eb08-4c3f-9cc0-f78635fc37ec")
+_DEFAULT_QUALIFICATION_FLIGHT = (
+    ROOT
+    / "docs"
+    / "baseline"
+    / "PRCB-1.0"
+    / "qualification"
+    / "PRCB_C2_NOMINAL_FLIGHT.json"
+)
+
+
+def _lineage_families(family: str) -> list[str]:
+    if family in {"AIRCRAFT_FLIGHT", "AIRCRAFT_ENERGY", "AIRCRAFT_CONTROL_RESPONSE",
+                  "AIRCRAFT_HANDLING", "AIRCRAFT_PERSISTENCE"}:
+        return ["FLIGHT", "SCENARIO"]
+    if family in {"REFERENCE_TRUTH", "TIME_ALIGNMENT"}:
+        return ["FLIGHT", "RANGE_ACMI", "SCENARIO"]
+    if family == "DATALINK":
+        return ["TDL", "RANGE_ACMI", "SCENARIO"]
+    return ["MISSION_AVIONICS", "RANGE_ACMI", "SCENARIO"]
+
+
+def _source_id(session_id: str, family: SourceFamily, kind: str) -> str:
+    return str(
+        uuid5(
+            _SOURCE_NAMESPACE,
+            f"{session_id}|{family.value}|{kind}",
+        )
+    )
+
+
+def _interchange_source_document(
+    *,
+    session_id: str,
+    family: SourceFamily,
+    metric_codes: list[str],
+    ordinal: int,
+) -> dict[str, object]:
+    descriptor = descriptor_for_interchange_family(family)
+    source_id = _source_id(session_id, family, "source")
+    artifact_id = _source_id(session_id, family, "artifact")
+    stream_id = _source_id(session_id, family, "stream")
+    profile_hash = hashlib.sha256(
+        f"ED2-B1-QUALIFICATION:{family.value}".encode("ascii")
+    ).hexdigest()
+    source_document = {
+        "schema": "TPAA_PRODUCTION_INTERCHANGE_SOURCE_V1",
+        "schema_version": "1.0.0",
+        "source_family": family.value,
+        "session_id": session_id,
+        "profile": {
+            "profile_id": f"ED2_B1_{family.value}_QUALIFICATION",
+            "profile_version": "1.0.0",
+            "profile_hash": profile_hash,
+        },
+        "knowledge_time_utc": "2026-10-08T00:00:00Z",
+        "payload": {
+            "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+            "qualification_only": True,
+            "metric_codes": metric_codes,
+        },
+    }
+    return {
+        "source_json": json.dumps(
+            source_document,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ),
+        "source_import": {
+            "source_family": family.value,
+            "source_id": source_id,
+            "session_id": session_id,
+            "platform_id": None,
+            "producer_system": "ED2_B1_QUALIFICATION_GATEWAY",
+            "schema_name": "TPAA_PRODUCTION_INTERCHANGE_SOURCE_V1",
+            "schema_version": "1.0.0",
+            "time_basis": "SESSION_TIME_US",
+            "nominal_rate_hz": None,
+            "source_quality": "1.0",
+            "source_stream_id": stream_id,
+            "stream_code": f"{family.value}_QUALIFICATION",
+            "ordinal_basis": "SOURCE_SEQUENCE",
+            "stream_status": "ACTIVE",
+            "artifact_id": artifact_id,
+            "source_artifact_sequence": ordinal,
+            "uri_kind": "MANAGED",
+            "availability_status": "AVAILABLE",
+            "last_verified_at": "2026-10-08T00:00:00Z",
+            "mtime_source": None,
+            "source_ref": f"qualification://ED2_B1/{family.value}",
+            "media_type": descriptor.media_types[0],
+            "classification_label": "UNCLASSIFIED",
+        },
+    }
+
+
 def build_full_p1_request_contract(
     *,
     aircraft_id: str,
     authority_root: Path = AUTHORITY,
+    flight_source_json: str | None = None,
 ) -> dict[str, object]:
-    """Return JSON-safe exact-116 inputs plus exact system authority bindings."""
+    """Return a JSON-safe six-source exact-116 qualification request contract."""
 
     inputs = build_full_p1_catalog_inputs(authority_root=authority_root)
     systems, bindings = build_full_p1_system_authority(
@@ -276,8 +380,97 @@ def build_full_p1_request_contract(
         authority_root=authority_root,
         aircraft_id=aircraft_id,
     )
+    plan = build_m3_metric_execution_plan(authority_root)
+    source_text = (
+        _DEFAULT_QUALIFICATION_FLIGHT.read_text(encoding="utf-8")
+        if flight_source_json is None
+        else flight_source_json
+    )
+    flight_raw: object = json.loads(source_text)
+    if not isinstance(flight_raw, dict):
+        raise TypeError("ED2_P1_QUALIFICATION_FLIGHT_INVALID")
+    session_id = flight_raw.get("session_id")
+    source_aircraft = flight_raw.get("aircraft_id")
+    if not isinstance(session_id, str) or not isinstance(source_aircraft, str):
+        raise TypeError("ED2_P1_QUALIFICATION_FLIGHT_IDENTITY_INVALID")
+    if source_aircraft != aircraft_id:
+        raise ValueError("ED2_P1_QUALIFICATION_AIRCRAFT_DRIFT")
+
+    metric_lineage = {
+        definition.metric_code: _lineage_families(definition.family)
+        for definition in plan.definitions
+    }
+    family_metric_codes = {
+        family.value: sorted(
+            code
+            for code, families in metric_lineage.items()
+            if family.value in families
+        )
+        for family in SourceFamily
+    }
+    source_documents: list[dict[str, object]] = [
+        {
+            "source_json": source_text,
+            "source_import": {
+                "source_family": "FLIGHT",
+                "source_id": _source_id(session_id, SourceFamily.FLIGHT, "source"),
+                "session_id": session_id,
+                "platform_id": None,
+                "producer_system": "PRCB_C5_INSTALLED_QUALIFICATION",
+                "schema_name": "TPAA_PRODUCTION_FLIGHT_SOURCE_V1",
+                "schema_version": "1.0.0",
+                "time_basis": "SOURCE_US",
+                "nominal_rate_hz": "10.0",
+                "source_quality": "1.0",
+                "source_stream_id": _source_id(
+                    session_id,
+                    SourceFamily.FLIGHT,
+                    "stream",
+                ),
+                "stream_code": "FLIGHT_PRIMARY",
+                "ordinal_basis": "SOURCE_SEQUENCE",
+                "stream_status": "ACTIVE",
+                "artifact_id": _source_id(
+                    session_id,
+                    SourceFamily.FLIGHT,
+                    "artifact",
+                ),
+                "source_artifact_sequence": 0,
+                "uri_kind": "EXTERNAL_FILE",
+                "availability_status": "AVAILABLE",
+                "last_verified_at": "2026-10-08T00:00:00Z",
+                "mtime_source": None,
+                "source_ref": "qualification://PRCB_C2_NOMINAL_FLIGHT",
+                "media_type": PRODUCTION_FLIGHT_MEDIA_TYPE,
+                "classification_label": "UNCLASSIFIED",
+                "session_code": "ED2-B1-FULL-P1",
+                "session_type": "SIM",
+            },
+        }
+    ]
+    for ordinal, family in enumerate(
+        (
+            SourceFamily.MISSION_AVIONICS,
+            SourceFamily.TDL,
+            SourceFamily.RANGE_ACMI,
+            SourceFamily.SCENARIO,
+            SourceFamily.AUDIO_VIDEO,
+        ),
+        start=1,
+    ):
+        source_documents.append(
+            _interchange_source_document(
+                session_id=session_id,
+                family=family,
+                metric_codes=family_metric_codes[family.value],
+                ordinal=ordinal,
+            )
+        )
+
     payload: dict[str, object] = {
         "schema": "TPAA_ED2_B1_FULL_P1_REQUEST_CONTRACT_V1",
+        "source_documents": source_documents,
+        "metric_input_source_families": metric_lineage,
         "p1_catalog_inputs": inputs,
         "mission_system_instances": systems,
         "metric_system_bindings": bindings,

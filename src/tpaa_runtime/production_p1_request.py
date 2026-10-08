@@ -12,6 +12,16 @@ from dataclasses import dataclass
 from typing import cast
 from uuid import UUID
 
+from tpaa_ingest import (
+    ProductionFlightJsonAdapter,
+    ProductionInterchangeJsonAdapter,
+    ProductionSourceAdapterError,
+    SourceAdapter,
+    SourceFamily,
+    validate_production_flight_document,
+    validate_production_interchange_document,
+)
+
 from .production_p1_catalog import ProductionP1CatalogContract
 from .production_p1_materialization import ProductionP1SystemBinding
 
@@ -63,9 +73,22 @@ class ProductionP1Request:
 
 
 @dataclass(frozen=True, slots=True)
+class ProductionP1SourceRef:
+    source_family: SourceFamily
+    source_id: str
+    artifact_id: str
+    artifact_sha256: str
+    adapter_id: str
+    adapter_version: str
+    source_ref: str
+
+
+@dataclass(frozen=True, slots=True)
 class ProductionP1SourceSelection:
     flight_payload: dict[str, object]
     source_count: int
+    session_id: str
+    refs_by_family: dict[SourceFamily, tuple[ProductionP1SourceRef, ...]]
 
 
 def _mapping(value: object, *, field: str) -> dict[str, object]:
@@ -219,6 +242,7 @@ def parse_production_p1_request(
     *,
     contract: ProductionP1CatalogContract,
     aircraft_id: str,
+    source_selection: ProductionP1SourceSelection,
 ) -> ProductionP1Request:
     """Validate and normalize exact-116 Catalog inputs plus system authority."""
 
@@ -240,6 +264,129 @@ def parse_production_p1_request(
         code: _mapping(input_root[code], field=f"p1_catalog_inputs.{code}")
         for code in contract.metric_codes
     }
+
+    lineage_root = _mapping(
+        payload.get("metric_input_source_families"),
+        field="metric_input_source_families",
+    )
+    if set(lineage_root) != expected_codes:
+        raise ProductionP1RequestError(
+            "ED2_P1_SOURCE_LINEAGE_MEMBERSHIP_INVALID",
+            (
+                f"missing={sorted(expected_codes - set(lineage_root))!r};"
+                f"extra={sorted(set(lineage_root) - expected_codes)!r}"
+            ),
+        )
+    required_by_family: dict[str, frozenset[SourceFamily]] = {
+        "REFERENCE_TRUTH": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.RANGE_ACMI}
+        ),
+        "TIME_ALIGNMENT": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.RANGE_ACMI}
+        ),
+        "AIRCRAFT_FLIGHT": frozenset({SourceFamily.FLIGHT}),
+        "AIRCRAFT_ENERGY": frozenset({SourceFamily.FLIGHT}),
+        "AIRCRAFT_CONTROL_RESPONSE": frozenset({SourceFamily.FLIGHT}),
+        "AIRCRAFT_HANDLING": frozenset({SourceFamily.FLIGHT}),
+        "AIRCRAFT_PERSISTENCE": frozenset({SourceFamily.FLIGHT}),
+        "SENSOR_DETECTION": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+        "SENSOR_ACCURACY": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+        "TRACK_PERFORMANCE": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+        "ASSOCIATION_IDENTIFICATION": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+        "PASSIVE_SENSOR": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+        "RWR_ESM": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+        "DATALINK": frozenset({SourceFamily.TDL}),
+        "SENSOR_FUSION": frozenset(
+            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+        ),
+    }
+    definition_by_code = {
+        definition.metric_code: definition
+        for definition in contract.plan.definitions
+    }
+    for code in contract.metric_codes:
+        raw_families = lineage_root[code]
+        if (
+            not isinstance(raw_families, Sequence)
+            or isinstance(raw_families, (str, bytes))
+            or not raw_families
+            or not all(isinstance(item, str) for item in raw_families)
+        ):
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_LINEAGE_INVALID",
+                code,
+            )
+        families: list[SourceFamily] = []
+        for raw_family in cast(Sequence[str], raw_families):
+            try:
+                family = SourceFamily(raw_family)
+            except ValueError as exc:
+                raise ProductionP1RequestError(
+                    "ED2_P1_SOURCE_LINEAGE_FAMILY_UNSUPPORTED",
+                    f"{code}:{raw_family}",
+                ) from exc
+            if family in families:
+                raise ProductionP1RequestError(
+                    "ED2_P1_SOURCE_LINEAGE_DUPLICATE",
+                    f"{code}:{family.value}",
+                )
+            if not source_selection.refs_by_family.get(family):
+                raise ProductionP1RequestError(
+                    "ED2_P1_SOURCE_LINEAGE_UNREGISTERED",
+                    f"{code}:{family.value}",
+                )
+            families.append(family)
+
+        definition = definition_by_code[code]
+        required = required_by_family.get(definition.family)
+        if required is None:
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_LINEAGE_POLICY_MISSING",
+                definition.family,
+            )
+        if not required.issubset(set(families)):
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_LINEAGE_INSUFFICIENT",
+                (
+                    f"{code}:required="
+                    f"{sorted(item.value for item in required)!r}:"
+                    f"actual={sorted(item.value for item in families)!r}"
+                ),
+            )
+        if "_source_lineage" in inputs[code]:
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_LINEAGE_OVERRIDE_FORBIDDEN",
+                code,
+            )
+        refs = [
+            ref
+            for family in sorted(families, key=lambda item: item.value)
+            for ref in source_selection.refs_by_family[family]
+        ]
+        inputs[code]["_source_lineage"] = [
+            {
+                "source_family": ref.source_family.value,
+                "source_id": ref.source_id,
+                "artifact_id": ref.artifact_id,
+                "artifact_sha256": ref.artifact_sha256,
+                "adapter_id": ref.adapter_id,
+                "adapter_version": ref.adapter_version,
+                "source_ref": ref.source_ref,
+            }
+            for ref in refs
+        ]
 
     system_codes = {
         definition.metric_code
@@ -333,50 +480,161 @@ def parse_production_p1_request(
     )
 
 
+def _inspect_source_document(
+    document: Mapping[str, object],
+    *,
+    index: int,
+) -> tuple[dict[str, object], str, ProductionP1SourceRef]:
+    item = dict(document)
+    source_json = _text(
+        item.get("source_json"),
+        field=f"source_documents[{index}].source_json",
+    )
+    source_bytes = source_json.encode("utf-8")
+    metadata = _mapping(
+        item.get("source_import"),
+        field=f"source_documents[{index}].source_import",
+    )
+    family_text = _text(
+        metadata.get("source_family"),
+        field=f"source_documents[{index}].source_family",
+    )
+    try:
+        family = SourceFamily(family_text)
+    except ValueError as exc:
+        raise ProductionP1RequestError(
+            "ED2_P1_SOURCE_FAMILY_UNSUPPORTED",
+            family_text,
+        ) from exc
+
+    try:
+        adapter: SourceAdapter
+        if family is SourceFamily.FLIGHT:
+            flight = validate_production_flight_document(source_bytes)
+            session_id = _uuid(
+                flight.get("session_id"),
+                field=f"source_documents[{index}].session_id",
+            )
+            adapter = ProductionFlightJsonAdapter()
+        else:
+            interchange = validate_production_interchange_document(
+                source_bytes,
+                expected_family=family,
+            )
+            session_id = interchange.session_id
+            adapter = ProductionInterchangeJsonAdapter(family)
+
+        envelope = adapter.inspect(
+            source_ref=_text(
+                metadata.get("source_ref"),
+                field=f"source_documents[{index}].source_ref",
+            ),
+            data=source_bytes,
+            media_type=_text(
+                metadata.get("media_type"),
+                field=f"source_documents[{index}].media_type",
+            ),
+            classification_label=(
+                None
+                if metadata.get("classification_label") is None
+                else _text(
+                    metadata.get("classification_label"),
+                    field=f"source_documents[{index}].classification_label",
+                )
+            ),
+        )
+    except ProductionSourceAdapterError as exc:
+        raise ProductionP1RequestError(exc.code, exc.detail) from exc
+
+    imported_session_id = _uuid(
+        metadata.get("session_id"),
+        field=f"source_documents[{index}].source_import.session_id",
+    )
+    if imported_session_id != session_id:
+        raise ProductionP1RequestError(
+            "ED2_P1_SOURCE_IMPORT_SESSION_DRIFT",
+            f"index={index}:document={session_id}:import={imported_session_id}",
+        )
+    source_id = _uuid(
+        metadata.get("source_id"),
+        field=f"source_documents[{index}].source_id",
+    )
+    artifact_id = _uuid(
+        metadata.get("artifact_id"),
+        field=f"source_documents[{index}].artifact_id",
+    )
+    return (
+        item,
+        session_id,
+        ProductionP1SourceRef(
+            source_family=family,
+            source_id=source_id,
+            artifact_id=artifact_id,
+            artifact_sha256=envelope.artifact_sha256,
+            adapter_id=envelope.adapter_id,
+            adapter_version=envelope.adapter_version,
+            source_ref=envelope.source_ref,
+        ),
+    )
+
+
 def select_production_p1_sources(
     payload: Mapping[str, object],
 ) -> ProductionP1SourceSelection:
-    """Select exactly one FLIGHT source from the governed source set."""
+    """Inspect the governed source set and select exactly one primary FLIGHT."""
 
     raw_documents = payload.get("source_documents")
     if raw_documents is None:
-        flight_payload = dict(payload)
-        import_meta = _mapping(
-            flight_payload.get("source_import"),
-            field="source_import",
-        )
-        if import_meta.get("source_family") != "FLIGHT":
+        documents = [dict(payload)]
+    else:
+        if (
+            not isinstance(raw_documents, Sequence)
+            or isinstance(raw_documents, (str, bytes))
+            or not raw_documents
+        ):
             raise ProductionP1RequestError(
-                "ED2_P1_PRIMARY_FLIGHT_SOURCE_MISSING",
-                "source_import",
+                "ED2_P1_SOURCE_SET_INVALID",
+                "source_documents",
             )
-        return ProductionP1SourceSelection(
-            flight_payload=flight_payload,
-            source_count=1,
-        )
+        documents = [
+            _mapping(item, field=f"source_documents[{index}]")
+            for index, item in enumerate(raw_documents)
+        ]
 
-    if (
-        not isinstance(raw_documents, Sequence)
-        or isinstance(raw_documents, (str, bytes))
-        or not raw_documents
-    ):
-        raise ProductionP1RequestError(
-            "ED2_P1_SOURCE_SET_INVALID",
-            "source_documents",
+    flight: list[dict[str, object]] = []
+    session_id: str | None = None
+    source_ids: set[str] = set()
+    artifact_ids: set[str] = set()
+    refs: dict[SourceFamily, list[ProductionP1SourceRef]] = {}
+    for index, document in enumerate(documents):
+        item, current_session, source_ref = _inspect_source_document(
+            document,
+            index=index,
         )
-    documents = [
-        _mapping(item, field=f"source_documents[{index}]")
-        for index, item in enumerate(raw_documents)
-    ]
-    flight = []
-    for index, item in enumerate(documents):
-        meta = _mapping(
-            item.get("source_import"),
-            field=f"source_documents[{index}].source_import",
-        )
-        if meta.get("source_family") == "FLIGHT":
+        if session_id is None:
+            session_id = current_session
+        elif current_session != session_id:
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_SET_SESSION_DRIFT",
+                current_session,
+            )
+        if source_ref.source_id in source_ids:
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_SET_IDENTITY_DUPLICATE",
+                source_ref.source_id,
+            )
+        if source_ref.artifact_id in artifact_ids:
+            raise ProductionP1RequestError(
+                "ED2_P1_SOURCE_SET_IDENTITY_DUPLICATE",
+                source_ref.artifact_id,
+            )
+        source_ids.add(source_ref.source_id)
+        artifact_ids.add(source_ref.artifact_id)
+        refs.setdefault(source_ref.source_family, []).append(source_ref)
+        if source_ref.source_family is SourceFamily.FLIGHT:
             flight.append(item)
-    if len(flight) != 1:
+
+    if len(flight) != 1 or session_id is None:
         raise ProductionP1RequestError(
             "ED2_P1_PRIMARY_FLIGHT_SOURCE_CARDINALITY",
             str(len(flight)),
@@ -384,4 +642,15 @@ def select_production_p1_sources(
     return ProductionP1SourceSelection(
         flight_payload=flight[0],
         source_count=len(documents),
+        session_id=session_id,
+        refs_by_family={
+            family: tuple(
+                sorted(
+                    family_refs,
+                    key=lambda ref: (ref.source_id, ref.artifact_id),
+                )
+            )
+            for family, family_refs in refs.items()
+        },
     )
+

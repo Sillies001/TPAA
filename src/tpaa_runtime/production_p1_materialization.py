@@ -352,6 +352,29 @@ def materialize_production_p1_release(
             continue
 
         input_payload = inputs[record.metric_code]
+        raw_source_lineage = input_payload.get("_source_lineage")
+        if (
+            not isinstance(raw_source_lineage, list)
+            or not raw_source_lineage
+        ):
+            raise ProductionP1MaterializationError(
+                "ED2_P1_SOURCE_LINEAGE_MISSING",
+                record.metric_code,
+            )
+        source_lineage: list[dict[str, object]] = []
+        for lineage_index, raw_lineage in enumerate(raw_source_lineage):
+            source_lineage.append(
+                dict(
+                    _mapping(
+                        raw_lineage,
+                        field=(
+                            f"{record.metric_code}."
+                            f"_source_lineage[{lineage_index}]"
+                        ),
+                    )
+                )
+            )
+        source_lineage_hash = _json_hash(source_lineage)
         system: ProductionP1SystemBinding | None = None
         if definition.subject_type == "MISSION_SYSTEM_INSTANCE":
             system = _system_binding(
@@ -421,6 +444,8 @@ def materialize_production_p1_release(
                         "execution_record_hash": record.logical_hash,
                         "plugin_output_hash": record.plugin_output_hash,
                         "input_payload_hash": record.input_payload_hash,
+                        "source_lineage": source_lineage,
+                        "source_lineage_hash": source_lineage_hash,
                     },
                     algorithm_versions={
                         "algorithm_id": record.algorithm_id,
