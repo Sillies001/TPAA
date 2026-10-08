@@ -17,9 +17,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.manifest.build_artifacts import git_revision, sha256_file  # noqa: E402
-from tools.testing.ed2_p1_full_input_builder import (  # noqa: E402
-    build_full_p1_request_contract,
-)
 from tools.packaging.m5_runtime_bundle import (  # noqa: E402
     LINUX_PROFILES,
     WINDOWS_PROFILES,
@@ -28,6 +25,9 @@ from tools.packaging.m5_runtime_bundle import (  # noqa: E402
     _tar_gz,
     _write_json,
     _zip,
+)
+from tools.testing.ed2_p1_full_input_builder import (  # noqa: E402
+    build_full_p1_request_contract,
 )
 
 CONTRACT = REPO_ROOT / "docs" / "baseline" / "PRCB-1.0" / "C5_RELEASE_CONTRACT.json"

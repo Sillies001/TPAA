@@ -22,10 +22,10 @@ from tpaa_application import (  # noqa: E402
     P6PersistenceRepository,
 )
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
+from tpaa_observation import allocate_session_release_id  # noqa: E402
 from tpaa_qualification.ed2_p1_request_contract import (  # noqa: E402
     load_ed2_p1_request_contract,
 )
-from tpaa_observation import allocate_session_release_id  # noqa: E402
 from tpaa_qualification.prcb_c5_api_desktop import (  # noqa: E402
     PRCBC5DesktopApiExpectation,
     verify_prcb_c5_desktop_api_discovery,
@@ -238,13 +238,15 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     )
     release = runtime.application.m1_release(release_id)
     metrics = runtime.application.m1_metrics(release_id)
+    metric_instance_count = release.get("metric_instance_count")
     if (
         release.get("release_id") != release_id
         or release.get("catalog_definition_count") != 116
         or release.get("metric_code_count") != 116
-        or not isinstance(release.get("metric_instance_count"), int)
-        or int(release["metric_instance_count"]) < 116
-        or len(metrics) != int(release["metric_instance_count"])
+        or isinstance(metric_instance_count, bool)
+        or not isinstance(metric_instance_count, int)
+        or metric_instance_count < 116
+        or len(metrics) != metric_instance_count
     ):
         raise RuntimeError("installed P1 release identity/full-catalog mismatch")
 

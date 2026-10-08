@@ -206,13 +206,15 @@ def run_installed_service_e2e(
     )
     release = runtime.application.m1_release(release_id)
     metrics = runtime.application.m1_metrics(release_id)
+    metric_instance_count = release.get("metric_instance_count")
     if (
         release.get("release_id") != release_id
         or release.get("catalog_definition_count") != 116
         or release.get("metric_code_count") != 116
-        or not isinstance(release.get("metric_instance_count"), int)
-        or int(release["metric_instance_count"]) < 116
-        or len(metrics) != int(release["metric_instance_count"])
+        or isinstance(metric_instance_count, bool)
+        or not isinstance(metric_instance_count, int)
+        or metric_instance_count < 116
+        or len(metrics) != metric_instance_count
     ):
         raise RuntimeError(
             "installed Service P1 release identity/full-catalog mismatch"
