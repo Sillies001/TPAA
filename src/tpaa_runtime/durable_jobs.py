@@ -57,12 +57,14 @@ from tpaa_storage import (
     ComputeJobState,
     LocalObjectStore,
     ParquetColumn,
+    ParquetDatasetArtifact,
     ParquetPartition,
     ParquetScalarType,
     ParquetSchema,
     ParquetWriteRequest,
     PolarsParquetPlane,
 )
+from tpaa_storage.product_identity import product_object_ref_id
 
 from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
 from .production_worker import (
@@ -84,6 +86,7 @@ from .production_worker import (
 
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
 _P1_COMMAND = "BUILD_P1_RELEASE"
+_P1_CANONICAL_DATASET_PRODUCER_VERSION = "ED2-B1-P1-CANONICAL-1.0.0"
 
 
 class ProductionJobExecutionError(RuntimeError):
@@ -151,6 +154,8 @@ def _number(value: object, *, field: str) -> float:
 _PREREQUISITE_IDENTITY_COLUMNS: dict[str, str] = {
     "registry.training_session": "session_id",
     "registry.dataset_snapshot": "dataset_snapshot_id",
+    "registry.object_reference": "object_ref_id",
+    "registry.dataset_manifest": "dataset_id",
     "master.aircraft_model": "aircraft_model_id",
     "master.aircraft": "aircraft_id",
     "master.entity": "entity_id",
@@ -243,6 +248,85 @@ def _persist_or_verify_prerequisite(
                 f"fields={','.join(sorted(mismatched))}"
             ),
         )
+
+
+def _canonical_dataset_prerequisites(
+    product: ProductionP1WorkerProduct,
+    artifact: ParquetDatasetArtifact,
+    *,
+    request_hash: str,
+) -> tuple[ProductionPrerequisiteRow, ProductionPrerequisiteRow]:
+    """Bind the sealed canonical Parquet object to DB 1.9 dataset authority."""
+
+    if (
+        artifact.schema.schema_id != "CANONICAL_AIRCRAFT_STATE_V1"
+        or artifact.schema.schema_version != "1.0.0"
+        or artifact.row_count != len(product.canonical_rows)
+        or artifact.min_session_time_us is None
+        or artifact.max_session_time_us is None
+        or artifact.min_session_time_us >= artifact.max_session_time_us
+    ):
+        raise ProductionJobExecutionError(
+            "ED2_P1_CANONICAL_DATASET_ARTIFACT_INVALID",
+            artifact.logical_uri,
+        )
+
+    object_ref_id = product_object_ref_id(
+        artifact.logical_uri,
+        artifact.artifact_sha256,
+    )
+    object_reference = ProductionPrerequisiteRow(
+        table="registry.object_reference",
+        values={
+            "object_ref_id": object_ref_id,
+            "managed_uri": artifact.logical_uri,
+            "media_type": "application/vnd.apache.parquet",
+            "size_bytes": artifact.byte_size,
+            "artifact_sha256": artifact.artifact_sha256,
+            "logical_content_hash": artifact.logical_content_hash,
+            "storage_backend": "LOCAL_OBJECT_STORE",
+            "sealed": True,
+            "gc_state": "ACTIVE",
+            "gc_state_version": 0,
+            "gc_marked_at": None,
+            "deleted_at": None,
+        },
+        field_kinds={},
+    )
+    dataset_manifest = ProductionPrerequisiteRow(
+        table="registry.dataset_manifest",
+        values={
+            "dataset_id": product.dataset_id,
+            # The manifest must precede Release publication because World has an
+            # immediate dataset FK. Release ownership is therefore intentionally
+            # nullable here; immutable request/world lineage binds the dataset.
+            "release_id": None,
+            "scope_type": "SESSION",
+            "session_id": product.release.session_id,
+            "longitudinal_scope_id": None,
+            "dataset_kind": "CANONICAL_FLIGHT",
+            "logical_name": f"production/canonical-flight/{product.dataset_id}",
+            "object_ref_id": object_ref_id,
+            "storage_uri": artifact.logical_uri,
+            "partition_spec": [
+                {"key": key, "value": value}
+                for key, value in artifact.partition.values
+            ],
+            "schema_version": artifact.schema.schema_version,
+            "row_count": artifact.row_count,
+            "min_session_time_us": artifact.min_session_time_us,
+            "max_session_time_us": artifact.max_session_time_us,
+            "artifact_sha256": artifact.artifact_sha256,
+            "logical_content_hash": artifact.logical_content_hash,
+            "producer_component": "tpaa_runtime.production_p1",
+            "producer_version": _P1_CANONICAL_DATASET_PRODUCER_VERSION,
+            "input_hash": request_hash,
+            "status": "READY",
+            "supersedes_dataset_id": None,
+        },
+        field_kinds={"partition_spec": "json"},
+    )
+    return object_reference, dataset_manifest
 
 
 def _audit_actor_id(actor: str) -> str | None:
@@ -611,6 +695,11 @@ class ProductionJobExecutor:
             logical_uri=artifact.logical_uri,
             logical_content_hash=artifact.logical_content_hash,
         )
+        canonical_dataset_prerequisites = _canonical_dataset_prerequisites(
+            product,
+            artifact,
+            request_hash=request_hash,
+        )
 
         expected_version = _integer(
             payload.get("expected_version_token"),
@@ -623,6 +712,8 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             for prerequisite in product.prerequisites:
+                _persist_or_verify_prerequisite(uow, prerequisite)
+            for prerequisite in canonical_dataset_prerequisites:
                 _persist_or_verify_prerequisite(uow, prerequisite)
             import_service = ProductionImportService(
                 adapters=self._adapters,

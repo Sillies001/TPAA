@@ -187,6 +187,7 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
         "tpaa-parquet://production/canonical-flight/"
     )
     assert len(str(locator["canonical_logical_content_hash"])) == 64
+    canonical_dataset_id = str(locator["canonical_dataset_id"])
     source_lineage = locator["source_lineage"]
     assert isinstance(source_lineage, list)
     assert source_lineage
@@ -238,9 +239,57 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
                 "status",
                 "coverage",
                 "logical_content_hash",
+                "dataset_id",
             ),
             order_by=("world_kind",),
         )
+        dataset_manifest_rows = uow.canonical_rows.many(
+            "registry.dataset_manifest",
+            where={"dataset_id": canonical_dataset_id},
+            columns=(
+                "dataset_id",
+                "release_id",
+                "scope_type",
+                "session_id",
+                "dataset_kind",
+                "logical_name",
+                "object_ref_id",
+                "storage_uri",
+                "schema_version",
+                "row_count",
+                "min_session_time_us",
+                "max_session_time_us",
+                "artifact_sha256",
+                "logical_content_hash",
+                "producer_component",
+                "producer_version",
+                "input_hash",
+                "status",
+                "supersedes_dataset_id",
+            ),
+            order_by=("dataset_id",),
+        )
+        assert len(dataset_manifest_rows) == 1
+        dataset_manifest = dataset_manifest_rows[0]
+        object_reference_rows = uow.canonical_rows.many(
+            "registry.object_reference",
+            where={"object_ref_id": dataset_manifest["object_ref_id"]},
+            columns=(
+                "object_ref_id",
+                "managed_uri",
+                "media_type",
+                "size_bytes",
+                "artifact_sha256",
+                "logical_content_hash",
+                "storage_backend",
+                "sealed",
+                "gc_state",
+                "gc_state_version",
+            ),
+            order_by=("object_ref_id",),
+        )
+        assert len(object_reference_rows) == 1
+        object_reference = object_reference_rows[0]
         relation_rows = uow.canonical_rows.many(
             "world.world_relation",
             where={"release_id": release_id},
@@ -281,6 +330,56 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
     assert all(str(row["episode_id"]) == episode_id for row in world_rows)
     assert all(row["status"] == "READY" for row in world_rows)
     assert len(world_rows) == 4
+    truth_world = next(
+        row for row in world_rows if row["world_kind"] == "TRUTH"
+    )
+    assert str(truth_world["dataset_id"]) == canonical_dataset_id
+
+    assert str(dataset_manifest["dataset_id"]) == canonical_dataset_id
+    assert dataset_manifest["release_id"] is None
+    assert dataset_manifest["scope_type"] == "SESSION"
+    assert str(dataset_manifest["session_id"]) == SESSION_ID
+    assert dataset_manifest["dataset_kind"] == "CANONICAL_FLIGHT"
+    assert dataset_manifest["logical_name"] == (
+        f"production/canonical-flight/{canonical_dataset_id}"
+    )
+    assert dataset_manifest["storage_uri"] == locator["canonical_dataset_uri"]
+    assert dataset_manifest["schema_version"] == "1.0.0"
+    assert int(dataset_manifest["row_count"]) > 1
+    assert int(dataset_manifest["min_session_time_us"]) < int(
+        dataset_manifest["max_session_time_us"]
+    )
+    assert len(str(dataset_manifest["artifact_sha256"])) == 64
+    assert (
+        dataset_manifest["logical_content_hash"]
+        == locator["canonical_logical_content_hash"]
+    )
+    assert dataset_manifest["producer_component"] == "tpaa_runtime.production_p1"
+    assert dataset_manifest["producer_version"] == "ED2-B1-P1-CANONICAL-1.0.0"
+    assert dataset_manifest["input_hash"] == request_hash
+    assert dataset_manifest["status"] == "READY"
+    assert dataset_manifest["supersedes_dataset_id"] is None
+
+    assert (
+        str(object_reference["object_ref_id"])
+        == str(dataset_manifest["object_ref_id"])
+    )
+    assert object_reference["managed_uri"] == dataset_manifest["storage_uri"]
+    assert object_reference["media_type"] == "application/vnd.apache.parquet"
+    assert int(object_reference["size_bytes"]) > 0
+    assert (
+        object_reference["artifact_sha256"]
+        == dataset_manifest["artifact_sha256"]
+    )
+    assert (
+        object_reference["logical_content_hash"]
+        == dataset_manifest["logical_content_hash"]
+    )
+    assert object_reference["storage_backend"] == "LOCAL_OBJECT_STORE"
+    assert bool(object_reference["sealed"]) is True
+    assert object_reference["gc_state"] == "ACTIVE"
+    assert int(object_reference["gc_state_version"]) == 0
+
     assert len(relation_rows) == 3
     assert all(row["relation_type"] == "PRECEDES" for row in relation_rows)
     assert all(row["relation_source"] == "OFFICIAL" for row in relation_rows)
