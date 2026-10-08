@@ -12,7 +12,11 @@
   },
   "governance": {
     "umbrella_issue": 245,
-    "batch_issues": [246, 247, 248],
+    "batch_issues": [
+      246,
+      247,
+      248
+    ],
     "batch_count": 3,
     "no_m10_p7": true,
     "exact_required_job_count": 14,
@@ -53,49 +57,71 @@
       "id": "ED2-P1-001",
       "batch": "B1",
       "requirement": "Production P1 execution is driven by the frozen exact 116-metric Catalog rather than a representative allow-list.",
-      "status": "OPEN",
+      "status": "IMPLEMENTED_PENDING_CI",
       "current_evidence": [
         "baseline/CB-1.4.0/canonical/P1_METRIC_CATALOG.json",
-        "src/tpaa_metric/m3_general_engine.py",
-        "src/tpaa_metric/m3_runtime_closure.py",
-        "src/tpaa_runtime/production_worker.py"
+        "src/tpaa_runtime/production_p1_catalog.py",
+        "src/tpaa_runtime/production_worker.py",
+        "tests/unit/runtime/test_ed2_production_p1_catalog.py",
+        "tests/integration/test_ed2_full_p1_catalog.py",
+        "tools/packaging/prcb_runtime_entry.py",
+        "src/tpaa_qualification/prcb_c5_service_e2e.py"
       ],
-      "gap": "Production worker currently selects five representative P1-AIR metrics."
+      "gap": "Implementation is present on the B1 branch; exact-head Hosted CI 14/14 is pending before COMPLETE."
     },
     {
       "id": "ED2-P1-002",
       "batch": "B1",
       "requirement": "Production P1 preserves exact Catalog subject membership: 40 AIRCRAFT, 72 MISSION_SYSTEM_INSTANCE, 4 TARGET_PAIR.",
-      "status": "OPEN",
+      "status": "IMPLEMENTED_PENDING_CI",
       "current_evidence": [
-        "baseline/CB-1.4.0/canonical/P1_METRIC_CATALOG.json",
-        "src/tpaa_observation/m3_publication.py"
+        "src/tpaa_runtime/production_p1_catalog.py",
+        "src/tpaa_runtime/production_p1_materialization.py",
+        "tests/unit/runtime/test_ed2_production_p1_materialization.py",
+        "tests/integration/test_ed2_full_p1_catalog.py",
+        "tools/testing/prcb_c5_four_profile_equivalence.py"
       ],
-      "gap": "Production publication path currently materializes the AIRCRAFT representative lane only."
+      "gap": "Exact 40 AIRCRAFT / 72 MISSION_SYSTEM_INSTANCE / 4 TARGET_PAIR implementation is present; exact-head Hosted CI 14/14 is pending."
     },
     {
       "id": "ED2-SRC-001",
       "batch": "B1",
       "requirement": "All six governed source families have explicit production adapter boundaries and fail-closed unsupported-profile behavior.",
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_CI",
       "current_evidence": [
         "src/tpaa_ingest/production_source.py",
         "src/tpaa_ingest/production_flight_json.py",
-        "src/tpaa_runtime/durable_jobs.py"
+        "src/tpaa_ingest/production_interchange_json.py",
+        "docs/baseline/ED2-CONFORMANCE/PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY.json",
+        "docs/baseline/ED2-CONFORMANCE/P1_SOURCE_FAMILY_POLICY.json",
+        "src/tpaa_runtime/production_p1_source_policy.py",
+        "src/tpaa_runtime/production_p1_request.py",
+        "tests/unit/ingest/test_ed2_production_interchange.py",
+        "tests/unit/ingest/test_ed2_production_flight_action.py",
+        "tests/unit/runtime/test_ed2_production_p1_request.py"
       ],
-      "gap": "Only FLIGHT has a registered production adapter and durable import path."
+      "gap": "Six production source families and trusted interchange/action profiles are implemented; exact-head Hosted CI 14/14 is pending."
     },
     {
       "id": "ED2-WORLD-001",
       "batch": "B1",
       "requirement": "Production P1 binds governed Context, Episode, Stage, World and event/relation prerequisites before Metric execution.",
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_CI",
       "current_evidence": [
-        "src/tpaa_episode",
-        "src/tpaa_world",
-        "src/tpaa_runtime/production_worker.py"
+        "baseline/CB-1.4.0/canonical/STAGE_REGISTRY.json",
+        "baseline/CB-1.4.0/canonical/WORLD_CAPABILITY_REGISTRY.json",
+        "docs/baseline/ED2-CONFORMANCE/P1_WORLD_AUTHORITY_POLICY.json",
+        "src/tpaa_episode/production_stage.py",
+        "src/tpaa_runtime/production_p1_world.py",
+        "src/tpaa_runtime/production_worker.py",
+        "src/tpaa_runtime/durable_jobs.py",
+        "tests/unit/episode/test_ed2_production_stage.py",
+        "tests/unit/application/test_prcb_c2_production_pipeline.py",
+        "tools/packaging/prcb_runtime_entry.py",
+        "src/tpaa_qualification/prcb_c5_service_e2e.py",
+        "tools/testing/prcb_c5_four_profile_equivalence.py"
       ],
-      "gap": "Qualified Episode/Stage/World projectors exist, but production P1 uses a reduced world with no Stage sequence."
+      "gap": "Governed BASIC_FLIGHT Episode/Stage and BASIC_CORE C/W/A/M World/Relation chain is implemented; exact-head Hosted CI 14/14 is pending."
     },
     {
       "id": "ED2-P2P6-001",
