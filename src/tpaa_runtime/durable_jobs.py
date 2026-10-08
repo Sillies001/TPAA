@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -41,14 +41,14 @@ from tpaa_capability.p3_twin import P3CapabilityEstimate
 from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
 from tpaa_capability.p6_forecast import P6ForecastRevision
 from tpaa_ingest import (
-    PRODUCTION_FLIGHT_ADAPTER_ID,
-    PRODUCTION_FLIGHT_ADAPTER_VERSION,
-    PRODUCTION_FLIGHT_MEDIA_TYPE,
     ProductionFlightJsonAdapter,
+    ProductionInterchangeJsonAdapter,
     ProductionSourceAdapterError,
+    SourceAdapter,
     SourceFamily,
     build_production_source_registry,
     validate_production_flight_document,
+    validate_production_interchange_document,
 )
 from tpaa_platform import SpawnWorkerDispatcher, WorkerPayload
 from tpaa_storage import (
@@ -247,7 +247,6 @@ class ProductionJobExecutor:
     def _source_import(payload: Mapping[str, object]) -> SourceImportCommand:
         source_json = _text(payload.get("source_json"), field="source_json")
         source_bytes = source_json.encode("utf-8")
-        document = validate_production_flight_document(source_bytes)
         metadata = _mapping(payload.get("source_import"), field="source_import")
         family_text = _text(metadata.get("source_family"), field="source_family")
         try:
@@ -257,15 +256,26 @@ class ProductionJobExecutor:
                 "UNSUPPORTED_ADAPTER",
                 family_text,
             ) from exc
-        if family is not SourceFamily.FLIGHT:
-            raise ProductionJobExecutionError("UNSUPPORTED_ADAPTER", family.value)
+
+        adapter: SourceAdapter
+        if family is SourceFamily.FLIGHT:
+            document = validate_production_flight_document(source_bytes)
+            adapter = ProductionFlightJsonAdapter()
+            document_session_id = document.get("session_id")
+        else:
+            adapter = ProductionInterchangeJsonAdapter(family)
+            interchange = validate_production_interchange_document(
+                source_bytes,
+                expected_family=family,
+            )
+            document_session_id = interchange.session_id
+
         session_id = _text(metadata.get("session_id"), field="session_id")
-        if document.get("session_id") != session_id:
+        if document_session_id != session_id:
             raise ProductionJobExecutionError(
                 "PRCB_C2_SOURCE_SESSION_DRIFT",
                 session_id,
             )
-        adapter = ProductionFlightJsonAdapter()
         envelope = adapter.inspect(
             source_ref=_text(metadata.get("source_ref"), field="source_ref"),
             data=source_bytes,
@@ -279,10 +289,12 @@ class ProductionJobExecutor:
                 )
             ),
         )
+        descriptor = adapter.descriptor
         if (
-            envelope.adapter_id != PRODUCTION_FLIGHT_ADAPTER_ID
-            or envelope.adapter_version != PRODUCTION_FLIGHT_ADAPTER_VERSION
-            or envelope.media_type != PRODUCTION_FLIGHT_MEDIA_TYPE
+            envelope.adapter_id != descriptor.adapter_id
+            or envelope.adapter_version != descriptor.adapter_version
+            or envelope.media_type not in descriptor.media_types
+            or envelope.source_family is not family
         ):
             raise ProductionJobExecutionError(
                 "PRCB_C2_ADAPTER_IDENTITY_DRIFT",
@@ -358,6 +370,56 @@ class ProductionJobExecutor:
         )
 
     @staticmethod
+    def _source_imports(
+        payload: Mapping[str, object],
+    ) -> tuple[SourceImportCommand, ...]:
+        raw_documents = payload.get("source_documents")
+        if raw_documents is None:
+            return (ProductionJobExecutor._source_import(payload),)
+        if (
+            not isinstance(raw_documents, Sequence)
+            or isinstance(raw_documents, (str, bytes))
+            or not raw_documents
+        ):
+            raise ProductionJobExecutionError(
+                "ED2_SOURCE_SET_INVALID",
+                "source_documents",
+            )
+
+        commands: list[SourceImportCommand] = []
+        source_ids: set[str] = set()
+        artifact_ids: set[str] = set()
+        session_id: str | None = None
+        for index, raw in enumerate(raw_documents):
+            document = _mapping(
+                raw,
+                field=f"source_documents[{index}]",
+            )
+            command = ProductionJobExecutor._source_import(document)
+            if session_id is None:
+                session_id = command.session_id
+            elif command.session_id != session_id:
+                raise ProductionJobExecutionError(
+                    "ED2_SOURCE_SET_SESSION_DRIFT",
+                    command.session_id,
+                )
+            if command.source_id in source_ids:
+                raise ProductionJobExecutionError(
+                    "ED2_SOURCE_SET_IDENTITY_DUPLICATE",
+                    command.source_id,
+                )
+            if command.artifact_id in artifact_ids:
+                raise ProductionJobExecutionError(
+                    "ED2_SOURCE_SET_IDENTITY_DUPLICATE",
+                    command.artifact_id,
+                )
+            source_ids.add(command.source_id)
+            artifact_ids.add(command.artifact_id)
+            commands.append(command)
+        return tuple(commands)
+
+
+    @staticmethod
     def _bind_parquet(
         product: ProductionP1WorkerProduct,
         *,
@@ -395,11 +457,14 @@ class ProductionJobExecutor:
                 "PRCB_C2_DOMAIN_COMMAND_UNSUPPORTED",
                 command,
             )
-        source_command = self._source_import(payload)
-        try:
-            self._adapters.require_family(source_command.envelope.source_family)
-        except ProductionSourceAdapterError as exc:
-            raise ProductionJobExecutionError(exc.code, exc.detail) from exc
+        source_commands = self._source_imports(payload)
+        for source_command in source_commands:
+            try:
+                self._adapters.require_family(
+                    source_command.envelope.source_family
+                )
+            except ProductionSourceAdapterError as exc:
+                raise ProductionJobExecutionError(exc.code, exc.detail) from exc
 
         result = self._dispatcher.dispatch(
             WorkerPayload(
@@ -465,10 +530,12 @@ class ProductionJobExecutor:
                     prerequisite.values,
                     field_kinds=prerequisite.field_kinds,
                 )
-            ProductionImportService(
+            import_service = ProductionImportService(
                 adapters=self._adapters,
                 provenance=SourceProvenanceRepository(uow.canonical_rows),
-            ).register(source_command)
+            )
+            for source_command in source_commands:
+                import_service.register(source_command)
             uow.publication.publish(
                 product.release,
                 idempotency_key=f"{job_key}:P1_RELEASE",

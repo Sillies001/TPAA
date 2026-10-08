@@ -10,7 +10,6 @@ from tpaa_ingest import (
     FROZEN_SOURCE_FAMILIES,
     PRODUCTION_FLIGHT_MEDIA_TYPE,
     ProductionFlightJsonAdapter,
-    ProductionSourceAdapterError,
     SourceFamily,
     build_production_source_registry,
 )
@@ -121,12 +120,14 @@ def test_prcb_c2_production_adapter_is_explicit_and_no_fallback() -> None:
     assert len(envelope.artifact_sha256) == 64
 
     registry = build_production_source_registry()
+    inventory = registry.inventory()
+    assert {item.source_family for item in inventory} == FROZEN_SOURCE_FAMILIES
     assert registry.require_family(SourceFamily.FLIGHT) == (adapter.descriptor,)
-    unsupported = FROZEN_SOURCE_FAMILIES - {SourceFamily.FLIGHT}
-    for family in unsupported:
-        with pytest.raises(ProductionSourceAdapterError) as caught:
-            registry.require_family(family)
-        assert caught.value.code == "UNSUPPORTED_ADAPTER"
+    for family in FROZEN_SOURCE_FAMILIES - {SourceFamily.FLIGHT}:
+        descriptors = registry.require_family(family)
+        assert len(descriptors) == 1
+        assert descriptors[0].source_family is family
+        assert descriptors[0].external_decoder is True
 
 
 def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(

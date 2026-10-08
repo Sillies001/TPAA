@@ -8,6 +8,7 @@ import math
 from typing import cast
 from uuid import UUID
 
+from .production_interchange_json import production_interchange_descriptors
 from .production_source import (
     ProductionSourceAdapterError,
     SourceAdapterDescriptor,
@@ -174,7 +175,9 @@ class ProductionFlightJsonAdapter:
 
 
 def build_production_source_registry() -> SourceAdapterRegistry:
-    """Return the production registry; unimplemented frozen families stay explicit."""
+    """Return exact production descriptors for all six frozen source families."""
 
-    adapter = ProductionFlightJsonAdapter()
-    return SourceAdapterRegistry((adapter.descriptor,))
+    flight = ProductionFlightJsonAdapter()
+    return SourceAdapterRegistry(
+        (flight.descriptor, *production_interchange_descriptors())
+    )
