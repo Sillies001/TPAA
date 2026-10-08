@@ -279,6 +279,17 @@ _DEFAULT_QUALIFICATION_FLIGHT = (
 )
 
 
+def _canonical_input_hash(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("ascii")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def _lineage_families(family: str) -> list[str]:
     if family in {"AIRCRAFT_FLIGHT", "AIRCRAFT_ENERGY", "AIRCRAFT_CONTROL_RESPONSE",
                   "AIRCRAFT_HANDLING", "AIRCRAFT_PERSISTENCE"}:
@@ -303,7 +314,7 @@ def _interchange_source_document(
     *,
     session_id: str,
     family: SourceFamily,
-    metric_codes: list[str],
+    metric_input_hashes: dict[str, str],
     ordinal: int,
 ) -> dict[str, object]:
     descriptor = descriptor_for_interchange_family(family)
@@ -327,7 +338,7 @@ def _interchange_source_document(
         "payload": {
             "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
             "qualification_only": True,
-            "metric_codes": metric_codes,
+            "metric_input_hashes": metric_input_hashes,
         },
     }
     return {
@@ -400,12 +411,19 @@ def build_full_p1_request_contract(
         definition.metric_code: _lineage_families(definition.family)
         for definition in plan.definitions
     }
-    family_metric_codes = {
-        family.value: sorted(
-            code
-            for code, families in metric_lineage.items()
-            if family.value in families
-        )
+    input_hashes = {
+        code: _canonical_input_hash(inputs[code])
+        for code in plan.metric_codes
+    }
+    family_metric_hashes = {
+        family.value: {
+            code: input_hashes[code]
+            for code in sorted(
+                code
+                for code, families in metric_lineage.items()
+                if family.value in families
+            )
+        }
         for family in SourceFamily
     }
     source_documents: list[dict[str, object]] = [
@@ -462,7 +480,7 @@ def build_full_p1_request_contract(
             _interchange_source_document(
                 session_id=session_id,
                 family=family,
-                metric_codes=family_metric_codes[family.value],
+                metric_input_hashes=family_metric_hashes[family.value],
                 ordinal=ordinal,
             )
         )

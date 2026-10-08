@@ -137,3 +137,66 @@ def test_full_p1_source_set_rejects_cross_session_interchange() -> None:
         match="ED2_P1_SOURCE_SET_SESSION_DRIFT",
     ):
         select_production_p1_sources(payload)
+
+
+
+def test_full_p1_request_rejects_metric_input_drift_from_source_projection() -> None:
+    payload = copy.deepcopy(_contract())
+    inputs = payload["p1_catalog_inputs"]
+    assert isinstance(inputs, dict)
+    metric = inputs["P1-AIR-004"]
+    assert isinstance(metric, dict)
+    metric["ed2_tamper_probe"] = "CHANGED_AFTER_SOURCE_PROJECTION"
+
+    catalog = build_production_p1_catalog_contract(AUTHORITY)
+    selection = select_production_p1_sources(payload)
+    with pytest.raises(
+        ProductionP1RequestError,
+        match="ED2_P1_SOURCE_INPUT_HASH_DRIFT",
+    ):
+        parse_production_p1_request(
+            payload,
+            contract=catalog,
+            aircraft_id=AIRCRAFT_ID,
+            source_selection=selection,
+        )
+
+
+def test_full_p1_request_rejects_missing_source_input_binding_claim() -> None:
+    payload = copy.deepcopy(_contract())
+    sources = payload["source_documents"]
+    assert isinstance(sources, list)
+    mission_raw = next(
+        item
+        for item in sources
+        if _source_family(item) == "MISSION_AVIONICS"
+    )
+    assert isinstance(mission_raw, dict)
+    source_json = mission_raw["source_json"]
+    assert isinstance(source_json, str)
+    document = json.loads(source_json)
+    assert isinstance(document, dict)
+    raw_payload = document["payload"]
+    assert isinstance(raw_payload, dict)
+    hashes = raw_payload["metric_input_hashes"]
+    assert isinstance(hashes, dict)
+    code = next(iter(hashes))
+    del hashes[code]
+    mission_raw["source_json"] = json.dumps(
+        document,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+    catalog = build_production_p1_catalog_contract(AUTHORITY)
+    selection = select_production_p1_sources(payload)
+    with pytest.raises(
+        ProductionP1RequestError,
+        match="ED2_P1_SOURCE_INPUT_BINDING_MISSING",
+    ):
+        parse_production_p1_request(
+            payload,
+            contract=catalog,
+            aircraft_id=AIRCRAFT_ID,
+            source_selection=selection,
+        )

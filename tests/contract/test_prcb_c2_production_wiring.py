@@ -14,6 +14,7 @@ def test_prcb_c2_production_runtime_has_no_fixture_or_inmemory_authority() -> No
         ROOT / "src" / "tpaa_runtime" / "production_p1_materialization.py",
         ROOT / "src" / "tpaa_runtime" / "production_p1_request.py",
         ROOT / "src" / "tpaa_ingest" / "production_flight_json.py",
+        ROOT / "src" / "tpaa_ingest" / "production_interchange_json.py",
     ]
     source = "\n".join(path.read_text(encoding="utf-8") for path in paths)
     assert "tests/fixtures" not in source
@@ -53,3 +54,19 @@ def test_prcb_c2_qualification_source_is_outside_test_fixture_package() -> None:
     assert "tests/fixtures" not in source.as_posix()
     text = source.read_text(encoding="utf-8")
     assert '"schema": "TPAA_PRODUCTION_FLIGHT_SOURCE_V1"' in text
+
+
+
+def test_ed2_b1_production_p1_cannot_regress_to_representative_subset() -> None:
+    worker = (
+        ROOT / "src" / "tpaa_runtime" / "production_worker.py"
+    ).read_text(encoding="utf-8")
+    catalog = (
+        ROOT / "src" / "tpaa_runtime" / "production_p1_catalog.py"
+    ).read_text(encoding="utf-8")
+
+    assert "_REPRESENTATIVE_CODES" not in worker
+    assert "compute_representative_metrics" not in worker
+    assert "PRODUCTION_P1_CATALOG_METRIC_COUNT: Final = 116" in catalog
+    assert "build_m3_metric_execution_plan" in catalog
+    assert "build_m3_runtime_plugin_registry" in catalog

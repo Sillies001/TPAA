@@ -7,6 +7,8 @@ fixtures, never guesses a subject identity and never silently drops a Metric.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import cast
@@ -81,6 +83,7 @@ class ProductionP1SourceRef:
     adapter_id: str
     adapter_version: str
     source_ref: str
+    metric_input_hashes: dict[str, str]
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,6 +135,32 @@ def _uuid(value: object, *, field: str) -> str:
             field,
         )
     return text
+
+
+def _canonical_input_hash(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("ascii")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _metric_input_hashes(
+    value: object,
+    *,
+    field: str,
+) -> dict[str, str]:
+    raw = _mapping(value, field=field)
+    return {
+        metric_code: _hash64(
+            digest,
+            field=f"{field}.{metric_code}",
+        )
+        for metric_code, digest in raw.items()
+    }
 
 
 def _hash64(value: object, *, field: str) -> str:
@@ -279,37 +308,89 @@ def parse_production_p1_request(
         )
     required_by_family: dict[str, frozenset[SourceFamily]] = {
         "REFERENCE_TRUTH": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.FLIGHT,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
         "TIME_ALIGNMENT": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.FLIGHT,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
-        "AIRCRAFT_FLIGHT": frozenset({SourceFamily.FLIGHT}),
-        "AIRCRAFT_ENERGY": frozenset({SourceFamily.FLIGHT}),
-        "AIRCRAFT_CONTROL_RESPONSE": frozenset({SourceFamily.FLIGHT}),
-        "AIRCRAFT_HANDLING": frozenset({SourceFamily.FLIGHT}),
-        "AIRCRAFT_PERSISTENCE": frozenset({SourceFamily.FLIGHT}),
+        "AIRCRAFT_FLIGHT": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
+        ),
+        "AIRCRAFT_ENERGY": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
+        ),
+        "AIRCRAFT_CONTROL_RESPONSE": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
+        ),
+        "AIRCRAFT_HANDLING": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
+        ),
+        "AIRCRAFT_PERSISTENCE": frozenset(
+            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
+        ),
         "SENSOR_DETECTION": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
         "SENSOR_ACCURACY": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
         "TRACK_PERFORMANCE": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
         "ASSOCIATION_IDENTIFICATION": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
         "PASSIVE_SENSOR": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
         "RWR_ESM": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
-        "DATALINK": frozenset({SourceFamily.TDL}),
+        "DATALINK": frozenset(
+            {
+                SourceFamily.TDL,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
+        ),
         "SENSOR_FUSION": frozenset(
-            {SourceFamily.MISSION_AVIONICS, SourceFamily.RANGE_ACMI}
+            {
+                SourceFamily.MISSION_AVIONICS,
+                SourceFamily.RANGE_ACMI,
+                SourceFamily.SCENARIO,
+            }
         ),
     }
     definition_by_code = {
@@ -370,6 +451,25 @@ def parse_production_p1_request(
                 "ED2_P1_SOURCE_LINEAGE_OVERRIDE_FORBIDDEN",
                 code,
             )
+        base_input_hash = _canonical_input_hash(inputs[code])
+        for family in families:
+            if family is SourceFamily.FLIGHT:
+                continue
+            claims = [
+                ref.metric_input_hashes[code]
+                for ref in source_selection.refs_by_family[family]
+                if code in ref.metric_input_hashes
+            ]
+            if not claims:
+                raise ProductionP1RequestError(
+                    "ED2_P1_SOURCE_INPUT_BINDING_MISSING",
+                    f"{code}:{family.value}",
+                )
+            if any(claim != base_input_hash for claim in claims):
+                raise ProductionP1RequestError(
+                    "ED2_P1_SOURCE_INPUT_HASH_DRIFT",
+                    f"{code}:{family.value}",
+                )
         refs = [
             ref
             for family in sorted(families, key=lambda item: item.value)
@@ -515,6 +615,7 @@ def _inspect_source_document(
                 flight.get("session_id"),
                 field=f"source_documents[{index}].session_id",
             )
+            metric_input_hashes: dict[str, str] = {}
             adapter = ProductionFlightJsonAdapter()
         else:
             interchange = validate_production_interchange_document(
@@ -522,6 +623,10 @@ def _inspect_source_document(
                 expected_family=family,
             )
             session_id = interchange.session_id
+            metric_input_hashes = _metric_input_hashes(
+                interchange.payload.get("metric_input_hashes"),
+                field=f"source_documents[{index}].metric_input_hashes",
+            )
             adapter = ProductionInterchangeJsonAdapter(family)
 
         envelope = adapter.inspect(
@@ -574,6 +679,7 @@ def _inspect_source_document(
             adapter_id=envelope.adapter_id,
             adapter_version=envelope.adapter_version,
             source_ref=envelope.source_ref,
+            metric_input_hashes=metric_input_hashes,
         ),
     )
 
