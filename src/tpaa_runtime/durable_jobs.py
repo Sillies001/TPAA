@@ -73,6 +73,7 @@ from .production_worker import (
     P6_COUNTERFACTUAL_COMMAND,
     P6_FORECAST_COMMAND,
     ProductionP1WorkerProduct,
+    ProductionPrerequisiteRow,
     ProductionP2AttributionWorkerInput,
     ProductionP3EstimateWorkerInput,
     ProductionP4AssessmentWorkerInput,
@@ -145,6 +146,102 @@ def _number(value: object, *, field: str) -> float:
     if isinstance(value, (int, float)):
         return float(value)
     raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
+
+
+_PREREQUISITE_IDENTITY_COLUMNS: dict[str, str] = {
+    "registry.training_session": "session_id",
+    "registry.dataset_snapshot": "dataset_snapshot_id",
+    "master.aircraft_model": "aircraft_model_id",
+    "master.aircraft": "aircraft_id",
+    "master.entity": "entity_id",
+    "master.aircraft_instance": "aircraft_instance_id",
+    "context.evaluation_context": "context_id",
+    "episode.training_episode": "episode_id",
+    "master.mission_system_instance": "mission_system_instance_id",
+    "metric.metric_definition": "metric_definition_id",
+}
+
+
+def _logical_prerequisite_value(
+    value: object,
+    *,
+    field_kind: str,
+) -> object:
+    if isinstance(value, Decimal):
+        return float(value)
+    if field_kind in {"json", "text_array", "uuid_array"}:
+        parsed = value
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError as exc:
+                raise ProductionJobExecutionError(
+                    "ED2_P1_PREREQUISITE_STORED_VALUE_INVALID",
+                    field_kind,
+                ) from exc
+        if field_kind in {"text_array", "uuid_array"}:
+            if isinstance(parsed, tuple):
+                return list(parsed)
+            if not isinstance(parsed, list):
+                raise ProductionJobExecutionError(
+                    "ED2_P1_PREREQUISITE_STORED_VALUE_INVALID",
+                    field_kind,
+                )
+        return parsed
+    return value
+
+
+def _persist_or_verify_prerequisite(
+    uow: RuntimeCanonicalUnitOfWork,
+    prerequisite: ProductionPrerequisiteRow,
+) -> None:
+    identity_column = _PREREQUISITE_IDENTITY_COLUMNS.get(prerequisite.table)
+    if identity_column is None:
+        raise ProductionJobExecutionError(
+            "ED2_P1_PREREQUISITE_TABLE_UNSUPPORTED",
+            prerequisite.table,
+        )
+    if identity_column not in prerequisite.values:
+        raise ProductionJobExecutionError(
+            "ED2_P1_PREREQUISITE_IDENTITY_MISSING",
+            f"{prerequisite.table}:{identity_column}",
+        )
+    identity = prerequisite.values[identity_column]
+    columns = tuple(prerequisite.values)
+    existing = uow.canonical_rows.one(
+        prerequisite.table,
+        where={identity_column: identity},
+        columns=columns,
+    )
+    if existing is None:
+        uow.canonical_rows.insert(
+            prerequisite.table,
+            prerequisite.values,
+            field_kinds=prerequisite.field_kinds,
+        )
+        return
+
+    mismatched: list[str] = []
+    for column, expected in prerequisite.values.items():
+        kind = prerequisite.field_kinds.get(column, "scalar")
+        actual_logical = _logical_prerequisite_value(
+            existing[column],
+            field_kind=kind,
+        )
+        expected_logical = _logical_prerequisite_value(
+            expected,
+            field_kind=kind,
+        )
+        if actual_logical != expected_logical:
+            mismatched.append(column)
+    if mismatched:
+        raise ProductionJobExecutionError(
+            "ED2_P1_PREREQUISITE_IDENTITY_DRIFT",
+            (
+                f"{prerequisite.table}:{identity_column}={identity}:"
+                f"fields={','.join(sorted(mismatched))}"
+            ),
+        )
 
 
 def _audit_actor_id(actor: str) -> str | None:
@@ -525,11 +622,7 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             for prerequisite in product.prerequisites:
-                uow.canonical_rows.insert(
-                    prerequisite.table,
-                    prerequisite.values,
-                    field_kinds=prerequisite.field_kinds,
-                )
+                _persist_or_verify_prerequisite(uow, prerequisite)
             import_service = ProductionImportService(
                 adapters=self._adapters,
                 provenance=SourceProvenanceRepository(uow.canonical_rows),
