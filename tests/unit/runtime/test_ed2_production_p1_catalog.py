@@ -9,6 +9,7 @@ from tpaa_runtime.production_p1_catalog import (
     PRODUCTION_P1_SUBJECT_COUNTS,
     ProductionP1CatalogError,
     build_production_p1_catalog_contract,
+    production_p1_required_world_kinds,
     validate_production_p1_input_membership,
 )
 
@@ -118,3 +119,21 @@ def test_catalog_execution_record_retains_validated_plugin_output_without_hash_d
         )
         assert record.plugin_output_hash
         assert record.logical_hash
+
+
+
+def test_production_p1_definition_world_requirements_are_release_independent() -> None:
+    contract = build_production_p1_catalog_contract(AUTHORITY)
+
+    for definition in contract.plan.definitions:
+        kinds = production_p1_required_world_kinds(definition)
+        assert all(kind in {"TRUTH", "MACHINE"} for kind in kinds)
+        assert all("/" not in kind for kind in kinds)
+        if definition.subject_type == "AIRCRAFT":
+            assert kinds == ("TRUTH",)
+        else:
+            assert definition.subject_type in {
+                "MISSION_SYSTEM_INSTANCE",
+                "TARGET_PAIR",
+            }
+            assert kinds == ("TRUTH", "MACHINE")

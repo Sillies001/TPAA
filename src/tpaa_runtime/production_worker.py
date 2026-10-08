@@ -60,6 +60,7 @@ from .production_p1_catalog import (
     ProductionP1CatalogError,
     build_production_p1_catalog_contract,
     execute_production_p1_catalog,
+    production_p1_required_world_kinds,
 )
 from .production_p1_materialization import (
     ProductionP1AircraftBinding,
@@ -750,7 +751,9 @@ def build_p1_worker_product(
                     "calculation_layer": "METRIC",
                     "capability_level": "CAP_L1_OBSERVED",
                     "capability_dimension": capability_dimension,
-                    "required_world_products": [world_id],
+                    "required_world_products": list(
+                        production_p1_required_world_kinds(definition)
+                    ),
                     "scope": "EPISODE",
                     "spec_uri": (
                         "canonical://P1_METRIC_CATALOG/"

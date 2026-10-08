@@ -17,6 +17,7 @@ from tpaa_metric import (
     M3_RUNTIME_METRIC_COUNT,
     M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
     CatalogMetricEngine,
+    M2MetricDefinition,
     M2MetricExecutionBatch,
     M2MetricExecutionPlan,
     build_m3_metric_execution_plan,
@@ -36,6 +37,25 @@ PRODUCTION_P1_SUBJECT_COUNTS: Final = {
     "MISSION_SYSTEM_INSTANCE": 72,
     "TARGET_PAIR": 4,
 }
+PRODUCTION_P1_REQUIRED_WORLD_KINDS: Final = {
+    "AIRCRAFT": ("TRUTH",),
+    "MISSION_SYSTEM_INSTANCE": ("TRUTH", "MACHINE"),
+    "TARGET_PAIR": ("TRUTH", "MACHINE"),
+}
+
+
+def production_p1_required_world_kinds(
+    definition: M2MetricDefinition,
+) -> tuple[str, ...]:
+    """Return stable Definition-level World kinds, never Release instance IDs."""
+
+    try:
+        return PRODUCTION_P1_REQUIRED_WORLD_KINDS[definition.subject_type]
+    except KeyError as exc:
+        raise ProductionP1CatalogError(
+            "ED2_P1_REQUIRED_WORLD_SUBJECT_UNSUPPORTED",
+            definition.subject_type,
+        ) from exc
 
 
 class ProductionP1CatalogError(RuntimeError):
