@@ -15,20 +15,128 @@
     "AUDIO_VIDEO is a registered production family but is not a required P1 metric source in this policy version."
   ],
   "families": [
-    {"metric_family":"REFERENCE_TRUTH","required_source_families":["FLIGHT","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"TIME_ALIGNMENT","required_source_families":["FLIGHT","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"AIRCRAFT_FLIGHT","required_source_families":["FLIGHT","SCENARIO"]},
-    {"metric_family":"AIRCRAFT_ENERGY","required_source_families":["FLIGHT","SCENARIO"]},
-    {"metric_family":"AIRCRAFT_CONTROL_RESPONSE","required_source_families":["FLIGHT","SCENARIO"]},
-    {"metric_family":"AIRCRAFT_HANDLING","required_source_families":["FLIGHT","SCENARIO"]},
-    {"metric_family":"AIRCRAFT_PERSISTENCE","required_source_families":["FLIGHT","SCENARIO"]},
-    {"metric_family":"SENSOR_DETECTION","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"SENSOR_ACCURACY","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"TRACK_PERFORMANCE","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"ASSOCIATION_IDENTIFICATION","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"PASSIVE_SENSOR","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"RWR_ESM","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"DATALINK","required_source_families":["TDL","RANGE_ACMI","SCENARIO"]},
-    {"metric_family":"SENSOR_FUSION","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]}
-  ]
+    {
+      "metric_family": "REFERENCE_TRUTH",
+      "required_source_families": [
+        "FLIGHT",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "TIME_ALIGNMENT",
+      "required_source_families": [
+        "FLIGHT",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "AIRCRAFT_FLIGHT",
+      "required_source_families": [
+        "FLIGHT",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "AIRCRAFT_ENERGY",
+      "required_source_families": [
+        "FLIGHT",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "AIRCRAFT_CONTROL_RESPONSE",
+      "required_source_families": [
+        "FLIGHT",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "AIRCRAFT_HANDLING",
+      "required_source_families": [
+        "FLIGHT",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "AIRCRAFT_PERSISTENCE",
+      "required_source_families": [
+        "FLIGHT",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "SENSOR_DETECTION",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "SENSOR_ACCURACY",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "TRACK_PERFORMANCE",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "ASSOCIATION_IDENTIFICATION",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "PASSIVE_SENSOR",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "RWR_ESM",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "DATALINK",
+      "required_source_families": [
+        "TDL",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    },
+    {
+      "metric_family": "SENSOR_FUSION",
+      "required_source_families": [
+        "MISSION_AVIONICS",
+        "RANGE_ACMI",
+        "SCENARIO"
+      ]
+    }
+  ],
+  "missing_source_behavior": {
+    "classification": "BUSINESS_INSUFFICIENCY",
+    "metric_status": "INSUFFICIENT_DATA",
+    "whole_job_failure": false,
+    "formula_execution_when_missing": false,
+    "reason_code_prefix": "ED2_SOURCE_FAMILY_MISSING_",
+    "malformed_source_contract_failure": true
+  }
 }

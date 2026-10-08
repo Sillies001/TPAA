@@ -200,3 +200,70 @@ def test_full_p1_request_rejects_missing_source_input_binding_claim() -> None:
             aircraft_id=AIRCRAFT_ID,
             source_selection=selection,
         )
+
+
+
+def test_full_p1_request_marks_missing_required_source_as_business_insufficiency() -> None:
+    payload = copy.deepcopy(_contract())
+    sources = payload["source_documents"]
+    assert isinstance(sources, list)
+    payload["source_documents"] = [
+        item
+        for item in sources
+        if _source_family(item) != "SCENARIO"
+    ]
+    lineage = payload["metric_input_source_families"]
+    assert isinstance(lineage, dict)
+    for metric_code, raw_families in lineage.items():
+        assert isinstance(metric_code, str)
+        assert isinstance(raw_families, list)
+        lineage[metric_code] = [
+            family
+            for family in raw_families
+            if family != "SCENARIO"
+        ]
+
+    catalog = build_production_p1_catalog_contract(AUTHORITY)
+    selection = select_production_p1_sources(payload)
+    assert selection.source_count == 5
+    request = parse_production_p1_request(
+        payload,
+        contract=catalog,
+        aircraft_id=AIRCRAFT_ID,
+        source_selection=selection,
+    )
+
+    assert len(request.inputs) == 116
+    for metric_input in request.inputs.values():
+        sufficiency = metric_input["_source_sufficiency"]
+        assert isinstance(sufficiency, dict)
+        assert sufficiency["status"] == "INSUFFICIENT_DATA"
+        assert sufficiency["missing_source_families"] == ["SCENARIO"]
+        assert sufficiency["reason_codes"] == [
+            "ED2_SOURCE_FAMILY_MISSING_SCENARIO"
+        ]
+
+
+def test_full_p1_request_forbids_caller_supplied_source_sufficiency() -> None:
+    payload = _contract()
+    inputs = payload["p1_catalog_inputs"]
+    assert isinstance(inputs, dict)
+    first = next(iter(inputs.values()))
+    assert isinstance(first, dict)
+    first["_source_sufficiency"] = {
+        "status": "READY",
+        "missing_source_families": [],
+    }
+    catalog = build_production_p1_catalog_contract(AUTHORITY)
+    selection = select_production_p1_sources(payload)
+
+    with pytest.raises(
+        ProductionP1RequestError,
+        match="ED2_P1_SOURCE_LINEAGE_OVERRIDE_FORBIDDEN",
+    ):
+        parse_production_p1_request(
+            payload,
+            contract=catalog,
+            aircraft_id=AIRCRAFT_ID,
+            source_selection=selection,
+        )

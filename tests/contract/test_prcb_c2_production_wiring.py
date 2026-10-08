@@ -13,6 +13,7 @@ def test_prcb_c2_production_runtime_has_no_fixture_or_inmemory_authority() -> No
         ROOT / "src" / "tpaa_runtime" / "production_p1_catalog.py",
         ROOT / "src" / "tpaa_runtime" / "production_p1_materialization.py",
         ROOT / "src" / "tpaa_runtime" / "production_p1_request.py",
+        ROOT / "src" / "tpaa_runtime" / "production_p1_source_policy.py",
         ROOT / "src" / "tpaa_ingest" / "production_flight_json.py",
         ROOT / "src" / "tpaa_ingest" / "production_interchange_json.py",
     ]

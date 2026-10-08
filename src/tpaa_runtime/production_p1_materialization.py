@@ -352,13 +352,64 @@ def materialize_production_p1_release(
             continue
 
         input_payload = inputs[record.metric_code]
+        if _json_hash(dict(input_payload)) != record.input_payload_hash:
+            raise ProductionP1MaterializationError(
+                "ED2_P1_INPUT_PAYLOAD_HASH_DRIFT",
+                record.metric_code,
+            )
         raw_source_lineage = input_payload.get("_source_lineage")
-        if (
-            not isinstance(raw_source_lineage, list)
-            or not raw_source_lineage
-        ):
+        if not isinstance(raw_source_lineage, list):
             raise ProductionP1MaterializationError(
                 "ED2_P1_SOURCE_LINEAGE_MISSING",
+                record.metric_code,
+            )
+        raw_source_sufficiency = input_payload.get("_source_sufficiency")
+        if not isinstance(raw_source_sufficiency, Mapping) or not all(
+            isinstance(key, str)
+            for key in raw_source_sufficiency
+        ):
+            raise ProductionP1MaterializationError(
+                "ED2_P1_SOURCE_SUFFICIENCY_MISSING",
+                record.metric_code,
+            )
+        source_sufficiency = dict(raw_source_sufficiency)
+        source_status = source_sufficiency.get("status")
+        if source_status not in {"READY", "INSUFFICIENT_DATA"}:
+            raise ProductionP1MaterializationError(
+                "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
+                f"{record.metric_code}:{source_status!r}",
+            )
+        missing_sources = source_sufficiency.get(
+            "missing_source_families"
+        )
+        source_reasons = source_sufficiency.get("reason_codes")
+        if source_status == "READY":
+            if raw_source_lineage == []:
+                raise ProductionP1MaterializationError(
+                    "ED2_P1_SOURCE_LINEAGE_MISSING",
+                    record.metric_code,
+                )
+            if missing_sources != [] or source_reasons != []:
+                raise ProductionP1MaterializationError(
+                    "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
+                    record.metric_code,
+                )
+        elif (
+            not isinstance(missing_sources, list)
+            or not missing_sources
+            or not all(
+                isinstance(item, str) and item
+                for item in missing_sources
+            )
+            or not isinstance(source_reasons, list)
+            or not source_reasons
+            or not all(
+                isinstance(item, str) and item
+                for item in source_reasons
+            )
+        ):
+            raise ProductionP1MaterializationError(
+                "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
                 record.metric_code,
             )
         source_lineage: list[dict[str, object]] = []
@@ -375,6 +426,7 @@ def materialize_production_p1_release(
                 )
             )
         source_lineage_hash = _json_hash(source_lineage)
+        source_sufficiency_hash = _json_hash(source_sufficiency)
         system: ProductionP1SystemBinding | None = None
         if definition.subject_type == "MISSION_SYSTEM_INSTANCE":
             system = _system_binding(
@@ -446,6 +498,8 @@ def materialize_production_p1_release(
                         "input_payload_hash": record.input_payload_hash,
                         "source_lineage": source_lineage,
                         "source_lineage_hash": source_lineage_hash,
+                        "source_sufficiency": source_sufficiency,
+                        "source_sufficiency_hash": source_sufficiency_hash,
                     },
                     algorithm_versions={
                         "algorithm_id": record.algorithm_id,

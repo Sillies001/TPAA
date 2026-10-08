@@ -13,6 +13,7 @@ from tpaa_ingest import (
     production_interchange_profile,
 )
 from tpaa_runtime.production_p1_source_policy import (
+    PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX,
     PRODUCTION_P1_SOURCE_POLICY_SCHEMA,
     PRODUCTION_P1_SOURCE_POLICY_VERSION,
     production_p1_source_family_policy,
@@ -182,6 +183,16 @@ def test_ed2_p1_source_family_policy_matches_catalog_and_runtime() -> None:
     }
     runtime = production_p1_source_family_policy()
     assert set(by_family) == catalog_families == set(runtime)
+
+    behavior = _mapping(authority["missing_source_behavior"])
+    assert behavior == {
+        "classification": "BUSINESS_INSUFFICIENCY",
+        "metric_status": "INSUFFICIENT_DATA",
+        "whole_job_failure": False,
+        "formula_execution_when_missing": False,
+        "reason_code_prefix": PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX,
+        "malformed_source_contract_failure": True,
+    }
 
     for family in sorted(catalog_families):
         raw_sources = by_family[family]["required_source_families"]

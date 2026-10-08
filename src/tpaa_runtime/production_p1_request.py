@@ -27,6 +27,7 @@ from tpaa_ingest import (
 from .production_p1_catalog import ProductionP1CatalogContract
 from .production_p1_materialization import ProductionP1SystemBinding
 from .production_p1_source_policy import (
+    PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX,
     production_p1_required_source_families,
 )
 
@@ -318,7 +319,6 @@ def parse_production_p1_request(
         if (
             not isinstance(raw_families, Sequence)
             or isinstance(raw_families, (str, bytes))
-            or not raw_families
             or not all(isinstance(item, str) for item in raw_families)
         ):
             raise ProductionP1RequestError(
@@ -356,27 +356,26 @@ def parse_production_p1_request(
                 "ED2_P1_SOURCE_LINEAGE_POLICY_MISSING",
                 definition.family,
             ) from exc
-        if not required.issubset(set(families)):
-            raise ProductionP1RequestError(
-                "ED2_P1_SOURCE_LINEAGE_INSUFFICIENT",
-                (
-                    f"{code}:required="
-                    f"{sorted(item.value for item in required)!r}:"
-                    f"actual={sorted(item.value for item in families)!r}"
-                ),
-            )
-        if "_source_lineage" in inputs[code]:
+
+        if (
+            "_source_lineage" in inputs[code]
+            or "_source_sufficiency" in inputs[code]
+        ):
             raise ProductionP1RequestError(
                 "ED2_P1_SOURCE_LINEAGE_OVERRIDE_FORBIDDEN",
                 code,
             )
+
         base_input_hash = _canonical_input_hash(inputs[code])
+        refs: list[ProductionP1SourceRef] = []
         for family in families:
+            family_refs = source_selection.refs_by_family[family]
             if family is SourceFamily.FLIGHT:
+                refs.extend(family_refs)
                 continue
             claims = [
                 ref.metric_input_hashes[code]
-                for ref in source_selection.refs_by_family[family]
+                for ref in family_refs
                 if code in ref.metric_input_hashes
             ]
             if not claims:
@@ -389,11 +388,20 @@ def parse_production_p1_request(
                     "ED2_P1_SOURCE_INPUT_HASH_DRIFT",
                     f"{code}:{family.value}",
                 )
-        refs = [
-            ref
-            for family in sorted(families, key=lambda item: item.value)
-            for ref in source_selection.refs_by_family[family]
-        ]
+            refs.extend(
+                ref
+                for ref in family_refs
+                if code in ref.metric_input_hashes
+            )
+
+        actual = frozenset(families)
+        missing = tuple(
+            sorted(
+                required - actual,
+                key=lambda item: item.value,
+            )
+        )
+        status = "READY" if not missing else "INSUFFICIENT_DATA"
         inputs[code]["_source_lineage"] = [
             {
                 "source_family": ref.source_family.value,
@@ -404,8 +412,36 @@ def parse_production_p1_request(
                 "adapter_version": ref.adapter_version,
                 "source_ref": ref.source_ref,
             }
-            for ref in refs
+            for ref in sorted(
+                refs,
+                key=lambda item: (
+                    item.source_family.value,
+                    item.source_id,
+                    item.artifact_id,
+                ),
+            )
         ]
+        inputs[code]["_source_sufficiency"] = {
+            "status": status,
+            "required_source_families": [
+                item.value
+                for item in sorted(required, key=lambda item: item.value)
+            ],
+            "actual_source_families": [
+                item.value
+                for item in sorted(actual, key=lambda item: item.value)
+            ],
+            "missing_source_families": [
+                item.value for item in missing
+            ],
+            "reason_codes": [
+                (
+                    f"{PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX}"
+                    f"{item.value}"
+                )
+                for item in missing
+            ],
+        }
 
     system_codes = {
         definition.metric_code

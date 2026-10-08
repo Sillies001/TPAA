@@ -72,6 +72,13 @@ def _execution() -> tuple[
                 "source_ref": "test://ed2/materialization",
             }
         ]
+        payload["_source_sufficiency"] = {
+            "status": "READY",
+            "required_source_families": ["FLIGHT"],
+            "actual_source_families": ["FLIGHT"],
+            "missing_source_families": [],
+            "reason_codes": [],
+        }
         inputs[definition.metric_code] = payload
     batch = CatalogMetricEngine(
         contract.plan,
@@ -233,4 +240,30 @@ def test_system_metric_instance_requires_explicit_subject_binding() -> None:
             context=_context(),
             aircraft=_aircraft(),
             system_bindings=systems,
+        )
+
+
+
+def test_materialization_rejects_post_execution_input_evidence_drift() -> None:
+    contract, batch, inputs = _execution()
+    first_code = contract.metric_codes[0]
+    inputs[first_code]["_source_sufficiency"] = {
+        "status": "INSUFFICIENT_DATA",
+        "required_source_families": ["FLIGHT", "SCENARIO"],
+        "actual_source_families": ["FLIGHT"],
+        "missing_source_families": ["SCENARIO"],
+        "reason_codes": ["ED2_SOURCE_FAMILY_MISSING_SCENARIO"],
+    }
+
+    with pytest.raises(
+        ProductionP1MaterializationError,
+        match="ED2_P1_INPUT_PAYLOAD_HASH_DRIFT",
+    ):
+        materialize_production_p1_release(
+            contract=contract,
+            batch=batch,
+            inputs=inputs,
+            context=_context(),
+            aircraft=_aircraft(),
+            system_bindings=_systems(contract),
         )

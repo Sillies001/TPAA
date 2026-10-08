@@ -11,7 +11,7 @@ from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final
+from typing import Final, cast
 
 from tpaa_metric import (
     M3_RUNTIME_METRIC_COUNT,
@@ -20,6 +20,9 @@ from tpaa_metric import (
     M2MetricDefinition,
     M2MetricExecutionBatch,
     M2MetricExecutionPlan,
+    M2MetricPlugin,
+    M2MetricPluginRequest,
+    MetricPluginRegistry,
     build_m3_metric_execution_plan,
     build_m3_runtime_plugin_registry,
 )
@@ -157,6 +160,159 @@ def build_production_p1_catalog_contract(
     )
 
 
+def _source_sufficiency(
+    request: M2MetricPluginRequest,
+) -> Mapping[str, object] | None:
+    raw = request.input_payload.get("_source_sufficiency")
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping) or not all(
+        isinstance(key, str) for key in raw
+    ):
+        raise ProductionP1CatalogError(
+            "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
+            request.definition.metric_code,
+        )
+    return cast(Mapping[str, object], raw)
+
+
+def _source_gate_runtime_applicable(
+    request: M2MetricPluginRequest,
+) -> bool:
+    definition = request.definition
+    applicability = definition.applicability
+    mode = applicability.applicability_mode
+    if mode in {"SUBJECT_TYPE", "QUALITY_FOUNDATION"}:
+        return True
+    if mode in {"SYSTEM_TYPE_EXACT", "SYSTEM_TYPE_SET"}:
+        system_type = request.input_payload.get("system_type")
+        if (
+            not isinstance(system_type, str)
+            or system_type not in definition.allowed_mission_system_types
+        ):
+            raise ProductionP1CatalogError(
+                "ED2_P1_SOURCE_GATE_APPLICABILITY_INVALID",
+                f"{definition.metric_code}:{system_type!r}",
+            )
+        return system_type in applicability.allowed_system_types
+    if mode == "PRODUCT_CAPABILITY":
+        required = applicability.required_product_semantics
+        raw_products = request.input_payload.get("product_semantics")
+        if (
+            required is None
+            or not isinstance(raw_products, (list, tuple))
+            or not all(
+                isinstance(item, str) and item
+                for item in raw_products
+            )
+            or len(raw_products) != len(set(raw_products))
+        ):
+            raise ProductionP1CatalogError(
+                "ED2_P1_SOURCE_GATE_APPLICABILITY_INVALID",
+                f"{definition.metric_code}:{raw_products!r}",
+            )
+        return required in raw_products
+    raise ProductionP1CatalogError(
+        "ED2_P1_SOURCE_GATE_APPLICABILITY_UNSUPPORTED",
+        f"{definition.metric_code}:{mode}",
+    )
+
+
+def _source_gate_output(
+    request: M2MetricPluginRequest,
+) -> Mapping[str, object] | None:
+    sufficiency = _source_sufficiency(request)
+    if sufficiency is None:
+        return None
+    status = sufficiency.get("status")
+    if status == "READY":
+        return None
+    if status != "INSUFFICIENT_DATA":
+        raise ProductionP1CatalogError(
+            "ED2_P1_SOURCE_SUFFICIENCY_STATUS_INVALID",
+            f"{request.definition.metric_code}:{status!r}",
+        )
+    reasons = sufficiency.get("reason_codes")
+    if (
+        not isinstance(reasons, list)
+        or not reasons
+        or not all(isinstance(item, str) and item for item in reasons)
+    ):
+        raise ProductionP1CatalogError(
+            "ED2_P1_SOURCE_SUFFICIENCY_REASON_INVALID",
+            request.definition.metric_code,
+        )
+    if "INSUFFICIENT_DATA" not in request.definition.allowed_result_statuses:
+        raise ProductionP1CatalogError(
+            "ED2_P1_SOURCE_INSUFFICIENT_STATUS_UNSUPPORTED",
+            request.definition.metric_code,
+        )
+    if not _source_gate_runtime_applicable(request):
+        return {
+            "metric_code": request.definition.metric_code,
+            "subject_type": request.definition.subject_type,
+            "observation_lane": request.definition.observation_lane,
+            "publication_route": request.definition.publication_route,
+            "applicable": False,
+            "instances": [],
+        }
+    return {
+        "metric_code": request.definition.metric_code,
+        "subject_type": request.definition.subject_type,
+        "observation_lane": request.definition.observation_lane,
+        "publication_route": request.definition.publication_route,
+        "applicable": True,
+        "instances": [
+            {
+                "status": "INSUFFICIENT_DATA",
+                "reason_codes": list(reasons),
+                "value_kind": request.definition.value_kind,
+                "value_numeric": None,
+                "value_structured": None,
+                "evidence": {
+                    "source_sufficiency": dict(sufficiency),
+                },
+            }
+        ],
+    }
+
+
+def _source_gated_plugin(
+    plugin: M2MetricPlugin,
+) -> M2MetricPlugin:
+    def execute(request: M2MetricPluginRequest) -> Mapping[str, object]:
+        gated = _source_gate_output(request)
+        if gated is not None:
+            return gated
+        return plugin(request)
+
+    return execute
+
+
+def _build_production_p1_plugin_registry(
+    contract: ProductionP1CatalogContract,
+) -> MetricPluginRegistry:
+    base = build_m3_runtime_plugin_registry(contract.plan)
+    production = MetricPluginRegistry()
+    for definition in contract.plan.definitions:
+        plugin_id, plugin = base.resolve(
+            definition.algorithm_id,
+            definition.algorithm_version,
+        )
+        production.register(
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
+            plugin_id=plugin_id,
+            plugin=_source_gated_plugin(plugin),
+        )
+    if production.plugin_identity_manifest != contract.plugin_identity_manifest:
+        raise ProductionP1CatalogError(
+            "ED2_P1_PLUGIN_IDENTITY_DRIFT",
+            repr(production.plugin_identity_manifest),
+        )
+    return production
+
+
 def validate_production_p1_input_membership(
     contract: ProductionP1CatalogContract,
     inputs: Mapping[str, Mapping[str, object]],
@@ -188,7 +344,7 @@ def execute_production_p1_catalog(
 
     contract = build_production_p1_catalog_contract(authority_root)
     validate_production_p1_input_membership(contract, inputs)
-    registry = build_m3_runtime_plugin_registry(contract.plan)
+    registry = _build_production_p1_plugin_registry(contract)
     batch = CatalogMetricEngine(
         contract.plan,
         registry,
