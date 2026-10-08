@@ -6,6 +6,7 @@ from .air_foundation import (
     M2AirFormalDelivery,
     build_m2_air_formal_delivery,
     register_m2_air_plugins,
+    serialize_m1_air_result,
 )
 from .catalog_engine import (
     CatalogMetricEngine,
@@ -103,6 +104,7 @@ __all__ = [
     "build_m2_sns_accuracy_inputs",
     "compute_representative_metrics",
     "register_m2_air_plugins",
+    "serialize_m1_air_result",
     "register_m2_sns_detection_plugins",
     "register_m2_sns_accuracy_plugins",
 ]

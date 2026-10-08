@@ -16,6 +16,7 @@ from tpaa_metric import (
     build_m2_metric_execution_plan,
     build_metric_context,
     register_m2_air_plugins,
+    serialize_m1_air_result,
 )
 from tpaa_observation import (
     AircraftPublicationIdentity,
@@ -250,3 +251,78 @@ def test_air_release_is_exact_immutable_three_metric_snapshot_and_replays() -> N
     assert context.latest_fallback_used is False
     with pytest.raises(FrozenInstanceError):
         release.status = "MUTATED"  # type: ignore[misc]
+
+
+
+def test_air_foundation_json_projection_preserves_exact_plugin_output() -> None:
+    _, world, context, delivery, plan, registry, _ = _runtime(
+        "BF_M1_NOMINAL_V1"
+    )
+    direct = _engine_outputs(delivery, plan, registry)
+
+    json_inputs: dict[str, dict[str, object]] = {}
+    for result in delivery.metric_batch.results:
+        json_inputs[result.metric_code] = {
+            "m1_result": serialize_m1_air_result(
+                result,
+                metric_context_id=context.metric_context_id,
+                world_product_id=world.world_product_id,
+            ),
+            "implementation_reuse": AIR_M1_IMPLEMENTATION,
+        }
+
+    from tpaa_metric import CatalogMetricEngine
+
+    json_batch = CatalogMetricEngine(plan, registry).execute(
+        json_inputs,
+        metric_codes=AIR_M2_FORMAL_CODES,
+    )
+    json_outputs = {
+        record.metric_code: record.plugin_output
+        for record in json_batch.records
+    }
+    assert json_outputs == direct
+
+
+def test_air_foundation_json_projection_tamper_fails_closed() -> None:
+    _, world, context, delivery, plan, registry, _ = _runtime(
+        "BF_M1_NOMINAL_V1"
+    )
+    result = delivery.metric_batch.results[0]
+    serialized = serialize_m1_air_result(
+        result,
+        metric_context_id=context.metric_context_id,
+        world_product_id=world.world_product_id,
+    )
+    evidence = serialized["evidence"]
+    assert isinstance(evidence, dict)
+    refs = evidence["refs"]
+    assert isinstance(refs, list)
+    assert refs
+    first_ref = refs[0]
+    assert isinstance(first_ref, dict)
+    first_ref["logical_hash"] = "0" * 64
+
+    definition = plan.definition(result.metric_code)
+    _plugin_id, plugin = registry.resolve(
+        definition.algorithm_id,
+        definition.algorithm_version,
+    )
+    from tpaa_metric.catalog_engine import M2MetricPluginRequest
+    from tpaa_metric.operators import M2_OPERATOR_IMPLEMENTATIONS
+
+    with pytest.raises(ValueError, match="M2_AIR_JSON_EVIDENCE_HASH_DRIFT"):
+        plugin(
+            M2MetricPluginRequest(
+                definition=definition,
+                input_payload={
+                    "m1_result": serialized,
+                    "implementation_reuse": AIR_M1_IMPLEMENTATION,
+                },
+                upstream_result_hashes=(),
+                operators={
+                    operator_id: M2_OPERATOR_IMPLEMENTATIONS[operator_id]
+                    for operator_id in definition.operator_bindings
+                },
+            )
+        )
