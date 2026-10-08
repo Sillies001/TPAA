@@ -41,6 +41,9 @@ from tpaa_metric import (
     build_m3_metric_execution_plan,
     serialize_m1_air_result,
 )
+from tpaa_runtime.production_p1_source_policy import (
+    production_p1_required_source_families,
+)
 from tpaa_world import project_m2_stage_world_lineage
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -292,14 +295,13 @@ def _canonical_input_hash(value: object) -> str:
 
 
 def _lineage_families(family: str) -> list[str]:
-    if family in {"AIRCRAFT_FLIGHT", "AIRCRAFT_ENERGY", "AIRCRAFT_CONTROL_RESPONSE",
-                  "AIRCRAFT_HANDLING", "AIRCRAFT_PERSISTENCE"}:
-        return ["FLIGHT", "SCENARIO"]
-    if family in {"REFERENCE_TRUTH", "TIME_ALIGNMENT"}:
-        return ["FLIGHT", "RANGE_ACMI", "SCENARIO"]
-    if family == "DATALINK":
-        return ["TDL", "RANGE_ACMI", "SCENARIO"]
-    return ["MISSION_AVIONICS", "RANGE_ACMI", "SCENARIO"]
+    return [
+        item.value
+        for item in sorted(
+            production_p1_required_source_families(family),
+            key=lambda item: item.value,
+        )
+    ]
 
 
 def _source_id(session_id: str, family: SourceFamily, kind: str) -> str:

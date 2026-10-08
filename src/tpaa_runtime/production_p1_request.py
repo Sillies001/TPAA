@@ -26,6 +26,9 @@ from tpaa_ingest import (
 
 from .production_p1_catalog import ProductionP1CatalogContract
 from .production_p1_materialization import ProductionP1SystemBinding
+from .production_p1_source_policy import (
+    production_p1_required_source_families,
+)
 
 
 class ProductionP1RequestError(RuntimeError):
@@ -306,93 +309,6 @@ def parse_production_p1_request(
                 f"extra={sorted(set(lineage_root) - expected_codes)!r}"
             ),
         )
-    required_by_family: dict[str, frozenset[SourceFamily]] = {
-        "REFERENCE_TRUTH": frozenset(
-            {
-                SourceFamily.FLIGHT,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "TIME_ALIGNMENT": frozenset(
-            {
-                SourceFamily.FLIGHT,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "AIRCRAFT_FLIGHT": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-        ),
-        "AIRCRAFT_ENERGY": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-        ),
-        "AIRCRAFT_CONTROL_RESPONSE": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-        ),
-        "AIRCRAFT_HANDLING": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-        ),
-        "AIRCRAFT_PERSISTENCE": frozenset(
-            {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-        ),
-        "SENSOR_DETECTION": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "SENSOR_ACCURACY": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "TRACK_PERFORMANCE": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "ASSOCIATION_IDENTIFICATION": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "PASSIVE_SENSOR": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "RWR_ESM": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "DATALINK": frozenset(
-            {
-                SourceFamily.TDL,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-        "SENSOR_FUSION": frozenset(
-            {
-                SourceFamily.MISSION_AVIONICS,
-                SourceFamily.RANGE_ACMI,
-                SourceFamily.SCENARIO,
-            }
-        ),
-    }
     definition_by_code = {
         definition.metric_code: definition
         for definition in contract.plan.definitions
@@ -431,12 +347,15 @@ def parse_production_p1_request(
             families.append(family)
 
         definition = definition_by_code[code]
-        required = required_by_family.get(definition.family)
-        if required is None:
+        try:
+            required = production_p1_required_source_families(
+                definition.family
+            )
+        except KeyError as exc:
             raise ProductionP1RequestError(
                 "ED2_P1_SOURCE_LINEAGE_POLICY_MISSING",
                 definition.family,
-            )
+            ) from exc
         if not required.issubset(set(families)):
             raise ProductionP1RequestError(
                 "ED2_P1_SOURCE_LINEAGE_INSUFFICIENT",

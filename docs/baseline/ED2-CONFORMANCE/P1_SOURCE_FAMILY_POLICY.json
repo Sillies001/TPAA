@@ -1,0 +1,34 @@
+{
+  "schema": "TPAA_ED2_P1_SOURCE_FAMILY_POLICY_V1",
+  "policy_version": "1.0.0",
+  "change_control": {
+    "umbrella_issue": 245,
+    "batch_issue": 246,
+    "canonical_catalog": "CB-1.4.0/P1_METRIC_CATALOG.json",
+    "canonical_input_authority": "CB-1.4.0/METRIC_INPUT_AUTHORITY_MATRIX.json"
+  },
+  "principles": [
+    "External protocols and vendor formats terminate at Gateway/Adapter boundaries.",
+    "P1 metric inputs must be traceable to governed Source/Canonical/World projections.",
+    "Reference-side families require RANGE_ACMI and SCENARIO authority in addition to any platform source.",
+    "Mission-system families require MISSION_AVIONICS unless the Catalog family is explicitly TDL-owned.",
+    "AUDIO_VIDEO is a registered production family but is not a required P1 metric source in this policy version."
+  ],
+  "families": [
+    {"metric_family":"REFERENCE_TRUTH","required_source_families":["FLIGHT","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"TIME_ALIGNMENT","required_source_families":["FLIGHT","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"AIRCRAFT_FLIGHT","required_source_families":["FLIGHT","SCENARIO"]},
+    {"metric_family":"AIRCRAFT_ENERGY","required_source_families":["FLIGHT","SCENARIO"]},
+    {"metric_family":"AIRCRAFT_CONTROL_RESPONSE","required_source_families":["FLIGHT","SCENARIO"]},
+    {"metric_family":"AIRCRAFT_HANDLING","required_source_families":["FLIGHT","SCENARIO"]},
+    {"metric_family":"AIRCRAFT_PERSISTENCE","required_source_families":["FLIGHT","SCENARIO"]},
+    {"metric_family":"SENSOR_DETECTION","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"SENSOR_ACCURACY","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"TRACK_PERFORMANCE","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"ASSOCIATION_IDENTIFICATION","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"PASSIVE_SENSOR","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"RWR_ESM","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"DATALINK","required_source_families":["TDL","RANGE_ACMI","SCENARIO"]},
+    {"metric_family":"SENSOR_FUSION","required_source_families":["MISSION_AVIONICS","RANGE_ACMI","SCENARIO"]}
+  ]
+}

@@ -12,11 +12,18 @@ from tpaa_ingest import (
     SourceFamily,
     production_interchange_profile,
 )
+from tpaa_runtime.production_p1_source_policy import (
+    PRODUCTION_P1_SOURCE_POLICY_SCHEMA,
+    PRODUCTION_P1_SOURCE_POLICY_VERSION,
+    production_p1_source_family_policy,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs" / "baseline" / "ED2-CONFORMANCE"
 MATRIX = BASE / "ED2_DESIGN_CONFORMANCE_MATRIX.json"
 INTERCHANGE_PROFILES = BASE / "PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY.json"
+SOURCE_FAMILY_POLICY = BASE / "P1_SOURCE_FAMILY_POLICY.json"
+CATALOG = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "P1_METRIC_CATALOG.json"
 
 
 def _load() -> dict[str, object]:
@@ -147,3 +154,40 @@ def test_ed2_interchange_profile_authority_matches_runtime_exactly() -> None:
         assert runtime.profile_version == item["profile_version"]
         assert runtime.profile_hash == expected_hash
         assert runtime.projection_class == item["projection_class"]
+
+
+
+def test_ed2_p1_source_family_policy_matches_catalog_and_runtime() -> None:
+    raw: object = json.loads(
+        SOURCE_FAMILY_POLICY.read_text(encoding="utf-8")
+    )
+    assert isinstance(raw, dict)
+    authority = cast(dict[str, object], raw)
+    assert authority["schema"] == PRODUCTION_P1_SOURCE_POLICY_SCHEMA
+    assert authority["policy_version"] == PRODUCTION_P1_SOURCE_POLICY_VERSION
+
+    catalog_raw: object = json.loads(CATALOG.read_text(encoding="utf-8"))
+    assert isinstance(catalog_raw, dict)
+    catalog = cast(dict[str, object], catalog_raw)
+    metric_rows = _mappings(catalog["metrics"])
+    catalog_families = {
+        str(item["family"])
+        for item in metric_rows
+    }
+
+    policy_rows = _mappings(authority["families"])
+    by_family = {
+        str(item["metric_family"]): item
+        for item in policy_rows
+    }
+    runtime = production_p1_source_family_policy()
+    assert set(by_family) == catalog_families == set(runtime)
+
+    for family in sorted(catalog_families):
+        raw_sources = by_family[family]["required_source_families"]
+        assert isinstance(raw_sources, list)
+        assert all(isinstance(item, str) for item in raw_sources)
+        assert set(raw_sources) == {
+            item.value
+            for item in runtime[family]
+        }
