@@ -394,7 +394,7 @@ def _stage_relations(
                 subject_series_id=None,
                 object_series_id=None,
                 cross_series=False,
-                start_session_time_us=right.start_session_time_us,
+                start_session_time_us=None,
                 end_session_time_us=None,
                 properties={
                     "stage_profile_id": projection.stage_profile_id,

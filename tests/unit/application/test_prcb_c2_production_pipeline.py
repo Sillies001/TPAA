@@ -254,6 +254,7 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
                 "relation_source",
                 "method_version",
                 "start_session_time_us",
+                "end_session_time_us",
             ),
             order_by=("start_session_time_us", "relation_id"),
         )
@@ -283,6 +284,8 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
     assert len(relation_rows) == 3
     assert all(row["relation_type"] == "PRECEDES" for row in relation_rows)
     assert all(row["relation_source"] == "OFFICIAL" for row in relation_rows)
+    assert all(row["start_session_time_us"] is None for row in relation_rows)
+    assert all(row["end_session_time_us"] is None for row in relation_rows)
     stage_ids = [str(row["stage_id"]) for row in stage_rows]
     assert [
         (str(row["subject_ref"]), str(row["object_ref"]))
