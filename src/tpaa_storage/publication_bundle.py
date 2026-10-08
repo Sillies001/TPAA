@@ -40,7 +40,7 @@ class CoreMetricInstanceRecord:
     metric_code: str
     episode_id: str
     stage_id: str | None
-    subject_entity_id: str
+    subject_entity_id: str | None
     value_numeric: float | None
     value_structured: dict[str, object] | None
     unit: str
@@ -53,6 +53,10 @@ class CoreMetricInstanceRecord:
     world_product_versions: dict[str, object]
     compute_version: str
     input_hash: str
+    mission_system_instance_id: str | None = None
+    tpaa_chain_id: str | None = None
+    value_text: str | None = None
+    value_boolean: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -83,6 +87,32 @@ class CoreObservationRecord:
 
 
 @dataclass(frozen=True)
+class CoreSystemObservationRecord:
+    """DB 1.9 system-performance observation decided by the domain layer."""
+
+    system_observation_id: str
+    episode_id: str | None
+    stage_id: str | None
+    aircraft_id: str
+    mission_system_instance_id: str
+    observed_metric_instance_id: str
+    reference_truth_profile_version: str | None
+    reference_quality_status: str
+    reference_uncertainty_summary: dict[str, object]
+    alignment_uncertainty_summary: dict[str, object]
+    observation_start_session_time_us: int
+    observation_end_session_time_us: int
+    context_tags: dict[str, object]
+    evidence_set_id: str
+    coverage: float
+    confidence: float
+    eligibility_status: str
+    exclusion_reason_code: str | None
+    comparison_key_hash: str
+    observation_schema_version: str
+
+
+@dataclass(frozen=True)
 class CorePublicationBundle:
     release_id: str
     release_no: int
@@ -99,3 +129,4 @@ class CorePublicationBundle:
     evidence_sets: tuple[CoreEvidenceRecord, ...]
     metric_instances: tuple[CoreMetricInstanceRecord, ...]
     observations: tuple[CoreObservationRecord, ...]
+    system_observations: tuple[CoreSystemObservationRecord, ...] = ()

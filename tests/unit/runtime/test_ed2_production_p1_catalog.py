@@ -60,3 +60,61 @@ def test_exact_metric_code_membership_is_accepted_before_business_dispatch() -> 
     inputs = {code: {} for code in contract.metric_codes}
 
     validate_production_p1_input_membership(contract, inputs)
+
+
+def test_catalog_execution_record_retains_validated_plugin_output_without_hash_drift() -> None:
+    from tpaa_metric import (
+        M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
+        CatalogMetricEngine,
+        M2MetricPluginRequest,
+        MetricPluginRegistry,
+        build_m3_metric_execution_plan,
+    )
+
+    plan = build_m3_metric_execution_plan(AUTHORITY)
+    registry = MetricPluginRegistry()
+
+    def probe(request: M2MetricPluginRequest) -> dict[str, object]:
+        return {
+            "metric_code": request.definition.metric_code,
+            "subject_type": request.definition.subject_type,
+            "observation_lane": request.definition.observation_lane,
+            "publication_route": request.definition.publication_route,
+            "applicable": False,
+            "instances": [],
+        }
+
+    for definition in plan.definitions:
+        registry.register(
+            definition.algorithm_id,
+            algorithm_version=definition.algorithm_version,
+            plugin_id=f"ed2-materialization-probe:{definition.metric_code}:v1",
+            plugin=probe,
+        )
+
+    inputs = {
+        definition.metric_code: {}
+        for definition in plan.definitions
+    }
+    batch = CatalogMetricEngine(
+        plan,
+        registry,
+        operator_implementations=M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
+    ).execute(
+        inputs,
+        validate_runtime_contract=False,
+    )
+
+    assert len(batch.records) == 116
+    for record, definition in zip(batch.records, plan.definitions, strict=True):
+        assert record.metric_code == definition.metric_code
+        assert record.plugin_output == probe(
+            M2MetricPluginRequest(
+                definition=definition,
+                input_payload={},
+                upstream_result_hashes=record.upstream_result_hashes,
+                operators={},
+            )
+        )
+        assert record.plugin_output_hash
+        assert record.logical_hash
