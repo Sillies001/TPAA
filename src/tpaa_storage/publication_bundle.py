@@ -24,6 +24,67 @@ class CoreMetricDefinitionRef:
 
 
 @dataclass(frozen=True)
+class CoreWorldProductRecord:
+    world_product_id: str
+    episode_id: str | None
+    stage_id: str | None
+    world_kind: str
+    subject_id: str | None
+    observer_id: str | None
+    actor_id: str | None
+    aircraft_id: str | None
+    aircraft_instance_id: str | None
+    dataset_id: str | None
+    start_session_time_us: int
+    end_session_time_us: int
+    status: str
+    coverage: float
+    confidence: float
+    reason_codes: tuple[str, ...]
+    source_authority_signature: str | None
+    world_version: str
+    policy_version: str
+    artifact_sha256: str | None
+    logical_content_hash: str
+    request_hash: str
+    supersedes_id: str | None = None
+
+
+@dataclass(frozen=True)
+class CoreWorldRelationRecord:
+    relation_id: str
+    episode_id: str
+    stage_id: str | None
+    relation_type: str
+    subject_ref: str
+    object_ref: str
+    subject_series_id: str | None
+    object_series_id: str | None
+    cross_series: bool
+    start_session_time_us: int | None
+    end_session_time_us: int | None
+    properties: dict[str, object]
+    confidence: float
+    relation_source: str
+    method_version: str
+
+
+@dataclass(frozen=True)
+class CoreTpaaMChainRecord:
+    chain_id: str
+    episode_id: str
+    stage_id: str | None
+    refs: dict[str, object]
+    start_session_time_us: int
+    end_session_time_us: int
+    chain_status: str
+    coverage: float
+    confidence: float
+    break_reason: str | None
+    chain_version: str
+
+
+@dataclass(frozen=True)
 class CoreEvidenceRecord:
     evidence_set_id: str
     episode_id: str
@@ -31,6 +92,8 @@ class CoreEvidenceRecord:
     end_session_time_us: int
     series_locator: dict[str, object]
     algorithm_versions: dict[str, object]
+    world_product_ids: tuple[str, ...] = ()
+    relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -130,3 +193,6 @@ class CorePublicationBundle:
     metric_instances: tuple[CoreMetricInstanceRecord, ...]
     observations: tuple[CoreObservationRecord, ...]
     system_observations: tuple[CoreSystemObservationRecord, ...] = ()
+    world_products: tuple[CoreWorldProductRecord, ...] = ()
+    world_relations: tuple[CoreWorldRelationRecord, ...] = ()
+    tpaa_m_chains: tuple[CoreTpaaMChainRecord, ...] = ()
