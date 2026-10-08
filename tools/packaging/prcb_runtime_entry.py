@@ -243,6 +243,7 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         release.get("release_id") != release_id
         or release.get("catalog_definition_count") != 116
         or release.get("metric_code_count") != 116
+        or release.get("world_product_count") != 4
         or isinstance(metric_instance_count, bool)
         or not isinstance(metric_instance_count, int)
         or metric_instance_count < 116
@@ -251,6 +252,64 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         raise RuntimeError("installed P1 release identity/full-catalog mismatch")
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
+        episode_rows = uow.canonical_rows.many(
+            "episode.training_episode",
+            where={"session_id": SESSION_ID},
+            columns=("episode_id", "episode_type", "data_sufficiency_status"),
+            order_by=("episode_id",),
+        )
+        if (
+            len(episode_rows) != 1
+            or episode_rows[0]["episode_type"] != "BASIC_FLIGHT"
+            or episode_rows[0]["data_sufficiency_status"] != "SUFFICIENT"
+        ):
+            raise RuntimeError("installed P1 BASIC_FLIGHT Episode authority mismatch")
+        episode_id = str(episode_rows[0]["episode_id"])
+        stage_rows = uow.canonical_rows.many(
+            "episode.episode_stage",
+            where={"episode_id": episode_id},
+            columns=("stage_id", "stage_type", "stage_order", "stage_status"),
+            order_by=("stage_order",),
+        )
+        world_rows = uow.canonical_rows.many(
+            "world.world_product_manifest",
+            where={"release_id": release_id},
+            columns=("world_kind", "status", "coverage", "episode_id"),
+            order_by=("world_kind",),
+        )
+        relation_rows = uow.canonical_rows.many(
+            "world.world_relation",
+            where={"release_id": release_id},
+            columns=(
+                "relation_type",
+                "subject_ref",
+                "object_ref",
+                "relation_source",
+                "start_session_time_us",
+            ),
+            order_by=("start_session_time_us",),
+        )
+        if [row["stage_type"] for row in stage_rows] != [
+            "SETUP_ENTRY",
+            "EXECUTION",
+            "STABILIZATION_RECOVERY",
+            "COMPLETION",
+        ]:
+            raise RuntimeError("installed P1 Stage sequence mismatch")
+        if [row["world_kind"] for row in world_rows] != [
+            "ACTION",
+            "CONTEXT",
+            "MACHINE",
+            "TRUTH",
+        ] or any(row["status"] != "READY" for row in world_rows):
+            raise RuntimeError("installed P1 BASIC_CORE World authority mismatch")
+        if (
+            len(relation_rows) != 3
+            or any(row["relation_type"] != "PRECEDES" for row in relation_rows)
+            or any(row["relation_source"] != "OFFICIAL" for row in relation_rows)
+        ):
+            raise RuntimeError("installed P1 Stage relation authority mismatch")
+
         observation_rows = uow.canonical_rows.many(
             "metric.capability_observation",
             where={"release_id": release_id},
@@ -673,6 +732,9 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "evidence_only_metric_instance_count": release[
             "evidence_only_metric_instance_count"
         ],
+        "world_product_count": len(world_rows),
+        "stage_count": len(stage_rows),
+        "world_relation_count": len(relation_rows),
         "p2_job_id": p2_submission.record.job_id,
         "p2_job_status": p2_submission.record.status.value,
         "p2_qualification_as_of_utc": p2_seed.as_of_utc,

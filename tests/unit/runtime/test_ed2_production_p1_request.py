@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from tools.testing.ed2_p1_full_input_builder import build_full_p1_request_contract
+from tpaa_ingest import SourceFamily
 from tpaa_runtime.production_p1_catalog import build_production_p1_catalog_contract
 from tpaa_runtime.production_p1_request import (
     ProductionP1RequestError,
@@ -267,3 +268,25 @@ def test_full_p1_request_forbids_caller_supplied_source_sufficiency() -> None:
             aircraft_id=AIRCRAFT_ID,
             source_selection=selection,
         )
+
+
+
+def test_full_p1_source_selection_retains_governed_world_projections() -> None:
+    payload = _contract()
+    selection = select_production_p1_sources(payload)
+
+    flight_refs = selection.refs_by_family[SourceFamily.FLIGHT]
+    scenario_refs = selection.refs_by_family[SourceFamily.SCENARIO]
+    assert len(flight_refs) == 1
+    assert len(scenario_refs) == 1
+
+    action = flight_refs[0].projection_payload.get("action_projection")
+    assert isinstance(action, dict)
+    assert action["schema"] == "TPAA_ED2_BASIC_FLIGHT_ACTION_PROJECTION_V1"
+    assert action["profile_id"] == "BASIC_FLIGHT_ACTION_V1"
+
+    stage = scenario_refs[0].projection_payload.get("stage_projection")
+    assert isinstance(stage, dict)
+    assert stage["stage_profile_id"] == "BASIC_FLIGHT_V1"
+    assert stage["precedence_source"] == "CONTEXT_OFFICIAL_MARKER"
+    assert stage["detection_method"] == "CONTEXT"

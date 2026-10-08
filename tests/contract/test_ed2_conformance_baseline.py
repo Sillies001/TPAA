@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import cast
 
 from tpaa_ingest import (
+    PRODUCTION_FLIGHT_ACTION_PROFILE_ID,
+    PRODUCTION_FLIGHT_ACTION_SCHEMA,
     PRODUCTION_INTERCHANGE_FAMILIES,
     PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY_VERSION,
     PRODUCTION_INTERCHANGE_PROFILE_SCHEMA,
@@ -18,13 +20,24 @@ from tpaa_runtime.production_p1_source_policy import (
     PRODUCTION_P1_SOURCE_POLICY_VERSION,
     production_p1_source_family_policy,
 )
+from tpaa_runtime.production_p1_world import (
+    PRODUCTION_P1_REQUIRED_WORLD_LETTERS,
+    PRODUCTION_P1_WORLD_CAPABILITY_CODE,
+    PRODUCTION_P1_WORLD_KIND_BY_LETTER,
+    PRODUCTION_P1_WORLD_POLICY_SCHEMA,
+    PRODUCTION_P1_WORLD_POLICY_VERSION,
+    PRODUCTION_P1_WORLD_SOURCE_FAMILIES,
+    validate_production_p1_world_authority,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs" / "baseline" / "ED2-CONFORMANCE"
 MATRIX = BASE / "ED2_DESIGN_CONFORMANCE_MATRIX.json"
 INTERCHANGE_PROFILES = BASE / "PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY.json"
 SOURCE_FAMILY_POLICY = BASE / "P1_SOURCE_FAMILY_POLICY.json"
-CATALOG = ROOT / "baseline" / "CB-1.4.0" / "canonical" / "P1_METRIC_CATALOG.json"
+WORLD_AUTHORITY_POLICY = BASE / "P1_WORLD_AUTHORITY_POLICY.json"
+CANONICAL = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+CATALOG = CANONICAL / "P1_METRIC_CATALOG.json"
 
 
 def _load() -> dict[str, object]:
@@ -202,3 +215,50 @@ def test_ed2_p1_source_family_policy_matches_catalog_and_runtime() -> None:
             item.value
             for item in runtime[family]
         }
+
+
+
+def test_ed2_p1_world_authority_policy_matches_frozen_world_registry() -> None:
+    raw: object = json.loads(
+        WORLD_AUTHORITY_POLICY.read_text(encoding="utf-8")
+    )
+    assert isinstance(raw, dict)
+    policy = cast(dict[str, object], raw)
+    assert policy["schema"] == PRODUCTION_P1_WORLD_POLICY_SCHEMA
+    assert policy["policy_version"] == PRODUCTION_P1_WORLD_POLICY_VERSION
+    assert policy["world_capability_code"] == PRODUCTION_P1_WORLD_CAPABILITY_CODE
+
+    registry = _mapping(policy["world_capability_registry"])
+    assert registry == {
+        "registry_id": "WORLD_CAPABILITY_REGISTRY",
+        "version": "1.0.0",
+        "core_baseline": "CB-1.4.0",
+        "required_letters": list(PRODUCTION_P1_REQUIRED_WORLD_LETTERS),
+    }
+    validate_production_p1_world_authority(CANONICAL)
+
+    world_products = _mapping(policy["world_products"])
+    assert set(world_products) == set(PRODUCTION_P1_WORLD_SOURCE_FAMILIES)
+    assert {
+        str(_mapping(value)["capability_letter"]): kind
+        for kind, value in world_products.items()
+    } == dict(PRODUCTION_P1_WORLD_KIND_BY_LETTER)
+
+    for world_kind, required in PRODUCTION_P1_WORLD_SOURCE_FAMILIES.items():
+        item = _mapping(world_products[world_kind])
+        raw_sources = item["required_source_families"]
+        assert isinstance(raw_sources, list)
+        assert all(isinstance(value, str) for value in raw_sources)
+        assert set(raw_sources) == {family.value for family in required}
+
+    action = _mapping(world_products["ACTION"])
+    assert action["projection_schema"] == PRODUCTION_FLIGHT_ACTION_SCHEMA
+    assert action["profile_id"] == PRODUCTION_FLIGHT_ACTION_PROFILE_ID
+
+    stage = _mapping(policy["stage_authority"])
+    assert stage == {
+        "source_family": "SCENARIO",
+        "stage_profile_id": "BASIC_FLIGHT_V1",
+        "precedence_source": "CONTEXT_OFFICIAL_MARKER",
+        "detection_method": "CONTEXT",
+    }

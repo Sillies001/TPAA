@@ -128,6 +128,9 @@ def _logical_product(report: dict[str, Any]) -> tuple[dict[str, object], str]:
         "evidence_only_metric_instance_count": report.get(
             "evidence_only_metric_instance_count"
         ),
+        "world_product_count": report.get("world_product_count"),
+        "stage_count": report.get("stage_count"),
+        "world_relation_count": report.get("world_relation_count"),
         "job_status": report.get("job_status"),
         "p2_job_status": report.get("p2_job_status"),
         "p2_release_id": report.get("p2_release_id"),
@@ -320,6 +323,9 @@ def qualify(
                     int,
                 )
                 or int(installed["evidence_only_metric_instance_count"]) <= 0
+                or installed.get("world_product_count") != 4
+                or installed.get("stage_count") != 4
+                or installed.get("world_relation_count") != 3
                 or installed.get("job_status") != "SUCCEEDED"
                 or installed.get("p2_job_status") != "SUCCEEDED"
                 or installed.get("p2_estimate_status") not in {

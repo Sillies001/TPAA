@@ -42,7 +42,13 @@ from tpaa_capability.p6_input import (
     P6InputSnapshot,
 )
 from tpaa_context import P3ClaimEnvelope
+from tpaa_episode import (
+    ProductionStageError,
+    ProductionStageProjection,
+    project_production_basic_stages,
+)
 from tpaa_generated.dto import EvaluationContextDTO
+from tpaa_ingest import SourceFamily
 from tpaa_ingest.canonical_flight_channels import CanonicalFlightRow
 from tpaa_ingest.production_flight_json import validate_production_flight_document
 from tpaa_metric import CatalogMetricEngineError
@@ -53,6 +59,7 @@ from tpaa_storage.hashing import canonical_request_hash
 from tpaa_storage.publication_bundle import (
     CorePublicationBundle,
     CoreWorldProductRecord,
+    CoreWorldRelationRecord,
 )
 from tpaa_world import P4InteractionScopeSnapshot
 
@@ -70,8 +77,14 @@ from .production_p1_materialization import (
 )
 from .production_p1_request import (
     ProductionP1RequestError,
+    ProductionP1SourceSelection,
     parse_production_p1_request,
     select_production_p1_sources,
+)
+from .production_p1_world import (
+    PRODUCTION_P1_WORLD_SOURCE_FAMILIES,
+    ProductionP1WorldPolicyError,
+    validate_production_p1_world_authority,
 )
 
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_ED2_B1_P1_WORKER_PRODUCT_V1"
@@ -85,6 +98,7 @@ P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
 _DATASET_NAMESPACE = UUID("daf518fe-13aa-4d23-9130-b42ac188e4cf")
 _EPISODE_NAMESPACE = UUID("2f54fd82-6212-4750-a2cf-9469c6ac65ec")
 _WORLD_NAMESPACE = UUID("e119738b-1527-4998-b67a-50730604ea28")
+_RELATION_NAMESPACE = UUID("4c1ea412-4f78-4547-b510-6cff4631b2ee")
 
 
 class ProductionWorkerError(RuntimeError):
@@ -271,6 +285,219 @@ def _hash(value: object) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _world_source_state(
+    source_selection: ProductionP1SourceSelection,
+    *,
+    required: frozenset[SourceFamily],
+) -> tuple[str, float, tuple[str, ...], str | None]:
+    actual = frozenset(
+        family
+        for family in required
+        if source_selection.refs_by_family.get(family)
+    )
+    missing = tuple(
+        sorted(
+            required - actual,
+            key=lambda item: item.value,
+        )
+    )
+    if not actual:
+        status = "MISSING"
+    elif missing:
+        status = "PARTIAL"
+    else:
+        status = "READY"
+    coverage = len(actual) / len(required)
+    reasons = tuple(
+        f"ED2_SOURCE_FAMILY_MISSING_{family.value}"
+        for family in missing
+    )
+    signature = (
+        None
+        if not actual
+        else _hash(
+            [
+                {
+                    "source_family": family.value,
+                    "artifact_sha256": ref.artifact_sha256,
+                }
+                for family in sorted(actual, key=lambda item: item.value)
+                for ref in source_selection.refs_by_family[family]
+            ]
+        )
+    )
+    return status, coverage, reasons, signature
+
+
+def _scenario_stage_payload(
+    source_selection: ProductionP1SourceSelection,
+) -> tuple[Mapping[str, object] | None, str | None]:
+    scenario_refs = source_selection.refs_by_family.get(
+        SourceFamily.SCENARIO,
+        (),
+    )
+    if not scenario_refs:
+        return None, None
+    candidates = tuple(
+        ref
+        for ref in scenario_refs
+        if "stage_projection" in ref.projection_payload
+    )
+    if len(candidates) != 1:
+        raise ProductionWorkerError(
+            "ED2_STAGE_SOURCE_PROJECTION_CARDINALITY",
+            str(len(candidates)),
+        )
+    return candidates[0].projection_payload, candidates[0].artifact_sha256
+
+
+def _stage_relations(
+    projection: ProductionStageProjection,
+    *,
+    episode_id: str,
+    source_authority_signature: str | None,
+) -> tuple[CoreWorldRelationRecord, ...]:
+    if projection.status != "READY":
+        return ()
+    result: list[CoreWorldRelationRecord] = []
+    for left, right in zip(
+        projection.stages,
+        projection.stages[1:],
+        strict=False,
+    ):
+        relation_id = str(
+            uuid5(
+                _RELATION_NAMESPACE,
+                json.dumps(
+                    {
+                        "episode_id": episode_id,
+                        "relation_type": "PRECEDES",
+                        "subject_ref": left.stage_id,
+                        "object_ref": right.stage_id,
+                        "method_version": projection.projector_version,
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    ensure_ascii=True,
+                    allow_nan=False,
+                ),
+            )
+        )
+        result.append(
+            CoreWorldRelationRecord(
+                relation_id=relation_id,
+                episode_id=episode_id,
+                stage_id=left.stage_id,
+                relation_type="PRECEDES",
+                subject_ref=left.stage_id,
+                object_ref=right.stage_id,
+                subject_series_id=None,
+                object_series_id=None,
+                cross_series=False,
+                start_session_time_us=right.start_session_time_us,
+                end_session_time_us=None,
+                properties={
+                    "stage_profile_id": projection.stage_profile_id,
+                    "from_stage_type": left.stage_type,
+                    "to_stage_type": right.stage_type,
+                    "stage_projection_hash": projection.logical_hash,
+                    "source_authority_signature": source_authority_signature,
+                },
+                confidence=min(left.confidence, right.confidence),
+                relation_source="OFFICIAL",
+                method_version=projection.projector_version,
+            )
+        )
+    return tuple(result)
+
+
+def _action_world_state(
+    source_selection: ProductionP1SourceSelection,
+    *,
+    start_session_time_us: int,
+    end_session_time_us: int,
+) -> tuple[str, float, tuple[str, ...], str | None]:
+    flight_refs = source_selection.refs_by_family.get(SourceFamily.FLIGHT, ())
+    if len(flight_refs) != 1:
+        raise ProductionWorkerError(
+            "ED2_ACTION_SOURCE_CARDINALITY_INVALID",
+            str(len(flight_refs)),
+        )
+    raw_projection = flight_refs[0].projection_payload.get(
+        "action_projection"
+    )
+    if raw_projection is None:
+        return (
+            "MISSING",
+            0.0,
+            ("ED2_ACTION_PROJECTION_MISSING",),
+            None,
+        )
+    projection = _mapping(
+        raw_projection,
+        field="FLIGHT.action_projection",
+    )
+    raw_events = projection.get("events")
+    if not isinstance(raw_events, list) or not raw_events:
+        raise ProductionWorkerError(
+            "ED2_ACTION_PROJECTION_INVALID",
+            "events",
+        )
+
+    covered = 0
+    for index, raw_event in enumerate(raw_events):
+        event = _mapping(
+            raw_event,
+            field=f"FLIGHT.action_projection.events[{index}]",
+        )
+        event_start = _integer(
+            event.get("start_session_time_us"),
+            field=(
+                f"FLIGHT.action_projection.events[{index}]."
+                "start_session_time_us"
+            ),
+        )
+        event_end = _integer(
+            event.get("end_session_time_us"),
+            field=(
+                f"FLIGHT.action_projection.events[{index}]."
+                "end_session_time_us"
+            ),
+        )
+        if (
+            event_start < start_session_time_us
+            or event_end > end_session_time_us
+            or event_start >= event_end
+        ):
+            raise ProductionWorkerError(
+                "ED2_ACTION_INTERVAL_OUTSIDE_EPISODE",
+                f"{event_start}:{event_end}",
+            )
+        covered += event_end - event_start
+
+    span = end_session_time_us - start_session_time_us
+    if span <= 0:
+        raise ProductionWorkerError(
+            "ED2_ACTION_EPISODE_INTERVAL_INVALID",
+            f"{start_session_time_us}:{end_session_time_us}",
+        )
+    coverage = min(1.0, covered / span)
+    signature = _hash(
+        {
+            "artifact_sha256": flight_refs[0].artifact_sha256,
+            "action_projection_hash": _hash(projection),
+        }
+    )
+    if coverage == 1.0:
+        return "READY", coverage, (), signature
+    return (
+        "PARTIAL",
+        coverage,
+        ("ED2_ACTION_COVERAGE_INCOMPLETE",),
+        signature,
+    )
+
+
 def _canonical_rows(document: dict[str, object]) -> tuple[CanonicalFlightRow, ...]:
     transform = _mapping(document.get("time_transform"), field="time_transform")
     scale = _number(transform.get("scale"), field="time_transform.scale")
@@ -422,22 +649,6 @@ def build_p1_worker_product(
         field="source_import",
     )
     source_sha = hashlib.sha256(source_bytes).hexdigest()
-    world_hash = _hash(
-        {
-            "release_id": release_id,
-            "session_id": session_id,
-            "episode_id": episode_id,
-            "aircraft_id": aircraft_id,
-            "dataset_id": dataset_id,
-            "canonical_logical_hash": canonical_hash,
-            "context_logical_hash": context_hash,
-            "episode_logical_hash": episode_hash,
-            "primary_source_sha256": source_sha,
-            "source_count": source_selection.source_count,
-            "request_hash": request_hash,
-        }
-    )
-    world_id = str(uuid5(_WORLD_NAMESPACE, world_hash))
 
     identity_raw = _mapping(
         body.get("publication_identity"),
@@ -489,6 +700,253 @@ def build_p1_worker_product(
         )
 
     try:
+        validate_production_p1_world_authority(authority_root)
+        (
+            stage_source_payload,
+            stage_source_artifact_sha256,
+        ) = _scenario_stage_payload(source_selection)
+        stage_projection = project_production_basic_stages(
+            stage_source_payload,
+            episode_id=episode_id,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            authority_root=authority_root,
+        )
+        stage_relations = _stage_relations(
+            stage_projection,
+            episode_id=episode_id,
+            source_authority_signature=stage_source_artifact_sha256,
+        )
+
+        (
+            context_status,
+            context_coverage,
+            context_reasons,
+            context_signature,
+        ) = _world_source_state(
+            source_selection,
+            required=PRODUCTION_P1_WORLD_SOURCE_FAMILIES["CONTEXT"],
+        )
+        (
+            truth_status,
+            truth_coverage,
+            truth_reasons,
+            truth_signature,
+        ) = _world_source_state(
+            source_selection,
+            required=PRODUCTION_P1_WORLD_SOURCE_FAMILIES["TRUTH"],
+        )
+        (
+            action_status,
+            action_coverage,
+            action_reasons,
+            action_signature,
+        ) = _action_world_state(
+            source_selection,
+            start_session_time_us=start,
+            end_session_time_us=end,
+        )
+        (
+            machine_status,
+            machine_coverage,
+            machine_reasons,
+            machine_signature,
+        ) = _world_source_state(
+            source_selection,
+            required=PRODUCTION_P1_WORLD_SOURCE_FAMILIES["MACHINE"],
+        )
+        basic_world_ready = (
+            stage_projection.status == "READY"
+            and context_status == "READY"
+            and truth_status == "READY"
+            and action_status == "READY"
+            and machine_status == "READY"
+        )
+
+        context_world_hash = _hash(
+            {
+                "world_kind": "CONTEXT",
+                "release_id": release_id,
+                "session_id": session_id,
+                "episode_id": episode_id,
+                "context_logical_hash": context_hash,
+                "stage_projection_hash": stage_projection.logical_hash,
+                "source_authority_signature": context_signature,
+                "status": context_status,
+                "coverage": context_coverage,
+                "reason_codes": list(context_reasons),
+                "request_hash": request_hash,
+            }
+        )
+        context_world_id = str(
+            uuid5(_WORLD_NAMESPACE, f"CONTEXT|{context_world_hash}")
+        )
+        action_world_hash = _hash(
+            {
+                "world_kind": "ACTION",
+                "release_id": release_id,
+                "session_id": session_id,
+                "episode_id": episode_id,
+                "aircraft_id": aircraft_id,
+                "stage_projection_hash": stage_projection.logical_hash,
+                "source_authority_signature": action_signature,
+                "status": action_status,
+                "coverage": action_coverage,
+                "reason_codes": list(action_reasons),
+                "request_hash": request_hash,
+            }
+        )
+        action_world_id = str(
+            uuid5(_WORLD_NAMESPACE, f"ACTION|{action_world_hash}")
+        )
+        truth_world_hash = _hash(
+            {
+                "world_kind": "TRUTH",
+                "release_id": release_id,
+                "session_id": session_id,
+                "episode_id": episode_id,
+                "aircraft_id": aircraft_id,
+                "dataset_id": dataset_id,
+                "canonical_logical_hash": canonical_hash,
+                "context_logical_hash": context_hash,
+                "episode_logical_hash": episode_hash,
+                "stage_projection_hash": stage_projection.logical_hash,
+                "stage_ids": [
+                    stage.stage_id for stage in stage_projection.stages
+                ],
+                "source_authority_signature": truth_signature,
+                "status": truth_status,
+                "coverage": truth_coverage,
+                "reason_codes": list(truth_reasons),
+                "request_hash": request_hash,
+            }
+        )
+        truth_world_id = str(
+            uuid5(_WORLD_NAMESPACE, f"TRUTH|{truth_world_hash}")
+        )
+        machine_world_hash = _hash(
+            {
+                "world_kind": "MACHINE",
+                "release_id": release_id,
+                "session_id": session_id,
+                "episode_id": episode_id,
+                "aircraft_id": aircraft_id,
+                "context_logical_hash": context_hash,
+                "episode_logical_hash": episode_hash,
+                "stage_projection_hash": stage_projection.logical_hash,
+                "stage_ids": [
+                    stage.stage_id for stage in stage_projection.stages
+                ],
+                "source_authority_signature": machine_signature,
+                "status": machine_status,
+                "coverage": machine_coverage,
+                "reason_codes": list(machine_reasons),
+                "request_hash": request_hash,
+            }
+        )
+        machine_world_id = str(
+            uuid5(_WORLD_NAMESPACE, f"MACHINE|{machine_world_hash}")
+        )
+        world_id = truth_world_id
+        world_hash = truth_world_hash
+
+        context_world = CoreWorldProductRecord(
+            world_product_id=context_world_id,
+            episode_id=episode_id,
+            stage_id=None,
+            world_kind="CONTEXT",
+            subject_id=None,
+            observer_id=None,
+            actor_id=None,
+            aircraft_id=aircraft_id,
+            aircraft_instance_id=aircraft_binding.aircraft_instance_id,
+            dataset_id=None,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            status=context_status,
+            coverage=context_coverage,
+            confidence=context_coverage,
+            reason_codes=context_reasons,
+            source_authority_signature=context_signature,
+            world_version="ED2_PRODUCTION_P1_CONTEXT_WORLD_V1",
+            policy_version="ED2-CONFORMANCE:B1",
+            artifact_sha256=None,
+            logical_content_hash=context_world_hash,
+            request_hash=request_hash,
+        )
+        action_world = CoreWorldProductRecord(
+            world_product_id=action_world_id,
+            episode_id=episode_id,
+            stage_id=None,
+            world_kind="ACTION",
+            subject_id=aircraft_binding.subject_entity_id,
+            observer_id=None,
+            actor_id=None,
+            aircraft_id=aircraft_id,
+            aircraft_instance_id=aircraft_binding.aircraft_instance_id,
+            dataset_id=None,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            status=action_status,
+            coverage=action_coverage,
+            confidence=action_coverage,
+            reason_codes=action_reasons,
+            source_authority_signature=action_signature,
+            world_version="ED2_PRODUCTION_P1_ACTION_WORLD_V1",
+            policy_version="ED2-CONFORMANCE:B1",
+            artifact_sha256=None,
+            logical_content_hash=action_world_hash,
+            request_hash=request_hash,
+        )
+        truth_world = CoreWorldProductRecord(
+            world_product_id=truth_world_id,
+            episode_id=episode_id,
+            stage_id=None,
+            world_kind="TRUTH",
+            subject_id=aircraft_binding.subject_entity_id,
+            observer_id=None,
+            actor_id=None,
+            aircraft_id=aircraft_id,
+            aircraft_instance_id=aircraft_binding.aircraft_instance_id,
+            dataset_id=dataset_id,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            status=truth_status,
+            coverage=truth_coverage,
+            confidence=truth_coverage,
+            reason_codes=truth_reasons,
+            source_authority_signature=truth_signature,
+            world_version="ED2_PRODUCTION_P1_TRUTH_WORLD_V1",
+            policy_version="ED2-CONFORMANCE:B1",
+            artifact_sha256=None,
+            logical_content_hash=truth_world_hash,
+            request_hash=request_hash,
+        )
+        machine_world = CoreWorldProductRecord(
+            world_product_id=machine_world_id,
+            episode_id=episode_id,
+            stage_id=None,
+            world_kind="MACHINE",
+            subject_id=aircraft_binding.subject_entity_id,
+            observer_id=None,
+            actor_id=None,
+            aircraft_id=aircraft_id,
+            aircraft_instance_id=aircraft_binding.aircraft_instance_id,
+            dataset_id=None,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            status=machine_status,
+            coverage=machine_coverage,
+            confidence=machine_coverage,
+            reason_codes=machine_reasons,
+            source_authority_signature=machine_signature,
+            world_version="ED2_PRODUCTION_P1_MACHINE_WORLD_V1",
+            policy_version="ED2-CONFORMANCE:B1",
+            artifact_sha256=None,
+            logical_content_hash=machine_world_hash,
+            request_hash=request_hash,
+        )
+
         contract = build_production_p1_catalog_contract(authority_root)
         request = parse_production_p1_request(
             body,
@@ -505,29 +963,8 @@ def build_p1_worker_product(
                 "ED2_P1_EXECUTION_PLAN_DRIFT",
                 execution_contract.plan.logical_hash,
             )
-        world_record = CoreWorldProductRecord(
-            world_product_id=world_id,
-            episode_id=episode_id,
-            stage_id=None,
-            world_kind="TRUTH",
-            subject_id=aircraft_binding.subject_entity_id,
-            observer_id=None,
-            actor_id=None,
-            aircraft_id=aircraft_id,
-            aircraft_instance_id=aircraft_binding.aircraft_instance_id,
-            dataset_id=dataset_id,
-            start_session_time_us=start,
-            end_session_time_us=end,
-            status="READY",
-            coverage=1.0,
-            confidence=1.0,
-            reason_codes=(),
-            source_authority_signature=source_sha,
-            world_version="ED2_PRODUCTION_P1_WORLD_V1",
-            policy_version="ED2-CONFORMANCE:B1",
-            artifact_sha256=None,
-            logical_content_hash=world_hash,
-            request_hash=request_hash,
+        relation_ids = tuple(
+            relation.relation_id for relation in stage_relations
         )
         release = materialize_production_p1_release(
             contract=execution_contract,
@@ -546,26 +983,69 @@ def build_p1_worker_product(
                 stage_id=None,
                 start_session_time_us=start,
                 end_session_time_us=end,
-                coverage=1.0,
-                confidence=1.0,
+                coverage=min(
+                    context_coverage,
+                    truth_coverage,
+                    action_coverage,
+                    machine_coverage,
+                ),
+                confidence=min(
+                    context_coverage,
+                    truth_coverage,
+                    action_coverage,
+                    machine_coverage,
+                ),
                 observation_schema_version="ED2-P1-OBSERVATION-V1",
                 world_product_versions={
-                    "truth_world_product_id": world_id,
-                    "truth_world_logical_hash": world_hash,
+                    "context_world_product_id": context_world_id,
+                    "context_world_logical_hash": context_world_hash,
+                    "truth_world_product_id": truth_world_id,
+                    "truth_world_logical_hash": truth_world_hash,
+                    "action_world_product_id": action_world_id,
+                    "action_world_logical_hash": action_world_hash,
+                    "machine_world_product_id": machine_world_id,
+                    "machine_world_logical_hash": machine_world_hash,
+                    "basic_core_ready": basic_world_ready,
                     "canonical_dataset_id": dataset_id,
                     "canonical_logical_hash": canonical_hash,
+                    "stage_profile_id": stage_projection.stage_profile_id,
+                    "stage_projection_status": stage_projection.status,
+                    "stage_projection_hash": stage_projection.logical_hash,
+                    "stage_registry_sha256": (
+                        stage_projection.stage_registry_sha256
+                    ),
+                    "stage_source_artifact_sha256": (
+                        stage_source_artifact_sha256
+                    ),
+                    "stage_ids": [
+                        stage.stage_id for stage in stage_projection.stages
+                    ],
                 },
-                world_product_ids=(world_id,),
+                world_product_ids=(
+                    context_world_id,
+                    truth_world_id,
+                    action_world_id,
+                    machine_world_id,
+                ),
+                relation_ids=relation_ids,
             ),
             aircraft=aircraft_binding,
             system_bindings=request.system_bindings,
-            world_products=(world_record,),
+            world_products=(
+                context_world,
+                truth_world,
+                action_world,
+                machine_world,
+            ),
+            world_relations=stage_relations,
         )
     except (
         CatalogMetricEngineError,
         ProductionP1CatalogError,
         ProductionP1MaterializationError,
         ProductionP1RequestError,
+        ProductionP1WorldPolicyError,
+        ProductionStageError,
     ) as exc:
         raise ProductionWorkerError(exc.code, exc.detail) from exc
 
@@ -679,7 +1159,7 @@ def build_p1_worker_product(
             values={
                 "episode_id": episode_id,
                 "session_id": session_id,
-                "episode_type": "PRODUCTION_P1",
+                "episode_type": "BASIC_FLIGHT",
                 "context_id": context_id,
                 "start_session_time_us": start,
                 "end_session_time_us": end,
@@ -687,13 +1167,40 @@ def build_p1_worker_product(
                 "primary_aircraft_id": aircraft_id,
                 "world_capability_code": "BASIC_CORE",
                 "episode_status": "READY",
-                "detector_version": "ED2_PRODUCTION_P1_WORLD_V1",
+                "detector_version": "ED2_B1_PRODUCTION_EPISODE_V1",
                 "coverage": 1.0,
                 "confidence": 1.0,
+                "data_sufficiency_status": (
+                    "SUFFICIENT"
+                    if basic_world_ready
+                    else "INSUFFICIENT_DATA"
+                ),
             },
             field_kinds={},
         ),
     ]
+
+    for stage in stage_projection.stages:
+        prerequisites.append(
+            ProductionPrerequisiteRow(
+                table="episode.episode_stage",
+                values={
+                    "stage_id": stage.stage_id,
+                    "episode_id": stage.episode_id,
+                    "stage_type": stage.stage_type,
+                    "stage_order": stage.stage_order,
+                    "start_session_time_us": stage.start_session_time_us,
+                    "end_session_time_us": stage.end_session_time_us,
+                    "detection_method": stage.detection_method,
+                    "stage_status": stage.stage_status,
+                    "coverage": stage.coverage,
+                    "confidence": stage.confidence,
+                    "detector_version": stage.detector_version,
+                    "supersedes_stage_id": None,
+                },
+                field_kinds={},
+            )
+        )
 
     for system in request.system_authorities:
         prerequisites.append(

@@ -22,7 +22,7 @@ from tpaa_runtime import (
     RuntimeProfile,
     build_desktop_production_runtime,
 )
-from tpaa_storage import bootstrap_sqlite
+from tpaa_storage import SQLiteDesktopUnitOfWork, bootstrap_sqlite
 from tpaa_storage.hashing import canonical_request_hash
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -173,7 +173,7 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
     assert release["capability_observation_count"] > 0
     assert release["system_observation_count"] > 0
     assert release["evidence_only_metric_instance_count"] > 0
-    assert release["world_product_count"] == 1
+    assert release["world_product_count"] == 4
     assert release["production_compute_configured"] is True
     metrics = runtime.application.m1_metrics(release_id)
     assert len(metrics) == release["metric_instance_count"]
@@ -196,6 +196,98 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
         for item in source_lineage
     )
     assert len(str(locator["source_lineage_hash"])) == 64
+    source_sufficiency = locator["source_sufficiency"]
+    assert isinstance(source_sufficiency, dict)
+    assert source_sufficiency["status"] == "READY"
+
+    with SQLiteDesktopUnitOfWork(database) as uow:
+        episode_rows = uow.canonical_rows.many(
+            "episode.training_episode",
+            where={
+                "session_id": SESSION_ID,
+                "context_id": CONTEXT_ID,
+            },
+            columns=("episode_id", "episode_type", "data_sufficiency_status"),
+            order_by=("episode_id",),
+        )
+        assert len(episode_rows) == 1
+        episode_id = str(episode_rows[0]["episode_id"])
+        assert episode_rows[0]["episode_type"] == "BASIC_FLIGHT"
+        assert episode_rows[0]["data_sufficiency_status"] == "SUFFICIENT"
+        stage_rows = uow.canonical_rows.many(
+            "episode.episode_stage",
+            where={"episode_id": episode_id},
+            columns=(
+                "stage_id",
+                "stage_type",
+                "stage_order",
+                "start_session_time_us",
+                "end_session_time_us",
+                "stage_status",
+                "detector_version",
+            ),
+            order_by=("stage_order",),
+        )
+        world_rows = uow.canonical_rows.many(
+            "world.world_product_manifest",
+            where={"release_id": release_id},
+            columns=(
+                "world_product_id",
+                "world_kind",
+                "episode_id",
+                "status",
+                "coverage",
+                "logical_content_hash",
+            ),
+            order_by=("world_kind",),
+        )
+        relation_rows = uow.canonical_rows.many(
+            "world.world_relation",
+            where={"release_id": release_id},
+            columns=(
+                "relation_id",
+                "episode_id",
+                "stage_id",
+                "relation_type",
+                "subject_ref",
+                "object_ref",
+                "relation_source",
+                "method_version",
+                "start_session_time_us",
+            ),
+            order_by=("start_session_time_us", "relation_id"),
+        )
+        uow.commit()
+
+    assert [row["stage_type"] for row in stage_rows] == [
+        "SETUP_ENTRY",
+        "EXECUTION",
+        "STABILIZATION_RECOVERY",
+        "COMPLETION",
+    ]
+    assert [row["stage_order"] for row in stage_rows] == [0, 1, 2, 3]
+    assert all(row["stage_status"] == "VALID" for row in stage_rows)
+    assert all(
+        row["detector_version"] == "ED2_B1_BASIC_FLIGHT_STAGE_PROJECTOR_V1"
+        for row in stage_rows
+    )
+    assert [row["world_kind"] for row in world_rows] == [
+        "ACTION",
+        "CONTEXT",
+        "MACHINE",
+        "TRUTH",
+    ]
+    assert all(str(row["episode_id"]) == episode_id for row in world_rows)
+    assert all(row["status"] == "READY" for row in world_rows)
+    assert len(world_rows) == 4
+    assert len(relation_rows) == 3
+    assert all(row["relation_type"] == "PRECEDES" for row in relation_rows)
+    assert all(row["relation_source"] == "OFFICIAL" for row in relation_rows)
+    stage_ids = [str(row["stage_id"]) for row in stage_rows]
+    assert [
+        (str(row["subject_ref"]), str(row["object_ref"]))
+        for row in relation_rows
+    ] == list(zip(stage_ids, stage_ids[1:], strict=False))
 
     restarted = build_desktop_production_runtime(config)
     assert (

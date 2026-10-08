@@ -88,6 +88,7 @@ class ProductionP1SourceRef:
     adapter_version: str
     source_ref: str
     metric_input_hashes: dict[str, str]
+    projection_payload: dict[str, object]
 
 
 @dataclass(frozen=True, slots=True)
@@ -571,6 +572,20 @@ def _inspect_source_document(
                 field=f"source_documents[{index}].session_id",
             )
             metric_input_hashes: dict[str, str] = {}
+            action_projection = flight.get("action_projection")
+            projection_payload = (
+                {}
+                if action_projection is None
+                else {
+                    "action_projection": _mapping(
+                        action_projection,
+                        field=(
+                            f"source_documents[{index}]."
+                            "action_projection"
+                        ),
+                    )
+                }
+            )
             adapter = ProductionFlightJsonAdapter()
         else:
             interchange = validate_production_interchange_document(
@@ -582,6 +597,7 @@ def _inspect_source_document(
                 interchange.payload.get("metric_input_hashes"),
                 field=f"source_documents[{index}].metric_input_hashes",
             )
+            projection_payload = dict(interchange.payload)
             adapter = ProductionInterchangeJsonAdapter(family)
 
         envelope = adapter.inspect(
@@ -635,6 +651,7 @@ def _inspect_source_document(
             adapter_version=envelope.adapter_version,
             source_ref=envelope.source_ref,
             metric_input_hashes=metric_input_hashes,
+            projection_payload=projection_payload,
         ),
     )
 

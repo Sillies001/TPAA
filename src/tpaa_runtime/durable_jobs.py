@@ -157,6 +157,7 @@ _PREREQUISITE_IDENTITY_COLUMNS: dict[str, str] = {
     "master.aircraft_instance": "aircraft_instance_id",
     "context.evaluation_context": "context_id",
     "episode.training_episode": "episode_id",
+    "episode.episode_stage": "stage_id",
     "master.mission_system_instance": "mission_system_instance_id",
     "metric.metric_definition": "metric_definition_id",
 }

@@ -39,6 +39,8 @@ from tpaa_ingest.p6_interop import (
     build_p6_interop_snapshot,
 )
 from tpaa_ingest.production_flight_json import (
+    PRODUCTION_FLIGHT_ACTION_PROFILE_ID,
+    PRODUCTION_FLIGHT_ACTION_SCHEMA,
     PRODUCTION_FLIGHT_ADAPTER_ID,
     PRODUCTION_FLIGHT_ADAPTER_VERSION,
     PRODUCTION_FLIGHT_MEDIA_TYPE,
@@ -109,6 +111,8 @@ __all__ = [
     "ReferenceIdentity",
     "P6InteropArtifactRef",
     "P6InteropSnapshot",
+    "PRODUCTION_FLIGHT_ACTION_PROFILE_ID",
+    "PRODUCTION_FLIGHT_ACTION_SCHEMA",
     "PRODUCTION_FLIGHT_ADAPTER_ID",
     "PRODUCTION_FLIGHT_ADAPTER_VERSION",
     "PRODUCTION_FLIGHT_MEDIA_TYPE",

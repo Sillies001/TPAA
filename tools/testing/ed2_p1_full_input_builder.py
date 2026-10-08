@@ -27,6 +27,8 @@ from tools.testing.m3_identification_remainder_check import (
 from tools.testing.m3_passive_remainder_check import _golden_inputs as _passive_inputs
 from tools.testing.m3_track_remainder_check import _golden_inputs as _track_inputs
 from tpaa_ingest import (
+    PRODUCTION_FLIGHT_ACTION_PROFILE_ID,
+    PRODUCTION_FLIGHT_ACTION_SCHEMA,
     PRODUCTION_FLIGHT_MEDIA_TYPE,
     SourceFamily,
     descriptor_for_interchange_family,
@@ -40,6 +42,13 @@ from tpaa_metric import (
     build_m2_sns_detection_inputs,
     build_m3_metric_execution_plan,
     serialize_m1_air_result,
+)
+from tpaa_episode.production_stage import (
+    PRODUCTION_STAGE_DETECTION_METHOD,
+    PRODUCTION_STAGE_ORDER,
+    PRODUCTION_STAGE_PRECEDENCE_SOURCE,
+    PRODUCTION_STAGE_PROFILE_ID,
+    PRODUCTION_STAGE_TERMINATOR,
 )
 from tpaa_runtime.production_p1_source_policy import (
     production_p1_required_source_families,
@@ -319,12 +328,22 @@ def _interchange_source_document(
     family: SourceFamily,
     metric_input_hashes: dict[str, str],
     ordinal: int,
+    stage_projection: dict[str, object] | None = None,
 ) -> dict[str, object]:
     descriptor = descriptor_for_interchange_family(family)
     source_id = _source_id(session_id, family, "source")
     artifact_id = _source_id(session_id, family, "artifact")
     stream_id = _source_id(session_id, family, "stream")
     profile = production_interchange_profile(family)
+    payload: dict[str, object] = {
+        "projection_class": profile.projection_class,
+        "qualification_only": True,
+        "metric_input_hashes": metric_input_hashes,
+    }
+    if stage_projection is not None:
+        if family is not SourceFamily.SCENARIO:
+            raise ValueError("ED2_P1_STAGE_PROJECTION_FAMILY_INVALID")
+        payload["stage_projection"] = stage_projection
     source_document = {
         "schema": "TPAA_PRODUCTION_INTERCHANGE_SOURCE_V1",
         "schema_version": "1.0.0",
@@ -336,11 +355,7 @@ def _interchange_source_document(
             "profile_hash": profile.profile_hash,
         },
         "knowledge_time_utc": "2026-10-08T00:00:00Z",
-        "payload": {
-            "projection_class": profile.projection_class,
-            "qualification_only": True,
-            "metric_input_hashes": metric_input_hashes,
-        },
+        "payload": payload,
     }
     return {
         "source_json": json.dumps(
@@ -378,6 +393,114 @@ def _interchange_source_document(
     }
 
 
+def _qualification_stage_projection(
+    flight_raw: Mapping[str, object],
+) -> dict[str, object]:
+    transform = flight_raw.get("time_transform")
+    rows = flight_raw.get("rows")
+    if not isinstance(transform, Mapping) or not isinstance(rows, list) or not rows:
+        raise TypeError("ED2_P1_QUALIFICATION_STAGE_SOURCE_INVALID")
+    scale_raw = transform.get("scale")
+    offset_raw = transform.get("offset_us")
+    if (
+        isinstance(scale_raw, bool)
+        or not isinstance(scale_raw, (int, float))
+        or isinstance(offset_raw, bool)
+        or not isinstance(offset_raw, int)
+    ):
+        raise TypeError("ED2_P1_QUALIFICATION_STAGE_TIME_INVALID")
+    first = rows[0]
+    last = rows[-1]
+    if not isinstance(first, Mapping) or not isinstance(last, Mapping):
+        raise TypeError("ED2_P1_QUALIFICATION_STAGE_ROW_INVALID")
+    first_source = first.get("source_time_us")
+    last_source = last.get("source_time_us")
+    if (
+        isinstance(first_source, bool)
+        or not isinstance(first_source, int)
+        or isinstance(last_source, bool)
+        or not isinstance(last_source, int)
+    ):
+        raise TypeError("ED2_P1_QUALIFICATION_STAGE_TIME_INVALID")
+    start = int(round(first_source * float(scale_raw))) + offset_raw
+    end = int(round(last_source * float(scale_raw))) + offset_raw + 1
+    span = end - start
+    if span < 4:
+        raise ValueError("ED2_P1_QUALIFICATION_STAGE_INTERVAL_TOO_SHORT")
+    boundaries = [
+        start,
+        start + span // 4,
+        start + span // 2,
+        start + (3 * span) // 4,
+        end,
+    ]
+    if any(
+        left >= right
+        for left, right in zip(boundaries, boundaries[1:], strict=False)
+    ):
+        raise ValueError("ED2_P1_QUALIFICATION_STAGE_INTERVAL_INVALID")
+    markers = [
+        {
+            "marker": stage_type,
+            "session_time_us": boundaries[index],
+        }
+        for index, stage_type in enumerate(PRODUCTION_STAGE_ORDER)
+    ]
+    markers.append(
+        {
+            "marker": PRODUCTION_STAGE_TERMINATOR,
+            "session_time_us": boundaries[-1],
+        }
+    )
+    return {
+        "stage_profile_id": PRODUCTION_STAGE_PROFILE_ID,
+        "precedence_source": PRODUCTION_STAGE_PRECEDENCE_SOURCE,
+        "detection_method": PRODUCTION_STAGE_DETECTION_METHOD,
+        "markers": markers,
+    }
+
+
+def _qualification_action_projection(
+    *,
+    session_id: str,
+    stage_projection: Mapping[str, object],
+) -> dict[str, object]:
+    raw_markers = stage_projection.get("markers")
+    if not isinstance(raw_markers, list) or len(raw_markers) < 2:
+        raise TypeError("ED2_P1_QUALIFICATION_ACTION_STAGE_INVALID")
+    first = raw_markers[0]
+    last = raw_markers[-1]
+    if not isinstance(first, Mapping) or not isinstance(last, Mapping):
+        raise TypeError("ED2_P1_QUALIFICATION_ACTION_STAGE_INVALID")
+    start = first.get("session_time_us")
+    end = last.get("session_time_us")
+    if (
+        isinstance(start, bool)
+        or not isinstance(start, int)
+        or isinstance(end, bool)
+        or not isinstance(end, int)
+        or start >= end
+    ):
+        raise TypeError("ED2_P1_QUALIFICATION_ACTION_TIME_INVALID")
+    return {
+        "schema": PRODUCTION_FLIGHT_ACTION_SCHEMA,
+        "profile_id": PRODUCTION_FLIGHT_ACTION_PROFILE_ID,
+        "events": [
+            {
+                "action_event_id": _source_id(
+                    session_id,
+                    SourceFamily.FLIGHT,
+                    "action-event",
+                ),
+                "action_type": "FLIGHT_CONTROL_ACTIVITY",
+                "start_session_time_us": start,
+                "end_session_time_us": end,
+                "evidence_ref": "qualification://ED2_B1/FLIGHT/actions",
+            }
+        ],
+    }
+
+
 def build_full_p1_request_contract(
     *,
     aircraft_id: str,
@@ -407,6 +530,22 @@ def build_full_p1_request_contract(
         raise TypeError("ED2_P1_QUALIFICATION_FLIGHT_IDENTITY_INVALID")
     if source_aircraft != aircraft_id:
         raise ValueError("ED2_P1_QUALIFICATION_AIRCRAFT_DRIFT")
+
+    stage_projection = _qualification_stage_projection(
+        cast(Mapping[str, object], flight_raw)
+    )
+
+    flight_raw["action_projection"] = _qualification_action_projection(
+        session_id=session_id,
+        stage_projection=stage_projection,
+    )
+    source_text = json.dumps(
+        flight_raw,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    )
 
     metric_lineage = {
         definition.metric_code: _lineage_families(definition.family)
@@ -483,6 +622,11 @@ def build_full_p1_request_contract(
                 family=family,
                 metric_input_hashes=family_metric_hashes[family.value],
                 ordinal=ordinal,
+                stage_projection=(
+                    stage_projection
+                    if family is SourceFamily.SCENARIO
+                    else None
+                ),
             )
         )
 

@@ -141,6 +141,9 @@ def _shared_exact_projection(report: dict[str, Any]) -> dict[str, object]:
         "capability_observation_count",
         "system_observation_count",
         "evidence_only_metric_instance_count",
+        "world_product_count",
+        "stage_count",
+        "world_relation_count",
     )
     result = {
         field: installed.get(field)
@@ -161,8 +164,13 @@ def _shared_exact_projection(report: dict[str, Any]) -> dict[str, object]:
     if (
         result["catalog_definition_count"] != 116
         or result["metric_code_count"] != 116
+        or result["world_product_count"] != 4
+        or result["stage_count"] != 4
+        or result["world_relation_count"] != 3
     ):
-        raise RuntimeError("shared exact P1 catalog membership is not 116")
+        raise RuntimeError(
+            "shared exact P1 Catalog/World/Stage membership drift"
+        )
     return result
 
 

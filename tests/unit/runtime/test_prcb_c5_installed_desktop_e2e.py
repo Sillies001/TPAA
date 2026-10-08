@@ -31,6 +31,9 @@ def test_prcb_c5_installed_desktop_p1_p6_restart_recovery_audit(
     assert result["capability_observation_count"] > 0
     assert result["system_observation_count"] > 0
     assert result["evidence_only_metric_instance_count"] > 0
+    assert result["world_product_count"] == 4
+    assert result["stage_count"] == 4
+    assert result["world_relation_count"] == 3
     assert result["p2_job_status"] == "SUCCEEDED"
     assert result["p2_qualification_as_of_utc"] == "2026-12-31T23:58:00Z"
     assert result["p2_execution_time_utc"] == "2026-12-31T23:59:00Z"
