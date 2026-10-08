@@ -15,6 +15,7 @@ from .catalog_engine import (
     M2MetricExecutionBatch,
     M2MetricExecutionPlan,
     M2MetricExecutionRecord,
+    M2MetricPlugin,
     M2MetricPluginRequest,
     MetricPluginRegistry,
     build_catalog_metric_execution_plan,
@@ -46,6 +47,7 @@ from .m3_runtime_closure import (
     M3_RUNTIME_OPERATOR_IMPLEMENTATIONS,
     build_m3_runtime_plugin_registry,
 )
+from .qa_foundation import build_m2_qa_inputs
 from .sns_accuracy import (
     M2_SNS_ACCURACY_PLUGINS,
     SNS_ACCURACY_CODES,
@@ -68,6 +70,7 @@ __all__ = [
     "M2MetricExecutionBatch",
     "M2MetricExecutionPlan",
     "M2MetricExecutionRecord",
+    "M2MetricPlugin",
     "M2MetricPluginRequest",
     "M2AirFormalDelivery",
     "MetricPluginRegistry",
@@ -95,6 +98,7 @@ __all__ = [
     "TasMachEnvelope",
     "build_catalog_metric_execution_plan",
     "build_m2_metric_execution_plan",
+    "build_m2_qa_inputs",
     "build_m3_metric_execution_plan",
     "build_m3_runtime_plugin_registry",
     "validate_m2_runtime_output",

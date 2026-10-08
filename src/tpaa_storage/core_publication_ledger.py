@@ -344,19 +344,19 @@ class CorePublicationLedger:
                     identity.aircraft_instance_id,
                 )
 
-        for observation in release.system_observations:
+        for system_observation in release.system_observations:
             instance = metric_instances.get(
-                observation.observed_metric_instance_id
+                system_observation.observed_metric_instance_id
             )
             if (
                 instance is None
                 or instance.mission_system_instance_id
-                != observation.mission_system_instance_id
+                != system_observation.mission_system_instance_id
                 or instance.subject_entity_id is not None
             ):
                 raise CorePublicationLedgerError(
                     "SYSTEM_OBSERVATION_METRIC_IDENTITY_MISMATCH",
-                    observation.system_observation_id,
+                    system_observation.system_observation_id,
                 )
             p = (
                 "mission_system_instance_id = ?"
@@ -366,16 +366,16 @@ class CorePublicationLedger:
             system = self._one(
                 "master.mission_system_instance",
                 p,
-                (observation.mission_system_instance_id,),
+                (system_observation.mission_system_instance_id,),
                 code="MISSION_SYSTEM_PREREQUISITE_CARDINALITY",
             )
             if (
-                str(_value(system, 0)) != observation.mission_system_instance_id
-                or str(_value(system, 1)) != observation.aircraft_id
+                str(_value(system, 0)) != system_observation.mission_system_instance_id
+                or str(_value(system, 1)) != system_observation.aircraft_id
             ):
                 raise CorePublicationLedgerError(
                     "MISSION_SYSTEM_PREREQUISITE_MISMATCH",
-                    observation.mission_system_instance_id,
+                    system_observation.mission_system_instance_id,
                 )
 
         world_products = {
@@ -612,22 +612,22 @@ class CorePublicationLedger:
                     "STAGE_EPISODE_SCOPE_DRIFT",
                     observation.stage_id,
                 )
-        for observation in release.system_observations:
-            if observation.stage_id is None:
+        for system_observation in release.system_observations:
+            if system_observation.stage_id is None:
                 continue
-            if observation.episode_id is None:
+            if system_observation.episode_id is None:
                 raise CorePublicationLedgerError(
                     "STAGE_EPISODE_SCOPE_DRIFT",
-                    observation.stage_id,
+                    system_observation.stage_id,
                 )
             prior = stage_episode.setdefault(
-                observation.stage_id,
-                observation.episode_id,
+                system_observation.stage_id,
+                system_observation.episode_id,
             )
-            if prior != observation.episode_id:
+            if prior != system_observation.episode_id:
                 raise CorePublicationLedgerError(
                     "STAGE_EPISODE_SCOPE_DRIFT",
-                    observation.stage_id,
+                    system_observation.stage_id,
                 )
 
         for world in release.world_products:
@@ -933,18 +933,24 @@ class CorePublicationLedger:
                 f"{release.release_id}|{release.context_id}|{release.context_version}",
             )
         )
-        observation_spans = (
-            *release.observations,
-            *release.system_observations,
-        )
-        start_us = min(
+        observation_start_times = [
             item.observation_start_session_time_us
-            for item in observation_spans
+            for item in release.observations
+        ]
+        observation_start_times.extend(
+            item.observation_start_session_time_us
+            for item in release.system_observations
         )
-        end_us = max(
+        observation_end_times = [
             item.observation_end_session_time_us
-            for item in observation_spans
+            for item in release.observations
+        ]
+        observation_end_times.extend(
+            item.observation_end_session_time_us
+            for item in release.system_observations
         )
+        start_us = min(observation_start_times)
+        end_us = max(observation_end_times)
         d.execute(
             f"""INSERT INTO {ref_table} (
                     release_context_ref_id, release_id, release_scope_type,
@@ -1224,7 +1230,7 @@ class CorePublicationLedger:
         system_observation_table = d.table(
             "metric.system_performance_observation"
         )
-        for observation in release.system_observations:
+        for system_observation in release.system_observations:
             d.execute(
                 f"""INSERT INTO {system_observation_table} (
                         system_observation_id, release_id, session_id, episode_id,
@@ -1244,28 +1250,28 @@ class CorePublicationLedger:
                         {now_expr}
                     )""",
                 (
-                    observation.system_observation_id,
+                    system_observation.system_observation_id,
                     release.release_id,
                     release.session_id,
-                    observation.episode_id,
-                    observation.stage_id,
-                    observation.aircraft_id,
-                    observation.mission_system_instance_id,
-                    observation.observed_metric_instance_id,
-                    observation.reference_truth_profile_version,
-                    observation.reference_quality_status,
-                    d.json(observation.reference_uncertainty_summary),
-                    d.json(observation.alignment_uncertainty_summary),
-                    observation.observation_start_session_time_us,
-                    observation.observation_end_session_time_us,
-                    d.json(observation.context_tags),
-                    observation.evidence_set_id,
-                    observation.coverage,
-                    observation.confidence,
-                    observation.eligibility_status,
-                    observation.exclusion_reason_code,
-                    observation.comparison_key_hash,
-                    observation.observation_schema_version,
+                    system_observation.episode_id,
+                    system_observation.stage_id,
+                    system_observation.aircraft_id,
+                    system_observation.mission_system_instance_id,
+                    system_observation.observed_metric_instance_id,
+                    system_observation.reference_truth_profile_version,
+                    system_observation.reference_quality_status,
+                    d.json(system_observation.reference_uncertainty_summary),
+                    d.json(system_observation.alignment_uncertainty_summary),
+                    system_observation.observation_start_session_time_us,
+                    system_observation.observation_end_session_time_us,
+                    d.json(system_observation.context_tags),
+                    system_observation.evidence_set_id,
+                    system_observation.coverage,
+                    system_observation.confidence,
+                    system_observation.eligibility_status,
+                    system_observation.exclusion_reason_code,
+                    system_observation.comparison_key_hash,
+                    system_observation.observation_schema_version,
                 ),
             )
 

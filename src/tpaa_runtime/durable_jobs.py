@@ -73,13 +73,13 @@ from .production_worker import (
     P6_COUNTERFACTUAL_COMMAND,
     P6_FORECAST_COMMAND,
     ProductionP1WorkerProduct,
-    ProductionPrerequisiteRow,
     ProductionP2AttributionWorkerInput,
     ProductionP3EstimateWorkerInput,
     ProductionP4AssessmentWorkerInput,
     ProductionP5AssessmentWorkerInput,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
+    ProductionPrerequisiteRow,
 )
 
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"

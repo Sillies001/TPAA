@@ -129,13 +129,13 @@ def _require_hash(value: str, *, field: str) -> None:
 
 
 def _validate_context(context: ProductionP1ReleaseContext) -> None:
-    for field, value in (
+    for field, identity_value in (
         ("release_id", context.release_id),
         ("session_id", context.session_id),
         ("context_id", context.context_id),
         ("episode_id", context.episode_id),
     ):
-        _require_uuid(value, field=field)
+        _require_uuid(identity_value, field=field)
     if context.stage_id is not None:
         _require_uuid(context.stage_id, field="stage_id")
     if context.parent_release_id is not None:
@@ -152,11 +152,11 @@ def _validate_context(context: ProductionP1ReleaseContext) -> None:
             "ED2_P1_PUBLICATION_INTERVAL_INVALID",
             context.release_id,
         )
-    for field, value in (
+    for field, quality_value in (
         ("coverage", context.coverage),
         ("confidence", context.confidence),
     ):
-        if not 0.0 <= value <= 1.0:
+        if not 0.0 <= quality_value <= 1.0:
             raise ProductionP1MaterializationError(
                 "ED2_P1_PUBLICATION_QUALITY_INVALID",
                 field,

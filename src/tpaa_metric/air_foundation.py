@@ -173,7 +173,7 @@ def _json_result(value: Mapping[str, object]) -> MetricResult:
     stage_raw = value.get("stage_id")
     if stage_raw is not None and not isinstance(stage_raw, str):
         raise ValueError("M2_AIR_JSON_RESULT_INVALID:stage_id")
-    stage_id = cast(str | None, stage_raw)
+    stage_id = stage_raw
     evidence_payload = {
         "metric_code": metric_code,
         "metric_context_id": metric_context_id,

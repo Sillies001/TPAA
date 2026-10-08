@@ -26,6 +26,13 @@ from tools.testing.m3_identification_remainder_check import (
 )
 from tools.testing.m3_passive_remainder_check import _golden_inputs as _passive_inputs
 from tools.testing.m3_track_remainder_check import _golden_inputs as _track_inputs
+from tpaa_episode.production_stage import (
+    PRODUCTION_STAGE_DETECTION_METHOD,
+    PRODUCTION_STAGE_ORDER,
+    PRODUCTION_STAGE_PRECEDENCE_SOURCE,
+    PRODUCTION_STAGE_PROFILE_ID,
+    PRODUCTION_STAGE_TERMINATOR,
+)
 from tpaa_ingest import (
     PRODUCTION_FLIGHT_ACTION_PROFILE_ID,
     PRODUCTION_FLIGHT_ACTION_SCHEMA,
@@ -42,13 +49,6 @@ from tpaa_metric import (
     build_m2_sns_detection_inputs,
     build_m3_metric_execution_plan,
     serialize_m1_air_result,
-)
-from tpaa_episode.production_stage import (
-    PRODUCTION_STAGE_DETECTION_METHOD,
-    PRODUCTION_STAGE_ORDER,
-    PRODUCTION_STAGE_PRECEDENCE_SOURCE,
-    PRODUCTION_STAGE_PROFILE_ID,
-    PRODUCTION_STAGE_TERMINATOR,
 )
 from tpaa_runtime.production_p1_source_policy import (
     production_p1_required_source_families,
@@ -104,7 +104,7 @@ def _required_products(
         if definition.metric_code.startswith(prefix)
         and definition.applicability.required_product_semantics is not None
     }
-    return sorted(cast(set[str], products))
+    return sorted(products)
 
 
 def build_full_p1_catalog_inputs(

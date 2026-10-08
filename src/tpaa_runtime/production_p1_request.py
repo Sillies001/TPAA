@@ -565,6 +565,7 @@ def _inspect_source_document(
 
     try:
         adapter: SourceAdapter
+        projection_payload: dict[str, object]
         if family is SourceFamily.FLIGHT:
             flight = validate_production_flight_document(source_bytes)
             session_id = _uuid(

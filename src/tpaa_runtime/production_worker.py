@@ -563,6 +563,13 @@ def build_p1_worker_product(
         raise ProductionWorkerError(exc.code, exc.detail) from exc
 
     flight_payload = source_selection.flight_payload
+    flight_refs = source_selection.refs_by_family.get(SourceFamily.FLIGHT, ())
+    if len(flight_refs) != 1:
+        raise ProductionWorkerError(
+            "ED2_P1_PRIMARY_FLIGHT_SOURCE_CARDINALITY",
+            str(len(flight_refs)),
+        )
+    flight_artifact_id = flight_refs[0].artifact_id
     source_json = _text(
         flight_payload.get("source_json"),
         field="source_json",
@@ -1082,7 +1089,7 @@ def build_p1_worker_product(
                     "canonical_logical_hash": canonical_hash,
                     "source_sha256": source_sha,
                 },
-                "input_refs": [artifact_id],
+                "input_refs": [flight_artifact_id],
                 "data_hash": canonical_hash,
                 "schema_version": "1.9.0",
                 "frozen": True,
