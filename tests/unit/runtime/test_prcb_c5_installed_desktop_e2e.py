@@ -25,7 +25,11 @@ def test_prcb_c5_installed_desktop_p1_p6_restart_recovery_audit(
     assert result["db_schema_version"] == "1.9.0"
     assert result["canonical_baseline"] == "CB-1.4.0"
     assert result["job_status"] == "SUCCEEDED"
-    assert result["metric_count"] == 5
+    assert result["metric_code_count"] == 116
+    assert result["metric_count"] >= 116
+    assert result["capability_observation_count"] > 0
+    assert result["system_observation_count"] > 0
+    assert result["evidence_only_metric_instance_count"] > 0
     assert result["p2_job_status"] == "SUCCEEDED"
     assert result["p2_qualification_as_of_utc"] == "2026-12-31T23:58:00Z"
     assert result["p2_execution_time_utc"] == "2026-12-31T23:59:00Z"

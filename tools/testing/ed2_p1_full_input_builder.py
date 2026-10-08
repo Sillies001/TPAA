@@ -211,6 +211,16 @@ def build_full_p1_system_authority(
         if definition.subject_type != "MISSION_SYSTEM_INSTANCE":
             continue
         payload = inputs[definition.metric_code]
+        existing_id = payload.get("mission_system_instance_id")
+        if isinstance(existing_id, str):
+            system_id = existing_id
+        else:
+            system_id = str(
+                uuid5(
+                    NAMESPACE_URL,
+                    f"ed2-full-116-system:{definition.metric_code}",
+                )
+            )
         raw_type = payload.get("system_type")
         if isinstance(raw_type, str):
             system_type = raw_type
@@ -220,33 +230,68 @@ def build_full_p1_system_authority(
             raise ValueError(
                 f"ED2_P1_SYSTEM_TYPE_UNRESOLVED:{definition.metric_code}"
             )
-        system_id = str(
-            uuid5(
-                NAMESPACE_URL,
-                f"ed2-full-116-system:{definition.metric_code}",
+        prior = systems.get(system_id)
+        if prior is not None and prior["system_type"] != system_type:
+            raise ValueError(
+                "ED2_P1_SYSTEM_TYPE_CONFLICT:"
+                f"{system_id}:{prior['system_type']}:{system_type}"
             )
-        )
         bindings[definition.metric_code] = system_id
-        systems[system_id] = {
-            "mission_system_instance_id": system_id,
-            "aircraft_id": aircraft_id,
-            "system_type": system_type,
-            "system_code": f"ED2-{definition.metric_code}",
-            "hardware_version": "QUALIFICATION",
-            "software_version": "QUALIFICATION",
-            "installation_id": f"QUAL-{definition.metric_code}",
-            "alignment_profile_version": "ED2-ALIGNMENT-V1",
-            "status": "ACTIVE",
-            "configuration_hash": hashlib.sha256(
-                definition.metric_code.encode("ascii")
-            ).hexdigest(),
-            "reference_truth_profile_version": "ED2-REFERENCE-V1",
-            "reference_quality_status": "AVAILABLE",
-            "reference_uncertainty_summary": {"status": "BOUNDED"},
-            "alignment_uncertainty_summary": {"status": "BOUNDED"},
-            "context_tags": {
-                "qualification": "ED2_FULL_116",
-                "family": definition.family,
-            },
-        }
+        if prior is None:
+            systems[system_id] = {
+                "mission_system_instance_id": system_id,
+                "aircraft_id": aircraft_id,
+                "system_type": system_type,
+                "system_code": f"ED2-{system_type}-{system_id[:8]}",
+                "hardware_version": "QUALIFICATION",
+                "software_version": "QUALIFICATION",
+                "installation_id": f"QUAL-{system_id[:12]}",
+                "alignment_profile_version": "ED2-ALIGNMENT-V1",
+                "status": "ACTIVE",
+                "configuration_hash": hashlib.sha256(
+                    system_id.encode("ascii")
+                ).hexdigest(),
+                "reference_truth_profile_version": "ED2-REFERENCE-V1",
+                "reference_quality_status": "AVAILABLE",
+                "reference_uncertainty_summary": {"status": "BOUNDED"},
+                "alignment_uncertainty_summary": {"status": "BOUNDED"},
+                "context_tags": {
+                    "qualification": "ED2_FULL_116",
+                    "system_type": system_type,
+                },
+            }
     return systems, bindings
+
+
+def build_full_p1_request_contract(
+    *,
+    aircraft_id: str,
+    authority_root: Path = AUTHORITY,
+) -> dict[str, object]:
+    """Return JSON-safe exact-116 inputs plus exact system authority bindings."""
+
+    inputs = build_full_p1_catalog_inputs(authority_root=authority_root)
+    systems, bindings = build_full_p1_system_authority(
+        inputs,
+        authority_root=authority_root,
+        aircraft_id=aircraft_id,
+    )
+    payload: dict[str, object] = {
+        "schema": "TPAA_ED2_B1_FULL_P1_REQUEST_CONTRACT_V1",
+        "p1_catalog_inputs": inputs,
+        "mission_system_instances": systems,
+        "metric_system_bindings": bindings,
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    )
+    restored: object = json.loads(encoded)
+    if not isinstance(restored, dict) or not all(
+        isinstance(key, str) for key in restored
+    ):
+        raise TypeError("ED2_P1_REQUEST_CONTRACT_JSON_INVALID")
+    return cast(dict[str, object], restored)

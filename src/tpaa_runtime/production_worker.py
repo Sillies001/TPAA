@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import cast
 from uuid import UUID, uuid5
 
-from tpaa_application.m1_publication import to_core_publication_bundle
 from tpaa_application.p2_persistence import P2DurableComputeInput
 from tpaa_application.p4_p5_compute_input import P5DurableComputeInput
 from tpaa_assessment import (
@@ -44,26 +43,37 @@ from tpaa_capability.p6_input import (
 )
 from tpaa_context import P3ClaimEnvelope
 from tpaa_generated.dto import EvaluationContextDTO
-from tpaa_generated.metric_registry import P1_METRICS
 from tpaa_ingest.canonical_flight_channels import CanonicalFlightRow
 from tpaa_ingest.production_flight_json import validate_production_flight_document
-from tpaa_metric import MetricAuthority, MetricContext, compute_representative_metrics
-from tpaa_observation import (
-    AircraftPublicationIdentity,
-    allocate_session_release_id,
-    build_session_release,
-)
+from tpaa_metric import CatalogMetricEngineError
+from tpaa_observation import allocate_session_release_id
 from tpaa_platform.worker import WorkerPayload, WorkerResult
 from tpaa_storage.canonical_rows import FieldKind
 from tpaa_storage.hashing import canonical_request_hash
-from tpaa_storage.publication_bundle import CorePublicationBundle
-from tpaa_world import (
-    AircraftObservedWorld,
-    P4InteractionScopeSnapshot,
-    WorldEvidenceRef,
+from tpaa_storage.publication_bundle import (
+    CorePublicationBundle,
+    CoreWorldProductRecord,
+)
+from tpaa_world import P4InteractionScopeSnapshot
+
+from .production_p1_catalog import (
+    ProductionP1CatalogError,
+    build_production_p1_catalog_contract,
+    execute_production_p1_catalog,
+)
+from .production_p1_materialization import (
+    ProductionP1AircraftBinding,
+    ProductionP1MaterializationError,
+    ProductionP1ReleaseContext,
+    materialize_production_p1_release,
+)
+from .production_p1_request import (
+    ProductionP1RequestError,
+    parse_production_p1_request,
+    select_production_p1_sources,
 )
 
-PRODUCTION_P1_WORKER_SCHEMA = "TPAA_PRCB_C2_P1_WORKER_PRODUCT_V1"
+PRODUCTION_P1_WORKER_SCHEMA = "TPAA_ED2_B1_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
 P2_ATTRIBUTION_COMMAND = "P2_ATTRIBUTION"
 P3_ESTIMATE_COMMAND = "P3_ESTIMATE"
@@ -71,18 +81,9 @@ P4_ASSESSMENT_COMMAND = "P4_ASSESSMENT"
 P5_ASSESSMENT_COMMAND = "P5_ASSESSMENT"
 P6_FORECAST_COMMAND = "P6_FORECAST"
 P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
-_REPRESENTATIVE_CODES = (
-    "P1-AIR-001",
-    "P1-AIR-002",
-    "P1-AIR-003",
-    "P1-AIR-004",
-    "P1-AIR-007",
-)
 _DATASET_NAMESPACE = UUID("daf518fe-13aa-4d23-9130-b42ac188e4cf")
 _EPISODE_NAMESPACE = UUID("2f54fd82-6212-4750-a2cf-9469c6ac65ec")
 _WORLD_NAMESPACE = UUID("e119738b-1527-4998-b67a-50730604ea28")
-_METRIC_CONTEXT_NAMESPACE = UUID("14cf8918-af80-4afc-9ab0-02933762717c")
-_EVIDENCE_NAMESPACE = UUID("de434824-1682-429b-b40d-34cd7da52204")
 
 
 class ProductionWorkerError(RuntimeError):
@@ -239,15 +240,6 @@ def _number(value: object, *, field: str) -> float:
     return result
 
 
-def _authority_text(
-    item: Mapping[str, object],
-    *,
-    code: str,
-    name: str,
-) -> str:
-    return _text(item.get(name), field=f"{code}.{name}")
-
-
 def _optional_number(
     row: dict[str, object],
     *,
@@ -276,58 +268,6 @@ def _hash(value: object) -> str:
         allow_nan=False,
     ).encode("ascii")
     return hashlib.sha256(encoded).hexdigest()
-
-
-def _catalog(authority_root: Path) -> tuple[str, str]:
-    path = authority_root / "P1_METRIC_CATALOG.json"
-    try:
-        data = path.read_bytes()
-        raw: object = json.loads(data.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ProductionWorkerError(
-            "PRCB_C2_METRIC_AUTHORITY_UNAVAILABLE",
-            str(path),
-        ) from exc
-    document = _mapping(raw, field="P1_METRIC_CATALOG")
-    version = _text(document.get("catalog_version"), field="catalog_version")
-    return version, hashlib.sha256(data).hexdigest()
-
-
-def _authorities() -> tuple[MetricAuthority, ...]:
-    selected: list[MetricAuthority] = []
-    for code in _REPRESENTATIVE_CODES:
-        matches = [item for item in P1_METRICS if item.get("metric_code") == code]
-        if len(matches) != 1:
-            raise ProductionWorkerError("PRCB_C2_METRIC_AUTHORITY_DRIFT", code)
-        item = matches[0]
-        semantic_version = item.get("semantic_version")
-        if isinstance(semantic_version, bool) or not isinstance(semantic_version, int):
-            raise ProductionWorkerError(
-                "PRCB_C2_METRIC_AUTHORITY_DRIFT",
-                f"{code}.semantic_version",
-            )
-        structured = item.get("structured_output_schema_id")
-        if structured is not None and not isinstance(structured, str):
-            raise ProductionWorkerError(
-                "PRCB_C2_METRIC_AUTHORITY_DRIFT",
-                f"{code}.structured_output_schema_id",
-            )
-        selected.append(
-            MetricAuthority(
-                metric_code=code,
-                semantic_id=_authority_text(item, code=code, name="semantic_id"),
-                semantic_version=semantic_version,
-                subject_type=_authority_text(item, code=code, name="subject_type"),
-                unit=_authority_text(item, code=code, name="unit"),
-                value_kind=_authority_text(item, code=code, name="value_kind"),
-                algorithm_id=_authority_text(item, code=code, name="algorithm_id"),
-                algorithm_version=_authority_text(item, code=code, name="algorithm_version"),
-                observation_lane=_authority_text(item, code=code, name="observation_lane"),
-                publication_route=_authority_text(item, code=code, name="publication_route"),
-                structured_output_schema_id=structured,
-            )
-        )
-    return tuple(selected)
 
 
 def _canonical_rows(document: dict[str, object]) -> tuple[CanonicalFlightRow, ...]:
@@ -386,10 +326,19 @@ def build_p1_worker_product(
     request_hash: str,
     authority_root: Path,
 ) -> ProductionP1WorkerProduct:
-    """Execute Source→Canonical→World→Metric→Release entirely in worker memory."""
+    """Execute governed Source→World→exact-116 Catalog→Release in the worker."""
 
     body = dict(payload)
-    source_json = _text(body.get("source_json"), field="source_json")
+    try:
+        source_selection = select_production_p1_sources(body)
+    except ProductionP1RequestError as exc:
+        raise ProductionWorkerError(exc.code, exc.detail) from exc
+
+    flight_payload = source_selection.flight_payload
+    source_json = _text(
+        flight_payload.get("source_json"),
+        field="source_json",
+    )
     source_bytes = source_json.encode("utf-8")
     document = validate_production_flight_document(source_bytes)
     session_id = _uuid(document.get("session_id"), field="session_id")
@@ -409,9 +358,14 @@ def build_p1_worker_product(
         session_id=session_id,
         request_hash=request_hash,
     )
-    episode_id = str(uuid5(_EPISODE_NAMESPACE, f"{session_id}|{canonical_hash}"))
+    episode_id = str(
+        uuid5(_EPISODE_NAMESPACE, f"{session_id}|{canonical_hash}")
+    )
 
-    context_raw = _mapping(body.get("evaluation_context"), field="evaluation_context")
+    context_raw = _mapping(
+        body.get("evaluation_context"),
+        field="evaluation_context",
+    )
     context_id = _uuid(
         context_raw.get("context_id"),
         field="evaluation_context.context_id",
@@ -420,35 +374,34 @@ def build_p1_worker_product(
         context_raw.get("session_id"),
         field="evaluation_context.session_id",
     ) != session_id:
-        raise ProductionWorkerError("PRCB_C2_CONTEXT_SESSION_DRIFT", context_id)
+        raise ProductionWorkerError(
+            "PRCB_C2_CONTEXT_SESSION_DRIFT",
+            context_id,
+        )
     context_version = _text(
         context_raw.get("context_version"),
         field="evaluation_context.context_version",
-    )
-    revision_no = _integer(
-        context_raw.get("revision_no"),
-        field="evaluation_context.revision_no",
-    )
-    rule_set_version = _text(
-        context_raw.get("rule_set_version"),
-        field="evaluation_context.rule_set_version",
-    )
-    metric_profile_version = _text(
-        context_raw.get("metric_profile_version"),
-        field="evaluation_context.metric_profile_version",
-    )
-    context_status = _text(
-        context_raw.get("status"),
-        field="evaluation_context.status",
     )
     context_projection: EvaluationContextDTO = {
         "context_id": context_id,
         "session_id": session_id,
         "context_version": context_version,
-        "revision_no": revision_no,
-        "rule_set_version": rule_set_version,
-        "metric_profile_version": metric_profile_version,
-        "status": context_status,
+        "revision_no": _integer(
+            context_raw.get("revision_no"),
+            field="evaluation_context.revision_no",
+        ),
+        "rule_set_version": _text(
+            context_raw.get("rule_set_version"),
+            field="evaluation_context.rule_set_version",
+        ),
+        "metric_profile_version": _text(
+            context_raw.get("metric_profile_version"),
+            field="evaluation_context.metric_profile_version",
+        ),
+        "status": _text(
+            context_raw.get("status"),
+            field="evaluation_context.status",
+        ),
     }
 
     start = canonical_rows[0].session_time_us
@@ -463,17 +416,11 @@ def build_p1_worker_product(
             "context_id": context_id,
         }
     )
-    source_import = _mapping(body.get("source_import"), field="source_import")
-    artifact_id = _uuid(
-        source_import.get("artifact_id"),
-        field="source_import.artifact_id",
+    source_import = _mapping(
+        flight_payload.get("source_import"),
+        field="source_import",
     )
     source_sha = hashlib.sha256(source_bytes).hexdigest()
-    base_refs = (
-        WorldEvidenceRef("EVALUATION_CONTEXT", context_id, context_hash),
-        WorldEvidenceRef("CANONICAL", dataset_id, canonical_hash),
-        WorldEvidenceRef("EPISODE", episode_id, episode_hash),
-    )
     world_hash = _hash(
         {
             "release_id": release_id,
@@ -483,117 +430,19 @@ def build_p1_worker_product(
             "dataset_id": dataset_id,
             "canonical_logical_hash": canonical_hash,
             "context_logical_hash": context_hash,
-            "source_sha256": source_sha,
+            "episode_logical_hash": episode_hash,
+            "primary_source_sha256": source_sha,
+            "source_count": source_selection.source_count,
+            "request_hash": request_hash,
         }
     )
     world_id = str(uuid5(_WORLD_NAMESPACE, world_hash))
-    world = AircraftObservedWorld(
-        fixture_id=artifact_id,
-        release_id=release_id,
-        session_id=session_id,
-        episode_id=episode_id,
-        stage_id=None,
-        world_product_id=world_id,
-        world_kind="TRUTH",
-        aircraft_id=aircraft_id,
-        dataset_id=dataset_id,
-        start_session_time_us=start,
-        end_session_time_us=end,
-        status="READY",
-        coverage=1.0,
-        confidence=1.0,
-        reason_codes=(),
-        world_version="PRCB_C2_PRODUCTION_P1_WORLD_V1",
-        policy_version="PRCB-1.0:C2",
-        capability_code="BASIC_CORE",
-        present_capability_letters=("C", "W", "A", "M"),
-        absent_capability_letters=("P", "J"),
-        artifact_sha256=world_hash,
-        logical_content_hash=world_hash,
-        request_hash=request_hash,
-        supersedes_id=None,
-        canonical_rows=canonical_rows,
-        stages=(),
-        evidence_refs=base_refs,
-    )
-
-    profile = _mapping(body.get("metric_profile"), field="metric_profile")
-    profile_id = _text(profile.get("profile_id"), field="metric_profile.profile_id")
-    if profile_id != metric_profile_version:
-        raise ProductionWorkerError("PRCB_C2_METRIC_PROFILE_DRIFT", profile_id)
-    min_coverage = _number(
-        profile.get("min_coverage"),
-        field="metric_profile.min_coverage",
-    )
-    max_gap_us = _integer(
-        profile.get("max_gap_us"),
-        field="metric_profile.max_gap_us",
-    )
-    derivative_window_s = _number(
-        profile.get("derivative_window_s"),
-        field="metric_profile.derivative_window_s",
-    )
-    sustain_duration_s = _number(
-        profile.get("sustain_duration_s"),
-        field="metric_profile.sustain_duration_s",
-    )
-    if not 0.0 < min_coverage <= 1.0 or max_gap_us <= 0:
-        raise ProductionWorkerError("PRCB_C2_METRIC_PROFILE_INVALID", profile_id)
-    if derivative_window_s <= 0.0 or sustain_duration_s <= 0.0:
-        raise ProductionWorkerError("PRCB_C2_METRIC_PROFILE_INVALID", profile_id)
-
-    catalog_version, catalog_hash = _catalog(authority_root)
-    refs = [*base_refs, world.world_evidence_ref]
-    aggregate_hash = _hash(
-        [
-            {"class": ref.ref_class, "id": ref.ref_id, "hash": ref.logical_hash}
-            for ref in refs
-        ]
-    )
-    refs.append(
-        WorldEvidenceRef(
-            "EVIDENCE",
-            str(uuid5(_EVIDENCE_NAMESPACE, aggregate_hash)),
-            aggregate_hash,
-        )
-    )
-    profile_hash = _hash(profile)
-    metric_identity = _hash(
-        {
-            "session_id": session_id,
-            "context_id": context_id,
-            "aircraft_id": aircraft_id,
-            "catalog_hash": catalog_hash,
-            "profile_hash": profile_hash,
-            "world_product_id": world_id,
-        }
-    )
-    metric_context = MetricContext(
-        metric_context_id=str(uuid5(_METRIC_CONTEXT_NAMESPACE, metric_identity)),
-        fixture_id=artifact_id,
-        session_id=session_id,
-        context_id=context_id,
-        subject_type="AIRCRAFT",
-        subject_id=aircraft_id,
-        catalog_id="P1_METRIC_CATALOG",
-        catalog_version=catalog_version,
-        catalog_sha256=catalog_hash,
-        profile_id=profile_id,
-        profile_sha256=profile_hash,
-        min_coverage=min_coverage,
-        max_gap_us=max_gap_us,
-        derivative_window_s=derivative_window_s,
-        sustain_duration_s=sustain_duration_s,
-        authorities=_authorities(),
-        input_refs=tuple(refs),
-    )
-    metric_batch = compute_representative_metrics(metric_context, world)
 
     identity_raw = _mapping(
         body.get("publication_identity"),
         field="publication_identity",
     )
-    identity = AircraftPublicationIdentity(
+    aircraft_binding = ProductionP1AircraftBinding(
         aircraft_id=aircraft_id,
         aircraft_model_id=_uuid(
             identity_raw.get("aircraft_model_id"),
@@ -616,6 +465,7 @@ def build_p1_worker_product(
             field="publication_identity.capability_type",
         ),
     )
+
     expected_version_token = _integer(
         body.get("expected_version_token"),
         field="expected_version_token",
@@ -627,31 +477,96 @@ def build_p1_worker_product(
         )
     parent_raw = body.get("parent_release_id")
     parent_release_id = (
-        None if parent_raw is None else _uuid(parent_raw, field="parent_release_id")
+        None
+        if parent_raw is None
+        else _uuid(parent_raw, field="parent_release_id")
     )
-    if expected_version_token == 0 and parent_release_id is not None:
+    if parent_release_id is not None:
         raise ProductionWorkerError(
             "PRCB_C2_PARENT_RELEASE_INVALID",
             parent_release_id,
         )
-    if expected_version_token > 0 and parent_release_id is None:
-        raise ProductionWorkerError(
-            "PRCB_C2_PARENT_RELEASE_REQUIRED",
-            str(expected_version_token),
-        )
 
-    release = build_session_release(
-        release_id=release_id,
-        request_hash=request_hash,
-        release_no=expected_version_token + 1,
-        parent_release_id=parent_release_id,
-        context=metric_context,
-        context_version=context_version,
-        context_projection=context_projection,
-        world=world,
-        batch=metric_batch,
-        identity=identity,
-    )
+    try:
+        contract = build_production_p1_catalog_contract(authority_root)
+        request = parse_production_p1_request(
+            body,
+            contract=contract,
+            aircraft_id=aircraft_id,
+        )
+        execution_contract, metric_batch = execute_production_p1_catalog(
+            authority_root,
+            request.inputs,
+        )
+        if execution_contract.plan.logical_hash != contract.plan.logical_hash:
+            raise ProductionP1CatalogError(
+                "ED2_P1_EXECUTION_PLAN_DRIFT",
+                execution_contract.plan.logical_hash,
+            )
+        world_record = CoreWorldProductRecord(
+            world_product_id=world_id,
+            episode_id=episode_id,
+            stage_id=None,
+            world_kind="TRUTH",
+            subject_id=aircraft_binding.subject_entity_id,
+            observer_id=None,
+            actor_id=None,
+            aircraft_id=aircraft_id,
+            aircraft_instance_id=aircraft_binding.aircraft_instance_id,
+            dataset_id=dataset_id,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            status="READY",
+            coverage=1.0,
+            confidence=1.0,
+            reason_codes=(),
+            source_authority_signature=source_sha,
+            world_version="ED2_PRODUCTION_P1_WORLD_V1",
+            policy_version="ED2-CONFORMANCE:B1",
+            artifact_sha256=None,
+            logical_content_hash=world_hash,
+            request_hash=request_hash,
+        )
+        release = materialize_production_p1_release(
+            contract=execution_contract,
+            batch=metric_batch,
+            inputs=request.inputs,
+            context=ProductionP1ReleaseContext(
+                release_id=release_id,
+                release_no=1,
+                parent_release_id=None,
+                request_hash=request_hash,
+                session_id=session_id,
+                context_id=context_id,
+                context_version=context_version,
+                context_binding_hash=context_hash,
+                episode_id=episode_id,
+                stage_id=None,
+                start_session_time_us=start,
+                end_session_time_us=end,
+                coverage=1.0,
+                confidence=1.0,
+                observation_schema_version="ED2-P1-OBSERVATION-V1",
+                world_product_versions={
+                    "truth_world_product_id": world_id,
+                    "truth_world_logical_hash": world_hash,
+                    "canonical_dataset_id": dataset_id,
+                    "canonical_logical_hash": canonical_hash,
+                },
+                world_product_ids=(world_id,),
+            ),
+            aircraft=aircraft_binding,
+            system_bindings=request.system_bindings,
+            world_products=(world_record,),
+        )
+    except (
+        CatalogMetricEngineError,
+        ProductionP1CatalogError,
+        ProductionP1MaterializationError,
+        ProductionP1RequestError,
+    ) as exc:
+        raise ProductionWorkerError(exc.code, exc.detail) from exc
+
     prerequisites: list[ProductionPrerequisiteRow] = [
         ProductionPrerequisiteRow(
             table="registry.training_session",
@@ -668,15 +583,37 @@ def build_p1_worker_product(
                 "end_session_time_us": end,
                 "training_type_set": [],
                 "data_status": "READY",
-                "source_count": 1,
+                "source_count": source_selection.source_count,
                 "schema_version": "1.9.0",
             },
             field_kinds={"training_type_set": "text_array"},
         ),
         ProductionPrerequisiteRow(
+            table="registry.dataset_snapshot",
+            values={
+                "dataset_snapshot_id": dataset_id,
+                "snapshot_type": "CANONICAL_FLIGHT",
+                "query_or_manifest": {
+                    "schema": "TPAA_ED2_B1_CANONICAL_DATASET_V1",
+                    "session_id": session_id,
+                    "aircraft_id": aircraft_id,
+                    "canonical_logical_hash": canonical_hash,
+                    "source_sha256": source_sha,
+                },
+                "input_refs": [artifact_id],
+                "data_hash": canonical_hash,
+                "schema_version": "1.9.0",
+                "frozen": True,
+            },
+            field_kinds={
+                "query_or_manifest": "json",
+                "input_refs": "uuid_array",
+            },
+        ),
+        ProductionPrerequisiteRow(
             table="master.aircraft_model",
             values={
-                "aircraft_model_id": identity.aircraft_model_id,
+                "aircraft_model_id": aircraft_binding.aircraft_model_id,
                 "type_code": _text(
                     identity_raw.get("aircraft_type_code"),
                     field="publication_identity.aircraft_type_code",
@@ -692,7 +629,7 @@ def build_p1_worker_product(
             table="master.aircraft",
             values={
                 "aircraft_id": aircraft_id,
-                "aircraft_model_id": identity.aircraft_model_id,
+                "aircraft_model_id": aircraft_binding.aircraft_model_id,
                 "internal_code": _text(
                     identity_raw.get("aircraft_internal_code"),
                     field="publication_identity.aircraft_internal_code",
@@ -704,7 +641,7 @@ def build_p1_worker_product(
         ProductionPrerequisiteRow(
             table="master.entity",
             values={
-                "entity_id": identity.subject_entity_id,
+                "entity_id": aircraft_binding.subject_entity_id,
                 "session_id": session_id,
                 "entity_type": "AIRCRAFT",
                 "alias": _text(
@@ -717,10 +654,10 @@ def build_p1_worker_product(
         ProductionPrerequisiteRow(
             table="master.aircraft_instance",
             values={
-                "aircraft_instance_id": identity.aircraft_instance_id,
+                "aircraft_instance_id": aircraft_binding.aircraft_instance_id,
                 "session_id": session_id,
                 "aircraft_id": aircraft_id,
-                "entity_id": identity.subject_entity_id,
+                "entity_id": aircraft_binding.subject_entity_id,
                 "instance_seq": 0,
                 "start_session_time_us": start,
                 "end_session_time_us": end,
@@ -740,45 +677,83 @@ def build_p1_worker_product(
             values={
                 "episode_id": episode_id,
                 "session_id": session_id,
-                "episode_type": "PRODUCTION_FLIGHT",
+                "episode_type": "PRODUCTION_P1",
                 "context_id": context_id,
                 "start_session_time_us": start,
                 "end_session_time_us": end,
                 "subject_scope": "AIRCRAFT",
                 "primary_aircraft_id": aircraft_id,
-                "world_capability_code": world.capability_code,
-                "episode_status": world.status,
-                "detector_version": world.world_version,
-                "coverage": world.coverage,
-                "confidence": world.confidence,
+                "world_capability_code": "BASIC_CORE",
+                "episode_status": "READY",
+                "detector_version": "ED2_PRODUCTION_P1_WORLD_V1",
+                "coverage": 1.0,
+                "confidence": 1.0,
             },
             field_kinds={},
         ),
     ]
-    for definition in release.definitions:
+
+    for system in request.system_authorities:
+        prerequisites.append(
+            ProductionPrerequisiteRow(
+                table="master.mission_system_instance",
+                values={
+                    "mission_system_instance_id": (
+                        system.mission_system_instance_id
+                    ),
+                    "aircraft_id": system.aircraft_id,
+                    "system_type": system.system_type,
+                    "system_code": system.system_code,
+                    "hardware_version": system.hardware_version,
+                    "software_version": system.software_version,
+                    "installation_id": system.installation_id,
+                    "alignment_profile_version": (
+                        system.alignment_profile_version
+                    ),
+                    "status": system.status,
+                    "configuration_hash": system.configuration_hash,
+                },
+                field_kinds={},
+            )
+        )
+
+    definition_by_code = {
+        item.metric_code: item
+        for item in execution_contract.plan.definitions
+    }
+    for definition_ref in release.definitions:
+        definition = definition_by_code[definition_ref.metric_code]
+        capability_dimension = (
+            aircraft_binding.capability_dimension
+            if definition.subject_type == "AIRCRAFT"
+            else definition.family
+        )
         prerequisites.append(
             ProductionPrerequisiteRow(
                 table="metric.metric_definition",
                 values={
-                    "metric_definition_id": definition.metric_definition_id,
+                    "metric_definition_id": (
+                        definition_ref.metric_definition_id
+                    ),
                     "metric_code": definition.metric_code,
                     "version": definition.algorithm_version,
-                    "catalog_version": definition.catalog_version,
-                    "catalog_hash": definition.catalog_hash,
+                    "catalog_version": definition_ref.catalog_version,
+                    "catalog_hash": definition_ref.catalog_hash,
                     "metric_semantic_id": definition.semantic_id,
                     "metric_semantic_version": definition.semantic_version,
-                    "name": definition.metric_code,
+                    "name": definition.name,
                     "subject_type": definition.subject_type,
                     "observation_lane": definition.observation_lane,
                     "publication_route": definition.publication_route,
-                    "category": "AIRCRAFT_FLIGHT",
+                    "category": definition.family,
                     "calculation_layer": "METRIC",
                     "capability_level": "CAP_L1_OBSERVED",
-                    "capability_dimension": identity.capability_dimension,
-                    "required_world_products": [world.world_product_id],
+                    "capability_dimension": capability_dimension,
+                    "required_world_products": [world_id],
                     "scope": "EPISODE",
                     "spec_uri": (
-                        f"canonical://P1_METRIC_CATALOG/{definition.metric_code}"
+                        "canonical://P1_METRIC_CATALOG/"
+                        f"{definition.metric_code}"
                     ),
                     "spec_hash": definition.definition_hash,
                     "definition_hash": definition.definition_hash,
@@ -789,9 +764,10 @@ def build_p1_worker_product(
                 field_kinds={"required_world_products": "json"},
             )
         )
+
     return ProductionP1WorkerProduct(
         schema=PRODUCTION_P1_WORKER_SCHEMA,
-        release=to_core_publication_bundle(release),
+        release=release,
         canonical_rows=tuple(canonical_payload),
         dataset_id=dataset_id,
         canonical_logical_hash=canonical_hash,

@@ -17,6 +17,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.manifest.build_artifacts import git_revision, sha256_file  # noqa: E402
+from tools.testing.ed2_p1_full_input_builder import (  # noqa: E402
+    build_full_p1_request_contract,
+)
 from tools.packaging.m5_runtime_bundle import (  # noqa: E402
     LINUX_PROFILES,
     WINDOWS_PROFILES,
@@ -37,6 +40,8 @@ QUALIFICATION_SOURCE = (
     / "qualification"
     / "PRCB_C2_NOMINAL_FLIGHT.json"
 )
+P1_QUALIFICATION_CONTRACT = "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+P1_QUALIFICATION_AIRCRAFT_ID = "c2000000-0000-4000-8000-000000000002"
 TARGET_VERSION = "1.0.1"
 
 
@@ -66,6 +71,13 @@ def _install_runtime_entry(stage: Path, profile: str) -> None:
     shutil.copy2(
         QUALIFICATION_SOURCE,
         qualification_root / QUALIFICATION_SOURCE.name,
+    )
+    _write_json(
+        qualification_root / P1_QUALIFICATION_CONTRACT,
+        build_full_p1_request_contract(
+            aircraft_id=P1_QUALIFICATION_AIRCRAFT_ID,
+            authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
+        ),
     )
     default_command = "ready"
     if profile in WINDOWS_PROFILES:
@@ -168,6 +180,9 @@ def build_prcb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
             "runtime_entry": "tools/packaging/prcb_runtime_entry.py",
             "production_qualification_source": (
                 "qualification/PRCB_C2_NOMINAL_FLIGHT.json"
+            ),
+            "production_p1_request_contract": (
+                f"qualification/{P1_QUALIFICATION_CONTRACT}"
             ),
             "file_inventory_sha256": _canonical_hash(inventory),
         }

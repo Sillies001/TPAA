@@ -106,6 +106,15 @@ def _logical_product(report: dict[str, Any]) -> tuple[dict[str, object], str]:
         "canonical_baseline": report.get("canonical_baseline"),
         "release_id": report.get("release_id"),
         "metric_count": report.get("metric_count"),
+        "catalog_definition_count": report.get("catalog_definition_count"),
+        "metric_code_count": report.get("metric_code_count"),
+        "capability_observation_count": report.get(
+            "capability_observation_count"
+        ),
+        "system_observation_count": report.get("system_observation_count"),
+        "evidence_only_metric_instance_count": report.get(
+            "evidence_only_metric_instance_count"
+        ),
         "job_status": report.get("job_status"),
         "p2_job_status": report.get("p2_job_status"),
         "p2_release_id": report.get("p2_release_id"),
@@ -234,7 +243,25 @@ def qualify(
             or installed.get("status") != "PASS"
             or installed.get("product_version") != "1.0.1"
             or installed.get("db_schema_version") != "1.9.0"
-            or installed.get("metric_count") != 5
+            or installed.get("catalog_definition_count") != 116
+            or installed.get("metric_code_count") != 116
+            or not isinstance(installed.get("metric_count"), int)
+            or int(installed["metric_count"]) < 116
+            or not isinstance(
+                installed.get("capability_observation_count"),
+                int,
+            )
+            or int(installed["capability_observation_count"]) <= 0
+            or not isinstance(
+                installed.get("system_observation_count"),
+                int,
+            )
+            or int(installed["system_observation_count"]) <= 0
+            or not isinstance(
+                installed.get("evidence_only_metric_instance_count"),
+                int,
+            )
+            or int(installed["evidence_only_metric_instance_count"]) <= 0
             or installed.get("p2_job_status") != "SUCCEEDED"
             or installed.get("p2_estimate_status") not in {
                 "IDENTIFIABLE",

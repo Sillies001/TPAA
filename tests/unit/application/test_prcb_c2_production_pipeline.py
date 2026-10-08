@@ -5,6 +5,9 @@ from pathlib import Path
 
 import pytest
 
+from tools.testing.ed2_p1_full_input_builder import (
+    build_full_p1_request_contract,
+)
 from tpaa_application import IdempotencyConflict, JobStatus
 from tpaa_ingest import (
     FROZEN_SOURCE_FAMILIES,
@@ -45,7 +48,7 @@ ENTITY_ID = "c2000000-0000-4000-8000-000000000009"
 
 def _payload() -> dict[str, object]:
     source_json = SOURCE.read_text(encoding="utf-8")
-    return {
+    payload: dict[str, object] = {
         "source_json": source_json,
         "source_import": {
             "source_family": "FLIGHT",
@@ -83,13 +86,6 @@ def _payload() -> dict[str, object]:
             "metric_profile_version": "PRCB_C2_P1_PROFILE_V1",
             "status": "ACTIVE",
         },
-        "metric_profile": {
-            "profile_id": "PRCB_C2_P1_PROFILE_V1",
-            "min_coverage": "0.8",
-            "max_gap_us": 200000,
-            "derivative_window_s": "0.3",
-            "sustain_duration_s": "0.5",
-        },
         "publication_identity": {
             "aircraft_model_id": MODEL_ID,
             "aircraft_instance_id": INSTANCE_ID,
@@ -104,6 +100,13 @@ def _payload() -> dict[str, object]:
         "expected_version_token": 0,
         "parent_release_id": None,
     }
+    payload.update(
+        build_full_p1_request_contract(
+            aircraft_id=AIRCRAFT_ID,
+            authority_root=AUTHORITY,
+        )
+    )
+    return payload
 
 
 def test_prcb_c2_production_adapter_is_explicit_and_no_fallback() -> None:
@@ -164,13 +167,19 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
     )
     release = runtime.application.m1_release(release_id)
     assert release["release_id"] == release_id
-    assert release["metric_count"] == 5
+    assert release["catalog_definition_count"] == 116
+    assert release["metric_code_count"] == 116
+    assert release["metric_instance_count"] >= 116
+    assert release["capability_observation_count"] > 0
+    assert release["system_observation_count"] > 0
+    assert release["evidence_only_metric_instance_count"] > 0
+    assert release["world_product_count"] == 1
     assert release["production_compute_configured"] is True
     metrics = runtime.application.m1_metrics(release_id)
-    assert len(metrics) == 5
+    assert len(metrics) == release["metric_instance_count"]
     evidence = runtime.application.m1_metric_evidence(
         release_id,
-        str(metrics[0]["metric_code"]),
+        "P1-AIR-001",
     )
     locator = evidence["series_locator"]
     assert isinstance(locator, dict)
@@ -196,9 +205,9 @@ def test_prcb_c2_desktop_job_runs_worker_pipeline_and_survives_restart(
     assert reused.record.status is JobStatus.SUCCEEDED
 
     changed = copy.deepcopy(payload)
-    profile = changed["metric_profile"]
-    assert isinstance(profile, dict)
-    profile["min_coverage"] = "0.75"
+    identity = changed["publication_identity"]
+    assert isinstance(identity, dict)
+    identity["entity_alias"] = "PRCB-C2-SUBJECT-CHANGED"
     with pytest.raises(IdempotencyConflict):
         restarted.application.submit_job(
             idempotency_key="prcb-c2-production-p1",

@@ -14,6 +14,9 @@ from tpaa_application import (
 )
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE
 from tpaa_observation import allocate_session_release_id
+from tpaa_qualification.ed2_p1_request_contract import (
+    load_ed2_p1_request_contract,
+)
 from tpaa_runtime import (
     ProductionPrincipalBinding,
     ProductionRuntimeConfig,
@@ -88,13 +91,17 @@ def _service_config(
     )
 
 
-def _qualification_payload(source_path: Path) -> dict[str, object]:
+def _qualification_payload(
+    source_path: Path,
+    *,
+    p1_contract_path: Path,
+) -> dict[str, object]:
     if not source_path.is_file():
         raise RuntimeError(
             f"production qualification source unavailable: {source_path}"
         )
     source_json = source_path.read_text(encoding="utf-8")
-    return {
+    payload: dict[str, object] = {
         "source_json": source_json,
         "source_import": {
             "source_family": "FLIGHT",
@@ -132,13 +139,6 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
             "metric_profile_version": "PRCB_C5_P1_PROFILE_V1",
             "status": "ACTIVE",
         },
-        "metric_profile": {
-            "profile_id": "PRCB_C5_P1_PROFILE_V1",
-            "min_coverage": "0.8",
-            "max_gap_us": 200000,
-            "derivative_window_s": "0.3",
-            "sustain_duration_s": "0.5",
-        },
         "publication_identity": {
             "aircraft_model_id": MODEL_ID,
             "aircraft_instance_id": INSTANCE_ID,
@@ -153,6 +153,8 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
         "expected_version_token": 0,
         "parent_release_id": None,
     }
+    payload.update(load_ed2_p1_request_contract(p1_contract_path))
+    return payload
 
 
 def run_installed_service_e2e(
@@ -160,6 +162,7 @@ def run_installed_service_e2e(
     authority_root: Path,
     work_root: Path,
     source_path: Path,
+    p1_contract_path: Path,
     conninfo: str,
     restore_conninfo: str,
     instructor_token: str,
@@ -169,7 +172,10 @@ def run_installed_service_e2e(
 
     _assert_clean_work_root(work_root)
     object_root = work_root / "primary-objects"
-    payload = _qualification_payload(source_path)
+    payload = _qualification_payload(
+        source_path,
+        p1_contract_path=p1_contract_path,
+    )
     config = _service_config(
         authority_root=authority_root,
         conninfo=conninfo,
@@ -200,9 +206,16 @@ def run_installed_service_e2e(
     )
     release = runtime.application.m1_release(release_id)
     metrics = runtime.application.m1_metrics(release_id)
-    if release.get("release_id") != release_id or len(metrics) != 5:
+    if (
+        release.get("release_id") != release_id
+        or release.get("catalog_definition_count") != 116
+        or release.get("metric_code_count") != 116
+        or not isinstance(release.get("metric_instance_count"), int)
+        or int(release["metric_instance_count"]) < 116
+        or len(metrics) != int(release["metric_instance_count"])
+    ):
         raise RuntimeError(
-            "installed Service P1 release identity/metric count mismatch"
+            "installed Service P1 release identity/full-catalog mismatch"
         )
 
     with PostgreSQLServiceUnitOfWork(conninfo) as uow:
@@ -572,6 +585,15 @@ def run_installed_service_e2e(
         "job_status": submission.record.status.value,
         "release_id": release_id,
         "metric_count": len(metrics),
+        "catalog_definition_count": release["catalog_definition_count"],
+        "metric_code_count": release["metric_code_count"],
+        "capability_observation_count": release[
+            "capability_observation_count"
+        ],
+        "system_observation_count": release["system_observation_count"],
+        "evidence_only_metric_instance_count": release[
+            "evidence_only_metric_instance_count"
+        ],
         "p2_job_id": p2_submission.record.job_id,
         "p2_job_status": p2_submission.record.status.value,
         "p2_release_id": p2_release_id,

@@ -22,6 +22,9 @@ from tpaa_application import (  # noqa: E402
     P6PersistenceRepository,
 )
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
+from tpaa_qualification.ed2_p1_request_contract import (  # noqa: E402
+    load_ed2_p1_request_contract,
+)
 from tpaa_observation import allocate_session_release_id  # noqa: E402
 from tpaa_qualification.prcb_c5_api_desktop import (  # noqa: E402
     PRCBC5DesktopApiExpectation,
@@ -61,6 +64,9 @@ DESKTOP_PROFILES = {"WINDOWS_DESKTOP_X64", "LINUX_DESKTOP_X64"}
 SERVICE_PROFILES = {"WINDOWS_SERVICE_X64", "LINUX_SERVICE_X64"}
 ALL_PROFILES = DESKTOP_PROFILES | SERVICE_PROFILES
 QUALIFICATION_SOURCE = APP_ROOT / "qualification" / "PRCB_C2_NOMINAL_FLIGHT.json"
+QUALIFICATION_P1_CONTRACT = (
+    APP_ROOT / "qualification" / "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+)
 
 SESSION_ID = "c2000000-0000-4000-8000-000000000001"
 CONTEXT_ID = "c2000000-0000-4000-8000-000000000003"
@@ -132,7 +138,7 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
     if not source_path.is_file():
         raise RuntimeError(f"production qualification source unavailable: {source_path}")
     source_json = source_path.read_text(encoding="utf-8")
-    return {
+    payload: dict[str, object] = {
         "source_json": source_json,
         "source_import": {
             "source_family": "FLIGHT",
@@ -170,13 +176,6 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
             "metric_profile_version": "PRCB_C5_P1_PROFILE_V1",
             "status": "ACTIVE",
         },
-        "metric_profile": {
-            "profile_id": "PRCB_C5_P1_PROFILE_V1",
-            "min_coverage": "0.8",
-            "max_gap_us": 200000,
-            "derivative_window_s": "0.3",
-            "sustain_duration_s": "0.5",
-        },
         "publication_identity": {
             "aircraft_model_id": MODEL_ID,
             "aircraft_instance_id": INSTANCE_ID,
@@ -191,6 +190,8 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
         "expected_version_token": 0,
         "parent_release_id": None,
     }
+    payload.update(load_ed2_p1_request_contract(QUALIFICATION_P1_CONTRACT))
+    return payload
 
 
 def _desktop_config(database: Path, object_root: Path) -> ProductionRuntimeConfig:
@@ -237,8 +238,15 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
     )
     release = runtime.application.m1_release(release_id)
     metrics = runtime.application.m1_metrics(release_id)
-    if release.get("release_id") != release_id or len(metrics) != 5:
-        raise RuntimeError("installed P1 release identity/metric count mismatch")
+    if (
+        release.get("release_id") != release_id
+        or release.get("catalog_definition_count") != 116
+        or release.get("metric_code_count") != 116
+        or not isinstance(release.get("metric_instance_count"), int)
+        or int(release["metric_instance_count"]) < 116
+        or len(metrics) != int(release["metric_instance_count"])
+    ):
+        raise RuntimeError("installed P1 release identity/full-catalog mismatch")
 
     with SQLiteDesktopUnitOfWork(database, write=True) as uow:
         observation_rows = uow.canonical_rows.many(
@@ -654,6 +662,15 @@ def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
         "job_status": submission.record.status.value,
         "release_id": release_id,
         "metric_count": len(metrics),
+        "catalog_definition_count": release["catalog_definition_count"],
+        "metric_code_count": release["metric_code_count"],
+        "capability_observation_count": release[
+            "capability_observation_count"
+        ],
+        "system_observation_count": release["system_observation_count"],
+        "evidence_only_metric_instance_count": release[
+            "evidence_only_metric_instance_count"
+        ],
         "p2_job_id": p2_submission.record.job_id,
         "p2_job_status": p2_submission.record.status.value,
         "p2_qualification_as_of_utc": p2_seed.as_of_utc,
@@ -739,6 +756,7 @@ def main() -> int:
             authority_root=_authority_root(),
             work_root=args.work_root,
             source_path=args.source,
+            p1_contract_path=QUALIFICATION_P1_CONTRACT,
             conninfo=_required_env("TPAA_SERVICE_CONNINFO"),
             restore_conninfo=_required_env("TPAA_SERVICE_RESTORE_CONNINFO"),
             instructor_token=_required_env("TPAA_C5_INSTRUCTOR_TOKEN"),
