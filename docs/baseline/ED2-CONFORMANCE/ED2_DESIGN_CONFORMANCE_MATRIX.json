@@ -1,0 +1,147 @@
+{
+  "schema": "TPAA_ED2_DESIGN_CONFORMANCE_BASELINE_V1",
+  "program": "ED2-CONFORMANCE",
+  "source_protected_main_sha": "0e8740c0a6eb3b02549d7020b9b9a46763f80abb",
+  "historical_qualification": {
+    "product_version": "1.0.1",
+    "protected_main_sha": "abf00eb44316c4f4927b5e7399bfe0ebab3a3f77",
+    "run_number": 696,
+    "actions_run_id": 37619872063,
+    "qualification": "TPAA_1_0_1_QUALIFIED",
+    "must_not_be_rewritten": true
+  },
+  "governance": {
+    "umbrella_issue": 245,
+    "batch_issues": [246, 247, 248],
+    "batch_count": 3,
+    "no_m10_p7": true,
+    "exact_required_job_count": 14,
+    "force_push_forbidden": true,
+    "mutable_latest_historical_fallback_forbidden": true,
+    "production_inmemory_authority_forbidden": true,
+    "production_test_fixture_dependency_forbidden": true,
+    "core_baseline": "CB-1.4.0",
+    "physical_db_authority": "1.9.0"
+  },
+  "design_sources": [
+    "03_TPAA_V8.0_总体方案",
+    "04_ED-2.0_工程设计公共基线",
+    "05A-05J engineering design supplements"
+  ],
+  "delivery_batches": [
+    {
+      "batch": "B1",
+      "issue": 246,
+      "title": "Production ingest, World and complete P1 execution",
+      "ci_policy": "ACCUMULATE_ON_BRANCH_THEN_SINGLE_PR_CANDIDATE"
+    },
+    {
+      "batch": "B2",
+      "issue": 247,
+      "title": "Continuous P2-P6 producers and full training assessment semantics",
+      "ci_policy": "ACCUMULATE_ON_BRANCH_THEN_SINGLE_PR_CANDIDATE"
+    },
+    {
+      "batch": "B3",
+      "issue": 248,
+      "title": "Upper product surfaces, UX, interoperability and final conformance qualification",
+      "ci_policy": "ACCUMULATE_ON_BRANCH_THEN_SINGLE_PR_CANDIDATE"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "ED2-P1-001",
+      "batch": "B1",
+      "requirement": "Production P1 execution is driven by the frozen exact 116-metric Catalog rather than a representative allow-list.",
+      "status": "OPEN",
+      "current_evidence": [
+        "baseline/CB-1.4.0/canonical/P1_METRIC_CATALOG.json",
+        "src/tpaa_metric/m3_general_engine.py",
+        "src/tpaa_metric/m3_runtime_closure.py",
+        "src/tpaa_runtime/production_worker.py"
+      ],
+      "gap": "Production worker currently selects five representative P1-AIR metrics."
+    },
+    {
+      "id": "ED2-P1-002",
+      "batch": "B1",
+      "requirement": "Production P1 preserves exact Catalog subject membership: 40 AIRCRAFT, 72 MISSION_SYSTEM_INSTANCE, 4 TARGET_PAIR.",
+      "status": "OPEN",
+      "current_evidence": [
+        "baseline/CB-1.4.0/canonical/P1_METRIC_CATALOG.json",
+        "src/tpaa_observation/m3_publication.py"
+      ],
+      "gap": "Production publication path currently materializes the AIRCRAFT representative lane only."
+    },
+    {
+      "id": "ED2-SRC-001",
+      "batch": "B1",
+      "requirement": "All six governed source families have explicit production adapter boundaries and fail-closed unsupported-profile behavior.",
+      "status": "PARTIAL",
+      "current_evidence": [
+        "src/tpaa_ingest/production_source.py",
+        "src/tpaa_ingest/production_flight_json.py",
+        "src/tpaa_runtime/durable_jobs.py"
+      ],
+      "gap": "Only FLIGHT has a registered production adapter and durable import path."
+    },
+    {
+      "id": "ED2-WORLD-001",
+      "batch": "B1",
+      "requirement": "Production P1 binds governed Context, Episode, Stage, World and event/relation prerequisites before Metric execution.",
+      "status": "PARTIAL",
+      "current_evidence": [
+        "src/tpaa_episode",
+        "src/tpaa_world",
+        "src/tpaa_runtime/production_worker.py"
+      ],
+      "gap": "Qualified Episode/Stage/World projectors exist, but production P1 uses a reduced world with no Stage sequence."
+    },
+    {
+      "id": "ED2-P2P6-001",
+      "batch": "B2",
+      "requirement": "Normal production workflows create all P2-P6 prerequisite products without qualification seed helpers.",
+      "status": "OPEN",
+      "current_evidence": [
+        "src/tpaa_runtime/durable_jobs.py",
+        "src/tpaa_qualification/prcb_c5_downstream.py"
+      ],
+      "gap": "Installed C5 E2E seeds P3-P6 prerequisite products before invoking production jobs."
+    },
+    {
+      "id": "ED2-ASSESS-001",
+      "batch": "B2",
+      "requirement": "Training assessment executes adopted sufficiency, critical-gate, competency and qualification semantics while preserving immutable evidence/review revisions.",
+      "status": "PARTIAL",
+      "current_evidence": [
+        "src/tpaa_assessment/p4_revision.py",
+        "src/tpaa_assessment/p5_assessment.py"
+      ],
+      "gap": "P4/P5 provide evidence/revision/approval substrate; P5 explicitly remains evidence-only when no numeric aggregation authority is adopted."
+    },
+    {
+      "id": "ED2-UPPER-001",
+      "batch": "B3",
+      "requirement": "Upper product surfaces cover Event/Relation/root-cause, longitudinal Human/Team, Course/Unit, Training Plugin, Joint/LVC gateway, media/bookmark/playlist and complete linked debrief UX.",
+      "status": "OPEN",
+      "current_evidence": [
+        "src/tpaa_gui/product_shell.py",
+        "src/tpaa_ingest/p6_interop.py"
+      ],
+      "gap": "Only partial substrates and presentation adapters exist for this combined design surface."
+    }
+  ],
+  "qualification": {
+    "design_conformance_claimed": false,
+    "status": "ED2_CONFORMANCE_IN_PROGRESS",
+    "failed_acceptance": [
+      "ED2-P1-001",
+      "ED2-P1-002",
+      "ED2-SRC-001",
+      "ED2-WORLD-001",
+      "ED2-P2P6-001",
+      "ED2-ASSESS-001",
+      "ED2-UPPER-001"
+    ]
+  }
+}
