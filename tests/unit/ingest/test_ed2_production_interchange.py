@@ -12,14 +12,13 @@ from tpaa_ingest import (
     SourceFamily,
     build_production_source_registry,
     descriptor_for_interchange_family,
+    production_interchange_profile,
     validate_production_interchange_document,
 )
 
 SESSION_ID = "e2000000-0000-4000-8000-000000000001"
-PROFILE_HASH = "a" * 64
-
-
 def _document(family: SourceFamily) -> bytes:
+    profile = production_interchange_profile(family)
     return json.dumps(
         {
             "schema": "TPAA_PRODUCTION_INTERCHANGE_SOURCE_V1",
@@ -27,13 +26,13 @@ def _document(family: SourceFamily) -> bytes:
             "source_family": family.value,
             "session_id": SESSION_ID,
             "profile": {
-                "profile_id": f"ED2_{family.value}_PROFILE",
-                "profile_version": "1.0.0",
-                "profile_hash": PROFILE_HASH,
+                "profile_id": profile.profile_id,
+                "profile_version": profile.profile_version,
+                "profile_hash": profile.profile_hash,
             },
             "knowledge_time_utc": "2026-10-08T00:00:00Z",
             "payload": {
-                "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+                "projection_class": profile.projection_class,
                 "lineage_ref": f"source:{family.value}",
             },
         },
@@ -94,4 +93,33 @@ def test_interchange_family_mismatch_and_flight_upgrade_fail_closed() -> None:
     ):
         validate_production_interchange_document(
             json.dumps(flight).encode("utf-8"),
+        )
+
+
+
+def test_interchange_profile_authority_and_projection_class_fail_closed() -> None:
+    raw = json.loads(_document(SourceFamily.SCENARIO).decode("utf-8"))
+    profile = raw["profile"]
+    assert isinstance(profile, dict)
+    profile["profile_hash"] = "0" * 64
+    with pytest.raises(
+        ProductionSourceAdapterError,
+        match="ED2_INTERCHANGE_PROFILE_UNAUTHORIZED",
+    ):
+        validate_production_interchange_document(
+            json.dumps(raw).encode("utf-8"),
+            expected_family=SourceFamily.SCENARIO,
+        )
+
+    raw = json.loads(_document(SourceFamily.SCENARIO).decode("utf-8"))
+    payload = raw["payload"]
+    assert isinstance(payload, dict)
+    payload["projection_class"] = "CLIENT_ASSERTED"
+    with pytest.raises(
+        ProductionSourceAdapterError,
+        match="ED2_INTERCHANGE_PROJECTION_CLASS_DRIFT",
+    ):
+        validate_production_interchange_document(
+            json.dumps(raw).encode("utf-8"),
+            expected_family=SourceFamily.SCENARIO,
         )

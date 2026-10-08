@@ -1,12 +1,22 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import cast
 
+from tpaa_ingest import (
+    PRODUCTION_INTERCHANGE_FAMILIES,
+    PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY_VERSION,
+    PRODUCTION_INTERCHANGE_PROFILE_SCHEMA,
+    SourceFamily,
+    production_interchange_profile,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs" / "baseline" / "ED2-CONFORMANCE"
 MATRIX = BASE / "ED2_DESIGN_CONFORMANCE_MATRIX.json"
+INTERCHANGE_PROFILES = BASE / "PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY.json"
 
 
 def _load() -> dict[str, object]:
@@ -75,3 +85,65 @@ def test_ed2_b1_freezes_exact_p1_catalog_membership_gap() -> None:
     assert "40 AIRCRAFT" in requirement
     assert "72 MISSION_SYSTEM_INSTANCE" in requirement
     assert "4 TARGET_PAIR" in requirement
+
+
+
+def test_ed2_interchange_profile_authority_matches_runtime_exactly() -> None:
+    raw: object = json.loads(
+        INTERCHANGE_PROFILES.read_text(encoding="utf-8")
+    )
+    assert isinstance(raw, dict)
+    authority = cast(dict[str, object], raw)
+    assert (
+        authority["schema"]
+        == "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY_V1"
+    )
+    assert (
+        authority["authority_version"]
+        == PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY_VERSION
+    )
+
+    profiles = _mappings(authority["profiles"])
+    by_family = {
+        str(item["source_family"]): item
+        for item in profiles
+    }
+    assert set(by_family) == {
+        family.value
+        for family in PRODUCTION_INTERCHANGE_FAMILIES
+    }
+
+    for family in sorted(
+        PRODUCTION_INTERCHANGE_FAMILIES,
+        key=lambda item: item.value,
+    ):
+        item = by_family[family.value]
+        runtime = production_interchange_profile(family)
+        descriptor = {
+            key: item[key]
+            for key in (
+                "schema",
+                "source_family",
+                "profile_id",
+                "profile_version",
+                "projection_class",
+                "producer_contract",
+                "metric_input_binding",
+                "external_decoder_required",
+            )
+        }
+        encoded = json.dumps(
+            descriptor,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+        expected_hash = hashlib.sha256(encoded).hexdigest()
+        assert descriptor["schema"] == PRODUCTION_INTERCHANGE_PROFILE_SCHEMA
+        assert expected_hash == item["profile_hash"]
+        assert runtime.source_family is SourceFamily(family.value)
+        assert runtime.profile_id == item["profile_id"]
+        assert runtime.profile_version == item["profile_version"]
+        assert runtime.profile_hash == expected_hash
+        assert runtime.projection_class == item["projection_class"]

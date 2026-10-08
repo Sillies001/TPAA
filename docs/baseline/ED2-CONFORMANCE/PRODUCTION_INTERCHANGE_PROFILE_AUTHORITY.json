@@ -1,0 +1,73 @@
+{
+  "schema": "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_AUTHORITY_V1",
+  "authority_version": "1.0.0",
+  "change_control": {
+    "umbrella_issue": 245,
+    "batch_issue": 246,
+    "core_baseline": "CB-1.4.0",
+    "physical_db_authority": "1.9.0"
+  },
+  "hash_contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "json": "sort_keys=true,separators=(',',':'),ensure_ascii=true,allow_nan=false",
+    "hash_scope": "profile descriptor excluding profile_hash"
+  },
+  "profiles": [
+    {
+      "schema": "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_V1",
+      "source_family": "MISSION_AVIONICS",
+      "profile_id": "ED2_B1_MISSION_AVIONICS_GATEWAY",
+      "profile_version": "1.0.0",
+      "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+      "producer_contract": "EXTERNAL_DECODER_RESOLVED_CANONICAL_WORLD_INPUTS",
+      "metric_input_binding": "SHA256_CANONICAL_JSON",
+      "external_decoder_required": true,
+      "profile_hash": "deaf16176be7e369ab864f2b5ea9e61560b60638f5d0cd445e07a4b6b1d591fe"
+    },
+    {
+      "schema": "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_V1",
+      "source_family": "TDL",
+      "profile_id": "ED2_B1_TDL_GATEWAY",
+      "profile_version": "1.0.0",
+      "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+      "producer_contract": "EXTERNAL_DECODER_RESOLVED_CANONICAL_WORLD_INPUTS",
+      "metric_input_binding": "SHA256_CANONICAL_JSON",
+      "external_decoder_required": true,
+      "profile_hash": "ad02b56e0501fbd864bd9cd1d0eec56f6723acbf43013a6febbb324cd67e9ad3"
+    },
+    {
+      "schema": "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_V1",
+      "source_family": "RANGE_ACMI",
+      "profile_id": "ED2_B1_RANGE_ACMI_GATEWAY",
+      "profile_version": "1.0.0",
+      "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+      "producer_contract": "EXTERNAL_DECODER_RESOLVED_CANONICAL_WORLD_INPUTS",
+      "metric_input_binding": "SHA256_CANONICAL_JSON",
+      "external_decoder_required": true,
+      "profile_hash": "788a5d5f23e5c76f26c0b292da5d71a5286f770f324859dd23b2a7db5cb12e2e"
+    },
+    {
+      "schema": "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_V1",
+      "source_family": "SCENARIO",
+      "profile_id": "ED2_B1_SCENARIO_GATEWAY",
+      "profile_version": "1.0.0",
+      "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+      "producer_contract": "EXTERNAL_DECODER_RESOLVED_CANONICAL_WORLD_INPUTS",
+      "metric_input_binding": "SHA256_CANONICAL_JSON",
+      "external_decoder_required": true,
+      "profile_hash": "cac2e732c985a7d880c8cf26db96aadc6d82cee440ae7346107fa566aca3f084"
+    },
+    {
+      "schema": "TPAA_ED2_PRODUCTION_INTERCHANGE_PROFILE_V1",
+      "source_family": "AUDIO_VIDEO",
+      "profile_id": "ED2_B1_AUDIO_VIDEO_GATEWAY",
+      "profile_version": "1.0.0",
+      "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+      "producer_contract": "EXTERNAL_DECODER_RESOLVED_CANONICAL_WORLD_INPUTS",
+      "metric_input_binding": "SHA256_CANONICAL_JSON",
+      "external_decoder_required": true,
+      "profile_hash": "f84781abd86991afa44f245b006092a6449c0e0babb157cf842d134758202dbd"
+    }
+  ]
+}

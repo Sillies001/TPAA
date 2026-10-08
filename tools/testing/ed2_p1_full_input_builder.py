@@ -30,6 +30,7 @@ from tpaa_ingest import (
     PRODUCTION_FLIGHT_MEDIA_TYPE,
     SourceFamily,
     descriptor_for_interchange_family,
+    production_interchange_profile,
 )
 from tpaa_metric import (
     AIR_M1_IMPLEMENTATION,
@@ -321,22 +322,20 @@ def _interchange_source_document(
     source_id = _source_id(session_id, family, "source")
     artifact_id = _source_id(session_id, family, "artifact")
     stream_id = _source_id(session_id, family, "stream")
-    profile_hash = hashlib.sha256(
-        f"ED2-B1-QUALIFICATION:{family.value}".encode("ascii")
-    ).hexdigest()
+    profile = production_interchange_profile(family)
     source_document = {
         "schema": "TPAA_PRODUCTION_INTERCHANGE_SOURCE_V1",
         "schema_version": "1.0.0",
         "source_family": family.value,
         "session_id": session_id,
         "profile": {
-            "profile_id": f"ED2_B1_{family.value}_QUALIFICATION",
-            "profile_version": "1.0.0",
-            "profile_hash": profile_hash,
+            "profile_id": profile.profile_id,
+            "profile_version": profile.profile_version,
+            "profile_hash": profile.profile_hash,
         },
         "knowledge_time_utc": "2026-10-08T00:00:00Z",
         "payload": {
-            "projection_class": "GOVERNED_CANONICAL_WORLD_INTERCHANGE",
+            "projection_class": profile.projection_class,
             "qualification_only": True,
             "metric_input_hashes": metric_input_hashes,
         },
