@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from uuid import NAMESPACE_URL, uuid5
 
-from tpaa_ingest import SourceFamily, descriptor_for_interchange_family
+from tpaa_ingest import (
+    SourceFamily,
+    descriptor_for_interchange_family,
+    production_interchange_profile,
+)
 from tpaa_runtime.durable_jobs import ProductionJobExecutor
 
 SESSION_ID = "e2100000-0000-4000-8000-000000000001"
@@ -15,6 +19,7 @@ def _id(name: str) -> str:
 
 def _item(family: SourceFamily, ordinal: int) -> dict[str, object]:
     descriptor = descriptor_for_interchange_family(family)
+    profile = production_interchange_profile(family)
     source_json = json.dumps(
         {
             "schema": "TPAA_PRODUCTION_INTERCHANGE_SOURCE_V1",
@@ -22,12 +27,15 @@ def _item(family: SourceFamily, ordinal: int) -> dict[str, object]:
             "source_family": family.value,
             "session_id": SESSION_ID,
             "profile": {
-                "profile_id": f"ED2_{family.value}_PROFILE",
-                "profile_version": "1.0.0",
-                "profile_hash": "b" * 64,
+                "profile_id": profile.profile_id,
+                "profile_version": profile.profile_version,
+                "profile_hash": profile.profile_hash,
             },
             "knowledge_time_utc": "2026-10-08T00:00:00Z",
-            "payload": {"lineage_ref": f"source:{family.value}:{ordinal}"},
+            "payload": {
+                "projection_class": profile.projection_class,
+                "lineage_ref": f"source:{family.value}:{ordinal}",
+            },
         },
         sort_keys=True,
         separators=(",", ":"),

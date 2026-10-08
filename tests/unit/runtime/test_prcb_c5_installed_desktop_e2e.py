@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from tools.packaging.prcb_runtime_entry import _desktop_e2e
+from tools.testing.ed2_p1_full_input_builder import build_full_p1_request_contract
 
 ROOT = Path(__file__).resolve().parents[3]
 SOURCE = (
@@ -13,12 +15,26 @@ SOURCE = (
     / "qualification"
     / "PRCB_C2_NOMINAL_FLIGHT.json"
 )
+AIRCRAFT_ID = "c2000000-0000-4000-8000-000000000002"
 
 
 def test_prcb_c5_installed_desktop_p1_p6_restart_recovery_audit(
     tmp_path: Path,
 ) -> None:
-    result = _desktop_e2e(tmp_path / "installed-e2e", SOURCE)
+    contract_path = tmp_path / "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+    contract_path.write_text(
+        json.dumps(
+            build_full_p1_request_contract(aircraft_id=AIRCRAFT_ID),
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        encoding="utf-8",
+    )
+    result = _desktop_e2e(
+        tmp_path / "installed-e2e",
+        SOURCE,
+        p1_contract_path=contract_path,
+    )
     assert result["schema"] == "TPAA_PRCB_C5_INSTALLED_DESKTOP_P1_P6_E2E_V1"
     assert result["status"] == "PASS"
     assert result["product_version"] == "1.0.1"

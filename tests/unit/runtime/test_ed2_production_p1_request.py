@@ -14,6 +14,7 @@ from tpaa_runtime.production_p1_request import (
     parse_production_p1_request,
     select_production_p1_sources,
 )
+from tpaa_storage.hashing import canonical_request_hash
 
 ROOT = Path(__file__).resolve().parents[3]
 AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
@@ -111,7 +112,7 @@ def test_full_p1_request_forbids_caller_supplied_source_lineage() -> None:
         )
 
 
-def test_full_p1_source_set_rejects_cross_session_interchange() -> None:
+def test_full_p1_source_set_rejects_document_import_session_drift() -> None:
     payload = copy.deepcopy(_contract())
     sources = payload["source_documents"]
     assert isinstance(sources, list)
@@ -135,10 +136,62 @@ def test_full_p1_source_set_rejects_cross_session_interchange() -> None:
 
     with pytest.raises(
         ProductionP1RequestError,
+        match="ED2_P1_SOURCE_IMPORT_SESSION_DRIFT",
+    ):
+        select_production_p1_sources(payload)
+
+
+def test_full_p1_source_set_rejects_cross_session_interchange() -> None:
+    payload = copy.deepcopy(_contract())
+    sources = payload["source_documents"]
+    assert isinstance(sources, list)
+    scenario_raw = next(
+        item
+        for item in sources
+        if _source_family(item) == "SCENARIO"
+    )
+    assert isinstance(scenario_raw, dict)
+    source_json = scenario_raw["source_json"]
+    assert isinstance(source_json, str)
+    document = json.loads(source_json)
+    assert isinstance(document, dict)
+    foreign_session = "c2000000-0000-4000-8000-000000000099"
+    document["session_id"] = foreign_session
+    scenario_raw["source_json"] = json.dumps(
+        document,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    metadata = scenario_raw["source_import"]
+    assert isinstance(metadata, dict)
+    metadata["session_id"] = foreign_session
+
+    with pytest.raises(
+        ProductionP1RequestError,
         match="ED2_P1_SOURCE_SET_SESSION_DRIFT",
     ):
         select_production_p1_sources(payload)
 
+
+def test_full_p1_request_contract_is_hash_safe_and_restores_numeric_inputs() -> None:
+    payload = _contract()
+    request_hash = canonical_request_hash(
+        {"job_type": "BUILD_P1_RELEASE", "payload": payload}
+    )
+    assert len(request_hash) == 64
+
+    catalog = build_production_p1_catalog_contract(AUTHORITY)
+    selection = select_production_p1_sources(payload)
+    request = parse_production_p1_request(
+        payload,
+        contract=catalog,
+        aircraft_id=AIRCRAFT_ID,
+        source_selection=selection,
+    )
+    air001 = request.inputs["P1-AIR-001"]
+    m1_result = air001["m1_result"]
+    assert isinstance(m1_result, dict)
+    assert isinstance(m1_result["value_numeric"], float)
 
 
 def test_full_p1_request_rejects_metric_input_drift_from_source_projection() -> None:

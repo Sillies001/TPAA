@@ -30,6 +30,10 @@ from .production_p1_source_policy import (
     PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX,
     production_p1_required_source_families,
 )
+from .production_p1_transport import (
+    ProductionP1TransportError,
+    decode_production_p1_transport,
+)
 
 
 class ProductionP1RequestError(RuntimeError):
@@ -294,10 +298,20 @@ def parse_production_p1_request(
                 f"extra={sorted(observed_codes - expected_codes)!r}"
             ),
         )
-    inputs = {
-        code: _mapping(input_root[code], field=f"p1_catalog_inputs.{code}")
-        for code in contract.metric_codes
-    }
+    inputs: dict[str, dict[str, object]] = {}
+    for code in contract.metric_codes:
+        field = f"p1_catalog_inputs.{code}"
+        try:
+            decoded = decode_production_p1_transport(
+                input_root[code],
+                field=field,
+            )
+        except ProductionP1TransportError as exc:
+            raise ProductionP1RequestError(
+                "ED2_P1_INPUT_TRANSPORT_INVALID",
+                str(exc),
+            ) from exc
+        inputs[code] = _mapping(decoded, field=field)
 
     lineage_root = _mapping(
         payload.get("metric_input_source_families"),

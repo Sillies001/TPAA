@@ -53,6 +53,7 @@ from tpaa_metric import (
 from tpaa_runtime.production_p1_source_policy import (
     production_p1_required_source_families,
 )
+from tpaa_runtime.production_p1_transport import encode_production_p1_transport
 from tpaa_world import project_m2_stage_world_lineage
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -630,11 +631,20 @@ def build_full_p1_request_contract(
             )
         )
 
+    transport_inputs = encode_production_p1_transport(
+        inputs,
+        field="p1_catalog_inputs",
+    )
+    if not isinstance(transport_inputs, dict) or not all(
+        isinstance(key, str) for key in transport_inputs
+    ):
+        raise TypeError("ED2_P1_REQUEST_TRANSPORT_INVALID")
+
     payload: dict[str, object] = {
         "schema": "TPAA_ED2_B1_FULL_P1_REQUEST_CONTRACT_V1",
         "source_documents": source_documents,
         "metric_input_source_families": metric_lineage,
-        "p1_catalog_inputs": inputs,
+        "p1_catalog_inputs": transport_inputs,
         "mission_system_instances": systems,
         "metric_system_bindings": bindings,
     }

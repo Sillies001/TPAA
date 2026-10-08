@@ -134,7 +134,11 @@ def _ready(profile_id: str) -> dict[str, object]:
     }
 
 
-def _qualification_payload(source_path: Path) -> dict[str, object]:
+def _qualification_payload(
+    source_path: Path,
+    *,
+    p1_contract_path: Path = QUALIFICATION_P1_CONTRACT,
+) -> dict[str, object]:
     if not source_path.is_file():
         raise RuntimeError(f"production qualification source unavailable: {source_path}")
     source_json = source_path.read_text(encoding="utf-8")
@@ -190,7 +194,7 @@ def _qualification_payload(source_path: Path) -> dict[str, object]:
         "expected_version_token": 0,
         "parent_release_id": None,
     }
-    payload.update(load_ed2_p1_request_contract(QUALIFICATION_P1_CONTRACT))
+    payload.update(load_ed2_p1_request_contract(p1_contract_path))
     return payload
 
 
@@ -210,12 +214,20 @@ def _assert_clean_work_root(work_root: Path) -> None:
     work_root.mkdir(parents=True, exist_ok=True)
 
 
-def _desktop_e2e(work_root: Path, source_path: Path) -> dict[str, object]:
+def _desktop_e2e(
+    work_root: Path,
+    source_path: Path,
+    *,
+    p1_contract_path: Path = QUALIFICATION_P1_CONTRACT,
+) -> dict[str, object]:
     _assert_clean_work_root(work_root)
     database = work_root / "primary.sqlite3"
     object_root = work_root / "primary-objects"
     bootstrap = bootstrap_sqlite(database)
-    payload = _qualification_payload(source_path)
+    payload = _qualification_payload(
+        source_path,
+        p1_contract_path=p1_contract_path,
+    )
     config = _desktop_config(database, object_root)
     runtime = build_desktop_production_runtime(config)
 
