@@ -187,14 +187,14 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
             "as_of_utc": "2029-12-31T23:30:00Z",
             "factor_order": ["SESSION_CONTEXT_FACTOR"],
             "factor_values_by_ordinal": {
-                "1": 0.0,
-                "2": 1.0,
-                "3": 1.0,
-                "4": 0.0,
-                "5": 0.5,
+                "1": "0.0",
+                "2": "1.0",
+                "3": "1.0",
+                "4": "0.0",
+                "5": "0.5",
             },
             "reference_factor_values": {
-                "SESSION_CONTEXT_FACTOR": 0.5
+                "SESSION_CONTEXT_FACTOR": "0.5"
             },
             "cohort_spec_id": "ED2_B2_P2_COHORT_V1",
             "cohort_spec_version": "1.0.0",
@@ -214,7 +214,7 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
                 "schema_version": "TPAA_P2_REFERENCE_CONDITION_V1",
                 "payload": {
                     "schema": "TPAA_P2_REFERENCE_CONDITION_V1",
-                    "factor_values": {"SESSION_CONTEXT_FACTOR": 0.5},
+                    "factor_values": {"SESSION_CONTEXT_FACTOR": "0.5"},
                 },
             },
             "attribution_spec": {

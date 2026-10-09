@@ -12,7 +12,7 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import cast
 from uuid import UUID, uuid5
@@ -135,12 +135,24 @@ def _integer(value: object, field: str) -> int:
 
 
 def _number(value: object, field: str) -> float:
-    if isinstance(value, bool) or not isinstance(
-        value,
-        (int, float, Decimal),
-    ):
+    if isinstance(value, bool):
         raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field)
-    result = float(value)
+    if isinstance(value, str):
+        if not value or value != value.strip():
+            raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field)
+        try:
+            parsed = Decimal(value)
+        except InvalidOperation as exc:
+            raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field) from exc
+        if not parsed.is_finite():
+            raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field)
+        value = parsed
+    if not isinstance(value, (int, float, Decimal)):
+        raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field)
+    try:
+        result = float(value)
+    except (ValueError, OverflowError) as exc:
+        raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field) from exc
     if result != result or result in {float("inf"), float("-inf")}:
         raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field)
     return result

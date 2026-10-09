@@ -184,6 +184,26 @@ _PREREQUISITE_IDENTITY_COLUMNS: dict[str, str] = {
 }
 
 
+def _governed_job_failure_detail(exc: Exception) -> str:
+    """Expose only governed table/field names for prerequisite drift diagnostics."""
+
+    error_kind = type(exc).__name__
+    if (
+        isinstance(exc, ProductionJobExecutionError)
+        and exc.code == "ED2_P1_PREREQUISITE_IDENTITY_DRIFT"
+    ):
+        table, _, remainder = exc.detail.partition(":")
+        _, separator, fields = remainder.rpartition(":fields=")
+        if (
+            table in _PREREQUISITE_IDENTITY_COLUMNS
+            and separator
+            and fields
+            and all(part.isidentifier() for part in fields.split(","))
+        ):
+            return f"{error_kind}:{table}:fields={fields}"
+    return error_kind
+
+
 def _logical_prerequisite_value(
     value: object,
     *,
@@ -1828,7 +1848,7 @@ class DurableApplicationJobControl:
                         reason_code=str(
                             getattr(exc, "code", "PRCB_C2_EXECUTION_FAILED")
                         ),
-                        error_detail=type(exc).__name__,
+                        error_detail=_governed_job_failure_detail(exc),
                     )
                 uow.commit()
             return JobSubmission(record=_job_record(current), reused=False)

@@ -173,6 +173,8 @@ def _submit(
                     submission.record.job_id
                 )
                 failure_reason = ",".join(failed.reason_codes)
+                if failed.error_detail is not None:
+                    failure_reason = f"{failure_reason}:{failed.error_detail}"
                 uow.commit()
         raise RuntimeError(
             f"ED2_B2_QUALIFICATION_JOB_FAILED:{command}:"
