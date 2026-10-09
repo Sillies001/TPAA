@@ -7,7 +7,10 @@ import argparse
 import json
 import os
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
+from typing import cast
 
 APP_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = APP_ROOT / "src"
@@ -24,6 +27,7 @@ from tpaa_application import (  # noqa: E402
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
 from tpaa_qualification.ed2_b2_continuous import (  # noqa: E402
+    QualificationUnitOfWork,
     QualificationUowFactory,
     run_ed2_b2_continuous_qualification,
 )
@@ -840,8 +844,10 @@ def _ed2_b2_e2e(
         )
         runtime = build_desktop_production_runtime(config)
 
-        def desktop_uow_factory(write: bool) -> SQLiteDesktopUnitOfWork:
-            return SQLiteDesktopUnitOfWork(database, write=write)
+        @contextmanager
+        def desktop_uow_factory(write: bool) -> Iterator[QualificationUnitOfWork]:
+            with SQLiteDesktopUnitOfWork(database, write=write) as uow:
+                yield cast(QualificationUnitOfWork, uow)
 
         uow_factory = desktop_uow_factory
     elif profile_id in SERVICE_PROFILES:
@@ -855,11 +861,13 @@ def _ed2_b2_e2e(
         )
         runtime = build_service_production_runtime(config)
 
-        def service_uow_factory(write: bool) -> PostgreSQLServiceUnitOfWork:
-            return PostgreSQLServiceUnitOfWork(
+        @contextmanager
+        def service_uow_factory(write: bool) -> Iterator[QualificationUnitOfWork]:
+            with PostgreSQLServiceUnitOfWork(
                 conninfo,
                 read_only=not write,
-            )
+            ) as uow:
+                yield cast(QualificationUnitOfWork, uow)
 
         uow_factory = service_uow_factory
         with PostgreSQLServiceUnitOfWork(

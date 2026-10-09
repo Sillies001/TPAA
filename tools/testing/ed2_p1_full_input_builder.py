@@ -502,6 +502,26 @@ def _qualification_action_projection(
     }
 
 
+def _remap_system_identity(
+    value: object,
+    identities: Mapping[str, str],
+) -> object:
+    """Rebind only exact Mission-System identities, including nested plugin inputs."""
+
+    if isinstance(value, str):
+        return identities.get(value, value)
+    if isinstance(value, list):
+        return [_remap_system_identity(item, identities) for item in value]
+    if isinstance(value, dict):
+        if not all(isinstance(key, str) for key in value):
+            raise TypeError("ED2_QUALIFICATION_SYSTEM_MAPPING_INVALID")
+        return {
+            identities.get(key, key): _remap_system_identity(item, identities)
+            for key, item in value.items()
+        }
+    return value
+
+
 def build_full_p1_request_contract(
     *,
     aircraft_id: str,
@@ -522,13 +542,20 @@ def build_full_p1_request_contract(
             existing_id: str(uuid5(system_id_namespace, f"mission-system:{existing_id}"))
             for existing_id in systems
         }
+        remapped_inputs: dict[str, dict[str, object]] = {}
+        for metric_code, original_input in inputs.items():
+            remapped = _remap_system_identity(original_input, remapped_ids)
+            if not isinstance(remapped, dict) or not all(
+                isinstance(key, str) for key in remapped
+            ):
+                raise TypeError("ED2_QUALIFICATION_SYSTEM_MAPPING_INVALID")
+            remapped_inputs[metric_code] = cast(dict[str, object], remapped)
+        inputs = remapped_inputs
         for metric_code, existing_id in bindings.items():
-            current_id = inputs[metric_code].get("mission_system_instance_id")
-            if current_id is not None and current_id != existing_id:
-                raise ValueError("ED2_QUALIFICATION_SYSTEM_INPUT_DRIFT")
-            inputs[metric_code]["mission_system_instance_id"] = remapped_ids[
+            if inputs[metric_code].get("mission_system_instance_id") != remapped_ids[
                 existing_id
-            ]
+            ]:
+                raise ValueError("ED2_QUALIFICATION_SYSTEM_INPUT_DRIFT")
         systems, bindings = build_full_p1_system_authority(
             inputs,
             authority_root=authority_root,

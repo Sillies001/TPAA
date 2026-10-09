@@ -9,6 +9,14 @@ from typing import cast
 from uuid import UUID, uuid5
 
 from tools.testing.ed2_p1_full_input_builder import build_full_p1_request_contract
+from tpaa_runtime.production_p1_catalog import (
+    build_production_p1_catalog_contract,
+    execute_production_p1_catalog,
+)
+from tpaa_runtime.production_p1_request import (
+    parse_production_p1_request,
+    select_production_p1_sources,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY = REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical"
@@ -139,8 +147,25 @@ def _p1_payload(ordinal: int) -> dict[str, object]:
 
 
 def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
+    # Qualification-only preflight uses the same governed Catalog path as the
+    # installed Worker, with no persistence or qualification seed substitution.
+    catalog = build_production_p1_catalog_contract(AUTHORITY)
     sessions = []
     for ordinal in range(1, 6):
+        payload = _p1_payload(ordinal)
+        sources = select_production_p1_sources(payload)
+        request = parse_production_p1_request(
+            payload,
+            contract=catalog,
+            aircraft_id=_AIRCRAFT_ID,
+            source_selection=sources,
+        )
+        executed, batch = execute_production_p1_catalog(AUTHORITY, request.inputs)
+        if (
+            executed.plan.logical_hash != catalog.plan.logical_hash
+            or batch.metric_codes != catalog.metric_codes
+        ):
+            raise RuntimeError("ED2_B2_QUALIFICATION_P1_PREFLIGHT_DRIFT")
         sessions.append(
             {
                 "ordinal": ordinal,
@@ -150,7 +175,7 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
                 "occurred_at_utc": (
                     f"2026-10-{ordinal:02d}T12:00:00Z"
                 ),
-                "p1_payload": _p1_payload(ordinal),
+                "p1_payload": payload,
             }
         )
     return {
