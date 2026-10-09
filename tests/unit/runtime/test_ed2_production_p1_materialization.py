@@ -325,15 +325,23 @@ def test_p2_comparison_key_excludes_exact_subject_and_context_identity() -> None
         item.observed_metric_instance_id: item.comparison_key_hash
         for item in second.observations
     }
+    first_instance_codes = {
+        item.metric_instance_id: item.metric_code for item in first.metric_instances
+    }
+    second_instance_codes = {
+        item.metric_instance_id: item.metric_code for item in second.metric_instances
+    }
     first_codes = {
-        item.metric_code: item.metric_instance_id
-        for item in first.metric_instances
-        if item.subject_entity_id is not None
+        first_instance_codes[item.observed_metric_instance_id]: (
+            item.observed_metric_instance_id
+        )
+        for item in first.observations
     }
     second_codes = {
-        item.metric_code: item.metric_instance_id
-        for item in second.metric_instances
-        if item.subject_entity_id is not None
+        second_instance_codes[item.observed_metric_instance_id]: (
+            item.observed_metric_instance_id
+        )
+        for item in second.observations
     }
     common = sorted(set(first_codes) & set(second_codes))
     assert common
@@ -361,10 +369,14 @@ def test_p2_comparison_key_excludes_exact_subject_and_context_identity() -> None
         item.observed_metric_instance_id: item.comparison_key_hash
         for item in third.observations
     }
+    third_instance_codes = {
+        item.metric_instance_id: item.metric_code for item in third.metric_instances
+    }
     third_codes = {
-        item.metric_code: item.metric_instance_id
-        for item in third.metric_instances
-        if item.subject_entity_id is not None
+        third_instance_codes[item.observed_metric_instance_id]: (
+            item.observed_metric_instance_id
+        )
+        for item in third.observations
     }
     assert any(
         first_by_definition[first_codes[code]]

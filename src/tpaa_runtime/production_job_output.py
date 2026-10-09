@@ -229,7 +229,7 @@ class ProductionJobOutputRepository:
             or str(row["snapshot_type"]) != _SNAPSHOT_TYPE
             or str(row["data_hash"]) != digest
             or str(row["schema_version"]) != _SCHEMA_VERSION
-            or row["frozen"] not in {True, 1}
+            or row["frozen"] not in (True, 1)
         ):
             raise ProductionJobOutputError(
                 "ED2_JOB_OUTPUT_INTEGRITY_FAILED",

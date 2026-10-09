@@ -11,7 +11,7 @@ import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import cast
@@ -174,7 +174,7 @@ def _utc_text(value: object, field: str) -> str:
     if isinstance(value, datetime):
         if value.tzinfo is None:
             raise ProductionDownstreamError("ED2_B2_TIME_INVALID", field)
-        return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
     text = _text(value, field)
     if not text.endswith("Z") or "T" not in text:
         raise ProductionDownstreamError("ED2_B2_TIME_INVALID", field)
@@ -971,6 +971,7 @@ def prepare_p3_build_worker_input(
                 ),
                 session_order_scope_id=scope_id,
                 session_order_scope_status="ACTIVE",
+                session_order_assignment_current=True,
                 session_order=session_order,
                 capability_type=estimate.capability_type,
                 metric_semantic_id=observation.metric_semantic_id,
@@ -1686,7 +1687,7 @@ def prepare_p6_build_worker_input(
             P6CapabilityTrainingRow(
                 estimate=estimate,
                 p4_revision=revision,
-                aircraft_id=estimate.aircraft_id,
+                aircraft_id=p3.exact_twin_revision(estimate.twin_revision_id).aircraft_id,
                 configuration_snapshot_id=configuration_id,
                 session_order_assignment_id=assignment_id,
                 session_order=order,

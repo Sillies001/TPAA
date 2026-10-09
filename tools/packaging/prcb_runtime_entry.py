@@ -102,7 +102,6 @@ def _authority_root() -> Path:
 
 def _runtime(profile_id: str) -> ProductionRuntime:
     object_root = Path(_required_env("TPAA_OBJECT_ROOT"))
-    uow_factory: QualificationUowFactory
     if profile_id in DESKTOP_PROFILES:
         database = Path(_required_env("TPAA_DESKTOP_DATABASE"))
         config = ProductionRuntimeConfig(
@@ -233,6 +232,8 @@ def _desktop_e2e(
     database = work_root / "primary.sqlite3"
     object_root = work_root / "primary-objects"
     bootstrap = bootstrap_sqlite(database)
+    schema_version = bootstrap.schema_version
+    core_baseline = bootstrap.core_baseline
     payload = _qualification_payload(
         source_path,
         p1_contract_path=p1_contract_path,
@@ -823,6 +824,7 @@ def _ed2_b2_e2e(
     work_root.mkdir(parents=True, exist_ok=True)
     object_root = work_root / "objects"
     object_store = LocalObjectStore(object_root)
+    uow_factory: QualificationUowFactory
 
     if profile_id in DESKTOP_PROFILES:
         database = work_root / "ed2-b2.sqlite3"
@@ -863,11 +865,11 @@ def _ed2_b2_e2e(
         with PostgreSQLServiceUnitOfWork(
             conninfo,
             read_only=True,
-        ) as uow:
-            metadata = uow.metadata.get()
+        ) as metadata_uow:
+            metadata = metadata_uow.metadata.get()
             schema_version = metadata.schema_version
             core_baseline = metadata.core_baseline
-            uow.commit()
+            metadata_uow.commit()
     else:
         raise RuntimeError("unsupported ED2 B2 qualification profile")
 
@@ -929,8 +931,8 @@ def _ed2_b2_e2e(
         "runtime_profile": (
             "DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"
         ),
-        "db_schema_version": bootstrap.schema_version,
-        "canonical_baseline": bootstrap.core_baseline,
+        "db_schema_version": schema_version,
+        "canonical_baseline": core_baseline,
         "restart_exact_replay": True,
         "tests_fixture_dependency": False,
         "production_seed_dependency": False,

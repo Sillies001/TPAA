@@ -32,11 +32,7 @@ from tpaa_application import (
     allocate_p2_release_id,
     p2_release_scope_key,
 )
-from tpaa_assessment import (
-    P2AttributionExecution,
-    P4AssessmentRevision,
-    P5AssessmentRevision,
-)
+from tpaa_assessment import P2AttributionExecution
 from tpaa_capability.p3_twin import P3CapabilityEstimate
 from tpaa_capability.p6_counterfactual import P6CounterfactualRevision
 from tpaa_capability.p6_forecast import P6ForecastRevision
@@ -67,6 +63,18 @@ from tpaa_storage import (
 from tpaa_storage.product_identity import product_object_ref_id
 
 from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
+from .production_downstream import (
+    persist_p3_worker_product,
+    persist_p4_worker_product,
+    persist_p5_worker_product,
+    persist_p6_worker_product,
+    prepare_p2_compute_input,
+    prepare_p3_build_worker_input,
+    prepare_p4_build_worker_input,
+    prepare_p5_build_worker_input,
+    prepare_p6_build_worker_input,
+)
+from .production_job_output import ProductionJobOutputRepository
 from .production_worker import (
     P2_ATTRIBUTION_COMMAND,
     P3_BUILD_COMMAND,
@@ -81,27 +89,16 @@ from .production_worker import (
     ProductionP3BuildWorkerProduct,
     ProductionP3EstimateWorkerInput,
     ProductionP4AssessmentWorkerInput,
+    ProductionP4BuildWorkerInput,
     ProductionP4AssessmentWorkerProduct,
     ProductionP5AssessmentWorkerInput,
+    ProductionP5BuildWorkerInput,
     ProductionP5AssessmentWorkerProduct,
     ProductionP6BuildWorkerProduct,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
     ProductionPrerequisiteRow,
 )
-from .production_job_output import ProductionJobOutputRepository
-from .production_downstream import (
-    persist_p3_worker_product,
-    persist_p4_worker_product,
-    persist_p5_worker_product,
-    persist_p6_worker_product,
-    prepare_p2_compute_input,
-    prepare_p3_build_worker_input,
-    prepare_p4_build_worker_input,
-    prepare_p5_build_worker_input,
-    prepare_p6_build_worker_input,
-)
-
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
 _P1_COMMAND = "BUILD_P1_RELEASE"
 _P1_CANONICAL_DATASET_PRODUCER_VERSION = "ED2-B1-P1-CANONICAL-1.0.0"
@@ -1170,6 +1167,7 @@ class ProductionJobExecutor:
             if production_raw is None
             else _mapping(production_raw, field="production_input")
         )
+        worker_input: ProductionP4BuildWorkerInput | ProductionP4AssessmentWorkerInput
         if production_input is not None:
             with self._write_uow_factory() as uow:
                 worker_input = prepare_p4_build_worker_input(
@@ -1306,6 +1304,7 @@ class ProductionJobExecutor:
             if production_raw is None
             else _mapping(production_raw, field="production_input")
         )
+        worker_input: ProductionP5BuildWorkerInput | ProductionP5AssessmentWorkerInput
         if production_input is not None:
             with self._write_uow_factory() as uow:
                 worker_input = prepare_p5_build_worker_input(

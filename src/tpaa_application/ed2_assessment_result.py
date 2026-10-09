@@ -317,7 +317,7 @@ class ED2AssessmentResultRepository:
             rebuilt.dataset_snapshot_id != str(row["dataset_snapshot_id"])
             or rebuilt.logical_content_hash != str(row["data_hash"])
             or str(row["schema_version"]) != _SCHEMA_VERSION
-            or row["frozen"] not in {True, 1}
+            or row["frozen"] not in (True, 1)
         ):
             raise ED2AssessmentResultError(
                 "ED2_ASSESSMENT_RESULT_INTEGRITY_FAILED",

@@ -10,7 +10,7 @@ import json
 from collections.abc import Callable, Mapping
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Protocol, cast
 
@@ -19,7 +19,6 @@ from tpaa_application import (
     JobStatus,
     M8ApprovalMutation,
     M8ViewerContext,
-    P2PersistenceRepository,
     P3PersistenceRepository,
     P4P5PersistenceRepository,
     P6PersistenceRepository,
@@ -27,7 +26,7 @@ from tpaa_application import (
 from tpaa_observation import allocate_session_release_id
 from tpaa_runtime.production import ProductionRuntime
 from tpaa_runtime.production_job_output import ProductionJobOutputRepository
-from tpaa_storage import LocalObjectStore
+from tpaa_storage import ComputeJobRepository, LocalObjectStore
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 from tpaa_storage.hashing import canonical_request_hash
 
@@ -154,7 +153,8 @@ def load_ed2_b2_continuous_plan(path: Path) -> dict[str, object]:
 def _submit(
     runtime: ProductionRuntime,
     *,
-    key: str,
+    uow_factory: QualificationUowFactory,
+    key:
     command: str,
     payload: dict[str, object],
     actor: str,
@@ -166,9 +166,18 @@ def _submit(
         actor=actor,
     )
     if submission.reused or submission.record.status is not JobStatus.SUCCEEDED:
+        failure_reason = "NOT_FAILED"
+        if submission.record.status is JobStatus.FAILED:
+            with uow_factory(False) as uow:
+                failed = ComputeJobRepository(uow.canonical_rows).exact(
+                    submission.record.job_id
+                )
+                failure_reason = ",".join(failed.reason_codes)
+                uow.commit()
         raise RuntimeError(
             f"ED2_B2_QUALIFICATION_JOB_FAILED:{command}:"
-            f"{submission.record.job_id}:{submission.record.status.value}"
+            f"{submission.record.job_id}:{submission.record.status.value}:"
+            f"{failure_reason}"
         )
     return submission.record.job_id
 
@@ -231,16 +240,16 @@ def _common_observations(
     )
     subjects = []
     for observation_id in observation_ids:
-        row = rows.one(
+        subject_row = rows.one(
             "metric.capability_observation",
             where={"observation_id": observation_id},
             columns=("subject_entity_id",),
         )
-        if row is None:
+        if subject_row is None:
             raise RuntimeError(
                 "ED2_B2_QUALIFICATION_OBSERVATION_NOT_FOUND"
             )
-        subjects.append(str(row["subject_entity_id"]))
+        subjects.append(str(subject_row["subject_entity_id"]))
     if len(set(subjects)) != 5:
         raise RuntimeError(
             "ED2_B2_QUALIFICATION_INDEPENDENT_SUBJECTS_REQUIRED"
@@ -276,7 +285,7 @@ def _parse_utc(value: str) -> datetime:
     if not value.endswith("Z"):
         raise RuntimeError("ED2_B2_QUALIFICATION_TIME_INVALID")
     return datetime.fromisoformat(value[:-1] + "+00:00").astimezone(
-        timezone.utc
+        UTC
     )
 
 
@@ -390,6 +399,7 @@ def run_ed2_b2_continuous_qualification(
         payload = _mapping(item.get("p1_payload"), "p1_payload")
         _submit(
             runtime,
+            uow_factory=uow_factory,
             key=f"ed2-b2-continuous-p1-{ordinal}",
             command="BUILD_P1_RELEASE",
             payload=payload,
@@ -471,6 +481,7 @@ def run_ed2_b2_continuous_qualification(
         execution_time = _offset(p2_as_of, target_index + 1)
         job_id = _submit(
             runtime,
+            uow_factory=uow_factory,
             key=f"ed2-b2-continuous-p2-{target_index + 1}",
             command="P2_ATTRIBUTION",
             payload={
@@ -538,6 +549,7 @@ def run_ed2_b2_continuous_qualification(
     }
     p3_job_id = _submit(
         runtime,
+        uow_factory=uow_factory,
         key="ed2-b2-continuous-p3-build",
         command="P3_BUILD_PRODUCTS",
         payload={"production_input": p3_input},
@@ -644,6 +656,7 @@ def run_ed2_b2_continuous_qualification(
         created_at = _offset(p4_base_time, (index - 1) * 10)
         p4_job_id = _submit(
             runtime,
+            uow_factory=uow_factory,
             key=f"ed2-b2-continuous-p4-{index}",
             command="P4_ASSESSMENT",
             payload={
@@ -737,6 +750,7 @@ def run_ed2_b2_continuous_qualification(
     p5_profile = _mapping(plan["p5_profile"], "p5_profile")
     p5_job_id = _submit(
         runtime,
+        uow_factory=uow_factory,
         key="ed2-b2-continuous-p5",
         command="P5_ASSESSMENT",
         payload={
@@ -885,6 +899,7 @@ def run_ed2_b2_continuous_qualification(
     }
     p6_build_job_id = _submit(
         runtime,
+        uow_factory=uow_factory,
         key="ed2-b2-continuous-p6-build",
         command="P6_BUILD_PRODUCTS",
         payload={"production_input": p6_production_input},
@@ -927,6 +942,7 @@ def run_ed2_b2_continuous_qualification(
 
     forecast_job = _submit(
         runtime,
+        uow_factory=uow_factory,
         key="ed2-b2-continuous-p6-forecast",
         command="P6_FORECAST",
         payload={
@@ -943,6 +959,7 @@ def run_ed2_b2_continuous_qualification(
     )
     counterfactual_job = _submit(
         runtime,
+        uow_factory=uow_factory,
         key="ed2-b2-continuous-p6-counterfactual",
         command="P6_COUNTERFACTUAL",
         payload={
