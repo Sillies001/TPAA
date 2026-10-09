@@ -139,13 +139,13 @@ def load_ed2_b2_continuous_plan(path: Path) -> dict[str, object]:
     if plan.get("schema") != ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA:
         raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA_DRIFT")
     sessions = _sequence_of_mappings(plan.get("sessions"), "sessions")
-    if len(sessions) != 5:
+    if len(sessions) != 8:
         raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_SESSION_COUNT")
     ordinals = tuple(
         _integer(item.get("ordinal"), "sessions.ordinal")
         for item in sessions
     )
-    if ordinals != (1, 2, 3, 4, 5):
+    if ordinals != tuple(range(1, 9)):
         raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_SESSION_ORDER")
     return plan
 
@@ -252,7 +252,7 @@ def _common_observations(
                 "ED2_B2_QUALIFICATION_OBSERVATION_NOT_FOUND"
             )
         subjects.append(str(subject_row["subject_entity_id"]))
-    if len(set(subjects)) != 5:
+    if len(set(subjects)) != len(release_ids):
         raise RuntimeError(
             "ED2_B2_QUALIFICATION_INDEPENDENT_SUBJECTS_REQUIRED"
         )
@@ -436,7 +436,7 @@ def run_ed2_b2_continuous_qualification(
         observation_ids[index]: {
             factor_order[0]: factors_raw[str(index + 1)]
         }
-        for index in range(5)
+        for index in range(len(observation_ids))
     }
     p2_as_of = _text(
         p2_profile.get("as_of_utc", "2029-12-31T23:30:00Z"),

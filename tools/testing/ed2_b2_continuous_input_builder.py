@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
+from decimal import Decimal
 from pathlib import Path
 from typing import cast
 from uuid import UUID, uuid5
@@ -146,12 +148,44 @@ def _p1_payload(ordinal: int) -> dict[str, object]:
     return payload
 
 
+def verify_p2_jackknife_support(
+    values_by_ordinal: Mapping[str, str],
+    *,
+    reference_value: str,
+    historical_count: int = 4,
+) -> None:
+    """Qualify every historical target against each leave-one-subject-out cohort."""
+
+    if set(values_by_ordinal) != {str(i) for i in range(1, 9)}:
+        raise ValueError("ED2_B2_P2_REFERENCE_SUBJECT_COUNT_INVALID")
+    values = tuple(Decimal(values_by_ordinal[str(i)]) for i in range(1, 9))
+    reference = Decimal(reference_value)
+    if not all(value.is_finite() for value in (*values, reference)):
+        raise ValueError("ED2_B2_P2_REFERENCE_NOT_FINITE")
+    for target_index in range(historical_count):
+        target = values[target_index]
+        cohort = [
+            value for index, value in enumerate(values)
+            if index != target_index
+        ]
+        for omitted in range(len(cohort)):
+            remaining = cohort[:omitted] + cohort[omitted + 1 :]
+            if (
+                len(set(remaining)) < 2
+                or min(remaining) > min(target, reference)
+                or max(remaining) < max(target, reference)
+            ):
+                raise ValueError(
+                    f"ED2_B2_P2_JACKKNIFE_SUPPORT_INSUFFICIENT:{target_index + 1}"
+                )
+
+
 def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
     # Qualification-only preflight uses the same governed Catalog path as the
     # installed Worker, with no persistence or qualification seed substitution.
     catalog = build_production_p1_catalog_contract(AUTHORITY)
     sessions = []
-    for ordinal in range(1, 6):
+    for ordinal in range(1, 9):
         payload = _p1_payload(ordinal)
         sources = select_production_p1_sources(payload)
         request = parse_production_p1_request(
@@ -169,7 +203,13 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
         sessions.append(
             {
                 "ordinal": ordinal,
-                "role": "P3_HISTORY" if ordinal <= 4 else "P4_P5_EVALUATION",
+                "role": (
+                    "P3_HISTORY"
+                    if ordinal <= 4
+                    else "P4_P5_EVALUATION"
+                    if ordinal == 5
+                    else "P2_INDEPENDENT_REFERENCE"
+                ),
                 "session_id": _id("session", ordinal),
                 "context_id": _id("context", ordinal),
                 "occurred_at_utc": (
@@ -178,6 +218,20 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
                 "p1_payload": payload,
             }
         )
+    p2_factor_values = {
+        "1": "0.35",
+        "2": "0.45",
+        "3": "0.55",
+        "4": "0.65",
+        "5": "0.0",
+        "6": "0.1",
+        "7": "0.9",
+        "8": "1.0",
+    }
+    verify_p2_jackknife_support(
+        p2_factor_values,
+        reference_value="0.5",
+    )
     return {
         "schema": ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA,
         "aircraft_id": _AIRCRAFT_ID,
@@ -186,13 +240,7 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
         "p2_profile": {
             "as_of_utc": "2029-12-31T23:30:00Z",
             "factor_order": ["SESSION_CONTEXT_FACTOR"],
-            "factor_values_by_ordinal": {
-                "1": "0.0",
-                "2": "1.0",
-                "3": "1.0",
-                "4": "0.0",
-                "5": "0.5",
-            },
+            "factor_values_by_ordinal": p2_factor_values,
             "reference_factor_values": {
                 "SESSION_CONTEXT_FACTOR": "0.5"
             },
