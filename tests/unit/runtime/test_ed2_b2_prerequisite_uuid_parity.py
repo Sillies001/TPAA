@@ -7,13 +7,8 @@ from uuid import UUID
 
 import pytest
 
-from tpaa_runtime.durable_jobs import (
-    ProductionJobExecutionError,
-    _logical_prerequisite_value,
-    _persist_or_verify_prerequisite,
-)
+from tpaa_runtime import durable_jobs
 from tpaa_runtime.production_worker import ProductionPrerequisiteRow
-
 
 _DEFINITION_ID = "c93bf5d6-29f1-41fb-bb9d-7d7640b3d441"
 
@@ -37,9 +32,9 @@ def test_ed2_b2_postgres_uuid_object_matches_exact_string_identity() -> None:
         "metric_code": "P1-TEST-001",
         "definition_hash": "expected-definition-hash",
     }
-    _persist_or_verify_prerequisite(uow, _definition_prerequisite())
+    durable_jobs._persist_or_verify_prerequisite(uow, _definition_prerequisite())
     uow.canonical_rows.insert.assert_not_called()
-    assert _logical_prerequisite_value(
+    assert durable_jobs._logical_prerequisite_value(
         UUID(_DEFINITION_ID), field_kind="scalar"
     ) == _DEFINITION_ID
 
@@ -49,7 +44,7 @@ def test_ed2_b2_sqlite_string_identity_is_unchanged() -> None:
     uow.canonical_rows.one.return_value = dict(
         _definition_prerequisite().values
     )
-    _persist_or_verify_prerequisite(uow, _definition_prerequisite())
+    durable_jobs._persist_or_verify_prerequisite(uow, _definition_prerequisite())
     uow.canonical_rows.insert.assert_not_called()
 
 
@@ -61,10 +56,10 @@ def test_ed2_b2_real_definition_hash_drift_still_fails_closed() -> None:
         "definition_hash": "different-definition-hash",
     }
     with pytest.raises(
-        ProductionJobExecutionError,
+        durable_jobs.ProductionJobExecutionError,
         match="ED2_P1_PREREQUISITE_IDENTITY_DRIFT.*fields=definition_hash",
     ):
-        _persist_or_verify_prerequisite(uow, _definition_prerequisite())
+        durable_jobs._persist_or_verify_prerequisite(uow, _definition_prerequisite())
     uow.canonical_rows.insert.assert_not_called()
 
 
@@ -75,7 +70,7 @@ def test_ed2_b2_distinct_postgres_uuid_still_fails_closed() -> None:
         "metric_definition_id": UUID("7e9e2459-6714-48a5-bb96-18673e5fd223"),
     }
     with pytest.raises(
-        ProductionJobExecutionError,
+        durable_jobs.ProductionJobExecutionError,
         match="ED2_P1_PREREQUISITE_IDENTITY_DRIFT.*fields=metric_definition_id",
     ):
-        _persist_or_verify_prerequisite(uow, _definition_prerequisite())
+        durable_jobs._persist_or_verify_prerequisite(uow, _definition_prerequisite())

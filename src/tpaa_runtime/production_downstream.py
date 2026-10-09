@@ -234,12 +234,23 @@ def _persist_object_reference(
             "registry.object_reference",
             {"object_ref_id": object_ref_id, **expected},
         )
-    elif any(current[key] != value for key, value in expected.items()):
+    elif any(
+        not _stored_field_matches(current[key], value)
+        for key, value in expected.items()
+    ):
         raise ProductionDownstreamError(
             "ED2_B2_MANAGED_OBJECT_IMMUTABLE_CONFLICT",
             object_ref_id,
         )
     return object_ref_id, digest
+
+
+def _stored_field_matches(actual: object, expected: object) -> bool:
+    """Normalize a PostgreSQL UUID adapter value, not the governed identity."""
+
+    if isinstance(actual, UUID) and isinstance(expected, str):
+        return str(actual) == expected
+    return actual == expected
 
 
 def _context_artifact_bytes(
@@ -292,7 +303,10 @@ def _context_artifact_bytes(
             "registry.context_artifact",
             {"context_artifact_id": context_artifact_id, **expected},
         )
-    elif any(current[key] != value for key, value in expected.items()):
+    elif any(
+        not _stored_field_matches(current[key], value)
+        for key, value in expected.items()
+    ):
         raise ProductionDownstreamError(
             "ED2_B2_CONTEXT_ARTIFACT_IMMUTABLE_CONFLICT",
             context_artifact_id,
@@ -725,7 +739,7 @@ def _ensure_session_order_authority(
         if isinstance(selector_value, str):
             normalized_scope["selector_json"] = json.loads(selector_value)
         if any(
-            normalized_scope[key] != value
+            not _stored_field_matches(normalized_scope[key], value)
             for key, value in expected_scope.items()
         ):
             raise ProductionDownstreamError(
@@ -775,7 +789,7 @@ def _ensure_session_order_authority(
                 {"assignment_id": assignment_id, **expected_assignment},
             )
         elif any(
-            current_assignment[key] != value
+            not _stored_field_matches(current_assignment[key], value)
             for key, value in expected_assignment.items()
         ):
             raise ProductionDownstreamError(
@@ -845,7 +859,7 @@ def _ensure_configuration_snapshot(
         if isinstance(snapshot_value, str):
             normalized_snapshot["snapshot_json"] = json.loads(snapshot_value)
         if any(
-            normalized_snapshot[key] != value
+            not _stored_field_matches(normalized_snapshot[key], value)
             for key, value in expected.items()
         ):
             raise ProductionDownstreamError(
