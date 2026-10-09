@@ -507,6 +507,7 @@ def build_full_p1_request_contract(
     aircraft_id: str,
     authority_root: Path = AUTHORITY,
     flight_source_json: str | None = None,
+    system_id_namespace: UUID | None = None,
 ) -> dict[str, object]:
     """Return a JSON-safe six-source exact-116 qualification request contract."""
 
@@ -516,6 +517,23 @@ def build_full_p1_request_contract(
         authority_root=authority_root,
         aircraft_id=aircraft_id,
     )
+    if system_id_namespace is not None:
+        remapped_ids = {
+            existing_id: str(uuid5(system_id_namespace, f"mission-system:{existing_id}"))
+            for existing_id in systems
+        }
+        for metric_code, existing_id in bindings.items():
+            current_id = inputs[metric_code].get("mission_system_instance_id")
+            if current_id is not None and current_id != existing_id:
+                raise ValueError("ED2_QUALIFICATION_SYSTEM_INPUT_DRIFT")
+            inputs[metric_code]["mission_system_instance_id"] = remapped_ids[
+                existing_id
+            ]
+        systems, bindings = build_full_p1_system_authority(
+            inputs,
+            authority_root=authority_root,
+            aircraft_id=aircraft_id,
+        )
     plan = build_m3_metric_execution_plan(authority_root)
     source_text = (
         _DEFAULT_QUALIFICATION_FLIGHT.read_text(encoding="utf-8")

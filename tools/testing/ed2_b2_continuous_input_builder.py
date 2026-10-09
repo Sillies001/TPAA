@@ -78,6 +78,7 @@ def _p1_payload(ordinal: int) -> dict[str, object]:
         aircraft_id=_AIRCRAFT_ID,
         authority_root=AUTHORITY,
         flight_source_json=source_json,
+        system_id_namespace=_NAMESPACE,
     )
     payload: dict[str, object] = {
         "source_json": source_json,
