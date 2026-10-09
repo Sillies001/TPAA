@@ -211,6 +211,8 @@ def _logical_prerequisite_value(
 ) -> object:
     if isinstance(value, Decimal):
         return float(value)
+    if isinstance(value, UUID):
+        return str(value)
     if field_kind in {"json", "text_array", "uuid_array"}:
         parsed = value
         if isinstance(value, str):

@@ -209,7 +209,7 @@ def test_m1_entry_activation_is_inside_required_exit_review_check() -> None:
 def test_m0_exit_postgres_and_review_jobs_are_fail_closed() -> None:
     text = _orchestration_text()
     assert "m0-exit-postgres:" in text
-    assert "image: postgres:16" in text
+    assert "image: public.ecr.aws/docker/library/postgres:16" in text
     assert "python tools/dev/tpaa_dev.py db-postgres-acceptance" in text
     assert "python tools/dev/tpaa_dev.py db-postgres-repository-acceptance" in text
     assert "python tools/ci/cold_start.py" in text

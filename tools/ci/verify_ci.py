@@ -346,7 +346,7 @@ def verify() -> dict[str, object]:
         "--evidence evidence/cross-platform/m1-batch-4-logical-equivalence.json",
         "dist/",
         "m0-exit-postgres:",
-        "image: postgres:16",
+        "image: public.ecr.aws/docker/library/postgres:16",
         "python tools/dev/tpaa_dev.py db-postgres-acceptance",
         "python tools/dev/tpaa_dev.py db-postgres-repository-acceptance",
         "python tools/dev/tpaa_dev.py m1-batch-2-storage-parity",
