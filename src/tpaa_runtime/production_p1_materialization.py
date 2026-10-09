@@ -82,6 +82,7 @@ class ProductionP1ReleaseContext:
     context_id: str
     context_version: str
     context_binding_hash: str
+    comparison_context_hash: str
     episode_id: str
     stage_id: str | None
     start_session_time_us: int
@@ -142,6 +143,10 @@ def _validate_context(context: ProductionP1ReleaseContext) -> None:
         _require_uuid(context.parent_release_id, field="parent_release_id")
     _require_hash(context.request_hash, field="request_hash")
     _require_hash(context.context_binding_hash, field="context_binding_hash")
+    _require_hash(
+        context.comparison_context_hash,
+        field="comparison_context_hash",
+    )
     if context.release_no < 1:
         raise ProductionP1MaterializationError(
             "ED2_P1_RELEASE_NUMBER_INVALID",
@@ -555,14 +560,15 @@ def materialize_production_p1_release(
 
             comparison_key = _json_hash(
                 {
+                    "schema": "TPAA_ED2_P2_COMPARISON_KEY_V1",
                     "metric_code": record.metric_code,
                     "subject_type": definition.subject_type,
-                    "subject_entity_id": subject_entity_id,
-                    "mission_system_instance_id": (
-                        None if system is None else system.mission_system_instance_id
+                    "context_comparability_hash": (
+                        context.comparison_context_hash
                     ),
-                    "context_id": context.context_id,
-                    "stage_id": context.stage_id,
+                    "observation_schema_version": (
+                        context.observation_schema_version
+                    ),
                 }
             )
             if definition.publication_route == "CAPABILITY_OBSERVATION":

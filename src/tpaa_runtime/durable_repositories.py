@@ -5,6 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Protocol, Self, TypeVar
 
+from tpaa_application.ed2_assessment_result import (
+    ED2AssessmentResultError,
+    ED2AssessmentResultRepository,
+)
 from tpaa_application.m6_workspace import (
     M6ApplicationError,
     M6P2WorkspaceSnapshot,
@@ -207,11 +211,66 @@ class DurableM8AssessmentRuntimeRepository:
         except P4P5PersistenceError as exc:
             raise M8ApplicationError(exc.code, exc.detail) from exc
 
+    @staticmethod
+    def _continue_ed2_result(
+        rows: CanonicalRowRepository,
+        *,
+        previous_revision_id: str,
+        revision_kind: str,
+        revision_id: str,
+        approval_state: str,
+        created_at_utc: str,
+    ) -> None:
+        results = ED2AssessmentResultRepository(rows)
+        try:
+            results.exact(previous_revision_id)
+        except ED2AssessmentResultError as exc:
+            if exc.code == "ED2_ASSESSMENT_RESULT_NOT_FOUND":
+                return
+            raise
+        results.successor(
+            previous_revision_id=previous_revision_id,
+            revision_kind=revision_kind,
+            revision_id=revision_id,
+            approval_state=approval_state,
+            created_at_utc=created_at_utc,
+        )
+
     def register_p4(self, revision: P4AssessmentRevision) -> None:
-        self._write(lambda repository: repository.register_p4(revision))
+        try:
+            with self._write_uow_factory() as uow:
+                repository = P4P5PersistenceRepository(uow.canonical_rows)
+                repository.register_p4(revision)
+                if revision.supersedes_id is not None:
+                    self._continue_ed2_result(
+                        uow.canonical_rows,
+                        previous_revision_id=revision.supersedes_id,
+                        revision_kind="P4",
+                        revision_id=revision.actor_assessment_id,
+                        approval_state=revision.approval_state,
+                        created_at_utc=revision.created_at_utc,
+                    )
+                uow.commit()
+        except (P4P5PersistenceError, ED2AssessmentResultError) as exc:
+            raise M8ApplicationError(exc.code, exc.detail) from exc
 
     def register_p5(self, revision: P5AssessmentRevision) -> None:
-        self._write(lambda repository: repository.register_p5(revision))
+        try:
+            with self._write_uow_factory() as uow:
+                repository = P4P5PersistenceRepository(uow.canonical_rows)
+                repository.register_p5(revision)
+                if revision.supersedes_id is not None:
+                    self._continue_ed2_result(
+                        uow.canonical_rows,
+                        previous_revision_id=revision.supersedes_id,
+                        revision_kind="P5",
+                        revision_id=revision.mission_assessment_id,
+                        approval_state=revision.approval_state,
+                        created_at_utc=revision.created_at_utc,
+                    )
+                uow.commit()
+        except (P4P5PersistenceError, ED2AssessmentResultError) as exc:
+            raise M8ApplicationError(exc.code, exc.detail) from exc
 
     def register_annotation(self, revision: InstructorAnnotationRevision) -> None:
         self._write(lambda repository: repository.register_annotation(revision))

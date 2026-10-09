@@ -26,6 +26,9 @@ from tools.packaging.m5_runtime_bundle import (  # noqa: E402
     _write_json,
     _zip,
 )
+from tools.testing.ed2_b2_continuous_input_builder import (  # noqa: E402
+    build_ed2_b2_continuous_qualification_plan,
+)
 from tools.testing.ed2_p1_full_input_builder import (  # noqa: E402
     build_full_p1_request_contract,
 )
@@ -41,6 +44,7 @@ QUALIFICATION_SOURCE = (
     / "PRCB_C2_NOMINAL_FLIGHT.json"
 )
 P1_QUALIFICATION_CONTRACT = "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+B2_CONTINUOUS_QUALIFICATION_PLAN = "ED2_B2_CONTINUOUS_QUALIFICATION_PLAN.json"
 P1_QUALIFICATION_AIRCRAFT_ID = "c2000000-0000-4000-8000-000000000002"
 TARGET_VERSION = "1.0.1"
 
@@ -78,6 +82,10 @@ def _install_runtime_entry(stage: Path, profile: str) -> None:
             aircraft_id=P1_QUALIFICATION_AIRCRAFT_ID,
             authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
         ),
+    )
+    _write_json(
+        qualification_root / B2_CONTINUOUS_QUALIFICATION_PLAN,
+        build_ed2_b2_continuous_qualification_plan(),
     )
     default_command = "ready"
     if profile in WINDOWS_PROFILES:
@@ -183,6 +191,9 @@ def build_prcb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
             ),
             "production_p1_request_contract": (
                 f"qualification/{P1_QUALIFICATION_CONTRACT}"
+            ),
+            "ed2_b2_continuous_qualification_plan": (
+                f"qualification/{B2_CONTINUOUS_QUALIFICATION_PLAN}"
             ),
             "file_inventory_sha256": _canonical_hash(inventory),
         }

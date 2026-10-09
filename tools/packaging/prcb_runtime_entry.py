@@ -23,6 +23,10 @@ from tpaa_application import (  # noqa: E402
 )
 from tpaa_ingest import PRODUCTION_FLIGHT_MEDIA_TYPE  # noqa: E402
 from tpaa_observation import allocate_session_release_id  # noqa: E402
+from tpaa_qualification.ed2_b2_continuous import (  # noqa: E402
+    QualificationUowFactory,
+    run_ed2_b2_continuous_qualification,
+)
 from tpaa_qualification.ed2_p1_request_contract import (  # noqa: E402
     load_ed2_p1_request_contract,
 )
@@ -53,6 +57,7 @@ from tpaa_runtime import (  # noqa: E402
 )
 from tpaa_storage import (  # noqa: E402
     LocalObjectStore,
+    PostgreSQLServiceUnitOfWork,
     SQLiteDesktopUnitOfWork,
     bootstrap_sqlite,
     verify_sqlite,
@@ -66,6 +71,9 @@ ALL_PROFILES = DESKTOP_PROFILES | SERVICE_PROFILES
 QUALIFICATION_SOURCE = APP_ROOT / "qualification" / "PRCB_C2_NOMINAL_FLIGHT.json"
 QUALIFICATION_P1_CONTRACT = (
     APP_ROOT / "qualification" / "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+)
+QUALIFICATION_B2_PLAN = (
+    APP_ROOT / "qualification" / "ED2_B2_CONTINUOUS_QUALIFICATION_PLAN.json"
 )
 
 SESSION_ID = "c2000000-0000-4000-8000-000000000001"
@@ -94,6 +102,7 @@ def _authority_root() -> Path:
 
 def _runtime(profile_id: str) -> ProductionRuntime:
     object_root = Path(_required_env("TPAA_OBJECT_ROOT"))
+    uow_factory: QualificationUowFactory
     if profile_id in DESKTOP_PROFILES:
         database = Path(_required_env("TPAA_DESKTOP_DATABASE"))
         config = ProductionRuntimeConfig(
@@ -729,8 +738,8 @@ def _desktop_e2e(
         "status": "PASS",
         "product_version": PRODUCT_VERSION,
         "runtime_profile": "DESKTOP",
-        "db_schema_version": bootstrap.schema_version,
-        "canonical_baseline": bootstrap.core_baseline,
+        "db_schema_version": schema_version,
+        "canonical_baseline": core_baseline,
         "job_id": submission.record.job_id,
         "job_status": submission.record.status.value,
         "release_id": release_id,
@@ -805,6 +814,130 @@ def _desktop_e2e(
     }
 
 
+def _ed2_b2_e2e(
+    profile_id: str,
+    work_root: Path,
+) -> dict[str, object]:
+    if work_root.exists() and any(work_root.iterdir()):
+        raise RuntimeError("ED2 B2 qualification work root must be empty")
+    work_root.mkdir(parents=True, exist_ok=True)
+    object_root = work_root / "objects"
+    object_store = LocalObjectStore(object_root)
+
+    if profile_id in DESKTOP_PROFILES:
+        database = work_root / "ed2-b2.sqlite3"
+        bootstrap_result = bootstrap_sqlite(database)
+        schema_version = bootstrap_result.schema_version
+        core_baseline = bootstrap_result.core_baseline
+        config = ProductionRuntimeConfig(
+            profile=RuntimeProfile.DESKTOP,
+            product_build_version=PRODUCT_VERSION,
+            authority_root=_authority_root(),
+            object_root=object_root,
+            desktop_database_path=database,
+        )
+        runtime = build_desktop_production_runtime(config)
+
+        def desktop_uow_factory(write: bool) -> SQLiteDesktopUnitOfWork:
+            return SQLiteDesktopUnitOfWork(database, write=write)
+
+        uow_factory = desktop_uow_factory
+    elif profile_id in SERVICE_PROFILES:
+        conninfo = _required_env("TPAA_SERVICE_CONNINFO")
+        config = ProductionRuntimeConfig(
+            profile=RuntimeProfile.SERVICE,
+            product_build_version=PRODUCT_VERSION,
+            authority_root=_authority_root(),
+            object_root=object_root,
+            service_conninfo=conninfo,
+        )
+        runtime = build_service_production_runtime(config)
+
+        def service_uow_factory(write: bool) -> PostgreSQLServiceUnitOfWork:
+            return PostgreSQLServiceUnitOfWork(
+                conninfo,
+                read_only=not write,
+            )
+
+        uow_factory = service_uow_factory
+        with PostgreSQLServiceUnitOfWork(
+            conninfo,
+            read_only=True,
+        ) as uow:
+            metadata = uow.metadata.get()
+            schema_version = metadata.schema_version
+            core_baseline = metadata.core_baseline
+            uow.commit()
+    else:
+        raise RuntimeError("unsupported ED2 B2 qualification profile")
+
+    result = run_ed2_b2_continuous_qualification(
+        runtime=runtime,
+        uow_factory=uow_factory,
+        object_store=object_store,
+        plan_path=QUALIFICATION_B2_PLAN,
+        actor="ED2-B2-INSTALLED-QUALIFICATION",
+    )
+
+    restarted = (
+        build_desktop_production_runtime(config)
+        if profile_id in DESKTOP_PROFILES
+        else build_service_production_runtime(config)
+    )
+    del restarted
+    with uow_factory(False) as uow:
+        p2 = P2PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+        )
+        for estimate_id in result.p2_estimate_ids:
+            if p2.exact_adjusted_estimate(estimate_id).status != "IDENTIFIABLE":
+                raise RuntimeError(
+                    "ED2 B2 restart P2 exact read failed"
+                )
+        p3 = P3PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+        )
+        p3.exact_twin_revision(result.p3_twin_revision_id)
+        assessments = P4P5PersistenceRepository(uow.canonical_rows)
+        for revision_id in result.p4_approved_revision_ids:
+            if assessments.exact_p4_revision(
+                revision_id
+            ).approval_state != "APPROVED":
+                raise RuntimeError(
+                    "ED2 B2 restart P4 exact read failed"
+                )
+        if assessments.exact_p5_revision(
+            result.p5_approved_revision_id
+        ).approval_state != "APPROVED":
+            raise RuntimeError("ED2 B2 restart P5 exact read failed")
+        p6 = P6PersistenceRepository(
+            uow.canonical_rows,
+            object_store=object_store,
+        )
+        p6.exact_model_revision(result.p6_model_id)
+        p6.exact_forecast(result.p6_forecast_result_id)
+        p6.exact_counterfactual(result.p6_counterfactual_run_id)
+        uow.commit()
+
+    report = result.report()
+    return {
+        **report,
+        "status": "PASS",
+        "product_version": PRODUCT_VERSION,
+        "runtime_profile": (
+            "DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"
+        ),
+        "db_schema_version": bootstrap.schema_version,
+        "canonical_baseline": bootstrap.core_baseline,
+        "restart_exact_replay": True,
+        "tests_fixture_dependency": False,
+        "production_seed_dependency": False,
+        "formal_release_claimed": False,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", required=True, choices=sorted(ALL_PROFILES))
@@ -817,6 +950,8 @@ def main() -> int:
     service = sub.add_parser("service-e2e")
     service.add_argument("--work-root", type=Path, required=True)
     service.add_argument("--source", type=Path, default=QUALIFICATION_SOURCE)
+    ed2_b2 = sub.add_parser("ed2-b2-e2e")
+    ed2_b2.add_argument("--work-root", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "ready":
@@ -838,6 +973,8 @@ def main() -> int:
             instructor_token=_required_env("TPAA_C5_INSTRUCTOR_TOKEN"),
             analyst_token=_required_env("TPAA_C5_ANALYST_TOKEN"),
         )
+    elif args.command == "ed2-b2-e2e":
+        result = _ed2_b2_e2e(args.profile, args.work_root)
     else:
         raise AssertionError(args.command)
     print(json.dumps(result, indent=2, sort_keys=True))

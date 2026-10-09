@@ -15,33 +15,60 @@ from uuid import UUID, uuid5
 from tpaa_application.p2_persistence import P2DurableComputeInput
 from tpaa_application.p4_p5_compute_input import P5DurableComputeInput
 from tpaa_assessment import (
+    P4AssessmentRevision,
     P4SubjectContext,
+    P4SubjectSource,
+    P5AssessmentRevision,
     build_p4_assessment_revision,
+    build_p4_subject_context,
     build_p5_aggregation,
     build_p5_assessment_revision,
     execute_p2_attribution,
     materialize_p4_human_machine_evidence,
     materialize_p5_team_mission_evidence,
 )
+from tpaa_assessment.ed2_profile import (
+    ED2AssessmentProfileResult,
+    evaluate_ed2_training_assessment,
+)
+from tpaa_capability.p3_model import (
+    P3CapabilityModelBuild,
+    P3CapabilitySurfaceBuild,
+    P3ModelExecutionProfile,
+    P3TrainingDatasetSnapshot,
+    build_capability_surface,
+    execute_capability_model,
+    materialize_training_dataset,
+)
 from tpaa_capability.p3_twin import (
     P3AircraftTwinRevision,
     P3CapabilityEstimate,
     P3TwinComponentBinding,
     evaluate_twin_capability_estimate,
+    publish_aircraft_twin_revision,
 )
 from tpaa_capability.p6_counterfactual import execute_p6_counterfactual
 from tpaa_capability.p6_forecast import (
+    P6CapabilityTrainingRow,
+    P6ForecastExecutionProfile,
     P6ManagedModelObject,
     P6ModelBuild,
     P6ModelRevision,
     execute_p6_forecast,
+    execute_p6_model_training,
 )
 from tpaa_capability.p6_input import (
+    P6ContextRef,
     P6CounterfactualRequestBinding,
+    P6FactualSourceRevision,
     P6ForecastRequestBinding,
     P6InputSnapshot,
+    P6P3ModelRef,
+    build_p6_counterfactual_request_binding,
+    build_p6_forecast_request_binding,
+    build_p6_input_snapshot,
 )
-from tpaa_context import P3ClaimEnvelope
+from tpaa_context import M8RoleModelBinding, P3ClaimEnvelope
 from tpaa_episode import (
     ProductionStageError,
     ProductionStageProjection,
@@ -51,17 +78,35 @@ from tpaa_generated.dto import EvaluationContextDTO
 from tpaa_ingest import SourceFamily
 from tpaa_ingest.canonical_flight_channels import CanonicalFlightRow
 from tpaa_ingest.production_flight_json import validate_production_flight_document
+from tpaa_longitudinal import (
+    P3AdjustedEstimateInput,
+    P3AuthorityPolicy,
+    P3LifecycleSegment,
+    P3ManagedObject,
+    P3ModelValidationSnapshot,
+    build_p3_lifecycle_segment,
+    build_p3_validation_snapshot,
+)
 from tpaa_metric import CatalogMetricEngineError
 from tpaa_observation import allocate_session_release_id
 from tpaa_platform.worker import WorkerPayload, WorkerResult
 from tpaa_storage.canonical_rows import FieldKind
 from tpaa_storage.hashing import canonical_request_hash
+from tpaa_storage.product_identity import product_object_ref_id
 from tpaa_storage.publication_bundle import (
     CorePublicationBundle,
     CoreWorldProductRecord,
     CoreWorldRelationRecord,
 )
-from tpaa_world import P4InteractionScopeSnapshot
+from tpaa_world import (
+    M8EvidenceRef,
+    M8WorldFactRef,
+    P4InteractionScopeSnapshot,
+    P5CompositionSnapshot,
+    P5ParticipantBinding,
+    build_p4_interaction_scope_snapshot,
+    build_p5_composition_snapshot,
+)
 
 from .production_p1_catalog import (
     ProductionP1CatalogError,
@@ -90,9 +135,11 @@ from .production_p1_world import (
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_ED2_B1_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
 P2_ATTRIBUTION_COMMAND = "P2_ATTRIBUTION"
+P3_BUILD_COMMAND = "P3_BUILD_PRODUCTS"
 P3_ESTIMATE_COMMAND = "P3_ESTIMATE"
 P4_ASSESSMENT_COMMAND = "P4_ASSESSMENT"
 P5_ASSESSMENT_COMMAND = "P5_ASSESSMENT"
+P6_BUILD_COMMAND = "P6_BUILD_PRODUCTS"
 P6_FORECAST_COMMAND = "P6_FORECAST"
 P6_COUNTERFACTUAL_COMMAND = "P6_COUNTERFACTUAL"
 _DATASET_NAMESPACE = UUID("daf518fe-13aa-4d23-9130-b42ac188e4cf")
@@ -147,6 +194,41 @@ class ProductionP2AttributionWorkerInput:
 
 
 @dataclass(frozen=True)
+class ProductionP3BuildWorkerInput:
+    """Exact P2 history used to construct governed P3 products in the worker."""
+
+    job_payload: dict[str, object]
+    estimates: tuple[P3AdjustedEstimateInput, ...]
+    segment_snapshot_id: str
+    validation_snapshot_id: str
+    training_dataset_snapshot_id: str
+    configuration_snapshot_id: str
+    as_of_utc: str
+    training_created_at_utc: str
+    trained_at_utc: str
+    surface_created_at_utc: str
+    twin_valid_from_utc: str
+    twin_published_at_utc: str
+    estimate_created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP3BuildWorkerProduct:
+    """P3 model/surface/twin and in-domain estimates decided by the worker."""
+
+    segment: P3LifecycleSegment
+    validation: P3ModelValidationSnapshot
+    training: P3TrainingDatasetSnapshot
+    model_build: P3CapabilityModelBuild
+    surface_build: P3CapabilitySurfaceBuild
+    model_object: P3ManagedObject
+    surface_object: P3ManagedObject
+    component: P3TwinComponentBinding
+    twin: P3AircraftTwinRevision
+    estimates: tuple[P3CapabilityEstimate, ...]
+
+
+@dataclass(frozen=True)
 class ProductionP3EstimateWorkerInput:
     """Exact durable P3 inputs plus canonical Job payload for worker verification."""
 
@@ -157,6 +239,28 @@ class ProductionP3EstimateWorkerInput:
     condition_point: dict[str, object]
     as_of_time_utc: str
     created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP4BuildWorkerInput:
+    """Exact durable inputs for worker-side P4 subject/scope construction."""
+
+    job_payload: dict[str, object]
+    source: P4SubjectSource
+    role_model: M8RoleModelBinding
+    fact_refs: tuple[M8WorldFactRef, ...]
+    machine_evidence: tuple[M8EvidenceRef, ...]
+    p3_estimate: P3CapabilityEstimate | None
+    confidence: float
+    created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP4AssessmentWorkerProduct:
+    subject: P4SubjectContext
+    scope: P4InteractionScopeSnapshot
+    revision: P4AssessmentRevision
+    assessment_result: ED2AssessmentProfileResult
 
 
 @dataclass(frozen=True)
@@ -172,6 +276,35 @@ class ProductionP4AssessmentWorkerInput:
 
 
 @dataclass(frozen=True)
+class ProductionP5BuildWorkerInput:
+    """Exact P4 members for worker-side P5 composition construction."""
+
+    job_payload: dict[str, object]
+    session_id: str
+    mission_episode_id: str
+    team_id: str | None
+    p4_revisions: tuple[P4AssessmentRevision, ...]
+    world_snapshot_refs: tuple[str, ...]
+    scenario_context_artifact_id: str | None
+    role_model_context_artifact_id: str
+    assessment_spec_id: str
+    assessment_spec_version: str
+    as_of_utc: str
+    objective_result_refs: tuple[str, ...]
+    evidence_set_id: str
+    confidence: float
+    created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP5AssessmentWorkerProduct:
+    composition: P5CompositionSnapshot
+    compute_input: P5DurableComputeInput
+    revision: P5AssessmentRevision
+    assessment_result: ED2AssessmentProfileResult
+
+
+@dataclass(frozen=True)
 class ProductionP5AssessmentWorkerInput:
     """Frozen P5 composition and exact member revisions."""
 
@@ -179,6 +312,34 @@ class ProductionP5AssessmentWorkerInput:
     compute_input: P5DurableComputeInput
     confidence: float
     created_at_utc: str
+
+
+@dataclass(frozen=True)
+class ProductionP6BuildWorkerInput:
+    """Exact approved P4/P3 history and factual inputs for P6 construction."""
+
+    job_payload: dict[str, object]
+    training_rows: tuple[P6CapabilityTrainingRow, ...]
+    factual_sources: tuple[P6FactualSourceRevision, ...]
+    p3_model_refs: tuple[P6P3ModelRef, ...]
+    scenario_context_refs: tuple[P6ContextRef, ...]
+    target_scope: str
+    subject_or_composition_ref: str
+    forecast_origin_utc: str
+    as_of_utc: str
+    trained_at_utc: str
+    sealed_at_utc: str
+    forecast_spec: dict[str, object] | None
+    counterfactual_spec: dict[str, object] | None
+
+
+@dataclass(frozen=True)
+class ProductionP6BuildWorkerProduct:
+    model_build: P6ModelBuild
+    managed_object: P6ManagedModelObject
+    input_snapshot: P6InputSnapshot
+    forecast_request: P6ForecastRequestBinding | None
+    counterfactual_request: P6CounterfactualRequestBinding | None
 
 
 @dataclass(frozen=True)
@@ -642,6 +803,17 @@ def build_p1_worker_product(
     start = canonical_rows[0].session_time_us
     end = canonical_rows[-1].session_time_us + 1
     context_hash = _hash(dict(context_projection))
+    comparison_context_hash = _hash(
+        {
+            "context_version": context_projection["context_version"],
+            "revision_no": context_projection["revision_no"],
+            "rule_set_version": context_projection["rule_set_version"],
+            "metric_profile_version": context_projection[
+                "metric_profile_version"
+            ],
+            "status": context_projection["status"],
+        }
+    )
     episode_hash = _hash(
         {
             "episode_id": episode_id,
@@ -986,6 +1158,7 @@ def build_p1_worker_product(
                 context_id=context_id,
                 context_version=context_version,
                 context_binding_hash=context_hash,
+                comparison_context_hash=comparison_context_hash,
                 episode_id=episode_id,
                 stage_id=None,
                 start_session_time_us=start,
@@ -1372,6 +1545,137 @@ def _execute_p2_attribution(payload: WorkerPayload) -> WorkerResult:
     )
 
 
+def _execute_p3_build(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP3BuildWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    policy = P3AuthorityPolicy.from_canonical()
+    profile = P3ModelExecutionProfile.from_canonical()
+    segment = build_p3_lifecycle_segment(
+        segment_snapshot_id=body.segment_snapshot_id,
+        estimates=body.estimates,
+        lifecycle_events=(),
+        as_of_utc=body.as_of_utc,
+        policy=policy,
+    )
+    validation = build_p3_validation_snapshot(
+        validation_snapshot_id=body.validation_snapshot_id,
+        training_dataset_snapshot_id=body.training_dataset_snapshot_id,
+        segment=segment,
+        estimates=body.estimates,
+        as_of_utc=body.as_of_utc,
+        policy=policy,
+    )
+    training = materialize_training_dataset(
+        segment=segment,
+        validation=validation,
+        estimates=body.estimates,
+        created_at_utc=body.training_created_at_utc,
+        policy=policy,
+        profile=profile,
+    )
+    model_build = execute_capability_model(
+        training=training,
+        validation=validation,
+        segment=segment,
+        estimates=body.estimates,
+        trained_at_utc=body.trained_at_utc,
+        policy=policy,
+        profile=profile,
+    )
+    surface_build = build_capability_surface(
+        model_build=model_build,
+        created_at_utc=body.surface_created_at_utc,
+        profile=profile,
+    )
+    model_object = P3ManagedObject(
+        object_ref_id=product_object_ref_id(
+            model_build.model.model_artifact_uri,
+            model_build.model.model_artifact_hash,
+        ),
+        managed_uri=model_build.model.model_artifact_uri,
+        artifact_sha256=model_build.model.model_artifact_hash,
+        sealed=True,
+        gc_state="ACTIVE",
+        deleted_at=None,
+    )
+    surface_object = P3ManagedObject(
+        object_ref_id=product_object_ref_id(
+            surface_build.surface.dataset_uri,
+            surface_build.surface.dataset_hash,
+        ),
+        managed_uri=surface_build.surface.dataset_uri,
+        artifact_sha256=surface_build.surface.dataset_hash,
+        sealed=True,
+        gc_state="ACTIVE",
+        deleted_at=None,
+    )
+    component = P3TwinComponentBinding(
+        model_build=model_build,
+        surface_build=surface_build,
+        model_object_ref_id=model_object.object_ref_id,
+        surface_object_ref_id=surface_object.object_ref_id,
+    )
+    twin = publish_aircraft_twin_revision(
+        aircraft_id=segment.aircraft_id,
+        components=(component,),
+        config_snapshot_id=body.configuration_snapshot_id,
+        evidence_snapshot_id=training.dataset_snapshot_id,
+        valid_from_utc=body.twin_valid_from_utc,
+        valid_to_utc=None,
+        as_of_data_time_utc=body.as_of_utc,
+        published_at_utc=body.twin_published_at_utc,
+        profile=profile,
+    )
+    estimates = tuple(
+        evaluate_twin_capability_estimate(
+            twin=twin,
+            components=(component,),
+            capability_type=segment.capability_type,
+            condition_point={
+                "session_order": item.session_order,
+                "reference_condition_id": segment.reference_condition_id,
+            },
+            as_of_time_utc=twin.as_of_data_time,
+            created_at_utc=body.estimate_created_at_utc,
+            profile=profile,
+            policy=policy,
+        )
+        for item in sorted(
+            body.estimates,
+            key=lambda value: (value.session_order, value.estimate_id),
+        )
+    )
+    product = ProductionP3BuildWorkerProduct(
+        segment=segment,
+        validation=validation,
+        training=training,
+        model_build=model_build,
+        surface_build=surface_build,
+        model_object=model_object,
+        surface_object=surface_object,
+        component=component,
+        twin=twin,
+        estimates=estimates,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(
+            twin.twin_revision_id,
+            model_build.model.capability_model_id,
+            *(item.estimate_id for item in estimates),
+        ),
+        domain_payload=product,
+    )
+
+
 def _execute_p3_estimate(payload: WorkerPayload) -> WorkerResult:
     body = payload.domain_payload
     if not isinstance(body, ProductionP3EstimateWorkerInput):
@@ -1444,6 +1748,82 @@ def _p3_claim_envelope(
     )
 
 
+def _p4_worker_product(
+    *,
+    subject: P4SubjectContext,
+    scope: P4InteractionScopeSnapshot,
+    p3_estimate: P3CapabilityEstimate | None,
+    confidence: float,
+    created_at_utc: str,
+) -> ProductionP4AssessmentWorkerProduct:
+    evidence = materialize_p4_human_machine_evidence(subject, scope)
+    claim = _p3_claim_envelope(subject, p3_estimate)
+    revision = build_p4_assessment_revision(
+        subject,
+        evidence=evidence,
+        annotations=(),
+        p3_claim=claim,
+        confidence=confidence,
+        created_at_utc=created_at_utc,
+        approval_state="DRAFT",
+        supersedes_id=None,
+    )
+    result = evaluate_ed2_training_assessment(
+        evidence_availability=tuple(
+            item.availability_status for item in evidence
+        ),
+        p3_validity_statuses=(claim.validity_status,),
+        approval_states=(revision.approval_state,),
+    )
+    return ProductionP4AssessmentWorkerProduct(
+        subject=subject,
+        scope=scope,
+        revision=revision,
+        assessment_result=result,
+    )
+
+
+def _execute_p4_build(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP4BuildWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    subject = build_p4_subject_context(
+        body.source,
+        role_model=body.role_model,
+    )
+    scope = build_p4_interaction_scope_snapshot(
+        subject_context_id=subject.subject_context_id,
+        episode_id=subject.episode_id,
+        as_of_utc=subject.as_of_utc,
+        fact_refs=body.fact_refs,
+        machine_evidence=body.machine_evidence,
+        instructor_evidence=(),
+    )
+    product = _p4_worker_product(
+        subject=subject,
+        scope=scope,
+        p3_estimate=body.p3_estimate,
+        confidence=body.confidence,
+        created_at_utc=body.created_at_utc,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(
+            product.revision.actor_assessment_id,
+            product.revision.logical_content_hash,
+            product.assessment_result.qualification_status,
+        ),
+        domain_payload=product,
+    )
+
+
 def _execute_p4_assessment(payload: WorkerPayload) -> WorkerResult:
     body = payload.domain_payload
     if not isinstance(body, ProductionP4AssessmentWorkerInput):
@@ -1452,27 +1832,118 @@ def _execute_p4_assessment(payload: WorkerPayload) -> WorkerResult:
             type(body).__name__,
         )
     _verify_job_request(payload, body.job_payload)
-    evidence = materialize_p4_human_machine_evidence(
-        body.subject,
-        body.scope,
-    )
-    value = build_p4_assessment_revision(
-        body.subject,
-        evidence=evidence,
-        annotations=(),
-        p3_claim=_p3_claim_envelope(body.subject, body.p3_estimate),
+    product = _p4_worker_product(
+        subject=body.subject,
+        scope=body.scope,
+        p3_estimate=body.p3_estimate,
         confidence=body.confidence,
         created_at_utc=body.created_at_utc,
-        approval_state="DRAFT",
-        supersedes_id=None,
     )
     return WorkerResult(
         job_id=payload.job_id,
         request_hash=payload.request_hash,
         command=payload.command,
         status="SUCCEEDED",
-        output=(value.actor_assessment_id, value.logical_content_hash),
-        domain_payload=value,
+        output=(
+            product.revision.actor_assessment_id,
+            product.revision.logical_content_hash,
+            product.assessment_result.qualification_status,
+        ),
+        domain_payload=product,
+    )
+
+
+def _p5_worker_product(
+    *,
+    compute_input: P5DurableComputeInput,
+    confidence: float,
+    created_at_utc: str,
+) -> ProductionP5AssessmentWorkerProduct:
+    evidence = materialize_p5_team_mission_evidence(
+        compute_input.composition,
+        p4_revisions=compute_input.p4_revisions,
+        evidence_set_id=compute_input.evidence_set_id,
+        objective_result_refs=compute_input.objective_result_refs,
+        as_of_utc=compute_input.as_of_utc,
+    )
+    aggregation = build_p5_aggregation(evidence)
+    revision = build_p5_assessment_revision(
+        compute_input.composition,
+        evidence=evidence,
+        aggregation=aggregation,
+        confidence=confidence,
+        created_at_utc=created_at_utc,
+        approval_state="DRAFT",
+        supersedes=None,
+    )
+    result = evaluate_ed2_training_assessment(
+        evidence_availability=(evidence.availability_status,),
+        p3_validity_statuses=tuple(
+            item.p3_validity_status for item in compute_input.p4_revisions
+        ),
+        approval_states=(revision.approval_state,),
+    )
+    return ProductionP5AssessmentWorkerProduct(
+        composition=compute_input.composition,
+        compute_input=compute_input,
+        revision=revision,
+        assessment_result=result,
+    )
+
+
+def _execute_p5_build(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP5BuildWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    participants = tuple(
+        P5ParticipantBinding(
+            subject_key=revision.subject_key,
+            role_code=revision.role_code,
+            aircraft_id=revision.aircraft_id,
+            twin_revision_id=revision.twin_revision_id,
+            p4_revision_id=revision.actor_assessment_id,
+        )
+        for revision in body.p4_revisions
+    )
+    composition = build_p5_composition_snapshot(
+        session_id=body.session_id,
+        mission_episode_id=body.mission_episode_id,
+        team_id=body.team_id,
+        participants=participants,
+        world_snapshot_refs=body.world_snapshot_refs,
+        scenario_context_artifact_id=body.scenario_context_artifact_id,
+        role_model_context_artifact_id=body.role_model_context_artifact_id,
+        assessment_spec_id=body.assessment_spec_id,
+        assessment_spec_version=body.assessment_spec_version,
+        as_of_utc=body.as_of_utc,
+    )
+    compute_input = P5DurableComputeInput(
+        composition=composition,
+        p4_revisions=body.p4_revisions,
+        objective_result_refs=body.objective_result_refs,
+        evidence_set_id=body.evidence_set_id,
+        as_of_utc=body.as_of_utc,
+    )
+    product = _p5_worker_product(
+        compute_input=compute_input,
+        confidence=body.confidence,
+        created_at_utc=body.created_at_utc,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(
+            product.revision.mission_assessment_id,
+            product.revision.logical_content_hash,
+            product.assessment_result.qualification_status,
+        ),
+        domain_payload=product,
     )
 
 
@@ -1484,31 +1955,155 @@ def _execute_p5_assessment(payload: WorkerPayload) -> WorkerResult:
             type(body).__name__,
         )
     _verify_job_request(payload, body.job_payload)
-    compute_input = body.compute_input
-    evidence = materialize_p5_team_mission_evidence(
-        compute_input.composition,
-        p4_revisions=compute_input.p4_revisions,
-        evidence_set_id=compute_input.evidence_set_id,
-        objective_result_refs=compute_input.objective_result_refs,
-        as_of_utc=compute_input.as_of_utc,
-    )
-    aggregation = build_p5_aggregation(evidence)
-    value = build_p5_assessment_revision(
-        compute_input.composition,
-        evidence=evidence,
-        aggregation=aggregation,
+    product = _p5_worker_product(
+        compute_input=body.compute_input,
         confidence=body.confidence,
         created_at_utc=body.created_at_utc,
-        approval_state="DRAFT",
-        supersedes=None,
     )
     return WorkerResult(
         job_id=payload.job_id,
         request_hash=payload.request_hash,
         command=payload.command,
         status="SUCCEEDED",
-        output=(value.mission_assessment_id, value.logical_content_hash),
-        domain_payload=value,
+        output=(
+            product.revision.mission_assessment_id,
+            product.revision.logical_content_hash,
+            product.assessment_result.qualification_status,
+        ),
+        domain_payload=product,
+    )
+
+
+def _execute_p6_build(payload: WorkerPayload) -> WorkerResult:
+    body = payload.domain_payload
+    if not isinstance(body, ProductionP6BuildWorkerInput):
+        raise ProductionWorkerError(
+            "PRCB_C2_WORKER_PRODUCT_INVALID",
+            type(body).__name__,
+        )
+    _verify_job_request(payload, body.job_payload)
+    build = execute_p6_model_training(
+        body.training_rows,
+        as_of_utc=body.as_of_utc,
+        trained_at_utc=body.trained_at_utc,
+    )
+    managed = P6ManagedModelObject(
+        object_ref_id=build.model.model_object_ref_id,
+        managed_uri=build.model.model_artifact_uri,
+        artifact_sha256=build.model.model_artifact_hash,
+        sealed=True,
+        gc_state="ACTIVE",
+        deleted_at=None,
+        sealed_at_utc=body.sealed_at_utc,
+    )
+    snapshot = build_p6_input_snapshot(
+        factual_sources=body.factual_sources,
+        p3_model_refs=body.p3_model_refs,
+        scenario_context_refs=body.scenario_context_refs,
+        target_scope=body.target_scope,
+        subject_or_composition_ref=body.subject_or_composition_ref,
+        forecast_origin_utc=body.forecast_origin_utc,
+        as_of_utc=body.as_of_utc,
+    )
+    profile = P6ForecastExecutionProfile.from_canonical()
+    forecast_request: P6ForecastRequestBinding | None = None
+    if body.forecast_spec is not None:
+        forecast_request = build_p6_forecast_request_binding(
+            input_snapshot=snapshot,
+            forecast_spec_id=_text(
+                body.forecast_spec.get("forecast_spec_id"),
+                field="forecast.forecast_spec_id",
+            ),
+            forecast_spec_version=_text(
+                body.forecast_spec.get("forecast_spec_version"),
+                field="forecast.forecast_spec_version",
+            ),
+            target_code=profile.target_code,
+            horizon_spec={
+                "type": profile.horizon_type,
+                "steps": profile.horizon_steps,
+                "target_session_order": build.target_session_order,
+            },
+            capability_model_id=build.model.capability_model_id,
+            model_profile_id=profile.profile_id,
+            model_profile_version=profile.profile_version,
+            training_dataset_snapshot_id=(
+                build.model.training_dataset_snapshot_id
+            ),
+            validation_dataset_snapshot_id=(
+                build.model.validation_dataset_snapshot_id
+            ),
+            assumption_profile_id=_text(
+                body.forecast_spec.get("assumption_profile_id"),
+                field="forecast.assumption_profile_id",
+            ),
+            assumption_profile_version=_text(
+                body.forecast_spec.get("assumption_profile_version"),
+                field="forecast.assumption_profile_version",
+            ),
+        )
+    counterfactual_request: P6CounterfactualRequestBinding | None = None
+    if body.counterfactual_spec is not None:
+        raw_bases = body.counterfactual_spec.get("base_product_refs")
+        if not isinstance(raw_bases, list) or not all(
+            isinstance(item, str) for item in raw_bases
+        ):
+            raise ProductionWorkerError(
+                "PRCB_C2_PAYLOAD_INVALID",
+                "counterfactual.base_product_refs",
+            )
+        interventions = _mapping(
+            body.counterfactual_spec.get("interventions"),
+            field="counterfactual.interventions",
+        )
+        held_fixed = _mapping(
+            body.counterfactual_spec.get("held_fixed_assumptions"),
+            field="counterfactual.held_fixed_assumptions",
+        )
+        counterfactual_request = build_p6_counterfactual_request_binding(
+            input_snapshot=snapshot,
+            base_product_refs=cast(list[str], raw_bases),
+            scenario_definition_id=_uuid(
+                body.counterfactual_spec.get("scenario_definition_id"),
+                field="counterfactual.scenario_definition_id",
+            ),
+            interventions=interventions,
+            held_fixed_assumptions=held_fixed,
+            model_refs=(build.model.capability_model_id,),
+            applicability_profile_ref=profile.applicability_profile_ref,
+        )
+    if forecast_request is None and counterfactual_request is None:
+        raise ProductionWorkerError(
+            "PRCB_C2_P6_REQUEST_REQUIRED",
+            "forecast/counterfactual",
+        )
+    product = ProductionP6BuildWorkerProduct(
+        model_build=build,
+        managed_object=managed,
+        input_snapshot=snapshot,
+        forecast_request=forecast_request,
+        counterfactual_request=counterfactual_request,
+    )
+    return WorkerResult(
+        job_id=payload.job_id,
+        request_hash=payload.request_hash,
+        command=payload.command,
+        status="SUCCEEDED",
+        output=(
+            build.model.capability_model_id,
+            snapshot.input_snapshot_id,
+            *(
+                ()
+                if forecast_request is None
+                else (forecast_request.forecast_request_id,)
+            ),
+            *(
+                ()
+                if counterfactual_request is None
+                else (counterfactual_request.counterfactual_request_id,)
+            ),
+        ),
+        domain_payload=product,
     )
 
 
@@ -1569,12 +2164,20 @@ def execute(payload: WorkerPayload) -> WorkerResult:
             return _execute_p1(payload)
         if payload.command == P2_ATTRIBUTION_COMMAND:
             return _execute_p2_attribution(payload)
+        if payload.command == P3_BUILD_COMMAND:
+            return _execute_p3_build(payload)
         if payload.command == P3_ESTIMATE_COMMAND:
             return _execute_p3_estimate(payload)
         if payload.command == P4_ASSESSMENT_COMMAND:
+            if isinstance(payload.domain_payload, ProductionP4BuildWorkerInput):
+                return _execute_p4_build(payload)
             return _execute_p4_assessment(payload)
         if payload.command == P5_ASSESSMENT_COMMAND:
+            if isinstance(payload.domain_payload, ProductionP5BuildWorkerInput):
+                return _execute_p5_build(payload)
             return _execute_p5_assessment(payload)
+        if payload.command == P6_BUILD_COMMAND:
+            return _execute_p6_build(payload)
         if payload.command == P6_FORECAST_COMMAND:
             return _execute_p6_forecast(payload)
         if payload.command == P6_COUNTERFACTUAL_COMMAND:

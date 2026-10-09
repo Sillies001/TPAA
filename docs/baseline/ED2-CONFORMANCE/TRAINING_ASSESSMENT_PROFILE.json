@@ -1,0 +1,65 @@
+{
+  "schema": "TPAA_ED2_TRAINING_ASSESSMENT_PROFILE_V1",
+  "profile_id": "ED2_TRAINING_ASSESSMENT_NON_NUMERIC_GATE_V1",
+  "profile_version": "1.0.0",
+  "authority": {
+    "core_baseline": "CB-1.4.0",
+    "physical_db_authority": "1.9.0",
+    "umbrella_issue": 245,
+    "batch_issue": 247,
+    "numeric_scoring_authority": "NONE",
+    "p4_score_must_remain_null": true,
+    "p4_grade_must_remain_null": true,
+    "p5_overall_score_must_remain_null": true,
+    "p5_grade_must_remain_null": true,
+    "causal_upgrade_forbidden": true
+  },
+  "availability_precedence": [
+    "NOT_IDENTIFIABLE",
+    "OUT_OF_DOMAIN",
+    "UNAVAILABLE",
+    "AVAILABLE"
+  ],
+  "critical_gates": [
+    {
+      "gate_code": "ED2_GATE_EVIDENCE_SUFFICIENT",
+      "source": "P4_P5_EVIDENCE_AVAILABILITY",
+      "mandatory": true
+    },
+    {
+      "gate_code": "ED2_GATE_P3_IN_DOMAIN",
+      "source": "P3_VALIDITY_DOMAIN_STATUS",
+      "mandatory": true
+    },
+    {
+      "gate_code": "ED2_GATE_REVIEW_APPROVED",
+      "source": "IMMUTABLE_APPROVAL_REVISION",
+      "mandatory": true
+    }
+  ],
+  "diagnostic_competency": {
+    "competency_code": "ED2_COMPETENCY_EVIDENCE_GROUNDED_EXECUTION",
+    "categorical_states": [
+      "DEMONSTRATED",
+      "NOT_DEMONSTRATED",
+      "UNAVAILABLE",
+      "OUT_OF_DOMAIN",
+      "NOT_IDENTIFIABLE"
+    ],
+    "numeric_value": null
+  },
+  "qualification_states": [
+    "QUALIFIED",
+    "NOT_QUALIFIED",
+    "REVIEW_REQUIRED",
+    "NOT_IDENTIFIABLE"
+  ],
+  "semantics": {
+    "missing_or_unavailable_evidence_zero_substitution_forbidden": true,
+    "not_identifiable_is_not_failure": true,
+    "out_of_domain_is_not_numeric_zero": true,
+    "draft_or_in_review_requires_human_review": true,
+    "rejected_review_is_not_qualified": true,
+    "all_mandatory_gates_required_for_qualification": true
+  }
+}

@@ -69,19 +69,37 @@ from tpaa_storage.product_identity import product_object_ref_id
 from .durable_repositories import RuntimeCanonicalUnitOfWork, RuntimeUnitOfWorkFactory
 from .production_worker import (
     P2_ATTRIBUTION_COMMAND,
+    P3_BUILD_COMMAND,
     P3_ESTIMATE_COMMAND,
     P4_ASSESSMENT_COMMAND,
     P5_ASSESSMENT_COMMAND,
+    P6_BUILD_COMMAND,
     P6_COUNTERFACTUAL_COMMAND,
     P6_FORECAST_COMMAND,
     ProductionP1WorkerProduct,
     ProductionP2AttributionWorkerInput,
+    ProductionP3BuildWorkerProduct,
     ProductionP3EstimateWorkerInput,
     ProductionP4AssessmentWorkerInput,
+    ProductionP4AssessmentWorkerProduct,
     ProductionP5AssessmentWorkerInput,
+    ProductionP5AssessmentWorkerProduct,
+    ProductionP6BuildWorkerProduct,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
     ProductionPrerequisiteRow,
+)
+from .production_job_output import ProductionJobOutputRepository
+from .production_downstream import (
+    persist_p3_worker_product,
+    persist_p4_worker_product,
+    persist_p5_worker_product,
+    persist_p6_worker_product,
+    prepare_p2_compute_input,
+    prepare_p3_build_worker_input,
+    prepare_p4_build_worker_input,
+    prepare_p5_build_worker_input,
+    prepare_p6_build_worker_input,
 )
 
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
@@ -778,10 +796,45 @@ class ProductionJobExecutor:
         request_hash: str,
         payload: Mapping[str, object],
     ) -> None:
-        dataset_snapshot_id = _text(
-            payload.get("dataset_snapshot_id"),
-            field="dataset_snapshot_id",
+        production_raw = payload.get("production_input")
+        production_input = (
+            None
+            if production_raw is None
+            else _mapping(production_raw, field="production_input")
         )
+        if production_input is None:
+            dataset_snapshot_id = _text(
+                payload.get("dataset_snapshot_id"),
+                field="dataset_snapshot_id",
+            )
+        else:
+            with self._write_uow_factory() as uow:
+                prepared = prepare_p2_compute_input(
+                    uow.canonical_rows,
+                    self._object_store,
+                    production_input,
+                )
+                dataset_snapshot_id = prepared.dataset_snapshot_id
+                explicit = payload.get("dataset_snapshot_id")
+                if (
+                    explicit is not None
+                    and _text(explicit, field="dataset_snapshot_id")
+                    != dataset_snapshot_id
+                ):
+                    raise ProductionJobExecutionError(
+                        "ED2_B2_P2_DATASET_ID_DRIFT",
+                        dataset_snapshot_id,
+                    )
+                compute_input = self._p2_repository(
+                    uow
+                ).exact_compute_input(dataset_snapshot_id)
+                lineage = P2ReleaseRepository(
+                    uow.canonical_rows
+                ).source_lineage(
+                    compute_input.input_bundle.target.release_id
+                )
+                # No commit: preparation is replayed atomically after worker success.
+
         execution_time_utc = _text(
             payload.get("execution_time_utc"),
             field="execution_time_utc",
@@ -805,14 +858,19 @@ class ProductionJobExecutor:
             )
         )
 
-        with self._write_uow_factory() as uow:
-            repository = self._p2_repository(uow)
-            compute_input = repository.exact_compute_input(dataset_snapshot_id)
-            release_repository = P2ReleaseRepository(uow.canonical_rows)
-            lineage = release_repository.source_lineage(
-                compute_input.input_bundle.target.release_id
-            )
-            uow.commit()
+        if production_input is None:
+            with self._write_uow_factory() as uow:
+                repository = self._p2_repository(uow)
+                compute_input = repository.exact_compute_input(
+                    dataset_snapshot_id
+                )
+                release_repository = P2ReleaseRepository(
+                    uow.canonical_rows
+                )
+                lineage = release_repository.source_lineage(
+                    compute_input.input_bundle.target.release_id
+                )
+                uow.commit()
 
         scope_key = p2_release_scope_key(
             compute_input.input_bundle.target.observation_id
@@ -859,7 +917,10 @@ class ProductionJobExecutor:
                     run.attribution_run_id,
                 )
         else:
-            if run.model_artifact_hash is None or run.model_artifact_uri is not None:
+            if (
+                run.model_artifact_hash is None
+                or run.model_artifact_uri is not None
+            ):
                 raise ProductionJobExecutionError(
                     "PRCB_C2_P2_MODEL_ARTIFACT_DRIFT",
                     run.attribution_run_id,
@@ -869,7 +930,10 @@ class ProductionJobExecutor:
                 "tpaa-object://p2-attribution-model/"
                 f"{run.attribution_run_id}.json"
             )
-            stored = self._object_store.put_bytes(logical_uri, artifact_bytes)
+            stored = self._object_store.put_bytes(
+                logical_uri,
+                artifact_bytes,
+            )
             if stored.artifact_sha256 != run.model_artifact_hash:
                 raise ProductionJobExecutionError(
                     "PRCB_C2_P2_MODEL_ARTIFACT_HASH_MISMATCH",
@@ -886,6 +950,17 @@ class ProductionJobExecutor:
             value=value,
         )
         with self._write_uow_factory() as uow:
+            if production_input is not None:
+                replayed = prepare_p2_compute_input(
+                    uow.canonical_rows,
+                    self._object_store,
+                    production_input,
+                )
+                if replayed.dataset_snapshot_id != dataset_snapshot_id:
+                    raise ProductionJobExecutionError(
+                        "ED2_B2_P2_PREPARE_REPLAY_DRIFT",
+                        dataset_snapshot_id,
+                    )
             repository = self._p2_repository(uow)
             repository.register_attribution_run(
                 value.attribution_run,
@@ -900,7 +975,9 @@ class ProductionJobExecutor:
                 manifest_hash=manifest_hash,
                 published_at_utc=execution_time_utc,
             )
-            repository.register_adjusted_estimate(value.adjusted_estimate)
+            repository.register_adjusted_estimate(
+                value.adjusted_estimate
+            )
             DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
             ).succeed(job_id)
@@ -914,6 +991,83 @@ class ProductionJobExecutor:
             uow.canonical_rows,
             object_store=self._object_store,
         )
+
+    def _execute_p3_build(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        production_input = _mapping(
+            payload.get("production_input"),
+            field="production_input",
+        )
+        with self._write_uow_factory() as uow:
+            worker_input = prepare_p3_build_worker_input(
+                uow.canonical_rows,
+                self._object_store,
+                job_payload=payload,
+                production_input=production_input,
+            )
+            # No commit: authority rows are replayed after worker success.
+        result = self._dispatcher.dispatch(
+            WorkerPayload(
+                job_id=job_id,
+                request_hash=request_hash,
+                command=P3_BUILD_COMMAND,
+                handler=_GOVERNED_HANDLER,
+                domain_payload=worker_input,
+            ),
+            timeout_seconds=120.0,
+        )
+        product = result.domain_payload
+        if result.status != "SUCCEEDED" or not isinstance(
+            product,
+            ProductionP3BuildWorkerProduct,
+        ):
+            raise ProductionJobExecutionError(
+                result.error_code or "PRCB_C2_WORKER_FAILED",
+                job_id,
+            )
+        with self._write_uow_factory() as uow:
+            replayed = prepare_p3_build_worker_input(
+                uow.canonical_rows,
+                self._object_store,
+                job_payload=payload,
+                production_input=production_input,
+            )
+            if replayed != worker_input:
+                raise ProductionJobExecutionError(
+                    "ED2_B2_P3_PREPARE_REPLAY_DRIFT",
+                    job_id,
+                )
+            persist_p3_worker_product(
+                uow.canonical_rows,
+                self._object_store,
+                product,
+            )
+            ProductionJobOutputRepository(
+                uow.canonical_rows
+            ).register(
+                job_id=job_id,
+                command=P3_BUILD_COMMAND,
+                product_refs=(
+                    ("capability_model_id", product.model_build.model.capability_model_id),
+                    ("twin_revision_id", product.twin.twin_revision_id),
+                    *tuple(
+                        (
+                            f"estimate_{index + 1}",
+                            estimate.estimate_id,
+                        )
+                        for index, estimate in enumerate(product.estimates)
+                    ),
+                ),
+            )
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
+            uow.commit()
 
     def _execute_p3_estimate(
         self,
@@ -1002,33 +1156,67 @@ class ProductionJobExecutor:
         request_hash: str,
         payload: Mapping[str, object],
     ) -> None:
-        snapshot_id = _text(
-            payload.get("scope_snapshot_id"),
-            field="scope_snapshot_id",
+        confidence = _number(
+            payload.get("confidence"),
+            field="confidence",
         )
-        confidence = _number(payload.get("confidence"), field="confidence")
         created_at_utc = _text(
             payload.get("created_at_utc"),
             field="created_at_utc",
         )
-        with self._write_uow_factory() as uow:
-            products = self._p4_p5_products(uow)
-            scope = self._p4_p5_inputs(uow).exact_p4_scope(snapshot_id)
-            if scope.instructor_evidence:
-                raise ProductionJobExecutionError(
-                    "PRCB_C2_P4_HUMAN_INPUT_REQUIRES_MUTATION_WORKFLOW",
-                    snapshot_id,
+        production_raw = payload.get("production_input")
+        production_input = (
+            None
+            if production_raw is None
+            else _mapping(production_raw, field="production_input")
+        )
+        if production_input is not None:
+            with self._write_uow_factory() as uow:
+                worker_input = prepare_p4_build_worker_input(
+                    uow.canonical_rows,
+                    self._object_store,
+                    authority_root=self._authority_root,
+                    job_payload=payload,
+                    production_input=production_input,
+                    confidence=confidence,
+                    created_at_utc=created_at_utc,
                 )
-            subject = products.exact_p4_subject(scope.subject_context_id)
-            p3_estimate_id = subject.p3_estimate_id
-            p3_estimate = (
-                None
-                if p3_estimate_id is None
-                else self._p3_repository(uow).exact_capability_estimate(
-                    p3_estimate_id
-                )
+                # No commit: context rows are replayed atomically after success.
+        else:
+            snapshot_id = _text(
+                payload.get("scope_snapshot_id"),
+                field="scope_snapshot_id",
             )
-            uow.commit()
+            with self._write_uow_factory() as uow:
+                products = self._p4_p5_products(uow)
+                scope = self._p4_p5_inputs(uow).exact_p4_scope(
+                    snapshot_id
+                )
+                if scope.instructor_evidence:
+                    raise ProductionJobExecutionError(
+                        "PRCB_C2_P4_HUMAN_INPUT_REQUIRES_MUTATION_WORKFLOW",
+                        snapshot_id,
+                    )
+                subject = products.exact_p4_subject(
+                    scope.subject_context_id
+                )
+                p3_estimate_id = subject.p3_estimate_id
+                p3_estimate = (
+                    None
+                    if p3_estimate_id is None
+                    else self._p3_repository(
+                        uow
+                    ).exact_capability_estimate(p3_estimate_id)
+                )
+                worker_input = ProductionP4AssessmentWorkerInput(
+                    job_payload=dict(payload),
+                    subject=subject,
+                    scope=scope,
+                    p3_estimate=p3_estimate,
+                    confidence=confidence,
+                    created_at_utc=created_at_utc,
+                )
+                uow.commit()
 
         result = self._dispatcher.dispatch(
             WorkerPayload(
@@ -1036,36 +1224,61 @@ class ProductionJobExecutor:
                 request_hash=request_hash,
                 command=P4_ASSESSMENT_COMMAND,
                 handler=_GOVERNED_HANDLER,
-                domain_payload=ProductionP4AssessmentWorkerInput(
-                    job_payload=dict(payload),
-                    subject=subject,
-                    scope=scope,
-                    p3_estimate=p3_estimate,
-                    confidence=confidence,
-                    created_at_utc=created_at_utc,
-                ),
+                domain_payload=worker_input,
             ),
             timeout_seconds=120.0,
         )
-        value = result.domain_payload
+        product = result.domain_payload
         if result.status != "SUCCEEDED" or not isinstance(
-            value,
-            P4AssessmentRevision,
+            product,
+            ProductionP4AssessmentWorkerProduct,
         ):
             raise ProductionJobExecutionError(
                 result.error_code or "PRCB_C2_WORKER_FAILED",
                 job_id,
             )
+        value = product.revision
         if value.approval_state != "DRAFT" or value.instructor_annotation_ids:
             raise ProductionJobExecutionError(
                 "PRCB_C2_P4_AUTOMATION_AUTHORITY_VIOLATION",
                 value.actor_assessment_id,
             )
         with self._write_uow_factory() as uow:
-            self._p4_p5_products(uow).register_p4_revision(
-                subject,
-                value,
-                annotations=(),
+            if production_input is not None:
+                replayed = prepare_p4_build_worker_input(
+                    uow.canonical_rows,
+                    self._object_store,
+                    authority_root=self._authority_root,
+                    job_payload=payload,
+                    production_input=production_input,
+                    confidence=confidence,
+                    created_at_utc=created_at_utc,
+                )
+                if replayed != worker_input:
+                    raise ProductionJobExecutionError(
+                        "ED2_B2_P4_PREPARE_REPLAY_DRIFT",
+                        job_id,
+                    )
+            scope_snapshot_id = persist_p4_worker_product(
+                uow.canonical_rows,
+                product,
+            )
+            ProductionJobOutputRepository(
+                uow.canonical_rows
+            ).register(
+                job_id=job_id,
+                command=P4_ASSESSMENT_COMMAND,
+                product_refs=(
+                    (
+                        "actor_assessment_id",
+                        product.revision.actor_assessment_id,
+                    ),
+                    ("scope_snapshot_id", scope_snapshot_id),
+                    (
+                        "subject_context_id",
+                        product.subject.subject_context_id,
+                    ),
+                ),
             )
             DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
@@ -1079,20 +1292,46 @@ class ProductionJobExecutor:
         request_hash: str,
         payload: Mapping[str, object],
     ) -> None:
-        snapshot_id = _text(
-            payload.get("selection_snapshot_id"),
-            field="selection_snapshot_id",
+        confidence = _number(
+            payload.get("confidence"),
+            field="confidence",
         )
-        confidence = _number(payload.get("confidence"), field="confidence")
         created_at_utc = _text(
             payload.get("created_at_utc"),
             field="created_at_utc",
         )
-        with self._write_uow_factory() as uow:
-            compute_input = self._p4_p5_inputs(uow).exact_p5_selection(
-                snapshot_id
+        production_raw = payload.get("production_input")
+        production_input = (
+            None
+            if production_raw is None
+            else _mapping(production_raw, field="production_input")
+        )
+        if production_input is not None:
+            with self._write_uow_factory() as uow:
+                worker_input = prepare_p5_build_worker_input(
+                    uow.canonical_rows,
+                    job_payload=payload,
+                    production_input=production_input,
+                    confidence=confidence,
+                    created_at_utc=created_at_utc,
+                )
+                # Read-only preparation; no commit required.
+        else:
+            snapshot_id = _text(
+                payload.get("selection_snapshot_id"),
+                field="selection_snapshot_id",
             )
-            uow.commit()
+            with self._write_uow_factory() as uow:
+                compute_input = self._p4_p5_inputs(
+                    uow
+                ).exact_p5_selection(snapshot_id)
+                worker_input = ProductionP5AssessmentWorkerInput(
+                    job_payload=dict(payload),
+                    compute_input=compute_input,
+                    confidence=confidence,
+                    created_at_utc=created_at_utc,
+                )
+                uow.commit()
 
         result = self._dispatcher.dispatch(
             WorkerPayload(
@@ -1100,24 +1339,20 @@ class ProductionJobExecutor:
                 request_hash=request_hash,
                 command=P5_ASSESSMENT_COMMAND,
                 handler=_GOVERNED_HANDLER,
-                domain_payload=ProductionP5AssessmentWorkerInput(
-                    job_payload=dict(payload),
-                    compute_input=compute_input,
-                    confidence=confidence,
-                    created_at_utc=created_at_utc,
-                ),
+                domain_payload=worker_input,
             ),
             timeout_seconds=120.0,
         )
-        value = result.domain_payload
+        product = result.domain_payload
         if result.status != "SUCCEEDED" or not isinstance(
-            value,
-            P5AssessmentRevision,
+            product,
+            ProductionP5AssessmentWorkerProduct,
         ):
             raise ProductionJobExecutionError(
                 result.error_code or "PRCB_C2_WORKER_FAILED",
                 job_id,
             )
+        value = product.revision
         if (
             value.approval_state != "DRAFT"
             or value.overall_score is not None
@@ -1128,9 +1363,36 @@ class ProductionJobExecutor:
                 value.mission_assessment_id,
             )
         with self._write_uow_factory() as uow:
-            self._p4_p5_products(uow).register_p5_revision(
-                compute_input.composition,
-                value,
+            if production_input is not None:
+                replayed = prepare_p5_build_worker_input(
+                    uow.canonical_rows,
+                    job_payload=payload,
+                    production_input=production_input,
+                    confidence=confidence,
+                    created_at_utc=created_at_utc,
+                )
+                if replayed != worker_input:
+                    raise ProductionJobExecutionError(
+                        "ED2_B2_P5_PREPARE_REPLAY_DRIFT",
+                        job_id,
+                    )
+            selection_snapshot_id = persist_p5_worker_product(
+                uow.canonical_rows,
+                product,
+            )
+            ProductionJobOutputRepository(
+                uow.canonical_rows
+            ).register(
+                job_id=job_id,
+                command=P5_ASSESSMENT_COMMAND,
+                product_refs=(
+                    (
+                        "mission_assessment_id",
+                        product.revision.mission_assessment_id,
+                    ),
+                    ("composition_id", product.composition.composition_id),
+                    ("selection_snapshot_id", selection_snapshot_id),
+                ),
             )
             DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
@@ -1146,6 +1408,97 @@ class ProductionJobExecutor:
             object_store=self._object_store,
             model_build_resolver=DurableP6ModelBuildResolver(uow.canonical_rows),
         )
+
+    def _execute_p6_build(
+        self,
+        *,
+        job_id: str,
+        request_hash: str,
+        payload: Mapping[str, object],
+    ) -> None:
+        production_input = _mapping(
+            payload.get("production_input"),
+            field="production_input",
+        )
+        with self._write_uow_factory() as uow:
+            worker_input = prepare_p6_build_worker_input(
+                uow.canonical_rows,
+                self._object_store,
+                job_payload=payload,
+                production_input=production_input,
+            )
+            # Read-only exact-product projection; no commit required.
+        result = self._dispatcher.dispatch(
+            WorkerPayload(
+                job_id=job_id,
+                request_hash=request_hash,
+                command=P6_BUILD_COMMAND,
+                handler=_GOVERNED_HANDLER,
+                domain_payload=worker_input,
+            ),
+            timeout_seconds=120.0,
+        )
+        product = result.domain_payload
+        if result.status != "SUCCEEDED" or not isinstance(
+            product,
+            ProductionP6BuildWorkerProduct,
+        ):
+            raise ProductionJobExecutionError(
+                result.error_code or "PRCB_C2_WORKER_FAILED",
+                job_id,
+            )
+        with self._write_uow_factory() as uow:
+            replayed = prepare_p6_build_worker_input(
+                uow.canonical_rows,
+                self._object_store,
+                job_payload=payload,
+                production_input=production_input,
+            )
+            if replayed != worker_input:
+                raise ProductionJobExecutionError(
+                    "ED2_B2_P6_PREPARE_REPLAY_DRIFT",
+                    job_id,
+                )
+            persist_p6_worker_product(
+                uow.canonical_rows,
+                self._object_store,
+                product,
+            )
+            p6_refs: list[tuple[str, str]] = [
+                (
+                    "capability_model_id",
+                    product.model_build.model.capability_model_id,
+                ),
+                (
+                    "input_snapshot_id",
+                    product.input_snapshot.input_snapshot_id,
+                ),
+            ]
+            if product.forecast_request is not None:
+                p6_refs.append(
+                    (
+                        "forecast_request_id",
+                        product.forecast_request.forecast_request_id,
+                    )
+                )
+            if product.counterfactual_request is not None:
+                p6_refs.append(
+                    (
+                        "counterfactual_request_id",
+                        product.counterfactual_request.counterfactual_request_id,
+                    )
+                )
+            ProductionJobOutputRepository(
+                uow.canonical_rows
+            ).register(
+                job_id=job_id,
+                command=P6_BUILD_COMMAND,
+                product_refs=tuple(p6_refs),
+            )
+            DurableJobControl(
+                ComputeJobRepository(uow.canonical_rows)
+            ).succeed(job_id)
+            uow.commit()
 
     def _execute_p6_forecast(
         self,
@@ -1195,6 +1548,17 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_forecast(value)
+            ProductionJobOutputRepository(
+                uow.canonical_rows
+            ).register(
+                job_id=job_id,
+                command=P6_FORECAST_COMMAND,
+                product_refs=(
+                    ("forecast_result_id", value.forecast_result_id),
+                    ("forecast_run_id", value.forecast_run_id),
+                    ("model_revision_id", value.model_revision_id),
+                ),
+            )
             DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
             ).succeed(job_id)
@@ -1252,6 +1616,22 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_counterfactual(value)
+            ProductionJobOutputRepository(
+                uow.canonical_rows
+            ).register(
+                job_id=job_id,
+                command=P6_COUNTERFACTUAL_COMMAND,
+                product_refs=(
+                    (
+                        "counterfactual_run_id",
+                        value.counterfactual_run_id,
+                    ),
+                    (
+                        "counterfactual_request_id",
+                        value.counterfactual_request_id,
+                    ),
+                ),
+            )
             DurableJobControl(
                 ComputeJobRepository(uow.canonical_rows)
             ).succeed(job_id)
@@ -1282,6 +1662,13 @@ class ProductionJobExecutor:
                 payload=payload,
             )
             return
+        if command == P3_BUILD_COMMAND:
+            self._execute_p3_build(
+                job_id=job_id,
+                request_hash=request_hash,
+                payload=payload,
+            )
+            return
         if command == P3_ESTIMATE_COMMAND:
             self._execute_p3_estimate(
                 job_id=job_id,
@@ -1298,6 +1685,13 @@ class ProductionJobExecutor:
             return
         if command == P5_ASSESSMENT_COMMAND:
             self._execute_p5_assessment(
+                job_id=job_id,
+                request_hash=request_hash,
+                payload=payload,
+            )
+            return
+        if command == P6_BUILD_COMMAND:
+            self._execute_p6_build(
                 job_id=job_id,
                 request_hash=request_hash,
                 payload=payload,
