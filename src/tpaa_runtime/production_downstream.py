@@ -1687,7 +1687,9 @@ def prepare_p6_build_worker_input(
             P6CapabilityTrainingRow(
                 estimate=estimate,
                 p4_revision=revision,
-                aircraft_id=p3.exact_twin_revision(estimate.twin_revision_id).aircraft_id,
+                aircraft_id=(
+                    p3.exact_twin_revision(estimate.twin_revision_id).aircraft_id
+                ),
                 configuration_snapshot_id=configuration_id,
                 session_order_assignment_id=assignment_id,
                 session_order=order,

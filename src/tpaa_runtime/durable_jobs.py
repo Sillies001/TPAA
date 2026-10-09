@@ -89,16 +89,17 @@ from .production_worker import (
     ProductionP3BuildWorkerProduct,
     ProductionP3EstimateWorkerInput,
     ProductionP4AssessmentWorkerInput,
-    ProductionP4BuildWorkerInput,
     ProductionP4AssessmentWorkerProduct,
+    ProductionP4BuildWorkerInput,
     ProductionP5AssessmentWorkerInput,
-    ProductionP5BuildWorkerInput,
     ProductionP5AssessmentWorkerProduct,
+    ProductionP5BuildWorkerInput,
     ProductionP6BuildWorkerProduct,
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
     ProductionPrerequisiteRow,
 )
+
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
 _P1_COMMAND = "BUILD_P1_RELEASE"
 _P1_CANONICAL_DATASET_PRODUCER_VERSION = "ED2-B1-P1-CANONICAL-1.0.0"

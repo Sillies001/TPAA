@@ -154,7 +154,7 @@ def _submit(
     runtime: ProductionRuntime,
     *,
     uow_factory: QualificationUowFactory,
-    key:
+    key: str,
     command: str,
     payload: dict[str, object],
     actor: str,
