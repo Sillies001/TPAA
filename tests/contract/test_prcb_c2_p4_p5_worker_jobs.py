@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,8 +28,7 @@ def test_prcb_c2_p4_p5_assessments_route_through_governed_workers() -> None:
     assert "build_p5_assessment_revision(" in worker
     assert "supersedes=None" in worker
 
-    assert "exact_p4_scope(" in jobs
-    assert "snapshot_id" in jobs
+    assert re.search(r"\.exact_p4_scope\(\s*snapshot_id\s*\)", jobs)
     assert "exact_p5_selection(" in jobs
     assert "persist_p4_worker_product(" in jobs
     assert "persist_p5_worker_product(" in jobs
