@@ -281,7 +281,7 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
         "p3_profile": {
             "session_order_scope": {
                 "scope_code": "ED2_B2_CONTINUOUS_P3",
-                "scope_type": "AIRCRAFT",
+                "scope_type": "AIRCRAFT_PROGRAM",
                 "subject_kind": "AIRCRAFT",
                 "selector_json": {
                     "aircraft_id": _AIRCRAFT_ID,

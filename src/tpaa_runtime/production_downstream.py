@@ -77,6 +77,9 @@ _P3_TRAINING_NAMESPACE = UUID("3af4ed3d-0396-4b7f-b250-25946dd299ca")
 _P3_CONFIG_NAMESPACE = UUID("98e2ee10-6cc4-4631-8863-3a7b3aba54b1")
 _P3_SCOPE_NAMESPACE = UUID("d31c8c61-b532-4c38-849b-2947a672ab0d")
 _P3_ASSIGNMENT_NAMESPACE = UUID("b457cd4f-d31b-4a18-907d-e44a3b99d1bd")
+_SESSION_ORDER_SCOPE_TYPES = frozenset(
+    {"AIRCRAFT_PROGRAM", "COHORT", "TRAINING_SEQUENCE", "CUSTOM_APPROVED"}
+)
 
 
 class ProductionDownstreamError(RuntimeError):
@@ -682,6 +685,12 @@ def _ensure_session_order_authority(
             "ED2_B2_SESSION_ORDER_MEMBERSHIP_MISMATCH",
             aircraft_id,
         )
+    scope_type = _text(specification.get("scope_type"), "scope_type")
+    if scope_type not in _SESSION_ORDER_SCOPE_TYPES:
+        raise ProductionDownstreamError(
+            "ED2_B2_SESSION_ORDER_SCOPE_TYPE_INVALID",
+            scope_type,
+        )
     selector = _mapping(
         specification.get("selector_json"),
         "selector_json",
@@ -689,7 +698,7 @@ def _ensure_session_order_authority(
     scope_material = {
         "aircraft_id": aircraft_id,
         "scope_code": _text(specification.get("scope_code"), "scope_code"),
-        "scope_type": _text(specification.get("scope_type"), "scope_type"),
+        "scope_type": scope_type,
         "subject_kind": _text(
             specification.get("subject_kind"),
             "subject_kind",
