@@ -34,7 +34,6 @@ from tpaa_storage import (
 from .admission import ProductAdmissionResolver, ProductFeatureAvailability
 from .config import ProductionRuntimeConfig, RuntimeProfile
 from .durable_discovery import DurableProductDiscovery
-from .ed2_upper_repository import DurableED2UpperProductRepository
 from .durable_longitudinal import (
     DurableM4DebriefRepository,
     DurableM4LongitudinalReleaseRepository,
@@ -48,6 +47,7 @@ from .durable_repositories import (
     RuntimeCanonicalUnitOfWork,
     RuntimeUnitOfWorkFactory,
 )
+from .ed2_upper_repository import DurableED2UpperProductRepository
 from .identity import (
     configured_service_principal_resolver,
     guard_production_principal_resolver,

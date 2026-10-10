@@ -37,6 +37,7 @@ def register_ed2_upper_routes(
     @app.get(
         "/api/v1/upper/{kind}",
         operation_id="listED2UpperProducts",
+        response_model=None,
     )
     def list_upper(kind: str) -> dict[str, object] | JSONResponse:
         try:
@@ -47,6 +48,7 @@ def register_ed2_upper_routes(
     @app.get(
         "/api/v1/upper/{kind}/{snapshot_id}",
         operation_id="getED2UpperProduct",
+        response_model=None,
     )
     def exact_upper(
         kind: str,

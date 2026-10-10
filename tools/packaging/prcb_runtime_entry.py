@@ -1129,9 +1129,9 @@ def _ed2_b3_e2e(
                 yield cast(QualificationUnitOfWork, uow)
 
         uow_factory = desktop_uow_factory
-        metadata = verify_sqlite(database)
-        schema_version = metadata.schema_version
-        core_baseline = metadata.core_baseline
+        desktop_metadata = verify_sqlite(database)
+        schema_version = desktop_metadata.schema_version
+        core_baseline = desktop_metadata.core_baseline
     elif profile_id in SERVICE_PROFILES:
         conninfo = _required_env("TPAA_SERVICE_CONNINFO")
         config = ProductionRuntimeConfig(
@@ -1156,9 +1156,9 @@ def _ed2_b3_e2e(
             conninfo,
             read_only=True,
         ) as metadata_uow:
-            metadata = metadata_uow.metadata.get()
-            schema_version = metadata.schema_version
-            core_baseline = metadata.core_baseline
+            service_metadata = metadata_uow.metadata.get()
+            schema_version = service_metadata.schema_version
+            core_baseline = service_metadata.core_baseline
             metadata_uow.commit()
     else:
         raise RuntimeError("unsupported ED2 B3 qualification profile")

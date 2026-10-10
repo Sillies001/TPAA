@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
+
 from tools.testing.prcb_c5_four_profile_equivalence import review
 
 
@@ -176,6 +178,7 @@ def test_prcb_c5_four_profile_review_preserves_p2_provenance_but_compares_semant
     )
     assert payload["status"] == "PASS"
     assert payload["failed_acceptance"] == []
+    assert payload["ed2_b3_upper_projection_by_profile"] == {}
     evidence_hashes_raw = payload["installed_evidence_sha256_by_profile"]
     assert isinstance(evidence_hashes_raw, dict)
     evidence_hashes = cast(dict[str, str], evidence_hashes_raw)
@@ -219,3 +222,28 @@ def test_prcb_c5_four_profile_review_fails_on_p2_semantic_drift(
     assert "service_windows_linux_p2_semantic_equivalence" in payload[
         "failed_acceptance"
     ]
+
+
+def test_prcb_c5_four_profile_review_rejects_partial_ed2_b3_evidence(
+    tmp_path: Path,
+) -> None:
+    linux_desktop, windows_desktop, linux_service, windows_service, revision = (
+        _inputs(tmp_path)
+    )
+    value = cast(
+        dict[str, Any],
+        json.loads(linux_desktop.read_text(encoding="utf-8")),
+    )
+    value["ed2_b3_upper_runtime"] = {}
+    linux_desktop.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(
+        RuntimeError,
+        match="ED2 B3 installed upper evidence incomplete across profiles",
+    ):
+        review(
+            linux_desktop=linux_desktop,
+            windows_desktop=windows_desktop,
+            linux_service=linux_service,
+            windows_service=windows_service,
+            expected_revision=revision,
+        )

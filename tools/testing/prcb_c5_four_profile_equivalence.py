@@ -317,10 +317,22 @@ def review(
         profile: _shared_exact_projection(report)
         for profile, report in by_profile.items()
     }
-    ed2_b3_exact = {
-        profile: _ed2_b3_projection(report)
+    ed2_b3_presence = {
+        profile: isinstance(report.get("ed2_b3_upper_runtime"), dict)
         for profile, report in by_profile.items()
     }
+    if any(ed2_b3_presence.values()) and not all(ed2_b3_presence.values()):
+        raise RuntimeError(
+            "ED2 B3 installed upper evidence incomplete across profiles"
+        )
+    ed2_b3_exact = (
+        {
+            profile: _ed2_b3_projection(report)
+            for profile, report in by_profile.items()
+        }
+        if all(ed2_b3_presence.values())
+        else {}
+    )
     package_hashes = {
         profile: str(report["package_sha256"])
         for profile, report in by_profile.items()
@@ -364,21 +376,6 @@ def review(
             )
             == 1
         ),
-        "ed2_b3_upper_exact_identity_all_profiles": (
-            len(
-                {
-                    json.dumps(value, sort_keys=True, separators=(",", ":"))
-                    for value in ed2_b3_exact.values()
-                }
-            )
-            == 1
-        ),
-        "ed2_b3_restart_backup_api_all_profiles": all(
-            _ed2_b3(report).get("restart_exact_replay") is True
-            and _ed2_b3(report).get("backup_restore_exact_replay") is True
-            and _ed2_b3(report).get("api_exact_read_verified") is True
-            for report in by_profile.values()
-        ),
         "desktop_installed_discovery_auth_replay_all_os": all(
             _desktop_acceptance(by_profile[profile])
             for profile in ("LINUX_DESKTOP_X64", "WINDOWS_DESKTOP_X64")
@@ -398,6 +395,30 @@ def review(
             for report in by_profile.values()
         ),
     }
+    if all(ed2_b3_presence.values()):
+        acceptance.update(
+            {
+                "ed2_b3_upper_exact_identity_all_profiles": (
+                    len(
+                        {
+                            json.dumps(
+                                value,
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            )
+                            for value in ed2_b3_exact.values()
+                        }
+                    )
+                    == 1
+                ),
+                "ed2_b3_restart_backup_api_all_profiles": all(
+                    _ed2_b3(report).get("restart_exact_replay") is True
+                    and _ed2_b3(report).get("backup_restore_exact_replay") is True
+                    and _ed2_b3(report).get("api_exact_read_verified") is True
+                    for report in by_profile.values()
+                ),
+            }
+        )
     failed = sorted(key for key, value in acceptance.items() if value is not True)
     return {
         "schema": "TPAA_PRCB_C5_FOUR_PROFILE_LOGICAL_EQUIVALENCE_V1",

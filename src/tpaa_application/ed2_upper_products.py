@@ -253,9 +253,9 @@ def _validate_event_relation(payload: Mapping[str, object]) -> None:
             "root_cause_candidates",
         )
     for index, raw in enumerate(candidates):
-        item = _mapping(raw, f"root_cause_candidates[{index}]")
+        candidate = _mapping(raw, f"root_cause_candidates[{index}]")
         category = _text(
-            item.get("category"),
+            candidate.get("category"),
             f"root_cause_candidates[{index}].category",
         )
         if category not in ED2_ROOT_CAUSE_CATEGORIES:
@@ -263,12 +263,12 @@ def _validate_event_relation(payload: Mapping[str, object]) -> None:
                 "ED2_UPPER_ROOT_CAUSE_CATEGORY_INVALID",
                 category,
             )
-        if item.get("candidate_only") is not True:
+        if candidate.get("candidate_only") is not True:
             raise ED2UpperProductError(
                 "ED2_UPPER_ROOT_CAUSE_MUST_BE_CANDIDATE",
                 category,
             )
-        if item.get("automatic_personnel_fault") is not False:
+        if candidate.get("automatic_personnel_fault") is not False:
             raise ED2UpperProductError(
                 "ED2_UPPER_AUTOMATIC_PERSONNEL_FAULT_FORBIDDEN",
                 category,

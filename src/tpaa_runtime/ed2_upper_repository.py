@@ -8,8 +8,8 @@ from typing import cast
 from uuid import UUID, uuid5
 
 from tpaa_application.ed2_upper_products import (
-    ED2UpperProduct,
     ED2_UPPER_PRODUCT_SCHEMA,
+    ED2UpperProduct,
     build_ed2_upper_product,
     normalize_ed2_upper_kind,
 )
