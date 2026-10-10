@@ -25,6 +25,7 @@ from tpaa_application import (
     P3PersistenceRepository,
     P4P5ComputeInputRepository,
     P4P5PersistenceRepository,
+    P6PersistenceError,
     P6PersistenceRepository,
     ProductionImportService,
     SourceImportCommand,
@@ -167,6 +168,36 @@ def _number(value: object, *, field: str) -> float:
     raise ProductionJobExecutionError("PRCB_C2_JOB_PAYLOAD_INVALID", field)
 
 
+_P6_RECONSTRUCTION_SAFE_DETAILS = frozenset(
+    {
+        "dataset_snapshot_contract",
+        "artifact_canonical_json",
+        "artifact_bytes",
+        "model_metadata",
+        "applicability_evidence",
+        "fit_row_ids",
+        "fit_row_membership",
+        "uncertainty_calibration",
+        "intercept",
+        "slope",
+        "session_order_origin",
+        "target_session_order",
+    }
+)
+_P6_RECONSTRUCTION_SAFE_PREFIXES = frozenset(
+    {
+        "p3_component_model",
+        "p3_segment_binding",
+        "p3_session_order_scope",
+        "session_order_assignment",
+        "training_session",
+        "session_order",
+        "dataset_membership",
+        "artifact_binding",
+    }
+)
+
+
 _PREREQUISITE_IDENTITY_COLUMNS: dict[str, str] = {
     "registry.training_session": "session_id",
     "registry.dataset_snapshot": "dataset_snapshot_id",
@@ -201,6 +232,16 @@ def _governed_job_failure_detail(exc: Exception) -> str:
             and all(part.isidentifier() for part in fields.split(","))
         ):
             return f"{error_kind}:{table}:fields={fields}"
+    if (
+        isinstance(exc, P6PersistenceError)
+        and exc.code == "P6_MODEL_BUILD_RECONSTRUCTION_MISMATCH"
+    ):
+        detail = exc.detail
+        category, separator, _remainder = detail.partition(":")
+        if detail in _P6_RECONSTRUCTION_SAFE_DETAILS:
+            return f"{error_kind}:{detail}"
+        if separator and category in _P6_RECONSTRUCTION_SAFE_PREFIXES:
+            return f"{error_kind}:{category}"
     return error_kind
 
 

@@ -35,6 +35,9 @@ ACTOR = "96600000-0000-4000-8000-000000000001"
 ROLE_ARTIFACT = "96600000-0000-4000-8000-000000000002"
 ROLE_OBJECT = "96600000-0000-4000-8000-000000000003"
 AS_OF = "2026-09-10T12:00:00Z"
+EVALUATION_SESSION = "96700000-0000-4000-8000-000000000001"
+EVALUATION_ASSIGNMENT = "96700000-0000-4000-8000-000000000002"
+EVALUATION_EPISODE = "96700000-0000-4000-8000-000000000003"
 
 
 @dataclass(frozen=True, slots=True)
@@ -243,6 +246,59 @@ def seed_p6_model_resolver_case(
         field_kinds={"selector_json": "json"},
     )
 
+    rows.insert(
+        "registry.training_session",
+        {
+            "session_id": EVALUATION_SESSION,
+            "session_code": "PIQB-B2-P6-EVALUATION",
+            "session_type": "SIM",
+            "start_session_time_us": 0,
+            "end_session_time_us": 1_000_000,
+            "start_occurred_at_utc": "2026-09-05T00:00:00Z",
+            "end_occurred_at_utc": "2026-09-05T00:10:00Z",
+            "session_order": 5,
+            "session_order_source": "MANUAL_REVIEWED",
+            "session_order_scope_id": SESSION_ORDER_SCOPE,
+            "training_type_set": ("QUALIFICATION",),
+            "data_status": "READY",
+            "source_count": 1,
+            "schema_version": "1.8.0",
+        },
+        field_kinds={"training_type_set": "text_array"},
+    )
+    rows.insert(
+        "registry.session_order_assignment",
+        {
+            "assignment_id": EVALUATION_ASSIGNMENT,
+            "session_order_scope_id": SESSION_ORDER_SCOPE,
+            "session_id": EVALUATION_SESSION,
+            "order_value": 5,
+            "source": "MANUAL_REVIEWED",
+            "revision_no": 1,
+            "is_current": True,
+            "reason": "PIQB B2 P6 evaluation session",
+            "operator_ref": "PIQB-B2",
+        },
+    )
+    rows.insert(
+        "episode.training_episode",
+        {
+            "episode_id": EVALUATION_EPISODE,
+            "session_id": EVALUATION_SESSION,
+            "episode_type": "MISSION",
+            "context_id": CONTEXT,
+            "start_session_time_us": 0,
+            "end_session_time_us": 1_000_000,
+            "subject_scope": "AIRCRAFT",
+            "primary_aircraft_id": AIRCRAFT,
+            "world_capability_code": "P6",
+            "episode_status": "COMPLETE",
+            "detector_version": "PIQB-B2",
+            "coverage": 1.0,
+            "confidence": 1.0,
+        },
+    )
+
     p4 = P4P5PersistenceRepository(rows)
     training_rows: list[P6CapabilityTrainingRow] = []
     for order in range(1, 5):
@@ -316,8 +372,8 @@ def seed_p6_model_resolver_case(
         )
         subject, revision = _subject_and_revision(
             estimate=estimate,
-            session_id=session_id,
-            episode_id=episode_id,
+            session_id=EVALUATION_SESSION,
+            episode_id=EVALUATION_EPISODE,
             actor_assessment_id=assessment_id,
             order=order,
         )

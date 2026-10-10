@@ -401,7 +401,73 @@ class DurableP6ModelBuildResolver:
     def _float_hex(value: float) -> str:
         return struct.pack(">d", value).hex()
 
-    def _assignment_id(self, *, session_id: str, session_order: int) -> str:
+    def _session_order_scope_id(
+        self,
+        *,
+        twin_revision_id: str,
+        capability_type: str,
+    ) -> str:
+        twin = self._p3.exact_twin_revision(twin_revision_id)
+        matches: list[str] = []
+        for model_id in twin.component_model_refs:
+            row = self._rows.one(
+                "capability.capability_model",
+                where={"capability_model_id": model_id},
+                columns=(
+                    "capability_type",
+                    "training_dataset_snapshot_id",
+                ),
+            )
+            if row is None:
+                raise self._mismatch(f"p3_component_model:{model_id}")
+            if str(row["capability_type"]) != capability_type:
+                continue
+            training = self._p3.exact_training(
+                str(row["training_dataset_snapshot_id"])
+            )
+            segment = self._p3.exact_segment(training.segment_snapshot_id)
+            if (
+                segment.aircraft_id != twin.aircraft_id
+                or segment.capability_type != capability_type
+            ):
+                raise self._mismatch(
+                    f"p3_segment_binding:{training.segment_snapshot_id}"
+                )
+            matches.append(segment.session_order_scope_id)
+        if len(matches) != 1:
+            raise self._mismatch(
+                f"p3_session_order_scope:{twin_revision_id}:"
+                f"{capability_type}"
+            )
+        return matches[0]
+
+    def _assignment_id(
+        self,
+        *,
+        twin_revision_id: str,
+        capability_type: str,
+        session_order: int,
+    ) -> str:
+        scope_id = self._session_order_scope_id(
+            twin_revision_id=twin_revision_id,
+            capability_type=capability_type,
+        )
+        assignments = self._rows.many(
+            "registry.session_order_assignment",
+            where={
+                "session_order_scope_id": scope_id,
+                "order_value": session_order,
+                "is_current": True,
+            },
+            columns=("assignment_id", "session_id", "revision_no"),
+            order_by=("revision_no",),
+        )
+        if len(assignments) != 1:
+            raise self._mismatch(
+                f"session_order_assignment:{scope_id}:{session_order}"
+            )
+        assignment = assignments[0]
+        session_id = str(assignment["session_id"])
         session = self._rows.one(
             "registry.training_session",
             where={"session_id": session_id},
@@ -416,28 +482,13 @@ class DurableP6ModelBuildResolver:
         order_raw = session["session_order"]
         if (
             scope_raw is None
+            or str(scope_raw) != scope_id
             or isinstance(order_raw, bool)
             or not isinstance(order_raw, int)
             or order_raw != session_order
         ):
             raise self._mismatch(f"session_order:{session_id}")
-        scope_id = str(scope_raw)
-        assignments = self._rows.many(
-            "registry.session_order_assignment",
-            where={
-                "session_order_scope_id": scope_id,
-                "session_id": session_id,
-                "order_value": session_order,
-                "is_current": True,
-            },
-            columns=("assignment_id", "revision_no"),
-            order_by=("revision_no",),
-        )
-        if len(assignments) != 1:
-            raise self._mismatch(
-                f"session_order_assignment:{session_id}:{session_order}"
-            )
-        return str(assignments[0]["assignment_id"])
+        return str(assignment["assignment_id"])
 
     def _training_row(
         self,
@@ -461,7 +512,8 @@ class DurableP6ModelBuildResolver:
                 f"training_row_binding:{p3_estimate_id}:{p4_revision_id}"
             )
         assignment_id = self._assignment_id(
-            session_id=revision.session_id,
+            twin_revision_id=estimate.twin_revision_id,
+            capability_type=estimate.capability_type,
             session_order=session_order,
         )
         return P6CapabilityTrainingRow(
