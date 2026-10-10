@@ -410,8 +410,8 @@ def qualify(
                 or ed2_b2.get("runtime_profile") != "SERVICE"
                 or ed2_b2.get("db_schema_version") != "1.9.0"
                 or ed2_b2.get("canonical_baseline") != "CB-1.4.0"
-                or len(cast(list[object], ed2_b2.get("session_ids", []))) != 5
-                or len(cast(list[object], ed2_b2.get("p1_release_ids", []))) != 5
+                or len(cast(list[object], ed2_b2.get("session_ids", []))) != 8
+                or len(cast(list[object], ed2_b2.get("p1_release_ids", []))) != 8
                 or len(cast(list[object], ed2_b2.get("p2_estimate_ids", []))) != 4
                 or len(cast(list[object], ed2_b2.get("p3_estimate_ids", []))) != 4
                 or len(

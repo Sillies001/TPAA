@@ -838,6 +838,14 @@ def run_ed2_b2_continuous_qualification(
         uow.commit()
 
     p6_profile = _mapping(plan["p6_profile"], "p6_profile")
+    counterfactual_profile = _mapping(
+        p6_profile.get("counterfactual"),
+        "p6.counterfactual",
+    )
+    scenario_definition_id = _text(
+        counterfactual_profile.get("scenario_definition_id"),
+        "p6.counterfactual.scenario_definition_id",
+    )
     p6_production_input: dict[str, object] = {
         "training_rows": [
             {
@@ -852,10 +860,7 @@ def run_ed2_b2_continuous_qualification(
         ],
         "scenario_context_refs": [
             {
-                "context_ref_id": _text(
-                    sessions[4].get("context_id"),
-                    "evaluation.context_id",
-                ),
+                "context_ref_id": scenario_definition_id,
                 "status": "ACTIVE",
                 "knowledge_time_utc": _text(
                     p5_profile.get("created_at_utc"),
@@ -892,10 +897,8 @@ def run_ed2_b2_continuous_qualification(
             "p6.forecast",
         ),
         "counterfactual": {
-            **_mapping(
-                p6_profile.get("counterfactual"),
-                "p6.counterfactual",
-            ),
+            **counterfactual_profile,
+            "scenario_definition_id": scenario_definition_id,
             "base_product_refs": [p4_approved[0], p5_approved],
         },
     }

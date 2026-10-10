@@ -68,3 +68,19 @@ def test_ed2_b2_assessment_profile_is_additive_to_frozen_cb_1_4_0() -> None:
 
     frozen = ROOT / "baseline" / "CB-1.4.0" / "canonical"
     assert not (frozen / "TRAINING_ASSESSMENT_PROFILE.json").exists()
+
+
+def test_ed2_b2_installed_chain_binds_p6_scenario_and_eight_session_report() -> None:
+    qualification = (
+        ROOT / "src" / "tpaa_qualification" / "ed2_b2_continuous.py"
+    ).read_text(encoding="utf-8")
+    assert '"context_ref_id": scenario_definition_id' in qualification
+    assert '"scenario_definition_id": scenario_definition_id' in qualification
+
+    for path in (
+        ROOT / "tools" / "testing" / "prcb_c5_installed_desktop_qualification.py",
+        ROOT / "tools" / "testing" / "prcb_c5_installed_service_qualification.py",
+    ):
+        source = path.read_text(encoding="utf-8")
+        assert 'ed2_b2.get("session_ids", []))) != 8' in source
+        assert 'ed2_b2.get("p1_release_ids", []))) != 8' in source

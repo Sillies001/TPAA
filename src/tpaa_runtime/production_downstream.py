@@ -200,6 +200,22 @@ def _utc_text(value: object, field: str) -> str:
     return text
 
 
+def _stored_utc_text(value: object, field: str) -> str:
+    """Normalize only governed DB timestamp representations to RFC3339 UTC."""
+
+    if isinstance(value, datetime) or (
+        isinstance(value, str) and value.endswith("Z")
+    ):
+        return _utc_text(value, field)
+    if not isinstance(value, str):
+        raise ProductionDownstreamError("ED2_B2_TIME_INVALID", field)
+    try:
+        sqlite_utc = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+    except ValueError as exc:
+        raise ProductionDownstreamError("ED2_B2_TIME_INVALID", field) from exc
+    return sqlite_utc.replace(tzinfo=UTC).isoformat().replace("+00:00", "Z")
+
+
 def _persist_object_reference(
     rows: CanonicalRowRepository,
     object_store: LocalObjectStore,
@@ -1259,7 +1275,7 @@ def _world_fact(
             None if row["stage_id"] is None else str(row["stage_id"])
         ),
         source_hash=str(row["logical_content_hash"]),
-        knowledge_time_utc=_utc_text(
+        knowledge_time_utc=_stored_utc_text(
             row["created_at"],
             "world.created_at",
         ),
