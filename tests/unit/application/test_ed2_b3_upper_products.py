@@ -129,7 +129,9 @@ def _media_payload() -> dict[str, object]:
                 "media_id": "media:1",
                 "media_type": "VIDEO",
                 "uri": "tpaa-object://media/debrief-1",
+                "artifact_sha256": _HASH,
                 "source_release_id": _RELEASE,
+                "transcript_status": "UNAVAILABLE",
             }
         ],
         "bookmarks": [
@@ -269,3 +271,39 @@ def test_ed2_b3_hash_input_remains_json_native_and_media_is_exact_release_bound(
             as_of_utc=_AS_OF,
             payload=media,
         )
+
+def test_ed2_b3_media_requires_sealed_hash_and_explicit_transcript_state() -> None:
+    missing_hash = _media_payload()
+    raw_media = missing_hash["media"]
+    assert isinstance(raw_media, list)
+    first = raw_media[0]
+    assert isinstance(first, dict)
+    del first["artifact_sha256"]
+    with pytest.raises(
+        ED2UpperProductError,
+        match="TEXT_INVALID:media\\[0\\]\\.artifact_sha256",
+    ):
+        build_ed2_upper_product(
+            kind="MEDIA_DEBRIEF",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=missing_hash,
+        )
+
+    missing_status = _media_payload()
+    raw_media = missing_status["media"]
+    assert isinstance(raw_media, list)
+    first = raw_media[0]
+    assert isinstance(first, dict)
+    del first["transcript_status"]
+    with pytest.raises(
+        ED2UpperProductError,
+        match="TRANSCRIPT_STATUS_INVALID",
+    ):
+        build_ed2_upper_product(
+            kind="MEDIA_DEBRIEF",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=missing_status,
+        )
+

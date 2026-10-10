@@ -247,6 +247,11 @@ def _validate_event_relation(payload: Mapping[str, object]) -> None:
         payload.get("root_cause_candidates"),
         "root_cause_candidates",
     )
+    if not candidates:
+        raise ED2UpperProductError(
+            "ED2_UPPER_ROOT_CAUSE_CANDIDATE_REQUIRED",
+            "root_cause_candidates",
+        )
     for index, raw in enumerate(candidates):
         item = _mapping(raw, f"root_cause_candidates[{index}]")
         category = _text(
@@ -281,6 +286,12 @@ def _validate_human_team(payload: Mapping[str, object]) -> None:
             "direct_identity_present",
         )
     _forbid_direct_identity(payload)
+    subject_key = _text(payload.get("subject_key"), "subject_key")
+    if not subject_key.startswith("pseudonym:"):
+        raise ED2UpperProductError(
+            "ED2_UPPER_PSEUDONYM_REQUIRED",
+            "subject_key",
+        )
     if not _texts(payload.get("comparison_dimensions"), "comparison_dimensions"):
         raise ED2UpperProductError(
             "ED2_UPPER_COHORT_DIMENSIONS_REQUIRED",
@@ -292,6 +303,11 @@ def _validate_human_team(payload: Mapping[str, object]) -> None:
         raise ED2UpperProductError(
             "ED2_UPPER_REVISION_REPLAY_REQUIRED",
             "revision_aware_replay",
+        )
+    if not _texts(payload.get("trend_contracts"), "trend_contracts"):
+        raise ED2UpperProductError(
+            "ED2_UPPER_TREND_CONTRACT_REQUIRED",
+            "trend_contracts",
         )
 
 
@@ -316,6 +332,11 @@ def _validate_course_unit(payload: Mapping[str, object]) -> None:
         raise ED2UpperProductError(
             "ED2_UPPER_COHORT_DIMENSIONS_REQUIRED",
             "cohort_dimensions",
+        )
+    if not _texts(payload.get("aggregate_refs"), "aggregate_refs"):
+        raise ED2UpperProductError(
+            "ED2_UPPER_AGGREGATE_REF_REQUIRED",
+            "aggregate_refs",
         )
 
 
@@ -364,6 +385,15 @@ def _validate_plugin(payload: Mapping[str, object]) -> None:
 
 
 def _validate_gateway(payload: Mapping[str, object]) -> None:
+    for field in (
+        "external_profile_id",
+        "external_profile_version",
+        "adapter_id",
+        "adapter_version",
+        "interop_snapshot_id",
+    ):
+        _text(payload.get(field), field)
+    _hash64(payload.get("logical_content_hash"), "logical_content_hash")
     if payload.get("external_protocol_boundary") is not True:
         raise ED2UpperProductError(
             "ED2_UPPER_GATEWAY_BOUNDARY_REQUIRED",
@@ -479,6 +509,10 @@ def _validate_media(
             )
         _text(item.get("media_type"), f"media[{index}].media_type")
         _text(item.get("uri"), f"media[{index}].uri")
+        _hash64(
+            item.get("artifact_sha256"),
+            f"media[{index}].artifact_sha256",
+        )
         transcript_status = item.get("transcript_status")
         if transcript_status not in {"AVAILABLE", "UNAVAILABLE"}:
             raise ED2UpperProductError(
@@ -486,9 +520,14 @@ def _validate_media(
                 media_id,
             )
         transcript_uri = item.get("transcript_uri")
+        transcript_sha256 = item.get("transcript_sha256")
         if transcript_status == "AVAILABLE":
             _text(transcript_uri, f"media[{index}].transcript_uri")
-        elif transcript_uri is not None:
+            _hash64(
+                transcript_sha256,
+                f"media[{index}].transcript_sha256",
+            )
+        elif transcript_uri is not None or transcript_sha256 is not None:
             raise ED2UpperProductError(
                 "ED2_UPPER_TRANSCRIPT_REF_MISMATCH",
                 media_id,

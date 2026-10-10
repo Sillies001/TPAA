@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -1082,6 +1083,23 @@ def _verify_ed2_b3_api(
             raise RuntimeError("ED2 B3 API exact index invalid")
 
 
+def _verify_ed2_b3_media_integrity(
+    object_store: LocalObjectStore,
+    result: ED2B3UpperQualificationResult,
+) -> None:
+    for field, logical_uri, expected_sha256 in (
+        ("media", result.media_uri, result.media_sha256),
+        ("transcript", result.transcript_uri, result.transcript_sha256),
+    ):
+        actual_sha256 = hashlib.sha256(
+            object_store.read_bytes(logical_uri)
+        ).hexdigest()
+        if actual_sha256 != expected_sha256:
+            raise RuntimeError(
+                f"ED2 B3 {field} object hash mismatch:{logical_uri}"
+            )
+
+
 def _ed2_b3_e2e(
     profile_id: str,
     work_root: Path,
@@ -1161,10 +1179,7 @@ def _ed2_b3_e2e(
     )
     _verify_ed2_b3_exact_runtime(restarted, result)
     _verify_ed2_b3_api(restarted, result)
-    if not object_store.read_bytes(result.media_uri):
-        raise RuntimeError("ED2 B3 governed media object unavailable")
-    if not object_store.read_bytes(result.transcript_uri):
-        raise RuntimeError("ED2 B3 governed transcript object unavailable")
+    _verify_ed2_b3_media_integrity(object_store, result)
 
     backup_restore_exact = False
     if profile_id in DESKTOP_PROFILES:
@@ -1191,10 +1206,7 @@ def _ed2_b3_e2e(
         restored = build_desktop_production_runtime(restored_config)
         _verify_ed2_b3_exact_runtime(restored, result)
         restored_store = LocalObjectStore(restored_objects)
-        if not restored_store.read_bytes(result.media_uri):
-            raise RuntimeError("ED2 B3 restored media object unavailable")
-        if not restored_store.read_bytes(result.transcript_uri):
-            raise RuntimeError("ED2 B3 restored transcript object unavailable")
+        _verify_ed2_b3_media_integrity(restored_store, result)
         backup_restore_exact = True
     else:
         backup = work_root / "ed2-b3-backup"
@@ -1220,10 +1232,7 @@ def _ed2_b3_e2e(
         restored = build_service_production_runtime(restored_config)
         _verify_ed2_b3_exact_runtime(restored, result)
         restored_store = LocalObjectStore(restored_objects)
-        if not restored_store.read_bytes(result.media_uri):
-            raise RuntimeError("ED2 B3 restored media object unavailable")
-        if not restored_store.read_bytes(result.transcript_uri):
-            raise RuntimeError("ED2 B3 restored transcript object unavailable")
+        _verify_ed2_b3_media_integrity(restored_store, result)
         backup_restore_exact = True
 
     report = result.report()

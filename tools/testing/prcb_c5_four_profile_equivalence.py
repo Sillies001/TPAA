@@ -103,6 +103,16 @@ def _ed2_b3(report: dict[str, Any]) -> dict[str, Any]:
         payload.get("schema") != "TPAA_ED2_B3_UPPER_QUALIFICATION_RESULT_V1"
         or payload.get("status") != "PASS"
         or payload.get("snapshot_count") != 8
+        or not _hex64(payload.get("media_sha256"))
+        or not _hex64(payload.get("transcript_sha256"))
+        or payload.get("verification_ids")
+        != [
+            "V-SAFE-002",
+            "V-COHORT-001",
+            "V-PLUGIN-001",
+            "V-KNOW-001",
+            "V-VIS-001",
+        ]
         or payload.get("restart_exact_replay") is not True
         or payload.get("backup_restore_exact_replay") is not True
         or payload.get("api_exact_read_verified") is not True
@@ -139,7 +149,10 @@ def _ed2_b3_projection(report: dict[str, Any]) -> dict[str, object]:
         "objective_availability": payload.get("objective_availability"),
         "semantic_layers": layers,
         "media_uri": payload.get("media_uri"),
+        "media_sha256": payload.get("media_sha256"),
         "transcript_uri": payload.get("transcript_uri"),
+        "transcript_sha256": payload.get("transcript_sha256"),
+        "verification_ids": payload.get("verification_ids"),
     }
 
 

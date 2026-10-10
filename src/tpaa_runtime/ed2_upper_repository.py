@@ -14,9 +14,9 @@ from tpaa_application.ed2_upper_products import (
     normalize_ed2_upper_kind,
 )
 from tpaa_application.ed2_upper_service import ED2UpperProductRepositoryPort
+from tpaa_storage.canonical_rows import CanonicalRowRepository
 
 from .durable_repositories import RuntimeUnitOfWorkFactory
-from tpaa_storage.canonical_rows import CanonicalRowRepository
 
 _NAMESPACE = UUID("ed2b3000-2d87-53e4-9832-4f927c0847be")
 _PREFIX = "ED2_UPPER_"

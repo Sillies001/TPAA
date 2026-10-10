@@ -35,7 +35,9 @@ class ED2B3UpperQualificationResult:
     event_availability: str
     objective_availability: str
     media_uri: str
+    media_sha256: str
     transcript_uri: str
+    transcript_sha256: str
 
     def report(self) -> dict[str, object]:
         snapshots = {
@@ -56,7 +58,16 @@ class ED2B3UpperQualificationResult:
             "event_availability": self.event_availability,
             "objective_availability": self.objective_availability,
             "media_uri": self.media_uri,
+            "media_sha256": self.media_sha256,
             "transcript_uri": self.transcript_uri,
+            "transcript_sha256": self.transcript_sha256,
+            "verification_ids": [
+                "V-SAFE-002",
+                "V-COHORT-001",
+                "V-PLUGIN-001",
+                "V-KNOW-001",
+                "V-VIS-001",
+            ],
             "restart_exact_replay": True,
             "linked_debrief_2d": True,
             "linked_debrief_3d": True,
@@ -464,7 +475,9 @@ def run_ed2_b3_upper_qualification(
         event_availability=event_availability,
         objective_availability=objective_availability,
         media_uri=media_object.logical_uri,
+        media_sha256=media_object.artifact_sha256,
         transcript_uri=transcript_object.logical_uri,
+        transcript_sha256=transcript_object.artifact_sha256,
     )
 
     for field, snapshot_id in (
