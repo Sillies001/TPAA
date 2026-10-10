@@ -880,6 +880,10 @@ def run_ed2_b2_continuous_qualification(
             p6_profile.get("forecast_origin_utc"),
             "p6.forecast_origin_utc",
         ),
+        "model_as_of_utc": _text(
+            p6_profile.get("model_as_of_utc"),
+            "p6.model_as_of_utc",
+        ),
         "as_of_utc": _text(
             p6_profile.get("as_of_utc"),
             "p6.as_of_utc",

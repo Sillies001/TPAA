@@ -1859,6 +1859,10 @@ def prepare_p6_build_worker_input(
             production_input.get("forecast_origin_utc"),
             "forecast_origin_utc",
         ),
+        model_as_of_utc=_utc_text(
+            production_input.get("model_as_of_utc"),
+            "model_as_of_utc",
+        ),
         as_of_utc=_utc_text(
             production_input.get("as_of_utc"),
             "as_of_utc",

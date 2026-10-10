@@ -27,6 +27,14 @@ def test_ed2_b2_continuous_producers_are_runtime_owned_and_worker_governed() -> 
     assert "build_p4_subject_context(" in worker
     assert "build_p5_composition_snapshot(" in worker
     assert "evaluate_ed2_training_assessment(" in worker
+    p6_build = worker.split("def _execute_p6_build", maxsplit=1)[1].split(
+        "def _execute_p6_forecast",
+        maxsplit=1,
+    )[0]
+    assert "model_as_of_utc: str" in worker
+    assert "as_of_utc=body.model_as_of_utc" in p6_build
+    assert "as_of_utc=body.as_of_utc" in p6_build
+    assert 'production_input.get("model_as_of_utc")' in downstream
 
     assert "prepare_p2_compute_input(" in jobs
     assert "prepare_p3_build_worker_input(" in jobs

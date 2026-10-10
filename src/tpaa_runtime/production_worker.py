@@ -326,6 +326,7 @@ class ProductionP6BuildWorkerInput:
     target_scope: str
     subject_or_composition_ref: str
     forecast_origin_utc: str
+    model_as_of_utc: str
     as_of_utc: str
     trained_at_utc: str
     sealed_at_utc: str
@@ -1984,7 +1985,7 @@ def _execute_p6_build(payload: WorkerPayload) -> WorkerResult:
     _verify_job_request(payload, body.job_payload)
     build = execute_p6_model_training(
         body.training_rows,
-        as_of_utc=body.as_of_utc,
+        as_of_utc=body.model_as_of_utc,
         trained_at_utc=body.trained_at_utc,
     )
     managed = P6ManagedModelObject(

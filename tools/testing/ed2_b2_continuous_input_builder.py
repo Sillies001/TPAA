@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import cast
@@ -180,6 +181,35 @@ def verify_p2_jackknife_support(
                 )
 
 
+def verify_p6_temporal_lifecycle(profile: Mapping[str, object]) -> None:
+    """Keep model-training cutoff distinct from the later forecast knowledge time."""
+
+    fields = (
+        "model_as_of_utc",
+        "trained_at_utc",
+        "sealed_at_utc",
+        "forecast_origin_utc",
+        "as_of_utc",
+    )
+    parsed: dict[str, datetime] = {}
+    for field in fields:
+        raw = profile.get(field)
+        if not isinstance(raw, str) or not raw.endswith("Z"):
+            raise ValueError(f"ED2_B2_P6_TIME_INVALID:{field}")
+        try:
+            parsed[field] = datetime.fromisoformat(raw[:-1] + "+00:00")
+        except ValueError as exc:
+            raise ValueError(f"ED2_B2_P6_TIME_INVALID:{field}") from exc
+    if not (
+        parsed["model_as_of_utc"]
+        <= parsed["trained_at_utc"]
+        <= parsed["sealed_at_utc"]
+        <= parsed["forecast_origin_utc"]
+        <= parsed["as_of_utc"]
+    ):
+        raise ValueError("ED2_B2_P6_TEMPORAL_LIFECYCLE_INVALID")
+
+
 def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
     # Qualification-only preflight uses the same governed Catalog path as the
     # installed Worker, with no persistence or qualification seed substitution.
@@ -232,6 +262,34 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
         p2_factor_values,
         reference_value="0.5",
     )
+    p6_profile: dict[str, object] = {
+        "target_scope": "SUBJECT",
+        "subject_or_composition_ref": _AIRCRAFT_ID,
+        "model_as_of_utc": "2030-01-01T05:00:00Z",
+        "trained_at_utc": "2030-01-01T05:01:00Z",
+        "sealed_at_utc": "2030-01-01T05:02:00Z",
+        "forecast_origin_utc": "2030-01-01T05:03:00Z",
+        "as_of_utc": "2030-01-01T05:03:00Z",
+        "forecast": {
+            "forecast_spec_id": "P6_FORECAST:P3_CAPABILITY_NEXT_SESSION",
+            "forecast_spec_version": "1.0.0",
+            "assumption_profile_id": "P6_ASSUMPTION:TRAINING_EVALUATION",
+            "assumption_profile_version": "1.0.0",
+        },
+        "counterfactual": {
+            "scenario_definition_id": _id("scenario", 1),
+            "interventions": {
+                "training_focus": {
+                    "type": "TRAINING_FOCUS",
+                    "value": "DEBRIEF_REPEAT",
+                }
+            },
+            "held_fixed_assumptions": {
+                "configuration": "UNCHANGED"
+            },
+        },
+    }
+    verify_p6_temporal_lifecycle(p6_profile)
     return {
         "schema": ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA,
         "aircraft_id": _AIRCRAFT_ID,
@@ -325,32 +383,7 @@ def build_ed2_b2_continuous_qualification_plan() -> dict[str, object]:
             "as_of_utc": "2030-01-01T02:00:00Z",
             "created_at_utc": "2030-01-01T02:01:00Z",
         },
-        "p6_profile": {
-            "target_scope": "SUBJECT",
-            "subject_or_composition_ref": _AIRCRAFT_ID,
-            "forecast_origin_utc": "2030-01-01T05:00:00Z",
-            "as_of_utc": "2030-01-01T05:00:00Z",
-            "trained_at_utc": "2030-01-01T05:01:00Z",
-            "sealed_at_utc": "2030-01-01T05:02:00Z",
-            "forecast": {
-                "forecast_spec_id": "P6_FORECAST:P3_CAPABILITY_NEXT_SESSION",
-                "forecast_spec_version": "1.0.0",
-                "assumption_profile_id": "P6_ASSUMPTION:TRAINING_EVALUATION",
-                "assumption_profile_version": "1.0.0",
-            },
-            "counterfactual": {
-                "scenario_definition_id": _id("scenario", 1),
-                "interventions": {
-                    "training_focus": {
-                        "type": "TRAINING_FOCUS",
-                        "value": "DEBRIEF_REPEAT",
-                    }
-                },
-                "held_fixed_assumptions": {
-                    "configuration": "UNCHANGED"
-                },
-            },
-        },
+        "p6_profile": p6_profile,
     }
 
 
