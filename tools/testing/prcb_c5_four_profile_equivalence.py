@@ -94,6 +94,68 @@ def _profile(
     return report
 
 
+def _ed2_b3(report: dict[str, Any]) -> dict[str, Any]:
+    value = report.get("ed2_b3_upper_runtime")
+    if not isinstance(value, dict):
+        raise RuntimeError("ED2 B3 installed upper evidence missing")
+    payload = cast(dict[str, Any], value)
+    if (
+        payload.get("schema") != "TPAA_ED2_B3_UPPER_QUALIFICATION_RESULT_V1"
+        or payload.get("status") != "PASS"
+        or payload.get("snapshot_count") != 8
+        or not _hex64(payload.get("media_sha256"))
+        or not _hex64(payload.get("transcript_sha256"))
+        or payload.get("verification_ids")
+        != [
+            "V-SAFE-002",
+            "V-COHORT-001",
+            "V-PLUGIN-001",
+            "V-KNOW-001",
+            "V-VIS-001",
+        ]
+        or payload.get("restart_exact_replay") is not True
+        or payload.get("backup_restore_exact_replay") is not True
+        or payload.get("api_exact_read_verified") is not True
+        or payload.get("api_latest_alias_rejected") is not True
+        or payload.get("privacy_boundaries_verified") is not True
+        or payload.get("training_plugin_contracts_verified") is not True
+        or payload.get("joint_lvc_boundary_verified") is not True
+        or payload.get("mutable_latest_fallback_used") is not False
+        or payload.get("formal_release_claimed") is not False
+    ):
+        raise RuntimeError("ED2 B3 installed upper evidence invalid")
+    return payload
+
+
+def _ed2_b3_projection(report: dict[str, Any]) -> dict[str, object]:
+    payload = _ed2_b3(report)
+    snapshots = payload.get("snapshot_ids")
+    layers = payload.get("semantic_layers")
+    if not isinstance(snapshots, dict) or len(snapshots) != 8:
+        raise RuntimeError("ED2 B3 snapshot identity set invalid")
+    if not all(
+        isinstance(key, str)
+        and isinstance(value, str)
+        and bool(value)
+        for key, value in snapshots.items()
+    ):
+        raise RuntimeError("ED2 B3 snapshot identity invalid")
+    if layers != ["W", "P", "A", "J", "M"]:
+        raise RuntimeError("ED2 B3 semantic layer set drift")
+    return {
+        "snapshot_ids": dict(sorted(snapshots.items())),
+        "source_release_ids": payload.get("source_release_ids"),
+        "event_availability": payload.get("event_availability"),
+        "objective_availability": payload.get("objective_availability"),
+        "semantic_layers": layers,
+        "media_uri": payload.get("media_uri"),
+        "media_sha256": payload.get("media_sha256"),
+        "transcript_uri": payload.get("transcript_uri"),
+        "transcript_sha256": payload.get("transcript_sha256"),
+        "verification_ids": payload.get("verification_ids"),
+    }
+
+
 def _p2_semantics(report: dict[str, Any]) -> dict[str, object]:
     installed = _installed(report)
     reasons = installed.get("p2_reason_codes")
@@ -255,6 +317,10 @@ def review(
         profile: _shared_exact_projection(report)
         for profile, report in by_profile.items()
     }
+    ed2_b3_exact = {
+        profile: _ed2_b3_projection(report)
+        for profile, report in by_profile.items()
+    }
     package_hashes = {
         profile: str(report["package_sha256"])
         for profile, report in by_profile.items()
@@ -297,6 +363,21 @@ def review(
                 }
             )
             == 1
+        ),
+        "ed2_b3_upper_exact_identity_all_profiles": (
+            len(
+                {
+                    json.dumps(value, sort_keys=True, separators=(",", ":"))
+                    for value in ed2_b3_exact.values()
+                }
+            )
+            == 1
+        ),
+        "ed2_b3_restart_backup_api_all_profiles": all(
+            _ed2_b3(report).get("restart_exact_replay") is True
+            and _ed2_b3(report).get("backup_restore_exact_replay") is True
+            and _ed2_b3(report).get("api_exact_read_verified") is True
+            for report in by_profile.values()
         ),
         "desktop_installed_discovery_auth_replay_all_os": all(
             _desktop_acceptance(by_profile[profile])
@@ -342,6 +423,7 @@ def review(
             "semantics while retaining explicit runtime knowledge-time provenance."
         ),
         "shared_exact_projection_by_profile": shared_exact,
+        "ed2_b3_upper_projection_by_profile": ed2_b3_exact,
         "acceptance": acceptance,
         "failed_acceptance": failed,
     }

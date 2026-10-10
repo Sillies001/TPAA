@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -17,6 +18,10 @@ SRC_ROOT = APP_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
+from fastapi import FastAPI  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+from tpaa_api import register_ed2_upper_routes  # noqa: E402
 from tpaa_application import (  # noqa: E402
     JobStatus,
     P2PersistenceRepository,
@@ -30,6 +35,10 @@ from tpaa_qualification.ed2_b2_continuous import (  # noqa: E402
     QualificationUnitOfWork,
     QualificationUowFactory,
     run_ed2_b2_continuous_qualification,
+)
+from tpaa_qualification.ed2_b3_upper import (  # noqa: E402
+    ED2B3UpperQualificationResult,
+    run_ed2_b3_upper_qualification,
 )
 from tpaa_qualification.ed2_p1_request_contract import (  # noqa: E402
     load_ed2_p1_request_contract,
@@ -57,7 +66,9 @@ from tpaa_runtime import (  # noqa: E402
     build_desktop_production_runtime,
     build_service_production_runtime,
     create_desktop_production_backup,
+    create_service_production_backup,
     restore_desktop_production_backup,
+    restore_service_production_backup,
 )
 from tpaa_storage import (  # noqa: E402
     LocalObjectStore,
@@ -948,6 +959,297 @@ def _ed2_b2_e2e(
     }
 
 
+
+def _ed2_b2_source_identity(
+    uow_factory: QualificationUowFactory,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    try:
+        plan = json.loads(QUALIFICATION_B2_PLAN.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("ED2 B3 B2 source plan unavailable") from exc
+    if not isinstance(plan, dict):
+        raise RuntimeError("ED2 B3 B2 source plan invalid")
+    raw_sessions = plan.get("sessions")
+    if not isinstance(raw_sessions, list) or len(raw_sessions) != 8:
+        raise RuntimeError("ED2 B3 B2 source Session set invalid")
+
+    session_ids: list[str] = []
+    for raw in raw_sessions:
+        if not isinstance(raw, dict):
+            raise RuntimeError("ED2 B3 B2 source Session invalid")
+        session_id = raw.get("session_id")
+        if not isinstance(session_id, str):
+            raise RuntimeError("ED2 B3 B2 source Session identity invalid")
+        session_ids.append(session_id)
+    if len(set(session_ids)) != 8:
+        raise RuntimeError("ED2 B3 B2 source Session identity drift")
+
+    release_ids: list[str] = []
+    with uow_factory(False) as uow:
+        for session_id in session_ids:
+            rows = uow.canonical_rows.many(
+                "registry.analysis_release",
+                where={
+                    "session_id": session_id,
+                    "scope_type": "SESSION",
+                },
+                columns=(
+                    "release_id",
+                    "scope_key",
+                    "status",
+                    "published_at",
+                ),
+                order_by=("release_no", "release_id"),
+            )
+            published = [
+                row
+                for row in rows
+                if str(row["scope_key"]) == session_id
+                and str(row["status"]) == "PUBLISHED"
+                and row["published_at"] is not None
+            ]
+            if len(published) != 1:
+                raise RuntimeError(
+                    "ED2 B3 exact B2 release cardinality invalid "
+                    f"session={session_id} count={len(published)}"
+                )
+            release_ids.append(str(published[0]["release_id"]))
+        uow.commit()
+    return tuple(session_ids), tuple(release_ids)
+
+
+def _ed2_b3_snapshot_pairs(
+    result: ED2B3UpperQualificationResult,
+) -> tuple[tuple[str, str], ...]:
+    return (
+        ("EVENT_RELATION_ROOT_CAUSE", result.event_relation_snapshot_id),
+        ("LONGITUDINAL_HUMAN_TEAM", result.human_snapshot_id),
+        ("LONGITUDINAL_HUMAN_TEAM", result.team_snapshot_id),
+        ("COURSE_UNIT_ANALYTICS", result.course_snapshot_id),
+        ("COURSE_UNIT_ANALYTICS", result.unit_snapshot_id),
+        ("TRAINING_PLUGIN_COMPOSITION", result.plugin_snapshot_id),
+        ("JOINT_LVC_GATEWAY", result.joint_lvc_snapshot_id),
+        ("MEDIA_DEBRIEF", result.media_debrief_snapshot_id),
+    )
+
+
+def _verify_ed2_b3_exact_runtime(
+    runtime: ProductionRuntime,
+    result: ED2B3UpperQualificationResult,
+) -> None:
+    for kind, snapshot_id in _ed2_b3_snapshot_pairs(result):
+        exact = runtime.application.ed2_upper_exact(
+            snapshot_id=snapshot_id,
+            expected_kind=kind,
+        )
+        if (
+            exact.get("snapshot_id") != snapshot_id
+            or exact.get("kind") != kind
+            or exact.get("frozen") is not True
+            or exact.get("mutable_alias_resolution") is not False
+        ):
+            raise RuntimeError(
+                f"ED2 B3 exact restart read drift:{kind}:{snapshot_id}"
+            )
+
+
+def _verify_ed2_b3_api(
+    runtime: ProductionRuntime,
+    result: ED2B3UpperQualificationResult,
+) -> None:
+    app = FastAPI()
+    register_ed2_upper_routes(app, runtime.application)
+    with TestClient(app) as client:
+        for kind, snapshot_id in _ed2_b3_snapshot_pairs(result):
+            response = client.get(
+                f"/api/v1/upper/{kind}/{snapshot_id}"
+            )
+            if (
+                response.status_code != 200
+                or response.json().get("snapshot_id") != snapshot_id
+            ):
+                raise RuntimeError(
+                    f"ED2 B3 API exact read failed:{kind}:{snapshot_id}"
+                )
+        if client.get(
+            "/api/v1/upper/MEDIA_DEBRIEF/latest"
+        ).status_code != 422:
+            raise RuntimeError("ED2 B3 API mutable latest alias accepted")
+        index = client.get("/api/v1/upper/MEDIA_DEBRIEF")
+        if (
+            index.status_code != 200
+            or index.json().get("current_latest_fallback_used") is not False
+        ):
+            raise RuntimeError("ED2 B3 API exact index invalid")
+
+
+def _verify_ed2_b3_media_integrity(
+    object_store: LocalObjectStore,
+    result: ED2B3UpperQualificationResult,
+) -> None:
+    for field, logical_uri, expected_sha256 in (
+        ("media", result.media_uri, result.media_sha256),
+        ("transcript", result.transcript_uri, result.transcript_sha256),
+    ):
+        actual_sha256 = hashlib.sha256(
+            object_store.read_bytes(logical_uri)
+        ).hexdigest()
+        if actual_sha256 != expected_sha256:
+            raise RuntimeError(
+                f"ED2 B3 {field} object hash mismatch:{logical_uri}"
+            )
+
+
+def _ed2_b3_e2e(
+    profile_id: str,
+    work_root: Path,
+) -> dict[str, object]:
+    object_root = work_root / "objects"
+    object_store = LocalObjectStore(object_root)
+    uow_factory: QualificationUowFactory
+
+    if profile_id in DESKTOP_PROFILES:
+        database = work_root / "ed2-b2.sqlite3"
+        if not database.is_file():
+            raise RuntimeError(
+                "ED2 B3 requires completed installed B2 Desktop authority"
+            )
+        config = ProductionRuntimeConfig(
+            profile=RuntimeProfile.DESKTOP,
+            product_build_version=PRODUCT_VERSION,
+            authority_root=_authority_root(),
+            object_root=object_root,
+            desktop_database_path=database,
+        )
+        runtime = build_desktop_production_runtime(config)
+
+        @contextmanager
+        def desktop_uow_factory(write: bool) -> Iterator[QualificationUnitOfWork]:
+            with SQLiteDesktopUnitOfWork(database, write=write) as uow:
+                yield cast(QualificationUnitOfWork, uow)
+
+        uow_factory = desktop_uow_factory
+        metadata = verify_sqlite(database)
+        schema_version = metadata.schema_version
+        core_baseline = metadata.core_baseline
+    elif profile_id in SERVICE_PROFILES:
+        conninfo = _required_env("TPAA_SERVICE_CONNINFO")
+        config = ProductionRuntimeConfig(
+            profile=RuntimeProfile.SERVICE,
+            product_build_version=PRODUCT_VERSION,
+            authority_root=_authority_root(),
+            object_root=object_root,
+            service_conninfo=conninfo,
+        )
+        runtime = build_service_production_runtime(config)
+
+        @contextmanager
+        def service_uow_factory(write: bool) -> Iterator[QualificationUnitOfWork]:
+            with PostgreSQLServiceUnitOfWork(
+                conninfo,
+                read_only=not write,
+            ) as uow:
+                yield cast(QualificationUnitOfWork, uow)
+
+        uow_factory = service_uow_factory
+        with PostgreSQLServiceUnitOfWork(
+            conninfo,
+            read_only=True,
+        ) as metadata_uow:
+            metadata = metadata_uow.metadata.get()
+            schema_version = metadata.schema_version
+            core_baseline = metadata.core_baseline
+            metadata_uow.commit()
+    else:
+        raise RuntimeError("unsupported ED2 B3 qualification profile")
+
+    session_ids, source_release_ids = _ed2_b2_source_identity(uow_factory)
+    result = run_ed2_b3_upper_qualification(
+        runtime=runtime,
+        uow_factory=uow_factory,
+        object_store=object_store,
+        session_ids=session_ids,
+        source_release_ids=source_release_ids,
+    )
+
+    restarted = (
+        build_desktop_production_runtime(config)
+        if profile_id in DESKTOP_PROFILES
+        else build_service_production_runtime(config)
+    )
+    _verify_ed2_b3_exact_runtime(restarted, result)
+    _verify_ed2_b3_api(restarted, result)
+    _verify_ed2_b3_media_integrity(object_store, result)
+
+    backup_restore_exact = False
+    if profile_id in DESKTOP_PROFILES:
+        backup = work_root / "ed2-b3-backup"
+        restored_database = work_root / "ed2-b3-restored.sqlite3"
+        restored_objects = work_root / "ed2-b3-restored-objects"
+        create_desktop_production_backup(
+            database=database,
+            object_root=object_root,
+            destination=backup,
+        )
+        restore_desktop_production_backup(
+            backup=backup,
+            target_database=restored_database,
+            target_object_root=restored_objects,
+        )
+        restored_config = ProductionRuntimeConfig(
+            profile=RuntimeProfile.DESKTOP,
+            product_build_version=PRODUCT_VERSION,
+            authority_root=_authority_root(),
+            object_root=restored_objects,
+            desktop_database_path=restored_database,
+        )
+        restored = build_desktop_production_runtime(restored_config)
+        _verify_ed2_b3_exact_runtime(restored, result)
+        restored_store = LocalObjectStore(restored_objects)
+        _verify_ed2_b3_media_integrity(restored_store, result)
+        backup_restore_exact = True
+    else:
+        backup = work_root / "ed2-b3-backup"
+        restored_objects = work_root / "ed2-b3-restored-objects"
+        restore_conninfo = _required_env("TPAA_SERVICE_RESTORE_CONNINFO")
+        create_service_production_backup(
+            conninfo=conninfo,
+            object_root=object_root,
+            destination=backup,
+        )
+        restore_service_production_backup(
+            backup=backup,
+            target_conninfo=restore_conninfo,
+            target_object_root=restored_objects,
+        )
+        restored_config = ProductionRuntimeConfig(
+            profile=RuntimeProfile.SERVICE,
+            product_build_version=PRODUCT_VERSION,
+            authority_root=_authority_root(),
+            object_root=restored_objects,
+            service_conninfo=restore_conninfo,
+        )
+        restored = build_service_production_runtime(restored_config)
+        _verify_ed2_b3_exact_runtime(restored, result)
+        restored_store = LocalObjectStore(restored_objects)
+        _verify_ed2_b3_media_integrity(restored_store, result)
+        backup_restore_exact = True
+
+    report = result.report()
+    return {
+        **report,
+        "status": "PASS",
+        "product_version": PRODUCT_VERSION,
+        "runtime_profile": (
+            "DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"
+        ),
+        "db_schema_version": schema_version,
+        "canonical_baseline": core_baseline,
+        "api_exact_read_verified": True,
+        "api_latest_alias_rejected": True,
+        "backup_restore_exact_replay": backup_restore_exact,
+    }
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", required=True, choices=sorted(ALL_PROFILES))
@@ -962,6 +1264,8 @@ def main() -> int:
     service.add_argument("--source", type=Path, default=QUALIFICATION_SOURCE)
     ed2_b2 = sub.add_parser("ed2-b2-e2e")
     ed2_b2.add_argument("--work-root", type=Path, required=True)
+    ed2_b3 = sub.add_parser("ed2-b3-e2e")
+    ed2_b3.add_argument("--work-root", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "ready":
@@ -985,6 +1289,8 @@ def main() -> int:
         )
     elif args.command == "ed2-b2-e2e":
         result = _ed2_b2_e2e(args.profile, args.work_root)
+    elif args.command == "ed2-b3-e2e":
+        result = _ed2_b3_e2e(args.profile, args.work_root)
     else:
         raise AssertionError(args.command)
     print(json.dumps(result, indent=2, sort_keys=True))

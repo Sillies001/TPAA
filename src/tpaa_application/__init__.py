@@ -15,6 +15,21 @@ from .ed2_assessment_result import (
     ED2AssessmentResultRepository,
     assessment_result_from_profile,
 )
+from .ed2_upper_products import (
+    ED2UpperProduct,
+    ED2UpperProductError,
+    ED2_DEBRIEF_LAYERS,
+    ED2_ROOT_CAUSE_CATEGORIES,
+    ED2_TRAINING_PLUGIN_CONTRACTS,
+    ED2_UPPER_KINDS,
+    ED2_UPPER_PRODUCT_SCHEMA,
+    build_ed2_upper_product,
+    normalize_ed2_upper_kind,
+)
+from .ed2_upper_service import (
+    ED2UpperProductRepositoryPort,
+    ED2UpperProductService,
+)
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -178,6 +193,17 @@ from .source_import import (
 from .use_cases import GetStorageBaselineStatus
 
 __all__ = [
+    "ED2UpperProduct",
+    "ED2UpperProductError",
+    "ED2UpperProductRepositoryPort",
+    "ED2UpperProductService",
+    "ED2_DEBRIEF_LAYERS",
+    "ED2_ROOT_CAUSE_CATEGORIES",
+    "ED2_TRAINING_PLUGIN_CONTRACTS",
+    "ED2_UPPER_KINDS",
+    "ED2_UPPER_PRODUCT_SCHEMA",
+    "build_ed2_upper_product",
+    "normalize_ed2_upper_kind",
     "ED2AssessmentResult",
     "ED2AssessmentResultError",
     "ED2AssessmentResultRepository",

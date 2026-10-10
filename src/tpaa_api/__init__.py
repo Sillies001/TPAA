@@ -2,6 +2,7 @@
 
 from .app import create_app, register_base_routes
 from .desktop import create_desktop_app
+from .ed2_upper import register_ed2_upper_routes
 from .m1_app import create_m1_app, register_m1_routes
 from .m3_app import create_m3_app, register_m3_routes
 from .m4_app import create_m4_app, register_m4_routes
@@ -26,6 +27,7 @@ from .unified import (
 )
 
 __all__ = [
+    "register_ed2_upper_routes",
     "M5ServiceSecurityError",
     "M8PrincipalResolver",
     "M9PrincipalResolver",
