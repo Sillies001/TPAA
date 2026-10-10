@@ -1,5 +1,6 @@
 """TPAA ingest-layer public contracts."""
 
+from tpaa_ingest.ed2_gateway import JointLVCGatewayAdapter, JointLVCGatewayError
 from tpaa_ingest.m2_measurement_alignment import (
     M2MeasurementAlignmentError,
     M2MeasurementAlignmentProjection,
@@ -88,6 +89,8 @@ from tpaa_ingest.source_adapter import (
 )
 
 __all__ = [
+    "JointLVCGatewayAdapter",
+    "JointLVCGatewayError",
     "ClockAlignmentSample",
     "ClockSegment",
     "FROZEN_SOURCE_FAMILIES",

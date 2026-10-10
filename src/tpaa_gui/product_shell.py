@@ -14,6 +14,7 @@ from .discovery import (
     session_items,
     session_release_items,
 )
+from .ed2_upper import ED2LinkedDebriefError, build_linked_debrief_projection
 from .m1_workspace import create_m1_workspace
 from .m3_workspace import M3_GUI_TRAINING_KEYS, create_m3_workspace_navigation
 from .m4_workspace import create_m4_workspace
@@ -441,6 +442,18 @@ def _create_visualization_page(
         root,
     )
     render.setObjectName("tpaaB5TrajectoryRender")
+    upper_snapshot = qt_widgets.QComboBox(root)
+    upper_snapshot.setObjectName("tpaaED2LinkedDebriefSnapshotId")
+    upper_refresh = qt_widgets.QPushButton(
+        "Refresh frozen ED-2 linked debrief products",
+        root,
+    )
+    upper_refresh.setObjectName("tpaaED2LinkedDebriefRefresh")
+    upper_render = qt_widgets.QPushButton(
+        "Load exact timeline / media / bookmark / playlist layers",
+        root,
+    )
+    upper_render.setObjectName("tpaaED2LinkedDebriefRender")
     output = qt_widgets.QPlainTextEdit(root)
     output.setObjectName("tpaaB5TrajectoryOutput")
     output.setReadOnly(True)
@@ -449,7 +462,17 @@ def _create_visualization_page(
         root,
     )
     status.setObjectName("tpaaB5TrajectoryStatus")
-    for widget in (notice, release_id, refresh, render, status, output):
+    for widget in (
+        notice,
+        release_id,
+        refresh,
+        render,
+        upper_snapshot,
+        upper_refresh,
+        upper_render,
+        status,
+        output,
+    ):
         layout.addWidget(widget)
 
     def refresh_releases() -> None:
@@ -513,8 +536,92 @@ def _create_visualization_page(
         status.setText("Trajectory/media: exact presentation ready")
         output.setPlainText(json.dumps(result, indent=2, sort_keys=True))
 
+    def refresh_upper_debrief() -> None:
+        http_status, payload = transport.product_request_json(
+            "GET",
+            "/api/v1/upper/MEDIA_DEBRIEF",
+        )
+        if http_status != 200:
+            status.setText(
+                f"ED-2 linked debrief: discovery HTTP error {http_status}"
+            )
+            return
+        raw_items = payload.get("items")
+        if not isinstance(raw_items, list):
+            status.setText("ED-2 linked debrief: invalid product index")
+            return
+        upper_snapshot.clear()
+        count = 0
+        for raw in raw_items:
+            if not isinstance(raw, Mapping):
+                continue
+            snapshot_id = raw.get("snapshot_id")
+            source_release_ids = raw.get("source_release_ids")
+            if not isinstance(snapshot_id, str):
+                continue
+            release_label = "-"
+            if (
+                isinstance(source_release_ids, list)
+                and source_release_ids
+                and isinstance(source_release_ids[0], str)
+            ):
+                release_label = source_release_ids[0]
+            upper_snapshot.addItem(
+                f"{release_label} · {snapshot_id}",
+                snapshot_id,
+            )
+            count += 1
+        status.setText(
+            f"ED-2 linked debrief: {count} frozen exact products discovered"
+        )
+
+    def render_upper_debrief() -> None:
+        selected = upper_snapshot.currentData()
+        if not isinstance(selected, str) or not selected:
+            status.setText(
+                "ED-2 linked debrief: exact snapshot selection required"
+            )
+            return
+        http_status, payload = transport.product_request_json(
+            "GET",
+            f"/api/v1/upper/MEDIA_DEBRIEF/{selected}",
+        )
+        if http_status != 200:
+            status.setText(
+                f"ED-2 linked debrief: exact read HTTP error {http_status}"
+            )
+            output.clear()
+            return
+        try:
+            projection = build_linked_debrief_projection(
+                payload,
+                expected_snapshot_id=selected,
+            )
+        except ED2LinkedDebriefError as exc:
+            status.setText(f"ED-2 linked debrief: INVALID · {exc}")
+            output.clear()
+            return
+        result = {
+            "snapshot_id": projection.snapshot_id,
+            "release_id": projection.release_id,
+            "semantic_layers": list(projection.semantic_layers),
+            "timeline_count": len(projection.timeline),
+            "media_count": len(projection.media),
+            "bookmark_count": len(projection.bookmarks),
+            "playlist_count": len(projection.playlists),
+            "view_2d": projection.view_2d,
+            "view_3d": projection.view_3d,
+            "cesium_linked": projection.cesium_linked,
+            "business_recompute": False,
+            "mutable_alias_resolution": False,
+        }
+        status.setText("ED-2 linked debrief: exact layered presentation ready")
+        output.setPlainText(json.dumps(result, indent=2, sort_keys=True))
+
     refresh.clicked.connect(refresh_releases)
     render.clicked.connect(render_payload)
+    upper_refresh.clicked.connect(refresh_upper_debrief)
+    upper_render.clicked.connect(render_upper_debrief)
     return root
 
 

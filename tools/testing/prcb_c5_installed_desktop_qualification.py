@@ -91,6 +91,24 @@ def _ed2_b2_command(
     return [str(stage / "run.sh"), *args]
 
 
+def _ed2_b3_command(
+    stage: Path,
+    platform_name: str,
+    work_root: Path,
+) -> list[str]:
+    args = ["ed2-b3-e2e", "--work-root", str(work_root)]
+    if platform_name == "windows":
+        return [
+            "cmd.exe",
+            "/d",
+            "/s",
+            "/c",
+            str(stage / "run.cmd"),
+            *args,
+        ]
+    return [str(stage / "run.sh"), *args]
+
+
 def _json_stdout(value: str) -> dict[str, Any]:
     decoder = json.JSONDecoder()
     for index, char in enumerate(value):
@@ -372,6 +390,50 @@ def qualify(
                 f"installed Desktop ED2 B2 report invalid: {ed2_b2}"
             )
 
+        ed2_b3_completed = subprocess.run(
+            _ed2_b3_command(
+                stage,
+                platform_name,
+                Path(raw) / "ed2-b2-work",
+            ),
+            cwd=stage,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=dict(os.environ),
+        )
+        if ed2_b3_completed.returncode != 0:
+            raise RuntimeError(
+                "installed Desktop ED2 B3 upper E2E failed "
+                f"rc={ed2_b3_completed.returncode} "
+                f"stderr={ed2_b3_completed.stderr[-6000:]}"
+            )
+        ed2_b3 = _json_stdout(ed2_b3_completed.stdout)
+        if (
+            ed2_b3.get("schema")
+            != "TPAA_ED2_B3_UPPER_QUALIFICATION_RESULT_V1"
+            or ed2_b3.get("status") != "PASS"
+            or ed2_b3.get("product_version") != "1.0.1"
+            or ed2_b3.get("runtime_profile") != "DESKTOP"
+            or ed2_b3.get("db_schema_version") != "1.9.0"
+            or ed2_b3.get("canonical_baseline") != "CB-1.4.0"
+            or ed2_b3.get("snapshot_count") != 8
+            or ed2_b3.get("restart_exact_replay") is not True
+            or ed2_b3.get("backup_restore_exact_replay") is not True
+            or ed2_b3.get("api_exact_read_verified") is not True
+            or ed2_b3.get("api_latest_alias_rejected") is not True
+            or ed2_b3.get("privacy_boundaries_verified") is not True
+            or ed2_b3.get("training_plugin_contracts_verified") is not True
+            or ed2_b3.get("joint_lvc_boundary_verified") is not True
+            or ed2_b3.get("tests_fixture_dependency") is not False
+            or ed2_b3.get("production_seed_dependency") is not False
+            or ed2_b3.get("mutable_latest_fallback_used") is not False
+            or ed2_b3.get("formal_release_claimed") is not False
+        ):
+            raise RuntimeError(
+                f"installed Desktop ED2 B3 report invalid: {ed2_b3}"
+            )
+
         logical_product, logical_hash = _logical_product(installed)
         report: dict[str, object] = {
             "schema": "TPAA_PRCB_C5_INSTALLED_DESKTOP_QUALIFICATION_V1",
@@ -390,6 +452,7 @@ def qualify(
             "fixtures_packaged": False,
             "installed_runtime": installed,
             "ed2_b2_continuous_runtime": ed2_b2,
+            "ed2_b3_upper_runtime": ed2_b3,
             "logical_product": logical_product,
             "logical_product_sha256": logical_hash,
         }
