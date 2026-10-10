@@ -1,5 +1,14 @@
 """P2/P4 assessment governance and attribution substrates."""
 
+from .ed2_profile import (
+    ED2_ASSESSMENT_PROFILE_ID,
+    ED2_ASSESSMENT_PROFILE_SCHEMA,
+    ED2_ASSESSMENT_PROFILE_VERSION,
+    ED2AssessmentGate,
+    ED2AssessmentProfileError,
+    ED2AssessmentProfileResult,
+    evaluate_ed2_training_assessment,
+)
 from .p2_attribution import (
     P2AdjustedCapabilityEstimate,
     P2AttributionExecution,
@@ -68,6 +77,13 @@ from .p5_assessment import (
 )
 
 __all__ = [
+    "ED2AssessmentGate",
+    "ED2AssessmentProfileError",
+    "ED2AssessmentProfileResult",
+    "ED2_ASSESSMENT_PROFILE_ID",
+    "ED2_ASSESSMENT_PROFILE_SCHEMA",
+    "ED2_ASSESSMENT_PROFILE_VERSION",
+    "evaluate_ed2_training_assessment",
     "P1ObservationInput",
     "P2AdjustedCapabilityEstimate",
     "P2AdmissionEvidence",

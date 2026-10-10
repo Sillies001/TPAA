@@ -78,6 +78,7 @@ def test_full_116_business_plugins_execute_and_materialize_one_release() -> None
         context_id=_id("context"),
         context_version="ED2-FULL-P1-CONTEXT-V1",
         context_binding_hash="d" * 64,
+        comparison_context_hash="e" * 64,
         episode_id=_id("episode"),
         stage_id=None,
         start_session_time_us=0,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +13,9 @@ def test_prcb_c2_p4_p5_assessments_route_through_governed_workers() -> None:
     jobs = (ROOT / "src" / "tpaa_runtime" / "durable_jobs.py").read_text(
         encoding="utf-8"
     )
+    downstream = (
+        ROOT / "src" / "tpaa_runtime" / "production_downstream.py"
+    ).read_text(encoding="utf-8")
 
     assert 'P4_ASSESSMENT_COMMAND = "P4_ASSESSMENT"' in worker
     assert 'P5_ASSESSMENT_COMMAND = "P5_ASSESSMENT"' in worker
@@ -24,10 +28,12 @@ def test_prcb_c2_p4_p5_assessments_route_through_governed_workers() -> None:
     assert "build_p5_assessment_revision(" in worker
     assert "supersedes=None" in worker
 
-    assert "exact_p4_scope(snapshot_id)" in jobs
+    assert re.search(r"\.exact_p4_scope\(\s*snapshot_id\s*\)", jobs)
     assert "exact_p5_selection(" in jobs
-    assert "register_p4_revision(" in jobs
-    assert "register_p5_revision(" in jobs
+    assert "persist_p4_worker_product(" in jobs
+    assert "persist_p5_worker_product(" in jobs
+    assert "register_p4_revision(" in downstream
+    assert "register_p5_revision(" in downstream
     assert jobs.count(").succeed(job_id)") >= 6
     assert "PRCB_C2_P4_HUMAN_INPUT_REQUIRES_MUTATION_WORKFLOW" in jobs
     assert "PRCB_C2_P4_AUTOMATION_AUTHORITY_VIOLATION" in jobs

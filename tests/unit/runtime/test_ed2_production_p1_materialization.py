@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 
@@ -98,6 +99,7 @@ def _context() -> ProductionP1ReleaseContext:
         context_id=_id("context"),
         context_version="ED2-CONTEXT-V1",
         context_binding_hash="b" * 64,
+        comparison_context_hash="c" * 64,
         episode_id=_id("episode"),
         stage_id=None,
         start_session_time_us=1_000_000,
@@ -267,3 +269,117 @@ def test_materialization_rejects_post_execution_input_evidence_drift() -> None:
             aircraft=_aircraft(),
             system_bindings=_systems(contract),
         )
+
+
+
+def test_p2_comparison_key_excludes_exact_subject_and_context_identity() -> None:
+    contract, batch, inputs = _execution()
+    first = materialize_production_p1_release(
+        contract=contract,
+        batch=batch,
+        inputs=inputs,
+        context=_context(),
+        aircraft=_aircraft(),
+        system_bindings=_systems(contract),
+    )
+    alternate_context = ProductionP1ReleaseContext(
+        release_id=_id("release-2"),
+        release_no=1,
+        parent_release_id=None,
+        request_hash="d" * 64,
+        session_id=_id("session-2"),
+        context_id=_id("context-2"),
+        context_version="ED2-CONTEXT-V1",
+        context_binding_hash="e" * 64,
+        comparison_context_hash="c" * 64,
+        episode_id=_id("episode-2"),
+        stage_id=None,
+        start_session_time_us=1_000_000,
+        end_session_time_us=11_000_000,
+        coverage=1.0,
+        confidence=1.0,
+        observation_schema_version="ED2-P1-OBSERVATION-V1",
+        world_product_versions={"truth": "ED2-WORLD-V1"},
+    )
+    alternate_aircraft = ProductionP1AircraftBinding(
+        aircraft_id=_id("aircraft"),
+        aircraft_model_id=_id("aircraft-model"),
+        aircraft_instance_id=_id("aircraft-instance-2"),
+        subject_entity_id=_id("aircraft-entity-2"),
+        capability_dimension="AIRCRAFT_FLIGHT",
+        capability_type="KINEMATIC_ENERGY_CONTROL",
+    )
+    second = materialize_production_p1_release(
+        contract=contract,
+        batch=batch,
+        inputs=inputs,
+        context=alternate_context,
+        aircraft=alternate_aircraft,
+        system_bindings=_systems(contract),
+    )
+    first_by_definition = {
+        item.observed_metric_instance_id: item.comparison_key_hash
+        for item in first.observations
+    }
+    second_by_definition = {
+        item.observed_metric_instance_id: item.comparison_key_hash
+        for item in second.observations
+    }
+    first_instance_codes = {
+        item.metric_instance_id: item.metric_code for item in first.metric_instances
+    }
+    second_instance_codes = {
+        item.metric_instance_id: item.metric_code for item in second.metric_instances
+    }
+    first_codes = {
+        first_instance_codes[item.observed_metric_instance_id]: (
+            item.observed_metric_instance_id
+        )
+        for item in first.observations
+    }
+    second_codes = {
+        second_instance_codes[item.observed_metric_instance_id]: (
+            item.observed_metric_instance_id
+        )
+        for item in second.observations
+    }
+    common = sorted(set(first_codes) & set(second_codes))
+    assert common
+    for code in common:
+        assert (
+            first_by_definition[first_codes[code]]
+            == second_by_definition[second_codes[code]]
+        )
+
+    changed_profile = replace(
+        alternate_context,
+        release_id=_id("release-3"),
+        request_hash="f" * 64,
+        comparison_context_hash="1" * 64,
+    )
+    third = materialize_production_p1_release(
+        contract=contract,
+        batch=batch,
+        inputs=inputs,
+        context=changed_profile,
+        aircraft=alternate_aircraft,
+        system_bindings=_systems(contract),
+    )
+    third_by_definition = {
+        item.observed_metric_instance_id: item.comparison_key_hash
+        for item in third.observations
+    }
+    third_instance_codes = {
+        item.metric_instance_id: item.metric_code for item in third.metric_instances
+    }
+    third_codes = {
+        third_instance_codes[item.observed_metric_instance_id]: (
+            item.observed_metric_instance_id
+        )
+        for item in third.observations
+    }
+    assert any(
+        first_by_definition[first_codes[code]]
+        != third_by_definition[third_codes[code]]
+        for code in common
+    )

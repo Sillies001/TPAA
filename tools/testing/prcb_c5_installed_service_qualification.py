@@ -73,6 +73,24 @@ def _installed_command(stage: Path, profile: str, work_root: Path) -> list[str]:
     return [str(stage / "run.sh"), *args]
 
 
+def _ed2_b2_command(
+    stage: Path,
+    profile: str,
+    work_root: Path,
+) -> list[str]:
+    args = ["ed2-b2-e2e", "--work-root", str(work_root)]
+    if profile.startswith("WINDOWS_"):
+        return [
+            "cmd.exe",
+            "/d",
+            "/s",
+            "/c",
+            str(stage / "run.cmd"),
+            *args,
+        ]
+    return [str(stage / "run.sh"), *args]
+
+
 def _json_stdout(value: str) -> dict[str, Any]:
     decoder = json.JSONDecoder()
     for index, char in enumerate(value):
@@ -365,6 +383,55 @@ def qualify(
                     f"installed Service P1-P6 E2E report invalid: {installed}"
                 )
 
+            ed2_b2_completed = subprocess.run(
+                _ed2_b2_command(
+                    stage,
+                    profile,
+                    Path(raw) / "ed2-b2-work",
+                ),
+                cwd=stage,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=environment,
+            )
+            if ed2_b2_completed.returncode != 0:
+                raise RuntimeError(
+                    "installed Service ED2 B2 continuous E2E failed "
+                    f"rc={ed2_b2_completed.returncode} "
+                    f"stderr={ed2_b2_completed.stderr[-6000:]}"
+                )
+            ed2_b2 = _json_stdout(ed2_b2_completed.stdout)
+            if (
+                ed2_b2.get("schema")
+                != "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_RESULT_V1"
+                or ed2_b2.get("status") != "PASS"
+                or ed2_b2.get("product_version") != "1.0.1"
+                or ed2_b2.get("runtime_profile") != "SERVICE"
+                or ed2_b2.get("db_schema_version") != "1.9.0"
+                or ed2_b2.get("canonical_baseline") != "CB-1.4.0"
+                or len(cast(list[object], ed2_b2.get("session_ids", []))) != 8
+                or len(cast(list[object], ed2_b2.get("p1_release_ids", []))) != 8
+                or len(cast(list[object], ed2_b2.get("p2_estimate_ids", []))) != 4
+                or len(cast(list[object], ed2_b2.get("p3_estimate_ids", []))) != 4
+                or len(
+                    cast(
+                        list[object],
+                        ed2_b2.get("p4_approved_revision_ids", []),
+                    )
+                )
+                != 4
+                or not isinstance(ed2_b2.get("p6_forecast_result_id"), str)
+                or not isinstance(ed2_b2.get("p6_counterfactual_run_id"), str)
+                or ed2_b2.get("restart_exact_replay") is not True
+                or ed2_b2.get("tests_fixture_dependency") is not False
+                or ed2_b2.get("production_seed_dependency") is not False
+                or ed2_b2.get("formal_release_claimed") is not False
+            ):
+                raise RuntimeError(
+                    f"installed Service ED2 B2 report invalid: {ed2_b2}"
+                )
+
             primary_after = verify_postgres(client, database)
             restored_after = verify_postgres(client, restore_database)
             if primary_after != restored_after:
@@ -391,6 +458,7 @@ def qualify(
                 "postgres_server_version": postgres_server_version,
                 "pg_dump_restore_executed": True,
                 "installed_runtime": installed,
+                "ed2_b2_continuous_runtime": ed2_b2,
                 "logical_product": logical_product,
                 "logical_product_sha256": logical_hash,
             }

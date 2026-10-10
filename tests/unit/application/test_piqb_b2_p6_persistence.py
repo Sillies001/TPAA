@@ -8,6 +8,7 @@ from typing import cast
 import pytest
 
 from tools.testing.piqb_b2_p6_resolver_fixture import (
+    EVALUATION_SESSION,
     seed_p6_model_resolver_case,
 )
 from tpaa_application import (
@@ -427,6 +428,33 @@ def test_p6_model_build_rehydrates_from_durable_p3_p4_rows(
             uow.canonical_rows,
             object_store,
         )
+        assert {
+            row.p4_revision.session_id for row in case.training_rows
+        } == {EVALUATION_SESSION}
+        assert {row.session_order for row in case.training_rows} == {
+            1,
+            2,
+            3,
+            4,
+        }
+        for row in case.training_rows:
+            assignment = uow.canonical_rows.one(
+                "registry.session_order_assignment",
+                where={
+                    "assignment_id": row.session_order_assignment_id,
+                },
+                columns=("session_id",),
+            )
+            assert assignment is not None
+            session = uow.canonical_rows.one(
+                "registry.training_session",
+                where={"session_id": str(assignment["session_id"])},
+                columns=("session_order", "session_order_scope_id"),
+            )
+            assert session == {
+                "session_order": None,
+                "session_order_scope_id": None,
+            }
         uow.commit()
 
     with SQLiteDesktopUnitOfWork(database) as uow:

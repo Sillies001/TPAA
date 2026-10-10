@@ -9,6 +9,12 @@ from .durable_job_control import (
     DurableJobControlError,
     DurableJobSubmission,
 )
+from .ed2_assessment_result import (
+    ED2AssessmentResult,
+    ED2AssessmentResultError,
+    ED2AssessmentResultRepository,
+    assessment_result_from_profile,
+)
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -172,6 +178,10 @@ from .source_import import (
 from .use_cases import GetStorageBaselineStatus
 
 __all__ = [
+    "ED2AssessmentResult",
+    "ED2AssessmentResultError",
+    "ED2AssessmentResultRepository",
+    "assessment_result_from_profile",
     "InMemorySecurityAuditSink",
     "SecurityAuditRecord",
     "SecurityAuditSink",

@@ -502,11 +502,58 @@ def _qualification_action_projection(
     }
 
 
+def _remap_system_identity(
+    value: object,
+    identities: Mapping[str, str],
+) -> object:
+    """Rebind only exact Mission-System identities, including nested plugin inputs."""
+
+    if isinstance(value, str):
+        return identities.get(value, value)
+    if isinstance(value, list):
+        return [_remap_system_identity(item, identities) for item in value]
+    if isinstance(value, dict):
+        if not all(isinstance(key, str) for key in value):
+            raise TypeError("ED2_QUALIFICATION_SYSTEM_MAPPING_INVALID")
+        return {
+            identities.get(key, key): _remap_system_identity(item, identities)
+            for key, item in value.items()
+        }
+    return value
+
+
+def _rebind_system_inputs(
+    inputs: Mapping[str, Mapping[str, object]],
+    bindings: Mapping[str, str],
+    remapped_ids: Mapping[str, str],
+) -> dict[str, dict[str, object]]:
+    """Preserve explicit bindings, and add missing ones like the production parser."""
+
+    remapped_inputs: dict[str, dict[str, object]] = {}
+    for metric_code, original_input in inputs.items():
+        remapped = _remap_system_identity(original_input, remapped_ids)
+        if not isinstance(remapped, dict) or not all(
+            isinstance(key, str) for key in remapped
+        ):
+            raise TypeError("ED2_QUALIFICATION_SYSTEM_MAPPING_INVALID")
+        remapped_inputs[metric_code] = cast(dict[str, object], remapped)
+    for metric_code, existing_id in bindings.items():
+        if metric_code not in remapped_inputs or existing_id not in remapped_ids:
+            raise ValueError("ED2_QUALIFICATION_SYSTEM_BINDING_MISSING")
+        expected_id = remapped_ids[existing_id]
+        current_id = remapped_inputs[metric_code].get("mission_system_instance_id")
+        if current_id is not None and current_id != expected_id:
+            raise ValueError("ED2_QUALIFICATION_SYSTEM_INPUT_DRIFT")
+        remapped_inputs[metric_code]["mission_system_instance_id"] = expected_id
+    return remapped_inputs
+
+
 def build_full_p1_request_contract(
     *,
     aircraft_id: str,
     authority_root: Path = AUTHORITY,
     flight_source_json: str | None = None,
+    system_id_namespace: UUID | None = None,
 ) -> dict[str, object]:
     """Return a JSON-safe six-source exact-116 qualification request contract."""
 
@@ -516,6 +563,17 @@ def build_full_p1_request_contract(
         authority_root=authority_root,
         aircraft_id=aircraft_id,
     )
+    if system_id_namespace is not None:
+        remapped_ids = {
+            existing_id: str(uuid5(system_id_namespace, f"mission-system:{existing_id}"))
+            for existing_id in systems
+        }
+        inputs = _rebind_system_inputs(inputs, bindings, remapped_ids)
+        systems, bindings = build_full_p1_system_authority(
+            inputs,
+            authority_root=authority_root,
+            aircraft_id=aircraft_id,
+        )
     plan = build_m3_metric_execution_plan(authority_root)
     source_text = (
         _DEFAULT_QUALIFICATION_FLIGHT.read_text(encoding="utf-8")

@@ -1070,7 +1070,7 @@ jobs:
     runs-on: ubuntu-24.04
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: tpaa
           POSTGRES_HOST_AUTH_METHOD: trust
