@@ -437,6 +437,24 @@ def test_p6_model_build_rehydrates_from_durable_p3_p4_rows(
             3,
             4,
         }
+        for row in case.training_rows:
+            assignment = uow.canonical_rows.one(
+                "registry.session_order_assignment",
+                where={
+                    "assignment_id": row.session_order_assignment_id,
+                },
+                columns=("session_id",),
+            )
+            assert assignment is not None
+            session = uow.canonical_rows.one(
+                "registry.training_session",
+                where={"session_id": str(assignment["session_id"])},
+                columns=("session_order", "session_order_scope_id"),
+            )
+            assert session == {
+                "session_order": None,
+                "session_order_scope_id": None,
+            }
         uow.commit()
 
     with SQLiteDesktopUnitOfWork(database) as uow:

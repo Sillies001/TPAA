@@ -439,7 +439,15 @@ class DurableP6ModelBuildResolver:
                 f"p3_session_order_scope:{twin_revision_id}:"
                 f"{capability_type}"
             )
-        return matches[0]
+        scope_id = matches[0]
+        scope = self._rows.one(
+            "registry.session_order_scope",
+            where={"session_order_scope_id": scope_id},
+            columns=("status",),
+        )
+        if scope is None or str(scope["status"]) != "ACTIVE":
+            raise self._mismatch(f"p3_session_order_scope_status:{scope_id}")
+        return scope_id
 
     def _assignment_id(
         self,
@@ -471,23 +479,10 @@ class DurableP6ModelBuildResolver:
         session = self._rows.one(
             "registry.training_session",
             where={"session_id": session_id},
-            columns=(
-                "session_order",
-                "session_order_scope_id",
-            ),
+            columns=("session_id",),
         )
-        if session is None:
+        if session is None or str(session["session_id"]) != session_id:
             raise self._mismatch(f"training_session:{session_id}")
-        scope_raw = session["session_order_scope_id"]
-        order_raw = session["session_order"]
-        if (
-            scope_raw is None
-            or str(scope_raw) != scope_id
-            or isinstance(order_raw, bool)
-            or not isinstance(order_raw, int)
-            or order_raw != session_order
-        ):
-            raise self._mismatch(f"session_order:{session_id}")
         return str(assignment["assignment_id"])
 
     def _training_row(
