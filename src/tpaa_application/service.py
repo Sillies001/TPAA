@@ -6,6 +6,7 @@ from typing import Protocol
 
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
 
+from .ed2_upper_service import ED2UpperProductService
 from .job_control import JobControl, JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
     M1PublishSessionCommand,
@@ -215,6 +216,7 @@ class ApplicationService:
         feature_availability: FeatureAvailabilityUseCase | None = None,
         qualification_status: QualificationStatusUseCase | None = None,
         operational_status: OperationalStatusUseCase | None = None,
+        ed2_upper: ED2UpperProductService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -230,6 +232,7 @@ class ApplicationService:
         self._feature_availability = feature_availability
         self._qualification_status = qualification_status
         self._operational_status = operational_status
+        self._ed2_upper = ed2_upper
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -286,6 +289,40 @@ class ApplicationService:
         if self._operational_status is None:
             raise RuntimeError("operational status use case is not configured")
         return dict(self._operational_status.execute())
+
+    def _ed2_upper_service(self) -> ED2UpperProductService:
+        if self._ed2_upper is None:
+            raise RuntimeError("ED2 upper-product service is not configured")
+        return self._ed2_upper
+
+    def ed2_upper_create(
+        self,
+        *,
+        kind: str,
+        source_release_ids: tuple[str, ...],
+        as_of_utc: str,
+        payload: dict[str, object],
+    ) -> dict[str, object]:
+        return self._ed2_upper_service().create(
+            kind=kind,
+            source_release_ids=source_release_ids,
+            as_of_utc=as_of_utc,
+            payload=payload,
+        )
+
+    def ed2_upper_exact(
+        self,
+        *,
+        snapshot_id: str,
+        expected_kind: str | None = None,
+    ) -> dict[str, object]:
+        return self._ed2_upper_service().exact(
+            snapshot_id=snapshot_id,
+            expected_kind=expected_kind,
+        )
+
+    def ed2_upper_list(self, kind: str) -> dict[str, object]:
+        return self._ed2_upper_service().list_kind(kind)
 
     def submit_job(
         self,

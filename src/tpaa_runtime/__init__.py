@@ -48,8 +48,18 @@ from .recovery import (
     restore_service_production_backup,
 )
 from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
+from .training_plugin import (
+    GovernedTrainingPluginRuntime,
+    TrainingPluginBinding,
+    TrainingPluginComposition,
+    TrainingPluginCompositionError,
+)
 
 __all__ = [
+    "GovernedTrainingPluginRuntime",
+    "TrainingPluginBinding",
+    "TrainingPluginComposition",
+    "TrainingPluginCompositionError",
     "ConfiguredBearerIdentityProvider",
     "ProductOperationalStatus",
     "ProductQualificationStatus",

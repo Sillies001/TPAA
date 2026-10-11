@@ -15,6 +15,7 @@ from tpaa_application import (
 )
 
 from .app import ActorResolver, register_base_routes
+from .ed2_upper import register_ed2_upper_routes
 from .m1_app import register_m1_routes
 from .m3_app import register_m3_routes
 from .m4_app import register_m4_routes
@@ -110,6 +111,7 @@ def register_unified_routes(
         actor_resolver=actor_resolver,
     )
     register_product_runtime_routes(app, application)
+    register_ed2_upper_routes(app, application)
     register_m1_routes(app, application)
     register_m3_routes(app, application)
     register_m4_routes(app, application)

@@ -13,6 +13,7 @@ from tpaa_api.m9_app import M9PrincipalResolver
 from tpaa_api.unified import UnifiedPrincipalResolver, create_unified_service_app
 from tpaa_application import (
     ApplicationService,
+    ED2UpperProductService,
     GetStorageBaselineStatus,
     M4WorkspaceService,
     M6WorkspaceService,
@@ -46,6 +47,7 @@ from .durable_repositories import (
     RuntimeCanonicalUnitOfWork,
     RuntimeUnitOfWorkFactory,
 )
+from .ed2_upper_repository import DurableED2UpperProductRepository
 from .identity import (
     configured_service_principal_resolver,
     guard_production_principal_resolver,
@@ -194,6 +196,12 @@ def _compose(
     core_runtime_status = build_trusted_runtime_status_use_case(
         product_build_version=config.product_build_version
     )
+    ed2_upper = ED2UpperProductService(
+        DurableED2UpperProductRepository(
+            read_uow_factory,
+            write_uow_factory,
+        )
+    )
     application = ApplicationService(
         get_storage_baseline_status=storage_status,
         job_control=job_control,
@@ -211,6 +219,7 @@ def _compose(
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=PRCBOperationalStatus(qualification_status),
+        ed2_upper=ed2_upper,
     )
     return ProductionRuntime(
         config=config,

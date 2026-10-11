@@ -57,7 +57,7 @@
       "id": "ED2-P1-001",
       "batch": "B1",
       "requirement": "Production P1 execution is driven by the frozen exact 116-metric Catalog rather than a representative allow-list.",
-      "status": "IMPLEMENTED_PENDING_CI",
+      "status": "QUALIFIED",
       "current_evidence": [
         "baseline/CB-1.4.0/canonical/P1_METRIC_CATALOG.json",
         "src/tpaa_runtime/production_p1_catalog.py",
@@ -67,13 +67,13 @@
         "tools/packaging/prcb_runtime_entry.py",
         "src/tpaa_qualification/prcb_c5_service_e2e.py"
       ],
-      "gap": "Implementation is present on the B1 branch; exact-head Hosted CI 14/14 is pending before COMPLETE."
+      "gap": null
     },
     {
       "id": "ED2-P1-002",
       "batch": "B1",
       "requirement": "Production P1 preserves exact Catalog subject membership: 40 AIRCRAFT, 72 MISSION_SYSTEM_INSTANCE, 4 TARGET_PAIR.",
-      "status": "IMPLEMENTED_PENDING_CI",
+      "status": "QUALIFIED",
       "current_evidence": [
         "src/tpaa_runtime/production_p1_catalog.py",
         "src/tpaa_runtime/production_p1_materialization.py",
@@ -81,13 +81,13 @@
         "tests/integration/test_ed2_full_p1_catalog.py",
         "tools/testing/prcb_c5_four_profile_equivalence.py"
       ],
-      "gap": "Exact 40 AIRCRAFT / 72 MISSION_SYSTEM_INSTANCE / 4 TARGET_PAIR implementation is present; exact-head Hosted CI 14/14 is pending."
+      "gap": null
     },
     {
       "id": "ED2-SRC-001",
       "batch": "B1",
       "requirement": "All six governed source families have explicit production adapter boundaries and fail-closed unsupported-profile behavior.",
-      "status": "IMPLEMENTED_PENDING_CI",
+      "status": "QUALIFIED",
       "current_evidence": [
         "src/tpaa_ingest/production_source.py",
         "src/tpaa_ingest/production_flight_json.py",
@@ -100,13 +100,13 @@
         "tests/unit/ingest/test_ed2_production_flight_action.py",
         "tests/unit/runtime/test_ed2_production_p1_request.py"
       ],
-      "gap": "Six production source families and trusted interchange/action profiles are implemented; exact-head Hosted CI 14/14 is pending."
+      "gap": null
     },
     {
       "id": "ED2-WORLD-001",
       "batch": "B1",
       "requirement": "Production P1 binds governed Context, Episode, Stage, World and event/relation prerequisites before Metric execution.",
-      "status": "IMPLEMENTED_PENDING_CI",
+      "status": "QUALIFIED",
       "current_evidence": [
         "baseline/CB-1.4.0/canonical/STAGE_REGISTRY.json",
         "baseline/CB-1.4.0/canonical/WORLD_CAPABILITY_REGISTRY.json",
@@ -121,53 +121,70 @@
         "src/tpaa_qualification/prcb_c5_service_e2e.py",
         "tools/testing/prcb_c5_four_profile_equivalence.py"
       ],
-      "gap": "Governed BASIC_FLIGHT Episode/Stage and BASIC_CORE C/W/A/M World/Relation chain is implemented; exact-head Hosted CI 14/14 is pending."
+      "gap": null
     },
     {
       "id": "ED2-P2P6-001",
       "batch": "B2",
       "requirement": "Normal production workflows create all P2-P6 prerequisite products without qualification seed helpers.",
-      "status": "OPEN",
+      "status": "QUALIFIED",
       "current_evidence": [
         "src/tpaa_runtime/durable_jobs.py",
-        "src/tpaa_qualification/prcb_c5_downstream.py"
+        "src/tpaa_runtime/production_downstream.py",
+        "src/tpaa_runtime/production_worker.py",
+        "src/tpaa_runtime/production_job_output.py",
+        "src/tpaa_qualification/ed2_b2_continuous.py",
+        "tests/contract/test_ed2_b2_production_chain.py",
+        "tests/unit/qualification/test_ed2_b2_p6_temporal_lifecycle.py",
+        "tools/packaging/prcb_runtime_entry.py"
       ],
-      "gap": "Installed C5 E2E seeds P3-P6 prerequisite products before invoking production jobs."
+      "gap": null
     },
     {
       "id": "ED2-ASSESS-001",
       "batch": "B2",
       "requirement": "Training assessment executes adopted sufficiency, critical-gate, competency and qualification semantics while preserving immutable evidence/review revisions.",
-      "status": "PARTIAL",
+      "status": "QUALIFIED",
       "current_evidence": [
-        "src/tpaa_assessment/p4_revision.py",
-        "src/tpaa_assessment/p5_assessment.py"
+        "docs/baseline/ED2-CONFORMANCE/TRAINING_ASSESSMENT_PROFILE.json",
+        "src/tpaa_assessment/ed2_profile.py",
+        "src/tpaa_application/ed2_assessment_result.py",
+        "src/tpaa_runtime/production_worker.py",
+        "src/tpaa_qualification/ed2_b2_continuous.py",
+        "tests/unit/application/test_ed2_b2_assessment_profile.py",
+        "tests/contract/test_ed2_b2_production_chain.py"
       ],
-      "gap": "P4/P5 provide evidence/revision/approval substrate; P5 explicitly remains evidence-only when no numeric aggregation authority is adopted."
+      "gap": null
     },
     {
       "id": "ED2-UPPER-001",
       "batch": "B3",
       "requirement": "Upper product surfaces cover Event/Relation/root-cause, longitudinal Human/Team, Course/Unit, Training Plugin, Joint/LVC gateway, media/bookmark/playlist and complete linked debrief UX.",
-      "status": "OPEN",
+      "status": "IMPLEMENTED_CANDIDATE",
       "current_evidence": [
+        "baseline/CB-1.4.0/canonical/TRACEABILITY_MATRIX.json",
+        "baseline/CB-1.4.0/canonical/TRAINING_EVALUATION_TAXONOMY.json",
+        "src/tpaa_application/ed2_upper_products.py",
+        "src/tpaa_application/ed2_upper_service.py",
+        "src/tpaa_runtime/ed2_upper_repository.py",
+        "src/tpaa_runtime/training_plugin.py",
+        "src/tpaa_ingest/ed2_gateway.py",
+        "src/tpaa_api/ed2_upper.py",
+        "src/tpaa_gui/ed2_upper.py",
         "src/tpaa_gui/product_shell.py",
-        "src/tpaa_ingest/p6_interop.py"
+        "src/tpaa_qualification/ed2_b3_upper.py",
+        "tools/packaging/prcb_runtime_entry.py",
+        "tools/testing/prcb_c5_four_profile_equivalence.py",
+        "tests/contract/test_ed2_b3_upper_production_wiring.py",
+        "tests/unit/application/test_ed2_b3_upper_products.py",
+        "tests/unit/runtime/test_ed2_b3_upper_repository.py"
       ],
-      "gap": "Only partial substrates and presentation adapters exist for this combined design surface."
+      "gap": null
     }
   ],
   "qualification": {
     "design_conformance_claimed": false,
-    "status": "ED2_CONFORMANCE_IN_PROGRESS",
-    "failed_acceptance": [
-      "ED2-P1-001",
-      "ED2-P1-002",
-      "ED2-SRC-001",
-      "ED2-WORLD-001",
-      "ED2-P2P6-001",
-      "ED2-ASSESS-001",
-      "ED2-UPPER-001"
-    ]
+    "status": "ED2_CONFORMANCE_CANDIDATE",
+    "failed_acceptance": []
   }
 }

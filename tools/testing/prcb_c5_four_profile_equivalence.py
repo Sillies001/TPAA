@@ -94,6 +94,152 @@ def _profile(
     return report
 
 
+def _ed2_b2_assessment_refs(
+    report: dict[str, Any],
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    value = report.get("ed2_b2_continuous_runtime")
+    if not isinstance(value, dict):
+        raise RuntimeError("ED2 B2 installed authority evidence missing")
+    payload = cast(dict[str, Any], value)
+    p4_drafts = payload.get("p4_draft_revision_ids")
+    p4_approved = payload.get("p4_approved_revision_ids")
+    p5_draft = payload.get("p5_draft_revision_id")
+    p5_approved = payload.get("p5_approved_revision_id")
+    if (
+        payload.get("schema")
+        != "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_RESULT_V1"
+        or payload.get("status") != "PASS"
+        or not isinstance(p4_drafts, list)
+        or len(p4_drafts) != 4
+        or not all(isinstance(item, str) and item for item in p4_drafts)
+        or not isinstance(p4_approved, list)
+        or len(p4_approved) != 4
+        or not all(isinstance(item, str) and item for item in p4_approved)
+        or not isinstance(p5_draft, str)
+        or not p5_draft
+        or not isinstance(p5_approved, str)
+        or not p5_approved
+    ):
+        raise RuntimeError("ED2 B2 installed assessment authority invalid")
+    return (
+        tuple(cast(list[str], p4_drafts))
+        + tuple(cast(list[str], p4_approved)),
+        (p5_draft, p5_approved),
+    )
+
+
+def _assessment_authority_sha256(
+    p4_refs: tuple[str, ...],
+    p5_refs: tuple[str, ...],
+) -> str:
+    rendered = json.dumps(
+        {
+            "p4_revision_refs": list(p4_refs),
+            "p5_revision_refs": list(p5_refs),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+    return hashlib.sha256(rendered.encode("utf-8")).hexdigest()
+
+
+def _ed2_b3(report: dict[str, Any]) -> dict[str, Any]:
+    value = report.get("ed2_b3_upper_runtime")
+    if not isinstance(value, dict):
+        raise RuntimeError("ED2 B3 installed upper evidence missing")
+    payload = cast(dict[str, Any], value)
+    p4_refs, p5_refs = _ed2_b2_assessment_refs(report)
+    expected_authority_sha256 = _assessment_authority_sha256(
+        p4_refs,
+        p5_refs,
+    )
+    if (
+        payload.get("schema") != "TPAA_ED2_B3_UPPER_QUALIFICATION_RESULT_V1"
+        or payload.get("status") != "PASS"
+        or payload.get("snapshot_count") != 8
+        or payload.get("assessment_authority_mode")
+        != "ED2_B2_EXACT_REVISION_OUTPUT"
+        or payload.get("assessment_authority_sha256")
+        != expected_authority_sha256
+        or payload.get("p4_revision_ref_count") != 12
+        or payload.get("p5_revision_ref_count") != 3
+        or not _hex64(payload.get("media_sha256"))
+        or not _hex64(payload.get("transcript_sha256"))
+        or payload.get("verification_ids")
+        != [
+            "V-SAFE-002",
+            "V-COHORT-001",
+            "V-PLUGIN-001",
+            "V-KNOW-001",
+            "V-VIS-001",
+        ]
+        or payload.get("restart_exact_replay") is not True
+        or payload.get("backup_restore_exact_replay") is not True
+        or payload.get("api_exact_read_verified") is not True
+        or payload.get("api_latest_alias_rejected") is not True
+        or payload.get("privacy_boundaries_verified") is not True
+        or payload.get("training_plugin_contracts_verified") is not True
+        or payload.get("joint_lvc_boundary_verified") is not True
+        or payload.get("mutable_latest_fallback_used") is not False
+        or payload.get("formal_release_claimed") is not False
+    ):
+        raise RuntimeError("ED2 B3 installed upper evidence invalid")
+    return payload
+
+
+def _ed2_b3_projection(report: dict[str, Any]) -> dict[str, object]:
+    payload = _ed2_b3(report)
+    snapshots = payload.get("snapshot_ids")
+    layers = payload.get("semantic_layers")
+    if not isinstance(snapshots, dict) or len(snapshots) != 8:
+        raise RuntimeError("ED2 B3 snapshot identity set invalid")
+    if not all(
+        isinstance(key, str)
+        and isinstance(value, str)
+        and bool(value)
+        for key, value in snapshots.items()
+    ):
+        raise RuntimeError("ED2 B3 snapshot identity invalid")
+    if layers != ["W", "P", "A", "J", "M"]:
+        raise RuntimeError("ED2 B3 semantic layer set drift")
+    stable_snapshot_kinds = (
+        "event_relation_root_cause",
+        "training_plugin",
+        "joint_lvc_gateway",
+        "media_debrief",
+    )
+    return {
+        "stable_snapshot_ids": {
+            key: snapshots[key] for key in stable_snapshot_kinds
+        },
+        "source_release_ids": payload.get("source_release_ids"),
+        "event_availability": payload.get("event_availability"),
+        "objective_availability": payload.get("objective_availability"),
+        "semantic_layers": layers,
+        "assessment_authority_mode": payload.get(
+            "assessment_authority_mode"
+        ),
+        "p4_revision_ref_count": payload.get("p4_revision_ref_count"),
+        "p5_revision_ref_count": payload.get("p5_revision_ref_count"),
+        "media_uri": payload.get("media_uri"),
+        "media_sha256": payload.get("media_sha256"),
+        "transcript_uri": payload.get("transcript_uri"),
+        "transcript_sha256": payload.get("transcript_sha256"),
+        "verification_ids": payload.get("verification_ids"),
+    }
+
+
+def _ed2_b3_snapshot_ids(report: dict[str, Any]) -> dict[str, str]:
+    snapshots = _ed2_b3(report).get("snapshot_ids")
+    if not isinstance(snapshots, dict):
+        raise RuntimeError("ED2 B3 snapshot identity set invalid")
+    return {
+        str(key): str(value)
+        for key, value in sorted(snapshots.items())
+    }
+
+
 def _p2_semantics(report: dict[str, Any]) -> dict[str, object]:
     installed = _installed(report)
     reasons = installed.get("p2_reason_codes")
@@ -255,6 +401,22 @@ def review(
         profile: _shared_exact_projection(report)
         for profile, report in by_profile.items()
     }
+    ed2_b3_presence = {
+        profile: isinstance(report.get("ed2_b3_upper_runtime"), dict)
+        for profile, report in by_profile.items()
+    }
+    if any(ed2_b3_presence.values()) and not all(ed2_b3_presence.values()):
+        raise RuntimeError(
+            "ED2 B3 installed upper evidence incomplete across profiles"
+        )
+    ed2_b3_logical = (
+        {
+            profile: _ed2_b3_projection(report)
+            for profile, report in by_profile.items()
+        }
+        if all(ed2_b3_presence.values())
+        else {}
+    )
     package_hashes = {
         profile: str(report["package_sha256"])
         for profile, report in by_profile.items()
@@ -317,6 +479,30 @@ def review(
             for report in by_profile.values()
         ),
     }
+    if all(ed2_b3_presence.values()):
+        acceptance.update(
+            {
+                "ed2_b3_upper_logical_equivalence_all_profiles": (
+                    len(
+                        {
+                            json.dumps(
+                                value,
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            )
+                            for value in ed2_b3_logical.values()
+                        }
+                    )
+                    == 1
+                ),
+                "ed2_b3_restart_backup_api_all_profiles": all(
+                    _ed2_b3(report).get("restart_exact_replay") is True
+                    and _ed2_b3(report).get("backup_restore_exact_replay") is True
+                    and _ed2_b3(report).get("api_exact_read_verified") is True
+                    for report in by_profile.values()
+                ),
+            }
+        )
     failed = sorted(key for key, value in acceptance.items() if value is not True)
     return {
         "schema": "TPAA_PRCB_C5_FOUR_PROFILE_LOGICAL_EQUIVALENCE_V1",
@@ -342,6 +528,22 @@ def review(
             "semantics while retaining explicit runtime knowledge-time provenance."
         ),
         "shared_exact_projection_by_profile": shared_exact,
+        "ed2_b3_upper_projection_by_profile": ed2_b3_logical,
+        "ed2_b3_profile_local_snapshot_ids": (
+            {
+                profile: _ed2_b3_snapshot_ids(report)
+                for profile, report in by_profile.items()
+            }
+            if all(ed2_b3_presence.values())
+            else {}
+        ),
+        "ed2_b3_identity_interpretation": (
+            "B3 exact snapshot identity is verified within each installed profile "
+            "across restart, backup/restore, and exact API reads. Cross-profile "
+            "logical equivalence requires exact stable upper-product identities "
+            "and governed longitudinal semantics while retaining the exact "
+            "profile-local B2 assessment revision authority."
+        ),
         "acceptance": acceptance,
         "failed_acceptance": failed,
     }

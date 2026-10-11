@@ -90,15 +90,8 @@ def test_ed2_conformance_preserves_historical_1_0_1_qualification() -> None:
 
     qualification = _mapping(baseline["qualification"])
     assert qualification["design_conformance_claimed"] is False
-    assert qualification["status"] == "ED2_CONFORMANCE_IN_PROGRESS"
-    failed = qualification["failed_acceptance"]
-    assert isinstance(failed, list)
-    assert {
-        "ED2-P1-001",
-        "ED2-P1-002",
-        "ED2-SRC-001",
-        "ED2-WORLD-001",
-    }.issubset(set(failed))
+    assert qualification["status"] == "ED2_CONFORMANCE_CANDIDATE"
+    assert qualification["failed_acceptance"] == []
 
 
 def test_ed2_b1_freezes_exact_p1_catalog_membership_gap() -> None:
@@ -108,22 +101,10 @@ def test_ed2_b1_freezes_exact_p1_catalog_membership_gap() -> None:
         for item in _mappings(baseline["requirements"])
     }
     assert requirements["ED2-P1-001"]["batch"] == "B1"
-    assert (
-        requirements["ED2-P1-001"]["status"]
-        == "IMPLEMENTED_PENDING_CI"
-    )
-    assert (
-        requirements["ED2-P1-002"]["status"]
-        == "IMPLEMENTED_PENDING_CI"
-    )
-    assert (
-        requirements["ED2-SRC-001"]["status"]
-        == "IMPLEMENTED_PENDING_CI"
-    )
-    assert (
-        requirements["ED2-WORLD-001"]["status"]
-        == "IMPLEMENTED_PENDING_CI"
-    )
+    assert requirements["ED2-P1-001"]["status"] == "QUALIFIED"
+    assert requirements["ED2-P1-002"]["status"] == "QUALIFIED"
+    assert requirements["ED2-SRC-001"]["status"] == "QUALIFIED"
+    assert requirements["ED2-WORLD-001"]["status"] == "QUALIFIED"
     requirement = str(requirements["ED2-P1-002"]["requirement"])
     assert "40 AIRCRAFT" in requirement
     assert "72 MISSION_SYSTEM_INSTANCE" in requirement
