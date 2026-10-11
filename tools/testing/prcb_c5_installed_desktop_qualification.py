@@ -418,6 +418,15 @@ def qualify(
             or ed2_b3.get("db_schema_version") != "1.9.0"
             or ed2_b3.get("canonical_baseline") != "CB-1.4.0"
             or ed2_b3.get("snapshot_count") != 8
+            or ed2_b3.get("assessment_authority_mode")
+            != "ED2_B2_EXACT_REVISION_OUTPUT"
+            or not isinstance(
+                ed2_b3.get("assessment_authority_sha256"),
+                str,
+            )
+            or len(cast(str, ed2_b3.get("assessment_authority_sha256"))) != 64
+            or ed2_b3.get("p4_revision_ref_count") != 12
+            or ed2_b3.get("p5_revision_ref_count") != 3
             or ed2_b3.get("restart_exact_replay") is not True
             or ed2_b3.get("backup_restore_exact_replay") is not True
             or ed2_b3.get("api_exact_read_verified") is not True

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, cast
@@ -247,3 +248,195 @@ def test_prcb_c5_four_profile_review_rejects_partial_ed2_b3_evidence(
             windows_service=windows_service,
             expected_revision=revision,
         )
+
+
+def _attach_ed2_b3(
+    path: Path,
+    *,
+    suffix: str,
+    stable_plugin_id: str = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+) -> None:
+    report = cast(
+        dict[str, Any],
+        json.loads(path.read_text(encoding="utf-8")),
+    )
+    p4_drafts = [f"p4-draft-{suffix}-{index}" for index in range(4)]
+    p4_approved = [f"p4-approved-{suffix}-{index}" for index in range(4)]
+    p5_draft = f"p5-draft-{suffix}"
+    p5_approved = f"p5-approved-{suffix}"
+    b2 = {
+        "schema": "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_RESULT_V1",
+        "status": "PASS",
+        "p4_draft_revision_ids": p4_drafts,
+        "p4_approved_revision_ids": p4_approved,
+        "p5_draft_revision_id": p5_draft,
+        "p5_approved_revision_id": p5_approved,
+    }
+    p4_refs = tuple(p4_drafts + p4_approved)
+    p5_refs = (p5_draft, p5_approved)
+    authority = hashlib.sha256(
+        json.dumps(
+            {
+                "p4_revision_refs": list(p4_refs),
+                "p5_revision_refs": list(p5_refs),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+    report["ed2_b2_continuous_runtime"] = b2
+    report["ed2_b3_upper_runtime"] = {
+        "schema": "TPAA_ED2_B3_UPPER_QUALIFICATION_RESULT_V1",
+        "status": "PASS",
+        "snapshot_count": 8,
+        "snapshot_ids": {
+            "event_relation_root_cause": (
+                "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+            ),
+            "human_longitudinal": f"human-{suffix}",
+            "team_longitudinal": f"team-{suffix}",
+            "course_analytics": f"course-{suffix}",
+            "unit_analytics": f"unit-{suffix}",
+            "training_plugin": stable_plugin_id,
+            "joint_lvc_gateway": (
+                "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+            ),
+            "media_debrief": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+        },
+        "source_release_ids": [
+            "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+        ],
+        "event_availability": "UNAVAILABLE",
+        "objective_availability": "UNAVAILABLE",
+        "assessment_authority_mode": "ED2_B2_EXACT_REVISION_OUTPUT",
+        "assessment_authority_sha256": authority,
+        "p4_revision_ref_count": 12,
+        "p5_revision_ref_count": 3,
+        "semantic_layers": ["W", "P", "A", "J", "M"],
+        "media_uri": "tpaa-object://ed2-b3/media/qualification-media.txt",
+        "media_sha256": "a" * 64,
+        "transcript_uri": (
+            "tpaa-object://ed2-b3/media/qualification-transcript.txt"
+        ),
+        "transcript_sha256": "b" * 64,
+        "verification_ids": [
+            "V-SAFE-002",
+            "V-COHORT-001",
+            "V-PLUGIN-001",
+            "V-KNOW-001",
+            "V-VIS-001",
+        ],
+        "restart_exact_replay": True,
+        "backup_restore_exact_replay": True,
+        "api_exact_read_verified": True,
+        "api_latest_alias_rejected": True,
+        "privacy_boundaries_verified": True,
+        "training_plugin_contracts_verified": True,
+        "joint_lvc_boundary_verified": True,
+        "mutable_latest_fallback_used": False,
+        "formal_release_claimed": False,
+    }
+    path.write_text(json.dumps(report), encoding="utf-8")
+
+
+def test_prcb_c5_b3_compares_longitudinal_semantics_not_profile_local_ids(
+    tmp_path: Path,
+) -> None:
+    linux_desktop, windows_desktop, linux_service, windows_service, revision = (
+        _inputs(tmp_path)
+    )
+    for suffix, path in (
+        ("1", linux_desktop),
+        ("2", windows_desktop),
+        ("3", linux_service),
+        ("4", windows_service),
+    ):
+        _attach_ed2_b3(path, suffix=suffix)
+
+    payload = review(
+        linux_desktop=linux_desktop,
+        windows_desktop=windows_desktop,
+        linux_service=linux_service,
+        windows_service=windows_service,
+        expected_revision=revision,
+    )
+    assert payload["status"] == "PASS"
+    acceptance = cast(dict[str, object], payload["acceptance"])
+    assert acceptance["ed2_b3_upper_logical_equivalence_all_profiles"] is True
+    local_ids = cast(
+        dict[str, dict[str, str]],
+        payload["ed2_b3_profile_local_snapshot_ids"],
+    )
+    assert (
+        local_ids["LINUX_DESKTOP_X64"]["human_longitudinal"]
+        != local_ids["WINDOWS_DESKTOP_X64"]["human_longitudinal"]
+    )
+
+
+def test_prcb_c5_b3_fails_on_stable_upper_identity_drift(
+    tmp_path: Path,
+) -> None:
+    linux_desktop, windows_desktop, linux_service, windows_service, revision = (
+        _inputs(tmp_path)
+    )
+    for suffix, path in (
+        ("1", linux_desktop),
+        ("2", windows_desktop),
+        ("3", linux_service),
+        ("4", windows_service),
+    ):
+        _attach_ed2_b3(path, suffix=suffix)
+    _attach_ed2_b3(
+        windows_service,
+        suffix="4",
+        stable_plugin_id="ffffffff-ffff-4fff-8fff-ffffffffffff",
+    )
+
+    payload = review(
+        linux_desktop=linux_desktop,
+        windows_desktop=windows_desktop,
+        linux_service=linux_service,
+        windows_service=windows_service,
+        expected_revision=revision,
+    )
+    assert payload["status"] == "FAIL"
+    assert "ed2_b3_upper_logical_equivalence_all_profiles" in payload[
+        "failed_acceptance"
+    ]
+
+
+def test_prcb_c5_b3_rejects_authority_hash_not_bound_to_b2(
+    tmp_path: Path,
+) -> None:
+    linux_desktop, windows_desktop, linux_service, windows_service, revision = (
+        _inputs(tmp_path)
+    )
+    for suffix, path in (
+        ("1", linux_desktop),
+        ("2", windows_desktop),
+        ("3", linux_service),
+        ("4", windows_service),
+    ):
+        _attach_ed2_b3(path, suffix=suffix)
+
+    value = cast(
+        dict[str, Any],
+        json.loads(windows_service.read_text(encoding="utf-8")),
+    )
+    b3 = cast(dict[str, Any], value["ed2_b3_upper_runtime"])
+    b3["assessment_authority_sha256"] = "0" * 64
+    windows_service.write_text(json.dumps(value), encoding="utf-8")
+
+    with pytest.raises(
+        RuntimeError,
+        match="ED2 B3 installed upper evidence invalid",
+    ):
+        review(
+            linux_desktop=linux_desktop,
+            windows_desktop=windows_desktop,
+            linux_service=linux_service,
+            windows_service=windows_service,
+            expected_revision=revision,
+        )
+

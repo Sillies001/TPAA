@@ -943,7 +943,7 @@ def _ed2_b2_e2e(
         uow.commit()
 
     report = result.report()
-    return {
+    payload = {
         **report,
         "status": "PASS",
         "product_version": PRODUCT_VERSION,
@@ -957,22 +957,49 @@ def _ed2_b2_e2e(
         "production_seed_dependency": False,
         "formal_release_claimed": False,
     }
-
+    authority_path = work_root / "ed2-b2-exact-authority.json"
+    authority_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return payload
 
 
 def _ed2_b2_source_identity(
     uow_factory: QualificationUowFactory,
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    work_root: Path,
+) -> tuple[
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+    str,
+    str,
+]:
     try:
         plan = json.loads(QUALIFICATION_B2_PLAN.read_text(encoding="utf-8"))
+        authority = json.loads(
+            (work_root / "ed2-b2-exact-authority.json").read_text(
+                encoding="utf-8"
+            )
+        )
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise RuntimeError("ED2 B3 B2 source plan unavailable") from exc
-    if not isinstance(plan, dict):
-        raise RuntimeError("ED2 B3 B2 source plan invalid")
+        raise RuntimeError("ED2 B3 exact B2 authority unavailable") from exc
+    if not isinstance(plan, dict) or not isinstance(authority, dict):
+        raise RuntimeError("ED2 B3 exact B2 authority invalid")
+    if (
+        authority.get("schema")
+        != "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_RESULT_V1"
+        or authority.get("status") != "PASS"
+        or authority.get("db_schema_version") != "1.9.0"
+        or authority.get("canonical_baseline") != "CB-1.4.0"
+    ):
+        raise RuntimeError("ED2 B3 exact B2 authority metadata invalid")
+
     raw_sessions = plan.get("sessions")
     if not isinstance(raw_sessions, list) or len(raw_sessions) != 8:
         raise RuntimeError("ED2 B3 B2 source Session set invalid")
-
     session_ids: list[str] = []
     for raw in raw_sessions:
         if not isinstance(raw, dict):
@@ -983,6 +1010,30 @@ def _ed2_b2_source_identity(
         session_ids.append(session_id)
     if len(set(session_ids)) != 8:
         raise RuntimeError("ED2 B3 B2 source Session identity drift")
+
+    authority_sessions = authority.get("session_ids")
+    release_ids_raw = authority.get("p1_release_ids")
+    p4_drafts_raw = authority.get("p4_draft_revision_ids")
+    p4_approved_raw = authority.get("p4_approved_revision_ids")
+    p5_draft = authority.get("p5_draft_revision_id")
+    p5_approved = authority.get("p5_approved_revision_id")
+    if (
+        authority_sessions != session_ids
+        or not isinstance(release_ids_raw, list)
+        or len(release_ids_raw) != 8
+        or not all(isinstance(item, str) and item for item in release_ids_raw)
+        or not isinstance(p4_drafts_raw, list)
+        or len(p4_drafts_raw) != 4
+        or not all(isinstance(item, str) and item for item in p4_drafts_raw)
+        or not isinstance(p4_approved_raw, list)
+        or len(p4_approved_raw) != 4
+        or not all(isinstance(item, str) and item for item in p4_approved_raw)
+        or not isinstance(p5_draft, str)
+        or not p5_draft
+        or not isinstance(p5_approved, str)
+        or not p5_approved
+    ):
+        raise RuntimeError("ED2 B3 exact B2 revision authority invalid")
 
     release_ids: list[str] = []
     with uow_factory(False) as uow:
@@ -1015,7 +1066,16 @@ def _ed2_b2_source_identity(
                 )
             release_ids.append(str(published[0]["release_id"]))
         uow.commit()
-    return tuple(session_ids), tuple(release_ids)
+    if release_ids != release_ids_raw:
+        raise RuntimeError("ED2 B3 exact B2 release authority drift")
+    return (
+        tuple(session_ids),
+        tuple(release_ids),
+        tuple(p4_drafts_raw),
+        tuple(p4_approved_raw),
+        p5_draft,
+        p5_approved,
+    )
 
 
 def _ed2_b3_snapshot_pairs(
@@ -1163,13 +1223,24 @@ def _ed2_b3_e2e(
     else:
         raise RuntimeError("unsupported ED2 B3 qualification profile")
 
-    session_ids, source_release_ids = _ed2_b2_source_identity(uow_factory)
+    (
+        session_ids,
+        source_release_ids,
+        p4_draft_revision_ids,
+        p4_approved_revision_ids,
+        p5_draft_revision_id,
+        p5_approved_revision_id,
+    ) = _ed2_b2_source_identity(uow_factory, work_root)
     result = run_ed2_b3_upper_qualification(
         runtime=runtime,
         uow_factory=uow_factory,
         object_store=object_store,
         session_ids=session_ids,
         source_release_ids=source_release_ids,
+        p4_draft_revision_ids=p4_draft_revision_ids,
+        p4_approved_revision_ids=p4_approved_revision_ids,
+        p5_draft_revision_id=p5_draft_revision_id,
+        p5_approved_revision_id=p5_approved_revision_id,
     )
 
     restarted = (

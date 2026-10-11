@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from uuid import UUID, uuid5
 
-from tpaa_application import ED2_TRAINING_PLUGIN_CONTRACTS
+from tpaa_application import (
+    ED2_TRAINING_PLUGIN_CONTRACTS,
+    P4P5PersistenceRepository,
+)
 from tpaa_ingest import JointLVCGatewayAdapter, P6InteropArtifactRef
 from tpaa_runtime import (
     GovernedTrainingPluginRuntime,
@@ -34,6 +38,9 @@ class ED2B3UpperQualificationResult:
     media_debrief_snapshot_id: str
     event_availability: str
     objective_availability: str
+    assessment_authority_sha256: str
+    p4_revision_ref_count: int
+    p5_revision_ref_count: int
     media_uri: str
     media_sha256: str
     transcript_uri: str
@@ -57,6 +64,10 @@ class ED2B3UpperQualificationResult:
             "snapshot_count": len(snapshots),
             "event_availability": self.event_availability,
             "objective_availability": self.objective_availability,
+            "assessment_authority_mode": "ED2_B2_EXACT_REVISION_OUTPUT",
+            "assessment_authority_sha256": self.assessment_authority_sha256,
+            "p4_revision_ref_count": self.p4_revision_ref_count,
+            "p5_revision_ref_count": self.p5_revision_ref_count,
             "media_uri": self.media_uri,
             "media_sha256": self.media_sha256,
             "transcript_uri": self.transcript_uri,
@@ -104,17 +115,11 @@ def _snapshot_id(projection: dict[str, object], field: str) -> str:
     return value
 
 
-def _refs_for_sessions(
+def _event_refs_for_sessions(
     uow_factory: QualificationUowFactory,
     session_ids: tuple[str, ...],
-) -> tuple[
-    tuple[str, ...],
-    tuple[str, ...],
-    tuple[str, ...],
-]:
+) -> tuple[str, ...]:
     event_refs: list[str] = []
-    p4_refs: list[str] = []
-    p5_refs: list[str] = []
     with uow_factory(False) as uow:
         for session_id in session_ids:
             for row in uow.canonical_rows.many(
@@ -124,30 +129,115 @@ def _refs_for_sessions(
                 order_by=("quality_event_id",),
             ):
                 event_refs.append(str(row["quality_event_id"]))
-            for row in uow.canonical_rows.many(
-                "assessment.actor_assessment",
-                where={"session_id": session_id},
-                columns=("actor_assessment_id",),
-                order_by=("actor_assessment_id",),
-            ):
-                p4_refs.append(str(row["actor_assessment_id"]))
-            for row in uow.canonical_rows.many(
-                "assessment.mission_assessment",
-                where={"session_id": session_id},
-                columns=("mission_assessment_id",),
-                order_by=("mission_assessment_id",),
-            ):
-                p5_refs.append(str(row["mission_assessment_id"]))
         uow.commit()
-    if len(set(p4_refs)) < 4:
-        raise RuntimeError("ED2_B3_P4_REVISION_SUPPORT_INSUFFICIENT")
-    if not p5_refs:
-        raise RuntimeError("ED2_B3_P5_REVISION_SUPPORT_INSUFFICIENT")
-    return (
-        tuple(sorted(set(event_refs))),
-        tuple(sorted(set(p4_refs))),
-        tuple(sorted(set(p5_refs))),
+    return tuple(sorted(set(event_refs)))
+
+
+def _assessment_revision_refs(
+    uow_factory: QualificationUowFactory,
+    *,
+    p4_draft_revision_ids: tuple[str, ...],
+    p4_approved_revision_ids: tuple[str, ...],
+    p5_draft_revision_id: str,
+    p5_approved_revision_id: str,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    if (
+        len(p4_draft_revision_ids) != 4
+        or len(p4_approved_revision_ids) != 4
+        or len(set(p4_draft_revision_ids)) != 4
+        or len(set(p4_approved_revision_ids)) != 4
+    ):
+        raise RuntimeError("ED2_B3_P4_EXACT_AUTHORITY_INVALID")
+    if (
+        not p5_draft_revision_id
+        or not p5_approved_revision_id
+        or p5_draft_revision_id == p5_approved_revision_id
+    ):
+        raise RuntimeError("ED2_B3_P5_EXACT_AUTHORITY_INVALID")
+
+    p4_refs: list[str] = []
+    p5_refs: list[str] = []
+    with uow_factory(False) as uow:
+        assessments = P4P5PersistenceRepository(uow.canonical_rows)
+        for draft_id, approved_id in zip(
+            p4_draft_revision_ids,
+            p4_approved_revision_ids,
+            strict=True,
+        ):
+            draft = assessments.exact_p4_revision(draft_id)
+            approved = assessments.exact_p4_revision(approved_id)
+            if (
+                draft.approval_state != "DRAFT"
+                or approved.approval_state != "APPROVED"
+            ):
+                raise RuntimeError("ED2_B3_P4_EXACT_AUTHORITY_STATE_INVALID")
+            current = approved
+            chain_ids = [approved.actor_assessment_id]
+            seen: set[str] = set()
+            while current.actor_assessment_id != draft_id:
+                current_id = current.actor_assessment_id
+                if current_id in seen or current.supersedes_id is None:
+                    raise RuntimeError(
+                        "ED2_B3_P4_EXACT_AUTHORITY_CHAIN_INVALID"
+                    )
+                seen.add(current_id)
+                current = assessments.exact_p4_revision(
+                    current.supersedes_id
+                )
+                chain_ids.append(current.actor_assessment_id)
+            if current.approval_state != "DRAFT" or len(chain_ids) != 3:
+                raise RuntimeError(
+                    "ED2_B3_P4_EXACT_AUTHORITY_CHAIN_INVALID"
+                )
+            p4_refs.extend(reversed(chain_ids))
+
+        p5_draft = assessments.exact_p5_revision(p5_draft_revision_id)
+        p5_approved = assessments.exact_p5_revision(
+            p5_approved_revision_id
+        )
+        if (
+            p5_draft.approval_state != "DRAFT"
+            or p5_approved.approval_state != "APPROVED"
+        ):
+            raise RuntimeError("ED2_B3_P5_EXACT_AUTHORITY_STATE_INVALID")
+        current_p5 = p5_approved
+        p5_chain_ids = [p5_approved.mission_assessment_id]
+        seen_p5: set[str] = set()
+        while current_p5.mission_assessment_id != p5_draft_revision_id:
+            current_id = current_p5.mission_assessment_id
+            if current_id in seen_p5 or current_p5.supersedes_id is None:
+                raise RuntimeError(
+                    "ED2_B3_P5_EXACT_AUTHORITY_CHAIN_INVALID"
+                )
+            seen_p5.add(current_id)
+            current_p5 = assessments.exact_p5_revision(
+                current_p5.supersedes_id
+            )
+            p5_chain_ids.append(current_p5.mission_assessment_id)
+        if current_p5.approval_state != "DRAFT" or len(p5_chain_ids) != 3:
+            raise RuntimeError(
+                "ED2_B3_P5_EXACT_AUTHORITY_CHAIN_INVALID"
+            )
+        p5_refs.extend(reversed(p5_chain_ids))
+        uow.commit()
+
+    return tuple(p4_refs), tuple(p5_refs)
+
+
+def _assessment_authority_sha256(
+    p4_refs: tuple[str, ...],
+    p5_refs: tuple[str, ...],
+) -> str:
+    rendered = json.dumps(
+        {
+            "p4_revision_refs": list(p4_refs),
+            "p5_revision_refs": list(p5_refs),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
     )
+    return hashlib.sha256(rendered.encode("utf-8")).hexdigest()
 
 
 def _relation_and_objective_refs(
@@ -241,6 +331,10 @@ def run_ed2_b3_upper_qualification(
     object_store: LocalObjectStore,
     session_ids: tuple[str, ...],
     source_release_ids: tuple[str, ...],
+    p4_draft_revision_ids: tuple[str, ...],
+    p4_approved_revision_ids: tuple[str, ...],
+    p5_draft_revision_id: str,
+    p5_approved_revision_id: str,
 ) -> ED2B3UpperQualificationResult:
     if (
         len(session_ids) != 8
@@ -250,9 +344,20 @@ def run_ed2_b3_upper_qualification(
     ):
         raise RuntimeError("ED2_B3_B2_SOURCE_SET_INVALID")
 
-    event_refs, p4_refs, p5_refs = _refs_for_sessions(
+    event_refs = _event_refs_for_sessions(
         uow_factory,
         session_ids,
+    )
+    p4_refs, p5_refs = _assessment_revision_refs(
+        uow_factory,
+        p4_draft_revision_ids=p4_draft_revision_ids,
+        p4_approved_revision_ids=p4_approved_revision_ids,
+        p5_draft_revision_id=p5_draft_revision_id,
+        p5_approved_revision_id=p5_approved_revision_id,
+    )
+    assessment_authority_sha256 = _assessment_authority_sha256(
+        p4_draft_revision_ids + p4_approved_revision_ids,
+        (p5_draft_revision_id, p5_approved_revision_id),
     )
     relation_refs, objective_refs = _relation_and_objective_refs(
         uow_factory,
@@ -474,6 +579,9 @@ def run_ed2_b3_upper_qualification(
         media_debrief_snapshot_id=_snapshot_id(media, "media"),
         event_availability=event_availability,
         objective_availability=objective_availability,
+        assessment_authority_sha256=assessment_authority_sha256,
+        p4_revision_ref_count=len(p4_refs),
+        p5_revision_ref_count=len(p5_refs),
         media_uri=media_object.logical_uri,
         media_sha256=media_object.artifact_sha256,
         transcript_uri=transcript_object.logical_uri,

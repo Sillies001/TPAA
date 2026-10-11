@@ -115,6 +115,12 @@ def test_ed2_b3_frozen_authorities_cover_upper_product_semantics() -> None:
         str(item["verification"]) for item in traceability["items"]
     )
     qualification = _source("src/tpaa_qualification/ed2_b3_upper.py")
+    runtime_entry = _source("tools/packaging/prcb_runtime_entry.py")
+    assert '"assessment.actor_assessment"' not in qualification
+    assert '"assessment.mission_assessment"' not in qualification
+    assert "P4P5PersistenceRepository" in qualification
+    assert "ED2_B2_EXACT_REVISION_OUTPUT" in qualification
+    assert "ed2-b2-exact-authority.json" in runtime_entry
     for verification_id in (
         "V-SAFE-002",
         "V-COHORT-001",
