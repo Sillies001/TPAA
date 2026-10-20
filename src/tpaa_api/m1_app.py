@@ -166,7 +166,10 @@ def register_m1_routes(app: FastAPI, application: ApplicationService) -> FastAPI
         try:
             return JSONResponse(
                 status_code=200,
-                content={"release_id": release_id, "items": application.m1_observations(release_id)},
+                content={
+                    "release_id": release_id,
+                    "items": application.m1_observations(release_id),
+                },
             )
         except M1ApplicationError as exc:
             return _m1_error(exc)

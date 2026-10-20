@@ -107,11 +107,24 @@ def test_regenerate_diff_blocks_committed_manual_edit_in_clean_git_checkout(tmp_
     shutil.copytree(
         REPO_ROOT,
         clone,
-        ignore=shutil.ignore_patterns(".git", ".venv", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"),
+        ignore=shutil.ignore_patterns(
+            ".git",
+            ".venv",
+            "__pycache__",
+            ".pytest_cache",
+            ".mypy_cache",
+            ".ruff_cache",
+            "evidence",
+        ),
     )
     assert _run("git", "init", "-b", "main", cwd=clone).returncode == 0
     assert _run("git", "config", "user.name", "TPAA Test", cwd=clone).returncode == 0
     assert _run("git", "config", "user.email", "tpaa-test@example.invalid", cwd=clone).returncode == 0
+    # Keep the disposable repository independent from host-level background
+    # maintenance.  On Windows, a globally registered maintenance task can race
+    # this short-lived repository and leave a partial multi-pack index.
+    assert _run("git", "config", "maintenance.auto", "false", cwd=clone).returncode == 0
+    assert _run("git", "config", "gc.auto", "0", cwd=clone).returncode == 0
     assert _run("git", "add", ".", cwd=clone).returncode == 0
     assert _run("git", "commit", "-m", "fixture baseline", cwd=clone).returncode == 0
 

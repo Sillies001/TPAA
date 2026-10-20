@@ -52,10 +52,7 @@ def _mapping(value: object, *, field: str) -> dict[str, object]:
 def _rows(value: object, *, field: str) -> list[dict[str, object]]:
     if not isinstance(value, list):
         raise M1ApplicationError("P1_DURABLE_ROW_INVALID", field)
-    return [
-        _mapping(item, field=f"{field}[{index}]")
-        for index, item in enumerate(value)
-    ]
+    return [_mapping(item, field=f"{field}[{index}]") for index, item in enumerate(value)]
 
 
 def _required_text(row: dict[str, object], field: str) -> str:
@@ -150,10 +147,7 @@ class DurableP1ReleaseReadService:
             if exc.code == "RELEASE_CARDINALITY":
                 raise M1ApplicationError("RELEASE_NOT_FOUND", release_id) from exc
             raise M1ApplicationError(exc.code, exc.detail) from exc
-        by_id = {
-            _required_text(row, "metric_definition_id"): row
-            for row in definitions
-        }
+        by_id = {_required_text(row, "metric_definition_id"): row for row in definitions}
         return membership, by_id
 
     @staticmethod
@@ -216,17 +210,12 @@ class DurableP1ReleaseReadService:
             for metric in metrics
         }
         observed_instance_ids = {
-            _required_text(item, "observed_metric_instance_id")
-            for item in capability_observations
-        } | {
-            _required_text(item, "observed_metric_instance_id")
-            for item in system_observations
-        }
+            _required_text(item, "observed_metric_instance_id") for item in capability_observations
+        } | {_required_text(item, "observed_metric_instance_id") for item in system_observations}
         evidence_only_count = sum(
             1
             for metric in metrics
-            if _required_text(metric, "metric_instance_id")
-            not in observed_instance_ids
+            if _required_text(metric, "metric_instance_id") not in observed_instance_ids
         )
         return {
             **release,
@@ -253,9 +242,9 @@ class DurableP1ReleaseReadService:
             field="metric_instances",
         ):
             definition_id = _required_text(metric, "metric_definition_id")
-            metric_definition_by_instance[
-                _required_text(metric, "metric_instance_id")
-            ] = self._definition(definitions, definition_id)
+            metric_definition_by_instance[_required_text(metric, "metric_instance_id")] = (
+                self._definition(definitions, definition_id)
+            )
 
         result: list[CapabilityObservationDTO] = []
         for row in _rows(membership.get("observations"), field="observations"):
@@ -369,9 +358,7 @@ class DurableP1ReleaseReadService:
                         "mission_system_instance_id",
                     ),
                     "value_kind": (
-                        "STRUCTURED"
-                        if row.get("value_structured") is not None
-                        else "NUMERIC"
+                        "STRUCTURED" if row.get("value_structured") is not None else "NUMERIC"
                     ),
                 }
             )
@@ -390,9 +377,7 @@ class DurableP1ReleaseReadService:
                 field="evidence_sets",
             )
         }
-        matches: list[
-            tuple[dict[str, object], dict[str, object], dict[str, object]]
-        ] = []
+        matches: list[tuple[dict[str, object], dict[str, object], dict[str, object]]] = []
         for row in _rows(
             membership.get("metric_instances"),
             field="metric_instances",
@@ -615,12 +600,8 @@ class DurableP1ReleaseReadService:
                 "release_id": release_id,
                 "session": {
                     "session_id": session_id,
-                    "start_session_time_us": str(
-                        _required_int(session, "start_session_time_us")
-                    ),
-                    "end_session_time_us": str(
-                        _required_int(session, "end_session_time_us")
-                    ),
+                    "start_session_time_us": str(_required_int(session, "start_session_time_us")),
+                    "end_session_time_us": str(_required_int(session, "end_session_time_us")),
                 },
                 "episode": {
                     "episode_id": _required_text(episodes[0], "episode_id"),
@@ -632,12 +613,8 @@ class DurableP1ReleaseReadService:
                         "episode_id": _required_text(row, "episode_id"),
                         "stage_type": _required_text(row, "stage_type"),
                         "stage_order": _required_int(row, "stage_order"),
-                        "start_session_time_us": str(
-                            _required_int(row, "start_session_time_us")
-                        ),
-                        "end_session_time_us": str(
-                            _required_int(row, "end_session_time_us")
-                        ),
+                        "start_session_time_us": str(_required_int(row, "start_session_time_us")),
+                        "end_session_time_us": str(_required_int(row, "end_session_time_us")),
                         "stage_status": _required_text(row, "stage_status"),
                         "coverage": _required_float(row, "coverage"),
                         "confidence": _required_float(row, "confidence"),
@@ -670,15 +647,11 @@ class DurableP1ReleaseReadService:
         membership, _definitions = self._snapshot(release_id)
         return {
             "release_id": release_id,
-            "world_products": _rows(
-                membership.get("world_products", []), field="world_products"
-            ),
+            "world_products": _rows(membership.get("world_products", []), field="world_products"),
             "world_relations": _rows(
                 membership.get("world_relations", []), field="world_relations"
             ),
-            "tpaa_m_chains": _rows(
-                membership.get("tpaa_m_chains", []), field="tpaa_m_chains"
-            ),
+            "tpaa_m_chains": _rows(membership.get("tpaa_m_chains", []), field="tpaa_m_chains"),
         }
 
     def series_range(
@@ -695,22 +668,16 @@ class DurableP1ReleaseReadService:
                 f"[{start_session_time_us},{end_session_time_us}) limit={limit}",
             )
         if self._object_store is None:
-            raise M1ApplicationError(
-                "P1_SERIES_STORE_NOT_CONFIGURED", release_id
-            )
+            raise M1ApplicationError("P1_SERIES_STORE_NOT_CONFIGURED", release_id)
         membership, _definitions = self._snapshot(release_id)
         locators = []
         for evidence in _rows(membership.get("evidence_sets"), field="evidence_sets"):
             locator = evidence.get("series_locator")
             if isinstance(locator, dict) and locator.get("canonical_dataset_id") is not None:
                 locators.append(_mapping(locator, field="series_locator"))
-        dataset_ids = {
-            _required_text(locator, "canonical_dataset_id") for locator in locators
-        }
+        dataset_ids = {_required_text(locator, "canonical_dataset_id") for locator in locators}
         if len(dataset_ids) != 1:
-            raise M1ApplicationError(
-                "P1_SERIES_DATASET_CARDINALITY", str(len(dataset_ids))
-            )
+            raise M1ApplicationError("P1_SERIES_DATASET_CARDINALITY", str(len(dataset_ids)))
         dataset_id = next(iter(dataset_ids))
         with self._read_uow_factory() as uow:
             dataset = uow.canonical_rows.one(
@@ -767,9 +734,7 @@ class DurableP1ReleaseReadService:
         candidates = [
             row
             for row in PolarsParquetPlane(self._object_store).scan_rows(artifact)
-            if start_session_time_us
-            <= _required_int(row, "session_time_us")
-            < end_session_time_us
+            if start_session_time_us <= _required_int(row, "session_time_us") < end_session_time_us
         ]
         return {
             "release_id": release_id,

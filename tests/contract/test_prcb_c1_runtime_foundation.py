@@ -9,7 +9,11 @@ from tpaa_runtime.admission import (
     ProductAdmissionResolver,
     ProductFeatureAvailability,
 )
-from tpaa_runtime.config import ProductionRuntimeConfig, RuntimeProfile
+from tpaa_runtime.config import (
+    ProductionPrincipalBinding,
+    ProductionRuntimeConfig,
+    RuntimeProfile,
+)
 
 
 def _flags(value: bool) -> dict[str, bool]:
@@ -69,6 +73,14 @@ def test_prcb_production_service_config_requires_conninfo(
         authority_root=authority,
         object_root=tmp_path / "objects",
         service_conninfo="dbname=tpaa user=tpaa",
+        service_principals=(
+            ProductionPrincipalBinding(
+                credential_sha256="a" * 64,
+                role="ADMIN_AUDITOR",
+                actor_id="contract-admin",
+                scope_match=True,
+            ),
+        ),
     )
     assert config.desktop_database_path is None
     assert config.service_conninfo == "dbname=tpaa user=tpaa"

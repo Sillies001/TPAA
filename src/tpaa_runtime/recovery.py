@@ -625,7 +625,9 @@ def _validated_service_drain_evidence(value: object) -> Mapping[str, object]:
     if (
         value.get("schema") != "TPAA_SERVICE_WRITE_DRAIN_V1"
         or value.get("state") != "MANAGED_WRITES_BLOCKED"
-        or not all(isinstance(value.get(field), str) and value.get(field) for field in required_text)
+        or not all(
+            isinstance(value.get(field), str) and value.get(field) for field in required_text
+        )
     ):
         raise ProductionRecoveryError("Service managed write-drain evidence is invalid")
     digest = value.get("database_identity_sha256")

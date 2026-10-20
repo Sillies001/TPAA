@@ -49,9 +49,7 @@ def main() -> int:
         not isinstance(raw_data_root, str) or not Path(raw_data_root).is_absolute()
     ):
         return 2
-    desktop_data_root = (
-        None if raw_data_root is None else Path(raw_data_root).resolve(strict=False)
-    )
+    desktop_data_root = None if raw_data_root is None else Path(raw_data_root).resolve(strict=False)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

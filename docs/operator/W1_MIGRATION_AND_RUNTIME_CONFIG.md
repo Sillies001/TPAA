@@ -56,7 +56,7 @@ with a clean one.
 Set `TPAA_RUNTIME_CONFIG_FILE` to an absolute path containing
 `TPAA_RUNTIME_CONFIG_V1`. Both public Desktop and Service entry configuration
 functions consume this schema. The document binds the product build, Core baseline,
-DB migration head, authority directory, profile directories, identity file, and
+DB migration head, authority directory, profile directories, federated identity, and
 storage backend.
 
 Secrets are never embedded in this document. Service connection information and S3
@@ -90,7 +90,15 @@ Minimal Service example with local object storage:
   "authority_root": "/opt/tpaa/authority/CB-1.5.0/canonical",
   "object_root": "/var/lib/tpaa/control",
   "migration_state_root": "/var/lib/tpaa/migrations",
-  "principals_file": "/etc/tpaa/principals.json",
+  "identity": {
+    "mode": "OIDC_MTLS",
+    "issuer": "https://identity.example.mil",
+    "audience": "tpaa-service",
+    "jwks_uri": "https://identity.example.mil/.well-known/jwks.json",
+    "ca_bundle": "/etc/tpaa/trust/client-ca.pem",
+    "allowed_spiffe_prefixes": ["spiffe://tpaa/service/"],
+    "revocation_file": "/etc/tpaa/revocations.json"
+  },
   "database": {
     "backend": "POSTGRESQL",
     "conninfo_ref": "env://TPAA_SERVICE_CONNINFO_SECRET"
@@ -99,10 +107,9 @@ Minimal Service example with local object storage:
 }
 ```
 
-The earlier environment-variable-only Service configuration is deprecated and is
-retained only through the W2/W3 development window. It must be removed before the W3
-exit gate and cannot be used as formal release evidence. `TPAA_RUNTIME_CONFIG_V1` is
-the only W1 target configuration and explicitly carries `migration_state_root`.
+The earlier environment-variable-only Service configuration was removed at the W3
+exit gate. `TPAA_RUNTIME_CONFIG_V1` is now the only public Service configuration;
+it explicitly carries `migration_state_root` and requires OIDC+mTLS identity.
 
 ## Product governance registries
 

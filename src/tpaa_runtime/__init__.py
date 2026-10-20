@@ -14,6 +14,7 @@ from .composition import (
     create_full_service_app,
 )
 from .config import (
+    OidcMtlsRuntimeConfig,
     ProductionPrincipalBinding,
     ProductionRuntimeConfig,
     ProductRuntimeConfig,
@@ -31,6 +32,11 @@ from .entry_config import (
     project_version,
     resolve_authority_root,
     service_production_config_from_environment,
+)
+from .federated_identity import (
+    OidcMtlsRequestIdentityProvider,
+    desktop_local_principal_resolver,
+    oidc_mtls_principal_resolver,
 )
 from .identity import (
     ConfiguredBearerIdentityProvider,
@@ -119,6 +125,8 @@ __all__ = [
     "TrainingPluginComposition",
     "TrainingPluginCompositionError",
     "ConfiguredBearerIdentityProvider",
+    "OidcMtlsRuntimeConfig",
+    "OidcMtlsRequestIdentityProvider",
     "SERVICE_PRINCIPALS_SCHEMA",
     "ProductOperationalStatus",
     "ProductionOperationalMetrics",
@@ -179,12 +187,14 @@ __all__ = [
     "guard_production_principal_resolver",
     "default_desktop_data_root",
     "desktop_production_config_from_environment",
+    "desktop_local_principal_resolver",
     "load_service_principal_bindings",
     "load_runtime_config_document",
     "materialize_source_documents",
     "parse_source_artifact_reference",
     "prepare_desktop_production_config",
     "permission_governance_status",
+    "oidc_mtls_principal_resolver",
     "project_version",
     "production_role",
     "resolve_authority_root",

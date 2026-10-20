@@ -9,6 +9,7 @@ description = "TPAA production airborne-data assessment and qualification system
 requires-python = ">=3.13,<3.14"
 license = "LicenseRef-Proprietary"
 dependencies = [
+    "cryptography==49.0.0",
     "fastapi[standard-no-fastapi-cloud-cli]==0.141.1",
     "polars==1.44.2",
     "psycopg[binary]==3.3.6",
@@ -28,6 +29,9 @@ tpaa-desktop = "tpaa_desktop.__main__:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["tpaa*"]
+
+[tool.setuptools.package-data]
+tpaa_security = ["TPAA_SECURITY_POLICY_V1.json"]
 
 [tool.uv]
 required-version = ">=0.10,<0.13"

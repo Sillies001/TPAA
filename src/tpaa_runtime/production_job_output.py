@@ -60,10 +60,7 @@ def _manifest(
         "schema": _SCHEMA_VERSION,
         "job_id": job_id,
         "command": command,
-        "product_refs": [
-            {"role": role, "ref": ref}
-            for role, ref in product_refs
-        ],
+        "product_refs": [{"role": role, "ref": ref} for role, ref in product_refs],
     }
 
 

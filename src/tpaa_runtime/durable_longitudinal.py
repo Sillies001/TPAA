@@ -161,9 +161,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
         authority_root: Path,
     ) -> None:
         self._read_uow_factory = read_uow_factory
-        self._authority = load_m4_longitudinal_authority(
-            _baseline_root(authority_root)
-        )
+        self._authority = load_m4_longitudinal_authority(_baseline_root(authority_root))
 
     def publish(
         self,
@@ -243,9 +241,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
                     "M4_DURABLE_SCOPE_RELEASE_MISMATCH",
                     release_id,
                 )
-            session_order_scope_id = _optional_text(
-                scope["session_order_scope_id"]
-            )
+            session_order_scope_id = _optional_text(scope["session_order_scope_id"])
             if session_order_scope_id is None:
                 raise M4LongitudinalError(
                     "M4_DURABLE_SESSION_ORDER_SCOPE_REQUIRED",
@@ -255,9 +251,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
                 scope["descriptor_json"],
                 "scope.descriptor_json",
             )
-            descriptor_hash = hashlib.sha256(
-                descriptor_json.encode("utf-8")
-            ).hexdigest()
+            descriptor_hash = hashlib.sha256(descriptor_json.encode("utf-8")).hexdigest()
             persisted_descriptor_hash = _text(
                 scope["descriptor_hash"],
                 "scope.descriptor_hash",
@@ -269,8 +263,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
             if (
                 descriptor_hash != persisted_descriptor_hash
                 or descriptor_hash != scope_key
-                or trend_profile_version
-                != self._authority.trend_profile_version
+                or trend_profile_version != self._authority.trend_profile_version
             ):
                 raise M4LongitudinalError(
                     "M4_DURABLE_SCOPE_HASH_MISMATCH",
@@ -399,8 +392,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
                     or str(sample["subject_id"]) != str(point_row["subject_id"])
                     or _integer(sample["session_order"], "sample.session_order")
                     != _integer(point_row["session_order"], "point.session_order")
-                    or str(sample["configuration_key"])
-                    != str(point_row["configuration_key"])
+                    or str(sample["configuration_key"]) != str(point_row["configuration_key"])
                 ):
                     raise M4LongitudinalError(
                         "M4_DURABLE_POINT_SAMPLE_MISMATCH",
@@ -419,9 +411,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
                             "M4_DURABLE_MARKER_INVALID",
                             sample_id,
                         )
-                    marker_refs.append(
-                        {str(key): value for key, value in marker.items()}
-                    )
+                    marker_refs.append({str(key): value for key, value in marker.items()})
                 points.append(
                     M4PerformanceTrendPoint(
                         trend_id=trend_id,
@@ -496,10 +486,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
                     )
                 bridge_hashes.append(str(bridge["bridge_hash"]))
 
-            if (
-                str(trend_row["trend_profile_version"])
-                != self._authority.trend_profile_version
-            ):
+            if str(trend_row["trend_profile_version"]) != self._authority.trend_profile_version:
                 raise M4LongitudinalError(
                     "M4_DURABLE_TREND_PROFILE_VERSION_MISMATCH",
                     trend_id,
@@ -575,9 +562,7 @@ class DurableM4LongitudinalReleaseRepository(M4LongitudinalReleaseRepository):
                     trend_row["created_at"],
                     "trend.created_at",
                 ),
-                supersedes_trend_id=_optional_text(
-                    trend_row["supersedes_trend_id"]
-                ),
+                supersedes_trend_id=_optional_text(trend_row["supersedes_trend_id"]),
                 points=tuple(points),
             )
 
@@ -706,8 +691,7 @@ class DurableM4DebriefRepository:
         matches = tuple(
             item
             for item in audits
-            if item.object_type == "M4_DEBRIEF_ANNOTATION"
-            and item.object_id == annotation_id
+            if item.object_type == "M4_DEBRIEF_ANNOTATION" and item.object_id == annotation_id
         )
         if len(matches) != 1:
             raise M4ApplicationError(
@@ -752,9 +736,7 @@ class DurableM4DebriefRepository:
             visibility=str(row["visibility"]),
             status=str(row["status"]),
             revision_no=_integer(row["revision_no"], "annotation.revision_no"),
-            supersedes_annotation_id=_optional_text(
-                row["supersedes_annotation_id"]
-            ),
+            supersedes_annotation_id=_optional_text(row["supersedes_annotation_id"]),
             evidence_set_id=_optional_text(row["evidence_set_id"]),
             reason=audit.reason or "",
             audit_id=audit.audit_id,
@@ -985,11 +967,7 @@ class DurableM4DebriefRepository:
                     "end_session_time_us": command.end_session_time_us,
                     "body_text": command.body_text,
                     "visibility": command.visibility,
-                    "status": (
-                        "DELETED"
-                        if command.operation == "DELETE"
-                        else "ACTIVE"
-                    ),
+                    "status": ("DELETED" if command.operation == "DELETE" else "ACTIVE"),
                     "revision_no": revision_no,
                     "supersedes_annotation_id": (
                         None if target is None else str(target["annotation_id"])
@@ -1085,11 +1063,7 @@ class DurableM4DebriefRepository:
                     "M4_ANNOTATION_AS_OF_REQUIRED",
                     "annotation_as_of_utc",
                 )
-            return tuple(
-                item
-                for item in values
-                if item.created_at <= query.annotation_as_of_utc
-            )
+            return tuple(item for item in values if item.created_at <= query.annotation_as_of_utc)
         selected = set(query.annotation_ids)
         result = tuple(item for item in values if item.annotation_id in selected)
         if {item.annotation_id for item in result} != selected:

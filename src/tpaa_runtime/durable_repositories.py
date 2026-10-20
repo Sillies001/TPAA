@@ -282,9 +282,7 @@ class DurableM8AssessmentRuntimeRepository:
         return self._read(lambda repository: repository.exact_p5(revision_id))
 
     def exact_annotation(self, annotation_id: str) -> InstructorAnnotationRevision:
-        return self._read(
-            lambda repository: repository.exact_annotation(annotation_id)
-        )
+        return self._read(lambda repository: repository.exact_annotation(annotation_id))
 
 
 class DurableM9P6RuntimeRepository:
@@ -344,9 +342,7 @@ class DurableM9P6RuntimeRepository:
         self,
         value: P6CounterfactualRequestBinding,
     ) -> None:
-        self._write(
-            lambda repository: repository.register_counterfactual_request(value)
-        )
+        self._write(lambda repository: repository.register_counterfactual_request(value))
 
     def register_model_build(
         self,
@@ -376,37 +372,25 @@ class DurableM9P6RuntimeRepository:
         return self._read(lambda repository: repository.exact_input(object_id))
 
     def exact_forecast_request(self, object_id: str) -> P6ForecastRequestBinding:
-        return self._read(
-            lambda repository: repository.exact_forecast_request(object_id)
-        )
+        return self._read(lambda repository: repository.exact_forecast_request(object_id))
 
     def exact_counterfactual_request(
         self,
         object_id: str,
     ) -> P6CounterfactualRequestBinding:
-        return self._read(
-            lambda repository: repository.exact_counterfactual_request(object_id)
-        )
+        return self._read(lambda repository: repository.exact_counterfactual_request(object_id))
 
     def exact_model_build(self, object_id: str) -> P6ModelBuild:
-        return self._read(
-            lambda repository: repository.exact_model_build(object_id)
-        )
+        return self._read(lambda repository: repository.exact_model_build(object_id))
 
     def exact_managed_object(self, model_id: str) -> P6ManagedModelObject:
-        return self._read(
-            lambda repository: repository.exact_managed_object(model_id)
-        )
+        return self._read(lambda repository: repository.exact_managed_object(model_id))
 
     def exact_forecast(self, object_id: str) -> P6ForecastRevision:
         return self._read(lambda repository: repository.exact_forecast(object_id))
 
     def exact_counterfactual(self, object_id: str) -> P6CounterfactualRevision:
-        return self._read(
-            lambda repository: repository.exact_counterfactual(object_id)
-        )
+        return self._read(lambda repository: repository.exact_counterfactual(object_id))
 
     def exact_recommendation(self, object_id: str) -> P6RecommendationRevision:
-        return self._read(
-            lambda repository: repository.exact_recommendation(object_id)
-        )
+        return self._read(lambda repository: repository.exact_recommendation(object_id))

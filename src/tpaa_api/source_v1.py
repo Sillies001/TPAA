@@ -44,9 +44,7 @@ async def _source_body(request: Request) -> bytes:
                 chunk = received[start : start + SOURCE_STREAM_CHUNK_BYTES]
                 received_bytes += len(chunk)
                 if received_bytes > SOURCE_MAX_ARTIFACT_BYTES:
-                    raise SourceWorkflowError(
-                        "SOURCE_ARTIFACT_SIZE_INVALID", str(received_bytes)
-                    )
+                    raise SourceWorkflowError("SOURCE_ARTIFACT_SIZE_INVALID", str(received_bytes))
                 chunks.append(chunk)
     except ClientDisconnect as exc:
         raise SourceWorkflowError("W2_SOURCE_IMPORT_CANCELLED", "client_disconnect") from exc

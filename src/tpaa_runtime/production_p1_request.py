@@ -104,9 +104,7 @@ class ProductionP1SourceSelection:
 
 
 def _mapping(value: object, *, field: str) -> dict[str, object]:
-    if not isinstance(value, Mapping) or not all(
-        isinstance(key, str) for key in value
-    ):
+    if not isinstance(value, Mapping) or not all(isinstance(key, str) for key in value):
         raise ProductionP1RequestError(
             "ED2_P1_REQUEST_MAPPING_INVALID",
             field,
@@ -326,8 +324,7 @@ def parse_production_p1_request(
             ),
         )
     definition_by_code = {
-        definition.metric_code: definition
-        for definition in contract.plan.definitions
+        definition.metric_code: definition for definition in contract.plan.definitions
     }
     for code in contract.metric_codes:
         raw_families = lineage_root[code]
@@ -363,19 +360,14 @@ def parse_production_p1_request(
 
         definition = definition_by_code[code]
         try:
-            required = production_p1_required_source_families(
-                definition.family
-            )
+            required = production_p1_required_source_families(definition.family)
         except KeyError as exc:
             raise ProductionP1RequestError(
                 "ED2_P1_SOURCE_LINEAGE_POLICY_MISSING",
                 definition.family,
             ) from exc
 
-        if (
-            "_source_lineage" in inputs[code]
-            or "_source_sufficiency" in inputs[code]
-        ):
+        if "_source_lineage" in inputs[code] or "_source_sufficiency" in inputs[code]:
             raise ProductionP1RequestError(
                 "ED2_P1_SOURCE_LINEAGE_OVERRIDE_FORBIDDEN",
                 code,
@@ -403,11 +395,7 @@ def parse_production_p1_request(
                     "ED2_P1_SOURCE_INPUT_HASH_DRIFT",
                     f"{code}:{family.value}",
                 )
-            refs.extend(
-                ref
-                for ref in family_refs
-                if code in ref.metric_input_hashes
-            )
+            refs.extend(ref for ref in family_refs if code in ref.metric_input_hashes)
 
         actual = frozenset(families)
         missing = tuple(
@@ -439,22 +427,14 @@ def parse_production_p1_request(
         inputs[code]["_source_sufficiency"] = {
             "status": status,
             "required_source_families": [
-                item.value
-                for item in sorted(required, key=lambda item: item.value)
+                item.value for item in sorted(required, key=lambda item: item.value)
             ],
             "actual_source_families": [
-                item.value
-                for item in sorted(actual, key=lambda item: item.value)
+                item.value for item in sorted(actual, key=lambda item: item.value)
             ],
-            "missing_source_families": [
-                item.value for item in missing
-            ],
+            "missing_source_families": [item.value for item in missing],
             "reason_codes": [
-                (
-                    f"{PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX}"
-                    f"{item.value}"
-                )
-                for item in missing
+                (f"{PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX}{item.value}") for item in missing
             ],
         }
 
@@ -480,8 +460,7 @@ def parse_production_p1_request(
         field="mission_system_instances",
     )
     system_ids = {
-        _uuid(value, field=f"metric_system_bindings.{code}")
-        for code, value in binding_root.items()
+        _uuid(value, field=f"metric_system_bindings.{code}") for code, value in binding_root.items()
     }
     if set(system_root) != system_ids:
         raise ProductionP1RequestError(
@@ -513,8 +492,7 @@ def parse_production_p1_request(
         authority = authorities[system_id]
         if (
             definition.allowed_mission_system_types
-            and authority.system_type
-            not in definition.allowed_mission_system_types
+            and authority.system_type not in definition.allowed_mission_system_types
         ):
             raise ProductionP1RequestError(
                 "ED2_P1_SYSTEM_DEFINITION_TYPE_INVALID",
@@ -530,10 +508,7 @@ def parse_production_p1_request(
         metric_input["mission_system_instance_id"] = system_id
 
         input_system_type = metric_input.get("system_type")
-        if (
-            input_system_type is not None
-            and input_system_type != authority.system_type
-        ):
+        if input_system_type is not None and input_system_type != authority.system_type:
             raise ProductionP1RequestError(
                 "ED2_P1_SYSTEM_TYPE_DRIFT",
                 definition.metric_code,
@@ -543,9 +518,7 @@ def parse_production_p1_request(
 
     return ProductionP1Request(
         inputs=inputs,
-        system_authorities=tuple(
-            authorities[system_id] for system_id in sorted(authorities)
-        ),
+        system_authorities=tuple(authorities[system_id] for system_id in sorted(authorities)),
         system_bindings=bindings,
     )
 
@@ -594,10 +567,7 @@ def _inspect_source_document(
                 else {
                     "action_projection": _mapping(
                         action_projection,
-                        field=(
-                            f"source_documents[{index}]."
-                            "action_projection"
-                        ),
+                        field=(f"source_documents[{index}].action_projection"),
                     )
                 }
             )
@@ -746,4 +716,3 @@ def select_production_p1_sources(
             for family, family_refs in refs.items()
         },
     )
-

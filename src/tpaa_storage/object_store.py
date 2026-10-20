@@ -107,7 +107,9 @@ class LocalObjectStore:
 
     def _lock_path(self, logical_uri: str) -> Path:
         digest = artifact_byte_hash(logical_uri.encode("utf-8"))
-        return self.filesystem.resolve(f".locks/{digest}.lock")
+        path = _native_io_path(self.filesystem.resolve(f".locks/{digest}.lock"))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
 
     def put_bytes(self, logical_uri: str, data: bytes) -> StoredObject:
         target = self.physical_path(logical_uri)

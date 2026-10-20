@@ -123,27 +123,21 @@ def build_production_p1_catalog_contract(
             str(len(registry.plugin_identity_manifest)),
         )
 
-    subject_counts = _sorted_counts(
-        [definition.subject_type for definition in plan.definitions]
-    )
+    subject_counts = _sorted_counts([definition.subject_type for definition in plan.definitions])
     if dict(subject_counts) != PRODUCTION_P1_SUBJECT_COUNTS:
         raise ProductionP1CatalogError(
             "ED2_P1_SUBJECT_MEMBERSHIP_DRIFT",
             repr(dict(subject_counts)),
         )
 
-    lane_counts = _sorted_counts(
-        [definition.observation_lane for definition in plan.definitions]
-    )
+    lane_counts = _sorted_counts([definition.observation_lane for definition in plan.definitions])
     if dict(lane_counts) != M3_PUBLICATION_LANE_COUNTS:
         raise ProductionP1CatalogError(
             "ED2_P1_LANE_MEMBERSHIP_DRIFT",
             repr(dict(lane_counts)),
         )
 
-    route_counts = _sorted_counts(
-        [definition.publication_route for definition in plan.definitions]
-    )
+    route_counts = _sorted_counts([definition.publication_route for definition in plan.definitions])
     if dict(route_counts) != M3_PUBLICATION_ROUTE_COUNTS:
         raise ProductionP1CatalogError(
             "ED2_P1_ROUTE_MEMBERSHIP_DRIFT",
@@ -166,9 +160,7 @@ def _source_sufficiency(
     raw = request.input_payload.get("_source_sufficiency")
     if raw is None:
         return None
-    if not isinstance(raw, Mapping) or not all(
-        isinstance(key, str) for key in raw
-    ):
+    if not isinstance(raw, Mapping) or not all(isinstance(key, str) for key in raw):
         raise ProductionP1CatalogError(
             "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
             request.definition.metric_code,
@@ -201,10 +193,7 @@ def _source_gate_runtime_applicable(
         if (
             required is None
             or not isinstance(raw_products, (list, tuple))
-            or not all(
-                isinstance(item, str) and item
-                for item in raw_products
-            )
+            or not all(isinstance(item, str) and item for item in raw_products)
             or len(raw_products) != len(set(raw_products))
         ):
             raise ProductionP1CatalogError(

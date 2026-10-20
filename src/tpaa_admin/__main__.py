@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import argparse
+import getpass
 import hashlib
 import json
 import os
+import platform
 import sys
 from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from tpaa_application import ReleaseManagementService
+from tpaa_platform.filesync import atomic_replace_bytes
 from tpaa_runtime import (
     create_desktop_production_backup,
     create_service_migration_backup,
@@ -23,6 +27,12 @@ from tpaa_runtime import (
     restore_desktop_production_backup,
     service_production_config_from_environment,
     stage_source_artifact_file,
+)
+from tpaa_security import (
+    ASSIGNMENT_SCHEMA,
+    EnvironmentSecretManager,
+    SecurityRole,
+    sign_assignment,
 )
 from tpaa_service import project_version
 from tpaa_storage import (
@@ -249,6 +259,45 @@ def _execute(args: argparse.Namespace) -> dict[str, object]:
             "permission_governance": permission_governance_status(),
         }
     data_root = _data_root(args.data_root)
+    if command == "identity-issue":
+        roles = tuple(SecurityRole(value) for value in args.role)
+        scopes = tuple(dict.fromkeys(args.scope))
+        if not roles or not scopes or args.valid_hours < 1 or args.valid_hours > 168:
+            raise ValueError("Desktop identity roles, scopes, or validity are invalid")
+        material = EnvironmentSecretManager(os.environ).resolve(args.key_ref)
+        now = datetime.now(UTC)
+        payload: dict[str, object] = {
+            "schema": ASSIGNMENT_SCHEMA,
+            "key_id": material.key_id,
+            "account_id": args.account_id or getpass.getuser(),
+            "device_id": args.device_id or platform.node(),
+            "subject": args.subject,
+            "roles": [role.value for role in roles],
+            "scopes": list(scopes),
+            "issued_at": now.isoformat().replace("+00:00", "Z"),
+            "expires_at": (now + timedelta(hours=args.valid_hours))
+            .isoformat()
+            .replace("+00:00", "Z"),
+        }
+        target = data_root / "desktop-identity.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        atomic_replace_bytes(
+            target,
+            json.dumps(
+                {**payload, "signature": sign_assignment(payload, material.value)},
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode(),
+        )
+        return {
+            "schema": RESULT_SCHEMA,
+            "command": command,
+            "status": "COMPLETE",
+            "identity_file": str(target),
+            "key_id": material.key_id,
+            "roles": [role.value for role in roles],
+            "expires_at": payload["expires_at"],
+        }
     authority_root = resolve_authority_root(anchor=Path(__file__))
     database, object_root = _paths(data_root)
 
@@ -329,6 +378,17 @@ def build_parser() -> argparse.ArgumentParser:
     source_stage.add_argument("--artifact-id", required=True)
     source_stage.add_argument("--source-file", type=Path, required=True)
     subcommands.add_parser("permissions")
+    identity = subcommands.add_parser("identity-issue")
+    identity.add_argument("--data-root", type=Path)
+    identity.add_argument("--subject", required=True)
+    identity.add_argument(
+        "--role", action="append", required=True, choices=tuple(SecurityRole)
+    )
+    identity.add_argument("--scope", action="append", required=True)
+    identity.add_argument("--key-ref", required=True)
+    identity.add_argument("--valid-hours", type=int, default=8)
+    identity.add_argument("--account-id")
+    identity.add_argument("--device-id")
 
     migrate = subcommands.add_parser("migrate")
     migrate_subcommands = migrate.add_subparsers(

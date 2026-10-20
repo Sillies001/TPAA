@@ -65,9 +65,7 @@ class ConfiguredBearerIdentityProvider:
                         actor_id=binding.actor_id,
                         scope_match=binding.scope_match,
                         validation_only=binding.validation_only,
-                        privileged_identity_authorized=(
-                            binding.privileged_identity_authorized
-                        ),
+                        privileged_identity_authorized=(binding.privileged_identity_authorized),
                         visibility_authorized=binding.visibility_authorized,
                         export_authorized=binding.export_authorized,
                     )

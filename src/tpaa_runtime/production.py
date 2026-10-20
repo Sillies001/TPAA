@@ -26,6 +26,18 @@ from tpaa_application import (
     build_trusted_runtime_status_use_case,
 )
 from tpaa_longitudinal import M4LongitudinalPublicationService
+from tpaa_security import (
+    ApiAuthorizationGuard,
+    ApprovalService,
+    AuthorizationService,
+    HttpsJwksProvider,
+    JsonRevocationRegistry,
+    MtlsCertificateVerifier,
+    MtlsConfiguration,
+    OidcConfiguration,
+    OidcTokenVerifier,
+    load_security_policy,
+)
 from tpaa_storage import (
     SERVICE_WRITE_GATE_LOCK_ID,
     LocalObjectStore,
@@ -37,6 +49,10 @@ from tpaa_storage import (
 )
 
 from .admission import ProductAdmissionResolver, ProductFeatureAvailability
+from .approval_repository import (
+    ApprovalExecutionValidator,
+    PersistentApprovalEventRepository,
+)
 from .config import ProductionRuntimeConfig, RuntimeProfile
 from .consistency import desktop_write_quiescence_lock
 from .durable_discovery import DurableProductDiscovery
@@ -55,6 +71,10 @@ from .durable_repositories import (
     RuntimeUnitOfWorkFactory,
 )
 from .ed2_upper_repository import DurableED2UpperProductRepository
+from .federated_identity import (
+    OidcMtlsRequestIdentityProvider,
+    oidc_mtls_principal_resolver,
+)
 from .identity import (
     configured_service_principal_resolver,
     guard_production_principal_resolver,
@@ -62,7 +82,11 @@ from .identity import (
 from .observability import PRCBOperationalStatus, PRCBQualificationStatus
 from .operational_metrics import CachedOperationalMetrics, ProductionOperationalMetrics
 from .readiness import ProductionDependencyProbe, ProductionRuntimeReadiness
-from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
+from .security_audit import (
+    ApplicationApiAuthorizationAudit,
+    PostgreSQLSecurityAuditSink,
+    SQLiteSecurityAuditSink,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,6 +98,8 @@ class ProductionRuntime:
     feature_availability: ProductFeatureAvailability
     application: ApplicationService
     service_principal_resolver: UnifiedPrincipalResolver | None
+    authorization_guard: ApiAuthorizationGuard
+    approval_service: ApprovalService
 
 
 def _validate_storage_status(
@@ -180,10 +206,35 @@ def _compose(
     )
 
     service_principal_resolver: UnifiedPrincipalResolver | None = None
-    if config.profile is RuntimeProfile.SERVICE and config.service_principals:
-        service_principal_resolver = configured_service_principal_resolver(
-            config.service_principals
-        )
+    if config.profile is RuntimeProfile.SERVICE:
+        if config.service_identity is not None:
+            identity_config = config.service_identity
+            revocations = JsonRevocationRegistry(identity_config.revocation_file)
+            policy = load_security_policy()
+            service_principal_resolver = oidc_mtls_principal_resolver(
+                OidcMtlsRequestIdentityProvider(
+                    oidc=OidcTokenVerifier(
+                        OidcConfiguration(
+                            issuer=identity_config.issuer,
+                            audience=identity_config.audience,
+                        ),
+                        HttpsJwksProvider(identity_config.jwks_uri),
+                        revocations,
+                    ),
+                    mtls=MtlsCertificateVerifier(
+                        MtlsConfiguration(
+                            ca_certificate_pem=identity_config.ca_bundle_path.read_bytes(),
+                            allowed_spiffe_prefixes=(identity_config.allowed_spiffe_prefixes),
+                        ),
+                        revocations,
+                    ),
+                    policy=policy,
+                )
+            )
+        elif config.service_principals:
+            service_principal_resolver = configured_service_principal_resolver(
+                config.service_principals
+            )
 
     configured = {
         "P1": True,
@@ -208,9 +259,7 @@ def _compose(
 
     else:
         assert config.service_conninfo is not None
-        state_root = config.migration_state_root or (
-            config.object_root.parent / ".tpaa-migrations"
-        )
+        state_root = config.migration_state_root or (config.object_root.parent / ".tpaa-migrations")
         service_migration = PostgreSQLMigrationService(
             config.service_conninfo,
             state_root=state_root,
@@ -223,8 +272,7 @@ def _compose(
         object_root=config.object_root,
         object_store=object_store,
         identity_ready=(
-            config.profile is RuntimeProfile.DESKTOP
-            or service_principal_resolver is not None
+            config.profile is RuntimeProfile.DESKTOP or service_principal_resolver is not None
         ),
         migration_ready=migration_ready,
     )
@@ -284,12 +332,24 @@ def _compose(
         source_workflow=SourceWorkflowService(object_store),
         episode_revision=DurableEpisodeRevisionService(write_uow_factory),
     )
+    policy = load_security_policy()
+    authorization = AuthorizationService(policy)
+    approval_service = ApprovalService(
+        authorization,
+        PersistentApprovalEventRepository(read_uow_factory, write_uow_factory),
+    )
     return ProductionRuntime(
         config=config,
         admission=admission,
         feature_availability=feature_availability,
         application=application,
         service_principal_resolver=service_principal_resolver,
+        authorization_guard=ApiAuthorizationGuard(
+            authorization,
+            audit=ApplicationApiAuthorizationAudit(audit_sink),
+            approval_validator=ApprovalExecutionValidator(approval_service),
+        ),
+        approval_service=approval_service,
     )
 
 
@@ -373,6 +433,7 @@ def create_production_desktop_app(
     bearer_token: str,
     m8_principal_resolver: M8PrincipalResolver | None = None,
     m9_principal_resolver: M9PrincipalResolver | None = None,
+    principal_resolver: UnifiedPrincipalResolver | None = None,
 ) -> FastAPI:
     """Expose the production Desktop graph without synthetic source fallback."""
 
@@ -381,6 +442,9 @@ def create_production_desktop_app(
         bearer_token=bearer_token,
         m8_principal_resolver=m8_principal_resolver,
         m9_principal_resolver=m9_principal_resolver,
+        principal_resolver=principal_resolver,
+        authorization_guard=runtime.authorization_guard,
+        approval_service=runtime.approval_service,
     )
     app.version = runtime.config.product_build_version
     return app
@@ -399,6 +463,8 @@ def create_production_service_app(
     app = create_unified_service_app(
         application=runtime.application,
         principal_resolver=guard_production_principal_resolver(selected),
+        authorization_guard=runtime.authorization_guard,
+        approval_service=runtime.approval_service,
     )
     app.version = runtime.config.product_build_version
     return app

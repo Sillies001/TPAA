@@ -169,9 +169,7 @@ def _validate_context(context: ProductionP1ReleaseContext) -> None:
 
 
 def _mapping(value: object, *, field: str) -> Mapping[str, object]:
-    if not isinstance(value, Mapping) or not all(
-        isinstance(key, str) for key in value
-    ):
+    if not isinstance(value, Mapping) or not all(isinstance(key, str) for key in value):
         raise ProductionP1MaterializationError(
             "ED2_P1_PLUGIN_OUTPUT_INVALID",
             field,
@@ -201,9 +199,7 @@ def _instances(output: Mapping[str, object]) -> tuple[Mapping[str, object], ...]
 
 def _reason_codes(instance: Mapping[str, object]) -> tuple[str, ...]:
     raw = instance.get("reason_codes")
-    if not isinstance(raw, list) or not all(
-        isinstance(item, str) and item for item in raw
-    ):
+    if not isinstance(raw, list) or not all(isinstance(item, str) and item for item in raw):
         raise ProductionP1MaterializationError(
             "ED2_P1_PLUGIN_OUTPUT_INVALID",
             "reason_codes",
@@ -245,10 +241,7 @@ def _system_binding(
     )
     _require_uuid(binding.aircraft_id, field=f"{metric_code}.aircraft_id")
     input_system = input_payload.get("mission_system_instance_id")
-    if (
-        input_system is not None
-        and input_system != binding.mission_system_instance_id
-    ):
+    if input_system is not None and input_system != binding.mission_system_instance_id:
         raise ProductionP1MaterializationError(
             "ED2_P1_SYSTEM_BINDING_DRIFT",
             metric_code,
@@ -302,8 +295,7 @@ def materialize_production_p1_release(
     system_observations: list[CoreSystemObservationRecord] = []
 
     definition_by_code = {
-        definition.metric_code: definition
-        for definition in contract.plan.definitions
+        definition.metric_code: definition for definition in contract.plan.definitions
     }
     for record in batch.records:
         definition = definition_by_code[record.metric_code]
@@ -370,8 +362,7 @@ def materialize_production_p1_release(
             )
         raw_source_sufficiency = input_payload.get("_source_sufficiency")
         if not isinstance(raw_source_sufficiency, Mapping) or not all(
-            isinstance(key, str)
-            for key in raw_source_sufficiency
+            isinstance(key, str) for key in raw_source_sufficiency
         ):
             raise ProductionP1MaterializationError(
                 "ED2_P1_SOURCE_SUFFICIENCY_MISSING",
@@ -384,9 +375,7 @@ def materialize_production_p1_release(
                 "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
                 f"{record.metric_code}:{source_status!r}",
             )
-        missing_sources = source_sufficiency.get(
-            "missing_source_families"
-        )
+        missing_sources = source_sufficiency.get("missing_source_families")
         source_reasons = source_sufficiency.get("reason_codes")
         if source_status == "READY":
             if raw_source_lineage == []:
@@ -402,16 +391,10 @@ def materialize_production_p1_release(
         elif (
             not isinstance(missing_sources, list)
             or not missing_sources
-            or not all(
-                isinstance(item, str) and item
-                for item in missing_sources
-            )
+            or not all(isinstance(item, str) and item for item in missing_sources)
             or not isinstance(source_reasons, list)
             or not source_reasons
-            or not all(
-                isinstance(item, str) and item
-                for item in source_reasons
-            )
+            or not all(isinstance(item, str) and item for item in source_reasons)
         ):
             raise ProductionP1MaterializationError(
                 "ED2_P1_SOURCE_SUFFICIENCY_INVALID",
@@ -423,10 +406,7 @@ def materialize_production_p1_release(
                 dict(
                     _mapping(
                         raw_lineage,
-                        field=(
-                            f"{record.metric_code}."
-                            f"_source_lineage[{lineage_index}]"
-                        ),
+                        field=(f"{record.metric_code}._source_lineage[{lineage_index}]"),
                     )
                 )
             )
@@ -457,8 +437,7 @@ def materialize_production_p1_release(
             eligibility, exclusion = _eligibility(status, reasons)
             value_numeric = instance.get("value_numeric")
             if value_numeric is not None and (
-                isinstance(value_numeric, bool)
-                or not isinstance(value_numeric, (int, float))
+                isinstance(value_numeric, bool) or not isinstance(value_numeric, (int, float))
             ):
                 raise ProductionP1MaterializationError(
                     "ED2_P1_PLUGIN_OUTPUT_INVALID",
@@ -482,10 +461,7 @@ def materialize_production_p1_release(
                 )
             )
 
-            identity = (
-                f"{context.release_id}|{record.metric_code}|{index}|"
-                f"{record.logical_hash}"
-            )
+            identity = f"{context.release_id}|{record.metric_code}|{index}|{record.logical_hash}"
             evidence_id = str(uuid5(_EVIDENCE_NAMESPACE, identity))
             metric_instance_id = str(uuid5(_INSTANCE_NAMESPACE, identity))
             evidence_sets.append(
@@ -517,9 +493,7 @@ def materialize_production_p1_release(
                 )
             )
             subject_entity_id = (
-                aircraft.subject_entity_id
-                if definition.subject_type == "AIRCRAFT"
-                else None
+                aircraft.subject_entity_id if definition.subject_type == "AIRCRAFT" else None
             )
             metric_instances.append(
                 CoreMetricInstanceRecord(
@@ -532,12 +506,8 @@ def materialize_production_p1_release(
                     mission_system_instance_id=(
                         None if system is None else system.mission_system_instance_id
                     ),
-                    tpaa_chain_id=(
-                        tpaa_m_chains[0].chain_id if tpaa_m_chains else None
-                    ),
-                    value_numeric=(
-                        None if value_numeric is None else float(value_numeric)
-                    ),
+                    tpaa_chain_id=(tpaa_m_chains[0].chain_id if tpaa_m_chains else None),
+                    value_numeric=(None if value_numeric is None else float(value_numeric)),
                     value_structured=structured,
                     unit=definition.unit,
                     status=status,
@@ -551,9 +521,7 @@ def materialize_production_p1_release(
                         "metric_execution_plan_hash": contract.plan.logical_hash,
                         "execution_record_hash": record.logical_hash,
                     },
-                    compute_version=(
-                        f"{record.algorithm_id}@{record.algorithm_version}"
-                    ),
+                    compute_version=(f"{record.algorithm_id}@{record.algorithm_version}"),
                     input_hash=record.input_payload_hash,
                 )
             )
@@ -563,12 +531,8 @@ def materialize_production_p1_release(
                     "schema": "TPAA_ED2_P2_COMPARISON_KEY_V1",
                     "metric_code": record.metric_code,
                     "subject_type": definition.subject_type,
-                    "context_comparability_hash": (
-                        context.comparison_context_hash
-                    ),
-                    "observation_schema_version": (
-                        context.observation_schema_version
-                    ),
+                    "context_comparability_hash": (context.comparison_context_hash),
+                    "observation_schema_version": (context.observation_schema_version),
                 }
             )
             if definition.publication_route == "CAPABILITY_OBSERVATION":
@@ -579,9 +543,7 @@ def materialize_production_p1_release(
                     )
                 observations.append(
                     CoreObservationRecord(
-                        observation_id=str(
-                            uuid5(_OBSERVATION_NAMESPACE, identity)
-                        ),
+                        observation_id=str(uuid5(_OBSERVATION_NAMESPACE, identity)),
                         episode_id=context.episode_id,
                         stage_id=context.stage_id,
                         aircraft_id=aircraft.aircraft_id,
@@ -597,21 +559,15 @@ def materialize_production_p1_release(
                         ),
                         observed_value_structured=structured,
                         unit=definition.unit,
-                        observation_start_session_time_us=(
-                            context.start_session_time_us
-                        ),
-                        observation_end_session_time_us=(
-                            context.end_session_time_us
-                        ),
+                        observation_start_session_time_us=(context.start_session_time_us),
+                        observation_end_session_time_us=(context.end_session_time_us),
                         evidence_set_id=evidence_id,
                         coverage=context.coverage,
                         confidence=context.confidence,
                         eligibility_status=eligibility,
                         exclusion_reason_code=exclusion,
                         comparison_key_hash=comparison_key,
-                        observation_schema_version=(
-                            context.observation_schema_version
-                        ),
+                        observation_schema_version=(context.observation_schema_version),
                     )
                 )
             elif definition.publication_route == "SYSTEM_PERFORMANCE_OBSERVATION":
@@ -622,32 +578,18 @@ def materialize_production_p1_release(
                     )
                 system_observations.append(
                     CoreSystemObservationRecord(
-                        system_observation_id=str(
-                            uuid5(_SYSTEM_OBSERVATION_NAMESPACE, identity)
-                        ),
+                        system_observation_id=str(uuid5(_SYSTEM_OBSERVATION_NAMESPACE, identity)),
                         episode_id=context.episode_id,
                         stage_id=context.stage_id,
                         aircraft_id=system.aircraft_id,
-                        mission_system_instance_id=(
-                            system.mission_system_instance_id
-                        ),
+                        mission_system_instance_id=(system.mission_system_instance_id),
                         observed_metric_instance_id=metric_instance_id,
-                        reference_truth_profile_version=(
-                            system.reference_truth_profile_version
-                        ),
+                        reference_truth_profile_version=(system.reference_truth_profile_version),
                         reference_quality_status=system.reference_quality_status,
-                        reference_uncertainty_summary=dict(
-                            system.reference_uncertainty_summary
-                        ),
-                        alignment_uncertainty_summary=dict(
-                            system.alignment_uncertainty_summary
-                        ),
-                        observation_start_session_time_us=(
-                            context.start_session_time_us
-                        ),
-                        observation_end_session_time_us=(
-                            context.end_session_time_us
-                        ),
+                        reference_uncertainty_summary=dict(system.reference_uncertainty_summary),
+                        alignment_uncertainty_summary=dict(system.alignment_uncertainty_summary),
+                        observation_start_session_time_us=(context.start_session_time_us),
+                        observation_end_session_time_us=(context.end_session_time_us),
                         context_tags=dict(system.context_tags),
                         evidence_set_id=evidence_id,
                         coverage=context.coverage,
@@ -655,9 +597,7 @@ def materialize_production_p1_release(
                         eligibility_status=eligibility,
                         exclusion_reason_code=exclusion,
                         comparison_key_hash=comparison_key,
-                        observation_schema_version=(
-                            context.observation_schema_version
-                        ),
+                        observation_schema_version=(context.observation_schema_version),
                     )
                 )
 
@@ -669,23 +609,13 @@ def materialize_production_p1_release(
             "catalog_hash": contract.plan.catalog_sha256,
             "plan_hash": contract.plan.logical_hash,
             "execution_batch_hash": batch.logical_hash,
-            "definition_ids": [
-                item.metric_definition_id for item in definitions
-            ],
+            "definition_ids": [item.metric_definition_id for item in definitions],
             "evidence_ids": [item.evidence_set_id for item in evidence_sets],
-            "metric_instance_ids": [
-                item.metric_instance_id for item in metric_instances
-            ],
+            "metric_instance_ids": [item.metric_instance_id for item in metric_instances],
             "observation_ids": [item.observation_id for item in observations],
-            "system_observation_ids": [
-                item.system_observation_id for item in system_observations
-            ],
-            "world_product_ids": [
-                item.world_product_id for item in world_products
-            ],
-            "world_relation_ids": [
-                item.relation_id for item in world_relations
-            ],
+            "system_observation_ids": [item.system_observation_id for item in system_observations],
+            "world_product_ids": [item.world_product_id for item in world_products],
+            "world_relation_ids": [item.relation_id for item in world_relations],
             "tpaa_m_chain_ids": [item.chain_id for item in tpaa_m_chains],
         }
     )

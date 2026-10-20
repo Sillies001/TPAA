@@ -131,7 +131,7 @@ def test_explicit_authority_root_does_not_depend_on_source_layout(
     assert verification.core_baseline == "CB-1.5.0"
 
 
-def test_service_config_requires_hashed_principals_and_no_system_fallback(
+def test_legacy_service_principal_loader_remains_migration_only(
     tmp_path: Path,
 ) -> None:
     token_hash = hashlib.sha256(b"service-test-token").hexdigest()
@@ -156,21 +156,20 @@ def test_service_config_requires_hashed_principals_and_no_system_fallback(
     bindings = load_service_principal_bindings(principals)
     assert len(bindings) == 1
     assert bindings[0].role == "ANALYST"
-    config = service_production_config_from_environment(
-        product_build_version="test-build",
-        authority_root=AUTHORITY,
-        environ={
-            "TPAA_SERVICE_CONNINFO": "dbname=tpaa",
-            "TPAA_OBJECT_ROOT": str(tmp_path / "objects"),
-            "TPAA_SERVICE_PRINCIPALS_FILE": str(principals),
-        },
-    )
-    assert config.profile is RuntimeProfile.SERVICE
-    assert config.service_principals == bindings
+    with pytest.raises(ValueError, match="TPAA_RUNTIME_CONFIG_FILE"):
+        service_production_config_from_environment(
+            product_build_version="test-build",
+            authority_root=AUTHORITY,
+            environ={
+                "TPAA_SERVICE_CONNINFO": "dbname=tpaa",
+                "TPAA_OBJECT_ROOT": str(tmp_path / "objects"),
+                "TPAA_SERVICE_PRINCIPALS_FILE": str(principals),
+            },
+        )
 
 
-def test_service_config_fails_closed_without_principal_file(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match="TPAA_SERVICE_PRINCIPALS_FILE"):
+def test_service_config_fails_closed_without_runtime_document(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="TPAA_RUNTIME_CONFIG_FILE"):
         service_production_config_from_environment(
             product_build_version="test-build",
             authority_root=AUTHORITY,
@@ -181,59 +180,28 @@ def test_service_config_fails_closed_without_principal_file(tmp_path: Path) -> N
         )
 
 
-def test_service_config_builds_explicit_s3_backend(tmp_path: Path) -> None:
-    principals = tmp_path / "principals.json"
-    principals.write_text(
-        json.dumps(
-            {
-                "schema": "TPAA_SERVICE_PRINCIPALS_V1",
-                "principals": [
-                    {
-                        "credential_sha256": hashlib.sha256(b"token").hexdigest(),
-                        "role": "ANALYST",
-                        "actor_id": None,
-                        "scope_match": True,
-                    }
-                ],
-            }
-        ),
-        encoding="utf-8",
-    )
-    config = service_production_config_from_environment(
-        product_build_version="test-build",
-        authority_root=AUTHORITY,
-        environ={
-            "TPAA_SERVICE_CONNINFO": "dbname=tpaa",
-            "TPAA_OBJECT_ROOT": str(tmp_path / "control"),
-            "TPAA_SERVICE_PRINCIPALS_FILE": str(principals),
-            "TPAA_OBJECT_STORE_BACKEND": "S3",
-            "TPAA_S3_BUCKET": "tpaa-test-bucket",
-            "TPAA_S3_PREFIX": "qualification",
-            "TPAA_S3_ENDPOINT_URL": "http://127.0.0.1:5000",
-            "TPAA_S3_ACCESS_KEY_ID": "test-access-key",
-            "TPAA_S3_SECRET_ACCESS_KEY": "test-secret-key",
-        },
-    )
-
-    assert isinstance(config.object_store, S3ObjectStore)
+def test_service_config_rejects_direct_environment_s3_secrets(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="TPAA_RUNTIME_CONFIG_FILE"):
+        service_production_config_from_environment(
+            product_build_version="test-build",
+            authority_root=AUTHORITY,
+            environ={
+                "TPAA_SERVICE_CONNINFO": "dbname=tpaa",
+                "TPAA_OBJECT_STORE_BACKEND": "S3",
+                "TPAA_S3_SECRET_ACCESS_KEY": "inline-secret",
+            },
+        )
 
 
 def test_service_config_fails_closed_for_unknown_object_backend(
     tmp_path: Path,
 ) -> None:
-    principals = tmp_path / "principals.json"
-    principals.write_text(
+    document = tmp_path / "service-runtime.json"
+    document.write_text(
         json.dumps(
             {
-                "schema": "TPAA_SERVICE_PRINCIPALS_V1",
-                "principals": [
-                    {
-                        "credential_sha256": hashlib.sha256(b"token").hexdigest(),
-                        "role": "ANALYST",
-                        "actor_id": None,
-                        "scope_match": True,
-                    }
-                ],
+                **_service_document(tmp_path),
+                "object_store": {"backend": "UNSUPPORTED"},
             }
         ),
         encoding="utf-8",
@@ -243,10 +211,8 @@ def test_service_config_fails_closed_for_unknown_object_backend(
             product_build_version="test-build",
             authority_root=AUTHORITY,
             environ={
-                "TPAA_SERVICE_CONNINFO": "dbname=tpaa",
-                "TPAA_OBJECT_ROOT": str(tmp_path / "objects"),
-                "TPAA_SERVICE_PRINCIPALS_FILE": str(principals),
-                "TPAA_OBJECT_STORE_BACKEND": "UNSUPPORTED",
+                "TPAA_RUNTIME_CONFIG_FILE": str(document),
+                "TPAA_TEST_CONNINFO": "dbname=tpaa",
             },
         )
 
@@ -296,6 +262,51 @@ def _principal_file(tmp_path: Path) -> Path:
     return principals
 
 
+def _identity_document(tmp_path: Path) -> dict[str, object]:
+    ca_bundle = tmp_path / "service-ca.pem"
+    ca_bundle.write_text("test-ca-placeholder", encoding="utf-8")
+    revocations = tmp_path / "revocations.json"
+    revocations.write_text(
+        json.dumps(
+            {
+                "schema": "TPAA_REVOCATION_REGISTRY_V1",
+                "revoked_tokens": [],
+                "revoked_certificates": [],
+                "issuer_not_before": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    return {
+        "mode": "OIDC_MTLS",
+        "issuer": "https://identity.example.test",
+        "audience": "tpaa-service",
+        "jwks_uri": "https://identity.example.test/.well-known/jwks.json",
+        "ca_bundle": str(ca_bundle),
+        "allowed_spiffe_prefixes": ["spiffe://tpaa/service/"],
+        "revocation_file": str(revocations),
+    }
+
+
+def _service_document(tmp_path: Path) -> dict[str, object]:
+    return {
+        "schema": "TPAA_RUNTIME_CONFIG_V1",
+        "profile": "SERVICE",
+        "product_build_version": "test-build",
+        "core_baseline": "CB-1.5.0",
+        "db_schema_version": "1.9.0",
+        "authority_root": str(AUTHORITY),
+        "object_root": str(tmp_path / "service-control"),
+        "migration_state_root": str(tmp_path / "migration-state"),
+        "identity": _identity_document(tmp_path),
+        "database": {
+            "backend": "POSTGRESQL",
+            "conninfo_ref": "env://TPAA_TEST_CONNINFO",
+        },
+        "object_store": {"backend": "LOCAL"},
+    }
+
+
 def test_w1_shared_desktop_runtime_config_document(tmp_path: Path) -> None:
     document = tmp_path / "desktop-runtime.json"
     data_root = tmp_path / "desktop-document-data"
@@ -325,7 +336,6 @@ def test_w1_shared_desktop_runtime_config_document(tmp_path: Path) -> None:
 
 
 def test_w1_shared_service_config_resolves_secret_references(tmp_path: Path) -> None:
-    principals = _principal_file(tmp_path)
     document = tmp_path / "service-runtime.json"
     document.write_text(
         json.dumps(
@@ -337,8 +347,8 @@ def test_w1_shared_service_config_resolves_secret_references(tmp_path: Path) -> 
                 "db_schema_version": "1.9.0",
                 "authority_root": str(AUTHORITY),
                 "object_root": str(tmp_path / "service-control"),
-                    "migration_state_root": str(tmp_path / "migration-state"),
-                "principals_file": str(principals),
+                "migration_state_root": str(tmp_path / "migration-state"),
+                "identity": _identity_document(tmp_path),
                 "database": {
                     "backend": "POSTGRESQL",
                     "conninfo_ref": "env://TPAA_TEST_CONNINFO",
@@ -368,13 +378,13 @@ def test_w1_shared_service_config_resolves_secret_references(tmp_path: Path) -> 
     )
     assert config.profile is RuntimeProfile.SERVICE
     assert config.service_conninfo == "dbname=tpaa"
+    assert config.service_identity is not None
     assert isinstance(config.object_store, S3ObjectStore)
 
 
 def test_w1_runtime_config_rejects_inline_secret_and_version_drift(
     tmp_path: Path,
 ) -> None:
-    principals = _principal_file(tmp_path)
     document = tmp_path / "invalid-runtime.json"
     payload = {
         "schema": "TPAA_RUNTIME_CONFIG_V1",
@@ -384,7 +394,7 @@ def test_w1_runtime_config_rejects_inline_secret_and_version_drift(
         "db_schema_version": "1.9.0",
         "authority_root": str(AUTHORITY),
         "object_root": str(tmp_path / "objects"),
-        "principals_file": str(principals),
+        "identity": _identity_document(tmp_path),
         "database": {"backend": "POSTGRESQL", "conninfo_ref": "password=inline"},
         "object_store": {"backend": "LOCAL"},
     }

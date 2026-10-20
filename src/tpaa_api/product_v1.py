@@ -25,9 +25,7 @@ PRODUCT_API_VERSION = "v1"
 PRODUCT_API_AUTHORITY_ID = "CROSS_LAYER_DTO_CONTRACTS"
 PRODUCT_API_AUTHORITY_VERSION = "UNVERSIONED_BY_AUTHORITY"
 PRODUCT_API_CORE_BASELINE = "CB-1.5.0"
-PRODUCT_API_AUTHORITY_SHA256 = (
-    "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9"
-)
+PRODUCT_API_AUTHORITY_SHA256 = "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9"
 
 
 class ProductV1Authority(TypedDict):
@@ -83,11 +81,7 @@ def _error(exc: Exception) -> JSONResponse:
         code = status.HTTP_404_NOT_FOUND
     elif "NOT_ADMITTED" in upper:
         code = status.HTTP_423_LOCKED
-    elif (
-        "NOT_AUTHORIZED" in upper
-        or "DENIED" in upper
-        or isinstance(exc, PermissionError)
-    ):
+    elif "NOT_AUTHORIZED" in upper or "DENIED" in upper or isinstance(exc, PermissionError):
         code = status.HTTP_403_FORBIDDEN
     elif "CONFLICT" in upper or "MISMATCH" in upper:
         code = status.HTTP_409_CONFLICT
@@ -190,9 +184,7 @@ def register_product_v1_routes(
     def p3_twin(twin_revision_id: UUID) -> ProductV1Envelope | JSONResponse:
         twin = str(twin_revision_id)
         try:
-            payload = application.m7_p3_twin(
-                M7TwinQuery(twin_revision_id=twin)
-            )
+            payload = application.m7_p3_twin(M7TwinQuery(twin_revision_id=twin))
         except (LookupError, RuntimeError, ValueError, PermissionError) as exc:
             return _error(exc)
         return _envelope(

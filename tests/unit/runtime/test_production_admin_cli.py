@@ -83,16 +83,50 @@ def test_admin_rejects_relative_data_root_without_leaking_detail(capsys) -> None
     assert "relative-data" not in captured.err
 
 
-def test_admin_permissions_reports_default_deny_gaps(capsys) -> None:
+def test_admin_permissions_reports_completed_default_deny_policy(capsys) -> None:
     assert main(["permissions"]) == 0
     payload = _payload(capsys.readouterr().out)
     assert payload["schema"] == "TPAA_ADMIN_RESULT_V1"
     assert payload["command"] == "permissions"
     governance = payload["permission_governance"]
     assert isinstance(governance, dict)
-    assert governance["status"] == "PARTIAL"
+    assert governance["status"] == "COMPLETE"
     assert governance["default_decision"] == "DENY"
-    assert governance["canonical_roles_not_admitted_for_production"] == ["MODEL_REVIEWER"]
+    assert governance["canonical_roles_not_admitted_for_production"] == []
+    assert governance["maker_checker"] == "REQUIRED"
+
+
+def test_admin_issues_signed_desktop_identity_without_echoing_secret(
+    tmp_path: Path,
+    capsys,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("TPAA_TEST_DESKTOP_IDENTITY_KEY", "not-returned-secret")
+    assert (
+        main(
+            [
+                "identity-issue",
+                "--data-root",
+                str(tmp_path),
+                "--subject",
+                "00000000-0000-4000-8000-000000000001",
+                "--role",
+                "INSTRUCTOR",
+                "--scope",
+                "*",
+                "--key-ref",
+                "env://TPAA_TEST_DESKTOP_IDENTITY_KEY",
+            ]
+        )
+        == 0
+    )
+    output = capsys.readouterr().out
+    assert "not-returned-secret" not in output
+    payload = _payload(output)
+    assert payload["status"] == "COMPLETE"
+    identity = json.loads((tmp_path / "desktop-identity.json").read_text(encoding="utf-8"))
+    assert identity["roles"] == ["INSTRUCTOR"]
+    assert len(identity["signature"]) == 64
 
 
 def test_admin_source_stage_returns_managed_immutable_reference(

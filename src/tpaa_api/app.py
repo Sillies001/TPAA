@@ -83,11 +83,7 @@ def register_base_routes(
         """Expose the Application-projected Core handshake with fail-closed HTTP status."""
 
         runtime = application.runtime_baseline_status()
-        http_status = (
-            status.HTTP_200_OK
-            if runtime.ready
-            else status.HTTP_503_SERVICE_UNAVAILABLE
-        )
+        http_status = status.HTTP_200_OK if runtime.ready else status.HTTP_503_SERVICE_UNAVAILABLE
         return JSONResponse(
             status_code=http_status,
             content=_readiness_payload(runtime),
@@ -120,9 +116,7 @@ def register_base_routes(
                 "command must be non-empty string",
                 422,
             )
-        if not isinstance(payload, dict) or not all(
-            isinstance(key, str) for key in payload
-        ):
+        if not isinstance(payload, dict) or not all(isinstance(key, str) for key in payload):
             return _system_error(
                 "JOB_PAYLOAD_INVALID",
                 "payload must be an object",
@@ -133,11 +127,7 @@ def register_base_routes(
                 idempotency_key=idempotency_key,
                 command=command,
                 payload=payload,
-                actor=(
-                    actor_resolver(request)
-                    if actor_resolver is not None
-                    else actor
-                ),
+                actor=(actor_resolver(request) if actor_resolver is not None else actor),
             )
         except IdempotencyConflict as exc:
             return _system_error("IDEMPOTENCY_KEY_CONFLICT", str(exc), 409)
@@ -171,11 +161,7 @@ def register_base_routes(
         try:
             record = application.cancel_job(
                 job_id=job_id,
-                actor=(
-                    actor_resolver(request)
-                    if actor_resolver is not None
-                    else actor
-                ),
+                actor=(actor_resolver(request) if actor_resolver is not None else actor),
                 reason=reason,
             )
         except JobNotFound as exc:

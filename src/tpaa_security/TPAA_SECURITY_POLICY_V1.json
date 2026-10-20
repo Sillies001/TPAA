@@ -1,0 +1,158 @@
+{
+  "schema": "TPAA_SECURITY_POLICY_V1",
+  "policy_version": "1.0.0",
+  "default_decision": "DENY",
+  "projection_role_mapping": {
+    "TRAINEE": "SUBJECT_SELF",
+    "INSTRUCTOR": "INSTRUCTOR_EVALUATOR",
+    "EVALUATOR": "INSTRUCTOR_EVALUATOR",
+    "TRAINING_MANAGER": "TEAM_LEAD",
+    "UNIT_ANALYST": "ANALYST",
+    "MAINTENANCE_ENGINEERING": "ANALYST",
+    "DATA_ENGINEER": "ADMIN_AUDITOR",
+    "ADMINISTRATOR": "ADMIN_AUDITOR",
+    "MODEL_REVIEWER": "MODEL_REVIEWER"
+  },
+  "role_permissions": {
+    "TRAINEE": [
+      "DERIVED_DATA_READ",
+      "ANNOTATION_WRITE"
+    ],
+    "INSTRUCTOR": [
+      "RAW_DATA_READ",
+      "DERIVED_DATA_READ",
+      "SOURCE_IMPORT",
+      "COMPUTE_EXECUTE",
+      "CONFIGURATION_WRITE",
+      "ANNOTATION_WRITE",
+      "DIRECT_IDENTITY_READ",
+      "PUBLICATION_OVERRIDE",
+      "EXPORT_DEIDENTIFIED"
+    ],
+    "EVALUATOR": [
+      "RAW_DATA_READ",
+      "DERIVED_DATA_READ",
+      "COMPUTE_EXECUTE",
+      "ANNOTATION_WRITE",
+      "DIRECT_IDENTITY_READ",
+      "ASSESSMENT_APPROVE",
+      "RECOMMENDATION_APPROVE",
+      "EXPORT_DEIDENTIFIED",
+      "APPROVAL_REVIEW"
+    ],
+    "TRAINING_MANAGER": [
+      "RAW_DATA_READ",
+      "DERIVED_DATA_READ",
+      "COMPUTE_EXECUTE",
+      "CONFIGURATION_WRITE",
+      "DIRECT_IDENTITY_READ",
+      "PROFILE_RULE_PUBLISH",
+      "PRODUCT_PUBLISH",
+      "WITHDRAW_RELEASE",
+      "EXPORT_DEIDENTIFIED",
+      "APPROVAL_REVIEW"
+    ],
+    "UNIT_ANALYST": [
+      "DERIVED_DATA_READ",
+      "EXPORT_DEIDENTIFIED"
+    ],
+    "MAINTENANCE_ENGINEERING": [
+      "RAW_DATA_READ",
+      "DERIVED_DATA_READ"
+    ],
+    "DATA_ENGINEER": [
+      "RAW_DATA_READ",
+      "DERIVED_DATA_READ",
+      "SOURCE_IMPORT",
+      "COMPUTE_EXECUTE",
+      "CONFIGURATION_WRITE",
+      "EXPORT_DEIDENTIFIED",
+      "PLUGIN_INSTALL",
+      "PLUGIN_ENABLE"
+    ],
+    "ADMINISTRATOR": [
+      "RAW_DATA_READ",
+      "DERIVED_DATA_READ",
+      "SOURCE_IMPORT",
+      "COMPUTE_EXECUTE",
+      "CONFIGURATION_WRITE",
+      "DIRECT_IDENTITY_READ",
+      "REIDENTIFY",
+      "EXPORT_DEIDENTIFIED",
+      "EXPORT_IDENTIFIED",
+      "WITHDRAW_RELEASE",
+      "PLUGIN_ENABLE",
+      "SECURITY_AUDIT_READ",
+      "APPROVAL_REVIEW",
+      "BREAK_GLASS"
+    ],
+    "MODEL_REVIEWER": [
+      "DERIVED_DATA_READ",
+      "MODEL_RELEASE",
+      "APPROVAL_REVIEW"
+    ]
+  },
+  "high_risk_permissions": {
+    "MODEL_RELEASE": {
+      "maker_roles": ["MODEL_REVIEWER"],
+      "checker_roles": ["TRAINING_MANAGER", "ADMINISTRATOR"]
+    },
+    "PRODUCT_PUBLISH": {
+      "maker_roles": ["TRAINING_MANAGER"],
+      "checker_roles": ["ADMINISTRATOR"]
+    },
+    "PUBLICATION_OVERRIDE": {
+      "maker_roles": ["INSTRUCTOR"],
+      "checker_roles": ["EVALUATOR", "TRAINING_MANAGER"]
+    },
+    "PLUGIN_INSTALL": {
+      "maker_roles": ["DATA_ENGINEER"],
+      "checker_roles": ["ADMINISTRATOR"]
+    }
+  },
+  "ownership_required_permissions": [
+    "RAW_DATA_READ",
+    "DERIVED_DATA_READ",
+    "ANNOTATION_WRITE",
+    "DIRECT_IDENTITY_READ",
+    "ASSESSMENT_APPROVE",
+    "RECOMMENDATION_APPROVE",
+    "EXPORT_DEIDENTIFIED",
+    "EXPORT_IDENTIFIED"
+  ],
+  "global_scope_roles": ["ADMINISTRATOR"],
+  "classification": {
+    "ordered": ["SYNTHETIC", "PUBLIC", "INTERNAL", "OPERATIONAL", "SENSITIVE"],
+    "identified_export_minimum_role": "ADMINISTRATOR",
+    "media_redaction_required_at_or_above": "OPERATIONAL"
+  },
+  "privacy": {
+    "pseudonym_algorithm": "HMAC-SHA256",
+    "purpose_binding_required": true,
+    "minimum_necessary": true,
+    "derived_inherits_source_classification": true,
+    "small_cohort_minimum": 5
+  },
+  "retention": {
+    "release_reference_blocks_physical_delete": true,
+    "legal_hold_blocks_delete": true,
+    "expired_default_action": "ARCHIVE"
+  },
+  "identity": {
+    "oidc_required_claims": ["iss", "sub", "aud", "exp", "iat", "jti"],
+    "allowed_jws_algorithms": ["RS256"],
+    "maximum_token_age_seconds": 900,
+    "mtls_required_for_service": true,
+    "token_certificate_binding_required": true
+  },
+  "break_glass": {
+    "maximum_seconds": 1800,
+    "allowed_permissions": ["PRODUCT_PUBLISH", "PUBLICATION_OVERRIDE", "WITHDRAW_RELEASE"],
+    "ticket_and_reason_required": true
+  },
+  "plugin_trust": {
+    "algorithm": "Ed25519",
+    "deployment_trust_root_required": true,
+    "unsigned_plugins_allowed": false
+  }
+}

@@ -151,9 +151,7 @@ def _strings(value: object) -> list[str]:
         return list(value)
     if isinstance(value, str):
         parsed = json.loads(value)
-        if not isinstance(parsed, list) or not all(
-            isinstance(item, str) for item in parsed
-        ):
+        if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):
             raise ValueError("discovery string-array JSON is invalid")
         return list(parsed)
     raise ValueError("discovery string-array is invalid")
@@ -192,10 +190,7 @@ class DurableProductDiscovery:
         return {
             "schema": _SCHEMA,
             "entity": "SESSION",
-            "items": [
-                {key: _safe(value) for key, value in row.items()}
-                for row in rows
-            ],
+            "items": [{key: _safe(value) for key, value in row.items()} for row in rows],
         }
 
     def releases(self, session_id: str) -> dict[str, object]:
@@ -222,21 +217,14 @@ class DurableProductDiscovery:
                 ),
                 order_by=("release_no", "release_id"),
             )
-            rows = tuple(
-                row
-                for row in raw_rows
-                if str(row["scope_key"]) == session_id
-            )
+            rows = tuple(row for row in raw_rows if str(row["scope_key"]) == session_id)
             uow.commit()
         return {
             "schema": _SCHEMA,
             "entity": "RELEASE",
             "session_id": session_id,
             "current_latest_fallback_used": False,
-            "items": [
-                {key: _safe(value) for key, value in row.items()}
-                for row in rows
-            ],
+            "items": [{key: _safe(value) for key, value in row.items()} for row in rows],
         }
 
     def products(self, kind: str) -> dict[str, object]:
@@ -244,17 +232,11 @@ class DurableProductDiscovery:
         try:
             table, id_column, columns = _PRODUCT_SPECS[normalized]
         except KeyError as exc:
-            raise ValueError(
-                f"unsupported discovery product kind: {kind}"
-            ) from exc
+            raise ValueError(f"unsupported discovery product kind: {kind}") from exc
         with self._read_uow_factory() as uow:
             rows = uow.canonical_rows.many(
                 table,
-                where=(
-                    {"scope_type": "LONGITUDINAL"}
-                    if normalized == "M4_RELEASE"
-                    else {}
-                ),
+                where=({"scope_type": "LONGITUDINAL"} if normalized == "M4_RELEASE" else {}),
                 columns=columns,
                 order_by=(id_column,),
             )
@@ -265,11 +247,7 @@ class DurableProductDiscovery:
                     or row.get("scope_key") != row.get("session_id")
                 ):
                     continue
-                metadata = {
-                    key: _safe(value)
-                    for key, value in row.items()
-                    if key != id_column
-                }
+                metadata = {key: _safe(value) for key, value in row.items() if key != id_column}
                 if normalized == "P2_ESTIMATE":
                     revision = uow.canonical_rows.one(
                         "capability.adjusted_capability_estimate_revision",
@@ -282,16 +260,10 @@ class DurableProductDiscovery:
                         columns=("release_id", "session_id"),
                     )
                     if revision is not None:
-                        metadata["p2_release_id"] = _safe(
-                            revision["p2_release_id"]
-                        )
+                        metadata["p2_release_id"] = _safe(revision["p2_release_id"])
                     if observation is not None:
-                        metadata["source_release_id"] = _safe(
-                            observation["release_id"]
-                        )
-                        metadata["session_id"] = _safe(
-                            observation["session_id"]
-                        )
+                        metadata["source_release_id"] = _safe(observation["release_id"])
+                        metadata["session_id"] = _safe(observation["session_id"])
                 elif normalized == "P6_RECOMMENDATION":
                     revision = uow.canonical_rows.one(
                         "intelligence.training_recommendation_revision",
@@ -324,7 +296,6 @@ class DurableProductDiscovery:
             "items": items,
         }
 
-
     def release_presentation(self, release_id: str) -> dict[str, object]:
         if not release_id.strip():
             raise ValueError("release_id must be non-empty")
@@ -351,15 +322,9 @@ class DurableProductDiscovery:
             source_series.append(
                 {
                     "evidence_set_id": raw.get("evidence_set_id"),
-                    "canonical_dataset_id": locator.get(
-                        "canonical_dataset_id"
-                    ),
-                    "canonical_dataset_uri": locator.get(
-                        "canonical_dataset_uri"
-                    ),
-                    "canonical_logical_content_hash": locator.get(
-                        "canonical_logical_content_hash"
-                    ),
+                    "canonical_dataset_id": locator.get("canonical_dataset_id"),
+                    "canonical_dataset_uri": locator.get("canonical_dataset_uri"),
+                    "canonical_logical_content_hash": locator.get("canonical_logical_content_hash"),
                 }
             )
         return {

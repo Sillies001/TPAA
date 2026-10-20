@@ -22,6 +22,26 @@ class RuntimeProfile(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
+class OidcMtlsRuntimeConfig:
+    issuer: str
+    audience: str
+    jwks_uri: str
+    ca_bundle_path: Path
+    allowed_spiffe_prefixes: tuple[str, ...]
+    revocation_file: Path
+
+    def __post_init__(self) -> None:
+        if not self.issuer.startswith("https://") or not self.jwks_uri.startswith("https://"):
+            raise ValueError("OIDC issuer and JWKS URI must use HTTPS")
+        if not self.audience or not self.allowed_spiffe_prefixes:
+            raise ValueError("OIDC audience and mTLS SPIFFE prefixes are required")
+        if not self.ca_bundle_path.is_file():
+            raise ValueError("mTLS CA bundle must exist")
+        if not self.revocation_file.is_file():
+            raise ValueError("identity revocation file must exist")
+
+
+@dataclass(frozen=True, slots=True)
 class ProductionPrincipalBinding:
     """Secret-free credential fingerprint mapped to one frozen least-privilege role."""
 
@@ -47,9 +67,7 @@ class ProductionPrincipalBinding:
         try:
             validate_production_principal_policy(
                 role=self.role,
-                privileged_identity_authorized=(
-                    self.privileged_identity_authorized
-                ),
+                privileged_identity_authorized=(self.privileged_identity_authorized),
                 visibility_authorized=self.visibility_authorized,
                 export_authorized=self.export_authorized,
             )
@@ -86,6 +104,7 @@ class ProductionRuntimeConfig:
     desktop_database_path: Path | None = None
     service_conninfo: str | None = None
     service_principals: tuple[ProductionPrincipalBinding, ...] = ()
+    service_identity: OidcMtlsRuntimeConfig | None = None
     object_store: ObjectStore | None = None
     migration_state_root: Path | None = None
 
@@ -103,19 +122,17 @@ class ProductionRuntimeConfig:
                 raise ValueError("Desktop production runtime forbids service_conninfo")
             if self.service_principals:
                 raise ValueError("Desktop runtime forbids service principal bindings")
+            if self.service_identity is not None:
+                raise ValueError("Desktop runtime forbids Service identity configuration")
             if self.object_store is not None:
                 raise ValueError("Desktop runtime uses its governed local object store")
         else:
             if not self.service_conninfo or not self.service_conninfo.strip():
                 raise ValueError("Service production runtime requires conninfo")
             if self.desktop_database_path is not None:
-                raise ValueError(
-                    "Service production runtime forbids desktop_database_path"
-                )
-            digests = tuple(
-                item.credential_sha256 for item in self.service_principals
-            )
+                raise ValueError("Service production runtime forbids desktop_database_path")
+            if bool(self.service_principals) == (self.service_identity is not None):
+                raise ValueError("Service runtime requires exactly one identity provider")
+            digests = tuple(item.credential_sha256 for item in self.service_principals)
             if len(set(digests)) != len(digests):
-                raise ValueError(
-                    "Service principal credential fingerprints must be unique"
-                )
+                raise ValueError("Service principal credential fingerprints must be unique")

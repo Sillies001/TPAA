@@ -16,6 +16,8 @@ from tpaa_runtime import (
     project_version,
     resolve_authority_root,
 )
+from tpaa_runtime.federated_identity import desktop_local_principal_resolver
+from tpaa_security import load_security_policy
 
 
 def create_runtime(
@@ -56,7 +58,16 @@ def create_app(
         environ=environ,
         app_root=app_root,
     )
-    return create_production_desktop_app(runtime, bearer_token=bearer_token)
+    identity = desktop_local_principal_resolver(
+        data_root=runtime.config.object_root.parent,
+        policy=load_security_policy(),
+        environ=environ,
+    )
+    return create_production_desktop_app(
+        runtime,
+        bearer_token=bearer_token,
+        principal_resolver=identity,
+    )
 
 
 __all__ = ["create_app", "create_runtime"]

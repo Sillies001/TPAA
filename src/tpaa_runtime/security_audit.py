@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from pathlib import Path
 
 from tpaa_application import SecurityAuditRecord, SecurityAuditSink
+from tpaa_security import ApiAuthorizationEvent
 from tpaa_storage import (
     AuditLogWrite,
     PostgreSQLServiceUnitOfWork,
@@ -56,3 +58,30 @@ class PostgreSQLSecurityAuditSink(SecurityAuditSink):
         ) as uow:
             uow.audit_log.append(_write(event))
             uow.commit()
+
+
+@dataclass(frozen=True, slots=True)
+class ApplicationApiAuthorizationAudit:
+    """Persist authorization decisions without storing a direct user identity."""
+
+    sink: SecurityAuditSink
+
+    def record(self, event: ApiAuthorizationEvent) -> None:
+        principal_key = "principal:" + hashlib.sha256(event.subject.encode()).hexdigest()
+        object_id = "api-path:" + hashlib.sha256(event.path.encode()).hexdigest()
+        self.sink.record(
+            SecurityAuditRecord(
+                actor_id=None,
+                principal_key=principal_key,
+                action="API_AUTHORIZATION",
+                object_type="API_ROUTE",
+                object_id=object_id,
+                outcome="ALLOW" if event.allowed else "DENY",
+                reason=event.code,
+                details={
+                    "method": event.method,
+                    "permission": event.permission,
+                    "policy_sha256": event.policy_sha256,
+                },
+            )
+        )

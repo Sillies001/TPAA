@@ -5,7 +5,7 @@ from typing import Never
 
 from fastapi.testclient import TestClient
 
-from tpaa_api import create_desktop_app
+from tpaa_api import UnifiedPrincipal, create_desktop_app
 from tpaa_application import (
     ApplicationService,
     M1PublicationService,
@@ -38,7 +38,19 @@ def _application() -> ApplicationService:
 
 
 def test_desktop_m1_routes_reuse_bearer_origin_and_path_security_boundary() -> None:
-    app = create_desktop_app(application=_application(), bearer_token="desktop-test")
+    principal = UnifiedPrincipal(
+        role="INSTRUCTOR_EVALUATOR",
+        actor_id="contract-instructor",
+        scope_match=True,
+        security_roles=("INSTRUCTOR",),
+        authentication_method="SIGNED_LOCAL_IDENTITY",
+        credential_id="contract-device",
+    )
+    app = create_desktop_app(
+        application=_application(),
+        bearer_token="desktop-test",
+        principal_resolver=lambda _request: principal,
+    )
     with TestClient(app) as client:
         unauthorized = client.post(
             "/m1/commands/import-session",

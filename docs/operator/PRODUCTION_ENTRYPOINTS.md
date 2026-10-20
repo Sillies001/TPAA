@@ -32,7 +32,7 @@ TPAA uses the platform per-user data location:
 The first startup creates and verifies:
 
 ```text
-<data-root>/tpaa.sqlite3   DB 1.9 / CB-1.4.0 authority
+<data-root>/tpaa.sqlite3   DB 1.9 / CB-1.5.0 authority
 <data-root>/objects/      managed product object storage
 ```
 
@@ -63,61 +63,39 @@ The command returns secret-free `TPAA_SERVICE_PREFLIGHT_V1` JSON and exits with
 status 2 when configuration, PostgreSQL, object storage, authority, worker, or
 readiness validation fails.
 
-The following environment variables are required:
+The public Service entry point accepts one runtime-document pointer:
 
 | Variable | Meaning |
 |---|---|
-| `TPAA_SERVICE_CONNINFO` | PostgreSQL connection information for a DB 1.9 database |
-| `TPAA_OBJECT_ROOT` | Absolute local object directory, or local control/scratch root when S3 is selected |
-| `TPAA_SERVICE_PRINCIPALS_FILE` | Absolute path to the secret-free principal binding file |
-| `TPAA_AUTHORITY_ROOT` | Absolute `CB-1.4.0/canonical` directory; required when the installed runtime cannot discover a source checkout |
+| `TPAA_RUNTIME_CONFIG_FILE` | Absolute path to strict `TPAA_RUNTIME_CONFIG_V1` configuration |
+| `TPAA_AUTHORITY_ROOT` | Absolute `CB-1.5.0/canonical` directory when an installed runtime cannot discover authority |
+
+Database and S3 secrets are `env://NAME` references inside the document. Inline
+secrets and the former direct environment configuration are rejected. Service
+identity must be `OIDC_MTLS`, with an HTTPS issuer/JWKS URI, client CA bundle,
+SPIFFE allowlist, and reloadable revocation registry.
 
 Service uses the local object backend by default. To select an S3-compatible
-backend, install the `service-s3` extra and configure all credentials
-explicitly so startup never falls back to an ambient instance identity:
+backend, install the `service-s3` extra and configure it in the document:
 
-| Variable | Meaning |
+| Runtime document field | Meaning |
 |---|---|
-| `TPAA_OBJECT_STORE_BACKEND` | `LOCAL` (default) or `S3` |
-| `TPAA_S3_BUCKET` | Existing governed bucket |
-| `TPAA_S3_PREFIX` | Governed key prefix; defaults to `tpaa` |
-| `TPAA_S3_ENDPOINT_URL` | Optional S3-compatible endpoint; omit for the provider default |
-| `TPAA_S3_REGION` | Region; defaults to `us-east-1` |
-| `TPAA_S3_ACCESS_KEY_ID` | Explicit access key identifier |
-| `TPAA_S3_SECRET_ACCESS_KEY` | Explicit secret access key |
+| `object_store.backend` | `LOCAL` or `S3` |
+| `object_store.bucket` | Existing governed bucket |
+| `object_store.prefix` | Governed key prefix |
+| `object_store.endpoint_url` | Optional S3-compatible endpoint |
+| `object_store.region` | Explicit region |
+| `object_store.access_key_id_ref` | `env://` secret reference |
+| `object_store.secret_access_key_ref` | `env://` secret reference |
 
 The adapter stores TPAA logical URIs below the configured prefix and verifies
 TPAA-owned SHA-256 metadata/bytes rather than treating an S3 ETag as content
 identity. Immutable writes use conditional create and reject a conflicting
 existing object. Bucket readiness is checked before runtime composition.
 
-The principal file contains SHA-256 fingerprints, never plaintext bearer
-credentials:
-
-```json
-{
-  "schema": "TPAA_SERVICE_PRINCIPALS_V1",
-  "principals": [
-    {
-      "credential_sha256": "<64 lowercase hexadecimal characters>",
-      "role": "ANALYST",
-      "actor_id": "example-analyst",
-      "scope_match": true,
-      "validation_only": false,
-      "privileged_identity_authorized": false,
-      "visibility_authorized": false,
-      "export_authorized": false
-    }
-  ]
-}
-```
-
-The currently admitted production role values are `SUBJECT_SELF`,
-`INSTRUCTOR_EVALUATOR`, `TEAM_LEAD`, `ANALYST`, and `ADMIN_AUDITOR`.
-`MODEL_REVIEWER` exists in the frozen P6 Canonical profile but is deliberately
-not admitted by production principal configuration until the product owner
-approves the mapping and separation-of-duty consequences. Unknown JSON fields
-are rejected rather than silently ignored.
+Business roles are `TRAINEE`, `INSTRUCTOR`, `EVALUATOR`, `TRAINING_MANAGER`,
+`UNIT_ANALYST`, `MAINTENANCE_ENGINEERING`, `DATA_ENGINEER`, `ADMINISTRATOR`, and
+`MODEL_REVIEWER`. Legacy Canonical role names remain view projections only.
 
 Missing identity configuration, unknown roles, invalid hashes, privilege
 escalation, DB authority mismatch, or unavailable object storage fail closed.
@@ -127,17 +105,22 @@ Inspect the current secret-free permission wiring and unresolved gaps with:
 tpaa-admin permissions
 ```
 
-The command reports `PARTIAL` and default `DENY`; it does not grant a role or
-permission. In particular, model release, generic product publish, publication
-override, and plugin installation remain unwired at this stage.
+The command reports the active policy hash, `COMPLETE`, and default `DENY`.
+Model release, product publish, publication override, and plugin install require
+separate maker/checker identities and one-time exact-target approval.
+
+## Desktop local identity
+
+The loopback bearer token protects only the GUI-owned transport channel. Issue a
+short-lived OS-account/device assignment with `tpaa-admin identity-issue`, then set
+`TPAA_DESKTOP_IDENTITY_FILE` and `TPAA_DESKTOP_IDENTITY_KEY_REF`. Missing or tampered
+identity leaves business routes closed while health/readiness remain available.
 
 ## Packaged PIQB probes
 
-The packaged `ready`, `product-smoke`, and `component-smoke` commands make an
-authenticated request to the Service application. For those probes only,
-`TPAA_SERVICE_PROBE_TOKEN` must contain a bearer credential whose SHA-256 is
-present in `TPAA_SERVICE_PRINCIPALS_FILE`. The long-running `service` command
-does not require the probe token.
+Target Service probes must use the same short-lived OIDC token and mTLS identity as
+other callers. Static fingerprint credentials remain qualification compatibility
+inputs only and are not accepted by the public Service configuration.
 
 The PIQB product package must not contain `app/tests/`, fixture directories,
 the legacy `ProductRuntimeConfig`, a SYSTEM all-privilege identity fallback,

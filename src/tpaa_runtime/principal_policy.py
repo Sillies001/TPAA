@@ -1,13 +1,10 @@
-"""Single fail-closed policy for currently admitted production principals.
-
-This module deliberately preserves the existing five-role production boundary.
-It reports, but does not grant, Canonical/design permissions that still require
-an approved role-mapping decision.
-"""
+"""Compatibility projection policy backed by the authoritative W3 policy."""
 
 from __future__ import annotations
 
 from enum import StrEnum
+
+from tpaa_security import load_security_policy
 
 
 class ProductionRole(StrEnum):
@@ -16,6 +13,7 @@ class ProductionRole(StrEnum):
     TEAM_LEAD = "TEAM_LEAD"
     ANALYST = "ANALYST"
     ADMIN_AUDITOR = "ADMIN_AUDITOR"
+    MODEL_REVIEWER = "MODEL_REVIEWER"
 
 
 class ProductPermission(StrEnum):
@@ -38,9 +36,7 @@ class PrincipalPolicyError(ValueError):
         self.code = code
 
 
-_RESTRICTED_ROLES = frozenset(
-    {ProductionRole.TEAM_LEAD, ProductionRole.ANALYST}
-)
+_RESTRICTED_ROLES = frozenset({ProductionRole.TEAM_LEAD, ProductionRole.ANALYST})
 
 
 def production_role(value: str | ProductionRole) -> ProductionRole:
@@ -64,9 +60,7 @@ def validate_production_principal_policy(
 
     selected = production_role(role)
     if selected in _RESTRICTED_ROLES and (
-        privileged_identity_authorized
-        or visibility_authorized
-        or export_authorized
+        privileged_identity_authorized or visibility_authorized or export_authorized
     ):
         raise PrincipalPolicyError(
             "ROLE_PRIVILEGE_ESCALATION",
@@ -81,12 +75,17 @@ def validate_production_principal_policy(
 
 
 def permission_governance_status() -> dict[str, object]:
-    """Return a secret-free diagnostic; this function grants no permission."""
+    """Return the secret-free W3 governance state and policy identity."""
 
+    policy = load_security_policy()
     return {
         "schema": "TPAA_PERMISSION_GOVERNANCE_STATUS_V1",
-        "status": "PARTIAL",
+        "status": "COMPLETE",
+        "policy_schema": str(policy.document["schema"]),
+        "policy_version": policy.version,
+        "policy_sha256": policy.sha256,
         "admitted_production_roles": [role.value for role in ProductionRole],
+        "business_roles": sorted(role.value for role in policy.role_permissions),
         "explicit_deployment_grants": [
             ProductPermission.DIRECT_IDENTITY_READ.value,
             ProductPermission.ANNOTATION_BODY_READ.value,
@@ -96,14 +95,11 @@ def permission_governance_status() -> dict[str, object]:
             ProductPermission.ASSESSMENT_APPROVE.value,
             ProductPermission.RECOMMENDATION_APPROVE.value,
         ],
-        "canonical_roles_not_admitted_for_production": ["MODEL_REVIEWER"],
-        "unwired_high_risk_permissions": [
-            ProductPermission.MODEL_RELEASE.value,
-            ProductPermission.PRODUCT_PUBLISH.value,
-            ProductPermission.PUBLICATION_OVERRIDE.value,
-            ProductPermission.PLUGIN_INSTALL.value,
-        ],
-        "design_role_mapping": "PRODUCT_DECISION_REQUIRED",
+        "canonical_roles_not_admitted_for_production": [],
+        "unwired_high_risk_permissions": [],
+        "high_risk_permissions": sorted(permission.value for permission in policy.high_risk_rules),
+        "design_role_mapping": "APPROVED_W3_LOCAL_BASELINE",
+        "maker_checker": "REQUIRED",
         "default_decision": "DENY",
     }
 

@@ -63,15 +63,11 @@ class DurableEpisodeRevisionService:
         try:
             parsed = UUID(episode_id)
         except ValueError as exc:
-            raise DurableEpisodeRevisionError(
-                "W2_EPISODE_ID_INVALID", episode_id
-            ) from exc
+            raise DurableEpisodeRevisionError("W2_EPISODE_ID_INVALID", episode_id) from exc
         if parsed.int == 0 or str(parsed) != episode_id:
             raise DurableEpisodeRevisionError("W2_EPISODE_ID_INVALID", episode_id)
         if not correction_key or correction_key.strip() != correction_key:
-            raise DurableEpisodeRevisionError(
-                "W2_EPISODE_CORRECTION_KEY_INVALID", correction_key
-            )
+            raise DurableEpisodeRevisionError("W2_EPISODE_CORRECTION_KEY_INVALID", correction_key)
         if (
             isinstance(start_session_time_us, bool)
             or isinstance(end_session_time_us, bool)
@@ -89,9 +85,7 @@ class DurableEpisodeRevisionService:
                 columns=_EPISODE_COLUMNS,
             )
             if previous is None:
-                raise DurableEpisodeRevisionError(
-                    "W2_EPISODE_NOT_FOUND", episode_id
-                )
+                raise DurableEpisodeRevisionError("W2_EPISODE_NOT_FOUND", episode_id)
             session_id = str(previous["session_id"])
             session = uow.canonical_rows.one(
                 "registry.training_session",
@@ -99,9 +93,7 @@ class DurableEpisodeRevisionService:
                 columns=("start_session_time_us", "end_session_time_us"),
             )
             if session is None:
-                raise DurableEpisodeRevisionError(
-                    "W2_EPISODE_SESSION_NOT_FOUND", session_id
-                )
+                raise DurableEpisodeRevisionError("W2_EPISODE_SESSION_NOT_FOUND", session_id)
             session_start = _integer(
                 session["start_session_time_us"], field="session.start_session_time_us"
             )
@@ -109,18 +101,13 @@ class DurableEpisodeRevisionService:
                 session["end_session_time_us"], field="session.end_session_time_us"
             )
             if start_session_time_us < session_start or end_session_time_us > session_end:
-                raise DurableEpisodeRevisionError(
-                    "W2_EPISODE_INTERVAL_OUTSIDE_SESSION", session_id
-                )
-            if (
-                start_session_time_us
-                == _integer(previous["start_session_time_us"], field="start_session_time_us")
-                and end_session_time_us
-                == _integer(previous["end_session_time_us"], field="end_session_time_us")
+                raise DurableEpisodeRevisionError("W2_EPISODE_INTERVAL_OUTSIDE_SESSION", session_id)
+            if start_session_time_us == _integer(
+                previous["start_session_time_us"], field="start_session_time_us"
+            ) and end_session_time_us == _integer(
+                previous["end_session_time_us"], field="end_session_time_us"
             ):
-                raise DurableEpisodeRevisionError(
-                    "W2_EPISODE_REVISION_NO_CHANGE", episode_id
-                )
+                raise DurableEpisodeRevisionError("W2_EPISODE_REVISION_NO_CHANGE", episode_id)
             identity = json.dumps(
                 {
                     "supersedes_episode_id": episode_id,
@@ -163,9 +150,7 @@ class DurableEpisodeRevisionService:
                 if {key: str(value) for key, value in actual.items()} != {
                     key: str(value) for key, value in expected.items()
                 }:
-                    raise DurableEpisodeRevisionError(
-                        "W2_EPISODE_REVISION_CONFLICT", revised_id
-                    )
+                    raise DurableEpisodeRevisionError("W2_EPISODE_REVISION_CONFLICT", revised_id)
             uow.commit()
         return EpisodeRevisionReceipt(
             episode_id=revised_id,

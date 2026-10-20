@@ -64,6 +64,11 @@ def service_preflight(
         "product_build_version": runtime.config.product_build_version,
         "db_schema_version": storage.schema_version,
         "core_baseline": storage.core_baseline,
+        "identity_mode": (
+            "OIDC_MTLS"
+            if runtime.config.service_identity is not None
+            else "LEGACY_STATIC_FINGERPRINT"
+        ),
         "principal_count": len(runtime.config.service_principals),
         "readiness": readiness.readiness,
         "mismatches": list(readiness.mismatches),

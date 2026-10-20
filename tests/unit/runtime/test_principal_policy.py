@@ -23,15 +23,17 @@ def test_production_role_boundary_is_not_silently_expanded() -> None:
         "TEAM_LEAD",
         "ANALYST",
         "ADMIN_AUDITOR",
+        "MODEL_REVIEWER",
     )
-    with pytest.raises(PrincipalPolicyError) as captured:
+    assert (
         validate_production_principal_policy(
             role="MODEL_REVIEWER",
             privileged_identity_authorized=False,
             visibility_authorized=False,
             export_authorized=False,
         )
-    assert captured.value.code == "ROLE_NOT_AUTHORIZED"
+        is ProductionRole.MODEL_REVIEWER
+    )
 
 
 def test_explicit_grants_preserve_existing_fail_closed_rules() -> None:
@@ -56,34 +58,28 @@ def test_explicit_grants_preserve_existing_fail_closed_rules() -> None:
 
 def test_permission_status_reports_gaps_without_granting_them() -> None:
     status = permission_governance_status()
-    assert status["status"] == "PARTIAL"
+    assert status["status"] == "COMPLETE"
     assert status["default_decision"] == "DENY"
-    assert status["canonical_roles_not_admitted_for_production"] == [
-        "MODEL_REVIEWER"
-    ]
-    assert status["unwired_high_risk_permissions"] == [
+    assert status["canonical_roles_not_admitted_for_production"] == []
+    assert status["unwired_high_risk_permissions"] == []
+    assert status["high_risk_permissions"] == [
         "MODEL_RELEASE",
+        "PLUGIN_INSTALL",
         "PRODUCT_PUBLISH",
         "PUBLICATION_OVERRIDE",
-        "PLUGIN_INSTALL",
     ]
-    assert status["design_role_mapping"] == "PRODUCT_DECISION_REQUIRED"
+    assert status["design_role_mapping"] == "APPROVED_W3_LOCAL_BASELINE"
+    assert len(status["policy_sha256"]) == 64
 
 
 def test_reported_role_gap_matches_frozen_canonical_profiles() -> None:
-    p4_p5 = json.loads(
-        (AUTHORITY / "P4_P5_ROLE_PRIVACY_PROFILE.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    p4_p5 = json.loads((AUTHORITY / "P4_P5_ROLE_PRIVACY_PROFILE.json").read_text(encoding="utf-8"))
     p6 = json.loads(
-        (AUTHORITY / "P6_ROLE_PRIVACY_RELEASE_PROFILE.json").read_text(
-            encoding="utf-8"
-        )
+        (AUTHORITY / "P6_ROLE_PRIVACY_RELEASE_PROFILE.json").read_text(encoding="utf-8")
     )
     canonical_roles = set(p4_p5["scope"]["role_families"])
     canonical_roles.update(p6["scope"]["role_families"])
     admitted_roles = {role.value for role in ProductionRole}
 
-    assert canonical_roles - admitted_roles == {"MODEL_REVIEWER"}
+    assert canonical_roles - admitted_roles == set()
     assert admitted_roles - canonical_roles == set()

@@ -97,9 +97,7 @@ def register_m9_routes(
     @app.get("/m9/models/{capability_model_id}")
     def model(capability_model_id: str, request: Request) -> JSONResponse:
         try:
-            payload = application.m9_model(
-                M9ExactQuery(capability_model_id, principal(request))
-            )
+            payload = application.m9_model(M9ExactQuery(capability_model_id, principal(request)))
         except M9ApplicationError as exc:
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
@@ -117,9 +115,7 @@ def register_m9_routes(
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.get(
-        "/m9/counterfactual-requests/{counterfactual_request_id}"
-    )
+    @app.get("/m9/counterfactual-requests/{counterfactual_request_id}")
     def counterfactual_request(
         counterfactual_request_id: str,
         request: Request,
@@ -135,9 +131,7 @@ def register_m9_routes(
     @app.get("/m9/forecasts/{forecast_result_id}")
     def forecast(forecast_result_id: str, request: Request) -> JSONResponse:
         try:
-            payload = application.m9_forecast(
-                M9ExactQuery(forecast_result_id, principal(request))
-            )
+            payload = application.m9_forecast(M9ExactQuery(forecast_result_id, principal(request)))
         except M9ApplicationError as exc:
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
@@ -211,9 +205,7 @@ def register_m9_routes(
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.post(
-        "/m9/counterfactual-requests/{counterfactual_request_id}/run"
-    )
+    @app.post("/m9/counterfactual-requests/{counterfactual_request_id}/run")
     def run_counterfactual(
         counterfactual_request_id: str,
         body: dict[str, object],

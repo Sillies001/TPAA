@@ -102,11 +102,7 @@ class ProductionDependencyProbe:
                 return False
             return True
         root = self._object_root
-        return (
-            root.is_dir()
-            and os.access(root, os.R_OK)
-            and os.access(root, os.W_OK)
-        )
+        return root.is_dir() and os.access(root, os.R_OK) and os.access(root, os.W_OK)
 
     def _worker_ready(self) -> bool:
         module_name, separator, attribute = self._worker_handler.partition(":")
@@ -121,9 +117,7 @@ class ProductionDependencyProbe:
     def _identity_provider_ready(self) -> bool:
         try:
             value = (
-                self._identity_ready()
-                if callable(self._identity_ready)
-                else self._identity_ready
+                self._identity_ready() if callable(self._identity_ready) else self._identity_ready
             )
         except Exception:
             return False

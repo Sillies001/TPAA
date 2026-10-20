@@ -13,6 +13,7 @@ from pathlib import Path
 from tpaa_storage import S3ObjectStore, bootstrap_sqlite, verify_sqlite
 
 from .config import (
+    OidcMtlsRuntimeConfig,
     ProductionPrincipalBinding,
     ProductionRuntimeConfig,
     RuntimeProfile,
@@ -47,7 +48,7 @@ _RUNTIME_CONFIG_FIELDS = frozenset(
         "authority_root",
         "data_root",
         "object_root",
-        "principals_file",
+        "identity",
         "database",
         "object_store",
         "migration_state_root",
@@ -164,7 +165,12 @@ def load_runtime_config_document(
         raise ValueError("runtime configuration profile is invalid") from exc
     values = os.environ if environ is None else environ
     if profile is RuntimeProfile.DESKTOP:
-        forbidden = ("object_root", "principals_file", "database", "object_store")
+        forbidden = (
+            "object_root",
+            "identity",
+            "database",
+            "object_store",
+        )
         if any(key in raw for key in forbidden):
             raise ValueError("Desktop runtime configuration contains Service fields")
         data_root = _absolute_path(
@@ -196,11 +202,43 @@ def load_runtime_config_document(
     object_root.mkdir(parents=True, exist_ok=True)
     if not object_root.is_dir():
         raise RuntimeError("service object root is not a directory")
-    principal_path = _absolute_path(
-        _document_text(raw, "principals_file"),
-        field="principals_file",
+    principals: tuple[ProductionPrincipalBinding, ...] = ()
+    identity = _document_mapping(raw, "identity")
+    expected_identity_fields = {
+        "mode",
+        "issuer",
+        "audience",
+        "jwks_uri",
+        "ca_bundle",
+        "allowed_spiffe_prefixes",
+        "revocation_file",
+    }
+    if set(identity) != expected_identity_fields:
+        raise ValueError("Service identity configuration fields are invalid")
+    if _document_text(identity, "mode") != "OIDC_MTLS":
+        raise ValueError("Service identity mode must be OIDC_MTLS")
+    raw_prefixes = identity.get("allowed_spiffe_prefixes")
+    if (
+        not isinstance(raw_prefixes, list)
+        or not raw_prefixes
+        or not all(
+            isinstance(value, str) and value.startswith("spiffe://") for value in raw_prefixes
+        )
+    ):
+        raise ValueError("Service SPIFFE prefixes are invalid")
+    service_identity = OidcMtlsRuntimeConfig(
+        issuer=_document_text(identity, "issuer"),
+        audience=_document_text(identity, "audience"),
+        jwks_uri=_document_text(identity, "jwks_uri"),
+        ca_bundle_path=_absolute_path(
+            _document_text(identity, "ca_bundle"), field="identity.ca_bundle"
+        ),
+        allowed_spiffe_prefixes=tuple(raw_prefixes),
+        revocation_file=_absolute_path(
+            _document_text(identity, "revocation_file"),
+            field="identity.revocation_file",
+        ),
     )
-    principals = load_service_principal_bindings(principal_path)
     migration_state_root = _absolute_path(
         _document_text(raw, "migration_state_root"),
         field="migration_state_root",
@@ -253,6 +291,7 @@ def load_runtime_config_document(
         object_root=object_root,
         service_conninfo=conninfo,
         service_principals=principals,
+        service_identity=service_identity,
         object_store=object_store,
         migration_state_root=migration_state_root,
     )
@@ -433,9 +472,7 @@ def load_service_principal_bindings(
             raise ValueError(f"service principal {index} must be an object")
         unexpected = sorted(set(item) - SERVICE_PRINCIPAL_FIELDS)
         if unexpected:
-            raise ValueError(
-                f"service principal {index} contains unsupported fields"
-            )
+            raise ValueError(f"service principal {index} contains unsupported fields")
         actor = item.get("actor_id")
         if actor is not None and not isinstance(actor, str):
             raise ValueError(f"service principal {index} actor_id must be text or null")
@@ -476,64 +513,14 @@ def service_production_config_from_environment(
 
     values = os.environ if environ is None else environ
     document = values.get("TPAA_RUNTIME_CONFIG_FILE", "").strip()
-    if document:
-        config = load_runtime_config_document(
-            Path(document),
-            expected_product_build_version=product_build_version,
-            expected_authority_root=authority_root,
-            environ=values,
-        )
-        if config.profile is not RuntimeProfile.SERVICE:
-            raise ValueError("Service entry requires a SERVICE runtime configuration")
-        return config
-    conninfo = values.get("TPAA_SERVICE_CONNINFO", "").strip()
-    if not conninfo:
-        raise ValueError("TPAA_SERVICE_CONNINFO is required")
-    object_value = values.get("TPAA_OBJECT_ROOT", "").strip()
-    if not object_value:
-        raise ValueError("TPAA_OBJECT_ROOT is required")
-    principal_value = values.get("TPAA_SERVICE_PRINCIPALS_FILE", "").strip()
-    if not principal_value:
-        raise ValueError("TPAA_SERVICE_PRINCIPALS_FILE is required")
-
-    object_root = _absolute_path(object_value, field="TPAA_OBJECT_ROOT")
-    object_root.mkdir(parents=True, exist_ok=True)
-    if not object_root.is_dir():
-        raise RuntimeError(f"service object root is not a directory: {object_root}")
-    principals = load_service_principal_bindings(Path(principal_value))
-    backend = values.get("TPAA_OBJECT_STORE_BACKEND", "LOCAL").strip().upper()
-    object_store = None
-    if backend == "S3":
-        bucket = values.get("TPAA_S3_BUCKET", "").strip()
-        access_key_id = values.get("TPAA_S3_ACCESS_KEY_ID", "").strip()
-        secret_access_key = values.get("TPAA_S3_SECRET_ACCESS_KEY", "").strip()
-        if not bucket:
-            raise ValueError("TPAA_S3_BUCKET is required for the S3 backend")
-        if not access_key_id or not secret_access_key:
-            raise ValueError("explicit S3 credentials are required for the S3 backend")
-        object_store = S3ObjectStore(
-            bucket=bucket,
-            prefix=values.get("TPAA_S3_PREFIX", "tpaa").strip(),
-            endpoint_url=values.get("TPAA_S3_ENDPOINT_URL", "").strip() or None,
-            region_name=values.get("TPAA_S3_REGION", "us-east-1").strip(),
-            access_key_id=access_key_id,
-            secret_access_key=secret_access_key,
-        )
-    elif backend != "LOCAL":
-        raise ValueError("TPAA_OBJECT_STORE_BACKEND must be LOCAL or S3")
-    return ProductionRuntimeConfig(
-        profile=RuntimeProfile.SERVICE,
-        product_build_version=product_build_version,
-        authority_root=authority_root,
-        object_root=object_root,
-        service_conninfo=conninfo,
-        service_principals=principals,
-        object_store=object_store,
-        migration_state_root=_absolute_path(
-            values.get(
-                "TPAA_MIGRATION_STATE_ROOT",
-                str(object_root.parent / ".tpaa-migrations"),
-            ),
-            field="TPAA_MIGRATION_STATE_ROOT",
-        ),
+    if not document:
+        raise ValueError("TPAA_RUNTIME_CONFIG_FILE is required for Service")
+    config = load_runtime_config_document(
+        Path(document),
+        expected_product_build_version=product_build_version,
+        expected_authority_root=authority_root,
+        environ=values,
     )
+    if config.profile is not RuntimeProfile.SERVICE:
+        raise ValueError("Service entry requires a SERVICE runtime configuration")
+    return config

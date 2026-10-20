@@ -93,4 +93,5 @@ def test_production_principal_policy_has_one_runtime_owner() -> None:
     assert "validate_production_principal_policy" in identity
     assert "class ProductionRole" in policy
     assert '"MODEL_REVIEWER"' in policy
-    assert '"PRODUCT_DECISION_REQUIRED"' in policy
+    assert '"APPROVED_W3_LOCAL_BASELINE"' in policy
+    assert '"status": "COMPLETE"' in policy

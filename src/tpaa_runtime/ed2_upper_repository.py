@@ -51,9 +51,7 @@ class DurableED2UpperProductRepository(ED2UpperProductRepositoryPort):
         decoded: object = value
         if isinstance(value, str):
             decoded = json.loads(value)
-        if not isinstance(decoded, Mapping) or not all(
-            isinstance(key, str) for key in decoded
-        ):
+        if not isinstance(decoded, Mapping) or not all(isinstance(key, str) for key in decoded):
             raise RuntimeError("ED2_UPPER_SNAPSHOT_MANIFEST_INVALID")
         return dict(cast(Mapping[str, object], decoded))
 
@@ -77,14 +75,8 @@ class DurableED2UpperProductRepository(ED2UpperProductRepositoryPort):
                 where={"release_id": release_id},
                 columns=("status", "published_at"),
             )
-            if (
-                row is None
-                or str(row["status"]) != "PUBLISHED"
-                or row["published_at"] is None
-            ):
-                raise RuntimeError(
-                    f"ED2_UPPER_SOURCE_RELEASE_NOT_PUBLISHED:{release_id}"
-                )
+            if row is None or str(row["status"]) != "PUBLISHED" or row["published_at"] is None:
+                raise RuntimeError(f"ED2_UPPER_SOURCE_RELEASE_NOT_PUBLISHED:{release_id}")
 
     @classmethod
     def _from_row(
@@ -191,9 +183,7 @@ class DurableED2UpperProductRepository(ED2UpperProductRepositoryPort):
                 ),
             )
             if row is None:
-                raise LookupError(
-                    f"ED2_UPPER_SNAPSHOT_NOT_FOUND:{snapshot_id}"
-                )
+                raise LookupError(f"ED2_UPPER_SNAPSHOT_NOT_FOUND:{snapshot_id}")
             product = self._from_row(snapshot_id, row)
             self._assert_source_releases(
                 uow.canonical_rows,
