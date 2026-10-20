@@ -19,6 +19,7 @@ from .product_v1 import (
     register_product_v1_routes,
 )
 from .runtime import register_product_runtime_routes
+from .source_v1 import register_source_v1_routes
 from .unified import (
     UnifiedPrincipal,
     UnifiedPrincipalResolver,
@@ -58,5 +59,6 @@ __all__ = [
     "ProductV1Envelope",
     "register_product_v1_routes",
     "register_product_runtime_routes",
+    "register_source_v1_routes",
     "register_unified_routes",
 ]

@@ -9,7 +9,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .bootstrap import verify_sqlite
-from .object_store import LocalObjectStore, StoredObject
+from .object_store import ObjectStore, StoredObject
 
 
 class BackupRestoreError(RuntimeError):
@@ -25,7 +25,7 @@ def _sqlite_backup(source: Path, destination: Path) -> None:
 def create_development_backup(
     *,
     database: Path,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     objects: tuple[StoredObject, ...],
     destination: Path,
 ) -> Path:
@@ -77,7 +77,7 @@ def restore_development_backup(
     *,
     backup: Path,
     target_database: Path,
-    target_object_store: LocalObjectStore,
+    target_object_store: ObjectStore,
 ) -> tuple[StoredObject, ...]:
     manifest_path = backup / "manifest.json"
     try:

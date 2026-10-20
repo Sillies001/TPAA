@@ -67,6 +67,39 @@ def test_prcb_c5_package_path_is_separate_from_historical_piqb() -> None:
     assert 'then set --' in packager
 
 
+def test_windows_runtime_bundle_excludes_non_runtime_build_intermediates() -> None:
+    from tools.packaging.m5_runtime_bundle import _clean_tree_ignore
+
+    ignored = _clean_tree_ignore(
+        "site-packages/PySide6/qml/Qt/labs/assetdownloader",
+        [
+            "objects-Debug",
+            "objects-RelWithDebInfo",
+            "plugin_init.cpp.obj",
+            "plugin.pch",
+            "plugin.ilk",
+            "runtime.dll",
+            "qmldir",
+        ],
+        skip_site_packages=False,
+    )
+
+    assert ignored == {
+        "objects-Debug",
+        "objects-RelWithDebInfo",
+        "plugin_init.cpp.obj",
+        "plugin.pch",
+        "plugin.ilk",
+    }
+
+    base_runtime_ignored = _clean_tree_ignore(
+        "C:/Python313/Lib",
+        ["encodings", "site-packages", "dist-packages"],
+        skip_site_packages=True,
+    )
+    assert base_runtime_ignored == {"site-packages", "dist-packages"}
+
+
 def test_prcb_c5_installed_desktop_qualification_runs_inside_existing_jobs() -> None:
     workflow = (ROOT / ".github" / "workflows" / "cross-platform-ci.yml").read_text(
         encoding="utf-8"
@@ -144,7 +177,8 @@ def test_prcb_c5_installed_service_uses_postgres_and_frozen_roles() -> None:
     assert "run_installed_service_e2e" in runtime
     assert "PostgreSQLServiceUnitOfWork" in service
     assert "build_service_production_runtime" in service
-    assert "create_service_production_backup" in service
+    assert "create_managed_service_production_backup" in service
+    assert "managed_write_drain_verified" in service
     assert "restore_service_production_backup" in service
     assert "verify_prcb_c5_service_api" in service
     assert "INSTRUCTOR_EVALUATOR" in service
@@ -168,6 +202,18 @@ def test_prcb_c5_installed_service_uses_postgres_and_frozen_roles() -> None:
     assert "tools.testing" not in service
     assert "tests/fixtures" not in service
     assert "InMemory" not in service
+
+
+def test_prcb_c5_service_qualification_binds_governed_recovery_confirmations() -> None:
+    tool = (
+        ROOT / "tools" / "testing" / "prcb_c5_installed_service_qualification.py"
+    ).read_text(encoding="utf-8")
+
+    assert '"TPAA_SERVICE_WRITE_DRAIN_CONFIRMATION"' in tool
+    assert '"WRITE_DRAIN_ENFORCED"' in tool
+    assert '"TPAA_SERVICE_RESTORE_STAGING_CONFIRMATION"' in tool
+    assert '"CLEAN_STAGING_TARGET"' in tool
+    assert 'installed.get("managed_write_drain_verified") is not True' in tool
 
 
 def test_prcb_c5_four_profile_logical_equivalence_is_gated_in_existing_job() -> None:

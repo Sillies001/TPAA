@@ -10,7 +10,7 @@ from tpaa_runtime import (
 from tpaa_storage import SQLiteDesktopUnitOfWork, bootstrap_sqlite
 
 ROOT = Path(__file__).resolve().parents[3]
-AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+AUTHORITY = ROOT / "baseline" / "CB-1.5.0" / "canonical"
 
 
 def test_prcb_c3_durable_job_submit_persists_actor_audit_in_same_db(

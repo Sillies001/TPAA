@@ -23,7 +23,7 @@ from tpaa_runtime import (
 from tpaa_storage import LocalObjectStore, SQLiteDesktopUnitOfWork, bootstrap_sqlite
 
 ROOT = Path(__file__).resolve().parents[3]
-AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+AUTHORITY = ROOT / "baseline" / "CB-1.5.0" / "canonical"
 P4 = "95200000-0000-4000-8000-000000000002"
 CONTEXT = "95200000-0000-4000-8000-000000000003"
 

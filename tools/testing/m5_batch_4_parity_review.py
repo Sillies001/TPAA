@@ -18,7 +18,7 @@ if str(SRC) not in sys.path:
 
 from tpaa_qualification import load_m5_qualification_authority  # noqa: E402
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TASK_BASELINE = ROOT / "docs" / "baseline" / "SDIB-1.4" / "M5_TASK_BASELINE.json"
 TRACKING_ISSUE = 142
 TASK_ID = "M5-TST-005"

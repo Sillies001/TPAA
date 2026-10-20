@@ -6,10 +6,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_prcb_c3_production_recovery_is_profile_specific_and_secret_safe() -> None:
-    source = (ROOT / "src" / "tpaa_runtime" / "recovery.py").read_text(
-        encoding="utf-8"
-    )
-    assert "TPAA_PRCB_C3_PRODUCTION_BACKUP_V1" in source
+    source = (ROOT / "src" / "tpaa_runtime" / "recovery.py").read_text(encoding="utf-8")
+    assert "TPAA_PRCB_C3_PRODUCTION_BACKUP_V2" in source
+    assert "DESKTOP_WRITE_QUIESCENCE" in source
+    assert "SERVICE_EXTERNAL_WRITE_DRAIN" in source
     assert "create_desktop_production_backup" in source
     assert "restore_desktop_production_backup" in source
     assert "create_service_production_backup" in source

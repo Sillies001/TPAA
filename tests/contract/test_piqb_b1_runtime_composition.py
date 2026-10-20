@@ -179,8 +179,16 @@ def test_b1_local_child_delegates_to_composition_root() -> None:
     source = (
         ROOT / "src" / "tpaa_api" / "local_backend_child.py"
     ).read_text(encoding="utf-8")
-    assert "build_desktop_application" in source
-    assert "create_full_desktop_app" in source
+    factory = (ROOT / "src" / "tpaa_desktop" / "__init__.py").read_text(
+        encoding="utf-8"
+    )
+    assert "from tpaa_desktop import create_app" in source
+    assert "app = create_app(" in source
+    assert "build_desktop_production_runtime" in factory
+    assert "create_production_desktop_app" in factory
+    assert "prepare_desktop_production_config" in factory
+    assert "build_desktop_application" not in source
+    assert "tests/fixtures" not in source
     assert "M1PublicationService" not in source
     assert "ApplicationService(" not in source
 

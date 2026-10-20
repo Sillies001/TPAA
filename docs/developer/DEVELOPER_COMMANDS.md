@@ -11,6 +11,9 @@ Run `python tools/dev/tpaa_dev.py list` to discover every governed command and i
 
 - `bootstrap` — validate CPython 3.13, `uv.lock`, CB-1.4.0 and optionally sync the frozen environment.
 - `verify-baseline` — M0-CORE-001 exact baseline verification.
+- `authority-diff` — W0-A deterministic comparison of two authority roots; the report is explicitly non-adopting.
+- `verify-authority-consistency` — W0-B Core/DB/DTO/hash closure check with a separate `REVIEW_REQUIRED` state for historical schema compatibility awaiting approval.
+- `verify-w0-successor` — W0-D/E deterministic reconstruction check for the approved local CB-1.5.0 successor package.
 - `verify-canonical` — M0-CORE-002 Canonical loader verification.
 - `generate` / `generate --check` — M0-CORE-003 deterministic generation and exact-tree check.
 - `verify-generated` — M0-CORE-004 non-destructive generated-tree/provenance verification.
@@ -24,11 +27,48 @@ Run `python tools/dev/tpaa_dev.py list` to discover every governed command and i
 
 Quality commands use an already-installed exact tool version when available. Otherwise they invoke `uv run --locked --with <tool>==<frozen-version> <tool> ...`, so the exact quality tool is overlaid onto the locked project environment rather than running in an isolated tool environment or silently floating to `latest`.
 
-## Reserved and fail-closed
+`authority-diff --reference-root <path> --candidate-root <path>` emits stable
+hash/size/metadata plus table, field, CHECK/enum, index-declaration, DTO and API
+transport/route summaries. A missing index or API-route authority is reported
+explicitly rather than silently treated as unchanged. The command never changes
+a lock or reports adoption. `verify-authority-consistency` returns `3` for `REVIEW_REQUIRED` when
+the current physical Core/DB authority is internally valid but older semantic
+artifacts still need an approved compatibility declaration. Use
+`--report-only --json` for inventory/report generation without weakening the
+status carried in the JSON payload.
 
-`run`/`run-api`/`run-gui`, `package`, `manifest`, and `cold-start` are intentionally discoverable now but exit with `NOT_IMPLEMENTED` until their controlling SDIB tasks are implemented. A placeholder command must never report success for a capability that does not yet exist.
+`verify-w0-successor` reconstructs CB-1.5.0 from its immutable CB-1.4.0
+predecessor plus the approved W0 decision, compatibility, index and API-route
+rules, then compares the complete directory digest. It verifies local approval
+integrity only and never pushes or deploys the baseline.
 
-`api-smoke` is the M0-API-002 acceptance entry point for the FastAPI health/readiness/version adapter. It requires the governed FastAPI dependency to be installed; `run-api` remains reserved until the service runtime/composition entry point is formally activated.
+## Runtime commands
+
+`run gui` and `run-gui` start the Desktop shell and its owned local backend.
+`run api` and `run-api` start the durable Service composition and accept
+`--host`/`--port`. The dispatcher supplies the source `PYTHONPATH`, so these
+commands work before an editable installation.
+
+Desktop composition has one public owner: `tpaa_desktop.create_runtime()` and
+`tpaa_desktop.create_app()`. The installed `tpaa-desktop` script uses
+`tpaa_desktop.__main__`; `python -m tpaa_gui` is only a compatibility delegate
+to that same entry point. PIQB packaging code must not construct production
+runtimes directly.
+
+Both Service forms also accept `--check-config`, which composes the same
+production runtime, runs live readiness checks, emits secret-free JSON, and
+exits without opening a listening socket.
+
+The Service entry remains fail-closed: PostgreSQL, object-root, principal, and
+Canonical authority configuration must be valid before it binds a socket. See
+`docs/operator/PRODUCTION_ENTRYPOINTS.md` for the required environment.
+
+`package`, `manifest`, and `cold-start` retain their separately governed
+implementation state shown by `tpaa_dev.py list --json`. A placeholder command
+must never report success for a capability that does not exist.
+
+`api-smoke` remains the M0-API-002 acceptance entry point for the FastAPI
+health/readiness/version adapter.
 
 ## Bootstrap modes
 

@@ -28,8 +28,21 @@ from .compute_job import (
     ComputeJobRepository,
     ComputeJobState,
 )
+from .migration_service import (
+    MIGRATION_JOURNAL_SCHEMA,
+    MIGRATION_RESULT_SCHEMA,
+    SUPPORTED_SCHEMA_VERSIONS,
+    TARGET_SCHEMA_VERSION,
+    MigrationHop,
+    MigrationPlan,
+    MigrationServiceError,
+    MigrationStatus,
+    PostgreSQLBackupProvider,
+    PostgreSQLMigrationService,
+    SQLiteMigrationService,
+)
 from .object_seal import LocalSealedObjectFlow, ObjectSealError, StagedObject
-from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
+from .object_store import LocalObjectStore, ObjectStore, ObjectStoreError, StoredObject
 from .parquet_plane import (
     ParquetColumn,
     ParquetDatasetArtifact,
@@ -48,6 +61,7 @@ from .persistence_fit import (
 from .ports import BaselineMetadataRepository, RepositoryBaselineMetadata, RepositoryUnitOfWork
 from .postgres_product_repository import PostgreSQLProductPublicationLedger
 from .postgres_repository import (
+    SERVICE_WRITE_GATE_LOCK_ID,
     PostgreSQLBaselineMetadataRepository,
     PostgreSQLRepositoryError,
     PostgreSQLServiceUnitOfWork,
@@ -68,6 +82,7 @@ from .product_publication import (
     recover_sealed_orphans,
     recover_staging_orphans,
 )
+from .s3_object_store import S3ObjectStore
 from .sqlite_product_repository import SQLiteProductPublicationLedger
 from .sqlite_repository import (
     SQLiteBaselineMetadataRepository,
@@ -84,11 +99,24 @@ __all__ = [
     "EXPECTED_DB_SCHEMA_VERSION",
     "BaselineMetadataRepository",
     "LocalObjectStore",
+    "MIGRATION_JOURNAL_SCHEMA",
+    "MIGRATION_RESULT_SCHEMA",
+    "SUPPORTED_SCHEMA_VERSIONS",
+    "TARGET_SCHEMA_VERSION",
+    "MigrationHop",
+    "MigrationPlan",
+    "MigrationServiceError",
+    "MigrationStatus",
+    "PostgreSQLBackupProvider",
+    "PostgreSQLMigrationService",
+    "SQLiteMigrationService",
+    "ObjectStore",
     "LocalSealedObjectFlow",
     "ObjectSealError",
     "ObjectStoreError",
     "StagedObject",
     "StoredObject",
+    "S3ObjectStore",
     "ACTIVE_COMPUTE_JOB_STATES",
     "TERMINAL_COMPUTE_JOB_STATES",
     "ComputeJobPersistenceError",
@@ -115,6 +143,7 @@ __all__ = [
     "PostgreSQLProductPublicationLedger",
     "PostgreSQLRepositoryError",
     "PostgreSQLServiceUnitOfWork",
+    "SERVICE_WRITE_GATE_LOCK_ID",
     "PersistenceFitError",
     "PersistenceFitRecord",
     "ProductPersistenceFitGate",

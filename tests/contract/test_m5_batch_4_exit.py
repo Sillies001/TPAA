@@ -7,7 +7,7 @@ from pathlib import Path
 from tpaa_qualification import load_m5_qualification_authority
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TASK_BASELINE = ROOT / "docs" / "baseline" / "SDIB-1.4" / "M5_TASK_BASELINE.json"
 WORKFLOW = ROOT / ".github" / "workflows" / "cross-platform-ci.yml"
 PLATFORM_RUNNER = ROOT / "tools" / "ci" / "run_platform_parallel_lanes.py"

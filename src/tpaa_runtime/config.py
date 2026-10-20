@@ -6,24 +6,11 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-_PRODUCTION_ROLES = frozenset(
-    {
-        "SUBJECT_SELF",
-        "INSTRUCTOR_EVALUATOR",
-        "TEAM_LEAD",
-        "ANALYST",
-        "ADMIN_AUDITOR",
-    }
-)
-_NO_PRIVILEGED_IDENTITY = frozenset({"TEAM_LEAD", "ANALYST"})
-_NO_VISIBILITY = frozenset({"TEAM_LEAD", "ANALYST"})
-_NO_EXPORT = frozenset(
-    {
-        "SUBJECT_SELF",
-        "INSTRUCTOR_EVALUATOR",
-        "TEAM_LEAD",
-        "ANALYST",
-    }
+from tpaa_storage import ObjectStore
+
+from .principal_policy import (
+    PrincipalPolicyError,
+    validate_production_principal_policy,
 )
 
 
@@ -55,19 +42,19 @@ class ProductionPrincipalBinding:
             or any(ch not in "0123456789abcdef" for ch in digest)
         ):
             raise ValueError("credential_sha256 must be lowercase SHA-256")
-        if self.role not in _PRODUCTION_ROLES:
-            raise ValueError("production role is not in frozen role family")
         if self.actor_id is not None and not self.actor_id.strip():
             raise ValueError("actor_id must be non-empty when configured")
-        if (
-            self.role in _NO_PRIVILEGED_IDENTITY
-            and self.privileged_identity_authorized
-        ):
-            raise ValueError("role cannot receive direct identity privilege")
-        if self.role in _NO_VISIBILITY and self.visibility_authorized:
-            raise ValueError("role cannot receive annotation visibility privilege")
-        if self.role in _NO_EXPORT and self.export_authorized:
-            raise ValueError("role cannot receive export privilege")
+        try:
+            validate_production_principal_policy(
+                role=self.role,
+                privileged_identity_authorized=(
+                    self.privileged_identity_authorized
+                ),
+                visibility_authorized=self.visibility_authorized,
+                export_authorized=self.export_authorized,
+            )
+        except PrincipalPolicyError as exc:
+            raise ValueError(str(exc)) from exc
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,6 +86,8 @@ class ProductionRuntimeConfig:
     desktop_database_path: Path | None = None
     service_conninfo: str | None = None
     service_principals: tuple[ProductionPrincipalBinding, ...] = ()
+    object_store: ObjectStore | None = None
+    migration_state_root: Path | None = None
 
     def __post_init__(self) -> None:
         if not self.product_build_version.strip():
@@ -114,6 +103,8 @@ class ProductionRuntimeConfig:
                 raise ValueError("Desktop production runtime forbids service_conninfo")
             if self.service_principals:
                 raise ValueError("Desktop runtime forbids service principal bindings")
+            if self.object_store is not None:
+                raise ValueError("Desktop runtime uses its governed local object store")
         else:
             if not self.service_conninfo or not self.service_conninfo.strip():
                 raise ValueError("Service production runtime requires conninfo")

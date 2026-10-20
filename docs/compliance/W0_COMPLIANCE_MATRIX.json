@@ -1,0 +1,109 @@
+{
+  "schema": "TPAA_COMPLIANCE_MATRIX_V1",
+  "scope": "W0_AUTHORITY_CONVERGENCE",
+  "adoption_state": "APPROVED_LOCAL_NOT_PUSHED",
+  "requirements": [
+    {
+      "id": "W0-A",
+      "requirement": "Generate a deterministic R3.3-to-current authority diff without mutating or adopting either authority root.",
+      "status": "CLOSED",
+      "implementation": [
+        "tools/baseline/authority_diff.py",
+        "tools/dev/tpaa_dev.py:authority-diff"
+      ],
+      "tests": [
+        "tests/contract/test_w0_authority_convergence.py::test_authority_diff_is_deterministic_and_non_adopting"
+      ],
+      "evidence": [
+        "docs/reviews/W0_R3_3_AUTHORITY_DIFF.json"
+      ],
+      "exit_criteria": "The deterministic DIFF_ONLY_NOT_ADOPTED report inventories all locked artifacts and explicitly covers table, field, CHECK/enum, index-declaration, DTO, API transport, and API-route authority deltas."
+    },
+    {
+      "id": "W0-B",
+      "requirement": "Verify current physical Core/DB/DTO/hash closure and distinguish hard failure from unresolved historical compatibility.",
+      "status": "CLOSED_PASS",
+      "implementation": [
+        "tools/baseline/verify_authority_consistency.py",
+        "tools/dev/tpaa_dev.py:verify-authority-consistency"
+      ],
+      "tests": [
+        "tests/contract/test_w0_authority_convergence.py::test_predecessor_authority_remains_review_required_and_unmodified",
+        "tests/contract/test_w0_authority_convergence.py::test_w0_successor_authority_is_fully_closed",
+        "tests/contract/test_w0_authority_convergence.py::test_current_physical_schema_mismatch_is_a_hard_failure"
+      ],
+      "evidence": [
+        "docs/reviews/W0_AUTHORITY_CONSISTENCY.json"
+      ],
+      "exit_criteria": "An approved compatibility authority resolves every historical DB declaration, and the successor authority explicitly governs indexes and API routes/endpoints (or records approved not-applicable rationales)."
+    },
+    {
+      "id": "W0-C",
+      "requirement": "Make the R3.3 independent package-manifest audit path-neutral on Windows and Linux.",
+      "status": "CLOSED_CROSS_PLATFORM_VERIFIED",
+      "implementation": [
+        "../../../1_TPAADesign/TPAA_V8.0_ED-2.0_Rebaseline_R3.3/tools/independent_audit.py",
+        "../../../1_TPAADesign/TPAA_V8.0_ED-2.0_Rebaseline_R3.3/PACKAGE_MANIFEST.sha256"
+      ],
+      "tests": [
+        "R3.3 tools/validate_rebaseline.py:65/65 PASS on Windows and Linux container",
+        "R3.3 tools/independent_audit.py:24/24 PASS on Windows and Linux container"
+      ],
+      "evidence": [
+        "docs/reviews/W0_AUTHORITY_CONVERGENCE_REVIEW.md"
+      ],
+      "exit_criteria": "The same unchanged package reports 24/24 PASS on both mandatory OS families."
+    },
+    {
+      "id": "W0-D",
+      "requirement": "Approve the successor Overall/Engineering/Core/DB/Product version identity and immutable predecessor lineage.",
+      "status": "APPROVED_CLOSED",
+      "implementation": [
+        "tools/baseline/adopt_w0_successor.py",
+        "baseline/CB-1.5.0/canonical/W0_BASELINE_AUTHORITY_DECISION.json",
+        "baseline/CB-1.5.0/BASELINE_LOCK.json"
+      ],
+      "tests": [
+        "tools/baseline/adopt_w0_successor.py --check",
+        "tests/contract/test_w0_authority_convergence.py::test_w0_successor_authority_is_fully_closed"
+      ],
+      "evidence": [
+        "docs/reviews/W0_AUTHORITY_CONVERGENCE_REVIEW.md"
+      ],
+      "decision_owner": "PROJECT_BASELINE_AUTHORITY",
+      "exit_criteria": "A named successor baseline is approved without overwriting the R3.3 historical package."
+    },
+    {
+      "id": "W0-E",
+      "requirement": "Approve explicit introduced-in and compatible-schema semantics for historical 1.6 authorities used with the current 1.9 physical schema.",
+      "status": "APPROVED_CLOSED",
+      "implementation": [
+        "baseline/CB-1.5.0/canonical/SCHEMA_COMPATIBILITY_AUTHORITY.json",
+        "baseline/CB-1.5.0/canonical/PHYSICAL_INDEX_AUTHORITY.json",
+        "baseline/CB-1.5.0/canonical/API_ROUTE_AUTHORITY.json",
+        "src/tpaa_canonical/loader.py"
+      ],
+      "tests": [
+        "tests/contract/test_w0_authority_convergence.py::test_w0_successor_authority_is_fully_closed",
+        "tests/contract/test_w0_authority_convergence.py::test_successor_explicitly_inherits_unchanged_predecessor_authorities",
+        "tests/unit/test_m0_core_002_canonical_loader.py::test_unapproved_predecessor_core_identity_still_fails_closed"
+      ],
+      "evidence": [
+        "docs/reviews/W0_AUTHORITY_CONSISTENCY.json"
+      ],
+      "decision_owner": "PROJECT_BASELINE_AUTHORITY",
+      "exit_criteria": "All 23 reported declarations are governed by approved compatibility metadata or a successor authority."
+    },
+    {
+      "id": "W0-F",
+      "requirement": "Establish the bidirectional design-code-test-evidence schema and complete it for W0; transfer later-wave expansion to W1-W9.",
+      "status": "W0_SCOPE_CLOSED",
+      "implementation": [
+        "docs/compliance/W0_COMPLIANCE_MATRIX.json"
+      ],
+      "tests": [],
+      "evidence": [],
+      "exit_criteria": "Every W0 requirement has an authority, implementation, test, evidence, status, and owner mapping; W1-W9 expansion remains a later-wave obligation."
+    }
+  ]
+}

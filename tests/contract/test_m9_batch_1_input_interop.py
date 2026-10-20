@@ -150,7 +150,7 @@ def test_m9_batch1_policy_and_input_identity_are_exact(
         "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e"
     )
     assert policy.role_profile_sha256 == (
-        "d5eff80dbfa912955ae7b09bc3e4a2868650466560cb1a5b1f558434e8076713"
+        "476ef4389a242033768aee7642190a304ded286aab7f5d59c1006b2f4db8a974"
     )
     first = _snapshot(policy)
     second = build_p6_input_snapshot(

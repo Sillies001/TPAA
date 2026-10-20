@@ -11,7 +11,7 @@ from enum import StrEnum
 from tpaa_platform.polars_runtime import GovernedPolarsRuntime
 from tpaa_storage.hashing import logical_content_hash
 from tpaa_storage.object_seal import LocalSealedObjectFlow
-from tpaa_storage.object_store import LocalObjectStore, StoredObject
+from tpaa_storage.object_store import ObjectStore, StoredObject
 
 _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9._-]+$")
@@ -246,7 +246,7 @@ class PolarsParquetPlane:
 
     def __init__(
         self,
-        store: LocalObjectStore,
+        store: ObjectStore,
         *,
         runtime: GovernedPolarsRuntime | None = None,
     ) -> None:
@@ -350,9 +350,11 @@ class PolarsParquetPlane:
         artifact: ParquetDatasetArtifact,
     ) -> tuple[dict[str, object], ...]:
         self._verify_stored(artifact)
-        path = self._store.physical_path(artifact.logical_uri)
-        lazy = self._runtime.scan_parquet(path)
-        frame = self._runtime.collect_streaming(lazy)
+        # External object backends deliberately expose no physical path.  The
+        # governed adapter therefore verifies and materializes the exact bytes
+        # before decoding them through the same bounded Polars runtime.
+        data = self._store.read_bytes(artifact.logical_uri)
+        frame = self._runtime.read_parquet_bytes(data)
         return self._verify_frame(
             artifact,
             self._runtime.rows(frame),

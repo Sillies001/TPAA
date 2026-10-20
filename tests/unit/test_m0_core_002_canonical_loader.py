@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import shutil
 from pathlib import Path
 
@@ -135,3 +137,38 @@ def test_unknown_or_unsafe_artifact_id_fails_closed() -> None:
     with pytest.raises(CanonicalArtifactError) as unsafe:
         loader.load("../STAGE_REGISTRY")
     assert unsafe.value.reason == "INVALID_ARTIFACT_ID"
+
+
+def test_unapproved_predecessor_core_identity_still_fails_closed(tmp_path: Path) -> None:
+    copied = tmp_path / EXPECTED_CORE_BASELINE
+    shutil.copytree(BASELINE_ROOT, copied)
+    authority_path = copied / "canonical" / "SCHEMA_COMPATIBILITY_AUTHORITY.json"
+    authority = json.loads(authority_path.read_text(encoding="utf-8"))
+    authority["core_inheritance"] = [
+        item
+        for item in authority["core_inheritance"]
+        if item["file"] != "P1_METRIC_CATALOG.json"
+    ]
+    authority_bytes = (json.dumps(authority, indent=2) + "\n").encode()
+    authority_path.write_bytes(authority_bytes)
+
+    lock_path = copied / "BASELINE_LOCK.json"
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    entry = next(
+        item
+        for item in lock["artifacts"]
+        if item["file"] == "SCHEMA_COMPATIBILITY_AUTHORITY.json"
+    )
+    entry["sha256"] = hashlib.sha256(authority_bytes).hexdigest()
+    entry["bytes"] = len(authority_bytes)
+    lock_bytes = (json.dumps(lock, indent=2) + "\n").encode()
+    lock_path.write_bytes(lock_bytes)
+
+    loader = CanonicalArtifactLoader(
+        copied,
+        trusted_lock_sha256=hashlib.sha256(lock_bytes).hexdigest(),
+    )
+    with pytest.raises(CanonicalArtifactError) as captured:
+        loader.load("P1_METRIC_CATALOG")
+    assert captured.value.reason == "CORE_BASELINE_MISMATCH"
+    assert "approved_inherited_core=NONE" in str(captured.value)

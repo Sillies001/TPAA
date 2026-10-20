@@ -166,10 +166,7 @@ def _assessment_revision_refs(
         ):
             draft = assessments.exact_p4_revision(draft_id)
             approved = assessments.exact_p4_revision(approved_id)
-            if (
-                draft.approval_state != "DRAFT"
-                or approved.approval_state != "APPROVED"
-            ):
+            if draft.approval_state != "DRAFT" or approved.approval_state != "APPROVED":
                 raise RuntimeError("ED2_B3_P4_EXACT_AUTHORITY_STATE_INVALID")
             current = approved
             chain_ids = [approved.actor_assessment_id]
@@ -177,28 +174,17 @@ def _assessment_revision_refs(
             while current.actor_assessment_id != draft_id:
                 current_id = current.actor_assessment_id
                 if current_id in seen or current.supersedes_id is None:
-                    raise RuntimeError(
-                        "ED2_B3_P4_EXACT_AUTHORITY_CHAIN_INVALID"
-                    )
+                    raise RuntimeError("ED2_B3_P4_EXACT_AUTHORITY_CHAIN_INVALID")
                 seen.add(current_id)
-                current = assessments.exact_p4_revision(
-                    current.supersedes_id
-                )
+                current = assessments.exact_p4_revision(current.supersedes_id)
                 chain_ids.append(current.actor_assessment_id)
             if current.approval_state != "DRAFT" or len(chain_ids) != 3:
-                raise RuntimeError(
-                    "ED2_B3_P4_EXACT_AUTHORITY_CHAIN_INVALID"
-                )
+                raise RuntimeError("ED2_B3_P4_EXACT_AUTHORITY_CHAIN_INVALID")
             p4_refs.extend(reversed(chain_ids))
 
         p5_draft = assessments.exact_p5_revision(p5_draft_revision_id)
-        p5_approved = assessments.exact_p5_revision(
-            p5_approved_revision_id
-        )
-        if (
-            p5_draft.approval_state != "DRAFT"
-            or p5_approved.approval_state != "APPROVED"
-        ):
+        p5_approved = assessments.exact_p5_revision(p5_approved_revision_id)
+        if p5_draft.approval_state != "DRAFT" or p5_approved.approval_state != "APPROVED":
             raise RuntimeError("ED2_B3_P5_EXACT_AUTHORITY_STATE_INVALID")
         current_p5 = p5_approved
         p5_chain_ids = [p5_approved.mission_assessment_id]
@@ -206,18 +192,12 @@ def _assessment_revision_refs(
         while current_p5.mission_assessment_id != p5_draft_revision_id:
             current_id = current_p5.mission_assessment_id
             if current_id in seen_p5 or current_p5.supersedes_id is None:
-                raise RuntimeError(
-                    "ED2_B3_P5_EXACT_AUTHORITY_CHAIN_INVALID"
-                )
+                raise RuntimeError("ED2_B3_P5_EXACT_AUTHORITY_CHAIN_INVALID")
             seen_p5.add(current_id)
-            current_p5 = assessments.exact_p5_revision(
-                current_p5.supersedes_id
-            )
+            current_p5 = assessments.exact_p5_revision(current_p5.supersedes_id)
             p5_chain_ids.append(current_p5.mission_assessment_id)
         if current_p5.approval_state != "DRAFT" or len(p5_chain_ids) != 3:
-            raise RuntimeError(
-                "ED2_B3_P5_EXACT_AUTHORITY_CHAIN_INVALID"
-            )
+            raise RuntimeError("ED2_B3_P5_EXACT_AUTHORITY_CHAIN_INVALID")
         p5_refs.extend(reversed(p5_chain_ids))
         uow.commit()
 
@@ -365,9 +345,7 @@ def run_ed2_b3_upper_qualification(
         p5_refs,
     )
     event_availability = "AVAILABLE" if event_refs else "UNAVAILABLE"
-    objective_availability = (
-        "AVAILABLE" if objective_refs else "UNAVAILABLE"
-    )
+    objective_availability = "AVAILABLE" if objective_refs else "UNAVAILABLE"
 
     create = runtime.application.ed2_upper_create
     event_relation = create(
@@ -389,6 +367,11 @@ def run_ed2_b3_upper_qualification(
                     "candidate_only": True,
                     "automatic_personnel_fault": False,
                     "responsibility_basis": "SYSTEM_OR_DATA_FACTOR",
+                    "evidence_refs": [
+                        f"event:{event_refs[0]}" if event_refs else "compliance:V-SAFE-002"
+                    ],
+                    "counterevidence_refs": [],
+                    "knowledge_time_utc": _AS_OF_UTC,
                 }
             ],
         },
@@ -420,6 +403,12 @@ def run_ed2_b3_upper_qualification(
                 "P90",
                 "TIME_SINCE_EXPOSURE",
             ],
+            "privacy_audit": {
+                "policy_id": "ED2-B3-PSEUDONYMIZATION",
+                "policy_version": "1.0.0",
+                "audit_sha256": assessment_authority_sha256,
+                "direct_identity_removed": True,
+            },
         },
     )
     team = create(
@@ -443,6 +432,12 @@ def run_ed2_b3_upper_qualification(
                 "TEAM_COORDINATION",
                 "CHAIN_PROCESS_TRENDS",
             ],
+            "privacy_audit": {
+                "policy_id": "ED2-B3-PSEUDONYMIZATION",
+                "policy_version": "1.0.0",
+                "audit_sha256": assessment_authority_sha256,
+                "direct_identity_removed": True,
+            },
         },
     )
 
@@ -455,6 +450,8 @@ def run_ed2_b3_upper_qualification(
             "scope_kind": "COURSE",
             "privacy_mode": "AGGREGATED",
             "minimum_cohort_size": 4,
+            "cohort_size": len(session_ids),
+            "result_state": "PUBLISHED",
             "suppressed_below_minimum": True,
             "cohort_dimensions": [
                 "aircraft_model",
@@ -476,6 +473,8 @@ def run_ed2_b3_upper_qualification(
             "scope_kind": "UNIT",
             "privacy_mode": "AGGREGATED",
             "minimum_cohort_size": 4,
+            "cohort_size": len(session_ids),
+            "result_state": "PUBLISHED",
             "suppressed_below_minimum": True,
             "cohort_dimensions": [
                 "aircraft_model",
@@ -539,10 +538,12 @@ def run_ed2_b3_upper_qualification(
                     "media_type": "text/plain",
                     "uri": media_object.logical_uri,
                     "artifact_sha256": media_object.artifact_sha256,
+                    "byte_size": media_object.byte_size,
                     "source_release_id": source_release_ids[0],
                     "transcript_status": "AVAILABLE",
                     "transcript_uri": transcript_object.logical_uri,
                     "transcript_sha256": transcript_object.artifact_sha256,
+                    "transcript_byte_size": transcript_object.byte_size,
                 }
             ],
             "bookmarks": [

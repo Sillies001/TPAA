@@ -119,9 +119,7 @@ def _utc(value: object, field: str) -> str:
 
 
 def _mapping(value: object, field: str) -> dict[str, object]:
-    if not isinstance(value, Mapping) or not all(
-        isinstance(key, str) for key in value
-    ):
+    if not isinstance(value, Mapping) or not all(isinstance(key, str) for key in value):
         raise ED2UpperProductError("ED2_UPPER_MAPPING_INVALID", field)
     return dict(cast(Mapping[str, object], value))
 
@@ -199,7 +197,11 @@ def _forbid_direct_identity(value: object, path: str = "payload") -> None:
             _forbid_direct_identity(item, f"{path}[{index}]")
 
 
-def _validate_event_relation(payload: Mapping[str, object]) -> None:
+def _validate_event_relation(
+    payload: Mapping[str, object],
+    *,
+    as_of_utc: str,
+) -> None:
     event_refs = _texts(payload.get("event_refs"), "event_refs")
     relation_refs = _texts(payload.get("relation_refs"), "relation_refs")
     objective_refs = _texts(payload.get("objective_refs"), "objective_refs")
@@ -254,6 +256,7 @@ def _validate_event_relation(payload: Mapping[str, object]) -> None:
         )
     for index, raw in enumerate(candidates):
         candidate = _mapping(raw, f"root_cause_candidates[{index}]")
+        candidate_path = f"root_cause_candidates[{index}]"
         category = _text(
             candidate.get("category"),
             f"root_cause_candidates[{index}].category",
@@ -271,6 +274,37 @@ def _validate_event_relation(payload: Mapping[str, object]) -> None:
         if candidate.get("automatic_personnel_fault") is not False:
             raise ED2UpperProductError(
                 "ED2_UPPER_AUTOMATIC_PERSONNEL_FAULT_FORBIDDEN",
+                category,
+            )
+        evidence_refs = _texts(
+            candidate.get("evidence_refs"),
+            f"{candidate_path}.evidence_refs",
+        )
+        counterevidence_refs = _texts(
+            candidate.get("counterevidence_refs"),
+            f"{candidate_path}.counterevidence_refs",
+        )
+        if not evidence_refs:
+            raise ED2UpperProductError(
+                "ED2_UPPER_ROOT_CAUSE_EVIDENCE_REQUIRED",
+                category,
+            )
+        if set(evidence_refs) & set(counterevidence_refs):
+            raise ED2UpperProductError(
+                "ED2_UPPER_ROOT_CAUSE_EVIDENCE_CONFLICT",
+                category,
+            )
+        knowledge_time = _utc(
+            candidate.get("knowledge_time_utc"),
+            f"{candidate_path}.knowledge_time_utc",
+        )
+        knowledge_instant = datetime.fromisoformat(
+            knowledge_time[:-1] + "+00:00"
+        )
+        as_of_instant = datetime.fromisoformat(as_of_utc[:-1] + "+00:00")
+        if knowledge_instant > as_of_instant:
+            raise ED2UpperProductError(
+                "ED2_UPPER_ROOT_CAUSE_KNOWLEDGE_TIME_FUTURE",
                 category,
             )
 
@@ -309,6 +343,15 @@ def _validate_human_team(payload: Mapping[str, object]) -> None:
             "ED2_UPPER_TREND_CONTRACT_REQUIRED",
             "trend_contracts",
         )
+    privacy_audit = _mapping(payload.get("privacy_audit"), "privacy_audit")
+    _text(privacy_audit.get("policy_id"), "privacy_audit.policy_id")
+    _text(privacy_audit.get("policy_version"), "privacy_audit.policy_version")
+    _hash64(privacy_audit.get("audit_sha256"), "privacy_audit.audit_sha256")
+    if privacy_audit.get("direct_identity_removed") is not True:
+        raise ED2UpperProductError(
+            "ED2_UPPER_PRIVACY_AUDIT_INVALID",
+            "privacy_audit.direct_identity_removed",
+        )
 
 
 def _validate_course_unit(payload: Mapping[str, object]) -> None:
@@ -333,7 +376,25 @@ def _validate_course_unit(payload: Mapping[str, object]) -> None:
             "ED2_UPPER_COHORT_DIMENSIONS_REQUIRED",
             "cohort_dimensions",
         )
-    if not _texts(payload.get("aggregate_refs"), "aggregate_refs"):
+    aggregate_refs = _texts(payload.get("aggregate_refs"), "aggregate_refs")
+    cohort_size = payload.get("cohort_size")
+    if isinstance(cohort_size, bool) or not isinstance(cohort_size, int) or cohort_size < 0:
+        raise ED2UpperProductError(
+            "ED2_UPPER_COHORT_SIZE_INVALID",
+            "cohort_size",
+        )
+    expected_state = "PUBLISHED" if cohort_size >= minimum else "SUPPRESSED"
+    if payload.get("result_state") != expected_state:
+        raise ED2UpperProductError(
+            "ED2_UPPER_COHORT_SUPPRESSION_MISMATCH",
+            "result_state",
+        )
+    if expected_state == "SUPPRESSED" and aggregate_refs:
+        raise ED2UpperProductError(
+            "ED2_UPPER_SUPPRESSED_AGGREGATE_FORBIDDEN",
+            "aggregate_refs",
+        )
+    if expected_state == "PUBLISHED" and not aggregate_refs:
         raise ED2UpperProductError(
             "ED2_UPPER_AGGREGATE_REF_REQUIRED",
             "aggregate_refs",
@@ -346,8 +407,7 @@ def _validate_plugin(payload: Mapping[str, object]) -> None:
     for index, raw in enumerate(components):
         item = _mapping(raw, f"components[{index}]")
         if any(
-            key in item
-            for key in ("module_path", "import_path", "dynamic_entrypoint", "wheel_uri")
+            key in item for key in ("module_path", "import_path", "dynamic_entrypoint", "wheel_uri")
         ):
             raise ED2UpperProductError(
                 "ED2_UPPER_PLUGIN_DYNAMIC_LOAD_FORBIDDEN",
@@ -366,6 +426,25 @@ def _validate_plugin(payload: Mapping[str, object]) -> None:
         _hash64(
             item.get("authority_hash"),
             f"components[{index}].authority_hash",
+        )
+        if item.get("distribution_kind") != "BUILTIN_FROZEN":
+            raise ED2UpperProductError(
+                "ED2_UPPER_PLUGIN_DISTRIBUTION_UNTRUSTED",
+                contract,
+            )
+        if item.get("approval_state") != "BASELINE_AUTHORIZED":
+            raise ED2UpperProductError(
+                "ED2_UPPER_PLUGIN_APPROVAL_REQUIRED",
+                contract,
+            )
+        if item.get("lifecycle_state") != "ENABLED":
+            raise ED2UpperProductError(
+                "ED2_UPPER_PLUGIN_LIFECYCLE_INVALID",
+                contract,
+            )
+        _hash64(
+            item.get("rollback_authority_hash"),
+            f"components[{index}].rollback_authority_hash",
         )
         if item.get("enabled") is not True:
             raise ED2UpperProductError(
@@ -394,6 +473,7 @@ def _validate_gateway(payload: Mapping[str, object]) -> None:
     ):
         _text(payload.get(field), field)
     _hash64(payload.get("logical_content_hash"), "logical_content_hash")
+    _hash64(payload.get("mapping_profile_sha256"), "mapping_profile_sha256")
     if payload.get("external_protocol_boundary") is not True:
         raise ED2UpperProductError(
             "ED2_UPPER_GATEWAY_BOUNDARY_REQUIRED",
@@ -461,9 +541,7 @@ def _validate_media(
             "2d/3d",
         )
     layers = set(_texts(payload.get("semantic_layers"), "semantic_layers"))
-    if not {"W", "P", "A", "J", "M"}.issubset(layers) or not layers.issubset(
-        ED2_DEBRIEF_LAYERS
-    ):
+    if not {"W", "P", "A", "J", "M"}.issubset(layers) or not layers.issubset(ED2_DEBRIEF_LAYERS):
         raise ED2UpperProductError(
             "ED2_UPPER_DEBRIEF_LAYERS_INVALID",
             ",".join(sorted(layers)),
@@ -508,11 +586,22 @@ def _validate_media(
                 media_id,
             )
         _text(item.get("media_type"), f"media[{index}].media_type")
-        _text(item.get("uri"), f"media[{index}].uri")
+        uri = _text(item.get("uri"), f"media[{index}].uri")
+        if not uri.startswith("tpaa-object://"):
+            raise ED2UpperProductError(
+                "ED2_UPPER_MEDIA_MANAGED_URI_REQUIRED",
+                media_id,
+            )
         _hash64(
             item.get("artifact_sha256"),
             f"media[{index}].artifact_sha256",
         )
+        byte_size = item.get("byte_size")
+        if isinstance(byte_size, bool) or not isinstance(byte_size, int) or byte_size <= 0:
+            raise ED2UpperProductError(
+                "ED2_UPPER_MEDIA_SIZE_INVALID",
+                media_id,
+            )
         transcript_status = item.get("transcript_status")
         if transcript_status not in {"AVAILABLE", "UNAVAILABLE"}:
             raise ED2UpperProductError(
@@ -522,12 +611,34 @@ def _validate_media(
         transcript_uri = item.get("transcript_uri")
         transcript_sha256 = item.get("transcript_sha256")
         if transcript_status == "AVAILABLE":
-            _text(transcript_uri, f"media[{index}].transcript_uri")
+            transcript_uri_text = _text(
+                transcript_uri,
+                f"media[{index}].transcript_uri",
+            )
+            if not transcript_uri_text.startswith("tpaa-object://"):
+                raise ED2UpperProductError(
+                    "ED2_UPPER_MEDIA_MANAGED_URI_REQUIRED",
+                    f"{media_id}:transcript",
+                )
             _hash64(
                 transcript_sha256,
                 f"media[{index}].transcript_sha256",
             )
-        elif transcript_uri is not None or transcript_sha256 is not None:
+            transcript_size = item.get("transcript_byte_size")
+            if (
+                isinstance(transcript_size, bool)
+                or not isinstance(transcript_size, int)
+                or transcript_size <= 0
+            ):
+                raise ED2UpperProductError(
+                    "ED2_UPPER_MEDIA_SIZE_INVALID",
+                    f"{media_id}:transcript",
+                )
+        elif (
+            transcript_uri is not None
+            or transcript_sha256 is not None
+            or item.get("transcript_byte_size") is not None
+        ):
             raise ED2UpperProductError(
                 "ED2_UPPER_TRANSCRIPT_REF_MISMATCH",
                 media_id,
@@ -590,7 +701,7 @@ def build_ed2_upper_product(
     _validate_json_native(body)
 
     if normalized == "EVENT_RELATION_ROOT_CAUSE":
-        _validate_event_relation(body)
+        _validate_event_relation(body, as_of_utc=as_of)
     elif normalized == "LONGITUDINAL_HUMAN_TEAM":
         _validate_human_team(body)
     elif normalized == "COURSE_UNIT_ANALYTICS":

@@ -21,7 +21,7 @@ from tpaa_longitudinal import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_PATH = (
     BASELINE / "canonical" / "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json"
 )

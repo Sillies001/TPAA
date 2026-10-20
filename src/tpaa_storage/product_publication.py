@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from .object_seal import LocalSealedObjectFlow, ObjectSealError
-from .object_store import LocalObjectStore, ObjectStoreError, StoredObject
+from .object_store import ObjectStore, ObjectStoreError, StoredObject
 
 
 class ProductPublicationError(RuntimeError):
@@ -262,7 +262,7 @@ class StagingRecoveryReport:
 
 
 def recover_sealed_orphans(
-    store: LocalObjectStore,
+    store: ObjectStore,
     *,
     logical_prefix: str,
     referenced_uris: Iterable[str],
@@ -300,7 +300,7 @@ def recover_sealed_orphans(
 
 
 def recover_registered_product_orphans(
-    store: LocalObjectStore,
+    store: ObjectStore,
     ledger: ProductPublicationLedger,
     *,
     logical_prefix: str,
@@ -333,7 +333,7 @@ def _staging_operation_id(logical_uri: str) -> str:
 
 
 def recover_staging_orphans(
-    store: LocalObjectStore,
+    store: ObjectStore,
     *,
     scheme: str,
     active_operation_ids: Iterable[str] = (),

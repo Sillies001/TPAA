@@ -16,7 +16,7 @@ from tpaa_canonical import (
 def _identity() -> RuntimeBaselineIdentity:
     return RuntimeBaselineIdentity(
         product_build_version="0.0.0+test",
-        core_baseline="CB-1.4.0",
+        core_baseline="CB-1.5.0",
         baseline_lock_sha256="lock",
         db_schema_version="1.6.0",
         core_authority_artifact_id="CORE_LOGICAL_MODEL",
@@ -95,18 +95,18 @@ def test_trusted_identity_is_derived_from_verified_canonical_baseline() -> None:
     identity = load_trusted_runtime_baseline_identity(product_build_version="0.0.0+test")
 
     assert identity.product_build_version == "0.0.0+test"
-    assert identity.core_baseline == "CB-1.4.0"
+    assert identity.core_baseline == "CB-1.5.0"
     assert identity.db_schema_version == "1.9.0"
     assert identity.core_authority_artifact_id == "CORE_LOGICAL_MODEL"
     assert identity.core_authority_sha256 == (
-        "7799895d706051f6d4c169da9ba2b73c14003922bed327558737712a64c49d1e"
+        "85befeab110a9fd2476720f601920bd4ca5e0f72c8611f1ca3a8f3e90f53d7cb"
     )
     assert identity.p1_metric_catalog_version == "1.14.0"
     assert identity.p1_metric_catalog_sha256 == (
         "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d"
     )
     assert identity.dto_authority_sha256 == (
-        "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
+        "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9"
     )
 
 

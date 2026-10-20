@@ -23,7 +23,7 @@ from tpaa_qualification import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_PATH = BASELINE / "canonical" / "M5_FORMAL_QUALIFICATION_AUTHORITY.json"
 
 

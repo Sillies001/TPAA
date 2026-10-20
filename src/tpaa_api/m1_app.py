@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Annotated
 
 from fastapi import FastAPI, Header, Query
@@ -45,6 +46,13 @@ def _required_token(body: dict[str, object]) -> int:
     value = body.get("expected_version_token")
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         raise M1ApplicationError("M1_COMMAND_FIELD_INVALID", "expected_version_token")
+    return value
+
+
+def _required_int(body: dict[str, object], field: str) -> int:
+    value = body.get(field)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise M1ApplicationError("M1_COMMAND_FIELD_INVALID", field)
     return value
 
 
@@ -219,6 +227,43 @@ def register_m1_routes(app: FastAPI, application: ApplicationService) -> FastAPI
             )
         except M1ApplicationError as exc:
             return _m1_error(exc)
+
+    @app.get("/m1/releases/{release_id}/world-graph")
+    def world_graph(release_id: str) -> JSONResponse:
+        try:
+            return JSONResponse(
+                status_code=200,
+                content=application.m1_world_graph(release_id),
+            )
+        except M1ApplicationError as exc:
+            return _m1_error(exc)
+
+    @app.post("/m1/episodes/{episode_id}/revisions")
+    def revise_episode(
+        episode_id: str,
+        body: dict[str, object],
+    ) -> JSONResponse:
+        try:
+            receipt = application.revise_episode(
+                episode_id=episode_id,
+                correction_key=_required_text(body, "correction_key"),
+                start_session_time_us=_required_int(body, "start_session_time_us"),
+                end_session_time_us=_required_int(body, "end_session_time_us"),
+            )
+        except M1ApplicationError as exc:
+            return _m1_error(exc)
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=422,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": str(getattr(exc, "code", "EPISODE_REVISION_FAILED")),
+                        "detail": str(getattr(exc, "detail", str(exc))),
+                    },
+                },
+            )
+        return JSONResponse(status_code=201, content=asdict(receipt))
 
     @app.get("/m1/releases/{release_id}/series")
     def series(

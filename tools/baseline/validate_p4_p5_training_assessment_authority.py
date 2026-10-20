@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BASELINE = REPO_ROOT / "baseline" / "CB-1.4.0"
+BASELINE = REPO_ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
 AUTHORITY = CANONICAL / "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json"
 ROLE_PROFILE = CANONICAL / "P4_P5_ROLE_PRIVACY_PROFILE.json"

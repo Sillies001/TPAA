@@ -128,6 +128,7 @@ class LocalBackendController:
         self,
         *,
         product_build_version: str = "0.0.0",
+        data_root: Path | None = None,
         child_command: Sequence[str] | None = None,
         startup_timeout_seconds: float = STARTUP_TIMEOUT_SECONDS,
         graceful_shutdown_seconds: float = GRACEFUL_SHUTDOWN_SECONDS,
@@ -136,6 +137,11 @@ class LocalBackendController:
         if not product_build_version:
             raise ValueError("product_build_version must be non-empty")
         self._product_build_version = product_build_version
+        if data_root is not None and not data_root.is_absolute():
+            raise ValueError("data_root must be an absolute path")
+        self._data_root = (
+            None if data_root is None else data_root.resolve(strict=False)
+        )
         self._child_command = tuple(
             child_command
             or (sys.executable, str(Path(__file__).resolve().parents[1] / "tpaa_api" / "local_backend_child.py"))
@@ -196,14 +202,15 @@ class LocalBackendController:
         )
         self._state = LocalBackendState.SPAWNED
         try:
-            self._send_control(
-                {
-                    "protocol": CONTROL_PROTOCOL,
-                    "type": "START",
-                    "bearer_token": self._token,
-                    "product_build_version": self._product_build_version,
-                }
-            )
+            start_record: dict[str, object] = {
+                "protocol": CONTROL_PROTOCOL,
+                "type": "START",
+                "bearer_token": self._token,
+                "product_build_version": self._product_build_version,
+            }
+            if self._data_root is not None:
+                start_record["desktop_data_root"] = str(self._data_root)
+            self._send_control(start_record)
             self._state = LocalBackendState.CONFIG_SENT
             record = self._read_control(self._startup_timeout)
             self._accept_listening(record)

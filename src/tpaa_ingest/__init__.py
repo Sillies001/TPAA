@@ -1,6 +1,22 @@
 """TPAA ingest-layer public contracts."""
 
 from tpaa_ingest.ed2_gateway import JointLVCGatewayAdapter, JointLVCGatewayError
+from tpaa_ingest.flight_recorder_csv import (
+    FLIGHT_RECORDER_ASSOCIATION_PROFILE,
+    FLIGHT_RECORDER_CSV_ADAPTER_ID,
+    FLIGHT_RECORDER_CSV_ADAPTER_VERSION,
+    FLIGHT_RECORDER_CSV_MAPPING_VERSION,
+    FLIGHT_RECORDER_CSV_MEDIA_TYPE,
+    FLIGHT_RECORDER_CSV_PROFILE_ID,
+    FLIGHT_RECORDER_REFERENCE_FRAME,
+    FLIGHT_RECORDER_TIME_PROFILE,
+    FLIGHT_RECORDER_UNIT_PROFILE,
+    FlightRecorderCsvAdapter,
+    FlightRecorderCsvInspection,
+    FlightRecorderCsvProfile,
+    NormalizedFlightRecorderCsv,
+    normalize_flight_recorder_csv,
+)
 from tpaa_ingest.m2_measurement_alignment import (
     M2MeasurementAlignmentError,
     M2MeasurementAlignmentProjection,
@@ -32,6 +48,13 @@ from tpaa_ingest.m2_time_alignment import (
     M2TimeAlignmentProjection,
     NavTimeUncertaintyInput,
     load_m2_time_alignment,
+)
+from tpaa_ingest.nasa_dashlink_mat import (
+    NASA_DASHLINK_MAPPING_PROFILE,
+    NASA_DASHLINK_MAT_ADAPTER_ID,
+    NASA_DASHLINK_MAT_ADAPTER_VERSION,
+    NASA_DASHLINK_MAT_MEDIA_TYPE,
+    NasaDashlinkMatAdapter,
 )
 from tpaa_ingest.p6_interop import (
     P6InteropArtifactRef,
@@ -93,6 +116,15 @@ __all__ = [
     "JointLVCGatewayError",
     "ClockAlignmentSample",
     "ClockSegment",
+    "FLIGHT_RECORDER_ASSOCIATION_PROFILE",
+    "FLIGHT_RECORDER_CSV_ADAPTER_ID",
+    "FLIGHT_RECORDER_CSV_ADAPTER_VERSION",
+    "FLIGHT_RECORDER_CSV_MAPPING_VERSION",
+    "FLIGHT_RECORDER_CSV_MEDIA_TYPE",
+    "FLIGHT_RECORDER_CSV_PROFILE_ID",
+    "FLIGHT_RECORDER_REFERENCE_FRAME",
+    "FLIGHT_RECORDER_TIME_PROFILE",
+    "FLIGHT_RECORDER_UNIT_PROFILE",
     "FROZEN_SOURCE_FAMILIES",
     "GOVERNED_FIXTURE_IDS",
     "InterpolationInput",
@@ -108,6 +140,11 @@ __all__ = [
     "MeasurementAlignmentRow",
     "MissionSystemIdentity",
     "MissionSystemInstance",
+    "NASA_DASHLINK_MAPPING_PROFILE",
+    "NASA_DASHLINK_MAT_ADAPTER_ID",
+    "NASA_DASHLINK_MAT_ADAPTER_VERSION",
+    "NASA_DASHLINK_MAT_MEDIA_TYPE",
+    "NasaDashlinkMatAdapter",
     "NavTimeUncertaintyInput",
     "ReferenceFrameProvenance",
     "ReferenceMatchQualityProfile",
@@ -130,6 +167,10 @@ __all__ = [
     "PRODUCTION_INTERCHANGE_SCHEMA_VERSION",
     "GovernedInterchangeDocument",
     "GovernedInterchangeProfile",
+    "FlightRecorderCsvAdapter",
+    "FlightRecorderCsvInspection",
+    "FlightRecorderCsvProfile",
+    "NormalizedFlightRecorderCsv",
     "ProductionInterchangeJsonAdapter",
     "ProductionFlightJsonAdapter",
     "ProductionSourceAdapterError",
@@ -158,5 +199,6 @@ __all__ = [
     "load_m2_reference_truth",
     "load_m2_time_alignment",
     "load_synthetic_fixture_bundle",
+    "normalize_flight_recorder_csv",
     "validate_production_flight_document",
 ]

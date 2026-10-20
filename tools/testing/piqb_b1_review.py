@@ -57,6 +57,7 @@ def review(
     admission = _text("src/tpaa_runtime/admission.py")
     desktop = _text("src/tpaa_api/desktop.py")
     child = _text("src/tpaa_api/local_backend_child.py")
+    desktop_factory = _text("src/tpaa_desktop/__init__.py")
     gui_transport = _text("src/tpaa_gui/local_backend.py")
     m9 = _text("src/tpaa_application/m9_workspace.py")
     app_service = _text("src/tpaa_application/service.py")
@@ -124,8 +125,13 @@ def review(
             )
         ),
         "local_child_uses_composition_root": (
-            "build_desktop_application" in child
-            and "create_full_desktop_app" in child
+            "from tpaa_desktop import create_app" in child
+            and "app = create_app(" in child
+            and "build_desktop_production_runtime" in desktop_factory
+            and "create_production_desktop_app" in desktop_factory
+            and "prepare_desktop_production_config" in desktop_factory
+            and "build_desktop_application" not in child
+            and "tests/fixtures" not in child
             and "M1PublicationService" not in child
             and "ApplicationService(" not in child
         ),

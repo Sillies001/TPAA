@@ -34,7 +34,7 @@ AIRCRAFT = str(UUID(int=100, version=4))
 TWIN = str(UUID(int=101, version=4))
 REFERENCE = str(UUID(int=102, version=4))
 CONFIG = str(UUID(int=103, version=4))
-PROFILE_SHA = "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394"
+PROFILE_SHA = "ccb5aa1272b958bacd20ac3d2adaf208386138dc2f3da7c15a48fd84eddf8e6d"
 
 
 def _uuid(seed: int) -> str:

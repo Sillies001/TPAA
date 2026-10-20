@@ -21,7 +21,7 @@ from tpaa_storage import SQLiteDesktopUnitOfWork, bootstrap_sqlite
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURES = ROOT / "tests" / "fixtures" / "m1"
-AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+AUTHORITY = ROOT / "baseline" / "CB-1.5.0" / "canonical"
 
 
 def _runtime(database: Path, object_root: Path) -> ProductionRuntime:

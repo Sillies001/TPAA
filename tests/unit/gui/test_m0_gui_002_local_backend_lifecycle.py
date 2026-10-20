@@ -11,8 +11,11 @@ from tpaa_gui.local_backend import (
 )
 
 
-def test_real_child_enters_ready_then_gracefully_exits() -> None:
-    controller = LocalBackendController(startup_timeout_seconds=5)
+def test_real_child_enters_ready_then_gracefully_exits(tmp_path) -> None:
+    controller = LocalBackendController(
+        startup_timeout_seconds=10,
+        data_root=(tmp_path / "desktop-data").resolve(),
+    )
     ready = controller.start()
     try:
         assert ready.state is LocalBackendState.READY
@@ -55,8 +58,11 @@ def test_handshake_mismatch_fails_closed(monkeypatch: pytest.MonkeyPatch) -> Non
         controller._perform_http_handshake()
 
 
-def test_backend_crash_immediately_revokes_ready() -> None:
-    controller = LocalBackendController(startup_timeout_seconds=5)
+def test_backend_crash_immediately_revokes_ready(tmp_path) -> None:
+    controller = LocalBackendController(
+        startup_timeout_seconds=10,
+        data_root=(tmp_path / "desktop-data").resolve(),
+    )
     controller.start()
     process = controller._process
     assert process is not None

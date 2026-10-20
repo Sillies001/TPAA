@@ -21,7 +21,7 @@ from tpaa_qualification import (  # noqa: E402
     validate_release_signoffs,
 )
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TASK_BASELINE = ROOT / "docs" / "baseline" / "SDIB-1.4" / "M5_TASK_BASELINE.json"
 TRACKING_ISSUE = 142
 TASK_ID = "M5-TST-007"

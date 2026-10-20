@@ -11,7 +11,7 @@ import pytest
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY = BASELINE / "canonical" / "M5_FORMAL_QUALIFICATION_AUTHORITY.json"
 VALIDATOR_PATH = ROOT / "tools" / "baseline" / "validate_m5_formal_qualification_authority.py"
 

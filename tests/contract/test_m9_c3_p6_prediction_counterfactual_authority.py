@@ -8,7 +8,7 @@ from pathlib import Path
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
 AUTHORITY = CANONICAL / "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json"
 ROLE_PROFILE = CANONICAL / "P6_ROLE_PRIVACY_RELEASE_PROFILE.json"
@@ -22,7 +22,7 @@ VALIDATOR_PATH = (
 )
 
 EXPECTED_AUTHORITY_SHA256 = "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e"
-EXPECTED_ROLE_PROFILE_SHA256 = "d5eff80dbfa912955ae7b09bc3e4a2868650466560cb1a5b1f558434e8076713"
+EXPECTED_ROLE_PROFILE_SHA256 = "476ef4389a242033768aee7642190a304ded286aab7f5d59c1006b2f4db8a974"
 
 SPEC = importlib.util.spec_from_file_location("m9_c3_validator", VALIDATOR_PATH)
 assert SPEC is not None and SPEC.loader is not None

@@ -1,15 +1,33 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "tpaa"
 version = "1.0.0"
 description = "TPAA production airborne-data assessment and qualification system"
 requires-python = ">=3.13,<3.14"
-license = "Proprietary"
+license = "LicenseRef-Proprietary"
 dependencies = [
     "fastapi[standard-no-fastapi-cloud-cli]==0.141.1",
     "polars==1.44.2",
     "psycopg[binary]==3.3.6",
     "pyside6==6.11.2",
 ]
+
+[project.optional-dependencies]
+service-s3 = ["boto3==1.43.112"]
+
+[project.scripts]
+tpaa-admin = "tpaa_admin.__main__:main"
+tpaa-service = "tpaa_service.__main__:main"
+
+[project.gui-scripts]
+tpaa-desktop = "tpaa_desktop.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["tpaa*"]
 
 [tool.uv]
 required-version = ">=0.10,<0.13"

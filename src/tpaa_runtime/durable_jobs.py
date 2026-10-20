@@ -52,7 +52,7 @@ from tpaa_storage import (
     AuditLogWrite,
     ComputeJobRepository,
     ComputeJobState,
-    LocalObjectStore,
+    ObjectStore,
     ParquetColumn,
     ParquetDatasetArtifact,
     ParquetPartition,
@@ -99,6 +99,11 @@ from .production_worker import (
     ProductionP6CounterfactualWorkerInput,
     ProductionP6ForecastWorkerInput,
     ProductionPrerequisiteRow,
+)
+from .source_artifacts import (
+    SourceArtifactError,
+    materialize_source_documents,
+    resolve_source_artifact,
 )
 
 _GOVERNED_HANDLER = "tpaa_runtime.production_worker:execute"
@@ -232,10 +237,7 @@ def _governed_job_failure_detail(exc: Exception) -> str:
             and all(part.isidentifier() for part in fields.split(","))
         ):
             return f"{error_kind}:{table}:fields={fields}"
-    if (
-        isinstance(exc, P6PersistenceError)
-        and exc.code == "P6_MODEL_BUILD_RECONSTRUCTION_MISMATCH"
-    ):
+    if isinstance(exc, P6PersistenceError) and exc.code == "P6_MODEL_BUILD_RECONSTRUCTION_MISMATCH":
         detail = exc.detail
         category, separator, _remainder = detail.partition(":")
         if detail in _P6_RECONSTRUCTION_SAFE_DETAILS:
@@ -388,8 +390,7 @@ def _canonical_dataset_prerequisites(
             "object_ref_id": object_ref_id,
             "storage_uri": artifact.logical_uri,
             "partition_spec": [
-                {"key": key, "value": value}
-                for key, value in artifact.partition.values
+                {"key": key, "value": value} for key, value in artifact.partition.values
             ],
             "schema_version": artifact.schema.schema_version,
             "row_count": artifact.row_count,
@@ -492,7 +493,7 @@ class ProductionJobExecutor:
         *,
         authority_root: Path,
         write_uow_factory: RuntimeUnitOfWorkFactory,
-        object_store: LocalObjectStore,
+        object_store: ObjectStore,
         max_workers: int = 2,
     ) -> None:
         self._authority_root = authority_root
@@ -505,9 +506,10 @@ class ProductionJobExecutor:
         self._dispatcher.cancel(job_id)
 
     @staticmethod
-    def _source_import(payload: Mapping[str, object]) -> SourceImportCommand:
-        source_json = _text(payload.get("source_json"), field="source_json")
-        source_bytes = source_json.encode("utf-8")
+    def _source_import(
+        payload: Mapping[str, object],
+        source_bytes: bytes,
+    ) -> SourceImportCommand:
         metadata = _mapping(payload.get("source_import"), field="source_import")
         family_text = _text(metadata.get("source_family"), field="source_family")
         try:
@@ -630,13 +632,25 @@ class ProductionJobExecutor:
             envelope=envelope,
         )
 
-    @staticmethod
     def _source_imports(
+        self,
         payload: Mapping[str, object],
     ) -> tuple[SourceImportCommand, ...]:
         raw_documents = payload.get("source_documents")
+        if raw_documents is not None and "source_json" in payload:
+            raise ProductionJobExecutionError(
+                "SOURCE_ARTIFACT_INLINE_FORBIDDEN",
+                "source_json",
+            )
         if raw_documents is None:
-            return (ProductionJobExecutor._source_import(payload),)
+            try:
+                _reference, source_bytes = resolve_source_artifact(
+                    self._object_store,
+                    payload,
+                )
+            except SourceArtifactError as exc:
+                raise ProductionJobExecutionError(exc.code, exc.detail) from exc
+            return (self._source_import(payload, source_bytes),)
         if (
             not isinstance(raw_documents, Sequence)
             or isinstance(raw_documents, (str, bytes))
@@ -656,7 +670,14 @@ class ProductionJobExecutor:
                 raw,
                 field=f"source_documents[{index}]",
             )
-            command = ProductionJobExecutor._source_import(document)
+            try:
+                _reference, source_bytes = resolve_source_artifact(
+                    self._object_store,
+                    document,
+                )
+            except SourceArtifactError as exc:
+                raise ProductionJobExecutionError(exc.code, exc.detail) from exc
+            command = self._source_import(document, source_bytes)
             if session_id is None:
                 session_id = command.session_id
             elif command.session_id != session_id:
@@ -678,7 +699,6 @@ class ProductionJobExecutor:
             artifact_ids.add(command.artifact_id)
             commands.append(command)
         return tuple(commands)
-
 
     @staticmethod
     def _bind_parquet(
@@ -721,11 +741,17 @@ class ProductionJobExecutor:
         source_commands = self._source_imports(payload)
         for source_command in source_commands:
             try:
-                self._adapters.require_family(
-                    source_command.envelope.source_family
-                )
+                self._adapters.require_family(source_command.envelope.source_family)
             except ProductionSourceAdapterError as exc:
                 raise ProductionJobExecutionError(exc.code, exc.detail) from exc
+
+        try:
+            worker_job_payload = materialize_source_documents(
+                self._object_store,
+                payload,
+            )
+        except SourceArtifactError as exc:
+            raise ProductionJobExecutionError(exc.code, exc.detail) from exc
 
         result = self._dispatcher.dispatch(
             WorkerPayload(
@@ -735,7 +761,9 @@ class ProductionJobExecutor:
                 handler=_GOVERNED_HANDLER,
                 domain_payload={
                     "authority_root": str(self._authority_root),
-                    "job_payload": dict(payload),
+                    # Source bytes are materialized only for the isolated worker;
+                    # the public/durable request remains an immutable reference.
+                    "job_payload": worker_job_payload,
                 },
             ),
             timeout_seconds=120.0,
@@ -805,11 +833,8 @@ class ProductionJobExecutor:
                 idempotency_key=f"{job_key}:P1_RELEASE",
                 expected_version_token=expected_version,
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
-
 
     def _p2_repository(
         self,
@@ -859,9 +884,7 @@ class ProductionJobExecutor:
     ) -> None:
         production_raw = payload.get("production_input")
         production_input = (
-            None
-            if production_raw is None
-            else _mapping(production_raw, field="production_input")
+            None if production_raw is None else _mapping(production_raw, field="production_input")
         )
         if production_input is None:
             dataset_snapshot_id = _text(
@@ -879,19 +902,14 @@ class ProductionJobExecutor:
                 explicit = payload.get("dataset_snapshot_id")
                 if (
                     explicit is not None
-                    and _text(explicit, field="dataset_snapshot_id")
-                    != dataset_snapshot_id
+                    and _text(explicit, field="dataset_snapshot_id") != dataset_snapshot_id
                 ):
                     raise ProductionJobExecutionError(
                         "ED2_B2_P2_DATASET_ID_DRIFT",
                         dataset_snapshot_id,
                     )
-                compute_input = self._p2_repository(
-                    uow
-                ).exact_compute_input(dataset_snapshot_id)
-                lineage = P2ReleaseRepository(
-                    uow.canonical_rows
-                ).source_lineage(
+                compute_input = self._p2_repository(uow).exact_compute_input(dataset_snapshot_id)
+                lineage = P2ReleaseRepository(uow.canonical_rows).source_lineage(
                     compute_input.input_bundle.target.release_id
                 )
                 # No commit: preparation is replayed atomically after worker success.
@@ -922,20 +940,14 @@ class ProductionJobExecutor:
         if production_input is None:
             with self._write_uow_factory() as uow:
                 repository = self._p2_repository(uow)
-                compute_input = repository.exact_compute_input(
-                    dataset_snapshot_id
-                )
-                release_repository = P2ReleaseRepository(
-                    uow.canonical_rows
-                )
+                compute_input = repository.exact_compute_input(dataset_snapshot_id)
+                release_repository = P2ReleaseRepository(uow.canonical_rows)
                 lineage = release_repository.source_lineage(
                     compute_input.input_bundle.target.release_id
                 )
                 uow.commit()
 
-        scope_key = p2_release_scope_key(
-            compute_input.input_bundle.target.observation_id
-        )
+        scope_key = p2_release_scope_key(compute_input.input_bundle.target.observation_id)
         release_id = allocate_p2_release_id(
             job_id=job_id,
             request_hash=request_hash,
@@ -969,28 +981,19 @@ class ProductionJobExecutor:
 
         run = value.attribution_run
         if value.model_artifact_json is None:
-            if (
-                run.model_artifact_uri is not None
-                or run.model_artifact_hash is not None
-            ):
+            if run.model_artifact_uri is not None or run.model_artifact_hash is not None:
                 raise ProductionJobExecutionError(
                     "PRCB_C2_P2_MODEL_ARTIFACT_DRIFT",
                     run.attribution_run_id,
                 )
         else:
-            if (
-                run.model_artifact_hash is None
-                or run.model_artifact_uri is not None
-            ):
+            if run.model_artifact_hash is None or run.model_artifact_uri is not None:
                 raise ProductionJobExecutionError(
                     "PRCB_C2_P2_MODEL_ARTIFACT_DRIFT",
                     run.attribution_run_id,
                 )
             artifact_bytes = value.model_artifact_json.encode("ascii")
-            logical_uri = (
-                "tpaa-object://p2-attribution-model/"
-                f"{run.attribution_run_id}.json"
-            )
+            logical_uri = f"tpaa-object://p2-attribution-model/{run.attribution_run_id}.json"
             stored = self._object_store.put_bytes(
                 logical_uri,
                 artifact_bytes,
@@ -1036,12 +1039,8 @@ class ProductionJobExecutor:
                 manifest_hash=manifest_hash,
                 published_at_utc=execution_time_utc,
             )
-            repository.register_adjusted_estimate(
-                value.adjusted_estimate
-            )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            repository.register_adjusted_estimate(value.adjusted_estimate)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def _p3_repository(
@@ -1108,9 +1107,7 @@ class ProductionJobExecutor:
                 self._object_store,
                 product,
             )
-            ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).register(
+            ProductionJobOutputRepository(uow.canonical_rows).register(
                 job_id=job_id,
                 command=P3_BUILD_COMMAND,
                 product_refs=(
@@ -1125,9 +1122,7 @@ class ProductionJobExecutor:
                     ),
                 ),
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def _execute_p3_estimate(
@@ -1192,11 +1187,8 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p3_repository(uow).register_estimate(value)
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
-
 
     def _p4_p5_products(
         self,
@@ -1227,9 +1219,7 @@ class ProductionJobExecutor:
         )
         production_raw = payload.get("production_input")
         production_input = (
-            None
-            if production_raw is None
-            else _mapping(production_raw, field="production_input")
+            None if production_raw is None else _mapping(production_raw, field="production_input")
         )
         worker_input: ProductionP4BuildWorkerInput | ProductionP4AssessmentWorkerInput
         if production_input is not None:
@@ -1251,24 +1241,18 @@ class ProductionJobExecutor:
             )
             with self._write_uow_factory() as uow:
                 products = self._p4_p5_products(uow)
-                scope = self._p4_p5_inputs(uow).exact_p4_scope(
-                    snapshot_id
-                )
+                scope = self._p4_p5_inputs(uow).exact_p4_scope(snapshot_id)
                 if scope.instructor_evidence:
                     raise ProductionJobExecutionError(
                         "PRCB_C2_P4_HUMAN_INPUT_REQUIRES_MUTATION_WORKFLOW",
                         snapshot_id,
                     )
-                subject = products.exact_p4_subject(
-                    scope.subject_context_id
-                )
+                subject = products.exact_p4_subject(scope.subject_context_id)
                 p3_estimate_id = subject.p3_estimate_id
                 p3_estimate = (
                     None
                     if p3_estimate_id is None
-                    else self._p3_repository(
-                        uow
-                    ).exact_capability_estimate(p3_estimate_id)
+                    else self._p3_repository(uow).exact_capability_estimate(p3_estimate_id)
                 )
                 worker_input = ProductionP4AssessmentWorkerInput(
                     job_payload=dict(payload),
@@ -1325,9 +1309,7 @@ class ProductionJobExecutor:
                 uow.canonical_rows,
                 product,
             )
-            ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).register(
+            ProductionJobOutputRepository(uow.canonical_rows).register(
                 job_id=job_id,
                 command=P4_ASSESSMENT_COMMAND,
                 product_refs=(
@@ -1342,9 +1324,7 @@ class ProductionJobExecutor:
                     ),
                 ),
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def _execute_p5_assessment(
@@ -1364,9 +1344,7 @@ class ProductionJobExecutor:
         )
         production_raw = payload.get("production_input")
         production_input = (
-            None
-            if production_raw is None
-            else _mapping(production_raw, field="production_input")
+            None if production_raw is None else _mapping(production_raw, field="production_input")
         )
         worker_input: ProductionP5BuildWorkerInput | ProductionP5AssessmentWorkerInput
         if production_input is not None:
@@ -1385,9 +1363,7 @@ class ProductionJobExecutor:
                 field="selection_snapshot_id",
             )
             with self._write_uow_factory() as uow:
-                compute_input = self._p4_p5_inputs(
-                    uow
-                ).exact_p5_selection(snapshot_id)
+                compute_input = self._p4_p5_inputs(uow).exact_p5_selection(snapshot_id)
                 worker_input = ProductionP5AssessmentWorkerInput(
                     job_payload=dict(payload),
                     compute_input=compute_input,
@@ -1443,9 +1419,7 @@ class ProductionJobExecutor:
                 uow.canonical_rows,
                 product,
             )
-            ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).register(
+            ProductionJobOutputRepository(uow.canonical_rows).register(
                 job_id=job_id,
                 command=P5_ASSESSMENT_COMMAND,
                 product_refs=(
@@ -1457,9 +1431,7 @@ class ProductionJobExecutor:
                     ("selection_snapshot_id", selection_snapshot_id),
                 ),
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def _p6_repository(
@@ -1551,16 +1523,12 @@ class ProductionJobExecutor:
                         product.counterfactual_request.counterfactual_request_id,
                     )
                 )
-            ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).register(
+            ProductionJobOutputRepository(uow.canonical_rows).register(
                 job_id=job_id,
                 command=P6_BUILD_COMMAND,
                 product_refs=tuple(p6_refs),
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def _execute_p6_forecast(
@@ -1611,9 +1579,7 @@ class ProductionJobExecutor:
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_forecast(value)
-            ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).register(
+            ProductionJobOutputRepository(uow.canonical_rows).register(
                 job_id=job_id,
                 command=P6_FORECAST_COMMAND,
                 product_refs=(
@@ -1622,9 +1588,7 @@ class ProductionJobExecutor:
                     ("model_revision_id", value.model_revision_id),
                 ),
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def _execute_p6_counterfactual(
@@ -1647,8 +1611,7 @@ class ProductionJobExecutor:
             request = repository.exact_counterfactual_request(request_id)
             input_snapshot = repository.exact_input(request.input_snapshot_id)
             models = tuple(
-                repository.exact_model_revision(model_id)
-                for model_id in request.model_refs
+                repository.exact_model_revision(model_id) for model_id in request.model_refs
             )
             uow.commit()
 
@@ -1669,19 +1632,14 @@ class ProductionJobExecutor:
             timeout_seconds=120.0,
         )
         value = result.domain_payload
-        if (
-            result.status != "SUCCEEDED"
-            or not isinstance(value, P6CounterfactualRevision)
-        ):
+        if result.status != "SUCCEEDED" or not isinstance(value, P6CounterfactualRevision):
             raise ProductionJobExecutionError(
                 result.error_code or "PRCB_C2_WORKER_FAILED",
                 job_id,
             )
         with self._write_uow_factory() as uow:
             self._p6_repository(uow).register_counterfactual(value)
-            ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).register(
+            ProductionJobOutputRepository(uow.canonical_rows).register(
                 job_id=job_id,
                 command=P6_COUNTERFACTUAL_COMMAND,
                 product_refs=(
@@ -1695,9 +1653,7 @@ class ProductionJobExecutor:
                     ),
                 ),
             )
-            DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).succeed(job_id)
+            DurableJobControl(ComputeJobRepository(uow.canonical_rows)).succeed(job_id)
             uow.commit()
 
     def execute(
@@ -1797,9 +1753,7 @@ class DurableApplicationJobControl:
     def _get_durable(self, job_id: str) -> object:
         try:
             with self._read_uow_factory() as uow:
-                record = DurableJobControl(
-                    ComputeJobRepository(uow.canonical_rows)
-                ).get(job_id)
+                record = DurableJobControl(ComputeJobRepository(uow.canonical_rows)).get(job_id)
                 uow.commit()
                 return record
         except Exception as exc:
@@ -1817,9 +1771,7 @@ class DurableApplicationJobControl:
     ) -> JobSubmission:
         try:
             with self._write_uow_factory() as uow:
-                control = DurableJobControl(
-                    ComputeJobRepository(uow.canonical_rows)
-                )
+                control = DurableJobControl(ComputeJobRepository(uow.canonical_rows))
                 submission = control.submit(
                     job_key=idempotency_key,
                     job_type=command,
@@ -1862,9 +1814,9 @@ class DurableApplicationJobControl:
             raise
 
         with self._write_uow_factory() as uow:
-            running = DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            ).start(queued.job_id)
+            running = DurableJobControl(ComputeJobRepository(uow.canonical_rows)).start(
+                queued.job_id
+            )
             uow.commit()
 
         try:
@@ -1877,9 +1829,7 @@ class DurableApplicationJobControl:
             )
         except Exception as exc:
             with self._write_uow_factory() as uow:
-                control = DurableJobControl(
-                    ComputeJobRepository(uow.canonical_rows)
-                )
+                control = DurableJobControl(ComputeJobRepository(uow.canonical_rows))
                 current = control.get(running.job_id)
                 if current.status in {
                     ComputeJobState.SUBMITTED,
@@ -1888,18 +1838,14 @@ class DurableApplicationJobControl:
                 }:
                     current = control.fail(
                         running.job_id,
-                        reason_code=str(
-                            getattr(exc, "code", "PRCB_C2_EXECUTION_FAILED")
-                        ),
+                        reason_code=str(getattr(exc, "code", "PRCB_C2_EXECUTION_FAILED")),
                         error_detail=_governed_job_failure_detail(exc),
                     )
                 uow.commit()
             return JobSubmission(record=_job_record(current), reused=False)
 
         with self._write_uow_factory() as uow:
-            control = DurableJobControl(
-                ComputeJobRepository(uow.canonical_rows)
-            )
+            control = DurableJobControl(ComputeJobRepository(uow.canonical_rows))
             current = control.get(running.job_id)
             if current.status is ComputeJobState.RUNNING:
                 terminal = control.succeed(running.job_id)
@@ -1922,9 +1868,7 @@ class DurableApplicationJobControl:
         self._executor.cancel(job_id)
         try:
             with self._write_uow_factory() as uow:
-                control = DurableJobControl(
-                    ComputeJobRepository(uow.canonical_rows)
-                )
+                control = DurableJobControl(ComputeJobRepository(uow.canonical_rows))
                 current = control.get(job_id)
                 if current.status is ComputeJobState.CANCELLED:
                     _record_job_audit(

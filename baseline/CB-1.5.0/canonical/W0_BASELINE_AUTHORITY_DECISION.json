@@ -1,0 +1,28 @@
+{
+  "authority_id": "W0_BASELINE_AUTHORITY_DECISION",
+  "authority_version": "1.0.0",
+  "decision_id": "W0-AUTHORITY-CONVERGENCE-2026-10-19",
+  "approval_status": "APPROVED",
+  "approval_date": "2026-10-19",
+  "approval_basis": "Explicit project-owner delegation to confirm all four W0 decisions and close W0.",
+  "version_tuple": {
+    "overall": "TPAA V8.0",
+    "engineering": "ED-2.0",
+    "core": "CB-1.5.0",
+    "db_schema": "1.9.0",
+    "product": "P1_METRIC_CATALOG-1.14.0"
+  },
+  "predecessor": {
+    "core": "CB-1.4.0",
+    "source_baseline_lock_sha256": "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437",
+    "r3_3_reference_lock_sha256": "9d96a7eb0ba2b1fb13b11d76943171f773fd42497df74bf79c01928cfa26e7fa",
+    "immutability": "R3.3 remains byte-identical and is never overwritten."
+  },
+  "decisions": {
+    "successor_required": true,
+    "historical_schema_compatibility": "APPROVED_PER_DECLARATION",
+    "index_authority": "REQUIRED_AND_ADDED",
+    "api_route_authority": "REQUIRED_AND_ADDED",
+    "production_release_claim": false
+  }
+}

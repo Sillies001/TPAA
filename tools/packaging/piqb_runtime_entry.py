@@ -4,13 +4,11 @@
 from __future__ import annotations
 
 import argparse
-import hmac
 import json
 import os
+import secrets
 import sys
 import time
-import tomllib
-from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
@@ -19,20 +17,14 @@ SRC_ROOT = APP_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-import uvicorn  # noqa: E402
-from fastapi import FastAPI, Request  # noqa: E402
+from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
-from tpaa_api.unified import UnifiedPrincipal  # noqa: E402
-from tpaa_runtime import (  # noqa: E402
-    ProductRuntime,
-    ProductRuntimeConfig,
-    RuntimeProfile,
-    build_desktop_application,
-    build_service_application,
-    create_full_desktop_app,
-    create_full_service_app,
-)
+from tpaa_desktop import create_app as create_desktop_app  # noqa: E402
+from tpaa_desktop.__main__ import main as desktop_main  # noqa: E402
+from tpaa_runtime import RuntimeProfile, project_version  # noqa: E402
+from tpaa_service import create_app as create_service_app  # noqa: E402
+from tpaa_service.__main__ import main as service_main  # noqa: E402
 
 DESKTOP_PROFILES = {"WINDOWS_DESKTOP_X64", "LINUX_DESKTOP_X64"}
 SERVICE_PROFILES = {"WINDOWS_SERVICE_X64", "LINUX_SERVICE_X64"}
@@ -49,14 +41,7 @@ _REQUIRED_PRODUCT_ROUTE_MARKERS = (
 
 
 def _project_version() -> str:
-    raw = tomllib.loads((APP_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    project = raw.get("project")
-    if not isinstance(project, dict):
-        raise RuntimeError("project metadata unavailable")
-    version = project.get("version")
-    if not isinstance(version, str) or not version:
-        raise RuntimeError("project version unavailable")
-    return version
+    return project_version(APP_ROOT)
 
 
 def _runtime_profile(profile_id: str) -> RuntimeProfile:
@@ -67,67 +52,28 @@ def _runtime_profile(profile_id: str) -> RuntimeProfile:
     raise ValueError(f"unsupported PIQB runtime profile: {profile_id}")
 
 
-def _config(profile_id: str) -> ProductRuntimeConfig:
-    fixture_root = APP_ROOT / "tests" / "fixtures" / "m1"
-    if not fixture_root.is_dir():
-        raise RuntimeError("packaged M1 qualification fixture root missing")
-    return ProductRuntimeConfig(
-        profile=_runtime_profile(profile_id),
-        product_build_version=_project_version(),
-        authority_root=APP_ROOT / "baseline" / "CB-1.4.0" / "canonical",
-        m1_fixture_root=fixture_root,
-    )
-
-
-def _runtime(profile_id: str) -> ProductRuntime:
-    config = _config(profile_id)
-    if config.profile is RuntimeProfile.DESKTOP:
-        return build_desktop_application(config)
-    return build_service_application(config)
-
-
-def _service_token() -> str:
-    token = os.environ.get("TPAA_SERVICE_TOKEN", "")
+def _service_probe_token() -> str:
+    token = os.environ.get("TPAA_SERVICE_PROBE_TOKEN", "")
     if len(token) < 24:
-        raise RuntimeError("TPAA_SERVICE_TOKEN must be injected and at least 24 characters")
+        raise RuntimeError(
+            "TPAA_SERVICE_PROBE_TOKEN must be injected and at least 24 characters"
+        )
     return token
 
 
-def _service_principal(token: str) -> Callable[[Request], object]:
-    def resolve(request: Request) -> object:
-        supplied = request.headers.get("authorization", "")
-        expected = f"Bearer {token}"
-        if not hmac.compare_digest(supplied, expected):
-            raise PermissionError("service bearer token required")
-        return UnifiedPrincipal(
-            role="SYSTEM",
-            actor_id="PIQB_SERVICE",
-            scope_match=True,
-            privileged_identity_authorized=True,
-            visibility_authorized=True,
-            export_authorized=True,
-        )
-
-    return resolve
-
-
 def _app(profile_id: str) -> tuple[FastAPI, dict[str, str]]:
-    runtime = _runtime(profile_id)
-    version = runtime.config.product_build_version
     if profile_id in DESKTOP_PROFILES:
-        token = "PIQB-DESKTOP-LOCAL-BEARER-QUALIFICATION-ONLY"
-        app = create_full_desktop_app(runtime, bearer_token=token)
+        token = secrets.token_urlsafe(32)
+        app = create_desktop_app(bearer_token=token, app_root=APP_ROOT)
         headers = {"Authorization": f"Bearer {token}"}
     else:
-        token = _service_token()
-        app = create_full_service_app(
-            runtime,
-            principal_resolver=_service_principal(token),
-        )
+        token = _service_probe_token()
+        app = create_service_app(app_root=APP_ROOT)
         headers = {"Authorization": f"Bearer {token}"}
-    if app.version != version:
+    if app.version != _project_version():
         raise RuntimeError(
-            f"FastAPI product version drift expected={version} observed={app.version}"
+            "FastAPI product version drift "
+            f"expected={_project_version()} observed={app.version}"
         )
     return app, headers
 
@@ -269,27 +215,16 @@ def _hold(profile_id: str, stop_file: Path) -> int:
 def _run_desktop(profile_id: str) -> int:
     if profile_id not in DESKTOP_PROFILES:
         raise RuntimeError("desktop command requires Desktop profile")
-    from tpaa_gui.desktop import run_desktop
-    from tpaa_gui.local_backend import LocalBackendController
-
-    backend = LocalBackendController(product_build_version=_project_version())
-    return run_desktop(backend=backend)
+    return desktop_main((), app_root=APP_ROOT)
 
 
 def _run_service(profile_id: str, host: str, port: int) -> int:
     if profile_id not in SERVICE_PROFILES:
         raise RuntimeError("service command requires Service profile")
-    app, _ = _app(profile_id)
-    uvicorn.run(
-        app,
-        host=host,
-        port=port,
-        log_config=None,
-        access_log=False,
-        server_header=False,
-        date_header=False,
+    return service_main(
+        ("--host", host, "--port", str(port)),
+        app_root=APP_ROOT,
     )
-    return 0
 
 
 def main() -> int:

@@ -42,7 +42,7 @@ from tpaa_world import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
-AUTHORITY = ROOT / "baseline" / "CB-1.4.0" / "canonical"
+AUTHORITY = ROOT / "baseline" / "CB-1.5.0" / "canonical"
 P5_AS_OF = "2026-09-20T13:00:00Z"
 HASH = "f" * 64
 

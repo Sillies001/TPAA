@@ -25,7 +25,7 @@ def test_prcb_desktop_production_composition_uses_db_1_9(
             authority_root=(
                 Path(__file__).resolve().parents[2]
                 / "baseline"
-                / "CB-1.4.0"
+                    / "CB-1.5.0"
                 / "canonical"
             ),
             object_root=tmp_path / "objects",
@@ -35,7 +35,7 @@ def test_prcb_desktop_production_composition_uses_db_1_9(
 
     storage = runtime.application.storage_baseline_status()
     assert storage.schema_version == "1.9.0"
-    assert storage.core_baseline == "CB-1.4.0"
+    assert storage.core_baseline == "CB-1.5.0"
 
     availability = runtime.application.feature_availability()
     states = {

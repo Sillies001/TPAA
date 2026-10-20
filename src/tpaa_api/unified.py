@@ -26,6 +26,7 @@ from .m9_app import M9PrincipalResolver, register_m9_routes
 from .product_discovery import register_product_discovery_routes
 from .product_v1 import register_product_v1_routes
 from .runtime import register_product_runtime_routes
+from .source_v1 import register_source_v1_routes
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,6 +112,7 @@ def register_unified_routes(
         actor_resolver=actor_resolver,
     )
     register_product_runtime_routes(app, application)
+    register_source_v1_routes(app, application)
     register_ed2_upper_routes(app, application)
     register_m1_routes(app, application)
     register_m3_routes(app, application)

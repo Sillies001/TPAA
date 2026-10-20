@@ -313,6 +313,17 @@ def qualify(
                 {
                     "TPAA_SERVICE_CONNINFO": primary_conninfo,
                     "TPAA_SERVICE_RESTORE_CONNINFO": restore_conninfo,
+                    # These confirmations are valid only because this tool
+                    # creates and governs both prefix-scoped qualification
+                    # databases immediately above.  Keep the production
+                    # runtime fail-closed when an operator has not supplied
+                    # the equivalent confirmations.
+                    "TPAA_SERVICE_WRITE_DRAIN_CONFIRMATION": (
+                        "WRITE_DRAIN_ENFORCED"
+                    ),
+                    "TPAA_SERVICE_RESTORE_STAGING_CONFIRMATION": (
+                        "CLEAN_STAGING_TARGET"
+                    ),
                     "TPAA_C5_INSTRUCTOR_TOKEN": _INSTRUCTOR_TOKEN,
                     "TPAA_C5_ANALYST_TOKEN": _ANALYST_TOKEN,
                 }
@@ -391,6 +402,7 @@ def qualify(
                 or installed.get("api_exact_read_backup_restore_replay") is not True
                 or installed.get("persistent_audit_verified") is not True
                 or installed.get("security_audit_verified") is not True
+                or installed.get("managed_write_drain_verified") is not True
                 or installed.get("model_reviewer_service_role_configured") is not False
                 or installed.get("tests_fixture_dependency") is not False
                 or installed.get("formal_release_claimed") is not False

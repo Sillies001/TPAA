@@ -33,7 +33,7 @@ from tools.manifest.build_artifacts import (  # noqa: E402
 )
 from tpaa_qualification import load_m5_qualification_authority  # noqa: E402
 
-BASELINE = REPO_ROOT / "baseline" / "CB-1.4.0"
+BASELINE = REPO_ROOT / "baseline" / "CB-1.5.0"
 RUNTIME_ENTRY = REPO_ROOT / "tools" / "packaging" / "m5_runtime_entry.py"
 WINDOWS_PROFILES = {"WINDOWS_DESKTOP_X64", "WINDOWS_SERVICE_X64"}
 LINUX_PROFILES = {"LINUX_DESKTOP_X64", "LINUX_SERVICE_X64"}
@@ -54,9 +54,18 @@ def _clean_tree_ignore(
         for name in names
         if name == "__pycache__"
         or name.endswith((".pyc", ".pyo", ".pth", ".egg-link"))
+        # Some binary wheels (notably PySide6) ship intermediate CMake object
+        # directories.  They are not runtime inputs and their deeply nested
+        # paths can exceed the default Windows path limit while assembling an
+        # otherwise valid offline bundle.
+        or name.lower().startswith("objects-")
+        or name.lower().endswith((".obj", ".pch", ".ilk"))
     }
-    if skip_site_packages and Path(directory).name.startswith("python"):
-        ignored.add("site-packages")
+    if skip_site_packages:
+        # The base interpreter may have unrelated globally installed packages.
+        # Exclude both conventional package directories wherever they occur;
+        # the locked environment's purelib/platlib is copied explicitly below.
+        ignored.update({"site-packages", "dist-packages"}.intersection(names))
     return ignored
 
 

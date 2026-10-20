@@ -20,7 +20,7 @@ def test_prcb_runtime_reports_historical_1_0_and_pending_1_0_1(
         ProductionRuntimeConfig(
             profile=RuntimeProfile.DESKTOP,
             product_build_version="1.0.1",
-            authority_root=root / "baseline" / "CB-1.4.0" / "canonical",
+            authority_root=root / "baseline" / "CB-1.5.0" / "canonical",
             object_root=tmp_path / "objects",
             desktop_database_path=database,
         )

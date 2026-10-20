@@ -27,6 +27,9 @@ PRODUCTION_FLIGHT_ACTION_PROFILE_ID = "BASIC_FLIGHT_ACTION_V1"
 _REQUIRED_ROW_FIELDS = frozenset(
     {"source_time_us", "p", "nz", "heading", "tas", "mach", "quality"}
 )
+_OPTIONAL_LINEAGE_ROW_FIELDS = frozenset(
+    {"source_row_ordinal", "source_clock_segment"}
+)
 
 
 def _uuid(value: object, *, field: str) -> str:
@@ -189,7 +192,11 @@ def validate_production_flight_document(data: bytes) -> dict[str, object]:
         raise ProductionSourceAdapterError("PRCB_SOURCE_DOCUMENT_INVALID", "rows")
     previous: int | None = None
     for index, item in enumerate(rows):
-        if not isinstance(item, dict) or set(item) != _REQUIRED_ROW_FIELDS:
+        if (
+            not isinstance(item, dict)
+            or not _REQUIRED_ROW_FIELDS.issubset(item)
+            or not set(item).issubset(_REQUIRED_ROW_FIELDS | _OPTIONAL_LINEAGE_ROW_FIELDS)
+        ):
             raise ProductionSourceAdapterError(
                 "PRCB_SOURCE_DOCUMENT_INVALID",
                 f"rows[{index}]",
@@ -206,6 +213,21 @@ def validate_production_flight_document(data: bytes) -> dict[str, object]:
                 f"rows[{index}].source_time_us",
             )
         previous = source_time
+        if "source_row_ordinal" in item:
+            ordinal = item.get("source_row_ordinal")
+            segment = item.get("source_clock_segment")
+            if (
+                isinstance(ordinal, bool)
+                or not isinstance(ordinal, int)
+                or ordinal != index
+                or isinstance(segment, bool)
+                or not isinstance(segment, int)
+                or segment < 0
+            ):
+                raise ProductionSourceAdapterError(
+                    "PRCB_SOURCE_DOCUMENT_INVALID",
+                    f"rows[{index}].lineage",
+                )
         if isinstance(quality, bool) or not isinstance(quality, int) or quality < 0:
             raise ProductionSourceAdapterError(
                 "PRCB_SOURCE_DOCUMENT_INVALID",
@@ -266,6 +288,16 @@ def build_production_source_registry() -> SourceAdapterRegistry:
     """Return exact production descriptors for all six frozen source families."""
 
     flight = ProductionFlightJsonAdapter()
+    from .flight_recorder_csv import FlightRecorderCsvAdapter
+    from .nasa_dashlink_mat import NasaDashlinkMatAdapter
+
+    recorder_csv = FlightRecorderCsvAdapter()
+    nasa_mat = NasaDashlinkMatAdapter()
     return SourceAdapterRegistry(
-        (flight.descriptor, *production_interchange_descriptors())
+        (
+            flight.descriptor,
+            recorder_csv.descriptor,
+            nasa_mat.descriptor,
+            *production_interchange_descriptors(),
+        )
     )

@@ -1,0 +1,550 @@
+{
+  "registry_id": "R39_KNOWLEDGE_COVERAGE",
+  "version": "1.1.0",
+  "core_baseline": "CB-1.4.0",
+  "purpose": "Machine-checkable migration coverage for 60 material R39 knowledge areas, now supplemented by R3 method/workflow fidelity reconstruction. This is migration evidence, not field/metric/schema authority.",
+  "source_report": "01B_R39知识保真与可视化保真_R3修复报告.md",
+  "entries": [
+    {
+      "id": "K001",
+      "source_knowledge": "C + TPAA-M 总体语义",
+      "r1_status": "充分承接",
+      "r2_action": "保留并扩展到所有 Phase",
+      "r2_targets": "03、02 Core",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K002",
+      "source_knowledge": "六类输入：Flight/Mission/TDL/Range/Scenario/Media",
+      "r1_status": "承接过浅",
+      "r2_action": "恢复完整 source→world→product 角色",
+      "r2_targets": "05A、05B、05E、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K003",
+      "source_knowledge": "Source Capability / Context Capability / World Capability",
+      "r1_status": "承接过浅",
+      "r2_action": "新建机器语义权威",
+      "r2_targets": "`WORLD_CAPABILITY_REGISTRY.json`",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K004",
+      "source_knowledge": "Basic Flight 完整训练评价",
+      "r1_status": "R1 只有概览",
+      "r2_action": "重写总体 §17 和专项 GUI/assessment",
+      "r2_targets": "03 §17、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K005",
+      "source_knowledge": "WVR 完整训练评价",
+      "r1_status": "R1 只有概览",
+      "r2_action": "重写总体 §18 和专项证据链",
+      "r2_targets": "03 §18、05B、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K006",
+      "source_knowledge": "BVR 六世界/信息链/团队态势",
+      "r1_status": "R1 只有概览",
+      "r2_action": "重写总体 §19，恢复 Truth/Perception/Action/J 链",
+      "r2_targets": "03 §19、05B、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K007",
+      "source_knowledge": "Strike/空对面训练评价",
+      "r1_status": "未承接",
+      "r2_action": "新增正式训练类型和 Stage profile",
+      "r2_targets": "03 §20、05B、05I、05G、`STAGE_REGISTRY.json`",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K008",
+      "source_knowledge": "四类训练统一 C+TPAA-M 矩阵",
+      "r1_status": "承接过浅",
+      "r2_action": "冻结四 training type taxonomy",
+      "r2_targets": "`TRAINING_EVALUATION_TAXONOMY.json`、03 §21",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K009",
+      "source_knowledge": "Individual/Team/Package/Joint-LVC 四 scope",
+      "r1_status": "R1 仅路线占位",
+      "r2_action": "冻结 scope 与污染隔离规则",
+      "r2_targets": "Taxonomy、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K010",
+      "source_knowledge": "Qualification/Competency/Evidence 三层输出",
+      "r1_status": "承接过浅",
+      "r2_action": "恢复为正式 assessment semantics",
+      "r2_targets": "Taxonomy、03 §23、05D、05I",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K011",
+      "source_knowledge": "Critical Gate / NOT_EVALUABLE",
+      "r1_status": "部分承接",
+      "r2_action": "纳入 Assessment Profile 与 GUI",
+      "r2_targets": "05D、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K012",
+      "source_knowledge": "Competency domain 体系",
+      "r1_status": "未充分承接",
+      "r2_action": "冻结 10 类能力域",
+      "r2_targets": "Taxonomy、05I",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K013",
+      "source_knowledge": "SA Evidence 与人员认知评价边界",
+      "r1_status": "未承接",
+      "r2_action": "明确 P1 evidence ≠ P4 human conclusion",
+      "r2_targets": "Taxonomy、CR-017/018、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K014",
+      "source_knowledge": "多机个人/团队成绩分离",
+      "r1_status": "未充分承接",
+      "r2_action": "冻结禁止 team→individual copy",
+      "r2_targets": "CR-017、05I、Review Gate",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K015",
+      "source_knowledge": "事件责任模型",
+      "r1_status": "承接过浅",
+      "r2_action": "保留 responsibility attributes，禁止无证据归因",
+      "r2_targets": "Taxonomy、05B、05I",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K016",
+      "source_knowledge": "系统因素不得归责个人",
+      "r1_status": "承接过浅",
+      "r2_action": "升格为归因安全规则",
+      "r2_targets": "05I、05J、CR-020",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K017",
+      "source_knowledge": "Event Graph / Evidence Graph",
+      "r1_status": "部分承接",
+      "r2_action": "恢复 Objective→Event→Relation→Assessment 链",
+      "r2_targets": "05B、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K018",
+      "source_knowledge": "根因只能作为候选原因",
+      "r1_status": "承接过浅",
+      "r2_action": "明确候选、反证、可辨识性",
+      "r2_targets": "Taxonomy、05I、05G、05J",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K019",
+      "source_knowledge": "教员 annotation / rubric 输入",
+      "r1_status": "部分承接",
+      "r2_action": "恢复独立人工证据层",
+      "r2_targets": "05D、05I、05E、05F",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K020",
+      "source_knowledge": "教员 override 不覆盖自动结果",
+      "r1_status": "未冻结",
+      "r2_action": "新建 revision integrity 规则",
+      "r2_targets": "CR-019、05I、05G、Review Gate",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K021",
+      "source_knowledge": "教员一致性分析",
+      "r1_status": "未承接",
+      "r2_action": "恢复 cohort-aware agreement",
+      "r2_targets": "05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K022",
+      "source_knowledge": "Assessment Profile",
+      "r1_status": "R1 只保留 ID",
+      "r2_action": "恢复适用范围/门槛/rubric/version 合同",
+      "r2_targets": "Taxonomy、03 §23、05D",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K023",
+      "source_knowledge": "Training-standard Rule DSL",
+      "r1_status": "未承接",
+      "r2_action": "恢复为受治理 artifact/插件输入",
+      "r2_targets": "04、05B、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K024",
+      "source_knowledge": "自动复盘优先级",
+      "r1_status": "未承接",
+      "r2_action": "恢复 review priority，但不当作结论",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K025",
+      "source_knowledge": "Bookmark / Debrief Point",
+      "r1_status": "未承接",
+      "r2_action": "恢复为复盘产品",
+      "r2_targets": "05G、05E/05F",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K026",
+      "source_knowledge": "Debrief Playlist",
+      "r1_status": "未承接",
+      "r2_action": "恢复可解释自动播放列表",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K027",
+      "source_knowledge": "Positive Event",
+      "r1_status": "未承接",
+      "r2_action": "与问题事件同等证据链",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K028",
+      "source_knowledge": "Audio/Video/Transcript 联动",
+      "r1_status": "承接过浅",
+      "r2_action": "恢复 time mapping、权限、retention",
+      "r2_targets": "05E、05G、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K029",
+      "source_knowledge": "个人长期能力",
+      "r1_status": "R1 过度收窄到平台趋势",
+      "r2_action": "恢复 P4 longitudinal contract",
+      "r2_targets": "05D、05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K030",
+      "source_knowledge": "团队长期能力 + composition marker",
+      "r1_status": "未承接",
+      "r2_action": "恢复 Team longitudinal",
+      "r2_targets": "05I、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K031",
+      "source_knowledge": "EWMA/波动/训练暴露/衰减提示",
+      "r1_status": "承接过浅",
+      "r2_action": "作为长期评价方法族恢复",
+      "r2_targets": "03 §25、05D/05I",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K032",
+      "source_knowledge": "Scenario difficulty / Cohort comparability",
+      "r1_status": "承接过浅",
+      "r2_action": "升格为 cohort comparability 规则",
+      "r2_targets": "CR-021、05D、05I、05J、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K033",
+      "source_knowledge": "Course/Unit training feedback",
+      "r1_status": "未承接",
+      "r2_action": "恢复课程/单位聚合与隐私边界",
+      "r2_targets": "03 §28、05I、05G、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K034",
+      "source_knowledge": "P2 Context Attribution / Normalization",
+      "r1_status": "R1 仅 phase 名称",
+      "r2_action": "冻结 factor→attribution→adjusted estimate 合同",
+      "r2_targets": "`EXTENSION_CONTRACT_REGISTRY.json`、05J",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K035",
+      "source_knowledge": "P2 可辨识性/不可辨识",
+      "r1_status": "未承接",
+      "r2_action": "`NOT_IDENTIFIABLE` 正式化",
+      "r2_targets": "CR-020、05J、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K036",
+      "source_knowledge": "P3 Capability Model / Surface",
+      "r1_status": "R1 只占位",
+      "r2_action": "冻结模型制品、适用域、验证合同",
+      "r2_targets": "Extension Registry、05J、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K037",
+      "source_knowledge": "Aircraft Digital Twin revision",
+      "r1_status": "未充分承接",
+      "r2_action": "恢复 Twin revision 生命周期",
+      "r2_targets": "05J、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K038",
+      "source_knowledge": "Reference-condition estimate",
+      "r1_status": "未承接",
+      "r2_action": "与 observed/adjusted/model estimate 分离",
+      "r2_targets": "05J",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K039",
+      "source_knowledge": "Aircraft Model Capability Profile",
+      "r1_status": "未承接",
+      "r2_action": "恢复型号画像和演化/变点",
+      "r2_targets": "05J、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K040",
+      "source_knowledge": "knowledge-time / 防未来信息泄漏",
+      "r1_status": "部分承接",
+      "r2_action": "升格为跨 P2～P6 强制规则",
+      "r2_targets": "CR-022、05A、05E、05J、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K041",
+      "source_knowledge": "Fact / Estimate / Forecast / Counterfactual 分离",
+      "r1_status": "R1 只有原则性提及",
+      "r2_action": "冻结产品类隔离",
+      "r2_targets": "Extension Registry、CR-016/023、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K042",
+      "source_knowledge": "P6 Forecast / Counterfactual / Recommendation",
+      "r1_status": "R1 只有 phase 名称",
+      "r2_action": "冻结输出合同与 UI 隔离",
+      "r2_targets": "Extension Registry、05G、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K043",
+      "source_knowledge": "Training Recommendation / Intervention Outcome",
+      "r1_status": "未承接",
+      "r2_action": "保留为 P6 dormant design contract",
+      "r2_targets": "Extension Registry、CORE_LOGICAL_MODEL 预留表",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K044",
+      "source_knowledge": "P1 非116扩展指标语义族",
+      "r1_status": "R1 未呈现",
+      "r2_action": "建立“非可执行扩展指标族”注册表",
+      "r2_targets": "`EXTENSION_METRIC_FAMILY_REGISTRY.json`",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K045",
+      "source_knowledge": "Data Quality / World relation 指标族",
+      "r1_status": "R1 工程有但训练语义弱",
+      "r2_action": "在扩展指标族中恢复",
+      "r2_targets": "Extension Metric Family Registry",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K046",
+      "source_knowledge": "Outcome 与过程/J 分离",
+      "r1_status": "承接过浅",
+      "r2_action": "明确 Outcome 不覆盖 process",
+      "r2_targets": "03、05C、05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K047",
+      "source_knowledge": "插件体系（Source/World/Event/Metric/Assessment）",
+      "r1_status": "R1 未系统承接",
+      "r2_action": "恢复 manifest/compatibility/namespace",
+      "r2_targets": "04、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K048",
+      "source_knowledge": "Training Plugin 映射",
+      "r1_status": "未承接",
+      "r2_action": "冻结 Training Plugin composition",
+      "r2_targets": "Taxonomy、CR-026、04/05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K049",
+      "source_knowledge": "Joint/LVC 外部互操作",
+      "r1_status": "R1 只有路线",
+      "r2_action": "恢复隔离 Gateway 与 provenance",
+      "r2_targets": "04、05B、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K050",
+      "source_knowledge": "Batch→Near-real-time 演进",
+      "r1_status": "R1 有部署但知识不完整",
+      "r2_action": "恢复 provisional→sealed 语义",
+      "r2_targets": "05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K051",
+      "source_knowledge": "多角色 GUI 默认视图",
+      "r1_status": "未充分承接",
+      "r2_action": "恢复角色入口但不改变语义",
+      "r2_targets": "05G、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K052",
+      "source_knowledge": "P01～P13 页面族",
+      "r1_status": "未承接",
+      "r2_action": "恢复完整信息架构",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K053",
+      "source_knowledge": "Truth–Track matrix / Track lifecycle / Cue-response",
+      "r1_status": "R1 GUI 过浅",
+      "r2_action": "恢复 BVR 专项证据组件",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K054",
+      "source_knowledge": "Strike route/target/designation/official scoring UI",
+      "r1_status": "未承接",
+      "r2_action": "恢复 Strike 专项组件",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K055",
+      "source_knowledge": "课程/单位/教员 concordance UI",
+      "r1_status": "未承接",
+      "r2_action": "恢复分析页",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K056",
+      "source_knowledge": "Capability Separation / Twin / Model Profile 页面",
+      "r1_status": "未承接",
+      "r2_action": "恢复 P06/P07/P08",
+      "r2_targets": "05G",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K057",
+      "source_knowledge": "数据权限/审计/导出",
+      "r1_status": "已承接",
+      "r2_action": "扩展到人员、模型、媒体、插件",
+      "r2_targets": "05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K058",
+      "source_knowledge": "Golden Session / Synthetic Cases / content validity",
+      "r1_status": "部分承接",
+      "r2_action": "扩展为全阶段验证族",
+      "r2_targets": "03 §33、05H",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K059",
+      "source_knowledge": "Historical replay / immutable release",
+      "r1_status": "充分承接",
+      "r2_action": "保留 R1 权威，不回退旧 schema",
+      "r2_targets": "05E、Core Rules",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    },
+    {
+      "id": "K060",
+      "source_knowledge": "116 指标 / 661 输入",
+      "r1_status": "充分承接",
+      "r2_action": "字节不变继续为 P1 唯一可执行指标权威",
+      "r2_targets": "两份 canonical authority",
+      "closure_status": "CLOSED_IN_R3_KNOWLEDGE_FIDELITY_BASELINE",
+      "design_fidelity": "L3_METHOD_OR_WORKFLOW_RECONSTRUCTED"
+    }
+  ],
+  "unresolved_count": 0
+}

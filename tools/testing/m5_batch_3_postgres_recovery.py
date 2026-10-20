@@ -30,7 +30,7 @@ from tools.storage.postgres_db import (  # noqa: E402
 from tpaa_qualification import load_m5_qualification_authority  # noqa: E402
 from tpaa_storage.bootstrap import EXPECTED_DB_SCHEMA_VERSION  # noqa: E402
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TRACKING_ISSUE = 141
 TASK_IDS = ("M5-DEV-004", "M5-TST-003")
 

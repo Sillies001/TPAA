@@ -20,7 +20,7 @@ from tpaa_qualification import (  # noqa: E402
     validate_four_profile_candidate,
 )
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TASK_IDS = (
     "M5-DEV-001",
     "M5-DEV-002",

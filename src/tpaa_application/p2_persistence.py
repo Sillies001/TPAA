@@ -25,7 +25,7 @@ from tpaa_assessment import (
     build_p2_input_bundle,
 )
 from tpaa_storage.canonical_rows import CanonicalRowRepository
-from tpaa_storage.object_store import LocalObjectStore
+from tpaa_storage.object_store import ObjectStore
 
 
 class P2PersistenceError(RuntimeError):
@@ -258,7 +258,7 @@ class P2PersistenceRepository:
         self,
         rows: CanonicalRowRepository,
         *,
-        object_store: LocalObjectStore | None = None,
+        object_store: ObjectStore | None = None,
     ) -> None:
         self._rows = rows
         self._object_store = object_store

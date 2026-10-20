@@ -106,6 +106,9 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
         "m1-entry-manifest",
         "generate",
         "verify-baseline",
+        "authority-diff",
+        "verify-authority-consistency",
+        "verify-w0-successor",
         "test-unit",
         "test-contract",
         "test-golden",
@@ -121,7 +124,7 @@ def test_all_sdib_developer_command_semantics_are_discoverable() -> None:
     assert required <= names
 
 
-def test_codegen_and_devops_commands_are_implemented_and_run_api_remains_reserved(
+def test_codegen_and_devops_commands_are_implemented(
     tmp_path: Path,
 ) -> None:
     generate = _run("generate", "--check")
@@ -153,9 +156,31 @@ def test_codegen_and_devops_commands_are_implemented_and_run_api_remains_reserve
     assert isinstance(version, str)
     assert any((tmp_path / "dist").glob(f"tpaa-{version}-*"))
 
-    run_api = _run("run-api")
-    assert run_api.returncode == 3
-    assert "M0-API-002" in run_api.stderr
+
+def test_runtime_commands_are_implemented() -> None:
+    run_api_help = _run("run-api", "--help")
+    assert run_api_help.returncode == 0, run_api_help.stderr
+    assert "--host" in run_api_help.stdout
+    assert "--port" in run_api_help.stdout
+
+    commands = json.loads(_run("list", "--json").stdout)
+    states = {item["name"]: item["state"] for item in commands}
+    assert states["run"] == "IMPLEMENTED"
+    assert states["run-api"] == "IMPLEMENTED"
+
+
+def test_project_declares_installable_production_entry_points() -> None:
+    project = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+    assert project["build-system"] == {
+        "requires": ["setuptools==80.9.0"],
+        "build-backend": "setuptools.build_meta",
+    }
+    assert project["project"]["scripts"]["tpaa-service"] == "tpaa_service.__main__:main"
+    assert project["project"]["scripts"]["tpaa-admin"] == "tpaa_admin.__main__:main"
+    assert (
+        project["project"]["gui-scripts"]["tpaa-desktop"]
+        == "tpaa_desktop.__main__:main"
+    )
 
 
 def test_baseline_verification_is_available_through_unified_cli() -> None:

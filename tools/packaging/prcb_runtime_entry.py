@@ -66,9 +66,10 @@ from tpaa_runtime import (  # noqa: E402
     build_desktop_production_runtime,
     build_service_production_runtime,
     create_desktop_production_backup,
-    create_service_production_backup,
+    create_managed_service_production_backup,
     restore_desktop_production_backup,
     restore_service_production_backup,
+    stage_inline_source_documents,
 )
 from tpaa_storage import (  # noqa: E402
     LocalObjectStore,
@@ -84,12 +85,8 @@ DESKTOP_PROFILES = {"WINDOWS_DESKTOP_X64", "LINUX_DESKTOP_X64"}
 SERVICE_PROFILES = {"WINDOWS_SERVICE_X64", "LINUX_SERVICE_X64"}
 ALL_PROFILES = DESKTOP_PROFILES | SERVICE_PROFILES
 QUALIFICATION_SOURCE = APP_ROOT / "qualification" / "PRCB_C2_NOMINAL_FLIGHT.json"
-QUALIFICATION_P1_CONTRACT = (
-    APP_ROOT / "qualification" / "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
-)
-QUALIFICATION_B2_PLAN = (
-    APP_ROOT / "qualification" / "ED2_B2_CONTINUOUS_QUALIFICATION_PLAN.json"
-)
+QUALIFICATION_P1_CONTRACT = APP_ROOT / "qualification" / "ED2_B1_FULL_P1_REQUEST_CONTRACT.json"
+QUALIFICATION_B2_PLAN = APP_ROOT / "qualification" / "ED2_B2_CONTINUOUS_QUALIFICATION_PLAN.json"
 
 SESSION_ID = "c2000000-0000-4000-8000-000000000001"
 CONTEXT_ID = "c2000000-0000-4000-8000-000000000003"
@@ -109,7 +106,7 @@ def _required_env(name: str) -> str:
 
 
 def _authority_root() -> Path:
-    root = APP_ROOT / "baseline" / "CB-1.4.0" / "canonical"
+    root = APP_ROOT / "baseline" / "CB-1.5.0" / "canonical"
     if not root.is_dir():
         raise RuntimeError("packaged canonical authority is unavailable")
     return root
@@ -149,7 +146,7 @@ def _ready(profile_id: str) -> dict[str, object]:
         "runtime_profile": runtime.config.profile.value,
         "product_version": runtime.config.product_build_version,
         "db_schema_version": "1.9.0",
-        "canonical_baseline": "CB-1.4.0",
+        "canonical_baseline": "CB-1.5.0",
         "feature_availability": availability,
         "production_composition": True,
         "tests_fixture_dependency": False,
@@ -249,9 +246,12 @@ def _desktop_e2e(
     bootstrap = bootstrap_sqlite(database)
     schema_version = bootstrap.schema_version
     core_baseline = bootstrap.core_baseline
-    payload = _qualification_payload(
-        source_path,
-        p1_contract_path=p1_contract_path,
+    payload = stage_inline_source_documents(
+        LocalObjectStore(object_root),
+        _qualification_payload(
+            source_path,
+            p1_contract_path=p1_contract_path,
+        ),
     )
     config = _desktop_config(database, object_root)
     runtime = build_desktop_production_runtime(config)
@@ -266,9 +266,7 @@ def _desktop_e2e(
     if submission.reused or submission.record.status is not JobStatus.SUCCEEDED:
         raise RuntimeError("installed P1 job did not complete as a fresh durable success")
 
-    request_hash = canonical_request_hash(
-        {"job_type": "BUILD_P1_RELEASE", "payload": payload}
-    )
+    request_hash = canonical_request_hash({"job_type": "BUILD_P1_RELEASE", "payload": payload})
     release_id = allocate_session_release_id(
         session_id=SESSION_ID,
         request_hash=request_hash,
@@ -365,9 +363,7 @@ def _desktop_e2e(
             and not isinstance(row["observed_value_numeric"], bool)
         ]
         if not numeric_eligible:
-            raise RuntimeError(
-                "installed P1 numeric eligible capability observation missing"
-            )
+            raise RuntimeError("installed P1 numeric eligible capability observation missing")
         observation_id = str(numeric_eligible[0]["observation_id"])
         p2_seed = prepare_prcb_c5_p2_workspace(
             uow.canonical_rows,
@@ -386,10 +382,7 @@ def _desktop_e2e(
         },
         actor="PRCB-C5-INSTALLED",
     )
-    if (
-        p2_submission.reused
-        or p2_submission.record.status is not JobStatus.SUCCEEDED
-    ):
+    if p2_submission.reused or p2_submission.record.status is not JobStatus.SUCCEEDED:
         with SQLiteDesktopUnitOfWork(database) as uow:
             durable_failure = uow.canonical_rows.one(
                 "registry.compute_job",
@@ -397,10 +390,7 @@ def _desktop_e2e(
                 columns=("status", "reason_codes", "error_detail"),
             )
             uow.commit()
-        raise RuntimeError(
-            "installed P2 attribution did not succeed: "
-            f"{durable_failure!r}"
-        )
+        raise RuntimeError(f"installed P2 attribution did not succeed: {durable_failure!r}")
 
     with SQLiteDesktopUnitOfWork(database) as uow:
         p2_release_rows = uow.canonical_rows.many(
@@ -433,9 +423,7 @@ def _desktop_e2e(
         p2_estimate_id = str(estimate_rows[0]["estimate_id"])
         p2_repository = P2PersistenceRepository(uow.canonical_rows)
         p2_estimate = p2_repository.exact_adjusted_estimate(p2_estimate_id)
-        p2_source = p2_repository.exact_source_observation(
-            p2_estimate.source_observation_id
-        )
+        p2_source = p2_repository.exact_source_observation(p2_estimate.source_observation_id)
         uow.commit()
 
     qualification_store = LocalObjectStore(object_root)
@@ -550,9 +538,7 @@ def _desktop_e2e(
             uow.canonical_rows,
             object_store=qualification_store,
         )
-        p6_forecast_actual = p6_products.exact_forecast(
-            p6_forecast_expected.forecast_result_id
-        )
+        p6_forecast_actual = p6_products.exact_forecast(p6_forecast_expected.forecast_result_id)
         p6_counterfactual_actual = p6_products.exact_counterfactual(
             p6_counterfactual_expected.counterfactual_run_id
         )
@@ -612,27 +598,21 @@ def _desktop_e2e(
     ):
         raise RuntimeError("installed restart/replay verification failed")
     with SQLiteDesktopUnitOfWork(database) as uow:
-        restarted_p2 = P2PersistenceRepository(
-            uow.canonical_rows
-        ).exact_adjusted_estimate(p2_estimate_id)
+        restarted_p2 = P2PersistenceRepository(uow.canonical_rows).exact_adjusted_estimate(
+            p2_estimate_id
+        )
         restarted_p3 = P3PersistenceRepository(
             uow.canonical_rows,
             object_store=qualification_store,
         ).exact_capability_estimate(p3_expected.estimate_id)
         restarted_assessments = P4P5PersistenceRepository(uow.canonical_rows)
-        restarted_p4 = restarted_assessments.exact_p4_revision(
-            p4_expected.actor_assessment_id
-        )
-        restarted_p5 = restarted_assessments.exact_p5_revision(
-            p5_expected.mission_assessment_id
-        )
+        restarted_p4 = restarted_assessments.exact_p4_revision(p4_expected.actor_assessment_id)
+        restarted_p5 = restarted_assessments.exact_p5_revision(p5_expected.mission_assessment_id)
         restarted_p6 = P6PersistenceRepository(
             uow.canonical_rows,
             object_store=qualification_store,
         )
-        restarted_forecast = restarted_p6.exact_forecast(
-            p6_forecast_expected.forecast_result_id
-        )
+        restarted_forecast = restarted_p6.exact_forecast(p6_forecast_expected.forecast_result_id)
         restarted_counterfactual = restarted_p6.exact_counterfactual(
             p6_counterfactual_expected.counterfactual_run_id
         )
@@ -704,27 +684,21 @@ def _desktop_e2e(
 
     restored_store = LocalObjectStore(restored_objects)
     with SQLiteDesktopUnitOfWork(restored_database) as uow:
-        restored_p2 = P2PersistenceRepository(
-            uow.canonical_rows
-        ).exact_adjusted_estimate(p2_estimate_id)
+        restored_p2 = P2PersistenceRepository(uow.canonical_rows).exact_adjusted_estimate(
+            p2_estimate_id
+        )
         restored_p3 = P3PersistenceRepository(
             uow.canonical_rows,
             object_store=restored_store,
         ).exact_capability_estimate(p3_expected.estimate_id)
         restored_assessments = P4P5PersistenceRepository(uow.canonical_rows)
-        restored_p4 = restored_assessments.exact_p4_revision(
-            p4_expected.actor_assessment_id
-        )
-        restored_p5 = restored_assessments.exact_p5_revision(
-            p5_expected.mission_assessment_id
-        )
+        restored_p4 = restored_assessments.exact_p4_revision(p4_expected.actor_assessment_id)
+        restored_p5 = restored_assessments.exact_p5_revision(p5_expected.mission_assessment_id)
         restored_p6 = P6PersistenceRepository(
             uow.canonical_rows,
             object_store=restored_store,
         )
-        restored_forecast = restored_p6.exact_forecast(
-            p6_forecast_expected.forecast_result_id
-        )
+        restored_forecast = restored_p6.exact_forecast(p6_forecast_expected.forecast_result_id)
         restored_counterfactual = restored_p6.exact_counterfactual(
             p6_counterfactual_expected.counterfactual_run_id
         )
@@ -762,13 +736,9 @@ def _desktop_e2e(
         "metric_count": len(metrics),
         "catalog_definition_count": release["catalog_definition_count"],
         "metric_code_count": release["metric_code_count"],
-        "capability_observation_count": release[
-            "capability_observation_count"
-        ],
+        "capability_observation_count": release["capability_observation_count"],
         "system_observation_count": release["system_observation_count"],
-        "evidence_only_metric_instance_count": release[
-            "evidence_only_metric_instance_count"
-        ],
+        "evidence_only_metric_instance_count": release["evidence_only_metric_instance_count"],
         "world_product_count": len(world_rows),
         "stage_count": len(stage_rows),
         "world_relation_count": len(relation_rows),
@@ -798,12 +768,8 @@ def _desktop_e2e(
         "p6_forecast_job_status": p6_forecast_submission.record.status.value,
         "p6_forecast_result_id": p6_forecast_expected.forecast_result_id,
         "p6_counterfactual_job_id": p6_counterfactual_submission.record.job_id,
-        "p6_counterfactual_job_status": (
-            p6_counterfactual_submission.record.status.value
-        ),
-        "p6_counterfactual_run_id": (
-            p6_counterfactual_expected.counterfactual_run_id
-        ),
+        "p6_counterfactual_job_status": (p6_counterfactual_submission.record.status.value),
+        "p6_counterfactual_run_id": (p6_counterfactual_expected.counterfactual_run_id),
         "p2_restart_exact_replay": True,
         "p2_backup_restore_exact_replay": True,
         "p3_p6_restart_exact_replay": True,
@@ -818,9 +784,7 @@ def _desktop_e2e(
         "desktop_discovery_restart_replay": True,
         "api_exact_read_backup_restore_replay": True,
         "desktop_discovery_backup_restore_replay": True,
-        "api_discovery_fingerprint": str(
-            initial_api_discovery["logical_fingerprint"]
-        ),
+        "api_discovery_fingerprint": str(initial_api_discovery["logical_fingerprint"]),
         "persistent_audit_verified": True,
         "backup_manifest": manifest.relative_to(work_root).as_posix(),
         "restored_schema_version": restored_verification.schema_version,
@@ -913,9 +877,7 @@ def _ed2_b2_e2e(
         )
         for estimate_id in result.p2_estimate_ids:
             if p2.exact_adjusted_estimate(estimate_id).status != "IDENTIFIABLE":
-                raise RuntimeError(
-                    "ED2 B2 restart P2 exact read failed"
-                )
+                raise RuntimeError("ED2 B2 restart P2 exact read failed")
         p3 = P3PersistenceRepository(
             uow.canonical_rows,
             object_store=object_store,
@@ -923,15 +885,12 @@ def _ed2_b2_e2e(
         p3.exact_twin_revision(result.p3_twin_revision_id)
         assessments = P4P5PersistenceRepository(uow.canonical_rows)
         for revision_id in result.p4_approved_revision_ids:
-            if assessments.exact_p4_revision(
-                revision_id
-            ).approval_state != "APPROVED":
-                raise RuntimeError(
-                    "ED2 B2 restart P4 exact read failed"
-                )
-        if assessments.exact_p5_revision(
-            result.p5_approved_revision_id
-        ).approval_state != "APPROVED":
+            if assessments.exact_p4_revision(revision_id).approval_state != "APPROVED":
+                raise RuntimeError("ED2 B2 restart P4 exact read failed")
+        if (
+            assessments.exact_p5_revision(result.p5_approved_revision_id).approval_state
+            != "APPROVED"
+        ):
             raise RuntimeError("ED2 B2 restart P5 exact read failed")
         p6 = P6PersistenceRepository(
             uow.canonical_rows,
@@ -947,9 +906,7 @@ def _ed2_b2_e2e(
         **report,
         "status": "PASS",
         "product_version": PRODUCT_VERSION,
-        "runtime_profile": (
-            "DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"
-        ),
+        "runtime_profile": ("DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"),
         "db_schema_version": schema_version,
         "canonical_baseline": core_baseline,
         "restart_exact_replay": True,
@@ -980,20 +937,17 @@ def _ed2_b2_source_identity(
     try:
         plan = json.loads(QUALIFICATION_B2_PLAN.read_text(encoding="utf-8"))
         authority = json.loads(
-            (work_root / "ed2-b2-exact-authority.json").read_text(
-                encoding="utf-8"
-            )
+            (work_root / "ed2-b2-exact-authority.json").read_text(encoding="utf-8")
         )
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise RuntimeError("ED2 B3 exact B2 authority unavailable") from exc
     if not isinstance(plan, dict) or not isinstance(authority, dict):
         raise RuntimeError("ED2 B3 exact B2 authority invalid")
     if (
-        authority.get("schema")
-        != "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_RESULT_V1"
+        authority.get("schema") != "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_RESULT_V1"
         or authority.get("status") != "PASS"
         or authority.get("db_schema_version") != "1.9.0"
-        or authority.get("canonical_baseline") != "CB-1.4.0"
+        or authority.get("canonical_baseline") != "CB-1.5.0"
     ):
         raise RuntimeError("ED2 B3 exact B2 authority metadata invalid")
 
@@ -1108,9 +1062,7 @@ def _verify_ed2_b3_exact_runtime(
             or exact.get("frozen") is not True
             or exact.get("mutable_alias_resolution") is not False
         ):
-            raise RuntimeError(
-                f"ED2 B3 exact restart read drift:{kind}:{snapshot_id}"
-            )
+            raise RuntimeError(f"ED2 B3 exact restart read drift:{kind}:{snapshot_id}")
 
 
 def _verify_ed2_b3_api(
@@ -1121,19 +1073,10 @@ def _verify_ed2_b3_api(
     register_ed2_upper_routes(app, runtime.application)
     with TestClient(app) as client:
         for kind, snapshot_id in _ed2_b3_snapshot_pairs(result):
-            response = client.get(
-                f"/api/v1/upper/{kind}/{snapshot_id}"
-            )
-            if (
-                response.status_code != 200
-                or response.json().get("snapshot_id") != snapshot_id
-            ):
-                raise RuntimeError(
-                    f"ED2 B3 API exact read failed:{kind}:{snapshot_id}"
-                )
-        if client.get(
-            "/api/v1/upper/MEDIA_DEBRIEF/latest"
-        ).status_code != 422:
+            response = client.get(f"/api/v1/upper/{kind}/{snapshot_id}")
+            if response.status_code != 200 or response.json().get("snapshot_id") != snapshot_id:
+                raise RuntimeError(f"ED2 B3 API exact read failed:{kind}:{snapshot_id}")
+        if client.get("/api/v1/upper/MEDIA_DEBRIEF/latest").status_code != 422:
             raise RuntimeError("ED2 B3 API mutable latest alias accepted")
         index = client.get("/api/v1/upper/MEDIA_DEBRIEF")
         if (
@@ -1151,13 +1094,9 @@ def _verify_ed2_b3_media_integrity(
         ("media", result.media_uri, result.media_sha256),
         ("transcript", result.transcript_uri, result.transcript_sha256),
     ):
-        actual_sha256 = hashlib.sha256(
-            object_store.read_bytes(logical_uri)
-        ).hexdigest()
+        actual_sha256 = hashlib.sha256(object_store.read_bytes(logical_uri)).hexdigest()
         if actual_sha256 != expected_sha256:
-            raise RuntimeError(
-                f"ED2 B3 {field} object hash mismatch:{logical_uri}"
-            )
+            raise RuntimeError(f"ED2 B3 {field} object hash mismatch:{logical_uri}")
 
 
 def _ed2_b3_e2e(
@@ -1171,9 +1110,7 @@ def _ed2_b3_e2e(
     if profile_id in DESKTOP_PROFILES:
         database = work_root / "ed2-b2.sqlite3"
         if not database.is_file():
-            raise RuntimeError(
-                "ED2 B3 requires completed installed B2 Desktop authority"
-            )
+            raise RuntimeError("ED2 B3 requires completed installed B2 Desktop authority")
         config = ProductionRuntimeConfig(
             profile=RuntimeProfile.DESKTOP,
             product_build_version=PRODUCT_VERSION,
@@ -1283,16 +1220,29 @@ def _ed2_b3_e2e(
         backup = work_root / "ed2-b3-backup"
         restored_objects = work_root / "ed2-b3-restored-objects"
         restore_conninfo = _required_env("TPAA_SERVICE_RESTORE_CONNINFO")
-        create_service_production_backup(
+        write_drain_confirmed = (
+            _required_env("TPAA_SERVICE_WRITE_DRAIN_CONFIRMATION") == "WRITE_DRAIN_ENFORCED"
+        )
+        staging_target_confirmed = (
+            _required_env("TPAA_SERVICE_RESTORE_STAGING_CONFIRMATION") == "CLEAN_STAGING_TARGET"
+        )
+        if not write_drain_confirmed or not staging_target_confirmed:
+            raise RuntimeError("Service recovery operator confirmation invalid")
+        _manifest, drain_receipt = create_managed_service_production_backup(
             conninfo=conninfo,
             object_root=object_root,
             destination=backup,
         )
-        restore_service_production_backup(
+        if drain_receipt.state != "MANAGED_WRITES_BLOCKED":
+            raise RuntimeError("ED2 B3 Service managed write-drain receipt invalid")
+        staging_receipt = restore_service_production_backup(
             backup=backup,
-            target_conninfo=restore_conninfo,
-            target_object_root=restored_objects,
+            staging_conninfo=restore_conninfo,
+            staging_object_root=restored_objects,
+            staging_target_confirmed=staging_target_confirmed,
         )
+        if staging_receipt.get("activation_state") != "NOT_ACTIVATED":
+            raise RuntimeError("ED2 B3 Service staging restore receipt invalid")
         restored_config = ProductionRuntimeConfig(
             profile=RuntimeProfile.SERVICE,
             product_build_version=PRODUCT_VERSION,
@@ -1311,15 +1261,14 @@ def _ed2_b3_e2e(
         **report,
         "status": "PASS",
         "product_version": PRODUCT_VERSION,
-        "runtime_profile": (
-            "DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"
-        ),
+        "runtime_profile": ("DESKTOP" if profile_id in DESKTOP_PROFILES else "SERVICE"),
         "db_schema_version": schema_version,
         "canonical_baseline": core_baseline,
         "api_exact_read_verified": True,
         "api_latest_alias_rejected": True,
         "backup_restore_exact_replay": backup_restore_exact,
     }
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -1357,6 +1306,12 @@ def main() -> int:
             restore_conninfo=_required_env("TPAA_SERVICE_RESTORE_CONNINFO"),
             instructor_token=_required_env("TPAA_C5_INSTRUCTOR_TOKEN"),
             analyst_token=_required_env("TPAA_C5_ANALYST_TOKEN"),
+            write_drain_confirmed=(
+                _required_env("TPAA_SERVICE_WRITE_DRAIN_CONFIRMATION") == "WRITE_DRAIN_ENFORCED"
+            ),
+            staging_target_confirmed=(
+                _required_env("TPAA_SERVICE_RESTORE_STAGING_CONFIRMATION") == "CLEAN_STAGING_TARGET"
+            ),
         )
     elif args.command == "ed2-b2-e2e":
         result = _ed2_b2_e2e(args.profile, args.work_root)

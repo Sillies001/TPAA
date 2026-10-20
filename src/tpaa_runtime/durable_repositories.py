@@ -60,7 +60,7 @@ from tpaa_capability.p6_input import (
 from tpaa_storage.audit_ledger import PersistentAuditLedger
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 from tpaa_storage.core_publication_ledger import CorePublishReceipt
-from tpaa_storage.object_store import LocalObjectStore
+from tpaa_storage.object_store import ObjectStore
 from tpaa_storage.ports import RepositoryUnitOfWork
 from tpaa_storage.publication_bundle import CorePublicationBundle
 
@@ -101,7 +101,7 @@ class DurableM6P2RuntimeRepository:
         self,
         read_uow_factory: RuntimeUnitOfWorkFactory,
         *,
-        object_store: LocalObjectStore,
+        object_store: ObjectStore,
     ) -> None:
         self._read_uow_factory = read_uow_factory
         self._object_store = object_store
@@ -136,7 +136,7 @@ class DurableM7P3RuntimeRepository:
         self,
         read_uow_factory: RuntimeUnitOfWorkFactory,
         *,
-        object_store: LocalObjectStore,
+        object_store: ObjectStore,
     ) -> None:
         self._read_uow_factory = read_uow_factory
         self._object_store = object_store
@@ -295,7 +295,7 @@ class DurableM9P6RuntimeRepository:
         read_uow_factory: RuntimeUnitOfWorkFactory,
         write_uow_factory: RuntimeUnitOfWorkFactory,
         *,
-        object_store: LocalObjectStore,
+        object_store: ObjectStore,
     ) -> None:
         self._read_uow_factory = read_uow_factory
         self._write_uow_factory = write_uow_factory

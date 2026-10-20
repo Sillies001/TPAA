@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
 TASK_BASELINE = ROOT / "docs" / "baseline" / "SDIB-1.5" / "M6_TASK_BASELINE.json"
 LOCK_PATH = BASELINE / "BASELINE_LOCK.json"

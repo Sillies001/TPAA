@@ -8,7 +8,7 @@ from pathlib import Path
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 VALIDATOR = ROOT / "tools" / "baseline" / "validate_m4_longitudinal_authority.py"
 
 def test_m4_c3_authority_is_controlled_and_versioned() -> None:

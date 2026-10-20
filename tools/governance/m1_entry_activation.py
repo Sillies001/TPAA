@@ -28,13 +28,13 @@ DEFAULT_ROLES = REPO_ROOT / "docs" / "governance" / "M1_ROLE_ASSIGNMENTS.json"
 # dependency resolution remains unchanged. M1 runtime verification still pins the
 # exact current lock bytes rather than accepting arbitrary dependency drift.
 EXPECTED_FROZEN = {
-    "core_baseline": "CB-1.4.0",
+    "core_baseline": "CB-1.5.0",
     "db_schema_version": "1.9.0",
     "baseline_lock_sha256": EXPECTED_BASELINE_LOCK_SHA256,
-    "dependency_lock_sha256": "7375f972ff6aaa5cd71e220087b366d71f3b8e64cb360241625bf9d076cfa50f",
+    "dependency_lock_sha256": "225f3022a4d1aeb9003e4cf19c4f3ef10e260d04991bd5f946fa1776e503b3d3",
     "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
     "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
-    "dto_authority_sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",
+    "dto_authority_sha256": "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9",
 }
 
 

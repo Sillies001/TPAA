@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol
 
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
@@ -49,6 +50,30 @@ from .m9_workspace import (
 )
 from .models import StorageBaselineStatus
 from .runtime import RuntimeBaselineStatus
+from .source_workflow import SourceWorkflowService
+
+
+@dataclass(frozen=True, slots=True)
+class EpisodeRevisionReceipt:
+    episode_id: str
+    supersedes_episode_id: str
+    session_id: str
+    episode_status: str
+    detector_version: str
+    start_session_time_us: int
+    end_session_time_us: int
+    correction_key: str
+
+
+class EpisodeRevisionUseCase(Protocol):
+    def revise(
+        self,
+        *,
+        episode_id: str,
+        correction_key: str,
+        start_session_time_us: int,
+        end_session_time_us: int,
+    ) -> EpisodeRevisionReceipt: ...
 
 
 class P1PublicationUseCase(Protocol):
@@ -101,6 +126,8 @@ class P1PublicationUseCase(Protocol):
     ) -> M1SessionEpisodeStageProjection: ...
 
     def replay(self, release_id: str) -> dict[str, object]: ...
+
+    def world_graph(self, release_id: str) -> dict[str, object]: ...
 
     def series_range(
         self,
@@ -217,6 +244,8 @@ class ApplicationService:
         qualification_status: QualificationStatusUseCase | None = None,
         operational_status: OperationalStatusUseCase | None = None,
         ed2_upper: ED2UpperProductService | None = None,
+        source_workflow: SourceWorkflowService | None = None,
+        episode_revision: EpisodeRevisionUseCase | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -233,6 +262,32 @@ class ApplicationService:
         self._qualification_status = qualification_status
         self._operational_status = operational_status
         self._ed2_upper = ed2_upper
+        self._source_workflow = source_workflow
+        self._episode_revision = episode_revision
+
+    def source_workflow(self) -> SourceWorkflowService:
+        """Return the configured W2 Source ingress use case."""
+
+        if self._source_workflow is None:
+            raise RuntimeError("source workflow use case is not configured")
+        return self._source_workflow
+
+    def revise_episode(
+        self,
+        *,
+        episode_id: str,
+        correction_key: str,
+        start_session_time_us: int,
+        end_session_time_us: int,
+    ) -> EpisodeRevisionReceipt:
+        if self._episode_revision is None:
+            raise RuntimeError("episode revision use case is not configured")
+        return self._episode_revision.revise(
+            episode_id=episode_id,
+            correction_key=correction_key,
+            start_session_time_us=start_session_time_us,
+            end_session_time_us=end_session_time_us,
+        )
 
     def storage_baseline_status(self) -> StorageBaselineStatus:
         """Return persisted storage baseline provenance via an Application use case."""
@@ -416,6 +471,9 @@ class ApplicationService:
 
     def replay_m1_release(self, release_id: str) -> dict[str, object]:
         return self._m1().replay(release_id)
+
+    def m1_world_graph(self, release_id: str) -> dict[str, object]:
+        return self._m1().world_graph(release_id)
 
     def m1_series_range(
         self,

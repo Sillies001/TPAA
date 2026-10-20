@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
@@ -81,6 +83,22 @@ class JointLVCGatewayAdapter:
     ) -> dict[str, object]:
         if snapshot.session_type != "LVC" or not snapshot.lossless_phase_mapping:
             raise JointLVCGatewayError("ED2_GATEWAY_SNAPSHOT_INVALID")
+        mapping_profile = {
+            "external_profile_id": snapshot.external_profile_id,
+            "external_profile_version": snapshot.external_profile_version,
+            "adapter_id": snapshot.adapter_id,
+            "adapter_version": snapshot.adapter_version,
+            "unit_basis": dict(snapshot.unit_basis),
+            "time_basis": snapshot.time_basis,
+        }
+        mapping_profile_sha256 = hashlib.sha256(
+            json.dumps(
+                mapping_profile,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+            ).encode("ascii")
+        ).hexdigest()
         return {
             "external_protocol_boundary": True,
             "session_type": "LVC",
@@ -97,4 +115,5 @@ class JointLVCGatewayAdapter:
             "canonical_relation_refs": list(canonical_relation_refs),
             "interop_snapshot_id": snapshot.interop_snapshot_id,
             "logical_content_hash": snapshot.logical_content_hash,
+            "mapping_profile_sha256": mapping_profile_sha256,
         }

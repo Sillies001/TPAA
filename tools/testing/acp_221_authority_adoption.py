@@ -32,6 +32,8 @@ SOURCE_CORE_SHA = "cbb15c1e0029be45213e4d7ab57a78fac47d7cc09c4627a9c388fafdadd2d
 SOURCE_LOCK_SHA = "2f3690d5e74e585a34ae35fdef9fb1e0cccb5504c6983d0c97417bb6a106b389"
 TARGET_CORE_SHA = "7799895d706051f6d4c169da9ba2b73c14003922bed327558737712a64c49d1e"
 TARGET_LOCK_SHA = "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437"
+SUCCESSOR_LOCK = ROOT / "baseline" / "CB-1.5.0" / "BASELINE_LOCK.json"
+SUCCESSOR_LOCK_SHA = "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab"
 EXPECTED_RELATION = "assessment.annotation_subject_context"
 EXPECTED_SOURCE_TABLES = 94
 EXPECTED_TARGET_TABLES = 95
@@ -122,6 +124,7 @@ def review(
     lock = _load(LOCK)
     proposal = _load(PROPOSAL)
     adoption = _load(ADOPTION)
+    successor_lock = _load(SUCCESSOR_LOCK)
     postgres = _load(postgres_migration)
 
     core_tables = core.get("tables")
@@ -247,7 +250,17 @@ def review(
             in README.read_text(encoding="utf-8")
         ),
         "loader_and_bootstrap_trust_target": (
-            TARGET_LOCK_SHA in LOADER.read_text(encoding="utf-8")
+            (
+                TARGET_LOCK_SHA in LOADER.read_text(encoding="utf-8")
+                or (
+                    SUCCESSOR_LOCK_SHA in LOADER.read_text(encoding="utf-8")
+                    and _sha(SUCCESSOR_LOCK) == SUCCESSOR_LOCK_SHA
+                    and TARGET_LOCK_SHA
+                    in successor_lock.get("baseline", {}).get(
+                        "lock_lineage_sha256", []
+                    )
+                )
+            )
             and 'EXPECTED_DB_SCHEMA_VERSION = "1.9.0"'
             in BOOTSTRAP.read_text(encoding="utf-8")
         ),

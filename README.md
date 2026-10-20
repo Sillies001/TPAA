@@ -5,7 +5,8 @@ TPAA V8.0 / ED-2.0 implementation monorepo governed by the frozen Canonical busi
 ## Current implementation state
 
 - Overall design input: **TPAA V8.0 / ED-2.0 Rebaseline R3.3**.
-- Machine business authority remains **CB-1.4.0** under `baseline/CB-1.4.0/`.
+- Current machine business authority is **CB-1.5.0** under `baseline/CB-1.5.0/`;
+  CB-1.4.0 remains an immutable predecessor.
 - Product integration/qualification authority is **PIQB-1.0**; B0-B6 are formally protected-main qualified and PIQB-1.0 is complete.
 - Product version is **1.0.0**.
 - Current physical database schema authority is **1.9.0**, adopted through ACP-216 -> ACP-219 -> ACP-221; historical M0-M9/M5 evidence that records 1.6.0 remains immutable historical evidence rather than current authority.
@@ -16,7 +17,7 @@ TPAA V8.0 / ED-2.0 implementation monorepo governed by the frozen Canonical busi
 
 ## Machine authority rule
 
-Business schemas, DTO contracts, Stage definitions, Metric definitions, P/M/WS vocabularies, and related governed semantics are consumed from the frozen machine-readable Canonical snapshot under `baseline/CB-1.4.0/`. Markdown files are explanatory or implementation references and are not a second schema authority.
+Business schemas, DTO contracts, Stage definitions, Metric definitions, P/M/WS vocabularies, and related governed semantics are consumed from the frozen machine-readable Canonical snapshot under `baseline/CB-1.5.0/`. Markdown files are explanatory or implementation references and are not a second schema authority.
 
 ## Toolchain baseline
 

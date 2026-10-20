@@ -37,6 +37,10 @@ class TrainingPluginComposition:
                     "implementation_version": item.implementation_version,
                     "authority_hash": item.authority_hash,
                     "enabled": item.enabled,
+                    "distribution_kind": "BUILTIN_FROZEN",
+                    "approval_state": "BASELINE_AUTHORIZED",
+                    "lifecycle_state": "ENABLED",
+                    "rollback_authority_hash": item.authority_hash,
                 }
                 for item in self.bindings
             ],
@@ -55,28 +59,19 @@ class GovernedTrainingPluginRuntime:
         bindings: tuple[TrainingPluginBinding, ...],
     ) -> TrainingPluginComposition:
         if not profile_id.strip() or not profile_version.strip():
-            raise TrainingPluginCompositionError(
-                "ED2_PLUGIN_PROFILE_IDENTITY_REQUIRED"
-            )
+            raise TrainingPluginCompositionError("ED2_PLUGIN_PROFILE_IDENTITY_REQUIRED")
         contracts = tuple(item.contract for item in bindings)
         if contracts != ED2_TRAINING_PLUGIN_CONTRACTS:
-            raise TrainingPluginCompositionError(
-                "ED2_PLUGIN_CONTRACT_SET_INVALID"
-            )
+            raise TrainingPluginCompositionError("ED2_PLUGIN_CONTRACT_SET_INVALID")
         for item in bindings:
             if (
                 not item.implementation_id.strip()
                 or not item.implementation_version.strip()
                 or not item.enabled
                 or len(item.authority_hash) != 64
-                or any(
-                    ch not in "0123456789abcdef"
-                    for ch in item.authority_hash
-                )
+                or any(ch not in "0123456789abcdef" for ch in item.authority_hash)
             ):
-                raise TrainingPluginCompositionError(
-                    f"ED2_PLUGIN_BINDING_INVALID:{item.contract}"
-                )
+                raise TrainingPluginCompositionError(f"ED2_PLUGIN_BINDING_INVALID:{item.contract}")
         return TrainingPluginComposition(
             profile_id=profile_id,
             profile_version=profile_version,

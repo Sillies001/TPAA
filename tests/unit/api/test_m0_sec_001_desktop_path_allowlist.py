@@ -49,6 +49,11 @@ def test_desktop_http_is_bearer_origin_and_path_allowlisted() -> None:
             "/outside-governed-surface",
             headers={"Authorization": "Bearer test-token"},
         )
+        unauthorized_metrics = client.get("/runtime/metrics")
+        allowed_metrics = client.get(
+            "/runtime/metrics",
+            headers={"Authorization": "Bearer test-token"},
+        )
 
     assert unauthorized.status_code == 401
     assert allowed.status_code == 200
@@ -56,6 +61,9 @@ def test_desktop_http_is_bearer_origin_and_path_allowlisted() -> None:
     assert origin.json() == {"detail": "ORIGIN_FORBIDDEN"}
     assert path.status_code == 404
     assert path.json() == {"detail": "PATH_NOT_ALLOWED"}
+    assert unauthorized_metrics.status_code == 401
+    assert allowed_metrics.status_code == 503
+    assert "unavailable" in allowed_metrics.text
 
 
 def test_missing_desktop_security_token_fails_closed() -> None:

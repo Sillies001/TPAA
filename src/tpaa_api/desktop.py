@@ -24,6 +24,7 @@ _DESKTOP_ALLOWED_PATHS = frozenset(
         "/runtime/features",
         "/runtime/qualification",
         "/runtime/observability",
+        "/runtime/metrics",
         "/jobs",
     }
 )

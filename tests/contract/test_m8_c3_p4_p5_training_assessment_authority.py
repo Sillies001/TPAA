@@ -8,7 +8,7 @@ from pathlib import Path
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY = BASELINE / "canonical" / "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json"
 ROLE_PROFILE = BASELINE / "canonical" / "P4_P5_ROLE_PRIVACY_PROFILE.json"
 VALIDATOR_PATH = ROOT / "tools" / "baseline" / "validate_p4_p5_training_assessment_authority.py"

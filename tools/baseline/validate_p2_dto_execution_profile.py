@@ -10,7 +10,7 @@ from typing import cast
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BASELINE = REPO_ROOT / "baseline" / "CB-1.4.0"
+BASELINE = REPO_ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
 DTO = CANONICAL / "CROSS_LAYER_DTO_CONTRACTS.json"
 PROFILE = CANONICAL / "P2_LINEAR_REFERENCE_ADJUSTMENT_PROFILE.json"

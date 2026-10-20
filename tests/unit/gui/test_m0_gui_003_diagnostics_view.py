@@ -18,7 +18,7 @@ from tpaa_gui.local_backend import LocalBackendController, LocalBackendError
 def _identity(version: str = "1.9.0") -> dict[str, str]:
     return {
         "product_build_version": "0.0.0",
-        "core_baseline": "CB-1.4.0",
+        "core_baseline": "CB-1.5.0",
         "p1_metric_catalog_version": "P1-METRIC-CATALOG-1.0",
         "db_schema_version": version,
     }
@@ -27,7 +27,7 @@ def _identity(version: str = "1.9.0") -> dict[str, str]:
 def _snapshot(*, readiness: str = "READY", failure_code: str | None = None) -> DiagnosticsSnapshot:
     identity = DiagnosticsIdentity(
         product_build_version="0.0.0",
-        core_baseline="CB-1.4.0",
+        core_baseline="CB-1.5.0",
         p1_metric_catalog_version="P1-METRIC-CATALOG-1.0",
         db_schema_version="1.9.0",
     )
@@ -50,7 +50,7 @@ def test_snapshot_projects_only_required_runtime_diagnostics() -> None:
 
     assert snapshot.readiness == "NOT_READY"
     assert snapshot.mismatches == ("DB_SCHEMA_VERSION_MISMATCH",)
-    assert snapshot.expected is not None and snapshot.expected.core_baseline == "CB-1.4.0"
+    assert snapshot.expected is not None and snapshot.expected.core_baseline == "CB-1.5.0"
     assert snapshot.observed is not None and snapshot.observed.db_schema_version == "1.5.0"
     assert "token" not in repr(snapshot).lower()
 
@@ -59,14 +59,17 @@ def test_lines_cover_readiness_build_core_catalog_schema_and_mismatch() -> None:
     lines = {object_name: text for object_name, _label, text in diagnostics_lines(_snapshot())}
     assert lines["tpaaDiagnosticsReadiness"] == "Readiness: READY"
     assert "Build: expected=0.0.0 observed=0.0.0" == lines["tpaaDiagnosticsBuild"]
-    assert "Core baseline: expected=CB-1.4.0 observed=CB-1.4.0" == lines["tpaaDiagnosticsCore"]
+    assert "Core baseline: expected=CB-1.5.0 observed=CB-1.5.0" == lines["tpaaDiagnosticsCore"]
     assert "P1 Catalog:" in lines["tpaaDiagnosticsCatalog"]
     assert "DB schema: expected=1.9.0 observed=1.9.0" == lines["tpaaDiagnosticsSchema"]
     assert lines["tpaaDiagnosticsMismatches"] == "Mismatches: NONE"
 
 
-def test_real_backend_exposes_sanitized_ready_diagnostics() -> None:
-    controller = LocalBackendController(startup_timeout_seconds=5)
+def test_real_backend_exposes_sanitized_ready_diagnostics(tmp_path) -> None:
+    controller = LocalBackendController(
+        startup_timeout_seconds=10,
+        data_root=(tmp_path / "desktop-data").resolve(),
+    )
     controller.start()
     try:
         snapshot = controller.diagnostics
@@ -74,15 +77,18 @@ def test_real_backend_exposes_sanitized_ready_diagnostics() -> None:
         assert snapshot.backend_state == "READY"
         assert snapshot.failure_code is None
         assert snapshot.expected is not None
-        assert snapshot.expected.core_baseline == "CB-1.4.0"
+        assert snapshot.expected.core_baseline == "CB-1.5.0"
         assert snapshot.expected.db_schema_version == "1.9.0"
         assert snapshot.expected.product_build_version == "0.0.0"
     finally:
         controller.shutdown()
 
 
-def test_backend_crash_changes_effective_diagnostics_to_not_ready() -> None:
-    controller = LocalBackendController(startup_timeout_seconds=5)
+def test_backend_crash_changes_effective_diagnostics_to_not_ready(tmp_path) -> None:
+    controller = LocalBackendController(
+        startup_timeout_seconds=10,
+        data_root=(tmp_path / "desktop-data").resolve(),
+    )
     controller.start()
     process = controller._process
     assert process is not None

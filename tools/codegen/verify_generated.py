@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import re
 import subprocess
 import sys
@@ -155,8 +156,8 @@ def verify() -> dict[str, object]:
         "generated_python_file_count": python_count,
         "checks": checks,
         "execution_limitations": [
-            "This evidence proves the vendor-neutral CI gate contract on the current Linux host; it does not claim execution by an external CI service.",
-            "Windows execution is not claimed; later platform/CI qualification evidence remains required.",
+            f"This evidence was executed on {platform.system()}; it does not claim execution by an external CI service.",
+            "Cross-platform equivalence is not claimed by this command alone; separate platform qualification evidence remains required.",
         ],
     }
 

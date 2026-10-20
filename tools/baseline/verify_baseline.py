@@ -15,16 +15,17 @@ import os
 import platform
 import subprocess
 import sys
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
-EXPECTED_CORE_BASELINE = "CB-1.4.0"
+EXPECTED_CORE_BASELINE = "CB-1.5.0"
 EXPECTED_BASELINE_LOCK_SHA256 = (
-    "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437"
+    "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab"
 )
-EXPECTED_CONTROLLED_ARTIFACT_COUNT = 33
+EXPECTED_CONTROLLED_ARTIFACT_COUNT = 37
 TASK_ID = "M0-CORE-001"
 GATE_ID = "M0-CORE-001.BASELINE_VERIFY"
 PRODUCT_BUILD_VERSION = "M0-BOOTSTRAP-UNVERSIONED"
@@ -46,7 +47,7 @@ class BaselineVerificationError(RuntimeError):
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
 def _sha256_file(path: Path) -> str:
@@ -247,7 +248,7 @@ def _evidence_payload(
     stage_hash = _artifact_hash_from_lock(lock or {}, "STAGE_REGISTRY.json")
     dto_hash = _artifact_hash_from_lock(lock or {}, "CROSS_LAYER_DTO_CONTRACTS.json")
     request_hash = hashlib.sha256(
-        f"{GATE_ID}|{EXPECTED_CORE_BASELINE}|{EXPECTED_BASELINE_LOCK_SHA256}".encode("utf-8")
+        f"{GATE_ID}|{EXPECTED_CORE_BASELINE}|{EXPECTED_BASELINE_LOCK_SHA256}".encode()
     ).hexdigest()
 
     return {
@@ -309,7 +310,7 @@ def _write_evidence(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Verify frozen CB-1.4.0 controlled artifacts exactly.")
+    parser = argparse.ArgumentParser(description="Verify frozen CB-1.5.0 controlled artifacts exactly.")
     parser.add_argument(
         "--baseline-root",
         type=Path,

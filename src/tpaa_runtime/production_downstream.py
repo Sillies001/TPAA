@@ -54,7 +54,7 @@ from tpaa_capability import (
 from tpaa_context import M8AuthorityPolicy, M8RoleModelBinding
 from tpaa_longitudinal import P3AdjustedEstimateInput
 from tpaa_storage.canonical_rows import CanonicalRowRepository
-from tpaa_storage.object_store import LocalObjectStore
+from tpaa_storage.object_store import ObjectStore
 from tpaa_storage.product_identity import product_object_ref_id
 from tpaa_world import M8EvidenceRef, M8WorldFactRef
 
@@ -218,7 +218,7 @@ def _stored_utc_text(value: object, field: str) -> str:
 
 def _persist_object_reference(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     logical_uri: str,
     data: bytes,
@@ -274,7 +274,7 @@ def _stored_field_matches(actual: object, expected: object) -> bool:
 
 def _context_artifact_bytes(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     artifact_kind: str,
     logical_key: str,
@@ -345,7 +345,7 @@ def _context_artifact_bytes(
 
 def _context_artifact_from_spec(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     spec: Mapping[str, object],
     artifact_kind: str,
@@ -398,7 +398,7 @@ def _ready_world_refs(
 
 def prepare_p2_compute_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     payload: Mapping[str, object],
 ) -> ProductionP2Prepared:
     policy = P2AuthorityPolicy.from_canonical()
@@ -896,7 +896,7 @@ def _ensure_configuration_snapshot(
 
 def prepare_p3_build_worker_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     job_payload: Mapping[str, object],
     production_input: Mapping[str, object],
@@ -1100,7 +1100,7 @@ def prepare_p3_build_worker_input(
 
 def persist_p3_worker_product(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     product: ProductionP3BuildWorkerProduct,
 ) -> None:
     repository = P3PersistenceRepository(rows, object_store=object_store)
@@ -1159,7 +1159,7 @@ def _bind_context_artifact(
 
 def _m8_role_and_profile(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     authority_root: Path,
     context_id: str,
@@ -1305,7 +1305,7 @@ def _p3_source_episode_ids(
 
 def prepare_p4_build_worker_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     authority_root: Path,
     job_payload: Mapping[str, object],
@@ -1700,7 +1700,7 @@ def _assignment_for_p3_estimate(
 
 def prepare_p6_build_worker_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     job_payload: Mapping[str, object],
     production_input: Mapping[str, object],
@@ -1890,7 +1890,7 @@ def prepare_p6_build_worker_input(
 
 def persist_p6_worker_product(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     product: ProductionP6BuildWorkerProduct,
 ) -> None:
     repository = P6PersistenceRepository(rows, object_store=object_store)

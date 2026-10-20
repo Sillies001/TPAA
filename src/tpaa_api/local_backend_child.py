@@ -16,13 +16,7 @@ if str(SRC_ROOT) not in sys.path:
 
 import uvicorn  # noqa: E402
 
-from tpaa_runtime import (  # noqa: E402
-    ProductRuntime,
-    ProductRuntimeConfig,
-    RuntimeProfile,
-    build_desktop_application,
-    create_full_desktop_app,
-)
+from tpaa_desktop import create_app  # noqa: E402
 
 CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
 
@@ -42,17 +36,6 @@ def _emit(record: dict[str, object]) -> None:
     sys.stdout.flush()
 
 
-def _runtime(product_build_version: str) -> ProductRuntime:
-    return build_desktop_application(
-        ProductRuntimeConfig(
-            profile=RuntimeProfile.DESKTOP,
-            product_build_version=product_build_version,
-            authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
-            m1_fixture_root=REPO_ROOT / "tests" / "fixtures" / "m1",
-        )
-    )
-
-
 def main() -> int:
     start = _read_record()
     if start.get("protocol") != CONTROL_PROTOCOL or start.get("type") != "START":
@@ -61,6 +44,14 @@ def main() -> int:
     build = start.get("product_build_version")
     if not isinstance(token, str) or not token or not isinstance(build, str) or not build:
         return 2
+    raw_data_root = start.get("desktop_data_root")
+    if raw_data_root is not None and (
+        not isinstance(raw_data_root, str) or not Path(raw_data_root).is_absolute()
+    ):
+        return 2
+    desktop_data_root = (
+        None if raw_data_root is None else Path(raw_data_root).resolve(strict=False)
+    )
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -68,9 +59,10 @@ def main() -> int:
     sock.listen(2048)
     port = int(sock.getsockname()[1])
 
-    app = create_full_desktop_app(
-        _runtime(build),
+    app = create_app(
         bearer_token=token,
+        product_build_version=build,
+        data_root=desktop_data_root,
     )
     config = uvicorn.Config(
         app,
