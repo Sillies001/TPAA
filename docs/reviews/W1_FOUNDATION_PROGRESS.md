@@ -62,6 +62,12 @@ No commit, staging, bypass, push, or deployment was performed to suppress the ga
 It is not a W1 functional regression and must be rerun only when an authorized clean
 release candidate exists.
 
+That deferred check was completed on 2026-10-20 after explicit authorization.
+Local checkpoint `8401751` passed the Windows Desktop development-package gate,
+including build/package manifests and SBOM, and the complete contract suite
+reported `815 passed, 0 failed`. No gate was relaxed, and no push or deployment
+was performed. The generated package remains `DEVELOPMENT_NOT_M5_QUALIFIED`.
+
 Pytest also emits the existing Windows cache/temp cleanup `WinError 5` after test
 assertions. Test processes otherwise returned the stated results.
 

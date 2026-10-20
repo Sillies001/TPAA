@@ -8,7 +8,7 @@
     "NOT_DEPLOYED",
     "NOT_PRODUCTION_READY",
     "W3_THROUGH_W9_OPEN",
-    "CLEAN_WORKTREE_PACKAGE_GATE_NOT_RUN"
+    "DEVELOPMENT_PACKAGE_NOT_M5_QUALIFIED"
   ],
   "requirements": [
     {
@@ -122,7 +122,8 @@
         "local NASA-derived FLIGHT plus five qualification companion families completed full P1 and restart replay",
         "mismatched Stage marker interval was rejected with ED2_STAGE_MARKER_INTERVAL_INVALID",
         "737 unit tests passed",
-        "814 contract tests passed with only the deliberate dirty-worktree package rejection",
+        "815 contract tests passed with zero failures on clean local checkpoint 8401751",
+        "WINDOWS_DESKTOP_X64 development package, manifest and SBOM passed the clean-worktree gate",
         "2 integration tests passed and 3 optional external-service profiles skipped"
       ],
       "status": "PASS_LOCAL"

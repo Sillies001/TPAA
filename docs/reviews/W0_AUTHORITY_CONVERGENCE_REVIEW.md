@@ -98,3 +98,12 @@ W0 is formally closed for this local worktree. Later W1-W9 traceability and
 production gates remain open. The current result is a locally approved
 engineering baseline, not a pushed, protected-main, signed, deployed or
 production-qualified release.
+
+## Post-closure local candidate verification (2026-10-20)
+
+The earlier clean-worktree packaging exclusion is resolved. Authorized local
+checkpoint `8401751` includes the governed W0-W2 candidate, and the complete
+contract suite now reports `815 passed, 0 failed`. The Windows Desktop
+development package, build/package manifests and SBOM pass without weakening
+the clean-tree gate. The candidate remains local, unpushed, unsigned,
+undeployed and explicitly not M5-qualified.
