@@ -1,0 +1,95 @@
+{
+  "schema": "TPAA_W4_GUI_COMPLIANCE_MATRIX_V1",
+  "design_authority": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3/05G",
+  "status": "CLOSED_LOCAL",
+  "decision": "PASS",
+  "production_ready": false,
+  "pushed": false,
+  "deployed": false,
+  "requirements": [
+    {
+      "id": "W4-01",
+      "requirement": "05G P01-P13 page contract",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/page_contract.py",
+        "docs/gui/W4_PAGE_CONTRACT.json",
+        "tests/unit/gui/test_w4_gui_foundation.py"
+      ]
+    },
+    {
+      "id": "W4-02",
+      "requirement": "ApplicationShellState and shared selection propagation",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/shell_state.py",
+        "tests/unit/gui/test_w4_gui_foundation.py"
+      ]
+    },
+    {
+      "id": "W4-03",
+      "requirement": "Mission Header, navigation, workspace, detail/evidence drawer, and status bar",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/product_shell.py",
+        "src/tpaa_gui/components.py",
+        "tools/gui/automation_smoke.py"
+      ]
+    },
+    {
+      "id": "W4-04",
+      "requirement": "Theme, DPI, accessibility, common states, table and form policies",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/design_system.py",
+        "src/tpaa_gui/components.py",
+        "src/tpaa_gui/icons.py",
+        "tests/unit/gui/test_w4_gui_foundation.py"
+      ]
+    },
+    {
+      "id": "W4-05",
+      "requirement": "M1 Session Browser rows remain readable",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/m1_workspace.py",
+        "tests/unit/gui/test_w4_gui_foundation.py"
+      ]
+    },
+    {
+      "id": "W4-06",
+      "requirement": "Association contribution default column width is sufficient",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/m6_workspace.py",
+        "docs/gui/baselines/w4_P08_1440x900_96dpi.png"
+      ]
+    },
+    {
+      "id": "W4-07",
+      "requirement": "Synthetic fixture controls are absent from the formal product composition",
+      "status": "PASS",
+      "evidence": [
+        "src/tpaa_gui/product_shell.py",
+        "tests/unit/gui/test_w4_gui_foundation.py"
+      ]
+    },
+    {
+      "id": "W4-08",
+      "requirement": "Windows and Linux offscreen Qt, 100-200 percent DPI, and 1024x720 minimum viewport",
+      "status": "PASS_LOCAL",
+      "evidence": [
+        "tools/gui/w4_visual_regression.py",
+        "tools/gui/Dockerfile.w4-linux",
+        "docs/gui/baselines/w4_visual_96dpi.json",
+        ".github/workflows/cross-platform-ci.yml"
+      ]
+    }
+  ],
+  "deferred_to_later_stages": [
+    "W5 completes P01-P03, P12, and P13 end-user workflows",
+    "W6 completes P04-P10 assessment and capability workflows",
+    "W7 completes P11 planning and plugin workflows",
+    "Production signing, protected-branch CI, and deployment qualification remain closed"
+  ]
+}

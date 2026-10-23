@@ -592,6 +592,14 @@ def create_m6_workspace(
     effects_table.setObjectName("tpaaM6FactorEffects")
     effects_table.setColumnCount(2)
     effects_table.setHorizontalHeaderLabels(["Factor", "Association contribution"])
+    effects_table.setAlternatingRowColors(True)
+    effects_table.setWordWrap(False)
+    effects_table.verticalHeader().setDefaultSectionSize(32)
+    effects_table.verticalHeader().setMinimumSectionSize(32)
+    effects_table.horizontalHeader().setMinimumSectionSize(120)
+    effects_table.setColumnWidth(0, 180)
+    effects_table.setColumnWidth(1, 240)
+    effects_table.horizontalHeader().setStretchLastSection(True)
     layout.addWidget(effects_table)
 
     def load_comparison() -> None:

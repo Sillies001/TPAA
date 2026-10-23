@@ -29,8 +29,8 @@ def test_harness_automates_real_composed_desktop_without_reimplementing_ready() 
     assert "PySide6" in source
     assert "run_desktop" in source
     assert "tpaaMainWindow" in source
-    assert "tpaaDiagnosticsReadiness" in source
-    assert '"Readiness: READY"' in source
+    assert "tpaaShellRuntimeStatus" in source
+    assert '"Runtime: READY"' in source
     assert "evaluate_runtime_baseline_handshake" not in source
     assert "CORE_BASELINE_MISMATCH" not in source
 
@@ -43,15 +43,14 @@ def test_harness_covers_sdib_launch_ready_close_and_backend_cleanup() -> None:
     assert "LocalBackendState.EXITED" in source
 
 
-def test_harness_uses_frozen_diagnostics_object_names() -> None:
+def test_harness_uses_w4_product_shell_object_names() -> None:
     source = HARNESS.read_text(encoding="utf-8")
     for name in (
-        "tpaaDiagnosticsReadiness",
-        "tpaaDiagnosticsMismatches",
-        "tpaaDiagnosticsBuild",
-        "tpaaDiagnosticsCore",
-        "tpaaDiagnosticsCatalog",
-        "tpaaDiagnosticsSchema",
+        "tpaaMissionHeader",
+        "tpaaB5ProductNavigation",
+        "tpaaB5ProductStack",
+        "tpaaDetailEvidenceDrawer",
+        "tpaaShellStatusBar",
     ):
         assert name in source
 

@@ -4,9 +4,15 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
 from typing import Any, Protocol
 
+from .components import (
+    create_detail_drawer,
+    create_mission_header,
+    create_shell_status_bar,
+    create_state_panel,
+)
+from .design_system import scaled_metrics
 from .diagnostics import DiagnosticsSnapshot
 from .discovery import (
     ProductDiscoveryError,
@@ -15,6 +21,7 @@ from .discovery import (
     session_release_items,
 )
 from .ed2_upper import ED2LinkedDebriefError, build_linked_debrief_projection
+from .icons import IconName, standard_icon
 from .m1_workspace import create_m1_workspace
 from .m3_workspace import M3_GUI_TRAINING_KEYS, create_m3_workspace_navigation
 from .m4_workspace import create_m4_workspace
@@ -22,6 +29,8 @@ from .m6_workspace import create_m6_workspace
 from .m7_workspace import create_m7_workspace
 from .m8_workspace import create_m8_workspace
 from .m9_workspace import create_m9_workspace
+from .page_contract import PAGE_CONTRACTS, PageContract, validate_page_contracts
+from .shell_state import ApplicationShellState
 from .visualization import (
     VisualizationPresentationError,
     build_2d_polyline,
@@ -103,66 +112,8 @@ class ProductDesktopTransport(Protocol):
     ) -> tuple[int, Mapping[str, object]]: ...
 
 
-@dataclass(frozen=True, slots=True)
-class ProductNavigationItem:
-    slot: str
-    key: str
-    title: str
-    surface: str
-    semantic_class: str
-
-
-PRODUCT_NAVIGATION = (
-    ProductNavigationItem(
-        "P01",
-        "SESSION_RELEASE",
-        "Session / Release",
-        "M1",
-        "C",
-    ),
-    ProductNavigationItem("P02", "DATA_QUALITY", "Data Quality", "M1/M3", "C"),
-    ProductNavigationItem("P03", "METRIC_EVIDENCE", "Metric / Evidence", "M1/M3", "P"),
-    ProductNavigationItem("P04", "TRAINING_WORKSPACE", "Training Workspace", "M3", "W"),
-    ProductNavigationItem("P05", "LONGITUDINAL_DEBRIEF", "Longitudinal / Debrief", "M4", "J"),
-    ProductNavigationItem("P06", "P2_ATTRIBUTION", "P2 Adjusted / Attribution", "M6", "P2"),
-    ProductNavigationItem("P07", "P3_TWIN_CAPABILITY", "P3 Twin / Capability", "M7", "P3"),
-    ProductNavigationItem(
-        "P08",
-        "P4_ACTOR_ASSESSMENT",
-        "P4 Actor Assessment",
-        "M8",
-        "ASSESSMENT",
-    ),
-    ProductNavigationItem(
-        "P09",
-        "P5_MISSION_ASSESSMENT",
-        "P5 Mission Assessment",
-        "M8",
-        "ASSESSMENT",
-    ),
-    ProductNavigationItem("P10", "P6_FORECAST", "P6 Forecast", "M9", "P6"),
-    ProductNavigationItem(
-        "P11",
-        "P6_COUNTERFACTUAL",
-        "P6 Counterfactual",
-        "M9",
-        "P6",
-    ),
-    ProductNavigationItem(
-        "P12",
-        "P6_RECOMMENDATION",
-        "P6 Recommendation",
-        "M9",
-        "P6",
-    ),
-    ProductNavigationItem(
-        "P13",
-        "GOVERNANCE_DIAGNOSTICS",
-        "Governance / Diagnostics",
-        "Runtime",
-        "M",
-    ),
-)
+ProductNavigationItem = PageContract
+PRODUCT_NAVIGATION = PAGE_CONTRACTS
 PRODUCT_SPINE = (
     "session_id",
     "episode_id",
@@ -176,13 +127,7 @@ SEMANTIC_LAYERS = ("C", "W", "P", "A", "J", "M", "ASSESSMENT", "P2", "P3", "P6")
 
 
 def validate_product_navigation() -> None:
-    expected_slots = tuple(f"P{index:02d}" for index in range(1, 14))
-    slots = tuple(item.slot for item in PRODUCT_NAVIGATION)
-    if slots != expected_slots:
-        raise ProductShellError("B5_PRODUCT_NAVIGATION_SLOT_MISMATCH")
-    keys = tuple(item.key for item in PRODUCT_NAVIGATION)
-    if len(set(keys)) != len(keys):
-        raise ProductShellError("B5_PRODUCT_NAVIGATION_KEY_DUPLICATE")
+    validate_page_contracts(PRODUCT_NAVIGATION)
     if set(SEMANTIC_LAYERS) != {
         "C",
         "W",
@@ -218,8 +163,10 @@ def _create_session_release_browser(
     release_selector.setObjectName("tpaaC4ReleaseSelector")
     refresh = qt_widgets.QPushButton("Refresh Sessions", root)
     refresh.setObjectName("tpaaC4SessionRefresh")
+    refresh.setIcon(standard_icon(qt_widgets, refresh, IconName.REFRESH))
     load_release = qt_widgets.QPushButton("Open exact Release", root)
     load_release.setObjectName("tpaaC4ReleaseOpen")
+    load_release.setIcon(standard_icon(qt_widgets, load_release, IconName.OPEN))
     status = qt_widgets.QLabel("Discovery: not loaded", root)
     status.setObjectName("tpaaC4SessionReleaseStatus")
     output = qt_widgets.QPlainTextEdit(root)
@@ -625,7 +572,7 @@ def _create_visualization_page(
     return root
 
 
-def create_product_workspace(
+def _create_legacy_product_workspace(
     qt_core: Any,
     qt_widgets: Any,
     parent: Any,
@@ -749,4 +696,249 @@ def create_product_workspace(
     root._tpaa_navigation = navigation
     root._tpaa_stack = stack
     root._tpaa_row_to_page = tuple(row_to_page)
+    return root
+
+
+def _create_w4_page_content(
+    contract: PageContract,
+    qt_core: Any,
+    qt_widgets: Any,
+    parent: Any,
+    *,
+    transport: ProductDesktopTransport,
+    diagnostics_provider: Callable[[], DiagnosticsSnapshot],
+) -> Any:
+    """Build one independent page surface without sharing mutable Qt parents."""
+
+    del diagnostics_provider
+    if contract.slot == "P01":
+        return _create_session_release_browser(
+            qt_widgets,
+            parent,
+            transport=transport,
+        )
+    if contract.slot == "P02":
+        return _create_session_release_browser(
+            qt_widgets,
+            parent,
+            transport=transport,
+        )
+    if contract.slot == "P03":
+        return _create_visualization_page(
+            qt_widgets,
+            parent,
+            transport=transport,
+        )
+    if contract.slot in {"P04", "P05"}:
+        return create_m8_workspace(
+            qt_widgets=qt_widgets,
+            transport=transport,
+            parent=parent,
+        )
+    if contract.slot in {"P06", "P07"}:
+        return create_m7_workspace(
+            qt_widgets=qt_widgets,
+            transport=transport,
+            parent=parent,
+        )
+    if contract.slot == "P08":
+        return create_m6_workspace(
+            qt_widgets=qt_widgets,
+            transport=transport,
+            parent=parent,
+        )
+    if contract.slot in {"P09", "P10"}:
+        return create_m4_workspace(
+            qt_widgets=qt_widgets,
+            transport=transport,
+            parent=parent,
+        )
+    if contract.slot == "P11":
+        return create_m9_workspace(qt_widgets, transport, parent)
+    if contract.slot == "P12":
+        return _create_m3_launcher(
+            qt_core,
+            qt_widgets,
+            parent,
+            transport=transport,
+        )
+    if contract.slot == "P13":
+        return _create_runtime_page(
+            qt_widgets,
+            parent,
+            transport=transport,
+        )
+    return create_state_panel(
+        qt_widgets,
+        parent,
+        kind="EMPTY",
+        title="No governed content",
+        message=f"{contract.slot} has no qualified presentation adapter.",
+    )
+
+
+def _wrap_w4_page(
+    contract: PageContract,
+    qt_core: Any,
+    qt_widgets: Any,
+    stack: Any,
+    *,
+    transport: ProductDesktopTransport,
+    diagnostics_provider: Callable[[], DiagnosticsSnapshot],
+) -> Any:
+    page = qt_widgets.QWidget(stack)
+    page.setObjectName(contract.object_name)
+    page.setAccessibleName(f"{contract.slot} {contract.title}")
+    page.setAccessibleDescription(contract.purpose)
+    layout = qt_widgets.QVBoxLayout(page)
+    layout.setContentsMargins(12, 12, 12, 12)
+    layout.setSpacing(8)
+    title = qt_widgets.QLabel(f"{contract.slot}  {contract.title}", page)
+    title.setObjectName(f"tpaa{contract.slot}Title")
+    title.setProperty("tpaaHeading", True)
+    purpose = qt_widgets.QLabel(contract.purpose, page)
+    purpose.setObjectName(f"tpaa{contract.slot}Purpose")
+    purpose.setProperty("tpaaMuted", True)
+    purpose.setWordWrap(True)
+    scroll = qt_widgets.QScrollArea(page)
+    scroll.setObjectName(f"tpaa{contract.slot}ScrollArea")
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(qt_widgets.QFrame.Shape.NoFrame)
+    content = _create_w4_page_content(
+        contract,
+        qt_core,
+        qt_widgets,
+        scroll,
+        transport=transport,
+        diagnostics_provider=diagnostics_provider,
+    )
+    content.setObjectName(f"tpaa{contract.slot}Content")
+    scroll.setWidget(content)
+    layout.addWidget(title)
+    layout.addWidget(purpose)
+    layout.addWidget(scroll, 1)
+    page._tpaa_contract = contract
+    page._tpaa_content = content
+    page._tpaa_scroll = scroll
+    return page
+
+
+def create_product_workspace(
+    qt_core: Any,
+    qt_widgets: Any,
+    parent: Any,
+    *,
+    transport: ProductDesktopTransport,
+    diagnostics_provider: Callable[[], DiagnosticsSnapshot],
+    logical_dpi: float = 96.0,
+) -> Any:
+    """Compose the R3.3 W4 P01-P13 application shell."""
+
+    validate_product_navigation()
+    metrics = scaled_metrics(logical_dpi)
+    state = ApplicationShellState()
+    root = qt_widgets.QWidget(parent)
+    root.setObjectName("tpaaB5ProductWorkspace")
+    root.setAccessibleName("TPAA governed analysis workspace")
+    outer = qt_widgets.QVBoxLayout(root)
+    outer.setContentsMargins(metrics.space_md, metrics.space_md, metrics.space_md, 0)
+    outer.setSpacing(metrics.space_sm)
+
+    mission_header = create_mission_header(
+        qt_widgets,
+        root,
+        state,
+        metrics=metrics,
+    )
+    outer.addWidget(mission_header)
+
+    body = qt_widgets.QSplitter(qt_core.Qt.Orientation.Horizontal, root)
+    body.setObjectName("tpaaApplicationShellBody")
+    body.setChildrenCollapsible(False)
+
+    navigation_frame = qt_widgets.QFrame(body)
+    navigation_frame.setObjectName("tpaaPrimaryNavigationFrame")
+    navigation_frame.setProperty("tpaaSurface", True)
+    navigation_frame.setMinimumWidth(metrics.navigation_width)
+    navigation_frame.setMaximumWidth(metrics.navigation_width * 2)
+    navigation_layout = qt_widgets.QVBoxLayout(navigation_frame)
+    navigation_heading = qt_widgets.QLabel("Analysis workspace", navigation_frame)
+    navigation_heading.setProperty("tpaaHeading", True)
+    navigation = qt_widgets.QListWidget(navigation_frame)
+    navigation.setObjectName("tpaaB5ProductNavigation")
+    navigation.setAccessibleName("Primary page navigation")
+    navigation.setAccessibleDescription("R3.3 governed P01 through P13 page catalogue")
+    navigation.setHorizontalScrollBarPolicy(qt_core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    spine = qt_widgets.QLabel(" / ".join(PRODUCT_SPINE), navigation_frame)
+    spine.setObjectName("tpaaB5ProductSpine")
+    spine.setProperty("tpaaMuted", True)
+    spine.setWordWrap(True)
+    semantic = qt_widgets.QLabel(" · ".join(SEMANTIC_LAYERS), navigation_frame)
+    semantic.setObjectName("tpaaB5SemanticLegend")
+    semantic.setProperty("tpaaMuted", True)
+    semantic.setWordWrap(True)
+    navigation_layout.addWidget(navigation_heading)
+    navigation_layout.addWidget(navigation, 1)
+    navigation_layout.addWidget(spine)
+    navigation_layout.addWidget(semantic)
+
+    stack = qt_widgets.QStackedWidget(body)
+    stack.setObjectName("tpaaB5ProductStack")
+    pages: list[Any] = []
+    for contract in PRODUCT_NAVIGATION:
+        item = qt_widgets.QListWidgetItem(f"{contract.slot}  {contract.title}")
+        item.setData(qt_core.Qt.ItemDataRole.UserRole, contract.slot)
+        item.setToolTip(f"{contract.navigation_group}: {contract.purpose}")
+        navigation.addItem(item)
+        page = _wrap_w4_page(
+            contract,
+            qt_core,
+            qt_widgets,
+            stack,
+            transport=transport,
+            diagnostics_provider=diagnostics_provider,
+        )
+        stack.addWidget(page)
+        pages.append(page)
+
+    detail_drawer = create_detail_drawer(
+        qt_widgets,
+        body,
+        state,
+        metrics=metrics,
+    )
+    body.addWidget(navigation_frame)
+    body.addWidget(stack)
+    body.addWidget(detail_drawer)
+    body.setStretchFactor(0, 0)
+    body.setStretchFactor(1, 1)
+    body.setStretchFactor(2, 0)
+    body.setSizes([metrics.navigation_width, 760, metrics.drawer_width])
+    outer.addWidget(body, 1)
+
+    snapshot = diagnostics_provider()
+    status_bar = create_shell_status_bar(
+        qt_widgets,
+        root,
+        state,
+        readiness=snapshot.readiness,
+    )
+    outer.addWidget(status_bar)
+
+    def change_page(row: int) -> None:
+        if 0 <= row < len(PRODUCT_NAVIGATION):
+            contract = PRODUCT_NAVIGATION[row]
+            stack.setCurrentIndex(row)
+            state.select_page(contract.slot)
+
+    navigation.currentRowChanged.connect(change_page)
+    navigation.setCurrentRow(0)
+    root._tpaa_navigation = navigation
+    root._tpaa_stack = stack
+    root._tpaa_row_to_page = tuple(range(len(PRODUCT_NAVIGATION)))
+    root._tpaa_pages = tuple(pages)
+    root._tpaa_shell_state = state
+    root._tpaa_mission_header = mission_header
+    root._tpaa_detail_drawer = detail_drawer
+    root._tpaa_status_bar = status_bar
     return root

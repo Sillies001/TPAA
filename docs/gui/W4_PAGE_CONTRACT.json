@@ -1,0 +1,29 @@
+{
+  "schema": "TPAA_W4_PAGE_CONTRACT_V1",
+  "design_authority": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3/05G",
+  "supersedes_for_product_navigation": "TPAA_PIQB_B5_DESKTOP_NAVIGATION_CONTRACT_V1",
+  "slots": [
+    {"slot":"P01","key":"TRAINING_SESSION_LIST","title":"Training Session List","surface":"M1","semantic_class":"P1"},
+    {"slot":"P02","key":"PLATFORM_PERFORMANCE_OVERVIEW","title":"Session / Episode & Platform Performance","surface":"M1/M3","semantic_class":"P1"},
+    {"slot":"P03","key":"INTERACTIVE_EVIDENCE_DEBRIEF","title":"Interactive Evidence / Episode Debrief","surface":"M1/M4","semantic_class":"P1/P4+"},
+    {"slot":"P04","key":"INDIVIDUAL_TRAINING_ASSESSMENT","title":"Individual Training Assessment","surface":"M8","semantic_class":"P4"},
+    {"slot":"P05","key":"TEAM_MISSION_ASSESSMENT","title":"Team / Package / Mission Assessment","surface":"M8","semantic_class":"P5"},
+    {"slot":"P06","key":"AIRCRAFT_CAPABILITY_TWIN","title":"Aircraft Capability Digital Twin","surface":"M7","semantic_class":"P3"},
+    {"slot":"P07","key":"AIRCRAFT_MODEL_CAPABILITY","title":"Aircraft Model Capability Profile","surface":"M7","semantic_class":"P3"},
+    {"slot":"P08","key":"CONTEXT_ADJUSTMENT","title":"Context Adjustment / Capability Separation","surface":"M6","semantic_class":"P2"},
+    {"slot":"P09","key":"CAPABILITY_EVOLUTION","title":"Observed Trend / Capability Evolution","surface":"M4/M7","semantic_class":"P1/P3"},
+    {"slot":"P10","key":"LONGITUDINAL_HUMAN_TEAM","title":"Longitudinal Human / Team","surface":"M4/M8","semantic_class":"P4/P5"},
+    {"slot":"P11","key":"COURSE_UNIT_JOINT_PLANNING","title":"Course / Unit / Joint-LVC & Planning","surface":"M9","semantic_class":"P5/P6"},
+    {"slot":"P12","key":"DATA_QUALITY_ELIGIBILITY","title":"Data Quality & Observation Eligibility","surface":"M1/M3","semantic_class":"P1"},
+    {"slot":"P13","key":"GOVERNANCE","title":"Profile / Version / Publication / Model Governance","surface":"Runtime","semantic_class":"P1+"}
+  ],
+  "shell_regions": ["MISSION_HEADER", "PRIMARY_NAVIGATION", "WORKSPACE", "DETAIL_EVIDENCE_DRAWER", "STATUS_BAR"],
+  "selection_spine": ["session_id", "episode_id", "stage_id", "context_id", "time_range", "truth_entity", "observer", "actor", "aircraft", "configuration_id", "objective_id", "event_id", "metric_instance_id", "observation_id", "attribution_id", "relation_id", "chain_id", "release_id"],
+  "rules": {
+    "exact_context_id_required": true,
+    "latest_alias_forbidden": true,
+    "fixture_controls_forbidden_in_production": true,
+    "minimum_window": [1024, 720],
+    "qualified_dpi_percent": [100, 125, 150, 200]
+  }
+}
