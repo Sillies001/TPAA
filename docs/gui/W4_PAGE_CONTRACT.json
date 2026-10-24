@@ -11,7 +11,7 @@
     {"slot":"P06","key":"AIRCRAFT_CAPABILITY_TWIN","title":"Aircraft Capability Digital Twin","surface":"M7","semantic_class":"P3"},
     {"slot":"P07","key":"AIRCRAFT_MODEL_CAPABILITY","title":"Aircraft Model Capability Profile","surface":"M7","semantic_class":"P3"},
     {"slot":"P08","key":"CONTEXT_ADJUSTMENT","title":"Context Adjustment / Capability Separation","surface":"M6","semantic_class":"P2"},
-    {"slot":"P09","key":"CAPABILITY_EVOLUTION","title":"Observed Trend / Capability Evolution","surface":"M4/M7","semantic_class":"P1/P3"},
+    {"slot":"P09","key":"CAPABILITY_EVOLUTION","title":"Aircraft / Mission-System Observed Trend / Capability Evolution","surface":"M4/M7","semantic_class":"P1/P3"},
     {"slot":"P10","key":"LONGITUDINAL_HUMAN_TEAM","title":"Longitudinal Human / Team","surface":"M4/M8","semantic_class":"P4/P5"},
     {"slot":"P11","key":"COURSE_UNIT_JOINT_PLANNING","title":"Course / Unit / Joint-LVC & Planning","surface":"M9","semantic_class":"P5/P6"},
     {"slot":"P12","key":"DATA_QUALITY_ELIGIBILITY","title":"Data Quality & Observation Eligibility","surface":"M1/M3","semantic_class":"P1"},

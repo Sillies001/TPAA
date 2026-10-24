@@ -44,6 +44,15 @@ from .w5_pages import (
     create_p12_page,
     create_p13_page,
 )
+from .w6_pages import (
+    create_p04_page,
+    create_p05_page,
+    create_p06_page,
+    create_p07_page,
+    create_p08_page,
+    create_p09_page,
+    create_p10_page,
+)
 
 
 class ProductShellError(RuntimeError):
@@ -104,6 +113,8 @@ class ProductDesktopTransport(Protocol):
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]: ...
 
     def m9_request_json(
@@ -766,30 +777,20 @@ def _create_w4_page_content(
             transport=transport,
             state=state,
         )
-    if contract.slot in {"P04", "P05"}:
-        return create_m8_workspace(
-            qt_widgets=qt_widgets,
-            transport=transport,
-            parent=parent,
-        )
-    if contract.slot in {"P06", "P07"}:
-        return create_m7_workspace(
-            qt_widgets=qt_widgets,
-            transport=transport,
-            parent=parent,
-        )
+    if contract.slot == "P04":
+        return create_p04_page(qt_widgets, parent, transport=transport)
+    if contract.slot == "P05":
+        return create_p05_page(qt_widgets, parent, transport=transport)
+    if contract.slot == "P06":
+        return create_p06_page(qt_widgets, parent, transport=transport)
+    if contract.slot == "P07":
+        return create_p07_page(qt_widgets, parent, transport=transport)
     if contract.slot == "P08":
-        return create_m6_workspace(
-            qt_widgets=qt_widgets,
-            transport=transport,
-            parent=parent,
-        )
-    if contract.slot in {"P09", "P10"}:
-        return create_m4_workspace(
-            qt_widgets=qt_widgets,
-            transport=transport,
-            parent=parent,
-        )
+        return create_p08_page(qt_widgets, parent, transport=transport)
+    if contract.slot == "P09":
+        return create_p09_page(qt_widgets, parent, transport=transport)
+    if contract.slot == "P10":
+        return create_p10_page(qt_widgets, parent, transport=transport)
     if contract.slot == "P11":
         return create_m9_workspace(qt_widgets, transport, parent)
     if contract.slot == "P12":
@@ -854,6 +855,7 @@ def _wrap_w4_page(
         diagnostics_provider=diagnostics_provider,
         state=state,
     )
+    content.setProperty("tpaaOriginalObjectName", content.objectName())
     content.setObjectName(f"tpaa{contract.slot}Content")
     scroll.setWidget(content)
     layout.addWidget(title)

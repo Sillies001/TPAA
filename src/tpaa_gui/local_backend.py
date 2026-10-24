@@ -596,10 +596,12 @@ class LocalBackendController:
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]:
         """Scoped transport for the admitted P4/P5 workspace."""
 
-        return self._surface_request_json("m8", method, path)
+        return self._surface_request_json("m8", method, path, body=body)
 
     def m9_request_json(
         self,

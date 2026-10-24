@@ -105,7 +105,7 @@ PAGE_CONTRACTS = (
     PageContract(
         "P09",
         "CAPABILITY_EVOLUTION",
-        "Observed Trend / Capability Evolution",
+        "Aircraft / Mission-System Observed Trend / Capability Evolution",
         "Aircraft Capability",
         "M4/M7",
         "P1/P3",
