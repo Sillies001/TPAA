@@ -124,4 +124,15 @@ def register_source_v1_routes(app: FastAPI, application: ApplicationService) -> 
             return _error(exc)
         return JSONResponse(status_code=201, content=payload)
 
+    @app.post("/api/v1/sources/p1-request/stage")
+    async def stage_p1_request(request: Request) -> JSONResponse:
+        """Replace inline source JSON with immutable managed references."""
+
+        try:
+            data = await _source_body(request)
+            payload = application.source_workflow().stage_p1_request_manifest(data)
+        except SourceWorkflowError as exc:
+            return _error(exc)
+        return JSONResponse(status_code=201, content=payload)
+
     return app

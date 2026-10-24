@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Iterable
 from dataclasses import asdict
 from datetime import UTC, datetime
@@ -114,6 +115,92 @@ class SourceWorkflowService:
                 }
                 for item in self._registry.inventory()
             ],
+        }
+
+    def stage_p1_request_manifest(self, data: bytes) -> dict[str, object]:
+        """Stage inline source documents from one governed P1 request manifest.
+
+        The method deliberately performs only ingress work: JSON shape checks,
+        immutable byte storage, and reference replacement.  The production P1
+        worker remains the sole authority for Catalog membership, identities,
+        metric inputs, and publication eligibility.
+        """
+
+        if not data or len(data) > SOURCE_MAX_ARTIFACT_BYTES:
+            raise SourceWorkflowError("SOURCE_ARTIFACT_SIZE_INVALID", str(len(data)))
+        try:
+            decoded = json.loads(data.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise SourceWorkflowError("W5_P1_MANIFEST_JSON_INVALID", str(exc)) from exc
+        if not isinstance(decoded, dict) or not all(
+            isinstance(key, str) for key in decoded
+        ):
+            raise SourceWorkflowError("W5_P1_MANIFEST_ROOT_INVALID", "root")
+        if decoded.get("schema") != "TPAA_ED2_B1_FULL_P1_REQUEST_CONTRACT_V1":
+            raise SourceWorkflowError("W5_P1_MANIFEST_SCHEMA_INVALID", "schema")
+        raw_documents = decoded.get("source_documents")
+        if not isinstance(raw_documents, list) or not raw_documents:
+            raise SourceWorkflowError(
+                "W5_P1_MANIFEST_SOURCE_DOCUMENTS_INVALID",
+                "source_documents",
+            )
+
+        staged_documents: list[dict[str, object]] = []
+        families: list[str] = []
+        for index, raw in enumerate(raw_documents):
+            field = f"source_documents[{index}]"
+            if not isinstance(raw, dict) or not all(isinstance(key, str) for key in raw):
+                raise SourceWorkflowError("W5_P1_MANIFEST_DOCUMENT_INVALID", field)
+            item = dict(raw)
+            source_json = item.pop("source_json", None)
+            if not isinstance(source_json, str) or not source_json:
+                raise SourceWorkflowError("W5_P1_MANIFEST_INLINE_SOURCE_REQUIRED", field)
+            metadata = item.get("source_import")
+            if not isinstance(metadata, dict):
+                raise SourceWorkflowError(
+                    "W5_P1_MANIFEST_SOURCE_IMPORT_INVALID",
+                    field,
+                )
+            source_import = dict(metadata)
+            artifact_id = source_import.get("artifact_id")
+            if not isinstance(artifact_id, str):
+                raise SourceWorkflowError("W5_P1_MANIFEST_ARTIFACT_ID_INVALID", field)
+            _uuid(artifact_id, field=f"{field}.artifact_id")
+            family = source_import.get("source_family")
+            if not isinstance(family, str) or not family:
+                raise SourceWorkflowError("W5_P1_MANIFEST_SOURCE_FAMILY_INVALID", field)
+            source_bytes = source_json.encode("utf-8")
+            if len(source_bytes) > SOURCE_MAX_ARTIFACT_BYTES:
+                raise SourceWorkflowError(
+                    "SOURCE_ARTIFACT_SIZE_INVALID",
+                    f"{field}:{len(source_bytes)}",
+                )
+            try:
+                stored = self._store.put_bytes_immutable(
+                    _canonical_uri(artifact_id),
+                    source_bytes,
+                )
+            except ObjectStoreError as exc:
+                raise SourceWorkflowError("W5_P1_MANIFEST_STAGE_FAILED", field) from exc
+            source_import["uri_kind"] = "MANAGED"
+            source_import["source_ref"] = stored.logical_uri
+            item["source_import"] = source_import
+            item["source_artifact"] = {
+                "logical_uri": stored.logical_uri,
+                "artifact_sha256": stored.artifact_sha256,
+                "byte_size": stored.byte_size,
+            }
+            staged_documents.append(item)
+            families.append(family)
+
+        payload = dict(decoded)
+        payload["source_documents"] = staged_documents
+        return {
+            "status": "STAGED",
+            "schema": "TPAA_W5_P1_REQUEST_STAGE_V1",
+            "source_document_count": len(staged_documents),
+            "source_families": families,
+            "payload": payload,
         }
 
     def inspect_flight_csv(

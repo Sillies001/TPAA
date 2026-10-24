@@ -46,6 +46,7 @@ _LOCAL_HTTP_ALLOWED_PREFIXES = (
     "/m8/",
     "/m9/",
     "/api/v1/",
+    "/security/",
 )
 
 
@@ -144,7 +145,7 @@ class LocalBackendController:
         )
         self._child_command = tuple(
             child_command
-            or (sys.executable, str(Path(__file__).resolve().parents[1] / "tpaa_api" / "local_backend_child.py"))
+            or (sys.executable, "-m", "tpaa_api.local_backend_child")
         )
         self._startup_timeout = startup_timeout_seconds
         self._graceful_shutdown = graceful_shutdown_seconds
@@ -155,6 +156,7 @@ class LocalBackendController:
         self._state = LocalBackendState.STOPPED
         self._failure_code: str | None = None
         self._baseline_diagnostics: DiagnosticsSnapshot = EMPTY_DIAGNOSTICS
+        self._stdout_drain_thread: threading.Thread | None = None
 
     @property
     def diagnostics(self) -> DiagnosticsSnapshot:
@@ -214,6 +216,7 @@ class LocalBackendController:
             self._state = LocalBackendState.CONFIG_SENT
             record = self._read_control(self._startup_timeout)
             self._accept_listening(record)
+            self._start_stdout_drain()
             self._state = LocalBackendState.LISTENING
             self._state = LocalBackendState.HTTP_HANDSHAKE
             self._perform_http_handshake()
@@ -236,7 +239,12 @@ class LocalBackendController:
                 self._send_control({"protocol": CONTROL_PROTOCOL, "type": "SHUTDOWN"})
                 self._state = LocalBackendState.SHUTDOWN_SENT
                 process.wait(timeout=self._graceful_shutdown)
-            except (BrokenPipeError, LocalBackendError, subprocess.TimeoutExpired):
+            except (
+                BrokenPipeError,
+                OSError,
+                LocalBackendError,
+                subprocess.TimeoutExpired,
+            ):
                 if process.poll() is None:
                     process.terminate()
                     try:
@@ -288,6 +296,34 @@ class LocalBackendController:
             raise LocalBackendError("MALFORMED_CONTROL_RECORD")
         return record
 
+    def _start_stdout_drain(self) -> None:
+        """Drain post-handshake child output so spawned workers cannot block.
+
+        The control protocol emits exactly one child-to-parent LISTENING record.
+        After it is consumed, any inherited stdout from libraries or spawned
+        workers is non-protocol diagnostic noise and must not fill the pipe.
+        """
+
+        process = self._process
+        if process is None or process.stdout is None:
+            raise LocalBackendError("CONTROL_CHANNEL_CLOSED")
+
+        def drain(stream: IO[str]) -> None:
+            try:
+                for _line in stream:
+                    pass
+            except (OSError, ValueError):
+                pass
+
+        thread = threading.Thread(
+            target=drain,
+            args=(process.stdout,),
+            daemon=True,
+            name="tpaa-local-backend-stdout-drain",
+        )
+        thread.start()
+        self._stdout_drain_thread = thread
+
     def _accept_listening(self, record: dict[str, Any]) -> None:
         if record.get("protocol") != CONTROL_PROTOCOL or record.get("type") != "LISTENING":
             raise LocalBackendError("INVALID_LISTENING_RECORD")
@@ -308,6 +344,7 @@ class LocalBackendController:
         *,
         body: dict[str, object] | None = None,
         headers: dict[str, str] | None = None,
+        request_timeout_seconds: float | None = None,
     ) -> tuple[int, dict[str, Any]]:
         """Issue one authenticated product request while keeping the bearer private."""
 
@@ -349,7 +386,11 @@ class LocalBackendController:
         try:
             with urllib.request.urlopen(
                 request,
-                timeout=self._startup_timeout,
+                timeout=(
+                    self._startup_timeout
+                    if request_timeout_seconds is None
+                    else request_timeout_seconds
+                ),
             ) as response:
                 payload = json.loads(response.read().decode("utf-8"))
                 if not isinstance(payload, dict):
@@ -384,6 +425,81 @@ class LocalBackendController:
             body=body,
             headers=headers,
         )
+
+    def source_request_bytes(
+        self,
+        path: str,
+        *,
+        data: bytes,
+        content_type: str,
+    ) -> tuple[int, dict[str, Any]]:
+        """POST user-selected source bytes without exposing bearer state."""
+
+        if not path.startswith("/api/v1/sources/"):
+            raise LocalBackendError("SOURCE_HTTP_PATH_FORBIDDEN")
+        if not data:
+            raise LocalBackendError("SOURCE_HTTP_BODY_EMPTY")
+        status = self.status
+        if not status.ready or self._port is None or self._token is None:
+            raise LocalBackendError("BACKEND_NOT_READY")
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self._port}{path}",
+            headers={
+                "Authorization": f"Bearer {self._token}",
+                "Content-Type": content_type,
+            },
+            data=data,
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self._startup_timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+                if not isinstance(payload, dict):
+                    raise LocalBackendError("INVALID_HTTP_PAYLOAD")
+                return response.status, payload
+        except urllib.error.HTTPError as exc:
+            try:
+                payload = json.loads(exc.read().decode("utf-8"))
+            except Exception:
+                payload = {}
+            return exc.code, payload if isinstance(payload, dict) else {}
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
+            raise LocalBackendError("LOCAL_HTTP_REQUEST_FAILED") from exc
+
+    def job_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        """Scoped formal job lifecycle adapter for P01."""
+
+        if method.upper() not in {"GET", "POST"}:
+            raise LocalBackendError("JOB_HTTP_METHOD_FORBIDDEN")
+        if path != "/jobs" and not path.startswith("/jobs/"):
+            raise LocalBackendError("JOB_HTTP_PATH_FORBIDDEN")
+        return self.request_json(
+            method,
+            path,
+            body=body,
+            headers=headers,
+            request_timeout_seconds=300.0 if method.upper() == "POST" else None,
+        )
+
+    def security_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, dict[str, Any]]:
+        """Read the protected Desktop permission/approval surface."""
+
+        if method.upper() != "GET":
+            raise LocalBackendError("SECURITY_HTTP_METHOD_FORBIDDEN")
+        if path != "/security/approvals":
+            raise LocalBackendError("SECURITY_HTTP_PATH_FORBIDDEN")
+        return self.request_json("GET", path)
 
     def _surface_request_json(
         self,

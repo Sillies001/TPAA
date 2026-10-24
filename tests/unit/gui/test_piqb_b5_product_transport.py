@@ -92,3 +92,31 @@ def test_m6_adapter_accepts_mapping_without_exposing_mutable_authority(
     monkeypatch.setattr(controller, "request_json", fake_request)
     controller.m6_request_json("POST", "/m6/p2/commands/example", body={"x": 1})
     assert observed == [{"x": 1}]
+
+
+def test_w5_job_and_security_adapters_are_narrowly_scoped(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = LocalBackendController()
+    calls: list[tuple[str, str]] = []
+
+    def fake_request(
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+        request_timeout_seconds: float | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        del body, headers, request_timeout_seconds
+        calls.append((method, path))
+        return 200, {}
+
+    monkeypatch.setattr(controller, "request_json", fake_request)
+    controller.job_request_json("POST", "/jobs", body={"command": "X"})
+    controller.security_request_json("GET", "/security/approvals")
+    assert calls == [("POST", "/jobs"), ("GET", "/security/approvals")]
+    with pytest.raises(LocalBackendError, match="JOB_HTTP_PATH_FORBIDDEN"):
+        controller.job_request_json("GET", "/m1/releases/x")
+    with pytest.raises(LocalBackendError, match="SECURITY_HTTP_METHOD_FORBIDDEN"):
+        controller.security_request_json("POST", "/security/approvals")

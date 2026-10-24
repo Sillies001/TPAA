@@ -16,6 +16,10 @@ def test_route_classification_covers_reads_writes_and_high_risk_actions() -> Non
     assert route_permission("GET", "/api/v1/source/items").value == "RAW_DATA_READ"
     assert route_permission("POST", "/jobs").value == "COMPUTE_EXECUTE"
     assert (
+        route_permission("POST", "/m1/releases/exact-release-id/replay").value
+        == "COMPUTE_EXECUTE"
+    )
+    assert (
         route_permission("POST", "/api/v1/releases/publish").value
         == "PRODUCT_PUBLISH"
     )

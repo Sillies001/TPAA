@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
 import sys
 import threading
@@ -72,28 +73,42 @@ def main() -> int:
         date_header=False,
     )
     server = uvicorn.Server(config)
-    thread = threading.Thread(
-        target=server.run,
-        kwargs={"sockets": [sock]},
+    shutdown_requested = threading.Event()
+
+    def watch_control_channel() -> None:
+        while True:
+            try:
+                record = _read_record()
+            except (OSError, RuntimeError, json.JSONDecodeError):
+                server.should_exit = True
+                return
+            if record.get("protocol") != CONTROL_PROTOCOL:
+                continue
+            if record.get("type") == "SHUTDOWN":
+                shutdown_requested.set()
+                server.should_exit = True
+                return
+
+    control_thread = threading.Thread(
+        target=watch_control_channel,
+        name="tpaa-local-backend-control",
         daemon=True,
     )
-    thread.start()
+    control_thread.start()
     _emit({
         "protocol": CONTROL_PROTOCOL,
         "type": "LISTENING",
         "pid": __import__("os").getpid(),
         "port": port,
     })
+    # LISTENING is the only child-to-parent control record. Detach Python's
+    # stdout afterwards so multiprocessing's mandatory pre-spawn stream flush
+    # can never block on the GUI control pipe while a governed worker starts.
+    sys.stdout = open(os.devnull, "w", encoding="utf-8")  # noqa: SIM115
 
     try:
-        while True:
-            record = _read_record()
-            if record.get("protocol") != CONTROL_PROTOCOL:
-                continue
-            if record.get("type") == "SHUTDOWN":
-                server.should_exit = True
-                thread.join(timeout=4.5)
-                return 0 if not thread.is_alive() else 3
+        server.run(sockets=[sock])
+        return 0 if shutdown_requested.is_set() else 3
     finally:
         server.should_exit = True
         sock.close()

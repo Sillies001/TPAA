@@ -37,6 +37,13 @@ from .visualization import (
     build_cesium_trajectory_packets,
     build_trajectory_presentation,
 )
+from .w5_pages import (
+    create_p01_page,
+    create_p02_page,
+    create_p03_page,
+    create_p12_page,
+    create_p13_page,
+)
 
 
 class ProductShellError(RuntimeError):
@@ -106,6 +113,29 @@ class ProductDesktopTransport(Protocol):
     ) -> tuple[int, Mapping[str, object]]: ...
 
     def runtime_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, Mapping[str, object]]: ...
+
+    def source_request_bytes(
+        self,
+        path: str,
+        *,
+        data: bytes,
+        content_type: str,
+    ) -> tuple[int, Mapping[str, object]]: ...
+
+    def job_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, Mapping[str, object]]: ...
+
+    def security_request_json(
         self,
         method: str,
         path: str,
@@ -707,27 +737,34 @@ def _create_w4_page_content(
     *,
     transport: ProductDesktopTransport,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot],
+    state: ApplicationShellState,
 ) -> Any:
     """Build one independent page surface without sharing mutable Qt parents."""
 
     del diagnostics_provider
     if contract.slot == "P01":
-        return _create_session_release_browser(
+        return create_p01_page(
+            qt_core,
             qt_widgets,
             parent,
             transport=transport,
+            state=state,
         )
     if contract.slot == "P02":
-        return _create_session_release_browser(
+        return create_p02_page(
+            qt_core,
             qt_widgets,
             parent,
             transport=transport,
+            state=state,
         )
     if contract.slot == "P03":
-        return _create_visualization_page(
+        return create_p03_page(
+            qt_core,
             qt_widgets,
             parent,
             transport=transport,
+            state=state,
         )
     if contract.slot in {"P04", "P05"}:
         return create_m8_workspace(
@@ -756,17 +793,20 @@ def _create_w4_page_content(
     if contract.slot == "P11":
         return create_m9_workspace(qt_widgets, transport, parent)
     if contract.slot == "P12":
-        return _create_m3_launcher(
+        return create_p12_page(
             qt_core,
             qt_widgets,
             parent,
             transport=transport,
+            state=state,
         )
     if contract.slot == "P13":
-        return _create_runtime_page(
+        return create_p13_page(
+            qt_core,
             qt_widgets,
             parent,
             transport=transport,
+            state=state,
         )
     return create_state_panel(
         qt_widgets,
@@ -785,6 +825,7 @@ def _wrap_w4_page(
     *,
     transport: ProductDesktopTransport,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot],
+    state: ApplicationShellState,
 ) -> Any:
     page = qt_widgets.QWidget(stack)
     page.setObjectName(contract.object_name)
@@ -811,6 +852,7 @@ def _wrap_w4_page(
         scroll,
         transport=transport,
         diagnostics_provider=diagnostics_provider,
+        state=state,
     )
     content.setObjectName(f"tpaa{contract.slot}Content")
     scroll.setWidget(content)
@@ -897,6 +939,7 @@ def create_product_workspace(
             stack,
             transport=transport,
             diagnostics_provider=diagnostics_provider,
+            state=state,
         )
         stack.addWidget(page)
         pages.append(page)

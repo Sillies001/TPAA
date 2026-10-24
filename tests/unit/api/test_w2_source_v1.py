@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -101,3 +102,46 @@ def test_source_transport_rejects_invalid_input(tmp_path: Path) -> None:
     )
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "W2_FLIGHT_CSV_SCHEMA_UNSUPPORTED"
+
+
+def test_w5_p1_request_manifest_stages_inline_sources_for_real_job(tmp_path: Path) -> None:
+    artifact_id = "d2100000-0000-4000-8000-000000000007"
+    manifest = {
+        "schema": "TPAA_ED2_B1_FULL_P1_REQUEST_CONTRACT_V1",
+        "source_documents": [
+            {
+                "source_import": {
+                    "artifact_id": artifact_id,
+                    "source_family": "FLIGHT",
+                    "uri_kind": "EXTERNAL_FILE",
+                    "source_ref": "file:///review/flight.json",
+                },
+                "source_json": '{"schema":"TPAA_PRODUCTION_FLIGHT_SOURCE_V1"}',
+            }
+        ],
+    }
+    response = _client(tmp_path).post(
+        "/api/v1/sources/p1-request/stage",
+        content=json.dumps(manifest).encode("utf-8"),
+        headers={"content-type": "application/json"},
+    )
+    assert response.status_code == 201
+    result = response.json()
+    assert result["status"] == "STAGED"
+    assert result["source_families"] == ["FLIGHT"]
+    document = result["payload"]["source_documents"][0]
+    assert "source_json" not in document
+    assert document["source_import"]["uri_kind"] == "MANAGED"
+    assert document["source_artifact"]["logical_uri"].endswith(
+        f"/{artifact_id}/source.json"
+    )
+
+
+def test_w5_p1_request_manifest_rejects_schema_drift(tmp_path: Path) -> None:
+    response = _client(tmp_path).post(
+        "/api/v1/sources/p1-request/stage",
+        content=b'{"schema":"DRIFTED","source_documents":[]}',
+        headers={"content-type": "application/json"},
+    )
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "W5_P1_MANIFEST_SCHEMA_INVALID"

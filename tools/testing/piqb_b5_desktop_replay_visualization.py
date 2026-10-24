@@ -101,6 +101,34 @@ class _NoRequestTransport:
     ) -> tuple[int, Mapping[str, object]]:
         return self._unused(method, path)
 
+    def source_request_bytes(
+        self,
+        path: str,
+        *,
+        data: bytes,
+        content_type: str,
+    ) -> tuple[int, Mapping[str, object]]:
+        del data, content_type
+        return self._unused("POST", path)
+
+    def job_request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, Mapping[str, object]]:
+        del body, headers
+        return self._unused(method, path)
+
+    def security_request_json(
+        self,
+        method: str,
+        path: str,
+    ) -> tuple[int, Mapping[str, object]]:
+        return self._unused(method, path)
+
 
 def _canonical_hash(value: object) -> str:
     raw = json.dumps(

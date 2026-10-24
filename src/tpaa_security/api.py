@@ -81,6 +81,8 @@ def route_permission(method: str, path: str) -> Permission | None:
         return Permission.PUBLICATION_OVERRIDE
     if "model" in lowered and any(term in lowered for term in ("publish", "release")):
         return Permission.MODEL_RELEASE
+    if normalized_method != "GET" and lowered.endswith("/replay"):
+        return Permission.COMPUTE_EXECUTE
     if normalized_method == "DELETE" and "release" in lowered:
         return Permission.WITHDRAW_RELEASE
     if normalized_method != "GET" and any(
