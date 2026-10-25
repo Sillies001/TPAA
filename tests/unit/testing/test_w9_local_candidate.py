@@ -73,6 +73,13 @@ def test_w9_local_manifest_binds_four_packages_and_all_categories(tmp_path: Path
         item["candidate_identity_sha256"] == candidate
         for item in result["evidence_bindings"]
     )
+    states = {
+        item["category"]: item["local_state"]
+        for item in result["evidence_bindings"]
+    }
+    assert states["REAL_DATA_AND_EXTERNAL_SYSTEMS"] == "PENDING_EXTERNAL"
+    assert states["GUI_VISUAL_AND_HUMAN_ROLE_TASKS"] == "PENDING_HUMAN"
+    assert states["PROTECTED_MAIN_AND_HOSTED_CI"] == "PENDING_PROTECTED_MAIN"
 
 
 def test_w9_local_manifest_fails_on_package_hash_or_revision_drift(

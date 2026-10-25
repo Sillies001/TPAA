@@ -24,6 +24,19 @@ PROFILES = (
     "LINUX_SERVICE_X64",
 )
 
+LOCAL_STATES = (
+    "PARTIAL_LOCAL_EVIDENCE",
+    "LOCAL_EVIDENCE_COMPLETE",
+    "PARTIAL_LOCAL_EVIDENCE",
+    "PENDING_EXTERNAL",
+    "PARTIAL_LOCAL_EVIDENCE",
+    "PENDING_TARGET",
+    "PENDING_TARGET",
+    "PENDING_HUMAN",
+    "PENDING_SIGNATURE",
+    "PENDING_PROTECTED_MAIN",
+)
+
 
 class W9CandidateError(RuntimeError):
     """Candidate package or evidence set is incomplete or inconsistent."""
@@ -150,17 +163,17 @@ def build_local_candidate_manifest(
     evidence_bindings = [
         {
             "category": category,
-            "local_state": (
-                "LOCAL_EVIDENCE_COMPLETE"
-                if category == "AUTHORITY_ARCHITECTURE_DTO_OPENAPI_MIGRATION_REPLAY"
-                else "PARTIAL_LOCAL_EVIDENCE"
-            ),
+            "local_state": state,
             "candidate_identity_sha256": candidate_identity,
             "evidence_sha256": _file_hash(path),
             "evidence_path": path.as_posix(),
             "formal_acceptance": False,
         }
-        for category, path in evidence_by_category.items()
+        for (category, path), state in zip(
+            evidence_by_category.items(),
+            LOCAL_STATES,
+            strict=True,
+        )
     ]
     return {
         "schema": "TPAA_W9_LOCAL_CANDIDATE_MANIFEST_V1",
