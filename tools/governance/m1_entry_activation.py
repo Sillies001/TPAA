@@ -24,14 +24,14 @@ from tpaa_canonical import EXPECTED_BASELINE_LOCK_SHA256  # noqa: E402
 DEFAULT_REVIEW = REPO_ROOT / "docs" / "reviews" / "M1_ENTRY_GATE_REVIEW.json"
 DEFAULT_ROLES = REPO_ROOT / "docs" / "governance" / "M1_ROLE_ASSIGNMENTS.json"
 
-# PIQB B6 changes only the TPAA project self-version in uv.lock; the third-party
-# dependency resolution remains unchanged. M1 runtime verification still pins the
-# exact current lock bytes rather than accepting arbitrary dependency drift.
+# M1 runtime verification pins the exact current lock bytes rather than accepting
+# arbitrary dependency drift.  The hash below includes the W9 security remediation
+# for cryptography and certifi and must change with any later approved lock update.
 EXPECTED_FROZEN = {
     "core_baseline": "CB-1.5.0",
     "db_schema_version": "1.9.0",
     "baseline_lock_sha256": EXPECTED_BASELINE_LOCK_SHA256,
-    "dependency_lock_sha256": "5b88baa290534c71f30bbc4336aaee1389145c591cb4c3eb1b5c2438721d63fd",
+    "dependency_lock_sha256": "d334f2b5beea96e2ea92b2273e0a0c04a849df6150236845ead8f2daf08c28b7",
     "p1_metric_catalog_sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
     "stage_authority_sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
     "dto_authority_sha256": "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9",
