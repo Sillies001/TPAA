@@ -235,6 +235,12 @@ class W8OperationsStatusUseCase(Protocol):
     def execute(self) -> dict[str, object]: ...
 
 
+class W9FinalQualificationStatusUseCase(Protocol):
+    """Single-candidate W9 final qualification and release decision."""
+
+    def execute(self) -> dict[str, object]: ...
+
+
 class ApplicationService:
     """Typed facade that is the transport-facing business-entry boundary."""
 
@@ -260,6 +266,7 @@ class ApplicationService:
         episode_revision: EpisodeRevisionUseCase | None = None,
         w7_external_capabilities: W7ExternalCapabilityUseCase | None = None,
         w8_operations_status: W8OperationsStatusUseCase | None = None,
+        w9_final_qualification_status: W9FinalQualificationStatusUseCase | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -280,6 +287,7 @@ class ApplicationService:
         self._episode_revision = episode_revision
         self._w7_external_capabilities = w7_external_capabilities
         self._w8_operations_status = w8_operations_status
+        self._w9_final_qualification_status = w9_final_qualification_status
 
     def source_workflow(self) -> SourceWorkflowService:
         """Return the configured W2 Source ingress use case."""
@@ -370,6 +378,11 @@ class ApplicationService:
         if self._w8_operations_status is None:
             raise RuntimeError("W8 operations status is not configured")
         return dict(self._w8_operations_status.execute())
+
+    def w9_final_qualification_status(self) -> dict[str, object]:
+        if self._w9_final_qualification_status is None:
+            raise RuntimeError("W9 final qualification status is not configured")
+        return dict(self._w9_final_qualification_status.execute())
 
     def _ed2_upper_service(self) -> ED2UpperProductService:
         if self._ed2_upper is None:

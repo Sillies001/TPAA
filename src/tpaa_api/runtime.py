@@ -65,6 +65,23 @@ def register_product_runtime_routes(
             )
         return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
 
+    @app.get("/runtime/final-qualification")
+    def runtime_final_qualification() -> JSONResponse:
+        try:
+            payload = application.w9_final_qualification_status()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "W9_FINAL_QUALIFICATION_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
     @app.get("/runtime/qualification")
     def runtime_qualification() -> JSONResponse:
         try:

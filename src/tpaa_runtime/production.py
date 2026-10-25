@@ -27,7 +27,7 @@ from tpaa_application import (
     build_trusted_runtime_status_use_case,
 )
 from tpaa_longitudinal import M4LongitudinalPublicationService
-from tpaa_qualification import load_m5_qualification_authority
+from tpaa_qualification import W9FinalQualificationStatus, load_m5_qualification_authority
 from tpaa_security import (
     ApiAuthorizationGuard,
     ApprovalService,
@@ -338,6 +338,7 @@ def _compose(
         w8_operations_status=W8OperationsStatus.local_closed(
             load_m5_qualification_authority(config.authority_root.parent)
         ),
+        w9_final_qualification_status=W9FinalQualificationStatus.local_closed(),
     )
     policy = load_security_policy()
     authorization = AuthorizationService(policy)

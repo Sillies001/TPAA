@@ -33,6 +33,7 @@ _LOCAL_HTTP_ALLOWED_PATHS = frozenset(
         "/runtime/features",
         "/runtime/external-capabilities",
         "/runtime/operations",
+        "/runtime/final-qualification",
         "/runtime/qualification",
         "/runtime/observability",
         "/jobs",
@@ -629,6 +630,7 @@ class LocalBackendController:
             "/runtime/features",
             "/runtime/external-capabilities",
             "/runtime/operations",
+            "/runtime/final-qualification",
             "/runtime/qualification",
             "/runtime/observability",
         }:
