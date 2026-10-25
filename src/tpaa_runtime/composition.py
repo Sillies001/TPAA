@@ -32,6 +32,7 @@ from tpaa_application import (
     M8WorkspaceService,
     M9WorkspaceService,
     SecurityAuditSink,
+    W7ExternalCapabilityRegistry,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_application.m1_repository import InMemorySessionPublicationRepository
@@ -133,6 +134,7 @@ def _build(
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=operational_status,
+        w7_external_capabilities=W7ExternalCapabilityRegistry.local_closed(),
     )
     return ProductRuntime(
         config=config,

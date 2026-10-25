@@ -20,6 +20,8 @@ class M9DesktopTransport(Protocol):
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]: ...
 
     def product_request_json(

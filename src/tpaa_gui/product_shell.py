@@ -53,6 +53,7 @@ from .w6_pages import (
     create_p09_page,
     create_p10_page,
 )
+from .w7_pages import create_p11_page
 
 
 class ProductShellError(RuntimeError):
@@ -121,6 +122,8 @@ class ProductDesktopTransport(Protocol):
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]: ...
 
     def runtime_request_json(
@@ -792,7 +795,7 @@ def _create_w4_page_content(
     if contract.slot == "P10":
         return create_p10_page(qt_widgets, parent, transport=transport)
     if contract.slot == "P11":
-        return create_m9_workspace(qt_widgets, transport, parent)
+        return create_p11_page(qt_widgets, parent, transport=transport)
     if contract.slot == "P12":
         return create_p12_page(
             qt_core,

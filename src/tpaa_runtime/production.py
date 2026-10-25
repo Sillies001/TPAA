@@ -23,6 +23,7 @@ from tpaa_application import (
     M9WorkspaceService,
     SecurityAuditSink,
     SourceWorkflowService,
+    W7ExternalCapabilityRegistry,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_longitudinal import M4LongitudinalPublicationService
@@ -331,6 +332,7 @@ def _compose(
         ed2_upper=ed2_upper,
         source_workflow=SourceWorkflowService(object_store),
         episode_revision=DurableEpisodeRevisionService(write_uow_factory),
+        w7_external_capabilities=W7ExternalCapabilityRegistry.local_closed(),
     )
     policy = load_security_policy()
     authorization = AuthorizationService(policy)

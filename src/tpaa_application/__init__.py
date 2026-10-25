@@ -212,6 +212,13 @@ from .source_workflow import (
     bounded_source_bytes,
 )
 from .use_cases import GetStorageBaselineStatus
+from .w7_external import (
+    W7_EXTERNAL_CAPABILITIES,
+    W7ExternalCapability,
+    W7ExternalCapabilityError,
+    W7ExternalCapabilityRegistry,
+    build_w7_external_registry,
+)
 
 __all__ = [
     "ConfigurationRecord",
@@ -379,4 +386,9 @@ __all__ = [
     "SourceProvenanceRecord",
     "SourceProvenanceRepository",
     "StorageBaselineStatus",
+    "W7_EXTERNAL_CAPABILITIES",
+    "W7ExternalCapability",
+    "W7ExternalCapabilityError",
+    "W7ExternalCapabilityRegistry",
+    "build_w7_external_registry",
 ]

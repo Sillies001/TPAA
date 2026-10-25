@@ -485,6 +485,11 @@ class M9WorkspaceService:
             policy=self._security,
         )
         payload = build.model.projection()
+        # W7 model-registry projection exposes the already-qualified evidence
+        # states verbatim.  The GUI must not infer releaseability from metrics.
+        payload["validation_status"] = build.model.status
+        payload["applicability_status"] = build.applicability.status
+        payload["calibration_status"] = build.uncertainty.status
         if direct is None:
             payload.pop("subject_id", None)
         if rule.model_metadata_read == "RELEASED_MODEL_SUMMARY":

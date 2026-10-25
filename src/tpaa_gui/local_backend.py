@@ -607,10 +607,12 @@ class LocalBackendController:
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]:
         """Scoped transport for the admitted P6 workspace."""
 
-        return self._surface_request_json("m9", method, path)
+        return self._surface_request_json("m9", method, path, body=body)
 
     def runtime_request_json(
         self,
@@ -621,7 +623,12 @@ class LocalBackendController:
 
         if method.upper() != "GET":
             raise LocalBackendError("RUNTIME_HTTP_METHOD_FORBIDDEN")
-        if path not in {"/runtime/features", "/runtime/qualification", "/runtime/observability"}:
+        if path not in {
+            "/runtime/features",
+            "/runtime/external-capabilities",
+            "/runtime/qualification",
+            "/runtime/observability",
+        }:
             raise LocalBackendError("RUNTIME_HTTP_PATH_FORBIDDEN")
         return self.request_json("GET", path)
 
