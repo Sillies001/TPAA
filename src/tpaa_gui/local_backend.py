@@ -31,6 +31,8 @@ _LOCAL_HTTP_ALLOWED_PATHS = frozenset(
         "/readiness",
         "/version",
         "/runtime/features",
+        "/runtime/external-capabilities",
+        "/runtime/operations",
         "/runtime/qualification",
         "/runtime/observability",
         "/jobs",
@@ -626,6 +628,7 @@ class LocalBackendController:
         if path not in {
             "/runtime/features",
             "/runtime/external-capabilities",
+            "/runtime/operations",
             "/runtime/qualification",
             "/runtime/observability",
         }:

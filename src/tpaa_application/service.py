@@ -229,6 +229,12 @@ class W7ExternalCapabilityUseCase(Protocol):
     def execute(self) -> dict[str, object]: ...
 
 
+class W8OperationsStatusUseCase(Protocol):
+    """Authority-bound W8 workload, recovery and target gate status."""
+
+    def execute(self) -> dict[str, object]: ...
+
+
 class ApplicationService:
     """Typed facade that is the transport-facing business-entry boundary."""
 
@@ -253,6 +259,7 @@ class ApplicationService:
         source_workflow: SourceWorkflowService | None = None,
         episode_revision: EpisodeRevisionUseCase | None = None,
         w7_external_capabilities: W7ExternalCapabilityUseCase | None = None,
+        w8_operations_status: W8OperationsStatusUseCase | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -272,6 +279,7 @@ class ApplicationService:
         self._source_workflow = source_workflow
         self._episode_revision = episode_revision
         self._w7_external_capabilities = w7_external_capabilities
+        self._w8_operations_status = w8_operations_status
 
     def source_workflow(self) -> SourceWorkflowService:
         """Return the configured W2 Source ingress use case."""
@@ -357,6 +365,11 @@ class ApplicationService:
         if self._w7_external_capabilities is None:
             raise RuntimeError("W7 external capability registry is not configured")
         return dict(self._w7_external_capabilities.execute())
+
+    def w8_operations_status(self) -> dict[str, object]:
+        if self._w8_operations_status is None:
+            raise RuntimeError("W8 operations status is not configured")
+        return dict(self._w8_operations_status.execute())
 
     def _ed2_upper_service(self) -> ED2UpperProductService:
         if self._ed2_upper is None:

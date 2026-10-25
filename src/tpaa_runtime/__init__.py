@@ -117,6 +117,17 @@ from .training_plugin import (
     TrainingPluginComposition,
     TrainingPluginCompositionError,
 )
+from .w8_operations import (
+    W8_EVIDENCE_CATEGORIES,
+    W8_TARGET_PROFILES,
+    W8ControlReceipt,
+    W8OperationsError,
+    W8OperationsStatus,
+    W8ServiceControlPort,
+    W8ServiceRecoveryOrchestrator,
+    W8TargetProfileEvidence,
+    build_w8_operations_status,
+)
 
 __all__ = [
     "AtomicFileServiceTrafficSwitch",
@@ -209,4 +220,13 @@ __all__ = [
     "stage_source_artifact",
     "stage_source_artifact_file",
     "validate_production_principal_policy",
+    "W8_EVIDENCE_CATEGORIES",
+    "W8_TARGET_PROFILES",
+    "W8ControlReceipt",
+    "W8OperationsError",
+    "W8OperationsStatus",
+    "W8ServiceControlPort",
+    "W8ServiceRecoveryOrchestrator",
+    "W8TargetProfileEvidence",
+    "build_w8_operations_status",
 ]

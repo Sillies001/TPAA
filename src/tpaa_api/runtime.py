@@ -48,6 +48,23 @@ def register_product_runtime_routes(
             )
         return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
 
+    @app.get("/runtime/operations")
+    def runtime_operations() -> JSONResponse:
+        try:
+            payload = application.w8_operations_status()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "W8_OPERATIONS_STATUS_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
     @app.get("/runtime/qualification")
     def runtime_qualification() -> JSONResponse:
         try:
