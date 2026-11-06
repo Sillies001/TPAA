@@ -102,3 +102,6 @@ npm audit 仍报告 1 项 high severity；尚未获得 `npm audit --json`，不�
 用户确认 Mypy：`Success: no issues found in 549 source files`。定向 Pytest 结果为 5 passed、1 failed。失败仅来自合同测试对 reduced-motion media query 的空格格式假设；真实 CSS 是有效的 minified 形式 `@media(prefers-reduced-motion:reduce)`，语义规则存在。
 
 已修正测试为 whitespace-tolerant regex，要求仍然存在 `prefers-reduced-motion: reduce` media query，但不再绑定 minifier 的空格输出格式。此项仅改测试断言，未改 CSS 或弱化无障碍要求。等待 Windows 重跑确认。
+
+
+CSS media-query 合同断言最终正则已在 `8abd5b48df4010127314be0bc5745e2e47709be8` 校正为有效 Python raw regex；本次仍只修复测试的空白容忍，不修改产品 CSS。等待定向 Pytest 复验。

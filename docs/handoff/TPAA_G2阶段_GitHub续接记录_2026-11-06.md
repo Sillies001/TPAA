@@ -97,3 +97,6 @@ uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_s
 - 唯一失败是合同测试硬编码要求 CSS 包含 `@media (prefers-reduced-motion:reduce)`，但真实 `style.css` 经压缩后合法形式为 `@media(prefers-reduced-motion:reduce)`。CSS 中确实存在 prefers-reduced-motion 规则，属于测试断言格式过严，不是产品 CSS 功能缺失。
 
 修复：将测试改为 whitespace-tolerant regex `@media\\s*\\(prefers-reduced-motion\\s*:\\s*reduce\\)`，保留对 reduced-motion 语义的检查，同时接受压缩和格式化 CSS。没有修改 CSS 产物，也没有放宽其他 G2 合同断言。修复提交后需重新运行定向 pytest。
+
+
+CSS 合同断言已在提交 `8abd5b48df4010127314be0bc5745e2e47709be8` 进一步修正为单反斜杠的 Python raw regex（`@media\s*\(prefers-reduced-motion\s*:\s*reduce\)`），以匹配 minified CSS。等待用户重新执行定向 Pytest。

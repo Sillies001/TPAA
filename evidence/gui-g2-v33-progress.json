@@ -18,7 +18,7 @@
     "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading"
   ],
   "release_claim": false,
-  "implementation_revision": "00a181eac32093254320960512775778c4f36e68",
+  "implementation_revision": "8abd5b48df4010127314be0bc5745e2e47709be8",
   "observed_local_failure": {
     "command": "npm run typecheck",
     "result": "FAILED",
@@ -84,7 +84,7 @@
       "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
     ],
     "approach": "Validate untrusted JSON arrays with _object_list(value: object, label: str) -> list[dict[str, Any]] before iteration; reject null and malformed members fail-closed",
-    "verification": "PENDING_WINDOWS_RERUN",
+    "verification": "PASS_WINDOWS_LOCAL",
     "commit": "c5df327b6ed42f7f06c3d8d079f52ed63c36856a"
   },
   "test_fix": {
@@ -92,6 +92,7 @@
       "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
     ],
     "approach": "Use whitespace-tolerant regular expression for the reduced-motion media query, accepting minified and formatted CSS without weakening the semantic requirement",
-    "verification": "PENDING_WINDOWS_RERUN"
+    "verification": "PENDING_WINDOWS_RERUN",
+    "commit": "8abd5b48df4010127314be0bc5745e2e47709be8"
   }
 }
