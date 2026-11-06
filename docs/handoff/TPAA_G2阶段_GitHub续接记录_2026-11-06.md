@@ -4,7 +4,7 @@
 - 仓库：`Sillies001/TPAA`
 - 工作分支：`codex/v33-g1-handoff-20261106`
 - G2 开工基线：`b92229da8dcc23f433ab7fc87f7210adbf32485e`
-- G2 实现代码快照（本次续接文档更新之前）：`6eb4522b55ab3c1768565803e65ff11b50c618d7`
+- G2 当前代码快照（修复 TypeScript TS18047）：`4b5e51f2abfc3aaea63c287a94d26a4b092f3155`
 - 当前阶段：`G2=IN_PROGRESS`
 - 前置阶段：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`
 - 后续阶段：`G3～G12=NOT_STARTED`
@@ -17,7 +17,7 @@ G2 已建立 v33 产品 Shell 的源代码框架：五模块 Ribbon、25 个常�
 
 ## 下一步必须执行
 
-在仓库根目录：
+确认工作区没有其他未提交更改、且本地已快进到本记录对应提交后，在仓库根目录：
 
 ```powershell
 $env:POLARS_SKIP_CPU_CHECK='1'

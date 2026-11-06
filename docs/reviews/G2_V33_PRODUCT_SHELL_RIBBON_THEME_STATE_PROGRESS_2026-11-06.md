@@ -5,7 +5,8 @@
 - 状态：`IN_PROGRESS`
 - 基线分支：`codex/v33-g1-handoff-20261106`
 - 基线提交：`b92229da8dcc23f433ab7fc87f7210adbf32485e`
-- G2 实现代码快照：`6eb4522b55ab3c1768565803e65ff11b50c618d7`
+- G2 初始实现代码快照：`6eb4522b55ab3c1768565803e65ff11b50c618d7`
+- TypeScript TS18047 修复提交：`4b5e51f2abfc3aaea63c287a94d26a4b092f3155`
 - 发布声明：无；本报告不代表 G2 关闭、产品完成、发布就绪或部署批准。
 
 ## 1. 本轮实施范围
@@ -60,3 +61,12 @@
 - WebEngine exact loopback、bearer/nonce 原生注入、off-the-record、无持久 Cookie 和失败关闭代码未修改。
 - 未推送默认分支、未创建发布声明、未生产部署。
 - G2 未满足全部退出门，必须保持 `IN_PROGRESS`；G3 不得提前启动。
+
+
+## 6. Windows 首轮构建反馈与修复（2026-11-06）
+
+用户在指定工作分支同步后执行 `npm ci` 成功；`npm run typecheck` 和 `npm run build` 均因同一组 12 处 TypeScript TS18047 失败。问题定位为 `document.querySelector("#app")` 的可空类型在 `render()` 闭包中未保留非空收窄。
+
+已在提交 `4b5e51f2abfc3aaea63c287a94d26a4b092f3155` 修复：将元素查询结果命名为 `rootElement`，执行 fail-fast 空值检查后，显式建立 `const root: HTMLDivElement = rootElement`；并增加 G2 合同测试断言。没有关闭 strictNullChecks、没有使用 `@ts-ignore`，也没有修改依赖版本。
+
+修复后的 Windows typecheck / Vite build 尚待用户重新执行。npm audit 同时报告 1 项 high severity vulnerability；尚未执行 `npm audit fix` 或 `--force`，待取得 `npm audit --json` 并评估依赖影响后再决定处理。

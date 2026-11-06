@@ -6,7 +6,7 @@
   "authority_checks": "STATIC_REVIEWED",
   "v24_ui_and_server_guard": "IMPLEMENTED_NOT_EXECUTED",
   "ribbon_themes_shared_state": "IMPLEMENTED_NOT_BUILT",
-  "frontend_typecheck": "NOT_RUN",
+  "frontend_typecheck": "PENDING_RERUN_AFTER_TS18047_FIX",
   "vite_build_and_web_dist_sync": "PENDING",
   "python_targeted_tests": "NOT_RUN",
   "webengine_visual_keyboard_hidpi_tests": "PENDING",
@@ -19,5 +19,20 @@
     "Confirm the actual desktop principal/permission matrix; do not invent view permissions absent from GUI_VIEW_CONTRACT"
   ],
   "release_claim": false,
-  "implementation_revision": "6eb4522b55ab3c1768565803e65ff11b50c618d7"
+  "implementation_revision": "4b5e51f2abfc3aaea63c287a94d26a4b092f3155",
+  "observed_local_failure": {
+    "command": "npm run typecheck",
+    "result": "FAILED",
+    "diagnostic": "TS18047: root is possibly null",
+    "count": 12,
+    "source": "frontend/gui-v33/src/main.ts",
+    "fixed_in": "4b5e51f2abfc3aaea63c287a94d26a4b092f3155",
+    "verification": "PENDING_WINDOWS_RERUN"
+  },
+  "dependency_audit": {
+    "npm_ci": "PASS",
+    "reported_findings": "1 high severity vulnerability",
+    "audit_fix_applied": false,
+    "next_action": "Inspect npm audit --json and evaluate the affected dependency path before any lockfile update"
+  }
 }
