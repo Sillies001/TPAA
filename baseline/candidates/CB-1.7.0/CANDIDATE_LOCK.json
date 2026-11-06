@@ -1,0 +1,102 @@
+{
+  "schema": "TPAA_BASELINE_CANDIDATE_LOCK_V1",
+  "baseline": {
+    "overall": "TPAA V8.0",
+    "engineering": "ED-2.1",
+    "core": "CB-1.7.0",
+    "db_schema": "1.10.0",
+    "product": "P1_METRIC_CATALOG-1.14.0",
+    "date": "2026-11-06",
+    "rebaseline": "R3.4_G2_GUI_PERMISSION_MAPPING_CANDIDATE",
+    "decision_id": "G2-V33-GUI-PERMISSION-MAPPING-CANDIDATE-2026-11-06",
+    "approval_status": "PROPOSED_NOT_APPROVED",
+    "release_claim": false
+  },
+  "parent": {
+    "core_baseline": "CB-1.6.0",
+    "lock_path": "baseline/CB-1.6.0/BASELINE_LOCK.json",
+    "lock_git_blob_sha": "7b66e6cf142d209b635dcbb4a7aa7aef19f77545",
+    "lock_sha256": "05310620cf697e9aa98edcdeb5fe88cbdfde753808c077cc68f506cc1455f1f2",
+    "inheritance_mode": "EXACT_IMMUTABLE_PARENT_OVERLAY",
+    "unchanged_parent_artifacts": "Inherited byte-for-byte by reference; no parent artifact copied or edited."
+  },
+  "artifacts": [
+    {
+      "path": "baseline/candidates/CB-1.7.0/canonical/GUI_VIEW_CONTRACT.json",
+      "sha256": "02d4e8153ceaf7032550db5bbd13c1ac5c1f8622fdaead74ef00fff3fb78484f",
+      "bytes": 30247
+    },
+    {
+      "path": "baseline/candidates/CB-1.7.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json",
+      "sha256": "ec0e7a781379918b80ca4622df6ab03f3052efb0d94e1d112266892f1ddf010e",
+      "bytes": 6853
+    },
+    {
+      "path": "baseline/candidates/CB-1.7.0/canonical/GUI_ROLE_VIEW_ACCESS_MATRIX.json",
+      "sha256": "be8b1efd872209a42f42932204a455a8214735b8cda8f6c4252514c46a93fae4",
+      "bytes": 68470
+    },
+    {
+      "path": "baseline/candidates/CB-1.7.0/AUTHORITY_DIFF.json",
+      "sha256": "9bc10b91a8b8368f8d7ba448e4fa4022a1d4832e66e5ab49bda9f34d083f8bd3",
+      "bytes": 2455
+    },
+    {
+      "path": "baseline/candidates/CB-1.7.0/COMPATIBILITY.json",
+      "sha256": "191a092be37bef44588f91ae080bd2ac4baf648fbebe51c932113aeadd2fff93",
+      "bytes": 2067
+    },
+    {
+      "path": "evidence/gui-g2-v33-permission-candidate-validation.json",
+      "sha256": "ac8dc975c57ec897637de63e5e661bc3cc637670198d09be1f27a838b24b1522",
+      "bytes": 4569
+    },
+    {
+      "path": "docs/reviews/G2_V33_GUI_PERMISSION_MAPPING_CANDIDATE_REVIEW_2026-11-06.md",
+      "sha256": "7fd4bd9ff1b9c394c0ec03604f6fc9aaae1c2e99d40bf56f07d3691ce45a60c7",
+      "bytes": 4486
+    }
+  ],
+  "source_inputs": [
+    {
+      "path": "baseline/CB-1.6.0/canonical/GUI_VIEW_CONTRACT.json",
+      "git_blob_sha": "df887271581aef2e608410b988f989e0bd36b913"
+    },
+    {
+      "path": "baseline/CB-1.6.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json",
+      "git_blob_sha": "fa3b104dc7b6cf3092b6b75e22e8eec86966da9e"
+    },
+    {
+      "path": "baseline/CB-1.6.0/BASELINE_LOCK.json",
+      "git_blob_sha": "7b66e6cf142d209b635dcbb4a7aa7aef19f77545"
+    },
+    {
+      "path": "docs/gui/demo-v33/V33_FINAL_VIEW_REGISTRY.json",
+      "git_blob_sha": "e2c50591a42864b0a6028252beb40c32a62a41a8"
+    },
+    {
+      "path": "docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json",
+      "git_blob_sha": "2c693389266acb7fa441dbbfea7888c0300e5775"
+    },
+    {
+      "path": "src/tpaa_security/TPAA_SECURITY_POLICY_V1.json",
+      "git_blob_sha": "a26f0336de4d53e917b7d1ada37038b238945743"
+    },
+    {
+      "path": "src/tpaa_security/permissions.py",
+      "git_blob_sha": "00a044f24b692e2e72dd552e2c8740b30c62c114"
+    },
+    {
+      "path": "baseline/CB-1.6.0/canonical/API_ROUTE_AUTHORITY.json",
+      "git_blob_sha": "00a1777b4c17824cba3e00cf6fee072e5ffa3e68"
+    }
+  ],
+  "activation": {
+    "status": "INACTIVE",
+    "prohibited_until": "Formal security/governance approval and completion of all runtime integration gates.",
+    "runtime_code_changed": false,
+    "database_migration_required": false,
+    "api_contract_implemented": false,
+    "main_branch_changed": false
+  }
+}

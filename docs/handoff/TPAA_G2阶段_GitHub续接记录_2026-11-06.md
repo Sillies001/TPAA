@@ -179,3 +179,20 @@ Review at branch HEAD `ccd220ec050d069bfc052ae2deba7e7bb126f417` confirms:
 - G2 must define and validate an explicit, reviewable mapping from each view's GUI permissions to the existing business permission policy, while preserving default deny and leaving CB-1.6.0 immutable. No role/view access matrix is inferred or silently activated.
 
 G2 remains `IN_PROGRESS`; G3 remains `NOT_STARTED`. Before permissioned navigation can be enabled, prepare a controlled successor authority diff, lock/provenance, compatibility and migration/validation evidence, and obtain the required policy review. Continue to keep all unbound views forbidden.
+
+
+## CB-1.7.0 GUI 权限映射候选已建立（2026-11-06）
+
+- 候选目录：`baseline/candidates/CB-1.7.0/`；父基线 `CB-1.6.0` 未修改。
+- 决策：`G2-V33-GUI-PERMISSION-MAPPING-CANDIDATE-2026-11-06`；状态 `PROPOSED_NOT_APPROVED`，运行激活 `INACTIVE`，`release_claim=false`。
+- 新增候选权威：GUI_VIEW_CONTRACT、GUI_PERMISSION_AUDIT_AUTHORITY、GUI_ROLE_VIEW_ACCESS_MATRIX；另有 AUTHORITY_DIFF、COMPATIBILITY、CANDIDATE_LOCK、review record 和静态 validation evidence。
+- 权限来源严格绑定现有 `SecurityRole`、`Permission` 和 `TPAA_SECURITY_POLICY_V1`；九种角色和业务权限没有增加。
+- 12 个 GUI 权限由 11 个现有 ID 加 `governance.audit.read` 组成；后者映射现有 `SECURITY_AUDIT_READ`，仅 ADMINISTRATOR 可获授。
+- 角色视图入口：TRAINEE 23；INSTRUCTOR 25；EVALUATOR 25；TRAINING_MANAGER 25；UNIT_ANALYST 23；MAINTENANCE_ENGINEERING 25；DATA_ENGINEER 25；ADMINISTRATOR 26；MODEL_REVIEWER 23。V03/V24 仅六个 RAW_DATA_READ 角色可进入；V22 仅 ADMINISTRATOR 可进入。
+- V23 actions：`batch.register` 仅 INSTRUCTOR/DATA_ENGINEER/ADMINISTRATOR；`batch.training_type.revise` 为 INSTRUCTOR/TRAINING_MANAGER/DATA_ENGINEER/ADMINISTRATOR。V24 `context.force_formation.revise` 同为四个 CONFIGURATION_WRITE 角色。
+- V04/V05/V06/V08/V20/V21/V26 的 event-window 与 replay deep-link 为可选能力；V24 的 window read 是必需权限。V06/V21 保持 shooter-only。
+- 静态结构检查通过：九角色枚举匹配、业务权限枚举匹配、26 视图完整、所有权限有绑定、V24 入口不变量、Strike shooter-only、继承源 hash 匹配、DB schema 不变。
+- 未运行 Ruff/Mypy/pytest/前端集成/Windows GUI 权限 smoke；候选未激活。
+- 阻断：Session DTO 尚无 `gui_permissions`；前端把 `payload.permissions` 当 GUI 权限；`scope_match=true` 目前可转换为 wildcard `*`；ApiAuthorizationGuard 未证明敏感读和所有 mutation ALWAYS audit；71 条 API route 无稳定 route_id/permission/audit 字段；安全/治理审批缺失。
+- DB schema 仍为 1.10.0，无 migration/backfill；API v1 仅规划 additive Session DTO 扩展，尚未实现。所有 query/mutation route IDs 保持空，不虚构 route binding。
+- G2 继续 `IN_PROGRESS`；G3 继续 `NOT_STARTED`。候选获批并完成运行时实现和负面测试前，所有未批准页面/能力继续 fail-closed。

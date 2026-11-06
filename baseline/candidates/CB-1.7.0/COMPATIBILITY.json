@@ -1,0 +1,59 @@
+{
+  "authority_id": "CB_1_7_0_CANDIDATE_COMPATIBILITY",
+  "authority_version": "1.0.0-candidate",
+  "base_core_baseline": "CB-1.6.0",
+  "candidate_core_baseline": "CB-1.7.0",
+  "status": "PROPOSED_NOT_APPROVED",
+  "activation_status": "INACTIVE",
+  "database": {
+    "current_schema": "1.10.0",
+    "candidate_schema": "1.10.0",
+    "migration_required": false,
+    "backfill_required": false,
+    "rationale": "Authority-only overlay; no persisted objects, columns, enums, role assignments or DB constraints change."
+  },
+  "api": {
+    "version": "v1",
+    "endpoint": "GET /security/session",
+    "current_permissions_field": "permissions",
+    "current_permissions_semantics": "Existing business permission IDs; preserve unchanged.",
+    "proposed_additive_fields": [
+      {
+        "name": "gui_permissions",
+        "type": "string[]",
+        "source": "server-side authority evaluation"
+      },
+      {
+        "name": "gui_permission_authority_id",
+        "type": "string",
+        "value": "GUI_PERMISSION_AUDIT_AUTHORITY"
+      },
+      {
+        "name": "gui_permission_authority_version",
+        "type": "string",
+        "value": "1.1.0-candidate"
+      }
+    ],
+    "non_breaking_rule": "Do not repurpose permissions; GUI permissions are not API authorization.",
+    "server_side_evaluation_required": true,
+    "not_implemented": true
+  },
+  "authorization": {
+    "decision": "GUI grant AND exact scope AND exact context/entry grant AND backend route authorization",
+    "exact_resource_context_required": true,
+    "non_global_roles_must_not_use_wildcard_scope": true,
+    "unknown": "DENY"
+  },
+  "route_compatibility": {
+    "api_route_count": 71,
+    "stable_route_ids_present": false,
+    "explicit_permission_audit_bindings_present": false,
+    "gui_query_route_ids_bound": false,
+    "gui_mutation_route_ids_bound": false,
+    "status": "NOT_READY_FOR_ROUTE_LEVEL_ACTIVATION"
+  },
+  "rollback": {
+    "candidate_overlay_removal": "No runtime rollback while inactive.",
+    "parent_baseline": "CB-1.6.0 remains active and immutable."
+  }
+}
