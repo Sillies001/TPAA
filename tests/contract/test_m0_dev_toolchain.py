@@ -212,7 +212,7 @@ def test_machine_readable_toolchain_verifier_passes() -> None:
     assert evidence["adrs"] == ["ADR-M0-001", "ADR-M0-002", "ADR-M0-003"]
 
 
-def test_quality_tool_fallback_runs_inside_locked_project_environment(
+def test_quality_tool_fallback_runs_inside_frozen_project_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     import importlib.util
@@ -231,7 +231,7 @@ def test_quality_tool_fallback_runs_inside_locked_project_environment(
     assert command == [
         "/usr/bin/uv",
         "run",
-        "--locked",
+        "--frozen",
         "--with",
         "mypy==2.3.1",
         "mypy",

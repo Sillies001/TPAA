@@ -397,7 +397,8 @@ def _quality_tool_command(tool: str, version: str, args: Sequence[str]) -> list[
     uv = _uv_executable()
     if uv is None:
         raise RuntimeError(f"{tool} {version} unavailable and uv is not on PATH")
-    return [uv, "run", "--locked", "--with", f"{tool}=={version}", tool, *args]
+    # --with adds a pinned one-off quality tool; --frozen keeps uv.lock untouched.
+    return [uv, "run", "--frozen", "--with", f"{tool}=={version}", tool, *args]
 
 
 def _quality_version(tool: str, version: str) -> tuple[str, str]:
