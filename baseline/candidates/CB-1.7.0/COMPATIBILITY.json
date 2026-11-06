@@ -36,7 +36,9 @@
     ],
     "non_breaking_rule": "Do not repurpose permissions; GUI permissions are not API authorization.",
     "server_side_evaluation_required": true,
-    "not_implemented": true
+    "not_implemented": false,
+    "implementation_state": "SESSION_DTO_FIELDS_IMPLEMENTED_GUI_AUTHORITY_INACTIVE",
+    "runtime_behavior": "The existing permissions field remains business permissions. gui_permissions is explicit and empty while the CB-1.7.0 GUI authority candidate is INACTIVE."
   },
   "authorization": {
     "decision": "GUI grant AND exact scope AND exact context/entry grant AND backend route authorization",
@@ -46,11 +48,14 @@
   },
   "route_compatibility": {
     "api_route_count": 71,
-    "stable_route_ids_present": false,
-    "explicit_permission_audit_bindings_present": false,
+    "stable_route_ids_present": true,
+    "explicit_permission_audit_bindings_present": true,
+    "authority_path": "baseline/candidates/CB-1.7.0/canonical/API_ROUTE_SECURITY_AUTHORITY.json",
+    "authority_activation_status": "INACTIVE",
+    "runtime_classifier_replaced": false,
     "gui_query_route_ids_bound": false,
     "gui_mutation_route_ids_bound": false,
-    "status": "NOT_READY_FOR_ROUTE_LEVEL_ACTIVATION"
+    "status": "CANDIDATE_EXPLICIT_AUTHORITY_READY_RUNTIME_SWITCH_BLOCKED"
   },
   "rollback": {
     "candidate_overlay_removal": "No runtime rollback while inactive.",

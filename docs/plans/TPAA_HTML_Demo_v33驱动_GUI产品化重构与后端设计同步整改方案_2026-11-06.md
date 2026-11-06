@@ -889,3 +889,8 @@ docs/gui/demo-v33 docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json
 本方案已覆盖 v33 基线、三份 Patch、26 视图、V01/V26、WE/Cluster/Window、双视角、后端/API/DTO、版本、设计同步、分阶段实施、测试、迁移、风险和 DoD。
 
 执行状态（2026-11-06）：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`，`G2=IN_PROGRESS`，`G3～G12=NOT_STARTED`。G0R/G1 证据沿用既有关闭记录。G2 的产品 Shell、Ribbon、三主题、共享状态和 V24 默认拒绝框架已实现；Windows Vite/类型检查/G1 确定性构建/G2 定向测试及 WebEngine loopback smoke 已由用户报告通过。现已在 `baseline/candidates/CB-1.7.0/` 建立未批准的权限权威 overlay，完成九角色/26 视图/12 GUI 权限的静态映射；候选验证报告为 `PASS_STATIC_ARTIFACT_VALIDATION_WITH_ACTIVATION_BLOCKERS`。候选尚未获安全/治理批准且保持 INACTIVE；`/security/session` 的 `gui_permissions` 字段、前端消费、exact scope（尤其禁止非全局 wildcard）、敏感读/mutation ALWAYS audit 和 route_id/permission/audit authority 仍未实现，因此不得关闭 G2 或启动 G3。上述状态不代表任何生产资格通过。
+
+
+### G2 安全授权整改增量（2026-11-06）
+
+已在工作分支实施：scope_match 与授权 scope 解耦；非全局 wildcard scope 默认拒绝；security/session 业务权限与 GUI 权限字段分离且 candidate inactive 时 GUI 权限为空；前端仅消费 gui_permissions；所有 business-Permission API 授权决策在 handler 前写去标识化审计并对审计写失败 fail-closed。另建立未激活 API_ROUTE_SECURITY_AUTHORITY，冻结 71 条既有运行路由的 stable route ID、permission 与 audit 语义，14 条 GUI reserved routes 不暴露。上述实现必须通过本批测试，且不自动激活 CB-1.7.0、不关闭 G2、不启动 G3。

@@ -21,6 +21,12 @@
       "operation": "ADD",
       "artifact": "GUI_ROLE_VIEW_ACCESS_MATRIX.json",
       "summary": "Machine-derived nine-role by 26-view access and capability/action grants."
+    },
+    {
+      "operation": "ADD",
+      "artifact": "API_ROUTE_SECURITY_AUTHORITY.json",
+      "path": "canonical/API_ROUTE_SECURITY_AUTHORITY.json",
+      "summary": "Freeze all 71 existing runtime routes into stable route IDs with explicit current business-permission and audit semantics; preserve 14 GUI routes as reserved and unknown routes default DENY. Candidate remains inactive."
     }
   ],
   "unchanged": [
@@ -41,11 +47,12 @@
     "release_claim": false
   },
   "unresolved_gates": [
-    "GET /security/session returns business permissions only; server-derived gui_permissions is not implemented.",
     "Frontend reads payload.permissions as GUI permission IDs; it must consume a distinct gui_permissions field without changing business permissions.",
-    "UnifiedPrincipal maps scope_match=true to '*' and AuthorizationService accepts '*' for ownership; exact scope enforcement and non-admin wildcard denial are not implemented.",
     "ApiAuthorizationGuard does not yet audit every candidate sensitive read and every mutation as required by the GUI audit authority.",
     "API_ROUTE_AUTHORITY contains 71 routes without stable route_id, permission or audit fields; GUI query_route_ids and mutation_route_ids remain empty.",
+    "Formal security/governance approval has not been recorded.",
+    "Runtime still uses the legacy route classifier; switching to API_ROUTE_SECURITY_AUTHORITY is blocked on formal approval plus exact registered-route parity tests.",
+    "Ruff, Mypy, pytest, frontend build and Windows WebEngine smoke for this security-hardening batch are not yet recorded.",
     "Formal security/governance approval has not been recorded."
   ]
 }

@@ -196,3 +196,12 @@ G2 remains `IN_PROGRESS`; G3 remains `NOT_STARTED`. Before permissioned navigati
 - 阻断：Session DTO 尚无 `gui_permissions`；前端把 `payload.permissions` 当 GUI 权限；`scope_match=true` 目前可转换为 wildcard `*`；ApiAuthorizationGuard 未证明敏感读和所有 mutation ALWAYS audit；71 条 API route 无稳定 route_id/permission/audit 字段；安全/治理审批缺失。
 - DB schema 仍为 1.10.0，无 migration/backfill；API v1 仅规划 additive Session DTO 扩展，尚未实现。所有 query/mutation route IDs 保持空，不虚构 route binding。
 - G2 继续 `IN_PROGRESS`；G3 继续 `NOT_STARTED`。候选获批并完成运行时实现和负面测试前，所有未批准页面/能力继续 fail-closed。
+
+
+## G2 安全授权硬化提交（2026-11-06）
+
+代码提交已完成以下整改：scope_match 不再生成授权 wildcard；非全局 wildcard scope 显式拒绝；/security/session 将 business permissions 与 gui_permissions 分离，且候选 inactive 时 GUI 权限为空；前端只消费 gui_permissions；所有受 business Permission 治理的 API 请求在 handler 前记录去标识化授权审计，审计写失败 fail-closed。
+
+生产审计链保持为 SQLite/PostgreSQL SecurityAuditSink -> 既有 audit.audit_log。新增未激活候选 API_ROUTE_SECURITY_AUTHORITY，显式覆盖 71 条现有 runtime routes，14 条 GUI routes 保持 RESERVED_G1_NOT_EXPOSED。运行时 classifier 尚未切换，G2 继续 IN_PROGRESS。
+
+下一步必须先跑 Ruff、Mypy、targeted pytest、frontend typecheck/build、G1 deterministic frontend build、G2 verifier；随后在 Windows 用 uv run --frozen 运行 WebEngine smoke。只有测试全部通过后，才更新本批 evidence 的测试状态。正式安全/治理审批和 runtime route-authority switch 仍是开放门禁。

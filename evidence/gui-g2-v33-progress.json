@@ -145,5 +145,23 @@
     "fix_commit": "c6e81f0710040ec163ede42d1f292a7a98c9f4c7",
     "fix": "LocalBackendController now injects the package import root into the child PYTHONPATH on all platforms while preserving existing PYTHONPATH entries and the Windows venv launcher behavior.",
     "verification": "PENDING_WINDOWS_LOCAL"
+  },
+  "security_hardening_batch": {
+    "status": "IMPLEMENTED_PENDING_TEST",
+    "scope_match_authorization_wildcard_removed": true,
+    "non_global_wildcard_scope_denied": true,
+    "session_business_gui_permissions_separated": true,
+    "gui_permission_activation_status": "INACTIVE",
+    "frontend_consumes_gui_permissions_only": true,
+    "all_governed_permission_routes_pre_handler_audited": true,
+    "audit_failure_fail_closed": true,
+    "direct_subject_pseudonymized_before_persistent_audit": true,
+    "persistent_audit_relation": "audit.audit_log",
+    "candidate_route_security_authority": "baseline/candidates/CB-1.7.0/canonical/API_ROUTE_SECURITY_AUTHORITY.json",
+    "candidate_route_count": 71,
+    "reserved_gui_routes": 14,
+    "runtime_route_authority_switched": false,
+    "tests": "PENDING",
+    "release_claim": false
   }
 }

@@ -37,24 +37,29 @@
       "bytes": 68470
     },
     {
+      "path": "baseline/candidates/CB-1.7.0/canonical/API_ROUTE_SECURITY_AUTHORITY.json",
+      "sha256": "f25c306621a07c448396cefcebfb400944f00b996f3a913e91520fb5f771c511",
+      "bytes": 38577
+    },
+    {
       "path": "baseline/candidates/CB-1.7.0/AUTHORITY_DIFF.json",
-      "sha256": "9bc10b91a8b8368f8d7ba448e4fa4022a1d4832e66e5ab49bda9f34d083f8bd3",
-      "bytes": 2455
+      "sha256": "d454e3c5f996e0c7250cc8a5a3b8a312ba1a58dde68794265d574f7089ee9875",
+      "bytes": 2914
     },
     {
       "path": "baseline/candidates/CB-1.7.0/COMPATIBILITY.json",
-      "sha256": "191a092be37bef44588f91ae080bd2ac4baf648fbebe51c932113aeadd2fff93",
-      "bytes": 2067
+      "sha256": "0ed9c7012b902fd4bd8887fcf619934e43c523c03bf3fbd1c5d19d0135bfaa39",
+      "bytes": 2541
     },
     {
       "path": "evidence/gui-g2-v33-permission-candidate-validation.json",
-      "sha256": "ac8dc975c57ec897637de63e5e661bc3cc637670198d09be1f27a838b24b1522",
-      "bytes": 4569
+      "sha256": "a7c797f1fb3b5bec048bd2f254611cd6a918f0430344db6bea6dc0165bdc9608",
+      "bytes": 5741
     },
     {
       "path": "docs/reviews/G2_V33_GUI_PERMISSION_MAPPING_CANDIDATE_REVIEW_2026-11-06.md",
-      "sha256": "7fd4bd9ff1b9c394c0ec03604f6fc9aaae1c2e99d40bf56f07d3691ce45a60c7",
-      "bytes": 4486
+      "sha256": "1b8db258fa50e9d6e8450335c54f59a9af12380b35dff3fd7d66dfd9d0b835fd",
+      "bytes": 5910
     }
   ],
   "source_inputs": [
@@ -93,10 +98,10 @@
   ],
   "activation": {
     "status": "INACTIVE",
-    "prohibited_until": "Formal security/governance approval and completion of all runtime integration gates.",
-    "runtime_code_changed": false,
+    "prohibited_until": "Formal security/governance approval, runtime route-authority switch/parity gate, and G2 integration test completion.",
+    "runtime_code_changed": true,
     "database_migration_required": false,
-    "api_contract_implemented": false,
+    "api_contract_implemented": true,
     "main_branch_changed": false
   }
 }

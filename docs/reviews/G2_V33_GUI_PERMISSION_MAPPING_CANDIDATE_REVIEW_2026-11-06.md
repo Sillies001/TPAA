@@ -66,3 +66,17 @@
 DB schema 保持 1.10.0；无持久化对象变化，不需要 migration/backfill。API v1 仅规划 additive Session DTO 扩展，尚未实现。CB-1.6.0 不修改，候选 overlay 可直接撤除。
 
 **在上述阻断项和正式审批关闭前，不得激活候选、放行视图、关闭 G2 或启动 G3。**
+
+
+## 7. G2 安全授权运行时代码硬化批次
+
+本批修改已经进入工作分支，但候选仍为 `PROPOSED_NOT_APPROVED / INACTIVE`：
+
+1. `scope_match` 继续只用于 M8/M9 的冻结领域视图语义，不再自动变成授权 `*`。非全局角色显式携带 `*` 时，ownership-required 权限返回 `RESOURCE_SCOPE_WILDCARD_DENIED`。
+2. `GET /security/session` 保留原业务 `permissions` 语义，新增独立 `gui_permissions`、GUI authority id/version/status。候选未激活时 `gui_permissions=[]`，前端因此默认拒绝业务视图。
+3. 前端只使用 `gui_permissions` 做视图权限判断，不再把业务 Permission ID 当 GUI Permission ID。
+4. 所有经过 W3 business Permission 的 API 请求均在 handler 前记录授权审计；subject 在 security 边界内先做 SHA-256 去标识化。
+5. 持久化审计 sink 写失败时 guard 返回 `AUDIT_WRITE_FAILED`，下游 handler 不执行。生产仍使用 SQLite/PostgreSQL SecurityAuditSink 写既有 `audit.audit_log`，没有引入 InMemory 生产适配或影子 schema。
+6. 新增未激活的 `API_ROUTE_SECURITY_AUTHORITY.json`，为冻结的 71 条运行路由建立 stable route ID、明确 permission/audit 语义，并原样保留 14 条 GUI reserved routes。运行时仍使用旧 classifier，正式切换需要审批和注册路由 parity 门禁。
+
+这些改动不等于激活 CB-1.7.0，也不构成 G2 关闭。
