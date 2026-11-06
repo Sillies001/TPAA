@@ -1,0 +1,22 @@
+{
+  "schema":"TPAA_GUI_G2_V33_PROGRESS_EVIDENCE_V1",
+  "status":"IN_PROGRESS",
+  "phase_status":"IN_PROGRESS",
+  "base_revision":"b92229da8dcc23f433ab7fc87f7210adbf32485e",
+  "authority_checks":"STATIC_REVIEWED",
+  "v24_ui_and_server_guard":"IMPLEMENTED_NOT_EXECUTED",
+  "ribbon_themes_shared_state":"IMPLEMENTED_NOT_BUILT",
+  "frontend_typecheck":"NOT_RUN",
+  "vite_build_and_web_dist_sync":"PENDING",
+  "python_targeted_tests":"NOT_RUN",
+  "webengine_visual_keyboard_hidpi_tests":"PENDING",
+  "open_gates":[
+    "Run npm ci, npm run typecheck and npm run build on the Windows workspace",
+    "Regenerate src/tpaa_gui/web_dist and pass tools/gui/g1_frontend_build.py",
+    "Run targeted Ruff and pytest for the new G2 contract and V24 server guard tests",
+    "Run the G0R/G1 verifier commands after the frontend build and confirm zero drift",
+    "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon and DPI checks",
+    "Confirm the actual desktop principal/permission matrix; do not invent view permissions absent from GUI_VIEW_CONTRACT"
+  ],
+  "release_claim":false
+}

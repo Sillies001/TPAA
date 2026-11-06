@@ -152,6 +152,11 @@ def create_desktop_app(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "UNAUTHORIZED"},
             )
+        if _is_direct_v24_navigation(request):
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"detail": "V24_REQUIRES_V08_CONTEXT"},
+            )
         principal: UnifiedPrincipal | None = None
         if principal_resolver is not None:
             try:
