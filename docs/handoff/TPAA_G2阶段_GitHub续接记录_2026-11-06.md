@@ -144,3 +144,38 @@ User reran G0R/G1 checks successfully and G2 verifier remains IN_PROGRESS. The G
 ## WebEngine child import-path root cause and correction (2026-11-06)
 
 The inherited-stderr rerun exposed the actual child exception: the interpreter could not resolve tpaa_api.local_backend_child because src had been added only to the parent's in-memory sys.path. A new Python process does not inherit that mutation. The correction passes the package root (the parent of tpaa_gui) through the child environment's PYTHONPATH, on Windows and POSIX, while preserving existing entries. Windows venv redirector bypass and __PYVENV_LAUNCHER__ handling remain intact. Local Windows runtime verification is pending.
+
+## Windows WebEngine smoke recheck passed (2026-11-06)
+
+The user reran the G1 WebEngine loopback smoke from the governed project environment using:
+
+```powershell
+uv run --frozen python tools/gui/g1_webengine_smoke.py --output "$env:TEMP\\tpaa-g1-webengine-smoke-recheck.json"
+```
+
+The reported TEMP evidence content:
+
+- `status=PASS`
+- exact loopback origin: `http://127.0.0.1:<ephemeral-port>`
+- `off_the_record=true`
+- `static_entry=/ui`
+- `backend_degraded_state=PASS`
+- `shutdown_state=EXITED`
+- `release_claim=false`
+
+This confirms that the prior child startup failure was caused by invoking the smoke with the global Python environment rather than the frozen project environment; rerunning with `uv run --frozen` made FastAPI available to the child. The child PYTHONPATH correction remains in place and no security boundary was relaxed.
+
+Non-blocking environment/runtime warnings were observed: Qt's optional fonts directory was absent; Chromium could not create a GLES3 shared context and logged GLES2 fallback attempts; Qt warned that a WebEnginePage had not yet been deleted when its profile release was requested. The smoke nevertheless completed PASS and the backend exited. Font deployment and WebEngine object destruction ordering remain follow-up hardening items; GLES3 software fallback and cross-platform qualification remain G11 gates.
+
+This is a user-reported Windows recheck written to a TEMP path. It does not overwrite or replace the immutable G1 closure evidence. It does not satisfy G2 visual/theme/keyboard/high-DPI checks and does not close G2.
+
+## G2 permission authority remains the controlling blocker
+
+Review at branch HEAD `ccd220ec050d069bfc052ae2deba7e7bb126f417` confirms:
+
+- All 26 entries in `baseline/CB-1.6.0/canonical/GUI_VIEW_CONTRACT.json` still have empty `required_permissions`.
+- `GUI_PERMISSION_AUDIT_AUTHORITY.json` defines 11 GUI permission IDs with default-deny semantics, but does not bind them to views or to the business permission vocabulary.
+- `GET /security/session` currently returns the business permissions from `TPAA_SECURITY_POLICY_V1` (for example `DERIVED_DATA_READ`, `SOURCE_IMPORT`, `CONFIGURATION_WRITE`), not the GUI permission IDs. A non-empty view binding alone would therefore still not authorize navigation.
+- G2 must define and validate an explicit, reviewable mapping from each view's GUI permissions to the existing business permission policy, while preserving default deny and leaving CB-1.6.0 immutable. No role/view access matrix is inferred or silently activated.
+
+G2 remains `IN_PROGRESS`; G3 remains `NOT_STARTED`. Before permissioned navigation can be enabled, prepare a controlled successor authority diff, lock/provenance, compatibility and migration/validation evidence, and obtain the required policy review. Continue to keep all unbound views forbidden.
