@@ -42,6 +42,7 @@ def main() -> int:
         controller = LocalBackendController(
             product_build_version="1.0.0",
             data_root=Path(temporary).resolve(),
+            child_stderr=None,
         )
         try:
             started = controller.start()

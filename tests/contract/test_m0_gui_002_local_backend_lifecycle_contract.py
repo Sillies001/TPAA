@@ -9,6 +9,7 @@ CHILD = ROOT / "src" / "tpaa_api" / "local_backend_child.py"
 DESKTOP_API = ROOT / "src" / "tpaa_api" / "desktop.py"
 STATUS = ROOT / "docs" / "developer" / "M0_STATUS.md"
 PLAN = ROOT / "docs" / "implementation" / "M0-GUI-002_LOCAL_BACKEND_LIFECYCLE_HANDSHAKE.md"
+WEBENGINE_SMOKE = ROOT / "tools" / "gui" / "g1_webengine_smoke.py"
 
 
 def _imports(path: Path) -> set[str]:
@@ -85,3 +86,8 @@ def test_status_and_plan_keep_task_scope_explicit() -> None:
     assert "Windows CPython 3.13.5" in status
     assert "owned_child_ready" in plan
     assert "M0-GUI-003" in plan
+
+
+def test_webengine_smoke_inherits_child_stderr_for_startup_diagnostics() -> None:
+    source = WEBENGINE_SMOKE.read_text(encoding="utf-8")
+    assert "child_stderr=None" in source

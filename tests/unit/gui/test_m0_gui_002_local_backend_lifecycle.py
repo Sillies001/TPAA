@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+
 import pytest
 
 from tpaa_gui.desktop import run_desktop
@@ -154,3 +156,13 @@ def test_non_windows_spawn_keeps_interpreter_and_does_not_copy_environment() -> 
 
     assert command == ["/repo/.venv/bin/python", "child.py"]
     assert child_env is None
+
+
+def test_child_stderr_is_suppressed_by_default_and_can_be_inherited() -> None:
+    production = LocalBackendController(child_command=("python", "fake-child.py"))
+    diagnostic = LocalBackendController(
+        child_command=("python", "fake-child.py"),
+        child_stderr=None,
+    )
+    assert production._child_stderr is subprocess.DEVNULL
+    assert diagnostic._child_stderr is None

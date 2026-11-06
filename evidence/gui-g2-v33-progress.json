@@ -17,7 +17,8 @@
     "Run Windows WebEngine loopback smoke to TEMP output; do not overwrite G1 closure evidence",
     "Create a controlled successor authority diff binding explicit permissions to all 26 views and map GUI permission IDs to TPAA security policy permissions",
     "Execute actual GUI three-theme, keyboard, focus, ribbon and high-DPI checks after view permission authority is admitted",
-    "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading"
+    "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading",
+    "Rerun Windows WebEngine smoke with inherited child stderr and fix the first real child startup exception"
   ],
   "release_claim": false,
   "implementation_revision": "55a59a661b1929aa80888b0afb82b7c0e99e7274",
@@ -135,5 +136,13 @@
     "root_cause": "G1 GUI_VIEW_CONTRACT currently contains empty required_permissions arrays for all 26 views; GUI permission catalog has default-deny identifiers but no per-view bindings or mapping to TPAA_SECURITY_POLICY_V1 permissions",
     "resolution": "Requires a controlled G2 successor authority diff, lock, compatibility and migration evidence; do not mutate CB-1.6.0 G1 candidate or invent a role matrix silently"
   },
-  "webengine_smoke_output_option": "tools/gui/g1_webengine_smoke.py --output <TEMP path>; default output remains the original G1 evidence path"
+  "webengine_smoke_output_option": "tools/gui/g1_webengine_smoke.py --output <TEMP path>; default output remains the original G1 evidence path",
+  "webengine_smoke_latest": "FAILED_CONTROL_CHANNEL_CLOSED_WINDOWS_LOCAL",
+  "webengine_smoke_diagnosis": {
+    "failure": "Child process closed stdout before emitting the LISTENING control record",
+    "known_limit": "LocalBackendController previously sent child stderr to DEVNULL, hiding the startup exception",
+    "change": "G1 smoke now inherits child stderr; production default remains DEVNULL",
+    "root_cause": "NOT_YET_IDENTIFIED",
+    "next_action": "Rerun smoke and capture child traceback before changing runtime composition"
+  }
 }

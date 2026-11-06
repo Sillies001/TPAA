@@ -134,3 +134,8 @@ G2 仍为 `IN_PROGRESS`。本轮新增权限安全修正待 Windows npm build、
 - The G1 WebEngine smoke tool now accepts `--output` so a fresh smoke can write to TEMP without overwriting the original G1 closure evidence.
 - The new permission correction, verifier, tests and smoke CLI have not yet been rerun on Windows. The earlier 6-pass result applies to the previous code revision only.
 - Exact next step: sync branch and run the consolidated command block in the latest ChatGPT handoff. Do not mark G2 closed.
+
+
+## WebEngine smoke failure investigation (2026-11-06)
+
+User reran G0R/G1 checks successfully and G2 verifier remains IN_PROGRESS. The G1 WebEngine smoke failed at LocalBackendController.start() with CONTROL_CHANNEL_CLOSED before receiving LISTENING. Inspection found stderr was hardwired to DEVNULL, so the child startup traceback was hidden. A narrowly scoped diagnostic change was made: LocalBackendController gains an optional child_stderr stream, defaulting to DEVNULL (production behavior unchanged); the G1 smoke explicitly passes child_stderr=None to inherit the PowerShell console stderr. This should expose the actual child-side exception on rerun. No runtime root cause is asserted until that traceback is observed.

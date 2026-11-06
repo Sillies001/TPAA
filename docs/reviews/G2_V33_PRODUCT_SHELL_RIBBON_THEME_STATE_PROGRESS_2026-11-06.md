@@ -123,3 +123,8 @@ Remote implementation revision: `55a59a661b1929aa80888b0afb82b7c0e99e7274`.
 Windows results on the preceding revision: Ruff PASS, Mypy PASS (549 files), G2 targeted tests 6 passed / 2 warnings. A subsequent fail-closed correction now denies navigation for any view whose machine contract has an empty or missing `required_permissions`, removes the V25 bypass, and requires V24 permission bindings in addition to its controlled grant. The verifier reports all unbound views and retains G2 as IN_PROGRESS. The G1 WebEngine smoke script gained an optional output path so the G1 closure evidence file is not overwritten during rechecks.
 
 This latest correction is not yet Windows-verified. The prior 6-pass test result must not be attributed to this new revision. A controlled G2 successor authority diff is required before populating view permissions; CB-1.6.0 must remain unchanged.
+
+
+## 12. WebEngine smoke startup failure triage (2026-11-06)
+
+The latest Windows rerun passed Ruff, Mypy (549 files), 7 targeted tests, G0R, G1 successor, G1 codegen, G1 frontend build and G1 static verification. The WebEngine smoke failed before LISTENING with `CONTROL_CHANNEL_CLOSED`. The child process stderr was redirected to DEVNULL, preventing root-cause visibility. A diagnostic-only injection point was added to LocalBackendController: default remains DEVNULL; G1 smoke inherits stderr to console. Next action is rerun and inspect the first child traceback. No assumption about a runtime defect has been made.

@@ -145,6 +145,7 @@ class LocalBackendController:
         product_build_version: str = "0.0.0",
         data_root: Path | None = None,
         child_command: Sequence[str] | None = None,
+        child_stderr: int | IO[str] | None = subprocess.DEVNULL,
         startup_timeout_seconds: float = STARTUP_TIMEOUT_SECONDS,
         graceful_shutdown_seconds: float = GRACEFUL_SHUTDOWN_SECONDS,
         terminate_wait_seconds: float = TERMINATE_WAIT_SECONDS,
@@ -161,6 +162,9 @@ class LocalBackendController:
             child_command
             or (sys.executable, "-m", "tpaa_api.local_backend_child")
         )
+        # Production discards child stderr by default. Diagnostic harnesses may
+        # inherit the parent stream so pre-LISTENING startup exceptions remain visible.
+        self._child_stderr = child_stderr
         self._startup_timeout = startup_timeout_seconds
         self._graceful_shutdown = graceful_shutdown_seconds
         self._terminate_wait = terminate_wait_seconds
@@ -212,7 +216,7 @@ class LocalBackendController:
             spawn_command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=self._child_stderr,
             text=True,
             encoding="utf-8",
             bufsize=1,
