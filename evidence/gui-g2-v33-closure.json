@@ -1,0 +1,116 @@
+{
+  "schema": "TPAA_GUI_G2_V33_CLOSURE_EVIDENCE_V1",
+  "status": "PASS",
+  "phase_status": "CLOSED_LOCAL_WITH_GATES",
+  "verified_at": "2026-11-06T14:39:53Z",
+  "source_revision": "f7bd46e02ee9542ddc43bb031d6955082040b005",
+  "source_state": "LOCAL_WORKING_TREE_NO_PUSH_NO_DEPLOYMENT",
+  "approval_id": "G2-CB-1.7.0-LOCAL-ACTIVATION-2026-11-06",
+  "core_baseline": "CB-1.7.0",
+  "authority_activation": "ACTIVE_LOCAL_ONLY",
+  "baseline_reproducibility": "PASS",
+  "generated_authority_drift": "NONE",
+  "static_shell_contract": "PASS",
+  "route_authority": {
+    "status": "PASS",
+    "route_count": 86,
+    "business_permission_routes": 75,
+    "authenticated_status_routes": 11,
+    "unknown_route_policy": "DENY"
+  },
+  "role_view_authority": {
+    "status": "PASS",
+    "role_count": 9,
+    "view_count": 26,
+    "view_counts": {
+      "TRAINEE": 23,
+      "INSTRUCTOR": 25,
+      "EVALUATOR": 25,
+      "TRAINING_MANAGER": 25,
+      "UNIT_ANALYST": 23,
+      "MAINTENANCE_ENGINEERING": 25,
+      "DATA_ENGINEER": 25,
+      "ADMINISTRATOR": 26,
+      "MODEL_REVIEWER": 23
+    }
+  },
+  "frontend_build": {
+    "schema": "TPAA_G1_V33_FRONTEND_BUILD_EVIDENCE_V1",
+    "status": "PASS",
+    "package_lock_sha256": "422bc9b149fdb9d364acdf003e5d3f8b19c147da998961c1724578b282492282",
+    "files": [
+      {
+        "path": ".vite/manifest.json",
+        "sha256": "210cf5ff0ed45044ba88763d7e63963cfaae66699f2fc3b0e339eb25cbda1478",
+        "bytes": 185
+      },
+      {
+        "path": "assets/index-Ck9gvWm3.css",
+        "sha256": "2d5494c1f489b4a2a0deef1ea0cf9f48f2eb1c55d2cbb4c7f0b83f61b21e1338",
+        "bytes": 11962
+      },
+      {
+        "path": "assets/index-D_SX_qdv.js",
+        "sha256": "ddd79cf896d53724d7d2c462c2180990dbde2ef4c00f4aca3ef4e217648b2f77",
+        "bytes": 40997
+      },
+      {
+        "path": "index.html",
+        "sha256": "90ddcde09390159b2f179785fae789a6dd5496b1e53217881635e29b194ee549",
+        "bytes": 510
+      }
+    ],
+    "remote_resources": 0,
+    "release_claim": false
+  },
+  "webengine_acceptance": [
+    {
+      "status": "PASS",
+      "scale": 1.0,
+      "exact_origin": "http://127.0.0.1:14016",
+      "off_the_record": true,
+      "screenshots": [
+        {
+          "path": "evidence/gui-g2-v33/screenshots/g2_tactical_100pct.png",
+          "sha256": "0d9dc853d10c22d7d4c92aa05a489528b9701f7e7558dea60992cd48b7d698f9"
+        },
+        {
+          "path": "evidence/gui-g2-v33/screenshots/g2_graphite_100pct.png",
+          "sha256": "c6957f5246ff1e424b495adecb88f1b4b757e5803336b1c42f63a9c042891b70"
+        },
+        {
+          "path": "evidence/gui-g2-v33/screenshots/g2_light_100pct.png",
+          "sha256": "39d4b7299b517c5bb33ec3cc46c2b931639dd0e29472cc19e259cc4625661c2c"
+        }
+      ]
+    },
+    {
+      "status": "PASS",
+      "scale": 1.5,
+      "exact_origin": "http://127.0.0.1:14030",
+      "off_the_record": true,
+      "screenshots": [
+        {
+          "path": "evidence/gui-g2-v33/screenshots/g2_tactical_150pct.png",
+          "sha256": "a48f627987479b1e3087b4b0b9c98d5b682619e9e7fdee1fd38288290a005711"
+        },
+        {
+          "path": "evidence/gui-g2-v33/screenshots/g2_graphite_150pct.png",
+          "sha256": "31d94e30ae3fd2abe9cb648cf2c9bd79da4e7a8c318a3d602500b31de652cf0f"
+        },
+        {
+          "path": "evidence/gui-g2-v33/screenshots/g2_light_150pct.png",
+          "sha256": "023f456b2fb72586e2724a0a2427123433dfd233f958eb611dbe70311dd52491"
+        }
+      ]
+    }
+  ],
+  "g0r_g1_regression_review": "PASS",
+  "open_gates": [],
+  "restrictions": {
+    "push": "PROHIBITED",
+    "production_deployment": "PROHIBITED",
+    "release_claim": false
+  },
+  "release_claim": false
+}
