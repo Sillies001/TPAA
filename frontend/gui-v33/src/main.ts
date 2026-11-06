@@ -19,11 +19,16 @@ interface ViewContract {
 interface ContractDocument { views: ViewContract[] }
 interface PermissionDocument { permissions: Array<{ permission_id: string; unknown_policy: string }> }
 interface DomainSelection {
-  batchId: string | null; sessionId: string | null; releaseId: string | null; contextId: string | null;
-  policyId: string | null; episodeId: string | null; stageId: string | null; weaponEventId: string | null;
-  attackClusterId: string | null; perspective: string; scope: string;
+  batchId: string | null; sessionId: string | null; sortieId: string | null;
+  releaseId: string | null; contextId: string | null; policyId: string | null;
+  episodeId: string | null; stageId: string | null; weaponEventId: string | null;
+  attackClusterId: string | null; formationId: string | null; memberId: string | null;
+  perspective: string; evaluatedSide: string | null; scope: string;
 }
-interface ReplayState { masterTimeCursorUs: number | null; selectionStartUs: number | null; selectionEndUs: number | null }
+interface ReplayState {
+  masterTimeCursorUs: number | null; selectionStartUs: number | null; selectionEndUs: number | null;
+  mediaId: string | null; transcriptId: string | null;
+}
 interface Frame { viewId: ViewId; moduleId: ModuleId; domain: DomainSelection; replay: ReplayState }
 interface V24Grant {
   sourceView: "V08"; eventCategory: "BVR"; releaseId: string; contextId: string;
@@ -67,16 +72,23 @@ const state = {
   navigation: {
     currentViewId: (directV24 ? "V08" : "V01") as ViewId,
     activeModuleId: (directV24 ? "training" : "overview") as ModuleId,
+    approvedPredecessor: null as ViewId | null,
+    deepLink: null as string | null,
     returnStack: [] as Frame[],
   },
   domainSelection: {
-    batchId: null, sessionId: null, releaseId: null, contextId: null, policyId: null,
+    batchId: null, sessionId: null, sortieId: null, releaseId: null, contextId: null, policyId: null,
     episodeId: null, stageId: null, weaponEventId: null, attackClusterId: null,
-    perspective: "overview", scope: "batch",
+    formationId: null, memberId: null, perspective: "overview", evaluatedSide: null, scope: "batch",
   } as DomainSelection,
-  replayState: { masterTimeCursorUs: null, selectionStartUs: null, selectionEndUs: null } as ReplayState,
+  replayState: {
+    masterTimeCursorUs: null, selectionStartUs: null, selectionEndUs: null, mediaId: null, transcriptId: null,
+  } as ReplayState,
   authorization: { status: "LOADING" as AuthState, permissions: new Set<string>(), roles: [] as string[] },
-  presentation: { theme: "graphite" as Theme, ribbonCollapsed: false },
+  presentation: {
+    theme: "graphite" as Theme, ribbonCollapsed: false,
+    expandedPanels: new Set<string>(), reportZoom: 1, tableLayout: {} as Record<string, string>,
+  },
   v24Grant: null as V24Grant | null,
   notice: directV24 ? ({
     viewId: "V08", state: "FORBIDDEN", title: "禁止直接访问协同攻击分析",
@@ -142,6 +154,7 @@ function navigateToView(id: ViewId): boolean {
   if (!selected) return false;
   state.navigation.currentViewId = id;
   state.navigation.activeModuleId = selected.module;
+  state.navigation.approvedPredecessor = null;
   state.notice = null;
   state.v24Grant = null;
   render();
@@ -163,8 +176,10 @@ function enterV24FromV08(grant: V24Grant | null): boolean {
   state.domainSelection.contextId = grant.contextId;
   state.domainSelection.weaponEventId = grant.weaponEventId;
   state.domainSelection.attackClusterId = grant.attackClusterId;
+  state.domainSelection.formationId = grant.formationId;
   state.navigation.currentViewId = "V24";
   state.navigation.activeModuleId = "training";
+  state.navigation.approvedPredecessor = "V08";
   state.notice = null;
   render();
   return true;
@@ -175,6 +190,7 @@ function goBack(): void {
     state.v24Grant = null;
     state.navigation.currentViewId = "V08";
     state.navigation.activeModuleId = "training";
+    state.navigation.approvedPredecessor = null;
     if (previous?.viewId === "V08") {
       state.domainSelection = { ...previous.domain };
       state.replayState = { ...previous.replay };
@@ -187,6 +203,7 @@ function goBack(): void {
   if (!previous) return;
   state.navigation.currentViewId = previous.viewId;
   state.navigation.activeModuleId = previous.moduleId;
+  state.navigation.approvedPredecessor = null;
   state.domainSelection = { ...previous.domain };
   state.replayState = { ...previous.replay };
   state.notice = null;
@@ -205,10 +222,12 @@ function toggleRibbon(): void {
 function contextValue(field: string): string | null {
   const values: Record<string, string | null> = {
     batch_id: state.domainSelection.batchId, session_id: state.domainSelection.sessionId,
-    release_id: state.domainSelection.releaseId, context_id: state.domainSelection.contextId,
-    policy_id: state.domainSelection.policyId, episode_id: state.domainSelection.episodeId,
-    stage_id: state.domainSelection.stageId, weapon_event_id: state.domainSelection.weaponEventId,
-    attack_cluster_id: state.domainSelection.attackClusterId,
+    sortie_id: state.domainSelection.sortieId, release_id: state.domainSelection.releaseId,
+    context_id: state.domainSelection.contextId, policy_id: state.domainSelection.policyId,
+    episode_id: state.domainSelection.episodeId, stage_id: state.domainSelection.stageId,
+    weapon_event_id: state.domainSelection.weaponEventId, attack_cluster_id: state.domainSelection.attackClusterId,
+    formation_id: state.domainSelection.formationId, member_id: state.domainSelection.memberId,
+    evaluated_side: state.domainSelection.evaluatedSide,
   };
   return values[field] ?? null;
 }
@@ -257,9 +276,12 @@ function renderV08Entry(): string {
 }
 function renderContextBar(): string {
   const items: Array<[string, string]> = [
-    ["批次", state.domainSelection.batchId ?? "未选择"], ["架次", state.domainSelection.sessionId ?? "未选择"],
+    ["批次", state.domainSelection.batchId ?? "未选择"],
+    ["架次", state.domainSelection.sortieId ?? state.domainSelection.sessionId ?? "未选择"],
     ["Release", state.domainSelection.releaseId ?? "未选择"], ["Context", state.domainSelection.contextId ?? "未选择"],
-    ["Weapon Event", state.domainSelection.weaponEventId ?? "未选择"], ["视角", state.domainSelection.perspective],
+    ["Weapon Event", state.domainSelection.weaponEventId ?? "未选择"],
+    ["编队", state.domainSelection.formationId ?? "未选择"], ["成员", state.domainSelection.memberId ?? "未选择"],
+    ["视角", state.domainSelection.perspective], ["评估方", state.domainSelection.evaluatedSide ?? "未选择"],
   ];
   return '<section class="context-bar" aria-label="共享业务上下文">' + items.map(([label, value]) =>
     '<div class="context-item"><span>' + esc(label) + '</span><strong title="' + esc(value) + '">' + esc(value) + "</strong></div>",

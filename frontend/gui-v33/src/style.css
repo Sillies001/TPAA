@@ -20,7 +20,7 @@ button:focus-visible,a:focus-visible,[tabindex="-1"]:focus-visible{outline:3px s
 .module-tab-index{color:var(--subtle);font-size:10px;font-variant-numeric:tabular-nums;letter-spacing:.08em}
 .ribbon-subrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:31px;padding-top:7px}.ribbon-caption{display:flex;gap:12px;color:var(--subtle);font-size:10px;letter-spacing:.1em}.ribbon-caption span+span{color:var(--muted);letter-spacing:0}
 .ribbon-toggle{min-height:26px;padding:0 9px;color:var(--muted);font-size:11px}.ribbon.is-collapsed .ribbon-subrow{min-height:26px}
-.context-bar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;padding:1px clamp(14px,2vw,30px);border-bottom:1px solid var(--border);background:var(--border)}
+.context-bar{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:1px;padding:1px clamp(14px,2vw,30px);border-bottom:1px solid var(--border);background:var(--border)}
 .context-item{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:8px 10px;background:var(--soft)}.context-item span{flex:0 0 auto;color:var(--subtle);font-size:10px}
 .context-item strong{overflow:hidden;color:var(--muted);font-size:11px;font-weight:550;text-overflow:ellipsis;white-space:nowrap}
 .workspace{display:grid;grid-template-columns:246px minmax(0,1fr);min-height:0;overflow:hidden}.workspace.is-expanded{grid-template-columns:minmax(0,1fr)}

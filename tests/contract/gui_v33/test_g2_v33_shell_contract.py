@@ -52,6 +52,14 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
         token in source
         for token in ("domainSelection", "replayState", "returnStack", "ribbonCollapsed")
     )
+    assert all(
+        token in source
+        for token in (
+            "sortieId", "formationId", "memberId", "evaluatedSide", "mediaId",
+            "transcriptId", "expandedPanels", "reportZoom", "tableLayout",
+            "approvedPredecessor", "deepLink",
+        )
+    )
     assert not re.search(
         r"\b(?:localStorage|sessionStorage)\.(?:setItem|removeItem|clear)\s*\(",
         source,
