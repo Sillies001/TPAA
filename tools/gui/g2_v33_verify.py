@@ -57,31 +57,80 @@ def verify() -> dict[str, Any]:
     registry_views = registry.get("views")
     contract_views = contract.get("views")
     _require(registry.get("view_count") == 26, "registry count drift")
-    _require(isinstance(registry_views, list) and [item.get("id") for item in registry_views] == ids, "registry IDs drift")
-    _require(isinstance(contract_views, list) and [item.get("view_id") for item in contract_views] == ids, "view contract IDs drift")
+    _require(
+        isinstance(registry_views, list) and [item.get("id") for item in registry_views] == ids,
+        "registry IDs drift",
+    )
+    _require(
+        isinstance(contract_views, list)
+        and [item.get("view_id") for item in contract_views] == ids,
+        "view contract IDs drift",
+    )
     modules = {item.get("id"): item for item in registry.get("modules", [])}
-    _require(len(modules) == 5 and modules.get("training", {}).get("landing") == "V26", "module landing drift")
+    _require(
+        len(modules) == 5 and modules.get("training", {}).get("landing") == "V26",
+        "module landing drift",
+    )
     v24 = next((item for item in contract_views if item.get("view_id") == "V24"), {})
     _require(v24.get("entry_type") == "CONDITIONAL_V08_ONLY", "V24 entry type drift")
-    _require(v24.get("allowed_predecessor") == ["V08"] and v24.get("return_target") == "V08", "V24 predecessor/return drift")
+    _require(
+        v24.get("allowed_predecessor") == ["V08"] and v24.get("return_target") == "V08",
+        "V24 predecessor/return drift",
+    )
 
-    _require("V33_FINAL_VIEW_REGISTRY.json" in main and "GUI_VIEW_CONTRACT.json" in main, "frontend authority imports missing")
-    _require('view.id !== "V24"' in main and "V24_REQUIRES_V08_CONTEXT" in main, "frontend V24 direct guard missing")
-    _require('fetch("/security/session"' in main and "required_permissions.every" in main, "permission-aware navigation missing")
+    _require(
+        "V33_FINAL_VIEW_REGISTRY.json" in main and "GUI_VIEW_CONTRACT.json" in main,
+        "frontend authority imports missing",
+    )
+    _require(
+        'view.id !== "V24"' in main and "V24_REQUIRES_V08_CONTEXT" in main,
+        "frontend V24 direct guard missing",
+    )
+    _require(
+        'fetch("/security/session"' in main and "required_permissions.every" in main,
+        "permission-aware navigation missing",
+    )
     _require('theme: "graphite"' in main, "Graphite is not the session default")
-    _require(all(f':root[data-tpaa-theme="{theme}"]' in css for theme in ("tactical", "graphite", "light")), "theme tokens missing")
-    _require("domainSelection" in main and "replayState" in main and "returnStack" in main, "shared state layers missing")
-    _require(not re.search(r"\b(?:localStorage|sessionStorage)\.(?:setItem|removeItem|clear)\s*\(", main), "browser business persistence write found")
+    _require(
+        all(
+            f':root[data-tpaa-theme="{theme}"]' in css
+            for theme in ("tactical", "graphite", "light")
+        ),
+        "theme tokens missing",
+    )
+    _require(
+        "domainSelection" in main and "replayState" in main and "returnStack" in main,
+        "shared state layers missing",
+    )
+    _require(
+        not re.search(
+            r"\b(?:localStorage|sessionStorage)\.(?:setItem|removeItem|clear)\s*\(",
+            main,
+        ),
+        "browser business persistence write found",
+    )
     _require("Math.random(" not in main, "random business data found")
-    _require("_is_direct_v24_navigation" in desktop and "V24_REQUIRES_V08_CONTEXT" in desktop, "server V24 direct guard missing")
+    _require(
+        "_is_direct_v24_navigation" in desktop and "V24_REQUIRES_V08_CONTEXT" in desktop,
+        "server V24 direct guard missing",
+    )
 
     reserved = routes.get("reserved_routes")
     _require(isinstance(reserved, list) and len(reserved) == 14, "G1 reserved route count drift")
     paths = openapi.get("paths", {})
-    _require(not any(item.get("path") in paths for item in reserved), "G1 reserved route was exposed")
-    _require(g0r.get("status") == "PASS" and g0r.get("release_claim") is False, "G0R evidence invalid")
+    _require(
+        not any(item.get("path") in paths for item in reserved),
+        "G1 reserved route was exposed",
+    )
+    _require(
+        g0r.get("status") == "PASS" and g0r.get("release_claim") is False,
+        "G0R evidence invalid",
+    )
     _require(g1.get("status") == "PASS" and g1.get("release_claim") is False, "G1 evidence invalid")
-    _require(all(item.get("unknown_policy") == "DENY" for item in permissions.get("permissions", [])), "permission unknown policy is not deny")
+    _require(
+        all(item.get("unknown_policy") == "DENY" for item in permissions.get("permissions", [])),
+        "permission unknown policy is not deny",
+    )
 
     return {
         "schema": "TPAA_GUI_G2_V33_PROGRESS_EVIDENCE_V1",
@@ -102,8 +151,8 @@ def verify() -> dict[str, Any]:
             "Regenerate src/tpaa_gui/web_dist and pass tools/gui/g1_frontend_build.py",
             "Run targeted Ruff and pytest for the new G2 contract and V24 server guard tests",
             "Run the G0R/G1 verifier commands after the frontend build and confirm zero drift",
-            "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon and DPI checks",
-            "Confirm the actual desktop principal/permission matrix; do not invent view permissions absent from GUI_VIEW_CONTRACT",
+            "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon "
+            "Confirm the actual desktop principal/permission matrix; do not invent "
         ],
         "release_claim": False,
     }
