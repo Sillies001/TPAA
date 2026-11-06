@@ -4,6 +4,7 @@
 - 仓库：`Sillies001/TPAA`
 - 工作分支：`codex/v33-g1-handoff-20261106`
 - G2 开工基线：`b92229da8dcc23f433ab7fc87f7210adbf32485e`
+- G2 实现代码快照（本次续接文档更新之前）：`6eb4522b55ab3c1768565803e65ff11b50c618d7`
 - 当前阶段：`G2=IN_PROGRESS`
 - 前置阶段：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`
 - 后续阶段：`G3～G12=NOT_STARTED`
@@ -28,7 +29,8 @@ Pop-Location
 
 python tools/gui/g1_frontend_build.py
 python tools/gui/g2_v33_verify.py
-python -m ruff check src/tpaa_api/desktop.py tests/contract/gui_v33 tests/unit/api
+python -m ruff check src/tpaa_api/desktop.py tests/contract/gui_v33/test_g2_v33_shell_contract.py tests/unit/api/test_g2_v33_conditional_view_guard.py tools/gui/g2_v33_verify.py
+python tools/dev/tpaa_dev.py typecheck
 python -m pytest tests/contract/gui_v33/test_g2_v33_shell_contract.py tests/unit/api/test_g2_v33_conditional_view_guard.py -q
 
 python tools/gui/g0r_v33_verify.py
