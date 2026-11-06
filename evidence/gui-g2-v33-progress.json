@@ -18,7 +18,8 @@
     "Create a controlled successor authority diff binding explicit permissions to all 26 views and map GUI permission IDs to TPAA security policy permissions",
     "Execute actual GUI three-theme, keyboard, focus, ribbon and high-DPI checks after view permission authority is admitted",
     "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading",
-    "Rerun Windows WebEngine smoke with inherited child stderr and fix the first real child startup exception"
+    "Rerun Windows WebEngine smoke with inherited child stderr and fix the first real child startup exception",
+    "Rerun Windows WebEngine smoke and real-child lifecycle test after child PYTHONPATH propagation"
   ],
   "release_claim": false,
   "implementation_revision": "55a59a661b1929aa80888b0afb82b7c0e99e7274",
@@ -139,10 +140,10 @@
   "webengine_smoke_output_option": "tools/gui/g1_webengine_smoke.py --output <TEMP path>; default output remains the original G1 evidence path",
   "webengine_smoke_latest": "FAILED_CONTROL_CHANNEL_CLOSED_WINDOWS_LOCAL",
   "webengine_smoke_diagnosis": {
-    "failure": "Child process closed stdout before emitting the LISTENING control record",
-    "known_limit": "LocalBackendController previously sent child stderr to DEVNULL, hiding the startup exception",
-    "change": "G1 smoke now inherits child stderr; production default remains DEVNULL",
-    "root_cause": "NOT_YET_IDENTIFIED",
-    "next_action": "Rerun smoke and capture child traceback before changing runtime composition"
+    "failure": "The child interpreter exited before LISTENING with ModuleNotFoundError: No module named 'tpaa_api'.",
+    "root_cause": "The parent process added the source src directory to its in-memory sys.path, but a new subprocess does not inherit that mutation. The child was invoked with -m tpaa_api.local_backend_child without the source root in PYTHONPATH.",
+    "fix_commit": "PENDING_COMMIT",
+    "fix": "LocalBackendController now injects the package import root into the child PYTHONPATH on all platforms while preserving existing PYTHONPATH entries and the Windows venv launcher behavior.",
+    "verification": "PENDING_WINDOWS_LOCAL"
   }
 }

@@ -128,3 +128,8 @@ This latest correction is not yet Windows-verified. The prior 6-pass test result
 ## 12. WebEngine smoke startup failure triage (2026-11-06)
 
 The latest Windows rerun passed Ruff, Mypy (549 files), 7 targeted tests, G0R, G1 successor, G1 codegen, G1 frontend build and G1 static verification. The WebEngine smoke failed before LISTENING with `CONTROL_CHANNEL_CLOSED`. The child process stderr was redirected to DEVNULL, preventing root-cause visibility. A diagnostic-only injection point was added to LocalBackendController: default remains DEVNULL; G1 smoke inherits stderr to console. Next action is rerun and inspect the first child traceback. No assumption about a runtime defect has been made.
+
+
+## 13. Confirmed child import-path failure and fix (2026-11-06)
+
+The diagnostic smoke rerun surfaced ModuleNotFoundError: No module named 'tpaa_api' from the base interpreter. The source root was present in the smoke parent's in-memory sys.path, but not in the child process environment. The lifecycle controller now propagates the package root through PYTHONPATH for every child launch, preserving any existing PYTHONPATH entries. The Windows base-interpreter/venv launcher logic is retained. Unit/contract tests were added for both same-interpreter and Windows venv-redirector cases. Windows end-to-end smoke verification remains pending.

@@ -62,16 +62,14 @@ def _prepare_child_spawn(
     executable: str | None = None,
     base_executable: str | None = None,
     environ: dict[str, str] | None = None,
+    import_root: Path | None = None,
 ) -> tuple[list[str], dict[str, str] | None]:
-    """Return a spawn command that bypasses the Windows venv redirector.
+    """Prepare the child interpreter and preserve the parent's import root.
 
-    CPython's Windows venv ``python.exe`` is a redirector process. Spawning it
-    directly would make ``Popen.pid`` refer to the redirector while the backend
-    reports the PID of the real interpreter. CPython's own Windows
-    multiprocessing launcher avoids that by spawning ``sys._base_executable``
-    directly and setting ``__PYVENV_LAUNCHER__`` to the venv interpreter path.
-    This keeps the virtual-environment semantics while preserving one real
-    owned process/PID for lifecycle enforcement.
+    On Windows, bypass the venv redirector so process ownership refers to the
+    real interpreter. A fresh child does not inherit in-memory sys.path
+    changes made by the parent (for example, the source-checkout src path),
+    so pass the package root through PYTHONPATH as well.
     """
 
     resolved_os_name = os.name if os_name is None else os_name
@@ -82,23 +80,46 @@ def _prepare_child_spawn(
         else base_executable
     )
     argv = list(command)
+    bypass_venv_redirector = False
 
-    if resolved_os_name != "nt" or not argv or not resolved_base:
+    if resolved_os_name == "nt" and argv and resolved_base:
+        def same_windows_path(left: str, right: str) -> bool:
+            return ntpath.normcase(ntpath.abspath(left)) == ntpath.normcase(
+                ntpath.abspath(right)
+            )
+
+        if same_windows_path(argv[0], resolved_executable) and not same_windows_path(
+            resolved_executable, resolved_base
+        ):
+            argv[0] = resolved_base
+            bypass_venv_redirector = True
+
+    if not bypass_venv_redirector and import_root is None:
         return argv, None
 
-    def same_windows_path(left: str, right: str) -> bool:
-        return ntpath.normcase(ntpath.abspath(left)) == ntpath.normcase(
-            ntpath.abspath(right)
-        )
-
-    if not same_windows_path(argv[0], resolved_executable) or same_windows_path(
-        resolved_executable, resolved_base
-    ):
-        return argv, None
-
-    argv[0] = resolved_base
     child_env = dict(os.environ if environ is None else environ)
-    child_env["__PYVENV_LAUNCHER__"] = resolved_executable
+    if bypass_venv_redirector:
+        child_env["__PYVENV_LAUNCHER__"] = resolved_executable
+
+    if import_root is not None:
+        resolved_import_root = Path(import_root).resolve(strict=False)
+        if not resolved_import_root.is_dir():
+            raise ValueError("child import root must be an existing directory")
+        existing_paths = [
+            item
+            for item in child_env.get("PYTHONPATH", "").split(os.pathsep)
+            if item
+        ]
+        normalized_root = os.path.normcase(os.path.abspath(resolved_import_root))
+        already_present = any(
+            os.path.normcase(os.path.abspath(item)) == normalized_root
+            for item in existing_paths
+        )
+        if not already_present:
+            child_env["PYTHONPATH"] = os.pathsep.join(
+                [str(resolved_import_root), *existing_paths]
+            )
+
     return argv, child_env
 
 
@@ -211,7 +232,10 @@ class LocalBackendController:
         self._baseline_diagnostics = EMPTY_DIAGNOSTICS
         self._token = secrets.token_urlsafe(32)
         self._desktop_nonce = secrets.token_urlsafe(32)
-        spawn_command, spawn_env = _prepare_child_spawn(self._child_command)
+        spawn_command, spawn_env = _prepare_child_spawn(
+            self._child_command,
+            import_root=Path(__file__).resolve().parents[1],
+        )
         self._process = subprocess.Popen(
             spawn_command,
             stdin=subprocess.PIPE,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 
 import pytest
@@ -166,3 +167,53 @@ def test_child_stderr_is_suppressed_by_default_and_can_be_inherited() -> None:
     )
     assert production._child_stderr is subprocess.DEVNULL
     assert diagnostic._child_stderr is None
+
+
+def test_child_spawn_exports_source_import_root_when_no_venv_redirector_is_needed(
+    tmp_path,
+) -> None:
+    import_root = tmp_path / "src"
+    import_root.mkdir()
+    existing_root = tmp_path / "additional-python-path"
+    existing_root.mkdir()
+    command, child_env = _prepare_child_spawn(
+        ("C:/Python313/python.exe", "-m", "tpaa_api.local_backend_child"),
+        os_name="nt",
+        executable="C:/Python313/python.exe",
+        base_executable="C:/Python313/python.exe",
+        environ={"KEEP": "1", "PYTHONPATH": str(existing_root)},
+        import_root=import_root,
+    )
+
+    assert command == ["C:/Python313/python.exe", "-m", "tpaa_api.local_backend_child"]
+    assert child_env is not None
+    assert child_env["KEEP"] == "1"
+    assert child_env["PYTHONPATH"].split(os.pathsep) == [
+        str(import_root),
+        str(existing_root),
+    ]
+
+
+def test_child_spawn_preserves_source_import_root_with_windows_venv_redirector(
+    tmp_path,
+) -> None:
+    import_root = tmp_path / "src"
+    import_root.mkdir()
+    command, child_env = _prepare_child_spawn(
+        (r"C:\repo\.venv\Scripts\python.exe", "-m", "tpaa_api.local_backend_child"),
+        os_name="nt",
+        executable=r"C:\repo\.venv\Scripts\python.exe",
+        base_executable=r"C:\Python313\python.exe",
+        environ={"KEEP": "1"},
+        import_root=import_root,
+    )
+
+    assert command == [
+        r"C:\Python313\python.exe",
+        "-m",
+        "tpaa_api.local_backend_child",
+    ]
+    assert child_env is not None
+    assert child_env["KEEP"] == "1"
+    assert child_env["__PYVENV_LAUNCHER__"] == r"C:\repo\.venv\Scripts\python.exe"
+    assert child_env["PYTHONPATH"].split(os.pathsep) == [str(import_root)]

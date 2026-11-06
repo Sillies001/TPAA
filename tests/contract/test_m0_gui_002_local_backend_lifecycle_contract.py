@@ -49,6 +49,8 @@ def test_windows_venv_redirector_is_bypassed_without_weakening_pid_ownership() -
     assert "__PYVENV_LAUNCHER__" in source
     assert "LISTENING_PID_MISMATCH" in source
     assert "pid != self._process.pid" in source
+    assert "import_root=Path(__file__).resolve().parents[1]" in source
+    assert 'child_env["PYTHONPATH"]' in source
 
 def test_child_binds_loopback_ephemeral_and_emits_non_secret_listening() -> None:
     source = CHILD.read_text(encoding="utf-8")

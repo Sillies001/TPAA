@@ -51,3 +51,8 @@ Final regression: unit **83/83 PASS**, migration **26/26 PASS**, contract **90/9
 ## Explicit non-scope
 
 M0-GUI-002 does not implement the M0-GUI-003 diagnostics view, M0-GUI-004 UI automation, service-profile authentication/RBAC, ADR-M0-008 logging selection, packaging, build manifest, or CI matrix.
+
+
+## Child module import path across process boundaries
+
+The GUI process may add the source/package root to its in-memory sys.path, but this is not inherited by a newly spawned interpreter. Before launching the module entry point tpaa_api.local_backend_child, the lifecycle controller must prepend the installed/source package root to the child PYTHONPATH while preserving existing entries. This applies whether the Windows venv redirector is bypassed or the parent already uses the base interpreter. The child still receives secrets only over stdin; no credentials may be moved into command-line arguments or environment variables.

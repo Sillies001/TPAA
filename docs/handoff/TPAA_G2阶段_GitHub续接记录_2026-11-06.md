@@ -139,3 +139,8 @@ G2 仍为 `IN_PROGRESS`。本轮新增权限安全修正待 Windows npm build、
 ## WebEngine smoke failure investigation (2026-11-06)
 
 User reran G0R/G1 checks successfully and G2 verifier remains IN_PROGRESS. The G1 WebEngine smoke failed at LocalBackendController.start() with CONTROL_CHANNEL_CLOSED before receiving LISTENING. Inspection found stderr was hardwired to DEVNULL, so the child startup traceback was hidden. A narrowly scoped diagnostic change was made: LocalBackendController gains an optional child_stderr stream, defaulting to DEVNULL (production behavior unchanged); the G1 smoke explicitly passes child_stderr=None to inherit the PowerShell console stderr. This should expose the actual child-side exception on rerun. No runtime root cause is asserted until that traceback is observed.
+
+
+## WebEngine child import-path root cause and correction (2026-11-06)
+
+The inherited-stderr rerun exposed the actual child exception: the interpreter could not resolve tpaa_api.local_backend_child because src had been added only to the parent's in-memory sys.path. A new Python process does not inherit that mutation. The correction passes the package root (the parent of tpaa_gui) through the child environment's PYTHONPATH, on Windows and POSIX, while preserving existing entries. Windows venv redirector bypass and __PYVENV_LAUNCHER__ handling remain intact. Local Windows runtime verification is pending.
