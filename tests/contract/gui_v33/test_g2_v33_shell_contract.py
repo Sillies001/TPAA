@@ -71,6 +71,7 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     )
     assert ":focus-visible" in css
     assert "focusTarget" in source and ".focus()" in source
+    assert 'const root: HTMLDivElement = rootElement' in source
     assert "@media (prefers-reduced-motion:reduce)" in css
     assert "@media(max-width:760px)" in css
 

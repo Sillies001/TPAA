@@ -43,8 +43,9 @@ const modules = new Map(registry.modules.map((item) => [item.id, item]));
 const views = new Map(registry.views.map((item) => [item.id, item]));
 const viewContracts = new Map(contracts.views.map((item) => [item.view_id, item]));
 const permissionPolicies = new Map(permissions.permissions.map((item) => [item.permission_id, item]));
-const root = document.querySelector<HTMLDivElement>("#app");
-if (!root) throw new Error("TPAA_GUI_ROOT_MISSING");
+const rootElement = document.querySelector<HTMLDivElement>("#app");
+if (!rootElement) throw new Error("TPAA_GUI_ROOT_MISSING");
+const root: HTMLDivElement = rootElement;
 
 function validateRegistry(): void {
   const expected = Array.from({ length: 26 }, (_, i) => "V" + String(i + 1).padStart(2, "0"));
