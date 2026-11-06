@@ -105,3 +105,12 @@ npm audit 仍报告 1 项 high severity；尚未获得 `npm audit --json`，不�
 
 
 CSS media-query 合同断言最终正则已在 `8abd5b48df4010127314be0bc5745e2e47709be8` 校正为有效 Python raw regex；本次仍只修复测试的空白容忍，不修改产品 CSS。等待定向 Pytest 复验。
+
+
+## 10. 定向测试通过后的权限模型审查（2026-11-06）
+
+用户确认定向 Pytest `6 passed, 2 warnings`，Ruff 和 Mypy 已通过。
+
+静态 authority review 发现：CB-1.6.0 的 GUI_VIEW_CONTRACT 26 个 `required_permissions` 全为空；GUI_PERMISSION_AUDIT_AUTHORITY 虽有 11 个 default-deny permission IDs，但没有 per-view bindings，也没有与 TPAA_SECURITY_POLICY_V1 中实际角色权限的机器映射。前端原 `[].every(...)` 为空数组真空成立，且 V25 存在无条件放行，因此不能声称权限化导航已实现。
+
+已实施 fail-closed 修正：所有视图（包括 V25）必须处于 READY 会话并拥有非空显式权限绑定；V24 还必须满足受控 grant 和权限；G2 verifier 将记录全部缺失绑定并维持 IN_PROGRESS。后续需形成新的受控 authority successor diff、lock、兼容性与迁移证据，不得修改已关闭的 G1 CB-1.6.0。

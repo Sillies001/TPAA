@@ -116,19 +116,22 @@ function validV24Grant(grant: V24Grant | null): grant is V24Grant {
     hasText(grant.releaseId) && hasText(grant.contextId) && hasText(grant.weaponEventId) &&
     hasText(grant.attackClusterId) && hasText(grant.formationId);
 }
-function canNavigate(id: ViewId): boolean {
-  if (id === "V24") {
-    return state.navigation.currentViewId === "V24" && state.v24Grant !== null &&
-      state.navigation.returnStack[state.navigation.returnStack.length - 1]?.viewId === "V08";
-  }
-  if (id === "V25") return true;
+function hasViewPermissions(id: ViewId): boolean {
   if (state.authorization.status !== "READY") return false;
   const contract = viewContracts.get(id);
-  if (!contract) return false;
+  if (!contract || contract.required_permissions.length === 0) return false;
   return contract.required_permissions.every((permissionId) => {
     const policy = permissionPolicies.get(permissionId);
     return Boolean(policy && policy.unknown_policy === "DENY" && state.authorization.permissions.has(permissionId));
   });
+}
+function canNavigate(id: ViewId): boolean {
+  if (id === "V24") {
+    return state.navigation.currentViewId === "V24" && state.v24Grant !== null &&
+      hasViewPermissions("V24") &&
+      state.navigation.returnStack[state.navigation.returnStack.length - 1]?.viewId === "V08";
+  }
+  return hasViewPermissions(id);
 }
 function snapshot(): Frame {
   return { viewId: state.navigation.currentViewId, moduleId: state.navigation.activeModuleId,
@@ -166,7 +169,7 @@ function navigateToModule(id: ModuleId): void {
   if (module) navigateToView(module.landing);
 }
 function enterV24FromV08(grant: V24Grant | null): boolean {
-  if (!validV24Grant(grant)) {
+  if (!validV24Grant(grant) || !hasViewPermissions("V24")) {
     setForbidden("V08", "协同攻击入口尚未获准", "必须由后端提供精确的 BVR Weapon Event、Attack Cluster、Formation、Release 和 Context 授权上下文；G2 不生成演示授权。", "V24_CONTROLLED_ENTRY_NOT_AVAILABLE");
     render();
     return false;

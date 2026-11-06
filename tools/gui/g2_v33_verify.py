@@ -46,6 +46,24 @@ def _require(condition: bool, message: str) -> None:
         raise G2VerificationError(message)
 
 
+def _unbound_view_permissions(views: list[dict[str, Any]]) -> list[str]:
+    """Return every view lacking an explicit non-empty permission binding."""
+
+    unbound: list[str] = []
+    for item in views:
+        view_id = item.get("view_id")
+        required = item.get("required_permissions")
+        if (
+            not isinstance(view_id, str)
+            or not isinstance(required, list)
+            or not required
+            or not all(isinstance(permission, str) and permission.strip() for permission in required)
+        ):
+            if isinstance(view_id, str):
+                unbound.append(view_id)
+    return unbound
+
+
 def _git_head() -> str:
     result = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
@@ -101,8 +119,11 @@ def verify() -> dict[str, Any]:
         "frontend V24 direct guard missing",
     )
     _require(
-        'fetch("/security/session"' in main and "required_permissions.every" in main,
-        "permission-aware navigation missing",
+        'fetch("/security/session"' in main
+        and "required_permissions.every" in main
+        and "function hasViewPermissions" in main
+        and "contract.required_permissions.length === 0" in main,
+        "fail-closed permission-aware navigation missing",
     )
     _require('theme: "graphite"' in main, "Graphite is not the session default")
     _require(
@@ -146,6 +167,22 @@ def verify() -> dict[str, Any]:
         all(item.get("unknown_policy") == "DENY" for item in permission_records),
         "permission unknown policy is not deny",
     )
+    unbound_view_ids = _unbound_view_permissions(contract_views)
+    open_gates = [
+        "Run npm ci, npm run typecheck and npm run build on the Windows workspace",
+        "Regenerate src/tpaa_gui/web_dist and pass tools/gui/g1_frontend_build.py",
+        "Run targeted Ruff and pytest for the new G2 contract and V24 server guard tests",
+        "Run the G0R/G1 verifier commands after the frontend build and confirm zero drift",
+        "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon and high-DPI checks",
+        "Inspect npm audit high severity advisory and assess the affected dependency path",
+    ]
+    if unbound_view_ids:
+        open_gates.insert(
+            0,
+            "Create a controlled successor authority diff binding explicit permissions to all 26 views; "
+            "current GUI_VIEW_CONTRACT has empty required_permissions for: "
+            + ", ".join(unbound_view_ids),
+        )
 
     return {
         "schema": "TPAA_GUI_G2_V33_PROGRESS_EVIDENCE_V1",
@@ -153,7 +190,11 @@ def verify() -> dict[str, Any]:
         "phase_status": "IN_PROGRESS",
         "verified_at": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "source_revision": _git_head(),
-        "authority_checks": "PASS",
+        "authority_checks": "PASS_STATIC_CATALOG",
+        "permissioned_navigation": (
+            "BLOCKED_MISSING_VIEW_PERMISSION_BINDINGS" if unbound_view_ids else "PASS"
+        ),
+        "unbound_view_ids": unbound_view_ids,
         "v24_ui_and_server_guard_static_checks": "PASS",
         "theme_and_shared_state_static_checks": "PASS",
         "g0r_g1_evidence_review": "PASS_STATIC_REVIEW",
@@ -161,14 +202,7 @@ def verify() -> dict[str, Any]:
         "vite_build_and_web_dist_sync": "PENDING",
         "python_targeted_tests": "NOT_RUN",
         "webengine_visual_keyboard_hidpi_tests": "PENDING",
-        "open_gates": [
-            "Run npm ci, npm run typecheck and npm run build on the Windows workspace",
-            "Regenerate src/tpaa_gui/web_dist and pass tools/gui/g1_frontend_build.py",
-            "Run targeted Ruff and pytest for the new G2 contract and V24 server guard tests",
-            "Run the G0R/G1 verifier commands after the frontend build and confirm zero drift",
-            "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon "
-            "Confirm the actual desktop principal/permission matrix; do not invent "
-        ],
+        "open_gates": open_gates,
         "release_claim": False,
     }
 

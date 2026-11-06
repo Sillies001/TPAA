@@ -6,7 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from tools.gui.g2_v33_verify import G2VerificationError, _object_list
+from tools.gui.g2_v33_verify import (
+    G2VerificationError,
+    _object_list,
+    _unbound_view_permissions,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 FRONTEND = ROOT / "frontend" / "gui-v33" / "src"
@@ -50,6 +54,9 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     assert 'fetch("/security/session"' in source
     assert "required_permissions.every" in source
     assert 'unknown_policy === "DENY"' in source
+    assert "function hasViewPermissions" in source
+    assert "contract.required_permissions.length === 0" in source
+    assert 'if (id === "V25") return true;' not in source
     assert 'theme: "graphite"' in source
     assert all(token in source for token in ('"tactical"', '"graphite"', '"light"'))
     assert all(
@@ -92,3 +99,13 @@ def test_g2_verifier_rejects_missing_or_malformed_json_object_arrays() -> None:
         _object_list(None, "contract.views")
     with pytest.raises(G2VerificationError, match="contract.views"):
         _object_list([None], "contract.views")
+
+
+def test_g2_permission_coverage_fails_closed_for_unbound_views() -> None:
+    assert _unbound_view_permissions(
+        [
+            {"view_id": "V01", "required_permissions": []},
+            {"view_id": "V25", "required_permissions": []},
+            {"view_id": "V03", "required_permissions": ["replay.read"]},
+        ]
+    ) == ["V01", "V25"]

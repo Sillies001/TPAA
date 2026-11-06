@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -32,6 +33,10 @@ OUTPUT = REPO_ROOT / "evidence" / "gui-g1-v33-webengine-smoke.json"
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    args = parser.parse_args()
+    output = args.output.resolve()
     _app = QApplication.instance() or QApplication([sys.argv[0]])
     with tempfile.TemporaryDirectory(prefix="tpaa-g1-web-") as temporary:
         controller = LocalBackendController(
@@ -95,9 +100,9 @@ def main() -> int:
         finally:
             stopped = controller.shutdown()
         result["shutdown_state"] = stopped.state.value
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"status": "PASS", "output": str(OUTPUT)}, ensure_ascii=False))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"status": "PASS", "output": str(output)}, ensure_ascii=False))
     return 0
 
 

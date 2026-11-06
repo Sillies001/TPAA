@@ -100,3 +100,26 @@ uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_s
 
 
 CSS 合同断言已在提交 `8abd5b48df4010127314be0bc5745e2e47709be8` 进一步修正为单反斜杠的 Python raw regex（`@media\s*\(prefers-reduced-motion\s*:\s*reduce\)`），以匹配 minified CSS。等待用户重新执行定向 Pytest。
+
+
+## 2026-11-06：G2 定向测试通过、权限门禁审查
+
+用户在 Windows 指定工作分支执行：
+- `uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_shell_contract.py tests/unit/api/test_g2_v33_conditional_view_guard.py -q`：`6 passed, 2 warnings`。
+- Ruff：PASS。
+- Mypy：`Success: no issues found in 549 source files`。
+
+进一步静态审查发现 G2 尚有关键权限门禁缺口：
+- `baseline/CB-1.6.0/canonical/GUI_VIEW_CONTRACT.json` 中 26 个视图的 `required_permissions` 全部为空。
+- 前端原逻辑使用 `required_permissions.every(...)`，空数组会真空成立；V25 还曾被显式放行。因此“任何已认证角色可打开所有视图”，并非真正的权限化导航。
+- `GUI_PERMISSION_AUDIT_AUTHORITY.json` 定义 11 个 default-deny GUI permission IDs，但没有 per-view binding，也没有映射到现有 `TPAA_SECURITY_POLICY_V1.json` 权限的机器权威。
+- 不能静默编辑 G1 的 CB-1.6.0；必须通过受控后继 authority diff/lock/compatibility/migration 完成映射后再开放视图。
+
+已提交的下一步安全修正：
+- 前端新增 `hasViewPermissions`；会话未 READY、视图权限列表为空/缺失、权限未在 catalog 中 default-deny 或会话未授予时全部拒绝。
+- 删除 V25 的无条件授权捷径。
+- V24 受控入口同样检查 V24 的明确权限。
+- G2 静态 verifier 将列出无权限绑定视图并标记 `BLOCKED_MISSING_VIEW_PERMISSION_BINDINGS`，而不是把空数组当作 permission gate 通过。
+- G1 WebEngine smoke 新增可选 `--output`，默认行为不变；G2 复验可写入 TEMP，不覆盖 `evidence/gui-g1-v33-webengine-smoke.json`。
+
+G2 仍为 `IN_PROGRESS`。本轮新增权限安全修正待 Windows npm build、Mypy、Ruff、定向 Pytest 和 G2 verifier 复验。
