@@ -95,3 +95,10 @@ npm audit 仍报告 1 项 high severity；尚未获得 `npm audit --json`，不�
 用户在 Windows 执行 `python tools/dev/tpaa_dev.py lint` 成功；`typecheck` 报告 3 处错误，全部位于 `tools/gui/g2_v33_verify.py`，根因是从 JSON `dict.get` 取出的数组值未先校验为非空对象数组。
 
 已提交修复（提交 `c5df327b6ed42f7f06c3d8d079f52ed63c36856a`）：新增 `_object_list(value: object, label: str) -> list[dict[str, Any]]`，明确校验值为数组、成员为字符串键 JSON 对象；将 registry.views、contract.views、registry.modules、routes.reserved_routes、permissions.permissions 全部通过该 helper 验证后再迭代。新增 G2 合同测试覆盖有效数组、null 和非对象成员。此修复仍待 Windows Mypy / pytest 复验，不得标记为 PASS。
+
+
+## 9. Mypy 通过与 G2 CSS 合同测试误报修正（2026-11-06）
+
+用户确认 Mypy：`Success: no issues found in 549 source files`。定向 Pytest 结果为 5 passed、1 failed。失败仅来自合同测试对 reduced-motion media query 的空格格式假设；真实 CSS 是有效的 minified 形式 `@media(prefers-reduced-motion:reduce)`，语义规则存在。
+
+已修正测试为 whitespace-tolerant regex，要求仍然存在 `prefers-reduced-motion: reduce` media query，但不再绑定 minifier 的空格输出格式。此项仅改测试断言，未改 CSS 或弱化无障碍要求。等待 Windows 重跑确认。

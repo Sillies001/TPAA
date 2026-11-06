@@ -8,18 +8,17 @@
   "ribbon_themes_shared_state": "IMPLEMENTED_NOT_BUILT",
   "frontend_typecheck": "PASS_WINDOWS_LOCAL",
   "vite_build_and_web_dist_sync": "PENDING",
-  "python_targeted_tests": "BLOCKED_GLOBAL_PYTEST_8_4_1_BELOW_REQUIRED_9_0_2",
+  "python_targeted_tests": "5_PASSED_1_FAILED_TEST_EXPECTATION_CSS_MINIFICATION_MISMATCH",
   "webengine_visual_keyboard_hidpi_tests": "PENDING",
   "open_gates": [
-    "Re-run python tools/dev/tpaa_dev.py typecheck after the G2 verifier JSON typing fix",
-    "Run targeted G2 contract and V24 server guard tests under pytest 9.0.2",
-    "Run G0R/G1 verifiers and codegen checks after the final web_dist build; confirm no evidence drift",
+    "Re-run targeted G2 contract and V24 server guard tests under pytest 9.0.2 after CSS assertion correction",
+    "Run G0R/G1 verifiers and codegen checks after final web_dist build; confirm zero evidence drift",
     "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon and DPI checks",
     "Confirm actual desktop principal/permission matrix; do not invent view permissions absent from GUI_VIEW_CONTRACT",
     "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading"
   ],
   "release_claim": false,
-  "implementation_revision": "c5df327b6ed42f7f06c3d8d079f52ed63c36856a",
+  "implementation_revision": "00a181eac32093254320960512775778c4f36e68",
   "observed_local_failure": {
     "command": "npm run typecheck",
     "result": "FAILED",
@@ -38,7 +37,7 @@
   "vite_build": "PASS_WINDOWS_LOCAL",
   "g1_frontend_determinism": "PASS_WINDOWS_LOCAL",
   "g2_static_verifier": "PASS_IN_PROGRESS_WINDOWS_LOCAL",
-  "python_quality_tools": "RUFF_PASS_MYPY_FIX_COMMITTED_PENDING_RERUN",
+  "python_quality_tools": "RUFF_PASS_MYPY_PASS_WINDOWS_LOCAL",
   "observed_local_failures": [
     {
       "command": "python -m ruff check ...",
@@ -61,6 +60,13 @@
       "reason": "Mypy found three unsafe optional JSON array iterations in tools/gui/g2_v33_verify.py (contract.views and routes.reserved_routes)",
       "diagnostic": "Need type annotation for v24; contract_views may be None; reserved may be None",
       "fixed_in": "PENDING_COMMIT"
+    },
+    {
+      "command": "uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_shell_contract.py tests/unit/api/test_g2_v33_conditional_view_guard.py -q",
+      "result": "1_FAILED_5_PASSED",
+      "reason": "The reduced-motion CSS media query exists and is valid but is minified as @media(prefers-reduced-motion:reduce); the test incorrectly required a space after @media",
+      "fixed_in": "PENDING_COMMIT",
+      "scope": "test assertion only; no product CSS behavior defect observed"
     }
   ],
   "toolchain_fix": {
@@ -80,5 +86,12 @@
     "approach": "Validate untrusted JSON arrays with _object_list(value: object, label: str) -> list[dict[str, Any]] before iteration; reject null and malformed members fail-closed",
     "verification": "PENDING_WINDOWS_RERUN",
     "commit": "c5df327b6ed42f7f06c3d8d079f52ed63c36856a"
+  },
+  "test_fix": {
+    "changed": [
+      "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
+    ],
+    "approach": "Use whitespace-tolerant regular expression for the reduced-motion media query, accepting minified and formatted CSS without weakening the semantic requirement",
+    "verification": "PENDING_WINDOWS_RERUN"
   }
 }

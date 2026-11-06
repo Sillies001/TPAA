@@ -87,3 +87,13 @@ uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_s
 修复方案：新增 `_object_list(value: object, label: str) -> list[dict[str, Any]]`，对 registry.views、contract.views、registry.modules、routes.reserved_routes 和 permissions.permissions 进行运行时对象数组校验；对 null、非数组、非对象成员 fail-closed 报错。V24 和保留路由循环现在只消费经过校验的对象列表。新增合同测试覆盖正常对象数组、null 和非法成员。
 
 当前结果：Ruff 用户报告 PASS；本次 Mypy 修复尚未在 Windows 复验。G2 继续保持 `IN_PROGRESS`。
+
+
+## G2 Python 质量门禁反馈与 CSS 合同断言修正（2026-11-06）
+
+用户在 Windows 本地确认：
+- `python tools/dev/tpaa_dev.py typecheck`：PASS，549 个 source files 无 Mypy 问题。
+- G2 定向 Pytest：5 passed、1 failed。
+- 唯一失败是合同测试硬编码要求 CSS 包含 `@media (prefers-reduced-motion:reduce)`，但真实 `style.css` 经压缩后合法形式为 `@media(prefers-reduced-motion:reduce)`。CSS 中确实存在 prefers-reduced-motion 规则，属于测试断言格式过严，不是产品 CSS 功能缺失。
+
+修复：将测试改为 whitespace-tolerant regex `@media\\s*\\(prefers-reduced-motion\\s*:\\s*reduce\\)`，保留对 reduced-motion 语义的检查，同时接受压缩和格式化 CSS。没有修改 CSS 产物，也没有放宽其他 G2 合同断言。修复提交后需重新运行定向 pytest。
