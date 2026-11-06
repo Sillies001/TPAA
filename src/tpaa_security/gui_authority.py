@@ -1,10 +1,10 @@
-"""Approved CB-1.7.0 GUI permission derivation boundary."""
+"""Approved CB-1.8.0 GUI permission derivation boundary."""
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 
-from .generated_g2_authority import (
+from .generated_g3_authority import (
     GUI_ACTIVATION_STATUS,
     GUI_AUTHORITY_ID,
     GUI_AUTHORITY_VERSION,

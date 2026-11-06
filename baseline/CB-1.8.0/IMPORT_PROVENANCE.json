@@ -1,0 +1,11 @@
+{
+  "record_type": "G3_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G3-V33-ASYNC-GATEWAY-2026-11-06",
+  "source_baseline": "CB-1.7.0",
+  "source_baseline_lock_sha256": "712d120d8fba2f5e391fe922b34f7ee7b0fa1c14e301838d71b506d1d051958b",
+  "core_baseline": "CB-1.8.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 47,
+  "release_claim": false
+}

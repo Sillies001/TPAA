@@ -7,7 +7,8 @@ import re
 from dataclasses import dataclass
 from typing import Protocol
 
-from .generated_g2_authority import ROUTE_SECURITY_BINDINGS
+from .generated_g3_authority import ROUTE_SECURITY_BINDINGS
+from .gui_authority import derive_gui_permissions
 from .permissions import HIGH_RISK_PERMISSIONS, Permission
 from .policy import (
     AuthorizationDecision,
@@ -65,6 +66,7 @@ class RouteSecurityBinding:
     template: str
     permission: Permission | None
     audit_mode: str
+    gui_permission_id: str | None
 
 
 class RouteSecurityAuthorityError(LookupError):
@@ -94,10 +96,18 @@ _ROUTE_TABLE = tuple(
             template=template,
             permission=None if permission_id is None else Permission(permission_id),
             audit_mode=audit_mode,
+            gui_permission_id=gui_permission_id,
         ),
         _route_pattern(template),
     )
-    for route_id, method, template, permission_id, audit_mode in ROUTE_SECURITY_BINDINGS
+    for (
+        route_id,
+        method,
+        template,
+        permission_id,
+        audit_mode,
+        gui_permission_id,
+    ) in ROUTE_SECURITY_BINDINGS
 )
 
 
@@ -182,6 +192,22 @@ class ApiAuthorizationGuard:
                 resource=target,
                 approval_id=validated_approval,
             )
+        if binding is not None and decision.allowed and binding.gui_permission_id is not None:
+            business_permissions = frozenset(
+                permission
+                for role in principal.roles
+                for permission in self.authorization.policy.role_permissions[role]
+            )
+            gui_permissions = derive_gui_permissions(
+                principal.roles,
+                business_permissions,
+            )
+            if binding.gui_permission_id not in gui_permissions:
+                decision = AuthorizationDecision(
+                    allowed=False,
+                    code="GUI_PERMISSION_DENIED",
+                    policy_sha256=self.authorization.policy.sha256,
+                )
         if binding is None or binding.audit_mode == "ALWAYS" or not decision.allowed:
             try:
                 self.audit.record(

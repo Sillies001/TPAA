@@ -1,7 +1,8 @@
 import "./style.css";
 import registryJson from "../../../docs/gui/demo-v33/V33_FINAL_VIEW_REGISTRY.json";
-import contractJson from "../../../baseline/CB-1.7.0/canonical/GUI_VIEW_CONTRACT.json";
-import permissionJson from "../../../baseline/CB-1.7.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json";
+import contractJson from "../../../baseline/CB-1.8.0/canonical/GUI_VIEW_CONTRACT.json";
+import permissionJson from "../../../baseline/CB-1.8.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json";
+import { AsyncGateway, GatewayError, createGuiClient } from "./services/gateway.js";
 
 type Theme = "tactical" | "graphite" | "light";
 type UiState = "LOADING" | "EMPTY" | "READY" | "DEGRADED" | "ERROR" | "FORBIDDEN" | "N_A";
@@ -43,6 +44,8 @@ const modules = new Map(registry.modules.map((item) => [item.id, item]));
 const views = new Map(registry.views.map((item) => [item.id, item]));
 const viewContracts = new Map(contracts.views.map((item) => [item.view_id, item]));
 const permissionPolicies = new Map(permissions.permissions.map((item) => [item.permission_id, item]));
+const asyncGateway = new AsyncGateway();
+const guiClient = createGuiClient(asyncGateway);
 const rootElement = document.querySelector<HTMLDivElement>("#app");
 if (!rootElement) throw new Error("TPAA_GUI_ROOT_MISSING");
 const root: HTMLDivElement = rootElement;
@@ -371,7 +374,7 @@ function render(): void {
       '</h2><p class="page-description">产品视图由 v33 视图注册表驱动；业务语义、权限与数据真实性以机器权威和后端合同为准。</p></div>',
     '<div class="page-actions"><button type="button" class="secondary-button" data-action="back"' +
       (state.navigation.returnStack.length ? "" : " disabled") + '>返回</button><button type="button" class="secondary-button" data-action="home">总览</button></div></div>',
-    renderPageBody(view, status), '</main></div><footer class="statusbar"><span>GUI-DEMO-V33-2026-11-05 · CB-1.7.0 已激活</span>',
+    renderPageBody(view, status), '</main></div><footer class="statusbar"><span>GUI-DEMO-V33-2026-11-05 · CB-1.8.0 已激活</span>',
     '<span>权限：' + esc(state.authorization.status) + " · 业务数据：未接入（G3 起）</span><span>主题：" +
       esc(state.presentation.theme) + "</span></footer></div>",
   ].join("");
@@ -406,43 +409,35 @@ function render(): void {
 }
 async function loadAuthorization(): Promise<void> {
   try {
-    const response = await fetch("/security/session", {
-      method: "GET", credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" },
-    });
-    if (response.status === 401 || response.status === 403) {
-      state.authorization.status = "FORBIDDEN";
-      state.authorization.permissions.clear();
-      state.authorization.roles = [];
-      render();
-      return;
-    }
-    if (!response.ok) {
-      state.authorization.status = "DEGRADED";
-      render();
-      return;
-    }
-    const payload: unknown = await response.json();
-    if (typeof payload !== "object" || payload === null || !("schema" in payload) ||
-      payload.schema !== "TPAA_SECURITY_SESSION_CONTEXT_V1" || !("permissions" in payload) ||
-      !Array.isArray(payload.permissions) || !("gui_permissions" in payload) ||
-      !Array.isArray(payload.gui_permissions) || !("roles" in payload) || !Array.isArray(payload.roles) ||
-      !("gui_permission_authority_id" in payload) ||
-      payload.gui_permission_authority_id !== "GUI_PERMISSION_AUDIT_AUTHORITY" ||
-      !("gui_permission_authority_version" in payload) ||
-      payload.gui_permission_authority_version !== "1.1.0" ||
-      !("gui_permission_activation_status" in payload) ||
-      payload.gui_permission_activation_status !== "ACTIVE") {
+    const payload = await guiClient.bootstrap();
+    const principal = payload.principal;
+    const provenance = payload.provenance;
+    if (!Array.isArray(principal.gui_permissions) || !Array.isArray(principal.roles) ||
+      provenance.authority_id !== "GUI_ASYNC_GATEWAY_AUTHORITY" ||
+      provenance.authority_version !== "1.0.0" ||
+      provenance.core_baseline !== "CB-1.8.0" ||
+      payload.catalog.schema !== "TPAA_GUI_CATALOG_V1" ||
+      payload.catalog.catalog_version !== "CB-1.8.0:1.0.0") {
       state.authorization.status = "ERROR";
       render();
       return;
     }
+    asyncGateway.setPartition(payload.cache_partition_key, state.domainSelection.releaseId);
     state.authorization.permissions = new Set(
-      payload.gui_permissions.filter((item): item is string => typeof item === "string"),
+      principal.gui_permissions.filter((item): item is string => typeof item === "string"),
     );
-    state.authorization.roles = payload.roles.filter((item): item is string => typeof item === "string");
+    state.authorization.roles = principal.roles.filter((item): item is string => typeof item === "string");
     state.authorization.status = "READY";
-  } catch {
-    state.authorization.status = "DEGRADED";
+  } catch (error) {
+    if (error instanceof GatewayError && (error.status === 401 || error.status === 403 || error.code === "FORBIDDEN")) {
+      state.authorization.status = "FORBIDDEN";
+      state.authorization.permissions.clear();
+      state.authorization.roles = [];
+    } else if (error instanceof GatewayError && (error.code === "TIMEOUT" || error.code === "BACKEND_UNAVAILABLE")) {
+      state.authorization.status = "DEGRADED";
+    } else {
+      state.authorization.status = "ERROR";
+    }
   }
   render();
 }

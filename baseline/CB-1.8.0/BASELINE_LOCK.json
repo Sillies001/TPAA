@@ -1,0 +1,256 @@
+{
+  "baseline": {
+    "overall": "TPAA V8.0",
+    "engineering": "ED-2.1",
+    "core": "CB-1.8.0",
+    "db_schema": "1.10.0",
+    "product": "P1_METRIC_CATALOG-1.14.0",
+    "date": "2026-11-06",
+    "rebaseline": "R3.5_G3_ASYNC_GATEWAY",
+    "decision_id": "G3-V33-ASYNC-GATEWAY-2026-11-06",
+    "approval_id": "G3-CB-1.8.0-LOCAL-CLOSURE-2026-11-06",
+    "approval_status": "APPROVED_LOCAL",
+    "activation_status": "ACTIVE",
+    "lock_lineage_sha256": [
+      "712d120d8fba2f5e391fe922b34f7ee7b0fa1c14e301838d71b506d1d051958b"
+    ],
+    "release_claim": false
+  },
+  "artifacts": [
+    {
+      "file": "API_ROUTE_AUTHORITY.json",
+      "sha256": "99070dedbfc117db667ea0728f0a7d1c0fea09939e218b721a28919641a18bf1",
+      "bytes": 27348
+    },
+    {
+      "file": "API_ROUTE_SECURITY_AUTHORITY.json",
+      "sha256": "577335ec1901074d2072b2899657fec98e3f06d80f48ef841d194fa792edeec6",
+      "bytes": 47403
+    },
+    {
+      "file": "CAPABILITY_PHASE_REGISTRY.json",
+      "sha256": "c2184ae93c08f5877372daa5e107ffa1df2b56a03c761ae568440cf72cfacb4e",
+      "bytes": 3560
+    },
+    {
+      "file": "CORE_LOGICAL_MODEL.json",
+      "sha256": "7bafa74416896909d75c5798b81bf59b643beb8897cc2c1bb61ba7cf901935d3",
+      "bytes": 226310
+    },
+    {
+      "file": "CORE_RULES.json",
+      "sha256": "6ef85436cf8c5648600b1245cc6c42feb55ef50b42752ac0213939145388f805",
+      "bytes": 9563
+    },
+    {
+      "file": "CROSS_LAYER_DTO_CONTRACTS.json",
+      "sha256": "46e68ab882008bf71debd5fd7ea3dc0d8f4bea0cbf2c7f03a7c846263da17a8e",
+      "bytes": 167721
+    },
+    {
+      "file": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+      "sha256": "7e583a2503735a10ddd85b8ead67d5369cd34d423246c96254c4cb80eaaf1dfb",
+      "bytes": 6015
+    },
+    {
+      "file": "ENGINEERING_WORKSTREAM_REGISTRY.json",
+      "sha256": "adea6bba20fb6b9ec002e9e1d355259c594f292ef4721fb7272de0f387747e6d",
+      "bytes": 3578
+    },
+    {
+      "file": "EXTENSION_CONTRACT_REGISTRY.json",
+      "sha256": "f987ea2801557befac44aaf3b47b3953a5cdbaaa662e39c2f3970526f3371f41",
+      "bytes": 6323
+    },
+    {
+      "file": "EXTENSION_METRIC_FAMILY_REGISTRY.json",
+      "sha256": "4687377e5fb63b3a5c94fec6eeba0b0d0d395e1061ee4fa4c81fe64aa0220857",
+      "bytes": 4046
+    },
+    {
+      "file": "G2_GUI_SECURITY_APPROVAL.json",
+      "sha256": "510d3dc0ec7684a7199d3a4d9b57630683740edda7be346a2ddae4220e5dc60e",
+      "bytes": 846
+    },
+    {
+      "file": "G3_GATEWAY_APPROVAL.json",
+      "sha256": "2666cb835e4bac4c7c04db749d71b88d009ad7a97741e75b741dbd52582962fe",
+      "bytes": 688
+    },
+    {
+      "file": "GUI_ASYNC_GATEWAY_AUTHORITY.json",
+      "sha256": "c9208cf089e7f6b63eb150a397c7283044dff726c1b825a1251b5efa672fb596",
+      "bytes": 3605
+    },
+    {
+      "file": "GUI_DOMAIN_ADMISSION_AUTHORITY.json",
+      "sha256": "048afbbbd14dbd467007254e3a4c051448df836137efaa9c91b31fa4074a9878",
+      "bytes": 1732
+    },
+    {
+      "file": "GUI_PERMISSION_AUDIT_AUTHORITY.json",
+      "sha256": "f7f5f53d77ec664ccafb8f55e92258c080db21abba270f7dfaf3695be1ce17ff",
+      "bytes": 7130
+    },
+    {
+      "file": "GUI_ROLE_VIEW_ACCESS_MATRIX.json",
+      "sha256": "3b58d09cbca9689d8046c6963ac93cc4abc6ee634a1df07b1f93375414d8caab",
+      "bytes": 71191
+    },
+    {
+      "file": "GUI_STATE_REASON_AUTHORITY.json",
+      "sha256": "80d55f956c73f066c2adffcb8b86a4f64fa11a18a9b724989e156d9f3e45e677",
+      "bytes": 608
+    },
+    {
+      "file": "GUI_TASK_METRIC_ADMISSION_AUTHORITY.json",
+      "sha256": "c5bdbf03a45715af7c0cdccae302356d74e14d2bef89c9389fb82deeaed334c5",
+      "bytes": 385
+    },
+    {
+      "file": "GUI_VIEW_CONTRACT.json",
+      "sha256": "6e098c38990b1ffd1b73c6f2c4795bf6a6303bf077429aae5dde0aa2ac5e92c4",
+      "bytes": 31567
+    },
+    {
+      "file": "KNOWLEDGE_FIDELITY_MATRIX.json",
+      "sha256": "2581ad99c061cc1c0e84f10c4ab8ca30ef70c0ba3f1b8843830d3536d6f06f49",
+      "bytes": 227087
+    },
+    {
+      "file": "M2_QA_SNS_AUTHORITY.json",
+      "sha256": "1f0755836e7ea40b3b69c83dae1b2b636ff80e37d8630c5ce158d5dfccffd5d3",
+      "bytes": 14211
+    },
+    {
+      "file": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json",
+      "sha256": "c1c073bce8870feceb90bdb6c28172c4c726de6b15fc70208e169336baa59dfa",
+      "bytes": 51519
+    },
+    {
+      "file": "M5_FORMAL_QUALIFICATION_AUTHORITY.json",
+      "sha256": "e3dd1fafa9c65d6c9a85dfb7172d60adef3e9c17893e3b546b962275c42c01b1",
+      "bytes": 17376
+    },
+    {
+      "file": "METRIC_INPUT_AUTHORITY_MATRIX.json",
+      "sha256": "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc",
+      "bytes": 319120
+    },
+    {
+      "file": "P1_METRIC_CATALOG.json",
+      "sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+      "bytes": 352115
+    },
+    {
+      "file": "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY.json",
+      "sha256": "1bfc6c9eb8e2142249c327af5698bc6a8925f983fd8363b1d2bd835966eea5fa",
+      "bytes": 14168
+    },
+    {
+      "file": "P2_LINEAR_REFERENCE_ADJUSTMENT_PROFILE.json",
+      "sha256": "202e255bd09349407e0e7cc4d77d8b848df99d84dc00e50e46871eb4f82f0d68",
+      "bytes": 10356
+    },
+    {
+      "file": "P3_CAPABILITY_TWIN_AUTHORITY.json",
+      "sha256": "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b",
+      "bytes": 16963
+    },
+    {
+      "file": "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL_PROFILE.json",
+      "sha256": "d66aa780d1c2e31ec664d173a0cdbc355f98c9ff3f751a6949e84f74cdf93876",
+      "bytes": 9927
+    },
+    {
+      "file": "P4_P5_ROLE_PRIVACY_PROFILE.json",
+      "sha256": "99a526cead816010373cdd81cd889d33fa359b5d0b74d87743e51d0f649f1113",
+      "bytes": 6741
+    },
+    {
+      "file": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json",
+      "sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
+      "bytes": 18296
+    },
+    {
+      "file": "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE.json",
+      "sha256": "ccb5aa1272b958bacd20ac3d2adaf208386138dc2f3da7c15a48fd84eddf8e6d",
+      "bytes": 15127
+    },
+    {
+      "file": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json",
+      "sha256": "a138c97e6c9891f767ee25de8841e2bc9ca899ddf6d09b98b9e4bae73d9be79e",
+      "bytes": 17810
+    },
+    {
+      "file": "P6_ROLE_PRIVACY_RELEASE_PROFILE.json",
+      "sha256": "476ef4389a242033768aee7642190a304ded286aab7f5d59c1006b2f4db8a974",
+      "bytes": 8285
+    },
+    {
+      "file": "PHYSICAL_INDEX_AUTHORITY.json",
+      "sha256": "59e0e0e7115adff84b3aa32d43066a3430eb2cd2da7194133ce32168b101259f",
+      "bytes": 35220
+    },
+    {
+      "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",
+      "sha256": "d127409485588d80b75c0353725f4042f310d196892fb91005978ea57dbaf106",
+      "bytes": 8345
+    },
+    {
+      "file": "R39_KNOWLEDGE_COVERAGE.json",
+      "sha256": "18405a22423e067116981d815bf51cac0e8b68d82b0d9c1bacd77489a01bb7db",
+      "bytes": 22271
+    },
+    {
+      "file": "REVIEW_GATES.json",
+      "sha256": "af2ee2452ff02fef13bcdad93cdd8f853b80a1de762061e8c52c41403aca5698",
+      "bytes": 7129
+    },
+    {
+      "file": "SCHEMA_AUTHORITY_REGISTRY.json",
+      "sha256": "8db2c80c412d4d7521eafc7a53043238a9aad544610e2a54005b4abe0533b68e",
+      "bytes": 2932
+    },
+    {
+      "file": "SCHEMA_COMPATIBILITY_AUTHORITY.json",
+      "sha256": "a240fe6dcbd1252f8521516395db945c160b8b9f21ec6f63fe82f803cc90436b",
+      "bytes": 6908
+    },
+    {
+      "file": "SOURCE_PROVENANCE.json",
+      "sha256": "d9f388774b078d2d27fd3259d19bf3ed617e55400b706f7634ca5758dfe406c9",
+      "bytes": 2700
+    },
+    {
+      "file": "STAGE_REGISTRY.json",
+      "sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+      "bytes": 6023
+    },
+    {
+      "file": "TERMINOLOGY_REGISTRY.json",
+      "sha256": "87dcd17588a5d714772eba158ff1468aef4521e167af92eaa3a4e28b5514d543",
+      "bytes": 3640
+    },
+    {
+      "file": "TRACEABILITY_MATRIX.json",
+      "sha256": "273d96d770f876710fc40d4ee4fa62786451062c52f671a122bfac8bb82778dc",
+      "bytes": 8592
+    },
+    {
+      "file": "TRAINING_EVALUATION_TAXONOMY.json",
+      "sha256": "38e83af0e20c766d37b84090fed570d72f6dc699c53a4b414030712a93b168ad",
+      "bytes": 5281
+    },
+    {
+      "file": "W0_BASELINE_AUTHORITY_DECISION.json",
+      "sha256": "28a7cccc21d0fefe44183f2c69a249a05d01faf3a674e7b0aa5dfcfffe43e160",
+      "bytes": 1098
+    },
+    {
+      "file": "WORLD_CAPABILITY_REGISTRY.json",
+      "sha256": "2031ee88603131ff08e588fb55ca59552f96c1858f5d40d4e185da6e0b624b3a",
+      "bytes": 4260
+    }
+  ]
+}

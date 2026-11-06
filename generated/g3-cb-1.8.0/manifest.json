@@ -1,0 +1,26 @@
+{
+  "schema": "TPAA_G3_GATEWAY_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.8.0",
+  "baseline_lock_sha256": "25b299410c9e1c3ffda9eee38c8ebc1e35111d8775058f8f5b028297cefd2a4c",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g3-gateway.ts",
+      "sha256": "d9721a57b0ae23bb6508b5baf941f77d8b76e127f6116066552b467ecb779b72",
+      "bytes": 4133
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g3_gateway.py",
+      "sha256": "b62d605bde853286d4694cbcfa31cdce0a5e14ceaaea72a1741b25c2fb7f3f5c",
+      "bytes": 12085
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g3_authority.py",
+      "sha256": "41466b77a097133a51087d564e084f733ef6884bf4c99eb67fdab0a80af69ddb",
+      "bytes": 11083
+    }
+  ],
+  "release_claim": false
+}

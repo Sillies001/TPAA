@@ -1,0 +1,36 @@
+{
+  "schema": "TPAA_G3_V33_WEBENGINE_ACCEPTANCE_V1",
+  "status": "PASS",
+  "scale": 1.5,
+  "exact_origin": "http://127.0.0.1:8956",
+  "off_the_record": true,
+  "bootstrap": {
+    "core_baseline": "CB-1.8.0",
+    "authority_id": "GUI_ASYNC_GATEWAY_AUTHORITY",
+    "view_count": 26,
+    "cache_partition_key_redacted": true
+  },
+  "pagination": {
+    "page_one_count": 7,
+    "page_two_count": 7,
+    "overlap": false
+  },
+  "dynamic_selector": {
+    "items": [],
+    "reason_code": "CONTEXT_REQUIRED"
+  },
+  "webengine_probe": {
+    "status": 200,
+    "schema": "TPAA_GUI_BOOTSTRAP_V1"
+  },
+  "shell": {
+    "view": "V01",
+    "module": "overview",
+    "theme": "graphite",
+    "disabledModules": 0,
+    "overflow": false,
+    "dpr": 1.5
+  },
+  "release_claim": false,
+  "shutdown_state": "EXITED"
+}

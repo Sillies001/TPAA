@@ -1,0 +1,29 @@
+{
+  "schema": "TPAA_G1_V33_FRONTEND_BUILD_EVIDENCE_V1",
+  "status": "PASS",
+  "package_lock_sha256": "422bc9b149fdb9d364acdf003e5d3f8b19c147da998961c1724578b282492282",
+  "files": [
+    {
+      "path": ".vite/manifest.json",
+      "sha256": "29cc24990d1894bba509112ddef3f747e48c6019f0ef29766bc30075e4883b4d",
+      "bytes": 185
+    },
+    {
+      "path": "assets/index-Ck9gvWm3.css",
+      "sha256": "2d5494c1f489b4a2a0deef1ea0cf9f48f2eb1c55d2cbb4c7f0b83f61b21e1338",
+      "bytes": 11962
+    },
+    {
+      "path": "assets/index-coI03sHG.js",
+      "sha256": "b83b5dc098b6e428725515ec9aaf1a6c7987b484c24a67136435b08f9ee57871",
+      "bytes": 45146
+    },
+    {
+      "path": "index.html",
+      "sha256": "2212feac0ac18cc7171ecbeaa9bcbc6a93bfd9148a530bb49442025b881dca1c",
+      "bytes": 510
+    }
+  ],
+  "remote_resources": 0,
+  "release_claim": false
+}

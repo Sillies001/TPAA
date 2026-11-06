@@ -1,0 +1,479 @@
+{
+  "authority_id": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_SEMANTIC_CONTRACT",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "effective_milestone": "M9",
+  "tracking_issue": 194,
+  "activation_rule": {
+    "authority_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "authority_adoption_does_not_admit_p6": true,
+    "p6_admission_requires_protected_main_m9_exit_go": true
+  },
+  "source_basis": {
+    "sdib_task_baseline": "docs/baseline/SDIB-1.8/M9_TASK_BASELINE.json",
+    "extension_contract": "EXTENSION_CONTRACT_REGISTRY.json:P6",
+    "capability_phase": "CAPABILITY_PHASE_REGISTRY.json:P6",
+    "p4_p5_authority": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json:1.0.0",
+    "p4_p5_authority_sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
+    "p4_p5_role_profile": "P4_P5_ROLE_PRIVACY_PROFILE.json:1.0.0",
+    "p4_p5_role_profile_sha256": "99a526cead816010373cdd81cd889d33fa359b5d0b74d87743e51d0f649f1113",
+    "m9_entry_protected_main_sha": "ffbd5e5f0561ce39d8736de765dd6be240edfae1",
+    "m9_entry_run_number": 529,
+    "core_products": [
+      "registry.dataset_snapshot",
+      "capability.capability_model",
+      "intelligence.forecast_run",
+      "intelligence.forecast_result",
+      "intelligence.counterfactual_run",
+      "intelligence.training_recommendation",
+      "intelligence.intervention_outcome",
+      "registry.training_session",
+      "registry.data_source",
+      "registry.source_artifact",
+      "registry.object_reference"
+    ],
+    "decision_scope": "freeze exact P6 source/model/projection/counterfactual/recommendation/interoperability and C4 admission boundaries without selecting an implementation-default model family"
+  },
+  "scope": {
+    "p1_p5_historical_products_immutable": true,
+    "p6_authority_frozen_not_admitted": true,
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "fact_projection_physical_and_semantic_separation_required": true,
+    "operational_tactical_optimization_outside_safety_boundary": true,
+    "recommendation_advisory_only": true,
+    "gui_direct_persistence_access_permitted": false,
+    "api_gui_business_recomputation_permitted": false
+  },
+  "table_bindings": {
+    "input_snapshot": "registry.dataset_snapshot",
+    "capability_model": "capability.capability_model",
+    "managed_object": "registry.object_reference",
+    "forecast_run": "intelligence.forecast_run",
+    "forecast_result": "intelligence.forecast_result",
+    "counterfactual_run": "intelligence.counterfactual_run",
+    "training_recommendation": "intelligence.training_recommendation",
+    "intervention_outcome": "intelligence.intervention_outcome",
+    "training_session": "registry.training_session",
+    "data_source": "registry.data_source",
+    "source_stream": "registry.source_stream",
+    "source_artifact": "registry.source_artifact",
+    "audit_log": "audit.audit_log"
+  },
+  "exact_identity_rules": {
+    "forbidden_pointer_tokens": [
+      "CURRENT",
+      "LATEST",
+      "DEFAULT"
+    ],
+    "version_and_identity_resolution": "EXACT_ONLY",
+    "historical_fallback_to_current_latest_default": false,
+    "input_snapshot_identity_prefix": "P6_INPUT_SHA256:",
+    "forecast_request_identity_prefix": "P6_FORECAST_REQUEST_SHA256:",
+    "forecast_result_identity_prefix": "P6_FORECAST_RESULT_SHA256:",
+    "counterfactual_request_identity_prefix": "P6_COUNTERFACTUAL_REQUEST_SHA256:",
+    "recommendation_identity_prefix": "P6_RECOMMENDATION_SHA256:",
+    "interop_snapshot_identity_prefix": "P6_INTEROP_SHA256:",
+    "identity_hash_serialization": "UTF8_CANONICAL_JSON_SORTED_KEYS_NO_NAN",
+    "source_or_model_change_creates_new_identity": true
+  },
+  "input_snapshot_contract": {
+    "carrier_table": "registry.dataset_snapshot",
+    "snapshot_type": "P6_INPUT",
+    "frozen_required": true,
+    "exact_published_p4_p5_source_refs_required": true,
+    "p3_refs_optional_but_exact_when_present": true,
+    "explicit_forecast_origin_utc_required": true,
+    "explicit_as_of_utc_required": true,
+    "future_information_forbidden": true,
+    "same_outcome_information_forbidden": true,
+    "hidden_source_recomputation_or_substitution_forbidden": true,
+    "current_latest_default_resolution_forbidden": true,
+    "availability_states": [
+      "AVAILABLE",
+      "UNAVAILABLE",
+      "OUT_OF_DOMAIN",
+      "INSUFFICIENT_EVIDENCE",
+      "NOT_IDENTIFIABLE"
+    ],
+    "unavailable_numeric_zero_substitution_forbidden": true
+  },
+  "model_authority_contract": {
+    "carrier_table": "capability.capability_model",
+    "default_model_profile": null,
+    "implementation_default_model_family_forbidden": true,
+    "implementation_default_threshold_forbidden": true,
+    "exact_adopted_model_profile_required_for_execution": true,
+    "exact_training_dataset_snapshot_required": true,
+    "exact_validation_dataset_snapshot_required": true,
+    "training_validation_identity_overlap_forbidden": true,
+    "training_validation_outcome_leakage_forbidden": true,
+    "exact_plugin_name_and_version_required": true,
+    "managed_object_sealed_active_required": true,
+    "model_artifact_hash_must_match_managed_object": true,
+    "applicability_profile_required": true,
+    "uncertainty_calibration_profile_required": true,
+    "historical_model_resolution_exact_only": true,
+    "model_supersession_creates_new_revision": true
+  },
+  "applicability_uncertainty_contract": {
+    "applicability_states": [
+      "APPLICABLE",
+      "OUT_OF_DOMAIN",
+      "INSUFFICIENT_EVIDENCE",
+      "NOT_IDENTIFIABLE"
+    ],
+    "numeric_projection_allowed_only_when_applicable": true,
+    "explicit_uncertainty_required_for_numeric_projection": true,
+    "calibration_evidence_required_when_profile_requires_calibration": true,
+    "out_of_domain_zero_coercion_forbidden": true,
+    "unavailable_zero_coercion_forbidden": true,
+    "mathematical_executability_does_not_imply_product_validity": true
+  },
+  "forecast_contract": {
+    "fact_projection_separation_required": true,
+    "exact_input_snapshot_required": true,
+    "exact_model_revision_required": true,
+    "exact_target_and_horizon_required": true,
+    "exact_assumption_profile_required": true,
+    "explicit_forecast_origin_required": true,
+    "explicit_as_of_utc_required": true,
+    "threshold_probabilities_require_profile_authority": true,
+    "implementation_default_probability_threshold_forbidden": true,
+    "projection_to_fact_upgrade_forbidden": true,
+    "recompute_on_read_forbidden": true
+  },
+  "counterfactual_contract": {
+    "exact_factual_baseline_refs_required": true,
+    "explicit_typed_interventions_required": true,
+    "explicit_held_fixed_assumptions_required": true,
+    "exact_model_refs_required": true,
+    "applicability_and_identifiability_required": true,
+    "default_causal_claim_level": "SCENARIO_PROJECTION_NON_CAUSAL",
+    "stronger_causal_claim_requires_separately_adopted_authority": true,
+    "association_to_causal_upgrade_forbidden": true,
+    "factual_baseline_mutation_forbidden": true
+  },
+  "recommendation_contract": {
+    "carrier_table": "intelligence.training_recommendation",
+    "exact_source_forecast_or_counterfactual_refs_required": true,
+    "explicit_objective_constraints_required": true,
+    "explicit_allowed_action_space_required": true,
+    "advisory_only": true,
+    "automatic_command_forbidden": true,
+    "historical_truth_upgrade_forbidden": true,
+    "p1_p5_mutation_forbidden": true,
+    "approval_states": [
+      "DRAFT",
+      "IN_REVIEW",
+      "APPROVED",
+      "REJECTED",
+      "RELEASED"
+    ],
+    "allowed_transitions": [
+      "DRAFT->IN_REVIEW",
+      "IN_REVIEW->APPROVED",
+      "IN_REVIEW->REJECTED",
+      "APPROVED->RELEASED"
+    ],
+    "approval_or_release_does_not_upgrade_source_claim": true,
+    "later_intervention_outcome_remains_separate_fact": true
+  },
+  "interoperability_contract": {
+    "session_types": [
+      "LIVE",
+      "SIM",
+      "LVC"
+    ],
+    "exact_external_profile_id_and_version_required": true,
+    "exact_adapter_id_and_version_required": true,
+    "explicit_unit_and_time_basis_required": true,
+    "source_or_projection_class_required": true,
+    "exact_artifact_hash_and_provenance_required": true,
+    "applicability_uncertainty_and_release_state_preserved": true,
+    "unversioned_external_alias_forbidden": true,
+    "lossy_phase_conversion_forbidden": true,
+    "fact_projection_conflation_forbidden": true,
+    "second_fact_model_forbidden": true
+  },
+  "knowledge_time_contract": {
+    "explicit_as_of_utc_required": true,
+    "all_input_and_model_artifacts_must_be_available_by_as_of": true,
+    "forecast_origin_not_after_as_of": true,
+    "future_information_forbidden": true,
+    "same_outcome_or_post_horizon_outcome_leakage_forbidden": true,
+    "historical_current_latest_default_fallback_forbidden": true
+  },
+  "release_replay_contract": {
+    "exact_input_snapshot_required": true,
+    "exact_model_revision_and_artifact_hash_required": true,
+    "exact_forecast_counterfactual_recommendation_revision_required": true,
+    "exact_external_profile_and_artifact_refs_required": true,
+    "historical_p1_p5_mutation_forbidden": true,
+    "retrospective_recompute_creates_new_p6_identity": true,
+    "later_observed_outcome_may_validate_but_not_rewrite_prior_projection": true,
+    "original_knowledge_time_context_preserved": true
+  },
+  "admission_guard": {
+    "required_event": "push",
+    "required_git_ref": "refs/heads/main",
+    "required_m9_exit_decision": "GO",
+    "required_run_conclusion": "success",
+    "required_job_count": 14,
+    "p6_external_claim_before_gate_forbidden": true,
+    "authority_or_profile_adoption_does_not_admit_p6": true
+  },
+  "dto_transport_rules": {
+    "uuid": "canonical lowercase UUID string",
+    "sha256": "lowercase 64-character hex",
+    "utc": "RFC3339 UTC ending in Z",
+    "number": "finite JSON number",
+    "arrays": "stable governed logical order",
+    "nullable": "null only where explicitly permitted"
+  },
+  "dto_contracts": {
+    "P6InputSnapshotDTO": {
+      "fields": [
+        "input_snapshot_id",
+        "snapshot_type",
+        "factual_source_refs",
+        "p3_model_refs",
+        "scenario_context_refs",
+        "target_scope",
+        "subject_or_composition_ref",
+        "forecast_origin_utc",
+        "as_of_utc",
+        "data_hash",
+        "availability_status",
+        "reason_codes"
+      ]
+    },
+    "P6ModelRevisionDTO": {
+      "fields": [
+        "capability_model_id",
+        "model_spec_id",
+        "model_spec_version",
+        "subject_type",
+        "subject_id",
+        "training_dataset_snapshot_id",
+        "validation_dataset_snapshot_id",
+        "plugin_name",
+        "plugin_version",
+        "model_artifact_uri",
+        "model_artifact_hash",
+        "model_object_ref_id",
+        "validity_domain",
+        "validation_metrics",
+        "applicability_profile_ref",
+        "uncertainty_profile_ref",
+        "status",
+        "trained_at",
+        "published_at",
+        "supersedes_model_id"
+      ]
+    },
+    "P6ForecastRequestDTO": {
+      "fields": [
+        "forecast_request_id",
+        "forecast_run_id",
+        "input_snapshot_id",
+        "forecast_spec_id",
+        "forecast_spec_version",
+        "target_scope",
+        "subject_ref",
+        "target_code",
+        "forecast_origin_utc",
+        "horizon_spec",
+        "capability_model_id",
+        "assumption_profile_id",
+        "assumption_profile_version",
+        "as_of_utc",
+        "request_hash"
+      ]
+    },
+    "P6ForecastResultDTO": {
+      "fields": [
+        "forecast_result_id",
+        "forecast_run_id",
+        "target_code",
+        "target_time",
+        "distribution",
+        "threshold_probabilities",
+        "applicability_status",
+        "uncertainty",
+        "status",
+        "factual_source_refs",
+        "model_revision_id",
+        "as_of_utc",
+        "logical_content_hash"
+      ]
+    },
+    "P6CounterfactualRequestDTO": {
+      "fields": [
+        "counterfactual_request_id",
+        "counterfactual_run_id",
+        "base_product_refs",
+        "scenario_definition_id",
+        "interventions",
+        "held_fixed_assumptions",
+        "model_refs",
+        "applicability_profile_ref",
+        "as_of_utc",
+        "request_hash"
+      ]
+    },
+    "P6CounterfactualResultDTO": {
+      "fields": [
+        "counterfactual_run_id",
+        "projection_dataset_uri",
+        "projection_dataset_hash",
+        "applicability_status",
+        "identifiability_status",
+        "causal_claim_level",
+        "uncertainty",
+        "assumptions",
+        "model_refs",
+        "status",
+        "as_of_utc",
+        "logical_content_hash"
+      ]
+    },
+    "P6RecommendationDTO": {
+      "fields": [
+        "recommendation_id",
+        "subject_key",
+        "subject_id",
+        "recommendation_spec_id",
+        "recommendation_spec_version",
+        "source_forecast_result_ids",
+        "source_counterfactual_run_ids",
+        "objective_constraints",
+        "allowed_action_space",
+        "rationale",
+        "source_gap_refs",
+        "proposed_training_items",
+        "applicability_status",
+        "uncertainty",
+        "status",
+        "approval_state",
+        "reviewer_subject_key",
+        "audit_ref",
+        "created_at",
+        "logical_content_hash"
+      ]
+    },
+    "P6InteropSnapshotDTO": {
+      "fields": [
+        "interop_snapshot_id",
+        "session_id",
+        "session_type",
+        "source_id",
+        "source_stream_id",
+        "artifact_refs",
+        "producer_system",
+        "external_profile_id",
+        "external_profile_version",
+        "adapter_id",
+        "adapter_version",
+        "unit_basis",
+        "time_basis",
+        "source_or_projection_class",
+        "canonical_entity_refs",
+        "object_hashes",
+        "applicability_status",
+        "uncertainty",
+        "release_state",
+        "as_of_utc",
+        "logical_content_hash"
+      ]
+    },
+    "P6AdmissionStateDTO": {
+      "fields": [
+        "source_revision",
+        "event_name",
+        "git_ref",
+        "protected_main",
+        "m9_exit_decision",
+        "run_conclusion",
+        "required_jobs_success",
+        "required_jobs_total",
+        "p6_admitted"
+      ]
+    }
+  },
+  "error_codes": [
+    "FAIL_CLOSED_P6_AUTHORITY_REQUIRED",
+    "FAIL_CLOSED_P6_EXACT_IDENTITY_REQUIRED",
+    "FAIL_CLOSED_P6_CURRENT_LATEST_DEFAULT_FORBIDDEN",
+    "FAIL_CLOSED_P6_INPUT_SNAPSHOT_REQUIRED",
+    "FAIL_CLOSED_P6_FUTURE_INFORMATION",
+    "FAIL_CLOSED_P6_SAME_OUTCOME_LEAKAGE",
+    "FAIL_CLOSED_P6_MODEL_PROFILE_REQUIRED",
+    "FAIL_CLOSED_P6_TRAINING_VALIDATION_LEAKAGE",
+    "FAIL_CLOSED_P6_MANAGED_OBJECT_REQUIRED",
+    "FAIL_CLOSED_P6_MODEL_HASH_MISMATCH",
+    "FAIL_CLOSED_P6_APPLICABILITY_REQUIRED",
+    "FAIL_CLOSED_P6_UNCERTAINTY_REQUIRED",
+    "FAIL_CLOSED_P6_OOD_ZERO_COERCION",
+    "FAIL_CLOSED_P6_COUNTERFACTUAL_ASSUMPTIONS_REQUIRED",
+    "FAIL_CLOSED_P6_CAUSAL_CLAIM_NOT_AUTHORIZED",
+    "FAIL_CLOSED_P6_RECOMMENDATION_COMMAND_UPGRADE",
+    "FAIL_CLOSED_P6_INTEROP_PROFILE_REQUIRED",
+    "FAIL_CLOSED_P6_INTEROP_LOSSY_MAPPING",
+    "FAIL_CLOSED_P6_FACT_PROJECTION_CONFLATION",
+    "FAIL_CLOSED_P6_P1_P5_MUTATION_FORBIDDEN",
+    "FAIL_CLOSED_P6_NOT_ADMITTED"
+  ],
+  "contract_hashes": {
+    "exact_identity_rules_sha256": "4a90295bb41a3faa7f3aaff8262cbf39764879b866d05874f3607791643be9fa",
+    "input_snapshot_contract_sha256": "4f4f9cd9171bacd4f76b818fc36326b76c4e7f59afa82bf96d4f442e7a4dc92a",
+    "model_authority_contract_sha256": "012ea1185f3c8dd570f0a1456188cf105a2b4ec5372510e58ec1013e515340bb",
+    "applicability_uncertainty_contract_sha256": "d4b4e07cdbe29dcc055e509c3d346c59183f3ce714eaf09fa99bd052aa8ac072",
+    "forecast_contract_sha256": "b3b920198b4d09273586659d485ac86d5ebcad6aabdb6506c49ba39968d8004f",
+    "counterfactual_contract_sha256": "7e26b6beeba5bc8cdb2975bc52ea1d9af729869feb96633b436963dfaf286f8d",
+    "recommendation_contract_sha256": "83fd6cc8829ac676d056a2d2701072c54d2043ed0070e147b92fa8242f429195",
+    "interoperability_contract_sha256": "7d8647354b47df2c5b2de9655371c5ea50516ea39cf8ef0e6283af4363128460",
+    "knowledge_time_contract_sha256": "91d85e0dfe3826ec2fd46dfacdc1f75f4b0c96b064721930f6c812f7b67aed1f",
+    "release_replay_contract_sha256": "9758e37448caef0f07b731b03554c5467c17c4ac2eb2d99be59b2f188cd294ee",
+    "admission_guard_sha256": "76ec1db60e455310ad46d1d2df4258f846c0966a3b1a015ccd07d7a4428c379f",
+    "dto_contracts_sha256": "616d5139ac2ab5b01e78b0911afeddda648020b6f0126e7923d25b7f8f46ecea"
+  },
+  "golden_vectors": {
+    "current_latest_model_fail": {
+      "value": "LATEST",
+      "expected_error": "FAIL_CLOSED_P6_CURRENT_LATEST_DEFAULT_FORBIDDEN"
+    },
+    "future_information_fail": {
+      "expected_error": "FAIL_CLOSED_P6_FUTURE_INFORMATION"
+    },
+    "training_validation_overlap_fail": {
+      "expected_error": "FAIL_CLOSED_P6_TRAINING_VALIDATION_LEAKAGE"
+    },
+    "unprofiled_model_fail": {
+      "model_profile_ref": null,
+      "expected_error": "FAIL_CLOSED_P6_MODEL_PROFILE_REQUIRED"
+    },
+    "ood_zero_fail": {
+      "applicability_status": "OUT_OF_DOMAIN",
+      "value": 0,
+      "expected_error": "FAIL_CLOSED_P6_OOD_ZERO_COERCION"
+    },
+    "causal_upgrade_fail": {
+      "causal_claim_level": "CAUSAL_EFFECT",
+      "expected_error": "FAIL_CLOSED_P6_CAUSAL_CLAIM_NOT_AUTHORIZED"
+    },
+    "recommendation_command_fail": {
+      "expected_error": "FAIL_CLOSED_P6_RECOMMENDATION_COMMAND_UPGRADE"
+    },
+    "lossy_interop_fail": {
+      "expected_error": "FAIL_CLOSED_P6_INTEROP_LOSSY_MAPPING"
+    },
+    "pre_exit_claim_fail": {
+      "expected_error": "FAIL_CLOSED_P6_NOT_ADMITTED"
+    }
+  }
+}

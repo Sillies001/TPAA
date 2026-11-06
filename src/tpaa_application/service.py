@@ -8,6 +8,7 @@ from typing import Protocol
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
 
 from .ed2_upper_service import ED2UpperProductService
+from .gui_gateway import GuiGatewayError, GuiGatewayPrincipal, GuiGatewayService
 from .job_control import JobControl, JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
     M1PublishSessionCommand,
@@ -267,6 +268,7 @@ class ApplicationService:
         w7_external_capabilities: W7ExternalCapabilityUseCase | None = None,
         w8_operations_status: W8OperationsStatusUseCase | None = None,
         w9_final_qualification_status: W9FinalQualificationStatusUseCase | None = None,
+        gui_gateway: GuiGatewayService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -288,6 +290,47 @@ class ApplicationService:
         self._w7_external_capabilities = w7_external_capabilities
         self._w8_operations_status = w8_operations_status
         self._w9_final_qualification_status = w9_final_qualification_status
+        self._gui_gateway = gui_gateway
+
+    def _gui(self) -> GuiGatewayService:
+        if self._gui_gateway is None:
+            raise GuiGatewayError("BACKEND_UNAVAILABLE", http_status=503, retryable=True)
+        return self._gui_gateway
+
+    def gui_catalog(
+        self,
+        principal: GuiGatewayPrincipal,
+        *,
+        request_id: str,
+    ) -> dict[str, object]:
+        return self._gui().catalog(principal, request_id=request_id)
+
+    def gui_bootstrap(
+        self,
+        principal: GuiGatewayPrincipal,
+        *,
+        request_id: str,
+    ) -> dict[str, object]:
+        return self._gui().bootstrap(principal, request_id=request_id)
+
+    def gui_selector(
+        self,
+        principal: GuiGatewayPrincipal,
+        selector_id: str,
+        *,
+        request_id: str,
+        release_id: str | None = None,
+        cursor: str | None = None,
+        limit: int = 50,
+    ) -> dict[str, object]:
+        return self._gui().selector(
+            principal,
+            selector_id,
+            request_id=request_id,
+            release_id=release_id,
+            cursor=cursor,
+            limit=limit,
+        )
 
     def source_workflow(self) -> SourceWorkflowService:
         """Return the configured W2 Source ingress use case."""

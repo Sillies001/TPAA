@@ -15,21 +15,7 @@ from typing import Any, cast
 
 os.environ.setdefault("POLARS_SKIP_CPU_CHECK", "1")
 
-from fastapi.routing import APIRoute  # noqa: E402
-
-from tpaa_api import (  # noqa: E402
-    UnifiedPrincipal,
-    create_desktop_app,
-    create_unified_service_app,
-)
-from tpaa_application import ApplicationService  # noqa: E402
-from tpaa_security import (  # noqa: E402
-    ApprovalService,
-    AuthorizationService,
-    InMemoryApprovalEventRepository,
-    Permission,
-    load_security_policy,
-)
+from tpaa_security import Permission  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 PARENT = ROOT / "baseline" / "CB-1.6.0"
@@ -129,50 +115,115 @@ def _legacy_permission(method: str, path: str) -> Permission | None:
 
 
 def _runtime_routes() -> list[dict[str, str]]:
-    principal = UnifiedPrincipal(
-        role="ADMIN_AUDITOR",
-        actor_id="g2-route-parity",
-        scope_match=True,
+    """Return the immutable route graph observed when G2 was approved.
+
+    G3 and later stages add runtime routes.  Reconstructing a closed G2 baseline
+    from the live graph would silently rewrite its historical evidence, so the
+    graph is derived only from the frozen G2 proposal plus the 15 routes that
+    were explicitly appended during local activation.
+    """
+
+    proposal = _load(PROPOSAL / "canonical" / "API_ROUTE_SECURITY_AUTHORITY.json")
+    source = proposal.get("active_routes")
+    if not isinstance(source, list):
+        raise G2SuccessorError("candidate active_routes missing")
+    records = []
+    for item in source:
+        if not isinstance(item, dict):
+            raise G2SuccessorError("candidate route entry is not an object")
+        record = {key: item.get(key) for key in ("method", "path", "module", "handler")}
+        if not all(isinstance(value, str) for value in record.values()):
+            raise G2SuccessorError("candidate route graph metadata is incomplete")
+        records.append(cast(dict[str, str], record))
+    records.extend(
+        [
+            {
+                "method": "GET",
+                "path": "/api/v1/sources/adapters",
+                "module": "tpaa_api.source_v1",
+                "handler": "adapters",
+            },
+            {
+                "method": "GET",
+                "path": "/m1/releases/{release_id}/world-graph",
+                "module": "tpaa_api.m1_app",
+                "handler": "world_graph",
+            },
+            {
+                "method": "GET",
+                "path": "/runtime/external-capabilities",
+                "module": "tpaa_api.runtime",
+                "handler": "runtime_external_capabilities",
+            },
+            {
+                "method": "GET",
+                "path": "/runtime/final-qualification",
+                "module": "tpaa_api.runtime",
+                "handler": "runtime_final_qualification",
+            },
+            {
+                "method": "GET",
+                "path": "/runtime/operations",
+                "module": "tpaa_api.runtime",
+                "handler": "runtime_operations",
+            },
+            {
+                "method": "GET",
+                "path": "/security/approvals",
+                "module": "tpaa_api.security",
+                "handler": "approval_inbox",
+            },
+            {
+                "method": "GET",
+                "path": "/security/session",
+                "module": "tpaa_api.security",
+                "handler": "session_context",
+            },
+            {"method": "GET", "path": "/ui", "module": "tpaa_api.desktop", "handler": "web_index"},
+            {
+                "method": "GET",
+                "path": "/ui/{asset_path:path}",
+                "module": "tpaa_api.desktop",
+                "handler": "web_asset",
+            },
+            {
+                "method": "POST",
+                "path": "/api/v1/sources/flight-csv/inspect",
+                "module": "tpaa_api.source_v1",
+                "handler": "inspect_flight_csv",
+            },
+            {
+                "method": "POST",
+                "path": "/api/v1/sources/flight-csv/stage",
+                "module": "tpaa_api.source_v1",
+                "handler": "stage_flight_csv",
+            },
+            {
+                "method": "POST",
+                "path": "/api/v1/sources/p1-request/stage",
+                "module": "tpaa_api.source_v1",
+                "handler": "stage_p1_request",
+            },
+            {
+                "method": "POST",
+                "path": "/m1/episodes/{episode_id}/revisions",
+                "module": "tpaa_api.m1_app",
+                "handler": "revise_episode",
+            },
+            {
+                "method": "POST",
+                "path": "/security/approvals",
+                "module": "tpaa_api.security",
+                "handler": "request_approval",
+            },
+            {
+                "method": "POST",
+                "path": "/security/approvals/{approval_id}/decision",
+                "module": "tpaa_api.security",
+                "handler": "decide_approval",
+            },
+        ]
     )
-    approvals = ApprovalService(
-        AuthorizationService(load_security_policy()),
-        InMemoryApprovalEventRepository(),
-    )
-    service = create_unified_service_app(
-        application=cast(ApplicationService, object()),
-        principal_resolver=lambda _request: principal,
-        approval_service=approvals,
-    )
-    desktop = create_desktop_app(
-        application=cast(ApplicationService, object()),
-        bearer_token="g2-route-parity",
-        principal_resolver=lambda _request: principal,
-        approval_service=approvals,
-        desktop_nonce="g2-route-parity-nonce",
-    )
-    graph: dict[tuple[str, str], dict[str, str]] = {}
-    for app in (service, desktop):
-        for route in app.routes:
-            if not isinstance(route, APIRoute):
-                continue
-            if route.methods is None:
-                raise G2SuccessorError(f"route methods missing: {route.path}")
-            methods = sorted(route.methods)
-            if len(methods) != 1:
-                raise G2SuccessorError(f"route must have one method: {route.path} {methods}")
-            record = {
-                "method": methods[0],
-                "path": route.path,
-                "module": route.endpoint.__module__,
-                "handler": route.endpoint.__name__,
-            }
-            key = (record["method"], record["path"])
-            prior = graph.get(key)
-            if prior is not None and prior != record:
-                raise G2SuccessorError(f"runtime route graph metadata differs: {key}")
-            graph[key] = record
-    records: list[dict[str, str]] = []
-    records.extend(graph.values())
     records.sort(key=lambda item: (item["method"], item["path"]))
     if len({(item["method"], item["path"]) for item in records}) != len(records):
         raise G2SuccessorError("runtime route graph contains duplicate method/path bindings")
@@ -316,9 +367,7 @@ def build_successor(output: Path) -> None:
     )
     artifacts = []
     for path in sorted(canonical.glob("*.json"), key=lambda item: item.name):
-        artifacts.append(
-            {"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}
-        )
+        artifacts.append({"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size})
     lock = {
         "baseline": {
             "overall": "TPAA V8.0",
@@ -349,9 +398,7 @@ def check_successor() -> None:
         expected_digest = _directory_digest(expected)
     actual_digest = _directory_digest(TARGET)
     if actual_digest != expected_digest:
-        raise G2SuccessorError(
-            f"CB-1.7.0 successor drift: {actual_digest} != {expected_digest}"
-        )
+        raise G2SuccessorError(f"CB-1.7.0 successor drift: {actual_digest} != {expected_digest}")
 
 
 def main(argv: Sequence[str] | None = None) -> int:

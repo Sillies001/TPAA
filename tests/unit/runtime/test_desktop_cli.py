@@ -22,9 +22,10 @@ def test_desktop_main_forwards_packaged_root_and_data_root(
         observed["controller"] = kwargs
         return backend
 
-    def run_desktop(argv, *, backend):
+    def run_desktop(argv, *, backend, config):
         observed["qt_args"] = argv
         observed["backend"] = backend
+        observed["gui_mode"] = config.mode.value
         return 0
 
     monkeypatch.setattr(desktop_cli, "project_version", project_version)
@@ -46,4 +47,5 @@ def test_desktop_main_forwards_packaged_root_and_data_root(
         },
         "qt_args": ["-style", "fusion"],
         "backend": backend,
+        "gui_mode": "legacy",
     }

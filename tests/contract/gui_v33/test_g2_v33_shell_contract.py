@@ -51,11 +51,13 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     assert "GUI_PERMISSION_AUDIT_AUTHORITY.json" in source
     assert 'view.id !== "V24"' in source
     assert "V24_REQUIRES_V08_CONTEXT" in source
-    assert 'fetch("/security/session"' in source
-    assert '"gui_permissions" in payload' in source
-    assert "payload.gui_permissions.filter" in source
-    assert 'payload.gui_permission_authority_version !== "1.1.0"' in source
-    assert 'payload.gui_permission_activation_status !== "ACTIVE"' in source
+    assert "createGuiClient" in source
+    assert "await guiClient.bootstrap()" in source
+    assert "principal.gui_permissions.filter" in source
+    assert 'provenance.authority_id !== "GUI_ASYNC_GATEWAY_AUTHORITY"' in source
+    assert 'provenance.authority_version !== "1.0.0"' in source
+    assert 'provenance.core_baseline !== "CB-1.8.0"' in source
+    assert "asyncGateway.setPartition" in source
     assert "payload.permissions.filter" not in source
     assert "required_permissions.every" in source
     assert 'unknown_policy === "DENY"' in source

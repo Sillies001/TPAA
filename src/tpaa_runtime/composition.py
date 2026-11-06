@@ -17,6 +17,7 @@ from tpaa_api.unified import (
 )
 from tpaa_application import (
     ApplicationService,
+    GuiGatewayService,
     InMemoryM3ReleasePublicationRepository,
     InMemoryM4DebriefRepository,
     InMemoryM6P2WorkspaceRepository,
@@ -134,6 +135,7 @@ def _build(
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=operational_status,
+        gui_gateway=GuiGatewayService(),
         w7_external_capabilities=W7ExternalCapabilityRegistry.local_closed(),
     )
     return ProductRuntime(

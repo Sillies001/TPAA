@@ -1,8 +1,8 @@
 # TPAA HTML Demo v33 驱动的 GUI 产品化重构、后端补齐与设计同步整改方案
 
-> 文档状态：`IN_PROGRESS_V33 / G0R、G1、G2 已本地关闭，G3 尚未启动`  
+> 文档状态：`IN_PROGRESS_V33 / G0R、G1、G2、G3 已本地关闭，G4 尚未启动`
 > 编制日期：2026-11-06  
-> 当前工作指令：G2 已按本地授权正式关闭；下一阶段从 G3 开始，启动前仍须单独确认范围，不得提前暴露未实现的 GUI API 路由。  
+> 当前工作指令：G3 已按本地授权正式关闭；下一阶段从 G4 开始，启动前仍须单独确认范围，不得提前暴露未实现的 GUI 业务 API 路由。
 > 替代关系：本文件替代 `TPAA_HTML_Demo驱动_GUI产品化重构与后端设计同步整改方案_2026-10-29.md` 作为后续 GUI 产品化工作的唯一实施方案。  
 > 目标对象：TPAA Desktop GUI、面向 GUI 的 Application/API 投影、必要领域/存储能力、总体与工程设计后继基线。  
 > 发布边界：只允许本地修改和验证；禁止推送、签名和生产部署。W9 继续保持 `NO_GO`。
@@ -888,9 +888,13 @@ docs/gui/demo-v33 docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json
 
 本方案已覆盖 v33 基线、三份 Patch、26 视图、V01/V26、WE/Cluster/Window、双视角、后端/API/DTO、版本、设计同步、分阶段实施、测试、迁移、风险和 DoD。
 
-执行状态（2026-11-06）：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`，`G2=CLOSED_LOCAL_WITH_GATES`，`G3～G12=NOT_STARTED`。G0R/G1 证据沿用既有关闭记录。项目所有者已正式批准 CB-1.7.0 G2 GUI 权限与 API 路由安全权威候选仅在本地激活；受控后继 `baseline/CB-1.7.0/`、生成式运行时权威、九角色/26 视图/12 GUI 权限映射和 Service/Desktop 并集 86 条稳定路由现均为 `APPROVED_LOCAL / ACTIVE`。`/security/session` 已区分业务权限与 GUI 权限；未知路由、未知角色、未绑定视图和非法 V24 直达均 fail-closed；受业务权限治理的路由在 handler 前写去标识化授权审计。确定性前端构建、Ruff、Mypy、G2 回归、三主题、键盘、焦点、100%/150% DPI、V24 条件入口和 WebEngine exact-loopback/off-the-record 验收均通过，统一证据为 `evidence/gui-g2-v33-closure.json`。该关闭仅适用于本地 G2 阶段，不代表 `PRODUCT_COMPLETE`、`RELEASE_READY` 或生产部署批准。
+执行状态（2026-11-06）：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`，`G2=CLOSED_LOCAL_WITH_GATES`，`G3=CLOSED_LOCAL_WITH_GATES`，`G4～G12=NOT_STARTED`。G0R/G1/G2 证据沿用既有关闭记录。项目所有者已授权 G3 仅在本地实施；受控后继 `baseline/CB-1.8.0/`（DB 继续为 1.10.0）、生成式 Python/TypeScript client、Application 所有的 catalog/bootstrap/selectors 组合读模型及三条受 `gui.view` 独立保护并强制审计的 GUI 基础读取路由现均为 `APPROVED_LOCAL / ACTIVE`。异步网关已实现请求去重、超时、取消、stale response 丢弃、principal/release 双分区内存缓存、版本化游标分页、统一错误/原因/来源、range/LOD 与短期媒体 ticket 校验。12 条 G4+ GUI 业务路由仍保持未注册、未暴露；动态业务 selector 在 G4 前只返回空集合和 `CONTEXT_REQUIRED`，不得生成 Demo/随机值。确定性前端构建、Ruff、Mypy、Python/TypeScript 动态门、100%/150% DPI 真实 WebEngine exact-loopback/off-the-record 验收均通过，统一证据为 `evidence/gui-g3-v33-closure.json`。该关闭仅适用于本地 G3 阶段，不代表 `PRODUCT_COMPLETE`、`RELEASE_READY` 或生产部署批准。
 
 
 ### G2 安全授权整改增量（2026-11-06）
 
-已完成并关闭：scope_match 与授权 scope 解耦；非全局 wildcard scope 默认拒绝；security/session 业务权限与 GUI 权限字段分离；前端仅消费 gui_permissions；所有 business-Permission API 授权决策在 handler 前写去标识化审计并对审计写失败 fail-closed。已由项目所有者批准并仅在本地激活 API_ROUTE_SECURITY_AUTHORITY，冻结 Service/Desktop 运行时并集 86 条路由的 stable route ID、permission 与 audit 语义；未知路由默认拒绝，14 条尚未实现的 GUI reserved routes 继续不暴露。G2 已关闭，G3 尚未启动；禁止推送、生产部署和发布声明的边界保持不变。
+已完成并关闭：scope_match 与授权 scope 解耦；非全局 wildcard scope 默认拒绝；security/session 业务权限与 GUI 权限字段分离；前端仅消费 gui_permissions；所有 business-Permission API 授权决策在 handler 前写去标识化审计并对审计写失败 fail-closed。已由项目所有者批准并仅在本地激活 API_ROUTE_SECURITY_AUTHORITY，冻结 Service/Desktop 的 G2 运行时并集 86 条路由的 stable route ID、permission 与 audit 语义；历史构建器改为从冻结输入重建，不会吸收 G3 新路由。未知路由默认拒绝；G3 仅激活三条基础读取路由，其余 12 条 GUI business routes 继续不暴露。禁止推送、生产部署和发布声明的边界保持不变。
+
+### G3 异步 Gateway 与组合读模型关闭增量（2026-11-06）
+
+已完成并关闭：CB-1.8.0 以不可变 CB-1.7.0 为直接父基线，DB schema 保持 1.10.0；`GUI_ASYNC_GATEWAY_AUTHORITY`、跨层 DTO、API 路由与安全权威同步激活。Desktop/Service 共用 Application Gateway；UI/REST 不读取原始文件或 Canonical 表。前端通过 bootstrap 获取经角色过滤的 catalog 和 GUI 权限，主体标识不回传，缓存分区键仅以不可逆摘要传输。三条基础路由采用 `AUTHENTICATED_GUI_PERMISSION`，统一守卫实际校验 `gui.view` 并写稳定 route ID 审计，避免业务权限误绑导致学员角色被提前拒绝。取消、超时、去重、stale 丢弃、双分区缓存、游标循环/篡改、分页、统一错误、range/LOD、媒体 ticket 和真实 WebEngine 门均通过。G4 尚未启动；Batch 登记、导入、训练类型修订和其他真实业务投影不得在 G4 机器权威与退出门完成前开放。

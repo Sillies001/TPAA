@@ -38,6 +38,7 @@ from .governance_registry import (
     GovernanceRegistryService,
     LifecycleEventRecord,
 )
+from .gui_gateway import GuiGatewayError, GuiGatewayPrincipal, GuiGatewayService
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -226,6 +227,9 @@ __all__ = [
     "ContextArtifactRecord",
     "GovernanceRegistryError",
     "GovernanceRegistryService",
+    "GuiGatewayError",
+    "GuiGatewayPrincipal",
+    "GuiGatewayService",
     "LifecycleEventRecord",
     "ManagedRelease",
     "ReleaseLifecycleReceipt",
