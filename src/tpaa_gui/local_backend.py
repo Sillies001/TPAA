@@ -82,12 +82,12 @@ def _prepare_child_spawn(
     argv = list(command)
     bypass_venv_redirector = False
 
-    if resolved_os_name == "nt" and argv and resolved_base:
-        def same_windows_path(left: str, right: str) -> bool:
-            return ntpath.normcase(ntpath.abspath(left)) == ntpath.normcase(
-                ntpath.abspath(right)
-            )
+    def same_windows_path(left: str, right: str) -> bool:
+        return ntpath.normcase(ntpath.abspath(left)) == ntpath.normcase(
+            ntpath.abspath(right)
+        )
 
+    if resolved_os_name == "nt" and argv and resolved_base:
         if same_windows_path(argv[0], resolved_executable) and not same_windows_path(
             resolved_executable, resolved_base
         ):

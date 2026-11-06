@@ -142,7 +142,7 @@
   "webengine_smoke_diagnosis": {
     "failure": "The child interpreter exited before LISTENING with ModuleNotFoundError: No module named 'tpaa_api'.",
     "root_cause": "The parent process added the source src directory to its in-memory sys.path, but a new subprocess does not inherit that mutation. The child was invoked with -m tpaa_api.local_backend_child without the source root in PYTHONPATH.",
-    "fix_commit": "PENDING_COMMIT",
+    "fix_commit": "c6e81f0710040ec163ede42d1f292a7a98c9f4c7",
     "fix": "LocalBackendController now injects the package import root into the child PYTHONPATH on all platforms while preserving existing PYTHONPATH entries and the Windows venv launcher behavior.",
     "verification": "PENDING_WINDOWS_LOCAL"
   }
