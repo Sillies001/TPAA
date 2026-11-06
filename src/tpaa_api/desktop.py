@@ -64,7 +64,6 @@ _DESKTOP_ALLOWED_PREFIXES = (
 )
 
 
-
 _V24_DIRECT_QUERY_KEYS = frozenset({"view", "view_id", "route", "page"})
 
 
