@@ -1,0 +1,130 @@
+{
+  "registry_id": "TERMINOLOGY_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "purpose": "Single authority for project progress/layer vocabulary. Only P, M, WS and training-process Stage are permitted for these meanings.",
+  "namespaces": {
+    "P": {
+      "canonical_term": "Capability Phase",
+      "cn": "能力成熟度/能力层",
+      "codes": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6"
+      ],
+      "meaning": "Evaluation/intelligence capability claim depth. Stable product semantics, not project progress.",
+      "authority": "CAPABILITY_PHASE_REGISTRY.json"
+    },
+    "M": {
+      "canonical_term": "Development Milestone",
+      "cn": "项目里程碑",
+      "codes": [
+        "M0",
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5",
+        "M6",
+        "M7",
+        "M8",
+        "M9"
+      ],
+      "meaning": "Project delivery/acceptance checkpoints. A milestone may advance one or more P capabilities but never renames them.",
+      "authority": "DEVELOPMENT_MILESTONE_REGISTRY.json"
+    },
+    "WS": {
+      "canonical_term": "Engineering Workstream",
+      "cn": "工程工作流",
+      "code_pattern": "WS-[A-Z0-9-]+",
+      "meaning": "Cross-cutting engineering work organization that spans milestones and capability phases.",
+      "authority": "ENGINEERING_WORKSTREAM_REGISTRY.json"
+    },
+    "Stage": {
+      "canonical_term": "Episode Stage",
+      "cn": "训练过程 Stage",
+      "meaning": "Versioned sub-interval/state inside a Training Episode. Stage is never a project milestone or capability maturity label.",
+      "authority": "STAGE_REGISTRY.json"
+    }
+  },
+  "separation_rules": [
+    "P codes are used only for capability maturity/product class.",
+    "M codes are used only for project progress and acceptance checkpoints.",
+    "WS codes are used only for engineering work organization.",
+    "Stage is used only inside training/Episode process semantics.",
+    "Generic Phase/阶段 shall not be used as an unqualified project-progress label in controlled design documents.",
+    "Legacy 1A-1G and 1C/1D/1E are not current progress/layer codes."
+  ],
+  "legacy_mappings": {
+    "1A": {
+      "current": "M0",
+      "workstreams": [
+        "WS-CORE",
+        "WS-DEVOPS"
+      ],
+      "status": "LEGACY_ONLY"
+    },
+    "1B": {
+      "current": "M0",
+      "workstreams": [
+        "WS-STORAGE",
+        "WS-TEST",
+        "WS-PERFORMANCE"
+      ],
+      "status": "LEGACY_ONLY"
+    },
+    "1C": {
+      "current": "M2",
+      "workstreams": [
+        "WS-METRIC",
+        "WS-TEST"
+      ],
+      "batch": "P1_FOUNDATION_32",
+      "status": "LEGACY_ONLY"
+    },
+    "1D": {
+      "current": "M3",
+      "workstreams": [
+        "WS-METRIC",
+        "WS-TEST"
+      ],
+      "batch": "P1_REMAINDER_84",
+      "status": "LEGACY_ONLY"
+    },
+    "1E": {
+      "current": "M4",
+      "workstreams": [
+        "WS-LONGITUDINAL",
+        "WS-GUI",
+        "WS-TEST"
+      ],
+      "batch": "P1_LONGITUDINAL",
+      "status": "LEGACY_ONLY"
+    },
+    "1F": {
+      "current": "M5",
+      "workstreams": [
+        "WS-PERFORMANCE",
+        "WS-PLATFORM",
+        "WS-TEST"
+      ],
+      "status": "LEGACY_ONLY"
+    },
+    "1G": {
+      "current": "M5",
+      "workstreams": [
+        "WS-DEVOPS",
+        "WS-SECURITY",
+        "WS-GOVERNANCE"
+      ],
+      "status": "LEGACY_ONLY"
+    }
+  },
+  "compatibility_aliases": {
+    "PHASE1_METRIC_CATALOG.json": "renamed to P1_METRIC_CATALOG.json; metric codes P1-* remain canonical.",
+    "PHASE_LIFECYCLE.json": "replaced by CAPABILITY_PHASE_REGISTRY.json."
+  }
+}

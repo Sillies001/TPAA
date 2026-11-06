@@ -24,13 +24,12 @@ if str(SRC_ROOT) not in sys.path:
 
 from tpaa_gui import LocalBackendController, LocalBackendState, run_desktop  # noqa: E402
 
-_REQUIRED_DIAGNOSTICS = (
-    "tpaaDiagnosticsReadiness",
-    "tpaaDiagnosticsMismatches",
-    "tpaaDiagnosticsBuild",
-    "tpaaDiagnosticsCore",
-    "tpaaDiagnosticsCatalog",
-    "tpaaDiagnosticsSchema",
+_REQUIRED_PRODUCT_SHELL_OBJECTS = (
+    "tpaaMissionHeader",
+    "tpaaB5ProductNavigation",
+    "tpaaB5ProductStack",
+    "tpaaDetailEvidenceDrawer",
+    "tpaaShellStatusBar",
 )
 
 
@@ -104,16 +103,18 @@ def run_smoke(*, headless: bool = True, timeout_seconds: float = 30.0) -> dict[s
             return
         checks["launch"] = "PASS"
 
-        readiness = window.findChild(QtWidgets.QLabel, "tpaaDiagnosticsReadiness")
-        if readiness is None or readiness.text() != "Readiness: READY":
+        readiness = window.findChild(QtWidgets.QLabel, "tpaaShellRuntimeStatus")
+        if readiness is None or readiness.text() != "Runtime: READY":
             return
         checks["backend_ready"] = "PASS"
 
-        labels = [window.findChild(QtWidgets.QLabel, name) for name in _REQUIRED_DIAGNOSTICS]
-        if any(label is None for label in labels):
-            fail("DIAGNOSTICS_OBJECT_MISSING")
+        objects = [window.findChild(QtCore.QObject, name) for name in _REQUIRED_PRODUCT_SHELL_OBJECTS]
+        if any(widget is None for widget in objects):
+            fail("PRODUCT_SHELL_OBJECT_MISSING")
             return
-        if not window.isVisible() or any(not label.isVisible() for label in labels if label is not None):
+        if not window.isVisible() or any(
+            not widget.isVisible() for widget in objects if widget is not None
+        ):
             return
         checks["diagnostics_visible"] = "PASS"
 

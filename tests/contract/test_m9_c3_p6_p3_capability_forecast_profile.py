@@ -8,7 +8,7 @@ from pathlib import Path
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 PROFILE = (
     BASELINE
     / "canonical"
@@ -21,7 +21,7 @@ VALIDATOR_PATH = (
     / "validate_p6_p3_capability_forecast_profile.py"
 )
 
-EXPECTED_PROFILE_SHA256 = "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394"
+EXPECTED_PROFILE_SHA256 = "ccb5aa1272b958bacd20ac3d2adaf208386138dc2f3da7c15a48fd84eddf8e6d"
 
 SPEC = importlib.util.spec_from_file_location("p6_profile_validator", VALIDATOR_PATH)
 assert SPEC is not None and SPEC.loader is not None

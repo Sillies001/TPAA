@@ -1,0 +1,71 @@
+{
+  "schema": "TPAA_W6_PRODUCT_WORKFLOW_CONTRACT_V1",
+  "baseline": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3",
+  "current_latest_fallback_forbidden": true,
+  "frontend_business_recompute_forbidden": true,
+  "pages": [
+    {
+      "slot": "P04",
+      "product": "P4_INDIVIDUAL_HUMAN_MACHINE",
+      "exact_api": "/m8/p4/assessments/{actor_assessment_id}",
+      "discovery_kind": "P4_ASSESSMENT",
+      "role_task": "individual assessment review and governed revision",
+      "semantic_guards": ["TEAM_TO_INDIVIDUAL_FORBIDDEN", "AUTOMATIC_ANNOTATION_FINAL_SEPARATE"]
+    },
+    {
+      "slot": "P05",
+      "product": "P5_TEAM_MISSION",
+      "exact_api": "/m8/p5/assessments/{mission_assessment_id}",
+      "discovery_kind": "P5_ASSESSMENT",
+      "role_task": "team, package, and mission review with immutable composition",
+      "semantic_guards": ["COMPOSITION_EXPLICIT", "PARTICIPANT_IS_EVIDENCE_NOT_PERSONAL_SCORE"]
+    },
+    {
+      "slot": "P06",
+      "product": "P3_REFERENCE_CONDITION_LONGITUDINAL",
+      "exact_api": "/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}/workspace",
+      "discovery_kind": "P3_TWIN+P3_ESTIMATE",
+      "role_task": "exact aircraft Twin review and evidence trace",
+      "semantic_guards": ["P1_P2_P3_LAYER_SEPARATION", "SAME_EPISODE_TRUTH_FEEDBACK_FORBIDDEN"]
+    },
+    {
+      "slot": "P07",
+      "product": "P3_MODEL_PROFILE",
+      "exact_api": "SERVER_PUBLISHED_PROFILE_REQUIRED",
+      "discovery_kind": "P3_MODEL_PROFILE",
+      "role_task": "model, block, and configuration cohort review",
+      "semantic_guards": ["FRONTEND_COHORT_AGGREGATION_FORBIDDEN", "AIRCRAFT_AND_EPISODE_COUNTS_REQUIRED", "OUTLIER_IS_REVIEW_NOT_FAULT"],
+      "absence_policy": "FAIL_CLOSED_UNAVAILABLE"
+    },
+    {
+      "slot": "P08",
+      "product": "P2_ADJUSTED",
+      "exact_api": "/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/{comparison|diagnostics}",
+      "discovery_kind": "P2_ESTIMATE",
+      "role_task": "observed versus adjusted comparison and attribution evidence drill",
+      "semantic_guards": ["ASSOCIATION_ONLY", "NOT_IDENTIFIABLE_HAS_NO_DETERMINISTIC_EFFECT", "NO_IMPLICIT_PERCENTAGE"]
+    },
+    {
+      "slot": "P09",
+      "product": "OBSERVED_PERFORMANCE_TREND",
+      "exact_api": "/m4/longitudinal/releases/{release_id}/trend",
+      "discovery_kind": "M4_RELEASE",
+      "role_task": "aircraft or mission-system exact trend and configuration-break review",
+      "semantic_guards": ["AIRCRAFT_MISSION_SYSTEM_LANES_SEPARATE", "CONFIGURATION_BREAK_EXPLICIT", "NO_FRONTEND_TREND_RECOMPUTE"]
+    },
+    {
+      "slot": "P10",
+      "product": "P4_P5_IMMUTABLE_HISTORY",
+      "exact_api": "/api/v1/discovery/products/{P4_ASSESSMENT|P5_ASSESSMENT}",
+      "discovery_kind": "P4_ASSESSMENT|P5_ASSESSMENT",
+      "role_task": "human or team immutable longitudinal history",
+      "semantic_guards": ["HUMAN_TEAM_LANES_SEPARATE", "TEAM_TO_INDIVIDUAL_FORBIDDEN", "NO_GUI_SCORE_TREND"]
+    }
+  ],
+  "lifecycle": {
+    "exact_history_visible": true,
+    "assessment_transitions": ["IN_REVIEW", "APPROVED", "REJECTED"],
+    "non_assessment_publication_authority": "P13_GOVERNANCE",
+    "empty_and_failure_states": "FAIL_CLOSED_VISIBLE"
+  }
+}

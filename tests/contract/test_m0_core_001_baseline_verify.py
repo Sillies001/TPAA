@@ -19,9 +19,9 @@ SPEC.loader.exec_module(VERIFY_BASELINE)
 
 class M0Core001BaselineVerifyTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.source = REPO_ROOT / "baseline" / "CB-1.4.0"
+        self.source = REPO_ROOT / "baseline" / "CB-1.5.0"
         self.temp_dir = tempfile.TemporaryDirectory()
-        self.baseline = Path(self.temp_dir.name) / "CB-1.4.0"
+        self.baseline = Path(self.temp_dir.name) / "CB-1.5.0"
         shutil.copytree(self.source, self.baseline)
         # copytree preserves read-only modes from the frozen source; tests need controlled mutation.
         for path in self.baseline.rglob("*"):
@@ -33,7 +33,7 @@ class M0Core001BaselineVerifyTests(unittest.TestCase):
 
     def test_approved_snapshot_passes_exactly(self) -> None:
         lock, results, errors = VERIFY_BASELINE.verify(self.baseline)
-        self.assertEqual(lock["baseline"]["core"], "CB-1.4.0")
+        self.assertEqual(lock["baseline"]["core"], "CB-1.5.0")
         self.assertEqual(len(results), VERIFY_BASELINE.EXPECTED_CONTROLLED_ARTIFACT_COUNT)
         self.assertTrue(all(item.status == "PASS" for item in results))
         self.assertEqual(

@@ -1,0 +1,16 @@
+{
+  "schema": "TPAA_W6_COMPLIANCE_MATRIX_V1",
+  "baseline": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3",
+  "status": "CLOSED_LOCAL_PASS_NOT_PUSHED_NOT_DEPLOYED",
+  "requirements": [
+    {"id": "W6-PAGE-MAP", "status": "PASS", "evidence": ["src/tpaa_gui/product_shell.py", "src/tpaa_gui/w6_pages.py"]},
+    {"id": "W6-EXACT-IDENTITY", "status": "PASS", "evidence": ["src/tpaa_gui/w6_projection.py", "tests/unit/gui/test_w6_product_workflows.py"]},
+    {"id": "W6-P1-P2-P3-SEPARATION", "status": "PASS", "evidence": ["src/tpaa_gui/w6_pages.py:create_p06_page"]},
+    {"id": "W6-ASSOCIATION-NOT-CAUSAL", "status": "PASS", "evidence": ["src/tpaa_gui/w6_projection.py:attribution_display_rows"]},
+    {"id": "W6-TEAM-INDIVIDUAL-ISOLATION", "status": "PASS", "evidence": ["src/tpaa_gui/w6_projection.py:build_individual_assessment", "src/tpaa_gui/w6_pages.py:create_p10_page"]},
+    {"id": "W6-CONFIG-BREAK", "status": "PASS", "evidence": ["src/tpaa_gui/w6_projection.py:trend_segments"]},
+    {"id": "W6-P07-SERVER-AGGREGATE", "status": "PASS_FAIL_CLOSED", "evidence": ["src/tpaa_gui/w6_pages.py:create_p07_page"]},
+    {"id": "W6-EMPTY-FAILURE", "status": "PASS", "evidence": ["tests/unit/gui/test_w6_product_workflows.py"]},
+    {"id": "W6-EXPERT-SEMANTIC-MISREAD", "status": "PASS_AUTOMATED_CONTRACT", "evidence": ["tests/unit/gui/test_w6_product_workflows.py"]}
+  ]
+}

@@ -23,7 +23,7 @@ def test_build_manifest_sbom_license_and_native_inventory_are_traceable(
     assert build["schema"] == "TPAA_M0_BUILD_MANIFEST_V1"
     assert build["qualification"] == "DEVELOPMENT_NOT_M5_QUALIFIED"
     assert build["platform_profile"] == profile
-    assert build["core_baseline"] == "CB-1.4.0"
+    assert build["core_baseline"] == "CB-1.5.0"
     assert build["db_schema_version"] == "1.9.0"
     assert len(str(build["source_revision"])) == 40
     assert len(str(build["baseline_lock_sha256"])) == 64

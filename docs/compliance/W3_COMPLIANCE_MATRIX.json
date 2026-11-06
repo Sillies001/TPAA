@@ -1,0 +1,101 @@
+{
+  "schema": "TPAA_W3_COMPLIANCE_MATRIX_V1",
+  "stage": "W3",
+  "status": "CLOSED_LOCAL_PASS",
+  "design_authority": [
+    "05H §15 Data Governance",
+    "05H §16 Security Controls",
+    "05H §22 Role Identity Separation",
+    "05H §23 Personnel Team Longitudinal Governance",
+    "05H §24 Plugin Lifecycle Governance",
+    "05H §27 Media Transcript Security"
+  ],
+  "requirements": [
+    {
+      "id": "W3-SEC-01",
+      "requirement": "Authoritative role-permission matrix with default deny and resource ownership",
+      "implementation": [
+        "src/tpaa_security/TPAA_SECURITY_POLICY_V1.json",
+        "src/tpaa_security/permissions.py",
+        "src/tpaa_security/policy.py",
+        "src/tpaa_security/api.py"
+      ],
+      "tests": [
+        "tests/unit/security/test_w3_policy_approval_privacy.py",
+        "tests/unit/security/test_w3_api_authorization.py"
+      ],
+      "status": "PASS_LOCAL"
+    },
+    {
+      "id": "W3-SEC-02",
+      "requirement": "OIDC JWKS mTLS rotation revocation and secret-manager ports",
+      "implementation": [
+        "src/tpaa_security/identity.py",
+        "src/tpaa_security/secrets.py",
+        "src/tpaa_runtime/federated_identity.py",
+        "src/tpaa_runtime/entry_config.py"
+      ],
+      "tests": [
+        "tests/unit/security/test_w3_identity_lifecycle.py",
+        "tests/unit/runtime/test_production_entry_config.py"
+      ],
+      "status": "PASS_LOCAL_TARGET_DEPLOYMENT_PENDING"
+    },
+    {
+      "id": "W3-SEC-03",
+      "requirement": "Pseudonymization redaction export retention media policy and audit",
+      "implementation": [
+        "src/tpaa_security/privacy.py",
+        "src/tpaa_runtime/security_audit.py"
+      ],
+      "tests": [
+        "tests/unit/security/test_w3_policy_approval_privacy.py"
+      ],
+      "status": "PASS_LOCAL"
+    },
+    {
+      "id": "W3-SOD-01",
+      "requirement": "Persistent maker checker inbox exact-target one-time approval and break glass",
+      "implementation": [
+        "src/tpaa_security/approval.py",
+        "src/tpaa_runtime/approval_repository.py",
+        "src/tpaa_api/security.py"
+      ],
+      "tests": [
+        "tests/unit/security/test_w3_policy_approval_privacy.py",
+        "tests/unit/runtime/test_w3_persistent_approval.py"
+      ],
+      "status": "PASS_LOCAL"
+    },
+    {
+      "id": "W3-DESKTOP-01",
+      "requirement": "Desktop user identity independent from loopback transport token",
+      "implementation": [
+        "src/tpaa_security/desktop_identity.py",
+        "src/tpaa_admin/__main__.py",
+        "src/tpaa_api/desktop.py"
+      ],
+      "tests": [
+        "tests/unit/security/test_w3_identity_lifecycle.py",
+        "tests/unit/runtime/test_production_admin_cli.py"
+      ],
+      "status": "PASS_LOCAL"
+    },
+    {
+      "id": "W3-PLUGIN-TRUST-01",
+      "requirement": "Plugin trust root and unsigned plugin policy frozen before lifecycle implementation",
+      "implementation": [
+        "src/tpaa_security/TPAA_SECURITY_POLICY_V1.json"
+      ],
+      "tests": [
+        "tests/contract/test_w3_security_conformance.py"
+      ],
+      "status": "POLICY_FROZEN_IMPLEMENTATION_DEFERRED_TO_PLUGIN_STAGE"
+    }
+  ],
+  "limitations": [
+    "No production IdP CA ingress HSM secret manager or network boundary was deployed",
+    "No production plugin trust root key was provisioned",
+    "W4 through W9 and formal signed release gates remain open"
+  ]
+}

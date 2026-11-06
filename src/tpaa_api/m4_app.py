@@ -103,26 +103,18 @@ def register_m4_routes(
                 request_id=str(body.get("request_id") or ""),
                 operation=str(body.get("operation") or ""),
                 base_release_id=str(body.get("base_release_id") or ""),
-                target_annotation_id=cast_optional_str(
-                    body.get("target_annotation_id")
-                ),
+                target_annotation_id=cast_optional_str(body.get("target_annotation_id")),
                 session_id=str(body.get("session_id") or ""),
                 episode_id=cast_optional_str(body.get("episode_id")),
                 stage_id=cast_optional_str(body.get("stage_id")),
                 author_id=str(body.get("author_id") or ""),
                 annotation_type=str(body.get("annotation_type") or ""),
-                start_session_time_us=cast_optional_int(
-                    body.get("start_session_time_us")
-                ),
-                end_session_time_us=cast_optional_int(
-                    body.get("end_session_time_us")
-                ),
+                start_session_time_us=cast_optional_int(body.get("start_session_time_us")),
+                end_session_time_us=cast_optional_int(body.get("end_session_time_us")),
                 body_text=str(body.get("body_text") or ""),
                 visibility=str(body.get("visibility") or ""),
                 reason=str(body.get("reason") or ""),
-                evidence_set_id=cast_optional_str(
-                    body.get("evidence_set_id")
-                ),
+                evidence_set_id=cast_optional_str(body.get("evidence_set_id")),
             )
             payload = application.m4_annotation(command)
             return JSONResponse(status_code=200, content=payload)

@@ -1,0 +1,61 @@
+{
+  "schema": "TPAA_W5_CORE_WORKFLOW_COMPLIANCE_MATRIX_V1",
+  "design_authority": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3/05G",
+  "status": "CLOSED_LOCAL",
+  "decision": "PASS",
+  "production_ready": false,
+  "pushed": false,
+  "deployed": false,
+  "requirements": [
+    {
+      "id": "W5-01",
+      "requirement": "P01 governed real-file import through P1 Release publication",
+      "status": "PASS",
+      "evidence": ["src/tpaa_application/source_workflow.py", "src/tpaa_api/source_v1.py", "tools/gui/w5_acceptance.py"]
+    },
+    {
+      "id": "W5-02",
+      "requirement": "P02 Session/Episode overview, Mission Header and three subject lanes",
+      "status": "PASS",
+      "evidence": ["src/tpaa_gui/w5_pages.py", "src/tpaa_gui/w5_projection.py", "tests/unit/gui/test_w5_core_workflows.py"]
+    },
+    {
+      "id": "W5-03",
+      "requirement": "P03 exact historical replay and metric-to-evidence linkage without current/latest fallback",
+      "status": "PASS",
+      "evidence": ["src/tpaa_gui/w5_pages.py", "tools/gui/w5_acceptance.py", "evidence/local/w5/windows/w5-acceptance.json"]
+    },
+    {
+      "id": "W5-04",
+      "requirement": "P12 quality dimensions and complete Observation Eligibility projection",
+      "status": "PASS",
+      "evidence": ["src/tpaa_gui/w5_projection.py", "tests/unit/gui/test_w5_core_workflows.py"]
+    },
+    {
+      "id": "W5-05",
+      "requirement": "P13 catalog, profile, context, release, model, permission, audit and runtime governance",
+      "status": "PASS",
+      "evidence": ["src/tpaa_gui/w5_pages.py", "tests/unit/gui/test_w5_core_workflows.py"]
+    },
+    {
+      "id": "W5-06",
+      "requirement": "N/A, Unknown, Review and Failure remain distinct",
+      "status": "PASS",
+      "evidence": ["src/tpaa_gui/w5_projection.py", "tests/unit/gui/test_w5_core_workflows.py"]
+    },
+    {
+      "id": "W5-07",
+      "requirement": "Windows Desktop governed worker remains bounded and responsive for full P1 payloads",
+      "status": "PASS",
+      "evidence": ["src/tpaa_platform/worker.py", "src/tpaa_platform/worker_child.py", "tests/unit/platform/test_piqb_b3_worker_dispatcher.py", "tools/gui/w5_acceptance.py"]
+    }
+  ],
+  "input_dependent_behavior": [
+    "P03 draws a trajectory only from an exact geodetic presentation. A Release without geodetic series shows the governed unavailable reason and never synthesizes or falls back to another Release."
+  ],
+  "deferred_to_later_stages": [
+    "W6 completes P04-P10 assessment, capability and longitudinal workflows",
+    "W7 completes P11 planning and plugin workflows",
+    "Production signing, protected-branch CI, production data qualification and deployment remain closed"
+  ]
+}

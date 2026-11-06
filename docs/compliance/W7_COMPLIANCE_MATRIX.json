@@ -1,0 +1,54 @@
+{
+  "schema": "TPAA_W7_COMPLIANCE_MATRIX_V1",
+  "stage": "W7",
+  "status": "CLOSED_LOCAL_WITH_EXTERNAL_GATES",
+  "production_ready": false,
+  "external_acceptance_claimed": false,
+  "items": [
+    {
+      "requirement": "P11_COURSE_UNIT_JOINT_LVC_PLANNING",
+      "implementation": ["src/tpaa_gui/w7_pages.py", "src/tpaa_gui/w7_projection.py"],
+      "tests": ["tests/unit/gui/test_w7_p11_workflows.py"],
+      "status": "CLOSED_PASS_LOCAL"
+    },
+    {
+      "requirement": "P6_FACT_FORECAST_COUNTERFACTUAL_RECOMMENDATION_SEPARATION",
+      "implementation": ["src/tpaa_gui/w7_pages.py", "src/tpaa_gui/m9_workspace.py"],
+      "tests": ["tests/unit/gui/test_w7_p11_workflows.py", "tests/contract/test_m9_batch_3_counterfactual_advisory_api_gui_security.py"],
+      "status": "CLOSED_PASS_LOCAL"
+    },
+    {
+      "requirement": "MEDIA_TRANSCRIPT_TIME_BOOKMARK_PLAYLIST_COMPARE",
+      "implementation": ["src/tpaa_gui/w7_pages.py", "src/tpaa_gui/ed2_upper.py"],
+      "tests": ["tests/unit/gui/test_w7_p11_workflows.py", "tests/unit/gui/test_ed2_b3_linked_debrief.py"],
+      "status": "CLOSED_PASS_LOCAL_EXPORT_GATED"
+    },
+    {
+      "requirement": "JOINT_LVC_LIVE_GATEWAY",
+      "implementation": ["src/tpaa_application/w7_external.py", "src/tpaa_api/runtime.py"],
+      "tests": ["tests/unit/gui/test_w7_p11_workflows.py", "tests/unit/ingest/test_ed2_b3_joint_lvc_gateway.py"],
+      "status": "FEATURE_GATED_NOT_CONFIGURED"
+    },
+    {
+      "requirement": "EXTERNAL_PLUGIN_TRUST_ISOLATION_ROLLBACK",
+      "implementation": ["src/tpaa_application/w7_external.py", "src/tpaa_application/ed2_upper_products.py"],
+      "tests": ["tests/unit/gui/test_w7_p11_workflows.py", "tests/unit/runtime/test_ed2_b3_training_plugin.py"],
+      "status": "FEATURE_GATED_NOT_CONFIGURED"
+    },
+    {
+      "requirement": "MODEL_REGISTRY_VALIDATION_MONITORING_ROLLBACK",
+      "implementation": ["src/tpaa_application/m9_workspace.py", "src/tpaa_gui/w7_pages.py", "src/tpaa_application/w7_external.py"],
+      "tests": ["tests/unit/gui/test_w7_p11_workflows.py", "tests/contract/test_m9_batch_2_model_forecast.py"],
+      "status": "CLOSED_PASS_LOCAL_ONLINE_GATED"
+    }
+  ],
+  "release_blockers_retained": [
+    "APPROVED_EXTERNAL_ENDPOINT_ACCEPTANCE",
+    "PRODUCTION_PLUGIN_TRUST_ROOT_AND_SANDBOX",
+    "MEDIA_OBJECT_STORE_REDACTION_EXPORT_POLICY",
+    "MODEL_ONLINE_MONITORING_AND_APPROVED_ROLLBACK",
+    "W8_TARGET_ENVIRONMENT_QUALIFICATION",
+    "W9_SINGLE_CANDIDATE_QUALIFICATION",
+    "SIGNED_PROTECTED_MAIN_RELEASE"
+  ]
+}

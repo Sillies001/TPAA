@@ -12,6 +12,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from tpaa_platform.filesync import InterProcessFileLock
+
 from .audit_ledger import PersistentAuditLedger
 from .bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
@@ -107,9 +109,19 @@ class SQLiteBaselineMetadataRepository:
 class SQLiteDesktopUnitOfWork:
     """One-connection explicit SQLite Desktop transaction boundary."""
 
-    def __init__(self, database: str | Path, *, write: bool = False) -> None:
+    def __init__(
+        self,
+        database: str | Path,
+        *,
+        write: bool = False,
+        authority_root: Path | None = None,
+        write_consistency_lock: Path | None = None,
+    ) -> None:
         self._path = Path(database)
         self._write = write
+        self._authority_root = authority_root
+        self._write_consistency_lock_path = write_consistency_lock
+        self._write_consistency_lock: InterProcessFileLock | None = None
         self._connection: sqlite3.Connection | None = None
         self._writer_lease: threading.Lock | None = None
         self._finalized = False
@@ -131,7 +143,10 @@ class SQLiteDesktopUnitOfWork:
         if self._connection is not None:
             raise SQLiteRepositoryError("UOW_REENTRY", "Unit of Work is already entered")
         try:
-            verification = verify_sqlite(self._path)
+            verification = verify_sqlite(
+                self._path,
+                authority_root=self._authority_root,
+            )
         except BootstrapError as exc:
             raise SQLiteRepositoryError("DATABASE_NOT_READY", str(exc)) from exc
         if verification.engine_profile != SQLITE_ENGINE_PROFILE:
@@ -141,8 +156,13 @@ class SQLiteDesktopUnitOfWork:
             )
 
         if self._write:
+            if self._write_consistency_lock_path is not None:
+                consistency_lock = InterProcessFileLock(self._write_consistency_lock_path)
+                consistency_lock.acquire()
+                self._write_consistency_lock = consistency_lock
             lease = _writer_lock(self._path)
             if not lease.acquire(blocking=False):
+                self._release_consistency_lock()
                 raise SQLiteRepositoryError(
                     "SINGLE_WRITER_BUSY", f"database={self._path.resolve()}"
                 )
@@ -165,6 +185,7 @@ class SQLiteDesktopUnitOfWork:
             if connection is not None:
                 connection.close()
             self._release_writer_lease()
+            self._release_consistency_lock()
             raise
 
     def _require_active(self) -> sqlite3.Connection:
@@ -201,6 +222,11 @@ class SQLiteDesktopUnitOfWork:
             self._writer_lease.release()
             self._writer_lease = None
 
+    def _release_consistency_lock(self) -> None:
+        if self._write_consistency_lock is not None:
+            self._write_consistency_lock.release()
+            self._write_consistency_lock = None
+
     def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
         connection = self._connection
         try:
@@ -208,7 +234,9 @@ class SQLiteDesktopUnitOfWork:
                 try:
                     connection.execute("ROLLBACK")
                 except sqlite3.DatabaseError as rollback_exc:
-                    raise SQLiteRepositoryError("ROLLBACK_FAILED", str(rollback_exc)) from rollback_exc
+                    raise SQLiteRepositoryError(
+                        "ROLLBACK_FAILED", str(rollback_exc)
+                    ) from rollback_exc
                 finally:
                     self._finalized = True
         finally:
@@ -216,6 +244,7 @@ class SQLiteDesktopUnitOfWork:
                 connection.close()
             self._connection = None
             self._release_writer_lease()
+            self._release_consistency_lock()
 
 
 def sqlite_repository_smoke(database: str | Path) -> dict[str, Any]:

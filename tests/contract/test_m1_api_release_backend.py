@@ -114,6 +114,15 @@ def test_publish_and_release_bound_read_snapshot() -> None:
     assert replay.json()["status"] == "PASS"
     assert replay.json()["current_latest_fallback_used"] is False
 
+    world_graph = client.get(f"/m1/releases/{release_id}/world-graph")
+    assert world_graph.status_code == 200
+    graph = world_graph.json()
+    assert [item["world_product_id"] for item in graph["world_products"]] == [
+        release.json()["world_product_id"]
+    ]
+    assert graph["world_relations"] == []
+    assert graph["tpaa_m_chains"] == []
+
     start = topo["session"]["start_session_time_us"]
     end = topo["session"]["end_session_time_us"]
     series = client.get(

@@ -211,9 +211,7 @@ class ProductFeatureAvailability:
         resolver: ProductAdmissionResolver,
         *,
         configured: Mapping[str, bool],
-        dependency_ready: (
-            Mapping[str, bool] | Callable[[], Mapping[str, bool]] | None
-        ) = None,
+        dependency_ready: (Mapping[str, bool] | Callable[[], Mapping[str, bool]] | None) = None,
         supported_profile: Mapping[str, bool] | None = None,
         available: Mapping[str, bool] | None = None,
     ) -> None:

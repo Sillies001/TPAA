@@ -1,0 +1,61 @@
+{
+  "schema": "TPAA_W8_COMPLIANCE_MATRIX_V1",
+  "stage": "W8",
+  "status": "CLOSED_LOCAL_WITH_TARGET_ENVIRONMENT_GATES",
+  "production_ready": false,
+  "target_environment_acceptance_claimed": false,
+  "formal_release_claimed": false,
+  "items": [
+    {
+      "requirement": "FROZEN_WORKLOAD_PERFORMANCE_RESOURCE_ENVELOPE",
+      "implementation": ["src/tpaa_runtime/w8_operations.py", "src/tpaa_api/runtime.py"],
+      "tests": ["tests/unit/runtime/test_w8_operations_productization.py"],
+      "status": "CLOSED_PASS_LOCAL"
+    },
+    {
+      "requirement": "POSTGRES_AND_OBJECT_STORE_SECURITY_LIFECYCLE",
+      "implementation": ["src/tpaa_runtime/recovery.py", "src/tpaa_storage/s3_object_store.py"],
+      "tests": ["tests/integration/test_service_recovery_postgres.py", "tests/integration/test_s3_object_store_http.py"],
+      "status": "CLOSED_PASS_LOCAL_TARGET_SECURITY_PENDING"
+    },
+    {
+      "requirement": "SERVICE_WRITE_DRAIN_SNAPSHOT_RESTORE_ACTIVATE_ROLLBACK",
+      "implementation": ["src/tpaa_runtime/w8_operations.py", "src/tpaa_runtime/service_drain.py", "src/tpaa_runtime/service_activation.py"],
+      "tests": ["tests/unit/runtime/test_w8_operations_productization.py", "tests/unit/runtime/test_service_activation.py", "tests/integration/test_service_recovery_postgres.py"],
+      "status": "CLOSED_PASS_LOCAL"
+    },
+    {
+      "requirement": "RPO_RTO_FAILURE_INJECTION_CROSS_VERSION_RECOVERY",
+      "implementation": ["src/tpaa_runtime/w8_operations.py", "src/tpaa_runtime/recovery.py"],
+      "tests": ["tests/unit/runtime/test_prcb_c3_service_recovery.py", "tests/contract/test_m5_batch_3_recovery_release.py"],
+      "status": "CLOSED_PASS_LOCAL_TARGET_TIMING_PENDING"
+    },
+    {
+      "requirement": "OBSERVABILITY_EXPORTER_SLO_ALERT",
+      "implementation": ["src/tpaa_runtime/operational_metrics.py", "src/tpaa_runtime/prometheus_metrics.py", "src/tpaa_runtime/w8_operations.py"],
+      "tests": ["tests/unit/runtime/test_prometheus_metrics.py", "tests/integration/test_prometheus_exposition.py"],
+      "status": "CLOSED_PASS_LOCAL_TARGET_ALERT_PENDING"
+    },
+    {
+      "requirement": "DESKTOP_SERVICE_PACKAGE_SBOM_SIGNATURE_UPGRADE_ROLLBACK",
+      "implementation": ["tools/packaging/m5_runtime_bundle.py", "tools/manifest/build_artifacts.py", "src/tpaa_runtime/recovery.py"],
+      "tests": ["tests/contract/test_m5_batch_3_recovery_release.py", "tests/contract/test_m5_batch_4_exit.py"],
+      "status": "CLOSED_PASS_LOCAL_TARGET_INSTALL_PENDING"
+    }
+  ],
+  "target_profiles": [
+    "WINDOWS_DESKTOP_X64",
+    "LINUX_DESKTOP_X64",
+    "WINDOWS_SERVICE_X64",
+    "LINUX_SERVICE_X64"
+  ],
+  "release_blockers_retained": [
+    "TARGET_PROFILE_PERFORMANCE_AND_RESOURCE_ACCEPTANCE",
+    "TARGET_POSTGRES_S3_SECURITY_AND_LIFECYCLE_ACCEPTANCE",
+    "TARGET_FAILURE_INJECTION_RPO_RTO_ACCEPTANCE",
+    "TARGET_SLO_ALERT_ROUTING_ACCEPTANCE",
+    "TARGET_INSTALL_UPGRADE_ROLLBACK_ACCEPTANCE",
+    "W9_SINGLE_CANDIDATE_QUALIFICATION",
+    "SIGNED_PROTECTED_MAIN_RELEASE"
+  ]
+}

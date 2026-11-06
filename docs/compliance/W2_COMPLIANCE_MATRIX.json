@@ -1,0 +1,132 @@
+{
+  "schema": "TPAA_W2_COMPLIANCE_MATRIX_V1",
+  "review_date": "2026-10-20",
+  "authority": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3",
+  "status": "CLOSED_LOCAL_PASS",
+  "scope_caveats": [
+    "NOT_PUSHED",
+    "NOT_DEPLOYED",
+    "NOT_PRODUCTION_READY",
+    "W3_THROUGH_W9_OPEN",
+    "DEVELOPMENT_PACKAGE_NOT_M5_QUALIFIED"
+  ],
+  "requirements": [
+    {
+      "id": "W2-01",
+      "requirement": "Source manifest registry inspect validate stage canonicalize API",
+      "implementation": [
+        "src/tpaa_ingest/production_source.py",
+        "src/tpaa_ingest/production_flight_json.py",
+        "src/tpaa_application/source_workflow.py",
+        "src/tpaa_api/source_v1.py"
+      ],
+      "verification": [
+        "tests/unit/ingest/test_w2_flight_recorder_csv.py",
+        "tests/unit/api/test_w2_source_v1.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "W2-02",
+      "requirement": "At least one real Flight or mission-system adapter",
+      "implementation": [
+        "src/tpaa_ingest/nasa_dashlink_mat.py",
+        "src/tpaa_ingest/flight_recorder_csv.py",
+        "tools/data/convert_nasa_dashlink_mat.py"
+      ],
+      "verification": [
+        "NASA DASHlink Tail 687 member 687200404160841.mat",
+        "source_sha256=317500a39ab3f38a3d48fa20a1f6f2ea31c31aefb8057cac87b6e4005bf85fc2",
+        "governed_csv_sha256=c3a9268b02077ae2e6dad7e2d8da918b939ecb1029859ba84afecf17ea0fb3ed",
+        "repeat conversion produced the same governed CSV digest"
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "W2-03",
+      "requirement": "Explicit time reference-frame unit and association profiles",
+      "implementation": [
+        "EXPLICIT_SESSION_TIME_V1",
+        "BODY_NED_TRUE_V1",
+        "DEG_KNOT_SI_NORMALIZATION_V1",
+        "EXPLICIT_AIRCRAFT_UUID_V1"
+      ],
+      "verification": [
+        "physical row order preserved",
+        "source clock resets segmented before normalization",
+        "degrees and knots converted to canonical radians and metres per second",
+        "aircraft association requires an explicit canonical UUID"
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "W2-04",
+      "requirement": "Episode detect revision and World manifest relation chain API",
+      "implementation": [
+        "src/tpaa_runtime/production_worker.py",
+        "src/tpaa_runtime/durable_episode.py",
+        "src/tpaa_runtime/durable_p1.py",
+        "src/tpaa_api/m1_app.py"
+      ],
+      "verification": [
+        "automatic P1 Episode and Stage topology",
+        "immutable manual Episode revision with supersedes_episode_id",
+        "World product and relation retrieval",
+        "explicit partial TPAA-M chain with P and J missing-link reason"
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "W2-05",
+      "requirement": "Large file chunk stream backpressure and cancel",
+      "implementation": [
+        "1 MiB transport chunks",
+        "64 MiB fail-closed artifact ceiling enforced while receiving",
+        "cooperative cancellation and ClientDisconnect handling",
+        "bounded historical series result limit of 5000 rows"
+      ],
+      "verification": [
+        "tests/unit/ingest/test_w2_flight_recorder_csv.py",
+        "tests/unit/api/test_w2_source_v1.py"
+      ],
+      "status": "PASS_FOR_W2_PROFILE"
+    },
+    {
+      "id": "W2-06",
+      "requirement": "Real-data golden set and privacy handling",
+      "implementation": [
+        "public de-identified NASA source is used only for local qualification",
+        "evidence/local/w2 is excluded from Git",
+        "tracked evidence contains metadata and SHA-256 digests only",
+        "raw and normalized objects are staged independently and immutably"
+      ],
+      "verification": [
+        "48 governed rows at 4 Hz",
+        "one clock segment",
+        "session interval 0 through 11750000 microseconds",
+        "mapping_manifest_sha256=5d2bd59441a6f12e56ea801f5d818f64e83a2a1dff2104782f33f1f60379831f"
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "W2-EXIT",
+      "requirement": "Real sample import P1 full-chain publication restart exact replay and abnormal-input fail-closed",
+      "implementation": [
+        "SourceWorkflowService to durable production P1 job",
+        "sealed Parquet evidence reconstruction",
+        "deterministic logical membership replay",
+        "schema time identity size and lifecycle failures are rejected"
+      ],
+      "verification": [
+        "tests/unit/application/test_prcb_c2_production_pipeline.py",
+        "local NASA-derived FLIGHT plus five qualification companion families completed full P1 and restart replay",
+        "mismatched Stage marker interval was rejected with ED2_STAGE_MARKER_INTERVAL_INVALID",
+        "737 unit tests passed",
+        "815 contract tests passed with zero failures on clean local checkpoint 8401751",
+        "WINDOWS_DESKTOP_X64 development package, manifest and SBOM passed the clean-worktree gate",
+        "2 integration tests passed and 3 optional external-service profiles skipped"
+      ],
+      "status": "PASS_LOCAL"
+    }
+  ]
+}

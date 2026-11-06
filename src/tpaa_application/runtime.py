@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
+from tpaa_canonical.loader import CanonicalArtifactLoader
 from tpaa_canonical.runtime_handshake import (
     RuntimeBaselineHandshake,
     RuntimeBaselineIdentity,
@@ -76,7 +78,11 @@ class GetRuntimeBaselineStatus:
         )
 
 
-def build_trusted_runtime_status_use_case(*, product_build_version: str) -> GetRuntimeBaselineStatus:
+def build_trusted_runtime_status_use_case(
+    *,
+    product_build_version: str,
+    authority_root: Path | None = None,
+) -> GetRuntimeBaselineStatus:
     """Wire the local trusted Core identity into the Application readiness use case.
 
     This remains transport-neutral; Desktop/API adapters consume the returned use case
@@ -84,8 +90,14 @@ def build_trusted_runtime_status_use_case(*, product_build_version: str) -> GetR
     version from a governed build manifest.
     """
 
+    loader = (
+        None
+        if authority_root is None
+        else CanonicalArtifactLoader(authority_root.resolve(strict=False).parent)
+    )
     return GetRuntimeBaselineStatus(
         lambda: load_trusted_runtime_baseline_handshake(
-            product_build_version=product_build_version
+            product_build_version=product_build_version,
+            loader=loader,
         )
     )

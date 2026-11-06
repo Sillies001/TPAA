@@ -32,10 +32,7 @@ def _error(exc: M8ApplicationError) -> JSONResponse:
         status = 404
     elif exc.code == "M8_P4_P5_NOT_ADMITTED":
         status = 423
-    elif (
-        "NOT_AUTHORIZED" in exc.code
-        or "APPROVAL_NOT_AUTHORIZED" in exc.code
-    ):
+    elif "NOT_AUTHORIZED" in exc.code or "APPROVAL_NOT_AUTHORIZED" in exc.code:
         status = 403
     elif exc.code in {
         "M8_IMMUTABLE_CONFLICT",
@@ -129,9 +126,7 @@ def register_m8_routes(
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.get(
-        "/m8/workspace/p4/{actor_assessment_id}/p5/{mission_assessment_id}"
-    )
+    @app.get("/m8/workspace/p4/{actor_assessment_id}/p5/{mission_assessment_id}")
     def workspace(
         actor_assessment_id: str,
         mission_assessment_id: str,
@@ -227,9 +222,7 @@ def register_m8_routes(
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.get(
-        "/m8/export/p4/{actor_assessment_id}/p5/{mission_assessment_id}"
-    )
+    @app.get("/m8/export/p4/{actor_assessment_id}/p5/{mission_assessment_id}")
     def export(
         actor_assessment_id: str,
         mission_assessment_id: str,

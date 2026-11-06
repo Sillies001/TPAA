@@ -1,0 +1,182 @@
+{
+  "registry_id": "PLATFORM_COMPATIBILITY_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "policy": {
+    "portability_goal": "One software product line with an OS-neutral Domain/Application/Algorithm core and explicit platform adapters; Windows and Linux are mandatory certified OS families.",
+    "business_core_rule": "Domain, World reconstruction, Stage/Event/Relation, Metric Engine, Assessment, Longitudinal, Capability Intelligence and Application use-case semantics shall not branch by operating system.",
+    "extension_rule": "Additional OS/distribution/CPU profiles may be qualified by adding runtime/packaging adapters and CI certification without redefining Canonical, Metric, Stage, Assessment or Release semantics.",
+    "production_profile_rule": "A deployment may designate a preferred production OS, but preference shall not redefine business behavior or make the common core OS-specific."
+  },
+  "mandatory_os_families": [
+    "WINDOWS",
+    "LINUX"
+  ],
+  "certification_profiles": {
+    "WINDOWS_DESKTOP_X64": {
+      "os_family": "WINDOWS",
+      "role": "DESKTOP",
+      "required": true,
+      "reference_environment": "Windows 11 x64 or an approved later compatible Windows desktop release",
+      "required_components": [
+        "Desktop GUI",
+        "Local API/Application backend",
+        "Worker",
+        "CLI",
+        "SQLite local store",
+        "Parquet/object access"
+      ]
+    },
+    "LINUX_DESKTOP_X64": {
+      "os_family": "LINUX",
+      "role": "DESKTOP",
+      "required": true,
+      "reference_environment": "Ubuntu LTS x86_64 reference profile; other Linux distributions require separate qualification evidence",
+      "required_components": [
+        "Desktop GUI",
+        "Local API/Application backend",
+        "Worker",
+        "CLI",
+        "SQLite local store",
+        "Parquet/object access"
+      ]
+    },
+    "WINDOWS_SERVICE_X64": {
+      "os_family": "WINDOWS",
+      "role": "SERVICE",
+      "required": true,
+      "reference_environment": "Windows Server x64 approved enterprise profile",
+      "required_components": [
+        "Service API/Application",
+        "Worker",
+        "CLI/admin tools",
+        "PostgreSQL client",
+        "Parquet/object access"
+      ]
+    },
+    "LINUX_SERVICE_X64": {
+      "os_family": "LINUX",
+      "role": "SERVICE",
+      "required": true,
+      "reference_environment": "Ubuntu LTS/RHEL-compatible approved enterprise x86_64 service profile",
+      "required_components": [
+        "Service API/Application",
+        "Worker",
+        "CLI/admin tools",
+        "PostgreSQL client",
+        "Parquet/object access"
+      ]
+    }
+  },
+  "component_portability": {
+    "OS_NEUTRAL_REQUIRED": [
+      "Canonical/Domain",
+      "Time/Entity/Context",
+      "World reconstruction",
+      "Stage/Event/Relation",
+      "Metric Engine",
+      "Observation/Assessment",
+      "Longitudinal",
+      "P2-P6 governed product logic",
+      "Application Services",
+      "REST contracts",
+      "Release/Replay logic"
+    ],
+    "SHARED_CODE_REQUIRED": [
+      "PySide6 desktop GUI",
+      "Local backend",
+      "Worker orchestration",
+      "CLI",
+      "Source adapter framework",
+      "Visualization business projections"
+    ],
+    "PLATFORM_ADAPTER_ALLOWED": [
+      "filesystem/path",
+      "process/service lifecycle",
+      "temp/locking/atomic replace",
+      "native packaging",
+      "credential/key-store integration",
+      "hardware/GPU/media/codec integration"
+    ],
+    "CONDITIONAL_OS_SPECIFIC_ADAPTER": [
+      "vendor hardware driver",
+      "capture device",
+      "OS credential store",
+      "GPU/codec acceleration"
+    ],
+    "conditional_rule": "An OS-specific adapter must declare supported profiles and a deterministic unavailable/degraded state; it may not leak OS-specific business semantics above the adapter boundary."
+  },
+  "portability_rules": [
+    "Use pathlib/URI abstraction above the platform layer; never hard-code path separators or drive letters in Domain/Application logic.",
+    "Internal text, manifests and governed JSON use UTF-8; governed text artifacts use normalized LF for package/hash generation.",
+    "Logical identifiers and registered artifact names must not rely on case-insensitive filesystem behavior; files may not differ only by case.",
+    "Session Time/UTC and explicit locale-independent parsing are mandatory; OS locale/timezone must not alter business interpretation.",
+    "Worker/process design uses spawn-compatible serialization and shall not rely on fork-only inherited state.",
+    "File publication closes handles before seal/rename; atomic replace/locking behavior is tested on both Windows and Linux.",
+    "No POSIX-only permission, symlink, signal, shell, /tmp or /dev assumptions may appear in business logic.",
+    "No Windows Registry, COM, drive-letter or backslash assumptions may appear in business logic.",
+    "Native dependencies, Qt plugins, codecs and drivers are discovered/validated by packaging/runtime profiles and fail closed when unavailable."
+  ],
+  "logical_equivalence_contract": {
+    "same_frozen_inputs": [
+      "input artifact hashes",
+      "Core Baseline",
+      "schema/catalog/profile/stage/model versions",
+      "Context/World policy",
+      "build dependency lock"
+    ],
+    "exact_equivalence": [
+      "stable identities",
+      "Episode/Stage segmentation and codes",
+      "Event/Relation state and reason codes",
+      "Metric value_kind/status/N_A semantics",
+      "Qualification/status classifications",
+      "Release logical membership",
+      "canonical serialized non-floating fields"
+    ],
+    "numeric_equivalence": "Numeric algorithms must meet metric/operator-specific Golden acceptance tolerance. If publication specifies deterministic rounding/quantization, the published value must be exact after that rule; otherwise the approved Golden tolerance governs and must be identical for Windows and Linux.",
+    "physical_differences_allowed": [
+      "native package bytes",
+      "filesystem path syntax",
+      "temporary filenames",
+      "process IDs",
+      "log timestamps not used as business time",
+      "platform-specific binary/library bytes"
+    ],
+    "logical_hash_rule": "OS name, absolute local paths, process IDs and packaging metadata are excluded from logical content hashes unless explicitly part of governed business data."
+  },
+  "ci_certification_matrix": {
+    "required_for_merge": [
+      "Windows unit/contract tests",
+      "Linux unit/contract tests",
+      "Windows Golden/Replay subset",
+      "Linux Golden/Replay subset",
+      "cross-platform logical-equivalence comparison"
+    ],
+    "required_for_release": [
+      "Windows clean install/start/stop/uninstall smoke",
+      "Linux clean install/start/stop/uninstall smoke",
+      "Desktop GUI smoke on Windows and Linux",
+      "Service/API smoke on Windows and Linux",
+      "full Golden/Replay on both OS families",
+      "platform packaging/SBOM/manifest validation"
+    ],
+    "cross_platform_fixture": "The same frozen synthetic/golden bundle is executed on Windows and Linux and compared by logical product identity/status plus governed numeric tolerance.",
+    "failure_policy": "A mandatory profile failure blocks release. OS-specific optional adapters may be excluded only when their manifest explicitly marks the profile unsupported and the core remains functional."
+  },
+  "packaging": {
+    "common": "One source/dependency baseline and one semantic build version across OS artifacts; per-platform package manifests identify native dependencies and runtime profile.",
+    "windows": "Provide a governed Windows desktop/service artifact appropriate to the certified profile; no manual developer environment is required for acceptance.",
+    "linux": "Provide a governed Linux desktop/service artifact appropriate to the certified profile; exact package form may be distribution/profile specific.",
+    "upgrade": "Upgrade/rollback preserves DB schema and Release/Replay semantics across supported OS profiles."
+  },
+  "acceptance_evidence": [
+    "CI matrix records",
+    "Golden and replay comparison report",
+    "clean-install smoke logs",
+    "GUI/API startup evidence",
+    "package/SBOM/manifest",
+    "filesystem/process compatibility tests",
+    "cross-platform logical-equivalence report"
+  ]
+}

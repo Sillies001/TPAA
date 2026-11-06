@@ -26,7 +26,7 @@ from tpaa_qualification import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 RUNTIME_ENTRY = ROOT / "tools" / "packaging" / "m5_runtime_entry.py"
 REVISION = "a" * 40
 BUILD = "0.0.0+m5.test"

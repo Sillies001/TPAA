@@ -73,12 +73,12 @@ class _Window:
         self._visible = True
         self.closed = False
         names = {
-            "tpaaDiagnosticsReadiness": _Label("Readiness: READY"),
-            "tpaaDiagnosticsMismatches": _Label("Mismatches: NONE"),
-            "tpaaDiagnosticsBuild": _Label("Build: expected=0.0.0 observed=0.0.0"),
-            "tpaaDiagnosticsCore": _Label("Core baseline: expected=CB-1.4.0 observed=CB-1.4.0"),
-            "tpaaDiagnosticsCatalog": _Label("P1 Catalog: expected=P1 observed=P1"),
-            "tpaaDiagnosticsSchema": _Label("DB schema: expected=1.6.0 observed=1.6.0"),
+            "tpaaShellRuntimeStatus": _Label("Runtime: READY"),
+            "tpaaMissionHeader": _Label("Mission context"),
+            "tpaaB5ProductNavigation": _Label("Navigation"),
+            "tpaaB5ProductStack": _Label("Workspace"),
+            "tpaaDetailEvidenceDrawer": _Label("Detail and Evidence"),
+            "tpaaShellStatusBar": _Label("Application status"),
         }
         if missing:
             names.pop(missing)
@@ -135,7 +135,7 @@ def _install_fake_pyside(monkeypatch: pytest.MonkeyPatch, window: _Window) -> No
     _Application._instance = None
     _Application.windows = [window]
     _Timer.last = None
-    qt_core = types.SimpleNamespace(QTimer=_Timer)
+    qt_core = types.SimpleNamespace(QTimer=_Timer, QObject=object)
     qt_widgets = types.SimpleNamespace(QApplication=_Application, QLabel=_Label)
     package = types.ModuleType("PySide6")
     package.QtCore = qt_core
@@ -168,11 +168,11 @@ def test_automation_smoke_proves_launch_ready_visible_close_and_cleanup(monkeypa
     assert window.closed is True
 
 
-def test_automation_smoke_fails_closed_when_stable_diagnostics_object_is_missing(
+def test_automation_smoke_fails_closed_when_stable_shell_object_is_missing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module()
-    _install_fake_pyside(monkeypatch, _Window(missing="tpaaDiagnosticsSchema"))
+    _install_fake_pyside(monkeypatch, _Window(missing="tpaaDetailEvidenceDrawer"))
     monkeypatch.setattr(module, "LocalBackendController", _FakeController)
 
     def fake_run_desktop(*_args, **_kwargs) -> int:
@@ -183,7 +183,7 @@ def test_automation_smoke_fails_closed_when_stable_diagnostics_object_is_missing
     monkeypatch.setattr(module, "run_desktop", fake_run_desktop)
     result = module.run_smoke(headless=True, timeout_seconds=5)
     assert result["status"] == "FAIL"
-    assert result["failure"] == "DIAGNOSTICS_OBJECT_MISSING"
+    assert result["failure"] == "PRODUCT_SHELL_OBJECT_MISSING"
 
 
 def test_automation_smoke_rejects_non_positive_timeout() -> None:

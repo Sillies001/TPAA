@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import asdict
 from importlib import import_module
+from pathlib import Path
 from typing import Any
 
 from .audit_ledger import PersistentAuditLedger
@@ -39,6 +40,7 @@ class PostgreSQLRepositoryError(RuntimeError):
 
 
 ConnectionFactory = Callable[[str], Any]
+SERVICE_WRITE_GATE_LOCK_ID = int.from_bytes(b"TPAAWRIT", signed=True)
 
 
 def _default_connect(conninfo: str) -> Any:
@@ -92,10 +94,14 @@ class PostgreSQLBaselineMetadataRepository:
         )
 
 
-def _verify_ready(connection: Any) -> RepositoryBaselineMetadata:
+def _verify_ready(
+    connection: Any,
+    *,
+    authority_root: Path | None = None,
+) -> RepositoryBaselineMetadata:
     """Verify M0-STO-001 schema/provenance using the live PostgreSQL catalog."""
 
-    authority = _load_authority()
+    authority = _load_authority(authority_root=authority_root)
     expected_tables = set(_postgres_expected_tables(authority))
     expected_manifest = {
         "engine_profile": POSTGRES_ENGINE_PROFILE,
@@ -171,11 +177,15 @@ class PostgreSQLServiceUnitOfWork:
         conninfo: str,
         *,
         read_only: bool = False,
+        write_gate_lock_id: int | None = None,
         connection_factory: ConnectionFactory | None = None,
+        authority_root: Path | None = None,
     ) -> None:
         self._conninfo = conninfo
         self._read_only = read_only
+        self._write_gate_lock_id = write_gate_lock_id
         self._connection_factory = connection_factory or _default_connect
+        self._authority_root = authority_root
         self._connection: Any | None = None
         self._finalized = True
         self.metadata: PostgreSQLBaselineMetadataRepository
@@ -198,7 +208,19 @@ class PostgreSQLServiceUnitOfWork:
             if self._read_only:
                 with connection.cursor() as cursor:
                     cursor.execute("SET TRANSACTION READ ONLY")
-            _verify_ready(connection)
+            elif self._write_gate_lock_id is not None:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT pg_try_advisory_xact_lock_shared(%s)",
+                        (self._write_gate_lock_id,),
+                    )
+                    row = cursor.fetchone()
+                if row is None or row[0] is not True:
+                    raise PostgreSQLRepositoryError(
+                        "SERVICE_WRITE_DRAINED",
+                        "the deployment write-drain gate is closed",
+                    )
+            _verify_ready(connection, authority_root=self._authority_root)
             self._connection = connection
             self._finalized = False
             self.metadata = PostgreSQLBaselineMetadataRepository(connection)

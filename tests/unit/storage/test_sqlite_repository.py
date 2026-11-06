@@ -31,7 +31,7 @@ def test_sqlite_uow_and_metadata_repository_satisfy_engine_neutral_ports(tmp_pat
         metadata = uow.metadata.get()
         assert metadata.engine_profile == "sqlite-desktop"
         assert metadata.schema_version == "1.9.0"
-        assert metadata.core_baseline == "CB-1.4.0"
+        assert metadata.core_baseline == "CB-1.5.0"
         uow.commit()
 
 

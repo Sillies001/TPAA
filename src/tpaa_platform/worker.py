@@ -6,11 +6,14 @@ import hashlib
 import importlib
 import multiprocessing
 import pickle
+import queue
 import threading
 import time
 from dataclasses import dataclass
 from multiprocessing.connection import Connection
 from typing import Any
+
+from .worker_transport import IsolatedWorkerProcess, launch_worker, stop_worker
 
 
 @dataclass(frozen=True)
@@ -214,13 +217,6 @@ def _execute_command(payload: WorkerPayload) -> WorkerResult:
     )
 
 
-def _worker_execute(child: Connection, payload: WorkerPayload) -> None:
-    try:
-        child.send(_execute_command(payload))
-    finally:
-        child.close()
-
-
 def serialize_worker_payload(payload: WorkerPayload) -> bytes:
     return pickle.dumps(payload, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -260,7 +256,7 @@ class SpawnWorkerDispatcher:
     def __init__(self, *, max_workers: int = 2) -> None:
         self._admission = WorkerAdmissionController(max_workers)
         self._lock = threading.Lock()
-        self._processes: dict[str, Any] = {}
+        self._processes: dict[str, IsolatedWorkerProcess] = {}
         self._cancelled: set[str] = set()
 
     def active_job_ids(self) -> tuple[str, ...]:
@@ -278,9 +274,8 @@ class SpawnWorkerDispatcher:
             if process is None:
                 return False
             self._cancelled.add(job_id)
-        if process.is_alive():
-            process.terminate()
-            process.join(timeout=2.0)
+        if process.poll() is None:
+            stop_worker(process)
         return True
 
     def dispatch(
@@ -291,62 +286,75 @@ class SpawnWorkerDispatcher:
     ) -> WorkerResult:
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
-        serialize_worker_payload(payload)
+        serialized_payload = serialize_worker_payload(payload)
         self._admission.acquire(payload.job_id)
 
-        context = multiprocessing.get_context("spawn")
-        parent, child = context.Pipe(duplex=False)
-        process = context.Process(target=_worker_execute, args=(child, payload))
         try:
-            process.start()
-            child.close()
+            process = launch_worker()
+        except Exception:
+            self._admission.release(payload.job_id)
+            raise
+        exchange: queue.Queue[bytes | BaseException] = queue.Queue(maxsize=1)
+
+        def communicate() -> None:
+            try:
+                stdout, _stderr = process.communicate(input=serialized_payload)
+                exchange.put(stdout)
+            except BaseException as exc:  # pragma: no cover - defensive process boundary
+                exchange.put(exc)
+
+        try:
             with self._lock:
                 self._processes[payload.job_id] = process
+            exchange_thread = threading.Thread(
+                target=communicate,
+                daemon=True,
+                name=f"tpaa-worker-exchange-{payload.job_id}",
+            )
+            exchange_thread.start()
 
             deadline = time.monotonic() + timeout_seconds
-            received: Any | None = None
-            while received is None:
+            response: bytes | BaseException | None = None
+            while response is None:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
-                    if process.is_alive():
-                        process.terminate()
-                        process.join(timeout=2.0)
+                    if process.poll() is None:
+                        stop_worker(process)
                     raise WorkerTimeoutError(
                         f"B3_WORKER_TIMEOUT job_id={payload.job_id}"
                     )
-                if parent.poll(min(0.05, remaining)):
-                    received = parent.recv()
-                    break
+                try:
+                    response = exchange.get(timeout=min(0.05, remaining))
+                except queue.Empty:
+                    pass
                 with self._lock:
                     cancelled = payload.job_id in self._cancelled
                 if cancelled:
-                    if process.is_alive():
-                        process.terminate()
-                        process.join(timeout=2.0)
+                    if process.poll() is None:
+                        stop_worker(process)
                     raise WorkerCancelledError(
                         f"B3_WORKER_CANCELLED job_id={payload.job_id}"
                     )
-                if not process.is_alive():
-                    if parent.poll(0):
-                        received = parent.recv()
-                        break
-                    raise WorkerDispatchError(
-                        "B3_WORKER_EXIT_WITHOUT_RESULT "
-                        f"job_id={payload.job_id} exitcode={process.exitcode}"
-                    )
-
-            process.join(timeout=2.0)
-            if process.is_alive():
-                process.terminate()
-                process.join(timeout=2.0)
+            exchange_thread.join(timeout=2.0)
+            if isinstance(response, BaseException):
                 raise WorkerDispatchError(
-                    f"B3_WORKER_DID_NOT_EXIT job_id={payload.job_id}"
+                    f"B3_WORKER_EXCHANGE_FAILED job_id={payload.job_id}"
+                ) from response
+            if not isinstance(response, bytes) or not response:
+                raise WorkerDispatchError(
+                    f"B3_WORKER_EXIT_WITHOUT_RESULT job_id={payload.job_id}"
                 )
-            if process.exitcode != 0:
+            if process.returncode != 0:
                 raise WorkerDispatchError(
                     "B3_WORKER_NONZERO_EXIT "
-                    f"job_id={payload.job_id} exitcode={process.exitcode}"
+                    f"job_id={payload.job_id} exitcode={process.returncode}"
                 )
+            try:
+                received: Any = pickle.loads(response)
+            except Exception as exc:
+                raise WorkerDispatchError(
+                    f"B3_WORKER_RESULT_UNREADABLE job_id={payload.job_id}"
+                ) from exc
             if not isinstance(received, WorkerResult):
                 raise WorkerDispatchError(
                     f"B3_WORKER_RESULT_INVALID job_id={payload.job_id}"
@@ -361,11 +369,8 @@ class SpawnWorkerDispatcher:
                 )
             return received
         finally:
-            try:
-                child.close()
-            except OSError:
-                pass
-            parent.close()
+            if process.poll() is None:
+                stop_worker(process)
             with self._lock:
                 self._processes.pop(payload.job_id, None)
                 self._cancelled.discard(payload.job_id)

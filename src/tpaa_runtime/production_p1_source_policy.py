@@ -6,13 +6,9 @@ from typing import Final
 
 from tpaa_ingest import SourceFamily
 
-PRODUCTION_P1_SOURCE_POLICY_SCHEMA: Final = (
-    "TPAA_ED2_P1_SOURCE_FAMILY_POLICY_V1"
-)
+PRODUCTION_P1_SOURCE_POLICY_SCHEMA: Final = "TPAA_ED2_P1_SOURCE_FAMILY_POLICY_V1"
 PRODUCTION_P1_SOURCE_POLICY_VERSION: Final = "1.0.0"
-PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX: Final = (
-    "ED2_SOURCE_FAMILY_MISSING_"
-)
+PRODUCTION_P1_SOURCE_MISSING_REASON_PREFIX: Final = "ED2_SOURCE_FAMILY_MISSING_"
 
 _POLICY: Final = {
     "REFERENCE_TRUTH": frozenset(
@@ -29,21 +25,11 @@ _POLICY: Final = {
             SourceFamily.SCENARIO,
         }
     ),
-    "AIRCRAFT_FLIGHT": frozenset(
-        {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-    ),
-    "AIRCRAFT_ENERGY": frozenset(
-        {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-    ),
-    "AIRCRAFT_CONTROL_RESPONSE": frozenset(
-        {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-    ),
-    "AIRCRAFT_HANDLING": frozenset(
-        {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-    ),
-    "AIRCRAFT_PERSISTENCE": frozenset(
-        {SourceFamily.FLIGHT, SourceFamily.SCENARIO}
-    ),
+    "AIRCRAFT_FLIGHT": frozenset({SourceFamily.FLIGHT, SourceFamily.SCENARIO}),
+    "AIRCRAFT_ENERGY": frozenset({SourceFamily.FLIGHT, SourceFamily.SCENARIO}),
+    "AIRCRAFT_CONTROL_RESPONSE": frozenset({SourceFamily.FLIGHT, SourceFamily.SCENARIO}),
+    "AIRCRAFT_HANDLING": frozenset({SourceFamily.FLIGHT, SourceFamily.SCENARIO}),
+    "AIRCRAFT_PERSISTENCE": frozenset({SourceFamily.FLIGHT, SourceFamily.SCENARIO}),
     "SENSOR_DETECTION": frozenset(
         {
             SourceFamily.MISSION_AVIONICS,
@@ -117,6 +103,4 @@ def production_p1_required_source_families(
     try:
         return _POLICY[metric_family]
     except KeyError as exc:
-        raise KeyError(
-            f"ED2_P1_SOURCE_LINEAGE_POLICY_MISSING:{metric_family}"
-        ) from exc
+        raise KeyError(f"ED2_P1_SOURCE_LINEAGE_POLICY_MISSING:{metric_family}") from exc

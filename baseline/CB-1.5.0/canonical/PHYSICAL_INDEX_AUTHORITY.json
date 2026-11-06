@@ -1,0 +1,923 @@
+{
+  "authority_id": "PHYSICAL_INDEX_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.5.0",
+  "db_schema_version": "1.9.0",
+  "decision_id": "W0-AUTHORITY-CONVERGENCE-2026-10-19",
+  "approval_status": "APPROVED",
+  "secondary_index_policy": "Only primary-key and unique indexes declared by the Core model are governed in CB-1.5.0. Additional performance indexes require a successor authority change.",
+  "indexes": [
+    {
+      "index_id": "assessment.actor_assessment.actor_assessment_id.PRIMARY_KEY",
+      "table": "assessment.actor_assessment",
+      "fields": [
+        "actor_assessment_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "actor_assessment_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.actor_assessment_annotation_ref.table_constraint_0.PRIMARY_KEY",
+      "table": "assessment.actor_assessment_annotation_ref",
+      "fields": [],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "PRIMARY KEY (actor_assessment_id, ref_order)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.actor_assessment_annotation_ref.table_constraint_1.UNIQUE",
+      "table": "assessment.actor_assessment_annotation_ref",
+      "fields": [],
+      "kind": "UNIQUE",
+      "source_sql": "UNIQUE (actor_assessment_id, annotation_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.actor_assessment_machine_evidence_ref.table_constraint_0.PRIMARY_KEY",
+      "table": "assessment.actor_assessment_machine_evidence_ref",
+      "fields": [],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "PRIMARY KEY (actor_assessment_id, ref_order)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.actor_assessment_machine_evidence_ref.table_constraint_1.UNIQUE",
+      "table": "assessment.actor_assessment_machine_evidence_ref",
+      "fields": [],
+      "kind": "UNIQUE",
+      "source_sql": "UNIQUE (actor_assessment_id, evidence_ref)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.actor_assessment_revision.actor_assessment_id.PRIMARY_KEY",
+      "table": "assessment.actor_assessment_revision",
+      "fields": [
+        "actor_assessment_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "actor_assessment_id uuid PRIMARY KEY REFERENCES assessment.actor_assessment(actor_assessment_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.annotation_subject_context.annotation_id.PRIMARY_KEY",
+      "table": "assessment.annotation_subject_context",
+      "fields": [
+        "annotation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "annotation_id uuid PRIMARY KEY REFERENCES debrief.annotation(annotation_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.attribution_run.attribution_run_id.PRIMARY_KEY",
+      "table": "assessment.attribution_run",
+      "fields": [
+        "attribution_run_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "attribution_run_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.attribution_run_request_binding.attribution_run_id.PRIMARY_KEY",
+      "table": "assessment.attribution_run_request_binding",
+      "fields": [
+        "attribution_run_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "attribution_run_id uuid PRIMARY KEY REFERENCES assessment.attribution_run(attribution_run_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.competency_observation.competency_observation_id.PRIMARY_KEY",
+      "table": "assessment.competency_observation",
+      "fields": [
+        "competency_observation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "competency_observation_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.factor_feature_set.factor_feature_set_id.PRIMARY_KEY",
+      "table": "assessment.factor_feature_set",
+      "fields": [
+        "factor_feature_set_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "factor_feature_set_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.mission_assessment.mission_assessment_id.PRIMARY_KEY",
+      "table": "assessment.mission_assessment",
+      "fields": [
+        "mission_assessment_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "mission_assessment_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.mission_assessment_objective_ref.table_constraint_0.PRIMARY_KEY",
+      "table": "assessment.mission_assessment_objective_ref",
+      "fields": [],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "PRIMARY KEY (mission_assessment_id, ref_order)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.mission_assessment_objective_ref.table_constraint_1.UNIQUE",
+      "table": "assessment.mission_assessment_objective_ref",
+      "fields": [],
+      "kind": "UNIQUE",
+      "source_sql": "UNIQUE (mission_assessment_id, objective_ref)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.mission_assessment_revision.mission_assessment_id.PRIMARY_KEY",
+      "table": "assessment.mission_assessment_revision",
+      "fields": [
+        "mission_assessment_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "mission_assessment_id uuid PRIMARY KEY REFERENCES assessment.mission_assessment(mission_assessment_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.objective_result.objective_result_id.PRIMARY_KEY",
+      "table": "assessment.objective_result",
+      "fields": [
+        "objective_result_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "objective_result_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.p4_subject_context.subject_context_id.PRIMARY_KEY",
+      "table": "assessment.p4_subject_context",
+      "fields": [
+        "subject_context_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "subject_context_id text PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "assessment.p5_composition_participant.table_constraint_0.PRIMARY_KEY",
+      "table": "assessment.p5_composition_participant",
+      "fields": [],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "PRIMARY KEY (composition_id, ref_order)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.p5_composition_participant.table_constraint_1.UNIQUE",
+      "table": "assessment.p5_composition_participant",
+      "fields": [],
+      "kind": "UNIQUE",
+      "source_sql": "UNIQUE (composition_id, subject_key)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "assessment.p5_composition_snapshot.composition_id.PRIMARY_KEY",
+      "table": "assessment.p5_composition_snapshot",
+      "fields": [
+        "composition_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "composition_id text PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "audit.audit_log.audit_id.PRIMARY_KEY",
+      "table": "audit.audit_log",
+      "fields": [
+        "audit_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "audit_id bigserial PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.adjusted_capability_estimate.estimate_id.PRIMARY_KEY",
+      "table": "capability.adjusted_capability_estimate",
+      "fields": [
+        "estimate_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "estimate_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.adjusted_capability_estimate_revision.estimate_id.PRIMARY_KEY",
+      "table": "capability.adjusted_capability_estimate_revision",
+      "fields": [
+        "estimate_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "estimate_id uuid PRIMARY KEY REFERENCES capability.adjusted_capability_estimate(estimate_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.aircraft_twin_revision.twin_revision_id.PRIMARY_KEY",
+      "table": "capability.aircraft_twin_revision",
+      "fields": [
+        "twin_revision_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "twin_revision_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.capability_model.capability_model_id.PRIMARY_KEY",
+      "table": "capability.capability_model",
+      "fields": [
+        "capability_model_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "capability_model_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.capability_surface.surface_id.PRIMARY_KEY",
+      "table": "capability.capability_surface",
+      "fields": [
+        "surface_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "surface_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.intrinsic_capability_estimate.estimate_id.PRIMARY_KEY",
+      "table": "capability.intrinsic_capability_estimate",
+      "fields": [
+        "estimate_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "estimate_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "capability.p6_model_revision.capability_model_id.PRIMARY_KEY",
+      "table": "capability.p6_model_revision",
+      "fields": [
+        "capability_model_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "capability_model_id uuid PRIMARY KEY REFERENCES capability.capability_model(capability_model_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "context.evaluation_context.context_id.PRIMARY_KEY",
+      "table": "context.evaluation_context",
+      "fields": [
+        "context_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "context_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "debrief.annotation.annotation_id.PRIMARY_KEY",
+      "table": "debrief.annotation",
+      "fields": [
+        "annotation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "annotation_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "episode.analysis_series.series_id.PRIMARY_KEY",
+      "table": "episode.analysis_series",
+      "fields": [
+        "series_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "series_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "episode.episode_stage.stage_id.PRIMARY_KEY",
+      "table": "episode.episode_stage",
+      "fields": [
+        "stage_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "stage_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "episode.performance_window_tag.window_tag_id.PRIMARY_KEY",
+      "table": "episode.performance_window_tag",
+      "fields": [
+        "window_tag_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "window_tag_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "episode.training_episode.episode_id.PRIMARY_KEY",
+      "table": "episode.training_episode",
+      "fields": [
+        "episode_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "episode_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.counterfactual_request.counterfactual_request_id.PRIMARY_KEY",
+      "table": "intelligence.counterfactual_request",
+      "fields": [
+        "counterfactual_request_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "counterfactual_request_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.counterfactual_revision.counterfactual_run_id.PRIMARY_KEY",
+      "table": "intelligence.counterfactual_revision",
+      "fields": [
+        "counterfactual_run_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "counterfactual_run_id uuid PRIMARY KEY REFERENCES intelligence.counterfactual_run(counterfactual_run_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.counterfactual_run.counterfactual_run_id.PRIMARY_KEY",
+      "table": "intelligence.counterfactual_run",
+      "fields": [
+        "counterfactual_run_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "counterfactual_run_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.forecast_request.forecast_request_id.PRIMARY_KEY",
+      "table": "intelligence.forecast_request",
+      "fields": [
+        "forecast_request_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "forecast_request_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.forecast_result.forecast_result_id.PRIMARY_KEY",
+      "table": "intelligence.forecast_result",
+      "fields": [
+        "forecast_result_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "forecast_result_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.forecast_result_revision.forecast_result_id.PRIMARY_KEY",
+      "table": "intelligence.forecast_result_revision",
+      "fields": [
+        "forecast_result_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "forecast_result_id uuid PRIMARY KEY REFERENCES intelligence.forecast_result(forecast_result_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.forecast_run.forecast_run_id.PRIMARY_KEY",
+      "table": "intelligence.forecast_run",
+      "fields": [
+        "forecast_run_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "forecast_run_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.intervention_outcome.intervention_outcome_id.PRIMARY_KEY",
+      "table": "intelligence.intervention_outcome",
+      "fields": [
+        "intervention_outcome_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "intervention_outcome_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.training_recommendation.recommendation_id.PRIMARY_KEY",
+      "table": "intelligence.training_recommendation",
+      "fields": [
+        "recommendation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "recommendation_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "intelligence.training_recommendation_revision.recommendation_id.PRIMARY_KEY",
+      "table": "intelligence.training_recommendation_revision",
+      "fields": [
+        "recommendation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "recommendation_id uuid PRIMARY KEY REFERENCES intelligence.training_recommendation(recommendation_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft.aircraft_id.PRIMARY_KEY",
+      "table": "master.aircraft",
+      "fields": [
+        "aircraft_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "aircraft_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft.internal_code.UNIQUE",
+      "table": "master.aircraft",
+      "fields": [
+        "internal_code"
+      ],
+      "kind": "UNIQUE",
+      "source_sql": "internal_code text NOT NULL UNIQUE",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft_configuration.aircraft_configuration_id.PRIMARY_KEY",
+      "table": "master.aircraft_configuration",
+      "fields": [
+        "aircraft_configuration_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "aircraft_configuration_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft_configuration_snapshot.snapshot_id.PRIMARY_KEY",
+      "table": "master.aircraft_configuration_snapshot",
+      "fields": [
+        "snapshot_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "snapshot_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft_instance.aircraft_instance_id.PRIMARY_KEY",
+      "table": "master.aircraft_instance",
+      "fields": [
+        "aircraft_instance_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "aircraft_instance_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft_lifecycle_event.lifecycle_event_id.PRIMARY_KEY",
+      "table": "master.aircraft_lifecycle_event",
+      "fields": [
+        "lifecycle_event_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "lifecycle_event_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.aircraft_model.aircraft_model_id.PRIMARY_KEY",
+      "table": "master.aircraft_model",
+      "fields": [
+        "aircraft_model_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "aircraft_model_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.entity.entity_id.PRIMARY_KEY",
+      "table": "master.entity",
+      "fields": [
+        "entity_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "entity_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.entity_link.entity_link_id.PRIMARY_KEY",
+      "table": "master.entity_link",
+      "fields": [
+        "entity_link_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "entity_link_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "master.mission_system_instance.mission_system_instance_id.PRIMARY_KEY",
+      "table": "master.mission_system_instance",
+      "fields": [
+        "mission_system_instance_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "mission_system_instance_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.capability_observation.observation_id.PRIMARY_KEY",
+      "table": "metric.capability_observation",
+      "fields": [
+        "observation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "observation_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.capability_observation.observed_metric_instance_id.UNIQUE",
+      "table": "metric.capability_observation",
+      "fields": [
+        "observed_metric_instance_id"
+      ],
+      "kind": "UNIQUE",
+      "source_sql": "observed_metric_instance_id uuid NOT NULL UNIQUE REFERENCES metric.metric_instance(metric_instance_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.evidence_set.evidence_set_id.PRIMARY_KEY",
+      "table": "metric.evidence_set",
+      "fields": [
+        "evidence_set_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "evidence_set_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.longitudinal_sample.sample_id.PRIMARY_KEY",
+      "table": "metric.longitudinal_sample",
+      "fields": [
+        "sample_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "sample_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.metric_definition.metric_definition_id.PRIMARY_KEY",
+      "table": "metric.metric_definition",
+      "fields": [
+        "metric_definition_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "metric_definition_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.metric_instance.metric_instance_id.PRIMARY_KEY",
+      "table": "metric.metric_instance",
+      "fields": [
+        "metric_instance_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "metric_instance_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.performance_trend_series.trend_id.PRIMARY_KEY",
+      "table": "metric.performance_trend_series",
+      "fields": [
+        "trend_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "trend_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.structured_output_schema_registry.schema_id.PRIMARY_KEY",
+      "table": "metric.structured_output_schema_registry",
+      "fields": [
+        "schema_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "schema_id text PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.system_performance_observation.system_observation_id.PRIMARY_KEY",
+      "table": "metric.system_performance_observation",
+      "fields": [
+        "system_observation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "system_observation_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.system_performance_observation.observed_metric_instance_id.UNIQUE",
+      "table": "metric.system_performance_observation",
+      "fields": [
+        "observed_metric_instance_id"
+      ],
+      "kind": "UNIQUE",
+      "source_sql": "observed_metric_instance_id uuid NOT NULL UNIQUE REFERENCES metric.metric_instance(metric_instance_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "metric.trend_bridge.trend_bridge_id.PRIMARY_KEY",
+      "table": "metric.trend_bridge",
+      "fields": [
+        "trend_bridge_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "trend_bridge_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.analysis_release.release_id.PRIMARY_KEY",
+      "table": "registry.analysis_release",
+      "fields": [
+        "release_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "release_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.compute_job.job_id.PRIMARY_KEY",
+      "table": "registry.compute_job",
+      "fields": [
+        "job_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "job_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.context_artifact.context_artifact_id.PRIMARY_KEY",
+      "table": "registry.context_artifact",
+      "fields": [
+        "context_artifact_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "context_artifact_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.data_source.source_id.PRIMARY_KEY",
+      "table": "registry.data_source",
+      "fields": [
+        "source_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "source_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.dataset_manifest.dataset_id.PRIMARY_KEY",
+      "table": "registry.dataset_manifest",
+      "fields": [
+        "dataset_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "dataset_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.dataset_snapshot.dataset_snapshot_id.PRIMARY_KEY",
+      "table": "registry.dataset_snapshot",
+      "fields": [
+        "dataset_snapshot_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "dataset_snapshot_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.longitudinal_scope.longitudinal_scope_id.PRIMARY_KEY",
+      "table": "registry.longitudinal_scope",
+      "fields": [
+        "longitudinal_scope_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "longitudinal_scope_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.longitudinal_scope.longitudinal_scope_key.UNIQUE",
+      "table": "registry.longitudinal_scope",
+      "fields": [
+        "longitudinal_scope_key"
+      ],
+      "kind": "UNIQUE",
+      "source_sql": "longitudinal_scope_key char(64) NOT NULL UNIQUE",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.longitudinal_scope.descriptor_hash.UNIQUE",
+      "table": "registry.longitudinal_scope",
+      "fields": [
+        "descriptor_hash"
+      ],
+      "kind": "UNIQUE",
+      "source_sql": "descriptor_hash char(64) NOT NULL UNIQUE",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.mapping_manifest.mapping_manifest_id.PRIMARY_KEY",
+      "table": "registry.mapping_manifest",
+      "fields": [
+        "mapping_manifest_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "mapping_manifest_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.measurement_semantics.measurement_semantics_id.PRIMARY_KEY",
+      "table": "registry.measurement_semantics",
+      "fields": [
+        "measurement_semantics_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "measurement_semantics_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.mutation_idempotency.table_constraint_0.PRIMARY_KEY",
+      "table": "registry.mutation_idempotency",
+      "fields": [],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "PRIMARY KEY (operation_code, request_id)",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].constraints[]"
+    },
+    {
+      "index_id": "registry.object_binding.binding_id.PRIMARY_KEY",
+      "table": "registry.object_binding",
+      "fields": [
+        "binding_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "binding_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.object_reference.object_ref_id.PRIMARY_KEY",
+      "table": "registry.object_reference",
+      "fields": [
+        "object_ref_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "object_ref_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.object_reference.managed_uri.UNIQUE",
+      "table": "registry.object_reference",
+      "fields": [
+        "managed_uri"
+      ],
+      "kind": "UNIQUE",
+      "source_sql": "managed_uri text NOT NULL UNIQUE",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.quality_event.quality_event_id.PRIMARY_KEY",
+      "table": "registry.quality_event",
+      "fields": [
+        "quality_event_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "quality_event_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.session_order_assignment.assignment_id.PRIMARY_KEY",
+      "table": "registry.session_order_assignment",
+      "fields": [
+        "assignment_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "assignment_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.session_order_scope.session_order_scope_id.PRIMARY_KEY",
+      "table": "registry.session_order_scope",
+      "fields": [
+        "session_order_scope_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "session_order_scope_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.session_release_context_ref.release_context_ref_id.PRIMARY_KEY",
+      "table": "registry.session_release_context_ref",
+      "fields": [
+        "release_context_ref_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "release_context_ref_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.source_artifact.artifact_id.PRIMARY_KEY",
+      "table": "registry.source_artifact",
+      "fields": [
+        "artifact_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "artifact_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.source_clock_segment.source_clock_segment_id.PRIMARY_KEY",
+      "table": "registry.source_clock_segment",
+      "fields": [
+        "source_clock_segment_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "source_clock_segment_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.source_stream.source_stream_id.PRIMARY_KEY",
+      "table": "registry.source_stream",
+      "fields": [
+        "source_stream_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "source_stream_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.time_alignment_domain.time_alignment_domain_id.PRIMARY_KEY",
+      "table": "registry.time_alignment_domain",
+      "fields": [
+        "time_alignment_domain_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "time_alignment_domain_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.time_transform.time_transform_id.PRIMARY_KEY",
+      "table": "registry.time_transform",
+      "fields": [
+        "time_transform_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "time_transform_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "registry.training_session.session_id.PRIMARY_KEY",
+      "table": "registry.training_session",
+      "fields": [
+        "session_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "session_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "world.tpaa_m_chain.chain_id.PRIMARY_KEY",
+      "table": "world.tpaa_m_chain",
+      "fields": [
+        "chain_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "chain_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "world.world_product_manifest.world_product_id.PRIMARY_KEY",
+      "table": "world.world_product_manifest",
+      "fields": [
+        "world_product_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "world_product_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    },
+    {
+      "index_id": "world.world_relation.relation_id.PRIMARY_KEY",
+      "table": "world.world_relation",
+      "fields": [
+        "relation_id"
+      ],
+      "kind": "PRIMARY_KEY",
+      "source_sql": "relation_id uuid PRIMARY KEY",
+      "derivation": "CORE_LOGICAL_MODEL.tables[].fields[].sql"
+    }
+  ]
+}

@@ -95,6 +95,7 @@ from tpaa_storage.hashing import canonical_request_hash
 from tpaa_storage.product_identity import product_object_ref_id
 from tpaa_storage.publication_bundle import (
     CorePublicationBundle,
+    CoreTpaaMChainRecord,
     CoreWorldProductRecord,
     CoreWorldRelationRecord,
 )
@@ -131,6 +132,7 @@ from .production_p1_world import (
     ProductionP1WorldPolicyError,
     validate_production_p1_world_authority,
 )
+from .source_artifacts import SourceArtifactError, source_reference_payload
 
 PRODUCTION_P1_WORKER_SCHEMA = "TPAA_ED2_B1_P1_WORKER_PRODUCT_V1"
 P1_BUILD_COMMAND = "BUILD_P1_RELEASE"
@@ -452,11 +454,7 @@ def _world_source_state(
     *,
     required: frozenset[SourceFamily],
 ) -> tuple[str, float, tuple[str, ...], str | None]:
-    actual = frozenset(
-        family
-        for family in required
-        if source_selection.refs_by_family.get(family)
-    )
+    actual = frozenset(family for family in required if source_selection.refs_by_family.get(family))
     missing = tuple(
         sorted(
             required - actual,
@@ -470,10 +468,7 @@ def _world_source_state(
     else:
         status = "READY"
     coverage = len(actual) / len(required)
-    reasons = tuple(
-        f"ED2_SOURCE_FAMILY_MISSING_{family.value}"
-        for family in missing
-    )
+    reasons = tuple(f"ED2_SOURCE_FAMILY_MISSING_{family.value}" for family in missing)
     signature = (
         None
         if not actual
@@ -500,11 +495,7 @@ def _scenario_stage_payload(
     )
     if not scenario_refs:
         return None, None
-    candidates = tuple(
-        ref
-        for ref in scenario_refs
-        if "stage_projection" in ref.projection_payload
-    )
+    candidates = tuple(ref for ref in scenario_refs if "stage_projection" in ref.projection_payload)
     if len(candidates) != 1:
         raise ProductionWorkerError(
             "ED2_STAGE_SOURCE_PROJECTION_CARDINALITY",
@@ -585,9 +576,7 @@ def _action_world_state(
             "ED2_ACTION_SOURCE_CARDINALITY_INVALID",
             str(len(flight_refs)),
         )
-    raw_projection = flight_refs[0].projection_payload.get(
-        "action_projection"
-    )
+    raw_projection = flight_refs[0].projection_payload.get("action_projection")
     if raw_projection is None:
         return (
             "MISSING",
@@ -614,17 +603,11 @@ def _action_world_state(
         )
         event_start = _integer(
             event.get("start_session_time_us"),
-            field=(
-                f"FLIGHT.action_projection.events[{index}]."
-                "start_session_time_us"
-            ),
+            field=(f"FLIGHT.action_projection.events[{index}].start_session_time_us"),
         )
         event_end = _integer(
             event.get("end_session_time_us"),
-            field=(
-                f"FLIGHT.action_projection.events[{index}]."
-                "end_session_time_us"
-            ),
+            field=(f"FLIGHT.action_projection.events[{index}].end_session_time_us"),
         )
         if (
             event_start < start_session_time_us
@@ -755,9 +738,7 @@ def build_p1_worker_product(
         session_id=session_id,
         request_hash=request_hash,
     )
-    episode_id = str(
-        uuid5(_EPISODE_NAMESPACE, f"{session_id}|{canonical_hash}")
-    )
+    episode_id = str(uuid5(_EPISODE_NAMESPACE, f"{session_id}|{canonical_hash}"))
 
     context_raw = _mapping(
         body.get("evaluation_context"),
@@ -767,10 +748,13 @@ def build_p1_worker_product(
         context_raw.get("context_id"),
         field="evaluation_context.context_id",
     )
-    if _uuid(
-        context_raw.get("session_id"),
-        field="evaluation_context.session_id",
-    ) != session_id:
+    if (
+        _uuid(
+            context_raw.get("session_id"),
+            field="evaluation_context.session_id",
+        )
+        != session_id
+    ):
         raise ProductionWorkerError(
             "PRCB_C2_CONTEXT_SESSION_DRIFT",
             context_id,
@@ -809,9 +793,7 @@ def build_p1_worker_product(
             "context_version": context_projection["context_version"],
             "revision_no": context_projection["revision_no"],
             "rule_set_version": context_projection["rule_set_version"],
-            "metric_profile_version": context_projection[
-                "metric_profile_version"
-            ],
+            "metric_profile_version": context_projection["metric_profile_version"],
             "status": context_projection["status"],
         }
     )
@@ -868,11 +850,7 @@ def build_p1_worker_product(
             str(expected_version_token),
         )
     parent_raw = body.get("parent_release_id")
-    parent_release_id = (
-        None
-        if parent_raw is None
-        else _uuid(parent_raw, field="parent_release_id")
-    )
+    parent_release_id = None if parent_raw is None else _uuid(parent_raw, field="parent_release_id")
     if parent_release_id is not None:
         raise ProductionWorkerError(
             "PRCB_C2_PARENT_RELEASE_INVALID",
@@ -958,9 +936,7 @@ def build_p1_worker_product(
                 "request_hash": request_hash,
             }
         )
-        context_world_id = str(
-            uuid5(_WORLD_NAMESPACE, f"CONTEXT|{context_world_hash}")
-        )
+        context_world_id = str(uuid5(_WORLD_NAMESPACE, f"CONTEXT|{context_world_hash}"))
         action_world_hash = _hash(
             {
                 "world_kind": "ACTION",
@@ -976,9 +952,7 @@ def build_p1_worker_product(
                 "request_hash": request_hash,
             }
         )
-        action_world_id = str(
-            uuid5(_WORLD_NAMESPACE, f"ACTION|{action_world_hash}")
-        )
+        action_world_id = str(uuid5(_WORLD_NAMESPACE, f"ACTION|{action_world_hash}"))
         truth_world_hash = _hash(
             {
                 "world_kind": "TRUTH",
@@ -991,9 +965,7 @@ def build_p1_worker_product(
                 "context_logical_hash": context_hash,
                 "episode_logical_hash": episode_hash,
                 "stage_projection_hash": stage_projection.logical_hash,
-                "stage_ids": [
-                    stage.stage_id for stage in stage_projection.stages
-                ],
+                "stage_ids": [stage.stage_id for stage in stage_projection.stages],
                 "source_authority_signature": truth_signature,
                 "status": truth_status,
                 "coverage": truth_coverage,
@@ -1001,9 +973,7 @@ def build_p1_worker_product(
                 "request_hash": request_hash,
             }
         )
-        truth_world_id = str(
-            uuid5(_WORLD_NAMESPACE, f"TRUTH|{truth_world_hash}")
-        )
+        truth_world_id = str(uuid5(_WORLD_NAMESPACE, f"TRUTH|{truth_world_hash}"))
         machine_world_hash = _hash(
             {
                 "world_kind": "MACHINE",
@@ -1014,9 +984,7 @@ def build_p1_worker_product(
                 "context_logical_hash": context_hash,
                 "episode_logical_hash": episode_hash,
                 "stage_projection_hash": stage_projection.logical_hash,
-                "stage_ids": [
-                    stage.stage_id for stage in stage_projection.stages
-                ],
+                "stage_ids": [stage.stage_id for stage in stage_projection.stages],
                 "source_authority_signature": machine_signature,
                 "status": machine_status,
                 "coverage": machine_coverage,
@@ -1024,9 +992,7 @@ def build_p1_worker_product(
                 "request_hash": request_hash,
             }
         )
-        machine_world_id = str(
-            uuid5(_WORLD_NAMESPACE, f"MACHINE|{machine_world_hash}")
-        )
+        machine_world_id = str(uuid5(_WORLD_NAMESPACE, f"MACHINE|{machine_world_hash}"))
         world_id = truth_world_id
         world_hash = truth_world_hash
 
@@ -1143,8 +1109,42 @@ def build_p1_worker_product(
                 "ED2_P1_EXECUTION_PLAN_DRIFT",
                 execution_contract.plan.logical_hash,
             )
-        relation_ids = tuple(
-            relation.relation_id for relation in stage_relations
+        relation_ids = tuple(relation.relation_id for relation in stage_relations)
+        chain_refs: dict[str, object] = {
+            "C": [context_world_id],
+            "W": [truth_world_id],
+            "P": [],
+            "A": [action_world_id],
+            "J": [],
+            "M": [machine_world_id],
+            "relation_ids": list(relation_ids),
+        }
+        chain_hash = _hash(
+            {
+                "episode_id": episode_id,
+                "refs": chain_refs,
+                "start_session_time_us": start,
+                "end_session_time_us": end,
+                "chain_version": "ED2_PRODUCTION_P1_TPAA_M_CHAIN_V1",
+            }
+        )
+        tpaa_chain = CoreTpaaMChainRecord(
+            chain_id=str(uuid5(_WORLD_NAMESPACE, f"TPAA_M_CHAIN|{chain_hash}")),
+            episode_id=episode_id,
+            stage_id=None,
+            refs=chain_refs,
+            start_session_time_us=start,
+            end_session_time_us=end,
+            chain_status="PARTIAL",
+            coverage=4.0 / 6.0,
+            confidence=min(
+                context_coverage,
+                truth_coverage,
+                action_coverage,
+                machine_coverage,
+            ),
+            break_reason="P_AND_J_UNAVAILABLE",
+            chain_version="ED2_PRODUCTION_P1_TPAA_M_CHAIN_V1",
         )
         release = materialize_production_p1_release(
             contract=execution_contract,
@@ -1192,15 +1192,9 @@ def build_p1_worker_product(
                     "stage_profile_id": stage_projection.stage_profile_id,
                     "stage_projection_status": stage_projection.status,
                     "stage_projection_hash": stage_projection.logical_hash,
-                    "stage_registry_sha256": (
-                        stage_projection.stage_registry_sha256
-                    ),
-                    "stage_source_artifact_sha256": (
-                        stage_source_artifact_sha256
-                    ),
-                    "stage_ids": [
-                        stage.stage_id for stage in stage_projection.stages
-                    ],
+                    "stage_registry_sha256": (stage_projection.stage_registry_sha256),
+                    "stage_source_artifact_sha256": (stage_source_artifact_sha256),
+                    "stage_ids": [stage.stage_id for stage in stage_projection.stages],
                 },
                 world_product_ids=(
                     context_world_id,
@@ -1219,6 +1213,7 @@ def build_p1_worker_product(
                 machine_world,
             ),
             world_relations=stage_relations,
+            tpaa_m_chains=(tpaa_chain,),
         )
     except (
         CatalogMetricEngineError,
@@ -1352,9 +1347,7 @@ def build_p1_worker_product(
                 "coverage": 1.0,
                 "confidence": 1.0,
                 "data_sufficiency_status": (
-                    "SUFFICIENT"
-                    if basic_world_ready
-                    else "INSUFFICIENT_DATA"
+                    "SUFFICIENT" if basic_world_ready else "INSUFFICIENT_DATA"
                 ),
             },
             field_kinds={},
@@ -1388,18 +1381,14 @@ def build_p1_worker_product(
             ProductionPrerequisiteRow(
                 table="master.mission_system_instance",
                 values={
-                    "mission_system_instance_id": (
-                        system.mission_system_instance_id
-                    ),
+                    "mission_system_instance_id": (system.mission_system_instance_id),
                     "aircraft_id": system.aircraft_id,
                     "system_type": system.system_type,
                     "system_code": system.system_code,
                     "hardware_version": system.hardware_version,
                     "software_version": system.software_version,
                     "installation_id": system.installation_id,
-                    "alignment_profile_version": (
-                        system.alignment_profile_version
-                    ),
+                    "alignment_profile_version": (system.alignment_profile_version),
                     "status": system.status,
                     "configuration_hash": system.configuration_hash,
                 },
@@ -1407,10 +1396,7 @@ def build_p1_worker_product(
             )
         )
 
-    definition_by_code = {
-        item.metric_code: item
-        for item in execution_contract.plan.definitions
-    }
+    definition_by_code = {item.metric_code: item for item in execution_contract.plan.definitions}
     for definition_ref in release.definitions:
         definition = definition_by_code[definition_ref.metric_code]
         capability_dimension = (
@@ -1422,9 +1408,7 @@ def build_p1_worker_product(
             ProductionPrerequisiteRow(
                 table="metric.metric_definition",
                 values={
-                    "metric_definition_id": (
-                        definition_ref.metric_definition_id
-                    ),
+                    "metric_definition_id": (definition_ref.metric_definition_id),
                     "metric_code": definition.metric_code,
                     "version": definition.algorithm_version,
                     "catalog_version": definition_ref.catalog_version,
@@ -1439,14 +1423,9 @@ def build_p1_worker_product(
                     "calculation_layer": "METRIC",
                     "capability_level": "CAP_L1_OBSERVED",
                     "capability_dimension": capability_dimension,
-                    "required_world_products": list(
-                        production_p1_required_world_kinds(definition)
-                    ),
+                    "required_world_products": list(production_p1_required_world_kinds(definition)),
                     "scope": "EPISODE",
-                    "spec_uri": (
-                        "canonical://P1_METRIC_CATALOG/"
-                        f"{definition.metric_code}"
-                    ),
+                    "spec_uri": (f"canonical://P1_METRIC_CATALOG/{definition.metric_code}"),
                     "spec_hash": definition.definition_hash,
                     "definition_hash": definition.definition_hash,
                     "plugin_name": definition.algorithm_id,
@@ -1475,9 +1454,7 @@ def _verify_job_request(
     payload: WorkerPayload,
     job_payload: dict[str, object],
 ) -> None:
-    expected = canonical_request_hash(
-        {"job_type": payload.command, "payload": job_payload}
-    )
+    expected = canonical_request_hash({"job_type": payload.command, "payload": job_payload})
     if expected != payload.request_hash:
         raise ProductionWorkerError(
             "PRCB_C2_REQUEST_HASH_MISMATCH",
@@ -1488,10 +1465,14 @@ def _verify_job_request(
 def _execute_p1(payload: WorkerPayload) -> WorkerResult:
     body = _mapping(payload.domain_payload, field="domain_payload")
     authority_root = Path(_text(body.get("authority_root"), field="authority_root"))
-    request_payload = _mapping(body.get("job_payload"), field="job_payload")
+    materialized_payload = _mapping(body.get("job_payload"), field="job_payload")
+    try:
+        request_payload = source_reference_payload(materialized_payload)
+    except SourceArtifactError as exc:
+        raise ProductionWorkerError(exc.code, exc.detail) from exc
     _verify_job_request(payload, request_payload)
     product = build_p1_worker_product(
-        request_payload,
+        materialized_payload,
         request_hash=payload.request_hash,
         authority_root=authority_root,
     )
@@ -1730,16 +1711,8 @@ def _p3_claim_envelope(
         )
     lower_raw = estimate.uncertainty.get("lower")
     upper_raw = estimate.uncertainty.get("upper")
-    lower = (
-        None
-        if lower_raw is None
-        else _number(lower_raw, field="p3.uncertainty.lower")
-    )
-    upper = (
-        None
-        if upper_raw is None
-        else _number(upper_raw, field="p3.uncertainty.upper")
-    )
+    lower = None if lower_raw is None else _number(lower_raw, field="p3.uncertainty.lower")
+    upper = None if upper_raw is None else _number(upper_raw, field="p3.uncertainty.upper")
     return P3ClaimEnvelope(
         claim_level=estimate.claim_level,
         validity_status=estimate.validity_domain_status,
@@ -1770,9 +1743,7 @@ def _p4_worker_product(
         supersedes_id=None,
     )
     result = evaluate_ed2_training_assessment(
-        evidence_availability=tuple(
-            item.availability_status for item in evidence
-        ),
+        evidence_availability=tuple(item.availability_status for item in evidence),
         p3_validity_statuses=(claim.validity_status,),
         approval_states=(revision.approval_state,),
     )
@@ -1879,9 +1850,7 @@ def _p5_worker_product(
     )
     result = evaluate_ed2_training_assessment(
         evidence_availability=(evidence.availability_status,),
-        p3_validity_statuses=tuple(
-            item.p3_validity_status for item in compute_input.p4_revisions
-        ),
+        p3_validity_statuses=tuple(item.p3_validity_status for item in compute_input.p4_revisions),
         approval_states=(revision.approval_state,),
     )
     return ProductionP5AssessmentWorkerProduct(
@@ -2028,12 +1997,8 @@ def _execute_p6_build(payload: WorkerPayload) -> WorkerResult:
             capability_model_id=build.model.capability_model_id,
             model_profile_id=profile.profile_id,
             model_profile_version=profile.profile_version,
-            training_dataset_snapshot_id=(
-                build.model.training_dataset_snapshot_id
-            ),
-            validation_dataset_snapshot_id=(
-                build.model.validation_dataset_snapshot_id
-            ),
+            training_dataset_snapshot_id=(build.model.training_dataset_snapshot_id),
+            validation_dataset_snapshot_id=(build.model.validation_dataset_snapshot_id),
             assumption_profile_id=_text(
                 body.forecast_spec.get("assumption_profile_id"),
                 field="forecast.assumption_profile_id",
@@ -2046,9 +2011,7 @@ def _execute_p6_build(payload: WorkerPayload) -> WorkerResult:
     counterfactual_request: P6CounterfactualRequestBinding | None = None
     if body.counterfactual_spec is not None:
         raw_bases = body.counterfactual_spec.get("base_product_refs")
-        if not isinstance(raw_bases, list) or not all(
-            isinstance(item, str) for item in raw_bases
-        ):
+        if not isinstance(raw_bases, list) or not all(isinstance(item, str) for item in raw_bases):
             raise ProductionWorkerError(
                 "PRCB_C2_PAYLOAD_INVALID",
                 "counterfactual.base_product_refs",
@@ -2093,11 +2056,7 @@ def _execute_p6_build(payload: WorkerPayload) -> WorkerResult:
         output=(
             build.model.capability_model_id,
             snapshot.input_snapshot_id,
-            *(
-                ()
-                if forecast_request is None
-                else (forecast_request.forecast_request_id,)
-            ),
+            *(() if forecast_request is None else (forecast_request.forecast_request_id,)),
             *(
                 ()
                 if counterfactual_request is None

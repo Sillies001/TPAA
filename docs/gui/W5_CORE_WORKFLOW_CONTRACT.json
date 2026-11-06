@@ -1,0 +1,41 @@
+{
+  "schema": "TPAA_W5_CORE_WORKFLOW_CONTRACT_V1",
+  "design_authority": "TPAA_V8.0_ED-2.0_Rebaseline_R3.3/05G",
+  "release_binding": "EXACT_IMMUTABLE_ONLY",
+  "pages": {
+    "P01": {
+      "purpose": "Session discovery, governed real-file import, P1 publication and job status",
+      "write_routes": ["POST /api/v1/sources/p1-request/stage", "POST /jobs"],
+      "read_routes": ["GET /jobs/{job_id}", "GET /api/v1/discovery/sessions", "GET /api/v1/discovery/sessions/{session_id}/releases"]
+    },
+    "P02": {
+      "purpose": "Exact Session/Episode overview and Mission Header",
+      "subject_lanes": ["AIRCRAFT_PERFORMANCE", "MISSION_SYSTEM_PERFORMANCE", "REFERENCE_TRUTH_QUALITY"]
+    },
+    "P03": {
+      "purpose": "Exact historical replay, Master Timeline, metric and evidence linkage",
+      "fallback_policy": "FORBIDDEN",
+      "trajectory_policy": "RENDER_EXACT_GEODETIC_PRESENTATION_OR_SHOW_EXPLICIT_UNAVAILABLE"
+    },
+    "P12": {
+      "purpose": "Data quality and Observation Eligibility",
+      "required_dimensions": ["TIME", "REFERENCE", "ASSOCIATION", "WORLD", "OBSERVATION_ELIGIBILITY"]
+    },
+    "P13": {
+      "purpose": "Catalog, profile, context, release, model, permission, audit and runtime governance"
+    }
+  },
+  "status_semantics": {
+    "N_A": "NOT_APPLICABLE",
+    "UNKNOWN": "UNKNOWN_OR_NOT_COMPUTED",
+    "FAILED": "FAILURE",
+    "REVIEW_REQUIRED": "REVIEW",
+    "SUCCEEDED": "SUCCESS"
+  },
+  "acceptance": {
+    "real_file_to_p1_publication": true,
+    "observation_to_evidence_max_major_interactions": 4,
+    "exact_historical_replay": true,
+    "current_or_latest_fallback": false
+  }
+}

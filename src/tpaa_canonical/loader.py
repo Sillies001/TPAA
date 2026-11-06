@@ -17,11 +17,11 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
-EXPECTED_CORE_BASELINE = "CB-1.4.0"
+EXPECTED_CORE_BASELINE = "CB-1.5.0"
 EXPECTED_BASELINE_LOCK_SHA256 = (
-    "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437"
+    "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab"
 )
-EXPECTED_CONTROLLED_ARTIFACT_COUNT = 33
+EXPECTED_CONTROLLED_ARTIFACT_COUNT = 37
 UNVERSIONED_BY_AUTHORITY = "UNVERSIONED_BY_AUTHORITY"
 UNTRUSTED_NOT_PARSED = "UNTRUSTED_NOT_PARSED"
 NOT_REQUESTED = "NOT_REQUESTED"
@@ -171,7 +171,7 @@ def _string_field(payload: Mapping[str, Any], keys: Iterable[str]) -> tuple[str 
 
 
 class CanonicalArtifactLoader:
-    """Load only artifacts controlled by the approved CB-1.4.0 baseline lock."""
+    """Load artifacts controlled by one explicitly trusted baseline lock."""
 
     def __init__(
         self,
@@ -179,12 +179,18 @@ class CanonicalArtifactLoader:
         *,
         expected_core_baseline: str = EXPECTED_CORE_BASELINE,
         trusted_lock_sha256: str = EXPECTED_BASELINE_LOCK_SHA256,
+        expected_controlled_artifact_count: int = EXPECTED_CONTROLLED_ARTIFACT_COUNT,
     ) -> None:
         self.baseline_root = (baseline_root or _default_baseline_root()).resolve()
         self.canonical_root = self.baseline_root / "canonical"
         self.expected_core_baseline = expected_core_baseline
         self.trusted_lock_sha256 = trusted_lock_sha256.lower()
+        if expected_controlled_artifact_count <= 0:
+            raise ValueError("expected_controlled_artifact_count must be positive")
+        self.expected_controlled_artifact_count = expected_controlled_artifact_count
         self._baseline_metadata, self._entries = self._load_and_verify_lock()
+        self._approved_core_inheritance: Mapping[str, str] = MappingProxyType({})
+        self._approved_core_inheritance = self._load_approved_core_inheritance()
 
     @property
     def baseline_metadata(self) -> Mapping[str, Any]:
@@ -257,13 +263,13 @@ class CanonicalArtifactLoader:
                 artifact_id="BASELINE_LOCK",
                 detail="artifacts must be a JSON array",
             )
-        if len(artifacts) != EXPECTED_CONTROLLED_ARTIFACT_COUNT:
+        if len(artifacts) != self.expected_controlled_artifact_count:
             raise CanonicalArtifactError(
                 reason="BASELINE_LOCK_SCHEMA_MISMATCH",
                 artifact_id="BASELINE_LOCK",
                 detail=(
                     "controlled artifact count mismatch "
-                    f"expected={EXPECTED_CONTROLLED_ARTIFACT_COUNT} actual={len(artifacts)}"
+                    f"expected={self.expected_controlled_artifact_count} actual={len(artifacts)}"
                 ),
             )
 
@@ -354,6 +360,65 @@ class CanonicalArtifactLoader:
                 detail="artifact id must match ^[A-Z][A-Z0-9_]*$",
             )
         return normalized
+
+    def _load_approved_core_inheritance(self) -> Mapping[str, str]:
+        """Load the locked W0 inheritance decision before accepting legacy Core ids."""
+
+        if "SCHEMA_COMPATIBILITY_AUTHORITY" not in self._entries:
+            return MappingProxyType({})
+        authority = self.load("SCHEMA_COMPATIBILITY_AUTHORITY").payload
+        if (
+            authority.get("approval_status") != "APPROVED"
+            or authority.get("core_baseline") != self.expected_core_baseline
+        ):
+            raise CanonicalArtifactError(
+                reason="CORE_INHERITANCE_AUTHORITY_INVALID",
+                artifact_id="SCHEMA_COMPATIBILITY_AUTHORITY",
+                detail="inheritance authority must be approved for the active Core baseline",
+            )
+        raw_entries = authority.get("core_inheritance")
+        if not isinstance(raw_entries, list):
+            raise CanonicalArtifactError(
+                reason="CORE_INHERITANCE_AUTHORITY_INVALID",
+                artifact_id="SCHEMA_COMPATIBILITY_AUTHORITY",
+                detail="core_inheritance must be a JSON array",
+            )
+
+        approved: dict[str, str] = {}
+        for raw in raw_entries:
+            if not isinstance(raw, Mapping):
+                raise CanonicalArtifactError(
+                    reason="CORE_INHERITANCE_AUTHORITY_INVALID",
+                    artifact_id="SCHEMA_COMPATIBILITY_AUTHORITY",
+                    detail="core_inheritance entries must be JSON objects",
+                )
+            filename = raw.get("file")
+            declared = raw.get("declared_core_baseline")
+            compatible = raw.get("compatible_core_baseline")
+            status = raw.get("approval_status")
+            if (
+                not isinstance(filename, str)
+                or not filename.endswith(".json")
+                or Path(filename).name != filename
+                or not isinstance(declared, str)
+                or not declared
+                or compatible != self.expected_core_baseline
+                or status != "APPROVED"
+            ):
+                raise CanonicalArtifactError(
+                    reason="CORE_INHERITANCE_AUTHORITY_INVALID",
+                    artifact_id="SCHEMA_COMPATIBILITY_AUTHORITY",
+                    detail=f"invalid inheritance entry for {filename!r}",
+                )
+            inherited_id = filename.removesuffix(".json")
+            if inherited_id not in self._entries or inherited_id in approved:
+                raise CanonicalArtifactError(
+                    reason="CORE_INHERITANCE_AUTHORITY_INVALID",
+                    artifact_id="SCHEMA_COMPATIBILITY_AUTHORITY",
+                    detail=f"unknown or duplicate inherited artifact {filename}",
+                )
+            approved[inherited_id] = declared
+        return MappingProxyType(approved)
 
     def load(
         self,
@@ -461,7 +526,12 @@ class CanonicalArtifactLoader:
                 detail="core_baseline must be a non-empty string when declared",
             )
 
-        if core_baseline is not None and core_baseline != self.expected_core_baseline:
+        inherited_core = self._approved_core_inheritance.get(normalized_id)
+        if (
+            core_baseline is not None
+            and core_baseline != self.expected_core_baseline
+            and core_baseline != inherited_core
+        ):
             raise CanonicalArtifactError(
                 reason="CORE_BASELINE_MISMATCH",
                 artifact_id=normalized_id,
@@ -470,7 +540,8 @@ class CanonicalArtifactLoader:
                 expected_schema_version=expected.schema_version,
                 actual_schema_version=schema_version,
                 detail=(
-                    f"expected_core={self.expected_core_baseline} actual_core={core_baseline}"
+                    f"expected_core={self.expected_core_baseline} actual_core={core_baseline} "
+                    f"approved_inherited_core={inherited_core or 'NONE'}"
                 ),
             )
 

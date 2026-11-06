@@ -35,6 +35,9 @@ def _event_payload() -> dict[str, object]:
                 "candidate_only": True,
                 "automatic_personnel_fault": False,
                 "responsibility_basis": "SYSTEM_OR_DATA_FACTOR",
+                "evidence_refs": [f"event:{_EVENT}"],
+                "counterevidence_refs": [],
+                "knowledge_time_utc": _AS_OF,
             }
         ],
     }
@@ -54,6 +57,12 @@ def _human_payload() -> dict[str, object]:
         "revision_refs": [_REVISION],
         "revision_aware_replay": True,
         "trend_contracts": ["EWMA", "P10", "P50", "P90"],
+        "privacy_audit": {
+            "policy_id": "ED2-B3-PSEUDONYMIZATION",
+            "policy_version": "1.0.0",
+            "audit_sha256": _HASH,
+            "direct_identity_removed": True,
+        },
     }
 
 
@@ -62,6 +71,8 @@ def _course_payload() -> dict[str, object]:
         "scope_kind": "COURSE",
         "privacy_mode": "AGGREGATED",
         "minimum_cohort_size": 4,
+        "cohort_size": 8,
+        "result_state": "PUBLISHED",
         "suppressed_below_minimum": True,
         "cohort_dimensions": [
             "scenario_family",
@@ -84,6 +95,10 @@ def _plugin_payload() -> dict[str, object]:
                 "implementation_version": "1.0.0",
                 "authority_hash": _HASH,
                 "enabled": True,
+                "distribution_kind": "BUILTIN_FROZEN",
+                "approval_state": "BASELINE_AUTHORIZED",
+                "lifecycle_state": "ENABLED",
+                "rollback_authority_hash": _HASH,
             }
             for contract in ED2_TRAINING_PLUGIN_CONTRACTS
         ],
@@ -108,6 +123,7 @@ def _gateway_payload() -> dict[str, object]:
         "canonical_relation_refs": ["relation:formation:a-b"],
         "interop_snapshot_id": "P6_INTEROP_SHA256:" + _HASH,
         "logical_content_hash": _HASH,
+        "mapping_profile_sha256": _HASH,
     }
 
 
@@ -130,6 +146,7 @@ def _media_payload() -> dict[str, object]:
                 "media_type": "VIDEO",
                 "uri": "tpaa-object://media/debrief-1",
                 "artifact_sha256": _HASH,
+                "byte_size": 1024,
                 "source_release_id": _RELEASE,
                 "transcript_status": "UNAVAILABLE",
             }
@@ -182,8 +199,7 @@ def test_ed2_b3_upper_product_kinds_are_exact_and_hash_stable(
     assert first.source_release_ids == (_RELEASE,)
 
 
-def test_ed2_b3_root_cause_never_upgrades_candidate_to_causal_or_personnel_fault(
-) -> None:
+def test_ed2_b3_root_cause_never_upgrades_candidate_to_causal_or_personnel_fault() -> None:
     causal = _event_payload()
     causal["causal_upgrade"] = True
     with pytest.raises(ED2UpperProductError, match="CAUSAL_UPGRADE_FORBIDDEN"):
@@ -212,6 +228,36 @@ def test_ed2_b3_root_cause_never_upgrades_candidate_to_causal_or_personnel_fault
         )
 
 
+def test_ed2_b3_root_cause_requires_evidence_and_bounded_knowledge_time() -> None:
+    missing_evidence = _event_payload()
+    candidates = missing_evidence["root_cause_candidates"]
+    assert isinstance(candidates, list)
+    candidate = candidates[0]
+    assert isinstance(candidate, dict)
+    candidate["evidence_refs"] = []
+    with pytest.raises(ED2UpperProductError, match="EVIDENCE_REQUIRED"):
+        build_ed2_upper_product(
+            kind="EVENT_RELATION_ROOT_CAUSE",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=missing_evidence,
+        )
+
+    future_knowledge = _event_payload()
+    candidates = future_knowledge["root_cause_candidates"]
+    assert isinstance(candidates, list)
+    candidate = candidates[0]
+    assert isinstance(candidate, dict)
+    candidate["knowledge_time_utc"] = "2030-01-01T05:00:01Z"
+    with pytest.raises(ED2UpperProductError, match="KNOWLEDGE_TIME_FUTURE"):
+        build_ed2_upper_product(
+            kind="EVENT_RELATION_ROOT_CAUSE",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=future_knowledge,
+        )
+
+
 def test_ed2_b3_human_and_course_products_enforce_privacy_boundaries() -> None:
     human = _human_payload()
     human["actor_id"] = "66666666-6666-4666-8666-666666666666"
@@ -233,6 +279,16 @@ def test_ed2_b3_human_and_course_products_enforce_privacy_boundaries() -> None:
             payload=course,
         )
 
+    suppressed = _course_payload()
+    suppressed["cohort_size"] = 3
+    with pytest.raises(ED2UpperProductError, match="SUPPRESSION_MISMATCH"):
+        build_ed2_upper_product(
+            kind="COURSE_UNIT_ANALYTICS",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=suppressed,
+        )
+
 
 def test_ed2_b3_training_plugin_forbids_dynamic_import_contract_drift() -> None:
     payload = _plugin_payload()
@@ -249,9 +305,22 @@ def test_ed2_b3_training_plugin_forbids_dynamic_import_contract_drift() -> None:
             payload=payload,
         )
 
+    external = _plugin_payload()
+    components = external["components"]
+    assert isinstance(components, list)
+    first = components[0]
+    assert isinstance(first, dict)
+    first["distribution_kind"] = "EXTERNAL_WHEEL"
+    with pytest.raises(ED2UpperProductError, match="DISTRIBUTION_UNTRUSTED"):
+        build_ed2_upper_product(
+            kind="TRAINING_PLUGIN_COMPOSITION",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=external,
+        )
 
-def test_ed2_b3_hash_input_remains_json_native_and_media_is_exact_release_bound(
-) -> None:
+
+def test_ed2_b3_hash_input_remains_json_native_and_media_is_exact_release_bound() -> None:
     float_payload = _course_payload()
     float_payload["aggregate_value"] = 0.5
     with pytest.raises(ED2UpperProductError, match="FLOAT_FORBIDDEN"):
@@ -271,6 +340,7 @@ def test_ed2_b3_hash_input_remains_json_native_and_media_is_exact_release_bound(
             as_of_utc=_AS_OF,
             payload=media,
         )
+
 
 def test_ed2_b3_media_requires_sealed_hash_and_explicit_transcript_state() -> None:
     missing_hash = _media_payload()
@@ -307,3 +377,16 @@ def test_ed2_b3_media_requires_sealed_hash_and_explicit_transcript_state() -> No
             payload=missing_status,
         )
 
+    unmanaged = _media_payload()
+    raw_media = unmanaged["media"]
+    assert isinstance(raw_media, list)
+    first = raw_media[0]
+    assert isinstance(first, dict)
+    first["uri"] = "file:///tmp/debrief.mp4"
+    with pytest.raises(ED2UpperProductError, match="MANAGED_URI_REQUIRED"):
+        build_ed2_upper_product(
+            kind="MEDIA_DEBRIEF",
+            source_release_ids=(_RELEASE,),
+            as_of_utc=_AS_OF,
+            payload=unmanaged,
+        )

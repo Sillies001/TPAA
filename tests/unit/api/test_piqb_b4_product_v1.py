@@ -75,8 +75,8 @@ def test_product_v1_p1_response_binds_exact_id_and_dto_authority() -> None:
     assert payload["authority"] == {
         "artifact_id": "CROSS_LAYER_DTO_CONTRACTS",
         "artifact_version": "UNVERSIONED_BY_AUTHORITY",
-        "core_baseline": "CB-1.4.0",
-        "sha256": "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a",
+        "core_baseline": "CB-1.5.0",
+        "sha256": "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9",
     }
 
 

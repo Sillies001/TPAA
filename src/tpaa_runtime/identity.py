@@ -10,15 +10,9 @@ from fastapi import Request
 from tpaa_api.unified import UnifiedPrincipal, UnifiedPrincipalResolver
 
 from .config import ProductionPrincipalBinding
-
-_APPROVED_ROLES = frozenset(
-    {
-        "SUBJECT_SELF",
-        "INSTRUCTOR_EVALUATOR",
-        "TEAM_LEAD",
-        "ANALYST",
-        "ADMIN_AUDITOR",
-    }
+from .principal_policy import (
+    PrincipalPolicyError,
+    validate_production_principal_policy,
 )
 
 
@@ -29,16 +23,15 @@ class ProductionIdentityError(PermissionError):
 def validate_production_principal(value: object) -> UnifiedPrincipal:
     if not isinstance(value, UnifiedPrincipal):
         raise ProductionIdentityError("PRCB_C3_PRINCIPAL_INVALID")
-    if value.role not in _APPROVED_ROLES:
-        raise ProductionIdentityError("PRCB_C3_ROLE_NOT_AUTHORIZED")
-    if value.role in {"TEAM_LEAD", "ANALYST"} and (
-        value.privileged_identity_authorized
-        or value.visibility_authorized
-        or value.export_authorized
-    ):
-        raise ProductionIdentityError("PRCB_C3_ROLE_PRIVILEGE_ESCALATION")
-    if value.role != "ADMIN_AUDITOR" and value.export_authorized:
-        raise ProductionIdentityError("PRCB_C3_EXPORT_PRIVILEGE_ESCALATION")
+    try:
+        validate_production_principal_policy(
+            role=value.role,
+            privileged_identity_authorized=value.privileged_identity_authorized,
+            visibility_authorized=value.visibility_authorized,
+            export_authorized=value.export_authorized,
+        )
+    except PrincipalPolicyError as exc:
+        raise ProductionIdentityError(f"PRCB_C3_{exc.code}") from exc
     return value
 
 
@@ -72,9 +65,7 @@ class ConfiguredBearerIdentityProvider:
                         actor_id=binding.actor_id,
                         scope_match=binding.scope_match,
                         validation_only=binding.validation_only,
-                        privileged_identity_authorized=(
-                            binding.privileged_identity_authorized
-                        ),
+                        privileged_identity_authorized=(binding.privileged_identity_authorized),
                         visibility_authorized=binding.visibility_authorized,
                         export_authorized=binding.export_authorized,
                     )

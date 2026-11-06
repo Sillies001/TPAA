@@ -50,7 +50,7 @@ def _metadata() -> RepositoryBaselineMetadata:
     return RepositoryBaselineMetadata(
         engine_profile="sqlite-desktop",
         schema_version="1.6.0",
-        core_baseline="CB-1.4.0",
+        core_baseline="CB-1.5.0",
         authority_artifact_id="CORE_LOGICAL_MODEL",
         authority_sha256="authority",
         baseline_lock_sha256="lock",
@@ -70,7 +70,7 @@ def test_application_service_reads_storage_metadata_through_uow_port() -> None:
     assert actual == StorageBaselineStatus(
         engine_profile="sqlite-desktop",
         schema_version="1.6.0",
-        core_baseline="CB-1.4.0",
+        core_baseline="CB-1.5.0",
         authority_artifact_id="CORE_LOGICAL_MODEL",
         authority_sha256="authority",
         baseline_lock_sha256="lock",
@@ -100,5 +100,5 @@ def test_application_service_integrates_with_real_sqlite_repository(tmp_path) ->
 
     assert actual.engine_profile == "sqlite-desktop"
     assert actual.schema_version == "1.9.0"
-    assert actual.core_baseline == "CB-1.4.0"
+    assert actual.core_baseline == "CB-1.5.0"
     assert actual.authority_artifact_id == "CORE_LOGICAL_MODEL"

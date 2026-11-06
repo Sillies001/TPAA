@@ -22,18 +22,43 @@ from tpaa_application import (
     M8WorkspaceService,
     M9WorkspaceService,
     SecurityAuditSink,
+    SourceWorkflowService,
+    W7ExternalCapabilityRegistry,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_longitudinal import M4LongitudinalPublicationService
+from tpaa_qualification import W9FinalQualificationStatus, load_m5_qualification_authority
+from tpaa_security import (
+    ApiAuthorizationGuard,
+    ApprovalService,
+    AuthorizationService,
+    HttpsJwksProvider,
+    JsonRevocationRegistry,
+    MtlsCertificateVerifier,
+    MtlsConfiguration,
+    OidcConfiguration,
+    OidcTokenVerifier,
+    load_security_policy,
+)
 from tpaa_storage import (
+    SERVICE_WRITE_GATE_LOCK_ID,
     LocalObjectStore,
+    ObjectStore,
+    PostgreSQLMigrationService,
     PostgreSQLServiceUnitOfWork,
     SQLiteDesktopUnitOfWork,
+    SQLiteMigrationService,
 )
 
 from .admission import ProductAdmissionResolver, ProductFeatureAvailability
+from .approval_repository import (
+    ApprovalExecutionValidator,
+    PersistentApprovalEventRepository,
+)
 from .config import ProductionRuntimeConfig, RuntimeProfile
+from .consistency import desktop_write_quiescence_lock
 from .durable_discovery import DurableProductDiscovery
+from .durable_episode import DurableEpisodeRevisionService
 from .durable_longitudinal import (
     DurableM4DebriefRepository,
     DurableM4LongitudinalReleaseRepository,
@@ -48,13 +73,24 @@ from .durable_repositories import (
     RuntimeUnitOfWorkFactory,
 )
 from .ed2_upper_repository import DurableED2UpperProductRepository
+from .federated_identity import (
+    OidcMtlsRequestIdentityProvider,
+    oidc_mtls_principal_resolver,
+)
+from .formal_evidence import load_formal_runtime_evidence
 from .identity import (
     configured_service_principal_resolver,
     guard_production_principal_resolver,
 )
 from .observability import PRCBOperationalStatus, PRCBQualificationStatus
+from .operational_metrics import CachedOperationalMetrics, ProductionOperationalMetrics
 from .readiness import ProductionDependencyProbe, ProductionRuntimeReadiness
-from .security_audit import PostgreSQLSecurityAuditSink, SQLiteSecurityAuditSink
+from .security_audit import (
+    ApplicationApiAuthorizationAudit,
+    PostgreSQLSecurityAuditSink,
+    SQLiteSecurityAuditSink,
+)
+from .w8_operations import W8OperationsStatus
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +102,8 @@ class ProductionRuntime:
     feature_availability: ProductFeatureAvailability
     application: ApplicationService
     service_principal_resolver: UnifiedPrincipalResolver | None
+    authorization_guard: ApiAuthorizationGuard
+    approval_service: ApprovalService
 
 
 def _validate_storage_status(
@@ -74,13 +112,11 @@ def _validate_storage_status(
     status = application_status.execute()
     if status.schema_version != "1.9.0":
         raise RuntimeError(
-            "production storage schema mismatch "
-            f"expected=1.9.0 observed={status.schema_version}"
+            f"production storage schema mismatch expected=1.9.0 observed={status.schema_version}"
         )
-    if status.core_baseline != "CB-1.4.0":
+    if status.core_baseline != "CB-1.5.0":
         raise RuntimeError(
-            "production Core baseline mismatch "
-            f"expected=CB-1.4.0 observed={status.core_baseline}"
+            f"production Core baseline mismatch expected=CB-1.5.0 observed={status.core_baseline}"
         )
 
 
@@ -90,8 +126,8 @@ def _compose(
     read_uow_factory: RuntimeUnitOfWorkFactory,
     write_uow_factory: RuntimeUnitOfWorkFactory,
 ) -> ProductionRuntime:
-    object_store = LocalObjectStore(config.object_root)
-    object_store.filesystem.ensure_root()
+    object_store: ObjectStore = config.object_store or LocalObjectStore(config.object_root)
+    object_store.ensure_ready()
 
     storage_status = GetStorageBaselineStatus(read_uow_factory)
     _validate_storage_status(storage_status)
@@ -112,6 +148,7 @@ def _compose(
     p1_release_reads = DurableP1ReleaseReadService(
         read_uow_factory,
         production_compute_configured=True,
+        object_store=object_store,
     )
     m4_workspace = M4WorkspaceService(
         longitudinal=M4LongitudinalPublicationService(
@@ -141,10 +178,17 @@ def _compose(
     audit_sink: SecurityAuditSink
     if config.profile is RuntimeProfile.DESKTOP:
         assert config.desktop_database_path is not None
-        audit_sink = SQLiteSecurityAuditSink(config.desktop_database_path)
+        audit_sink = SQLiteSecurityAuditSink(
+            config.desktop_database_path,
+            authority_root=config.authority_root,
+            write_consistency_lock=desktop_write_quiescence_lock(config.object_root),
+        )
     else:
         assert config.service_conninfo is not None
-        audit_sink = PostgreSQLSecurityAuditSink(config.service_conninfo)
+        audit_sink = PostgreSQLSecurityAuditSink(
+            config.service_conninfo,
+            authority_root=config.authority_root,
+        )
 
     m8_workspace = M8WorkspaceService(
         DurableM8AssessmentRuntimeRepository(
@@ -166,10 +210,35 @@ def _compose(
     )
 
     service_principal_resolver: UnifiedPrincipalResolver | None = None
-    if config.profile is RuntimeProfile.SERVICE and config.service_principals:
-        service_principal_resolver = configured_service_principal_resolver(
-            config.service_principals
-        )
+    if config.profile is RuntimeProfile.SERVICE:
+        if config.service_identity is not None:
+            identity_config = config.service_identity
+            revocations = JsonRevocationRegistry(identity_config.revocation_file)
+            policy = load_security_policy()
+            service_principal_resolver = oidc_mtls_principal_resolver(
+                OidcMtlsRequestIdentityProvider(
+                    oidc=OidcTokenVerifier(
+                        OidcConfiguration(
+                            issuer=identity_config.issuer,
+                            audience=identity_config.audience,
+                        ),
+                        HttpsJwksProvider(identity_config.jwks_uri),
+                        revocations,
+                    ),
+                    mtls=MtlsCertificateVerifier(
+                        MtlsConfiguration(
+                            ca_certificate_pem=identity_config.ca_bundle_path.read_bytes(),
+                            allowed_spiffe_prefixes=(identity_config.allowed_spiffe_prefixes),
+                        ),
+                        revocations,
+                    ),
+                    policy=policy,
+                )
+            )
+        elif config.service_principals:
+            service_principal_resolver = configured_service_principal_resolver(
+                config.service_principals
+            )
 
     configured = {
         "P1": True,
@@ -179,9 +248,37 @@ def _compose(
         "P5": True,
         "P6": True,
     }
+    migration_authority_root = config.authority_root.parents[2] / "migrations" / "authority"
+    if config.profile is RuntimeProfile.DESKTOP:
+        assert config.desktop_database_path is not None
+        desktop_migration = SQLiteMigrationService(
+            config.desktop_database_path,
+            current_authority_root=config.authority_root,
+            migration_authority_root=migration_authority_root,
+        )
+
+        def migration_ready() -> bool:
+            status = desktop_migration.status()
+            return status.verified and status.at_head
+
+    else:
+        assert config.service_conninfo is not None
+        state_root = config.migration_state_root or (config.object_root.parent / ".tpaa-migrations")
+        service_migration = PostgreSQLMigrationService(
+            config.service_conninfo,
+            state_root=state_root,
+            current_authority_root=config.authority_root,
+            migration_authority_root=migration_authority_root,
+        )
+        migration_ready = service_migration.ready
     dependency_probe = ProductionDependencyProbe(
         storage_status=storage_status,
         object_root=config.object_root,
+        object_store=object_store,
+        identity_ready=(
+            config.profile is RuntimeProfile.DESKTOP or service_principal_resolver is not None
+        ),
+        migration_ready=migration_ready,
     )
     feature_availability = ProductFeatureAvailability(
         admission,
@@ -193,13 +290,35 @@ def _compose(
         profile=config.profile,
         product_build_version=config.product_build_version,
     )
+    base_operational_metrics = ProductionOperationalMetrics(
+        profile=config.profile,
+        read_uow_factory=read_uow_factory,
+        object_root=config.object_root,
+        object_store=config.object_store,
+        desktop_database=config.desktop_database_path,
+    )
+    operational_metrics = (
+        CachedOperationalMetrics(base_operational_metrics)
+        if config.profile is RuntimeProfile.SERVICE
+        else base_operational_metrics
+    )
     core_runtime_status = build_trusted_runtime_status_use_case(
-        product_build_version=config.product_build_version
+        product_build_version=config.product_build_version,
+        authority_root=config.authority_root,
     )
     ed2_upper = ED2UpperProductService(
         DurableED2UpperProductRepository(
             read_uow_factory,
             write_uow_factory,
+        )
+    )
+    m5_authority = load_m5_qualification_authority(config.authority_root.parent)
+    formal_evidence = (
+        None
+        if config.formal_qualification is None
+        else load_formal_runtime_evidence(
+            config.formal_qualification,
+            authority=m5_authority,
         )
     )
     application = ApplicationService(
@@ -218,8 +337,34 @@ def _compose(
         product_discovery=DurableProductDiscovery(read_uow_factory),
         feature_availability=feature_availability,
         qualification_status=qualification_status,
-        operational_status=PRCBOperationalStatus(qualification_status),
+        operational_status=PRCBOperationalStatus(
+            qualification_status,
+            metrics=operational_metrics,
+        ),
         ed2_upper=ed2_upper,
+        source_workflow=SourceWorkflowService(object_store),
+        episode_revision=DurableEpisodeRevisionService(write_uow_factory),
+        w7_external_capabilities=(
+            W7ExternalCapabilityRegistry.local_closed()
+            if formal_evidence is None
+            else formal_evidence.w7_external_capabilities
+        ),
+        w8_operations_status=(
+            W8OperationsStatus.local_closed(m5_authority)
+            if formal_evidence is None
+            else formal_evidence.w8_operations_status
+        ),
+        w9_final_qualification_status=(
+            W9FinalQualificationStatus.local_closed()
+            if formal_evidence is None
+            else formal_evidence.w9_final_qualification_status
+        ),
+    )
+    policy = load_security_policy()
+    authorization = AuthorizationService(policy)
+    approval_service = ApprovalService(
+        authorization,
+        PersistentApprovalEventRepository(read_uow_factory, write_uow_factory),
     )
     return ProductionRuntime(
         config=config,
@@ -227,6 +372,12 @@ def _compose(
         feature_availability=feature_availability,
         application=application,
         service_principal_resolver=service_principal_resolver,
+        authorization_guard=ApiAuthorizationGuard(
+            authorization,
+            audit=ApplicationApiAuthorizationAudit(audit_sink),
+            approval_validator=ApprovalExecutionValidator(approval_service),
+        ),
+        approval_service=approval_service,
     )
 
 
@@ -243,13 +394,21 @@ def build_desktop_production_runtime(
     def read_uow() -> RuntimeCanonicalUnitOfWork:
         return cast(
             RuntimeCanonicalUnitOfWork,
-            SQLiteDesktopUnitOfWork(database),
+            SQLiteDesktopUnitOfWork(
+                database,
+                authority_root=config.authority_root,
+            ),
         )
 
     def write_uow() -> RuntimeCanonicalUnitOfWork:
         return cast(
             RuntimeCanonicalUnitOfWork,
-            SQLiteDesktopUnitOfWork(database, write=True),
+            SQLiteDesktopUnitOfWork(
+                database,
+                write=True,
+                authority_root=config.authority_root,
+                write_consistency_lock=desktop_write_quiescence_lock(config.object_root),
+            ),
         )
 
     return _compose(
@@ -272,13 +431,21 @@ def build_service_production_runtime(
     def read_uow() -> RuntimeCanonicalUnitOfWork:
         return cast(
             RuntimeCanonicalUnitOfWork,
-            PostgreSQLServiceUnitOfWork(conninfo, read_only=True),
+            PostgreSQLServiceUnitOfWork(
+                conninfo,
+                read_only=True,
+                authority_root=config.authority_root,
+            ),
         )
 
     def write_uow() -> RuntimeCanonicalUnitOfWork:
         return cast(
             RuntimeCanonicalUnitOfWork,
-            PostgreSQLServiceUnitOfWork(conninfo),
+            PostgreSQLServiceUnitOfWork(
+                conninfo,
+                write_gate_lock_id=SERVICE_WRITE_GATE_LOCK_ID,
+                authority_root=config.authority_root,
+            ),
         )
 
     return _compose(
@@ -294,6 +461,8 @@ def create_production_desktop_app(
     bearer_token: str,
     m8_principal_resolver: M8PrincipalResolver | None = None,
     m9_principal_resolver: M9PrincipalResolver | None = None,
+    principal_resolver: UnifiedPrincipalResolver | None = None,
+    desktop_nonce: str | None = None,
 ) -> FastAPI:
     """Expose the production Desktop graph without synthetic source fallback."""
 
@@ -302,6 +471,10 @@ def create_production_desktop_app(
         bearer_token=bearer_token,
         m8_principal_resolver=m8_principal_resolver,
         m9_principal_resolver=m9_principal_resolver,
+        principal_resolver=principal_resolver,
+        authorization_guard=runtime.authorization_guard,
+        approval_service=runtime.approval_service,
+        desktop_nonce=desktop_nonce,
     )
     app.version = runtime.config.product_build_version
     return app
@@ -320,6 +493,8 @@ def create_production_service_app(
     app = create_unified_service_app(
         application=runtime.application,
         principal_resolver=guard_production_principal_resolver(selected),
+        authorization_guard=runtime.authorization_guard,
+        approval_service=runtime.approval_service,
     )
     app.version = runtime.config.product_build_version
     return app

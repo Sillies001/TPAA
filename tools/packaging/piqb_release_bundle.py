@@ -104,15 +104,6 @@ def _install_piqb_runtime(stage: Path, profile: str) -> None:
     target_entry.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PIQB_RUNTIME_ENTRY, target_entry)
 
-    fixture_source = REPO_ROOT / "tests" / "fixtures" / "m1"
-    if not fixture_source.is_dir():
-        raise RuntimeError("M1 qualification fixture source missing")
-    shutil.copytree(
-        fixture_source,
-        stage / "app" / "tests" / "fixtures" / "m1",
-        dirs_exist_ok=True,
-    )
-
     default_command = "desktop" if profile.endswith("_DESKTOP_X64") else "service"
     if profile in WINDOWS_PROFILES:
         launcher = stage / "run.cmd"
@@ -153,6 +144,39 @@ def _install_piqb_runtime(stage: Path, profile: str) -> None:
             newline="\n",
         )
         launcher.chmod(0o755)
+
+
+def _assert_production_payload(stage: Path) -> None:
+    for path in stage.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(stage).as_posix()
+        if relative.startswith("app/tests/") or "/fixtures/" in f"/{relative}/":
+            raise RuntimeError(
+                f"production package contains forbidden test material: {relative}"
+            )
+
+    entry = stage / "app" / "tools" / "packaging" / PIQB_RUNTIME_ENTRY.name
+    source = entry.read_text(encoding="utf-8")
+    forbidden = (
+        "ProductRuntimeConfig",
+        "build_desktop_application",
+        "build_service_application",
+        "create_full_desktop_app",
+        "create_full_service_app",
+        "build_desktop_production_runtime",
+        "build_service_production_runtime",
+        "create_production_desktop_app",
+        "create_production_service_app",
+        "tests/fixtures",
+        'role="SYSTEM"',
+    )
+    present = tuple(token for token in forbidden if token in source)
+    if present:
+        raise RuntimeError(
+            "PIQB product entry contains qualification-only wiring: "
+            + ",".join(present)
+        )
 
 
 def _canonical_hash(payload: object) -> str:
@@ -246,6 +270,7 @@ def build_piqb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
             stage = Path(stage_raw)
             _extract(base_package, stage)
             _install_piqb_runtime(stage, profile)
+            _assert_production_payload(stage)
 
             m5_manifest_path = stage / "build-evidence" / "package-manifest.json"
             m5_manifest = _json(m5_manifest_path)
@@ -270,7 +295,7 @@ def build_piqb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
                 "source_revision": revision,
                 "profile_id": profile,
                 "db_schema_version": "1.9.0",
-                "canonical_baseline": "CB-1.4.0",
+                "canonical_baseline": "CB-1.5.0",
                 "dependency_lock_sha256": dependency_lock_hash,
                 "sbom_sha256": sha256_file(spdx_path),
                 "file_inventory_sha256": inventory_hash,

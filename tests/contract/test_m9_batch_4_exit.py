@@ -61,7 +61,7 @@ def _valid_issues() -> dict[str, object]:
             "d37a994d6efbaeec2d10022ec083015771c40152 "
             "Run #542 36981630238 14/14 SUCCESS "
             "P6_P3_CAPABILITY_OLS_MAD_FORECAST 1.0.0 "
-            "6a064762b4edde3448b25e5b74384708745793acc863a8adfbfad40fc7651394 "
+            "ccb5aa1272b958bacd20ac3d2adaf208386138dc2f3da7c15a48fd84eddf8e6d "
             "9d6c70133e1994c5823bbe6efb499001b5aa697c "
             "Run #540 36968525803"
         ),

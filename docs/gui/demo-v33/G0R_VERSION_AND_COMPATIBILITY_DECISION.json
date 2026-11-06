@@ -1,0 +1,48 @@
+{
+  "schema": "TPAA_G0R_VERSION_AND_COMPATIBILITY_DECISION_V1",
+  "status": "APPROVED_LOCAL_FOR_G1_IMPLEMENTATION",
+  "decided_at": "2026-11-06T00:00:00+08:00",
+  "release_claim": false,
+  "versions": {
+    "overall": "TPAA V8.0",
+    "engineering_design": "ED-2.1",
+    "design_rebaseline": "R3.4",
+    "core_baseline_candidate": "CB-1.6.0",
+    "db_schema_initial": "1.9.0",
+    "db_schema_if_persistent_objects_are_approved": "1.10.0",
+    "api": "v1 additive",
+    "gui_view_contract": "1.0.0-v33",
+    "cross_layer_dto_candidate": "1.1.0",
+    "p1_metric_catalog_initial": "1.14.0"
+  },
+  "compatibility": {
+    "r3_3": "BYTE_FROZEN_PREDECESSOR",
+    "cb_1_4_0": "BYTE_FROZEN_PREDECESSOR",
+    "cb_1_5_0": "BYTE_FROZEN_DIRECT_PARENT",
+    "api_v1": "ADDITIVE_ONLY_NO_EXISTING_ROUTE_REDEFINITION",
+    "legacy_p_shell": "RETAIN_DIAGNOSTIC_FALLBACK_UNTIL_G11_DECISION",
+    "new_shell": "FEATURE_FLAGGED",
+    "destructive_change": "REQUIRES_NEW_MAJOR_AND_SEPARATE_APPROVAL"
+  },
+  "database_rule": {
+    "projection_only": "KEEP_1.9.0",
+    "new_persistent_batch_we_cluster_window_or_context": "REQUIRE_1.10.0_MIGRATION_BACKFILL_ROLLBACK",
+    "decision_point": "G1_MACHINE_AUTHORITY_DIFF"
+  },
+  "lineage": {
+    "current_gui_target": "GUI-DEMO-V33-2026-11-05",
+    "superseded_gui_target": "GUI-DEMO-V19-2026-10-29",
+    "parent_policy": "ALIGN_CB_1_5_0_BEFORE_CONSTRUCTING_CB_1_6_0",
+    "forbidden": [
+      "FORK_FROM_CB_1_4_0",
+      "MUTATE_R3_3_IN_PLACE",
+      "MUTATE_CB_1_4_0_IN_PLACE",
+      "MUTATE_CB_1_5_0_IN_PLACE"
+    ]
+  },
+  "open_gates": [
+    "G1 authority diff decides persistence and final DTO/schema versions",
+    "G11 target Windows/Linux security packaging GPU and software-rendering qualification",
+    "G12 independent design-compliance and release approval"
+  ]
+}

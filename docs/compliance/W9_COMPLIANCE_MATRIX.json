@@ -1,0 +1,90 @@
+{
+  "schema": "TPAA_W9_COMPLIANCE_MATRIX_V1",
+  "stage": "W9",
+  "status": "CLOSED_LOCAL_WITH_RELEASE_GATES",
+  "decision": "NO_GO",
+  "production_ready": false,
+  "formal_release_allowed": false,
+  "formal_release_claimed": false,
+  "items": [
+    {
+      "category": "FOUR_PROFILE_PACKAGES_AND_INSTALLED_RUNTIME",
+      "implementation": ["tools/qualification/w9_local_candidate.py", "tools/packaging/development_package.py"],
+      "tests": ["tests/unit/testing/test_w9_local_candidate.py"],
+      "status": "PARTIAL_LOCAL_EVIDENCE",
+      "formal_gate": "TARGET_INSTALLED_BLACK_BOX_E2E_PENDING"
+    },
+    {
+      "category": "AUTHORITY_ARCHITECTURE_DTO_OPENAPI_MIGRATION_REPLAY",
+      "implementation": ["src/tpaa_qualification/w9_final.py", "tools/architecture/verify_dependencies.py"],
+      "tests": ["tests/unit/runtime/test_w9_final_qualification.py", "tests/contract"],
+      "status": "LOCAL_EVIDENCE_COMPLETE",
+      "formal_gate": "FINAL_CANDIDATE_INDEPENDENT_ACCEPTANCE_PENDING"
+    },
+    {
+      "category": "UNIT_GOLDEN_INTEGRATION_INSTALLED_E2E",
+      "implementation": ["src/tpaa_qualification/w9_final.py"],
+      "tests": ["tests/unit", "tests/golden", "tests/integration", "tests/e2e"],
+      "status": "PARTIAL_LOCAL_EVIDENCE",
+      "formal_gate": "TARGET_INSTALLED_E2E_PENDING"
+    },
+    {
+      "category": "REAL_DATA_AND_EXTERNAL_SYSTEMS",
+      "implementation": ["src/tpaa_ingest", "src/tpaa_runtime/w7_external.py"],
+      "tests": ["tests/unit/ingest", "tests/integration"],
+      "status": "PENDING_EXTERNAL",
+      "formal_gate": "APPROVED_REAL_DATA_AND_EXTERNAL_ENDPOINTS_PENDING"
+    },
+    {
+      "category": "SECURITY_ROLE_PRIVACY_PLUGIN",
+      "implementation": ["src/tpaa_security", "src/tpaa_runtime/training_plugin.py", "pyproject.toml", "uv.lock"],
+      "tests": ["tests/unit/security", "tests/contract"],
+      "status": "PARTIAL_LOCAL_EVIDENCE",
+      "formal_gate": "PRODUCTION_TRUST_AND_INDEPENDENT_SECURITY_ACCEPTANCE_PENDING"
+    },
+    {
+      "category": "WORKLOAD_PERFORMANCE_RESOURCE",
+      "implementation": ["src/tpaa_runtime/w8_operations.py"],
+      "tests": ["tests/unit/runtime/test_w8_operations_productization.py"],
+      "status": "PENDING_TARGET",
+      "formal_gate": "FOUR_PROFILE_TARGET_WORKLOAD_ACCEPTANCE_PENDING"
+    },
+    {
+      "category": "BACKUP_RESTORE_DR_UPGRADE_ROLLBACK",
+      "implementation": ["src/tpaa_runtime/recovery.py", "src/tpaa_runtime/service_activation.py"],
+      "tests": ["tests/integration/test_service_recovery_postgres.py", "tests/contract/test_m5_batch_3_recovery_release.py"],
+      "status": "PENDING_TARGET",
+      "formal_gate": "TARGET_DR_AND_CROSS_VERSION_ACCEPTANCE_PENDING"
+    },
+    {
+      "category": "GUI_VISUAL_AND_HUMAN_ROLE_TASKS",
+      "implementation": ["src/tpaa_gui"],
+      "tests": ["tests/unit/gui", "tests/e2e"],
+      "status": "PENDING_HUMAN",
+      "formal_gate": "APPROVED_DISPLAY_AND_HUMAN_ROLE_SIGNOFF_PENDING"
+    },
+    {
+      "category": "SBOM_PROVENANCE_SIGNATURE",
+      "implementation": ["tools/manifest/build_artifacts.py", "tools/qualification/w9_local_candidate.py"],
+      "tests": ["tests/unit/devops/test_m0_dev_003_004_manifest_sbom.py", "tests/unit/testing/test_w9_local_candidate.py"],
+      "status": "PENDING_SIGNATURE",
+      "formal_gate": "APPROVED_PROVENANCE_AND_ORGANIZATION_SIGNATURE_PENDING"
+    },
+    {
+      "category": "PROTECTED_MAIN_AND_HOSTED_CI",
+      "implementation": ["src/tpaa_qualification/w9_final.py", ".github/workflows"],
+      "tests": ["tests/unit/runtime/test_w9_final_qualification.py", "tests/contract/ci"],
+      "status": "PENDING_PROTECTED_MAIN",
+      "formal_gate": "CURRENT_CANDIDATE_PROTECTED_MAIN_AND_HOSTED_CI_PENDING"
+    }
+  ],
+  "release_blockers_retained": [
+    "ALL_TEN_CATEGORIES_ACCEPTED_ON_ONE_CANDIDATE",
+    "ZERO_UNWAIVED_BLOCKER_AND_HIGH_FINDINGS",
+    "FOUR_PROFILE_TARGET_ACCEPTANCE",
+    "APPROVED_REAL_DATA_EXTERNAL_SYSTEMS_AND_HUMAN_TASKS",
+    "APPROVED_PROVENANCE_AND_SIGNATURE",
+    "PROTECTED_MAIN_EXACT_SHA_AND_HOSTED_CI",
+    "INDEPENDENT_RELEASE_APPROVAL"
+  ]
+}

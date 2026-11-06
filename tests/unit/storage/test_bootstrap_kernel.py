@@ -11,7 +11,7 @@ from tpaa_storage.bootstrap import EXPECTED_DB_SCHEMA_VERSION, BootstrapError
 def test_authority_is_exact_schema_1_7_0_and_all_tables_agree() -> None:
     authority = bootstrap_module._load_authority()
     assert authority.schema_version == EXPECTED_DB_SCHEMA_VERSION
-    assert authority.core_baseline == "CB-1.4.0"
+    assert authority.core_baseline == "CB-1.5.0"
     assert len(authority.tables) == 95
     assert all(
         table["schema_version"] == EXPECTED_DB_SCHEMA_VERSION

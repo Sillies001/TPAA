@@ -26,7 +26,7 @@ from tpaa_qualification import (  # noqa: E402
     validate_upgrade_rollback_qualification,
 )
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TRACKING_ISSUE = 142
 TASK_ID = "M5-TST-006"
 

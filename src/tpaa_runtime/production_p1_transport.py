@@ -30,9 +30,7 @@ def encode_production_p1_transport(
         result: dict[str, object] = {}
         for key, item in value.items():
             if not isinstance(key, str):
-                raise ProductionP1TransportError(
-                    f"{field}: mapping key must be str"
-                )
+                raise ProductionP1TransportError(f"{field}: mapping key must be str")
             result[key] = encode_production_p1_transport(
                 item,
                 field=f"{field}.{key}",
@@ -42,13 +40,8 @@ def encode_production_p1_transport(
         value,
         (str, bytes, bytearray),
     ):
-        return [
-            encode_production_p1_transport(item, field=f"{field}[]")
-            for item in value
-        ]
-    raise ProductionP1TransportError(
-        f"{field}: unsupported type {type(value).__name__}"
-    )
+        return [encode_production_p1_transport(item, field=f"{field}[]") for item in value]
+    raise ProductionP1TransportError(f"{field}: unsupported type {type(value).__name__}")
 
 
 def decode_production_p1_transport(
@@ -61,15 +54,11 @@ def decode_production_p1_transport(
     if value is None or isinstance(value, (str, bool, int)):
         return value
     if isinstance(value, float):
-        raise ProductionP1TransportError(
-            f"{field}: raw float is forbidden in request transport"
-        )
+        raise ProductionP1TransportError(f"{field}: raw float is forbidden in request transport")
     if isinstance(value, Mapping):
         if P1_FLOAT64_DECIMAL_MARKER in value:
             if len(value) != 1:
-                raise ProductionP1TransportError(
-                    f"{field}: decimal marker object has extra fields"
-                )
+                raise ProductionP1TransportError(f"{field}: decimal marker object has extra fields")
             raw = value[P1_FLOAT64_DECIMAL_MARKER]
             if not isinstance(raw, str) or not raw or raw.strip() != raw:
                 raise ProductionP1TransportError(
@@ -82,16 +71,12 @@ def decode_production_p1_transport(
                     f"{field}: decimal marker value is invalid"
                 ) from exc
             if not math.isfinite(restored) or repr(restored) != raw:
-                raise ProductionP1TransportError(
-                    f"{field}: decimal marker value is non-canonical"
-                )
+                raise ProductionP1TransportError(f"{field}: decimal marker value is non-canonical")
             return restored
         result: dict[str, object] = {}
         for key, item in value.items():
             if not isinstance(key, str):
-                raise ProductionP1TransportError(
-                    f"{field}: mapping key must be str"
-                )
+                raise ProductionP1TransportError(f"{field}: mapping key must be str")
             result[key] = decode_production_p1_transport(
                 item,
                 field=f"{field}.{key}",
@@ -101,10 +86,5 @@ def decode_production_p1_transport(
         value,
         (str, bytes, bytearray),
     ):
-        return [
-            decode_production_p1_transport(item, field=f"{field}[]")
-            for item in value
-        ]
-    raise ProductionP1TransportError(
-        f"{field}: unsupported type {type(value).__name__}"
-    )
+        return [decode_production_p1_transport(item, field=f"{field}[]") for item in value]
+    raise ProductionP1TransportError(f"{field}: unsupported type {type(value).__name__}")

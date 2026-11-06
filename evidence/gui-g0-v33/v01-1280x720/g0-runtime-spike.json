@@ -1,0 +1,607 @@
+{
+  "schema": "TPAA_G0_RUNTIME_SPIKE_EVIDENCE_V2",
+  "status": "PASS",
+  "baseline_id": "GUI-DEMO-V33-2026-11-05",
+  "demo_sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a",
+  "fixture_sha256": "325a05d6aed3f16765bc75bb2fa0db8673d431daa4cebb1ddd28f64dc1e1aefa",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "captured_views": [
+    "V01"
+  ],
+  "results": [
+    {
+      "engine": "webengine",
+      "off_the_record": true,
+      "load_finished_signal": true,
+      "source_sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a",
+      "initial_load_ms": 616.033,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "outputs": [
+        {
+          "path": "evidence/gui-g0-v33/v01-1280x720/webengine/tactical/V01.png",
+          "sha256": "f71974dd2b3c7100a78ec4cc983f297b77d7a56e4fb4a11da27b116997b74860",
+          "bytes": 167204,
+          "width": 1280,
+          "height": 720,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V01",
+          "geometry": {
+            "schema": "TPAA_V01_ELEMENT_GEOMETRY_V1",
+            "viewport": {
+              "width": 1280,
+              "height": 720,
+              "device_pixel_ratio": 1
+            },
+            "scale": 0.8,
+            "boxes": {
+              "overview": {
+                "left": 24,
+                "top": 132.8,
+                "right": 1256,
+                "bottom": 688,
+                "width": 1232,
+                "height": 555.2
+              },
+              "header": {
+                "left": 24,
+                "top": 132.8,
+                "right": 1256,
+                "bottom": 161.6,
+                "width": 1232,
+                "height": 28.8
+              },
+              "kpis": {
+                "left": 24,
+                "top": 169.6,
+                "right": 1256,
+                "bottom": 224,
+                "width": 1232,
+                "height": 54.4
+              },
+              "row_first": {
+                "left": 24,
+                "top": 232,
+                "right": 1256,
+                "bottom": 366.4,
+                "width": 1232,
+                "height": 134.4
+              },
+              "row_second": {
+                "left": 24,
+                "top": 374.4,
+                "right": 1256,
+                "bottom": 508.8,
+                "width": 1232,
+                "height": 134.4
+              },
+              "row_bottom": {
+                "left": 24,
+                "top": 516.8,
+                "right": 1256,
+                "bottom": 670.4,
+                "width": 1232,
+                "height": 153.6
+              },
+              "footer": {
+                "left": 24,
+                "top": 678.4,
+                "right": 1256,
+                "bottom": 688,
+                "width": 1232,
+                "height": 9.6
+              }
+            },
+            "children": {
+              "kpi": [
+                {
+                  "left": 24,
+                  "top": 170.8,
+                  "right": 224,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 230.4,
+                  "top": 170.8,
+                  "right": 430.4,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 436.8,
+                  "top": 170.8,
+                  "right": 636.8,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 643.2,
+                  "top": 170.8,
+                  "right": 843.2,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 849.6,
+                  "top": 170.8,
+                  "right": 1049.6,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 1056,
+                  "top": 170.8,
+                  "right": 1256,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                }
+              ],
+              "row_first_panel": [
+                {
+                  "left": 24,
+                  "top": 232,
+                  "right": 679.55,
+                  "bottom": 366.4,
+                  "width": 655.55,
+                  "height": 134.4
+                },
+                {
+                  "left": 685.95,
+                  "top": 232,
+                  "right": 1255.988,
+                  "bottom": 366.4,
+                  "width": 570.038,
+                  "height": 134.4
+                }
+              ],
+              "row_second_panel": [
+                {
+                  "left": 24,
+                  "top": 374.4,
+                  "right": 430.4,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                },
+                {
+                  "left": 436.8,
+                  "top": 374.4,
+                  "right": 843.2,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                },
+                {
+                  "left": 849.6,
+                  "top": 374.4,
+                  "right": 1256,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                }
+              ],
+              "row_bottom_panel": [
+                {
+                  "left": 24,
+                  "top": 516.8,
+                  "right": 712.05,
+                  "bottom": 670.4,
+                  "width": 688.05,
+                  "height": 153.6
+                },
+                {
+                  "left": 718.45,
+                  "top": 516.8,
+                  "right": 1255.988,
+                  "bottom": 670.4,
+                  "width": 537.538,
+                  "height": 153.6
+                }
+              ]
+            },
+            "issues": []
+          }
+        },
+        {
+          "path": "evidence/gui-g0-v33/v01-1280x720/webengine/graphite/V01.png",
+          "sha256": "6d66665fa14f3449e7d1370efc0d23800e6252bea5e556e30434ff326a8913a9",
+          "bytes": 163797,
+          "width": 1280,
+          "height": 720,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V01",
+          "geometry": {
+            "schema": "TPAA_V01_ELEMENT_GEOMETRY_V1",
+            "viewport": {
+              "width": 1280,
+              "height": 720,
+              "device_pixel_ratio": 1
+            },
+            "scale": 0.8,
+            "boxes": {
+              "overview": {
+                "left": 24,
+                "top": 132.8,
+                "right": 1256,
+                "bottom": 688,
+                "width": 1232,
+                "height": 555.2
+              },
+              "header": {
+                "left": 24,
+                "top": 132.8,
+                "right": 1256,
+                "bottom": 161.6,
+                "width": 1232,
+                "height": 28.8
+              },
+              "kpis": {
+                "left": 24,
+                "top": 169.6,
+                "right": 1256,
+                "bottom": 224,
+                "width": 1232,
+                "height": 54.4
+              },
+              "row_first": {
+                "left": 24,
+                "top": 232,
+                "right": 1256,
+                "bottom": 366.4,
+                "width": 1232,
+                "height": 134.4
+              },
+              "row_second": {
+                "left": 24,
+                "top": 374.4,
+                "right": 1256,
+                "bottom": 508.8,
+                "width": 1232,
+                "height": 134.4
+              },
+              "row_bottom": {
+                "left": 24,
+                "top": 516.8,
+                "right": 1256,
+                "bottom": 670.4,
+                "width": 1232,
+                "height": 153.6
+              },
+              "footer": {
+                "left": 24,
+                "top": 678.4,
+                "right": 1256,
+                "bottom": 688,
+                "width": 1232,
+                "height": 9.6
+              }
+            },
+            "children": {
+              "kpi": [
+                {
+                  "left": 24,
+                  "top": 170.8,
+                  "right": 224,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 230.4,
+                  "top": 170.8,
+                  "right": 430.4,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 436.8,
+                  "top": 170.8,
+                  "right": 636.8,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 643.2,
+                  "top": 170.8,
+                  "right": 843.2,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 849.6,
+                  "top": 170.8,
+                  "right": 1049.6,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 1056,
+                  "top": 170.8,
+                  "right": 1256,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                }
+              ],
+              "row_first_panel": [
+                {
+                  "left": 24,
+                  "top": 232,
+                  "right": 679.55,
+                  "bottom": 366.4,
+                  "width": 655.55,
+                  "height": 134.4
+                },
+                {
+                  "left": 685.95,
+                  "top": 232,
+                  "right": 1255.988,
+                  "bottom": 366.4,
+                  "width": 570.038,
+                  "height": 134.4
+                }
+              ],
+              "row_second_panel": [
+                {
+                  "left": 24,
+                  "top": 374.4,
+                  "right": 430.4,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                },
+                {
+                  "left": 436.8,
+                  "top": 374.4,
+                  "right": 843.2,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                },
+                {
+                  "left": 849.6,
+                  "top": 374.4,
+                  "right": 1256,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                }
+              ],
+              "row_bottom_panel": [
+                {
+                  "left": 24,
+                  "top": 516.8,
+                  "right": 712.05,
+                  "bottom": 670.4,
+                  "width": 688.05,
+                  "height": 153.6
+                },
+                {
+                  "left": 718.45,
+                  "top": 516.8,
+                  "right": 1255.988,
+                  "bottom": 670.4,
+                  "width": 537.538,
+                  "height": 153.6
+                }
+              ]
+            },
+            "issues": []
+          }
+        },
+        {
+          "path": "evidence/gui-g0-v33/v01-1280x720/webengine/light/V01.png",
+          "sha256": "1ecf1dfd944f15f131c1f1f6bda0cf3824a0adf5b11d9358bf529079c4123a4a",
+          "bytes": 160811,
+          "width": 1280,
+          "height": 720,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V01",
+          "geometry": {
+            "schema": "TPAA_V01_ELEMENT_GEOMETRY_V1",
+            "viewport": {
+              "width": 1280,
+              "height": 720,
+              "device_pixel_ratio": 1
+            },
+            "scale": 0.8,
+            "boxes": {
+              "overview": {
+                "left": 24,
+                "top": 132.8,
+                "right": 1256,
+                "bottom": 688,
+                "width": 1232,
+                "height": 555.2
+              },
+              "header": {
+                "left": 24,
+                "top": 132.8,
+                "right": 1256,
+                "bottom": 161.6,
+                "width": 1232,
+                "height": 28.8
+              },
+              "kpis": {
+                "left": 24,
+                "top": 169.6,
+                "right": 1256,
+                "bottom": 224,
+                "width": 1232,
+                "height": 54.4
+              },
+              "row_first": {
+                "left": 24,
+                "top": 232,
+                "right": 1256,
+                "bottom": 366.4,
+                "width": 1232,
+                "height": 134.4
+              },
+              "row_second": {
+                "left": 24,
+                "top": 374.4,
+                "right": 1256,
+                "bottom": 508.8,
+                "width": 1232,
+                "height": 134.4
+              },
+              "row_bottom": {
+                "left": 24,
+                "top": 516.8,
+                "right": 1256,
+                "bottom": 670.4,
+                "width": 1232,
+                "height": 153.6
+              },
+              "footer": {
+                "left": 24,
+                "top": 678.4,
+                "right": 1256,
+                "bottom": 688,
+                "width": 1232,
+                "height": 9.6
+              }
+            },
+            "children": {
+              "kpi": [
+                {
+                  "left": 24,
+                  "top": 170.8,
+                  "right": 224,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 230.4,
+                  "top": 170.8,
+                  "right": 430.4,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 436.8,
+                  "top": 170.8,
+                  "right": 636.8,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 643.2,
+                  "top": 170.8,
+                  "right": 843.2,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 849.6,
+                  "top": 170.8,
+                  "right": 1049.6,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                },
+                {
+                  "left": 1056,
+                  "top": 170.8,
+                  "right": 1256,
+                  "bottom": 222.8,
+                  "width": 200,
+                  "height": 52
+                }
+              ],
+              "row_first_panel": [
+                {
+                  "left": 24,
+                  "top": 232,
+                  "right": 679.55,
+                  "bottom": 366.4,
+                  "width": 655.55,
+                  "height": 134.4
+                },
+                {
+                  "left": 685.95,
+                  "top": 232,
+                  "right": 1255.988,
+                  "bottom": 366.4,
+                  "width": 570.038,
+                  "height": 134.4
+                }
+              ],
+              "row_second_panel": [
+                {
+                  "left": 24,
+                  "top": 374.4,
+                  "right": 430.4,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                },
+                {
+                  "left": 436.8,
+                  "top": 374.4,
+                  "right": 843.2,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                },
+                {
+                  "left": 849.6,
+                  "top": 374.4,
+                  "right": 1256,
+                  "bottom": 508.8,
+                  "width": 406.4,
+                  "height": 134.4
+                }
+              ],
+              "row_bottom_panel": [
+                {
+                  "left": 24,
+                  "top": 516.8,
+                  "right": 712.05,
+                  "bottom": 670.4,
+                  "width": 688.05,
+                  "height": 153.6
+                },
+                {
+                  "left": 718.45,
+                  "top": 516.8,
+                  "right": 1255.988,
+                  "bottom": 670.4,
+                  "width": 537.538,
+                  "height": 153.6
+                }
+              ]
+            },
+            "issues": []
+          }
+        }
+      ]
+    }
+  ],
+  "decision": "WEBENGINE_PREFERRED_QML_FALLBACK_PENDING_TARGET_GATES",
+  "release_claim": false
+}

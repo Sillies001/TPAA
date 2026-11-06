@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 FIXTURE = ROOT / "tests" / "fixtures" / "m4" / "C3_LONGITUDINAL_DEBRIEF_AUTHORITY_V1"
 EXPECTED_DTO_CONTRACTS = {"LongitudinalScopeDTO","LongitudinalTrendQueryDTO","LongitudinalTrendSeriesDTO","LongitudinalTrendPointDTO","LongitudinalReleaseDTO","DebriefQueryDTO","DebriefTimelineItemDTO","DebriefAnnotationDTO","DebriefAnnotationCommandDTO","DebriefBundleDTO"}
 

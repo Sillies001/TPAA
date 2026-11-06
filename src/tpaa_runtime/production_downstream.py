@@ -54,7 +54,7 @@ from tpaa_capability import (
 from tpaa_context import M8AuthorityPolicy, M8RoleModelBinding
 from tpaa_longitudinal import P3AdjustedEstimateInput
 from tpaa_storage.canonical_rows import CanonicalRowRepository
-from tpaa_storage.object_store import LocalObjectStore
+from tpaa_storage.object_store import ObjectStore
 from tpaa_storage.product_identity import product_object_ref_id
 from tpaa_world import M8EvidenceRef, M8WorldFactRef
 
@@ -96,9 +96,7 @@ class ProductionP2Prepared:
 
 
 def _mapping(value: object, field: str) -> dict[str, object]:
-    if not isinstance(value, Mapping) or not all(
-        isinstance(key, str) for key in value
-    ):
+    if not isinstance(value, Mapping) or not all(isinstance(key, str) for key in value):
         raise ProductionDownstreamError("ED2_B2_INPUT_INVALID", field)
     return dict(cast(Mapping[str, object], value))
 
@@ -203,9 +201,7 @@ def _utc_text(value: object, field: str) -> str:
 def _stored_utc_text(value: object, field: str) -> str:
     """Normalize only governed DB timestamp representations to RFC3339 UTC."""
 
-    if isinstance(value, datetime) or (
-        isinstance(value, str) and value.endswith("Z")
-    ):
+    if isinstance(value, datetime) or (isinstance(value, str) and value.endswith("Z")):
         return _utc_text(value, field)
     if not isinstance(value, str):
         raise ProductionDownstreamError("ED2_B2_TIME_INVALID", field)
@@ -218,7 +214,7 @@ def _stored_utc_text(value: object, field: str) -> str:
 
 def _persist_object_reference(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     logical_uri: str,
     data: bytes,
@@ -253,10 +249,7 @@ def _persist_object_reference(
             "registry.object_reference",
             {"object_ref_id": object_ref_id, **expected},
         )
-    elif any(
-        not _stored_field_matches(current[key], value)
-        for key, value in expected.items()
-    ):
+    elif any(not _stored_field_matches(current[key], value) for key, value in expected.items()):
         raise ProductionDownstreamError(
             "ED2_B2_MANAGED_OBJECT_IMMUTABLE_CONFLICT",
             object_ref_id,
@@ -274,7 +267,7 @@ def _stored_field_matches(actual: object, expected: object) -> bool:
 
 def _context_artifact_bytes(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     artifact_kind: str,
     logical_key: str,
@@ -291,10 +284,7 @@ def _context_artifact_bytes(
         "artifact_sha256": digest,
     }
     context_artifact_id = _uuid5(_CONTEXT_NAMESPACE, identity)
-    logical_uri = (
-        "tpaa-object://production-context/"
-        f"{context_artifact_id}.json"
-    )
+    logical_uri = f"tpaa-object://production-context/{context_artifact_id}.json"
     object_ref_id, stored_hash = _persist_object_reference(
         rows,
         object_store,
@@ -322,10 +312,7 @@ def _context_artifact_bytes(
             "registry.context_artifact",
             {"context_artifact_id": context_artifact_id, **expected},
         )
-    elif any(
-        not _stored_field_matches(current[key], value)
-        for key, value in expected.items()
-    ):
+    elif any(not _stored_field_matches(current[key], value) for key, value in expected.items()):
         raise ProductionDownstreamError(
             "ED2_B2_CONTEXT_ARTIFACT_IMMUTABLE_CONFLICT",
             context_artifact_id,
@@ -345,7 +332,7 @@ def _context_artifact_bytes(
 
 def _context_artifact_from_spec(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     spec: Mapping[str, object],
     artifact_kind: str,
@@ -398,7 +385,7 @@ def _ready_world_refs(
 
 def prepare_p2_compute_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     payload: Mapping[str, object],
 ) -> ProductionP2Prepared:
     policy = P2AuthorityPolicy.from_canonical()
@@ -420,8 +407,7 @@ def prepare_p2_compute_input(
         )
     target = repository.exact_source_observation(target_id)
     cohort_observations = tuple(
-        repository.exact_source_observation(observation_id)
-        for observation_id in cohort_ids
+        repository.exact_source_observation(observation_id) for observation_id in cohort_ids
     )
     feature_spec = _context_artifact_from_spec(
         rows,
@@ -512,17 +498,11 @@ def prepare_p2_compute_input(
     cohort_material = {
         "cohort_spec_id": cohort_spec_id,
         "cohort_spec_version": cohort_spec_version,
-        "comparability_dimensions": [
-            {"name": name, "value": value} for name, value in dimensions
-        ],
+        "comparability_dimensions": [{"name": name, "value": value} for name, value in dimensions],
         "knowledge_cutoff_utc": latest_knowledge,
         "observation_ids": list(cohort_ids),
-        "episode_ids": sorted(
-            {item.episode_id for item in cohort_observations}
-        ),
-        "subject_ids": sorted(
-            {item.subject_entity_id for item in cohort_observations}
-        ),
+        "episode_ids": sorted({item.episode_id for item in cohort_observations}),
+        "subject_ids": sorted({item.subject_entity_id for item in cohort_observations}),
     }
     cohort = P2CohortSnapshot(
         dataset_snapshot_id=_uuid5(_P2_COHORT_NAMESPACE, cohort_material),
@@ -536,17 +516,11 @@ def prepare_p2_compute_input(
         knowledge_cutoff_utc=latest_knowledge,
         raw_record_count=len(cohort_observations),
         observation_count=len(cohort_observations),
-        independent_subject_count=len(
-            {item.subject_entity_id for item in cohort_observations}
-        ),
+        independent_subject_count=len({item.subject_entity_id for item in cohort_observations}),
         effective_evidence_count=float(len(cohort_observations)),
         observation_ids=cohort_ids,
-        episode_ids=tuple(
-            sorted({item.episode_id for item in cohort_observations})
-        ),
-        subject_ids=tuple(
-            sorted({item.subject_entity_id for item in cohort_observations})
-        ),
+        episode_ids=tuple(sorted({item.episode_id for item in cohort_observations})),
+        subject_ids=tuple(sorted({item.subject_entity_id for item in cohort_observations})),
     )
     bundle = build_p2_input_bundle(
         target=target,
@@ -574,11 +548,7 @@ def prepare_p2_compute_input(
         observation = (
             target
             if observation_id == target_id
-            else next(
-                item
-                for item in cohort_observations
-                if item.observation_id == observation_id
-            )
+            else next(item for item in cohort_observations if item.observation_id == observation_id)
         )
         values = factor_values[observation_id]
         if set(values) != set(factor_order):
@@ -736,9 +706,7 @@ def _ensure_session_order_authority(
         "subject_kind": scope_material["subject_kind"],
         "selector_json": selector,
         "selector_hash": _hash(selector),
-        "selector_language_version": scope_material[
-            "selector_language_version"
-        ],
+        "selector_language_version": scope_material["selector_language_version"],
         "scope_revision": scope_material["scope_revision"],
         "status": "ACTIVE",
         "supersedes_scope_id": None,
@@ -896,7 +864,7 @@ def _ensure_configuration_snapshot(
 
 def prepare_p3_build_worker_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     job_payload: Mapping[str, object],
     production_input: Mapping[str, object],
@@ -915,11 +883,7 @@ def prepare_p3_build_worker_input(
     aircraft_ids = {item.aircraft_id for item in estimates}
     capability_types = {item.capability_type for item in estimates}
     reference_ids = {item.reference_condition_id for item in estimates}
-    if (
-        len(aircraft_ids) != 1
-        or len(capability_types) != 1
-        or len(reference_ids) != 1
-    ):
+    if len(aircraft_ids) != 1 or len(capability_types) != 1 or len(reference_ids) != 1:
         raise ProductionDownstreamError(
             "ED2_B2_P3_HISTORY_DOMAIN_DRIFT",
             ",".join(p2_ids),
@@ -945,9 +909,7 @@ def prepare_p3_build_worker_input(
         tuple[tuple[object, dict[str, object]], ...],
         observation_pairs,
     )
-    session_ids = tuple(
-        str(row["session_id"]) for _, row in typed_pairs
-    )
+    session_ids = tuple(str(row["session_id"]) for _, row in typed_pairs)
     if len(set(session_ids)) != len(session_ids):
         raise ProductionDownstreamError(
             "ED2_B2_P3_DISTINCT_SESSION_REQUIRED",
@@ -1100,7 +1062,7 @@ def prepare_p3_build_worker_input(
 
 def persist_p3_worker_product(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     product: ProductionP3BuildWorkerProduct,
 ) -> None:
     repository = P3PersistenceRepository(rows, object_store=object_store)
@@ -1159,7 +1121,7 @@ def _bind_context_artifact(
 
 def _m8_role_and_profile(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     authority_root: Path,
     context_id: str,
@@ -1271,9 +1233,7 @@ def _world_fact(
         ref_id=f"world:{world_product_id}",
         world_layer=layers[kind],
         episode_id=episode_id,
-        stage_id=(
-            None if row["stage_id"] is None else str(row["stage_id"])
-        ),
+        stage_id=(None if row["stage_id"] is None else str(row["stage_id"])),
         source_hash=str(row["logical_content_hash"]),
         knowledge_time_utc=_stored_utc_text(
             row["created_at"],
@@ -1291,21 +1251,17 @@ def _p3_source_episode_ids(
     components = p3.exact_twin_components(twin_revision_id)
     episode_ids: set[str] = set()
     for component in components:
-        training = p3.exact_training(
-            component.model_build.model.training_dataset_snapshot_id
-        )
+        training = p3.exact_training(component.model_build.model.training_dataset_snapshot_id)
         for estimate_id in training.estimate_ids:
             adjusted = p2.exact_adjusted_estimate(estimate_id)
-            observation = p2.exact_source_observation(
-                adjusted.source_observation_id
-            )
+            observation = p2.exact_source_observation(adjusted.source_observation_id)
             episode_ids.add(observation.episode_id)
     return tuple(sorted(episode_ids))
 
 
 def prepare_p4_build_worker_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     authority_root: Path,
     job_payload: Mapping[str, object],
@@ -1469,9 +1425,7 @@ def persist_p4_worker_product(
 ) -> str:
     products = P4P5PersistenceRepository(rows)
     products.register_p4_subject(product.subject)
-    scope_id = P4P5ComputeInputRepository(rows).register_p4_scope(
-        product.scope
-    )
+    scope_id = P4P5ComputeInputRepository(rows).register_p4_scope(product.scope)
     products.register_p4_revision(
         product.subject,
         product.revision,
@@ -1511,13 +1465,8 @@ def prepare_p5_build_worker_input(
     sessions = {item.session_id for item in revisions}
     episodes = {item.episode_id for item in revisions}
     evidence_sets = {item.evidence_set_id for item in revisions}
-    subjects = tuple(
-        products.exact_p4_subject(item.subject_context_id)
-        for item in revisions
-    )
-    role_artifacts = {
-        item.role_model_context_artifact_id for item in subjects
-    }
+    subjects = tuple(products.exact_p4_subject(item.subject_context_id) for item in revisions)
+    role_artifacts = {item.role_model_context_artifact_id for item in subjects}
     if (
         len(sessions) != 1
         or len(episodes) != 1
@@ -1532,25 +1481,31 @@ def prepare_p5_build_worker_input(
     explicit_episode = production_input.get("mission_episode_id")
     session_id = next(iter(sessions))
     episode_id = next(iter(episodes))
-    if explicit_session is not None and _text(
-        explicit_session,
-        "session_id",
-    ) != session_id:
+    if (
+        explicit_session is not None
+        and _text(
+            explicit_session,
+            "session_id",
+        )
+        != session_id
+    ):
         raise ProductionDownstreamError(
             "ED2_B2_P5_SESSION_MISMATCH",
             session_id,
         )
-    if explicit_episode is not None and _text(
-        explicit_episode,
-        "mission_episode_id",
-    ) != episode_id:
+    if (
+        explicit_episode is not None
+        and _text(
+            explicit_episode,
+            "mission_episode_id",
+        )
+        != episode_id
+    ):
         raise ProductionDownstreamError(
             "ED2_B2_P5_EPISODE_MISMATCH",
             episode_id,
         )
-    world_refs = tuple(
-        sorted({ref for subject in subjects for ref in subject.world_refs})
-    )
+    world_refs = tuple(sorted({ref for subject in subjects for ref in subject.world_refs}))
     return ProductionP5BuildWorkerInput(
         job_payload=dict(job_payload),
         session_id=session_id,
@@ -1626,9 +1581,7 @@ def _assignment_for_p3_estimate(
             "ED2_B2_P6_P3_COMPONENT_AMBIGUOUS",
             estimate_id,
         )
-    training = p3.exact_training(
-        matches[0].model_build.model.training_dataset_snapshot_id
-    )
+    training = p3.exact_training(matches[0].model_build.model.training_dataset_snapshot_id)
     segment = p3.exact_segment(training.segment_snapshot_id)
     condition_order = estimate.condition_point.get("session_order")
     if isinstance(condition_order, bool) or not isinstance(
@@ -1654,9 +1607,7 @@ def _assignment_for_p3_estimate(
             estimate_id,
         )
     adjusted = p2.exact_adjusted_estimate(p2_ids[0])
-    observation = p2.exact_source_observation(
-        adjusted.source_observation_id
-    )
+    observation = p2.exact_source_observation(adjusted.source_observation_id)
     row = rows.one(
         "metric.capability_observation",
         where={"observation_id": observation.observation_id},
@@ -1683,9 +1634,7 @@ def _assignment_for_p3_estimate(
             "ED2_B2_P6_ASSIGNMENT_NOT_FOUND",
             estimate_id,
         )
-    config_ids = {
-        item for item in segment.configuration_snapshot_ids
-    }
+    config_ids = {item for item in segment.configuration_snapshot_ids}
     if len(config_ids) != 1:
         raise ProductionDownstreamError(
             "ED2_B2_P6_CONFIGURATION_AMBIGUOUS",
@@ -1700,7 +1649,7 @@ def _assignment_for_p3_estimate(
 
 def prepare_p6_build_worker_input(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     *,
     job_payload: Mapping[str, object],
     production_input: Mapping[str, object],
@@ -1709,11 +1658,7 @@ def prepare_p6_build_worker_input(
     p3 = P3PersistenceRepository(rows, object_store=object_store)
     p45 = P4P5PersistenceRepository(rows)
     raw_rows = production_input.get("training_rows")
-    if (
-        not isinstance(raw_rows, Sequence)
-        or isinstance(raw_rows, (str, bytes))
-        or not raw_rows
-    ):
+    if not isinstance(raw_rows, Sequence) or isinstance(raw_rows, (str, bytes)) or not raw_rows:
         raise ProductionDownstreamError(
             "ED2_B2_P6_TRAINING_ROWS_REQUIRED",
             "training_rows",
@@ -1722,12 +1667,8 @@ def prepare_p6_build_worker_input(
     p3_model_refs: dict[str, P6P3ModelRef] = {}
     for index, raw in enumerate(raw_rows):
         item = _mapping(raw, f"training_rows[{index}]")
-        estimate = p3.exact_capability_estimate(
-            _text(item.get("p3_estimate_id"), "p3_estimate_id")
-        )
-        revision = p45.exact_p4_revision(
-            _text(item.get("p4_revision_id"), "p4_revision_id")
-        )
+        estimate = p3.exact_capability_estimate(_text(item.get("p3_estimate_id"), "p3_estimate_id"))
+        revision = p45.exact_p4_revision(_text(item.get("p4_revision_id"), "p4_revision_id"))
         assignment_id, configuration_id, order = _assignment_for_p3_estimate(
             rows,
             p2,
@@ -1738,17 +1679,13 @@ def prepare_p6_build_worker_input(
             P6CapabilityTrainingRow(
                 estimate=estimate,
                 p4_revision=revision,
-                aircraft_id=(
-                    p3.exact_twin_revision(estimate.twin_revision_id).aircraft_id
-                ),
+                aircraft_id=(p3.exact_twin_revision(estimate.twin_revision_id).aircraft_id),
                 configuration_snapshot_id=configuration_id,
                 session_order_assignment_id=assignment_id,
                 session_order=order,
             )
         )
-        for component in p3.exact_twin_components(
-            estimate.twin_revision_id
-        ):
+        for component in p3.exact_twin_components(estimate.twin_revision_id):
             model = component.model_build.model
             twin = p3.exact_twin_revision(estimate.twin_revision_id)
             p3_model_refs[model.capability_model_id] = P6P3ModelRef(
@@ -1808,10 +1745,7 @@ def prepare_p6_build_worker_input(
         )
 
     context_raw = production_input.get("scenario_context_refs", ())
-    if (
-        not isinstance(context_raw, Sequence)
-        or isinstance(context_raw, (str, bytes))
-    ):
+    if not isinstance(context_raw, Sequence) or isinstance(context_raw, (str, bytes)):
         raise ProductionDownstreamError(
             "ED2_B2_P6_CONTEXT_INVALID",
             "scenario_context_refs",
@@ -1819,9 +1753,7 @@ def prepare_p6_build_worker_input(
     context_refs = tuple(
         P6ContextRef(
             context_ref_id=_text(
-                _mapping(raw, "scenario_context_ref").get(
-                    "context_ref_id"
-                ),
+                _mapping(raw, "scenario_context_ref").get("context_ref_id"),
                 "scenario_context_ref.context_ref_id",
             ),
             status=_text(
@@ -1829,9 +1761,7 @@ def prepare_p6_build_worker_input(
                 "scenario_context_ref.status",
             ),
             knowledge_time_utc=_utc_text(
-                _mapping(raw, "scenario_context_ref").get(
-                    "knowledge_time_utc"
-                ),
+                _mapping(raw, "scenario_context_ref").get("knowledge_time_utc"),
                 "scenario_context_ref.knowledge_time_utc",
             ),
         )
@@ -1843,9 +1773,7 @@ def prepare_p6_build_worker_input(
         job_payload=dict(job_payload),
         training_rows=tuple(training_rows),
         factual_sources=tuple(factual_sources),
-        p3_model_refs=tuple(
-            p3_model_refs[key] for key in sorted(p3_model_refs)
-        ),
+        p3_model_refs=tuple(p3_model_refs[key] for key in sorted(p3_model_refs)),
         scenario_context_refs=context_refs,
         target_scope=_text(
             production_input.get("target_scope"),
@@ -1875,22 +1803,16 @@ def prepare_p6_build_worker_input(
             production_input.get("sealed_at_utc"),
             "sealed_at_utc",
         ),
-        forecast_spec=(
-            None
-            if forecast_raw is None
-            else _mapping(forecast_raw, "forecast")
-        ),
+        forecast_spec=(None if forecast_raw is None else _mapping(forecast_raw, "forecast")),
         counterfactual_spec=(
-            None
-            if counterfactual_raw is None
-            else _mapping(counterfactual_raw, "counterfactual")
+            None if counterfactual_raw is None else _mapping(counterfactual_raw, "counterfactual")
         ),
     )
 
 
 def persist_p6_worker_product(
     rows: CanonicalRowRepository,
-    object_store: LocalObjectStore,
+    object_store: ObjectStore,
     product: ProductionP6BuildWorkerProduct,
 ) -> None:
     repository = P6PersistenceRepository(rows, object_store=object_store)
@@ -1902,9 +1824,7 @@ def persist_p6_worker_product(
     if product.forecast_request is not None:
         repository.register_forecast_request(product.forecast_request)
         if (
-            repository.exact_forecast_request(
-                product.forecast_request.forecast_request_id
-            )
+            repository.exact_forecast_request(product.forecast_request.forecast_request_id)
             != product.forecast_request
         ):
             raise ProductionDownstreamError(
@@ -1912,9 +1832,7 @@ def persist_p6_worker_product(
                 product.forecast_request.forecast_request_id,
             )
     if product.counterfactual_request is not None:
-        repository.register_counterfactual_request(
-            product.counterfactual_request
-        )
+        repository.register_counterfactual_request(product.counterfactual_request)
         if (
             repository.exact_counterfactual_request(
                 product.counterfactual_request.counterfactual_request_id

@@ -1,0 +1,37 @@
+{
+  "schema": "TPAA_GUI_G0R_V33_SPIKE_FIXTURE_V1",
+  "fixture_kind": "CONTRACT_SHAPED_NON_RANDOM",
+  "authority_status": "G0R_TECHNICAL_SPIKE_NOT_PRODUCTION_TRUTH",
+  "authority_bindings": [
+    "docs/gui/demo-v33/DEMO_TARGET_BASELINE.json",
+    "docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json",
+    "baseline/CB-1.5.0/canonical/CROSS_LAYER_DTO_CONTRACTS.json"
+  ],
+  "context": {
+    "batch_id": "G0R-BATCH-001",
+    "session_id": "G0R-SESSION-001",
+    "episode_id": "G0R-EPISODE-001",
+    "weapon_event_id": "G0R-WE-001",
+    "release_id": "G0R-RELEASE-001",
+    "context_id": "G0R-CONTEXT-001",
+    "course": "BVR",
+    "readiness": "READY",
+    "workflow": "IDLE"
+  },
+  "V01": {
+    "title": "历史多批次训练综合总览",
+    "sections": ["六张关键指标", "任务级指标趋势", "历史训练活动趋势", "裁决状态趋势", "训练行为类别构成", "历史批次与摘要"]
+  },
+  "V04": {
+    "title": "超视距空战·单机目标侧复盘",
+    "sections": ["来袭态势", "威胁信息来源", "离散事件链", "目标动作曲线", "结果与裁决", "证据覆盖"]
+  },
+  "V08": {
+    "title": "超视距空战·编队目标侧复盘",
+    "sections": ["编队关系", "成员P_i/A_i矩阵", "成员动作时序", "信息共享关系", "成员结果", "团队证据"]
+  },
+  "V26": {
+    "title": "批次发射事件总览",
+    "sections": ["批次筛选", "WE与Cluster统计", "全批次发射时间线", "独立WE清单", "未发射行为", "分类例外"]
+  }
+}

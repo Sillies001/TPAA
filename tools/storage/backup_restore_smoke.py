@@ -50,7 +50,7 @@ def run() -> dict[str, object]:
         checks = {
             "manifest": manifest.is_file(),
             "database_schema": verification.schema_version == "1.9.0",
-            "database_core": verification.core_baseline == "CB-1.4.0",
+            "database_core": verification.core_baseline == "CB-1.5.0",
             "object_count": len(restored_objects) == 1,
             "object_ref": restored_objects[0] == source_object,
             "object_bytes": restored_store.read_bytes(source_object.logical_uri)

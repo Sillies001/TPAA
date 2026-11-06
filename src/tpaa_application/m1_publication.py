@@ -766,6 +766,39 @@ class M1PublicationService:
             "current_latest_fallback_used": False,
         }
 
+    def world_graph(self, release_id: str) -> dict[str, object]:
+        """Project the fixture-backed World using the production read shape."""
+
+        world = self._replay_world(release_id)
+        return {
+            "release_id": release_id,
+            "world_products": [
+                {
+                    "world_product_id": world.world_product_id,
+                    "release_id": world.release_id,
+                    "session_id": world.session_id,
+                    "episode_id": world.episode_id,
+                    "stage_id": world.stage_id,
+                    "world_kind": world.world_kind,
+                    "world_version": world.world_version,
+                    "policy_version": world.policy_version,
+                    "capability_code": world.capability_code,
+                    "present_capability_letters": list(
+                        world.present_capability_letters
+                    ),
+                    "absent_capability_letters": list(world.absent_capability_letters),
+                    "status": world.status,
+                    "coverage": world.coverage,
+                    "confidence": world.confidence,
+                    "reason_codes": list(world.reason_codes),
+                    "artifact_sha256": world.artifact_sha256,
+                    "logical_content_hash": world.logical_content_hash,
+                }
+            ],
+            "world_relations": [],
+            "tpaa_m_chains": [],
+        }
+
     def series_range(
         self,
         release_id: str,

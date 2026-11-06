@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from tpaa_application import ApplicationService
 
@@ -31,6 +31,57 @@ def register_product_runtime_routes(
             )
         return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
 
+    @app.get("/runtime/external-capabilities")
+    def runtime_external_capabilities() -> JSONResponse:
+        try:
+            payload = application.w7_external_capabilities()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "W7_EXTERNAL_CAPABILITIES_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
+    @app.get("/runtime/operations")
+    def runtime_operations() -> JSONResponse:
+        try:
+            payload = application.w8_operations_status()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "W8_OPERATIONS_STATUS_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
+    @app.get("/runtime/final-qualification")
+    def runtime_final_qualification() -> JSONResponse:
+        try:
+            payload = application.w9_final_qualification_status()
+        except RuntimeError as exc:
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "outcome": "SYSTEM_ERROR",
+                    "error": {
+                        "code": "W9_FINAL_QUALIFICATION_NOT_CONFIGURED",
+                        "detail": str(exc),
+                    },
+                },
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
     @app.get("/runtime/qualification")
     def runtime_qualification() -> JSONResponse:
         try:
@@ -52,17 +103,39 @@ def register_product_runtime_routes(
     def runtime_observability() -> JSONResponse:
         try:
             payload = application.operational_status()
-        except RuntimeError as exc:
+        except RuntimeError:
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 content={
                     "outcome": "SYSTEM_ERROR",
                     "error": {
                         "code": "OPERATIONAL_STATUS_NOT_CONFIGURED",
-                        "detail": str(exc),
+                        "detail": "operational status unavailable",
                     },
                 },
             )
         return JSONResponse(status_code=status.HTTP_200_OK, content=payload)
+
+    @app.get("/runtime/metrics", response_class=Response)
+    def runtime_metrics() -> Response:
+        try:
+            # Keep the product-runtime package import lazy: tpaa_runtime also
+            # composes tpaa_api, so importing it while routes are registering
+            # would create an initialization cycle.
+            from tpaa_runtime.prometheus_metrics import render_prometheus_metrics
+
+            payload = application.operational_status()
+            body = render_prometheus_metrics(payload)
+        except (RuntimeError, ValueError):
+            return Response(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content="# TPAA operational metrics unavailable\n",
+                media_type="text/plain",
+            )
+        return Response(
+            status_code=status.HTTP_200_OK,
+            content=body,
+            media_type="text/plain; version=0.0.4",
+        )
 
     return app

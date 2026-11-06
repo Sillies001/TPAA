@@ -1,0 +1,1486 @@
+{
+  "schema": "TPAA_G0_RUNTIME_SPIKE_EVIDENCE_V2",
+  "status": "PASS",
+  "baseline_id": "GUI-DEMO-V33-2026-11-05",
+  "demo_sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a",
+  "fixture_sha256": "325a05d6aed3f16765bc75bb2fa0db8673d431daa4cebb1ddd28f64dc1e1aefa",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "captured_views": [],
+  "results": [
+    {
+      "engine": "webengine",
+      "off_the_record": true,
+      "load_finished_signal": true,
+      "source_sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a",
+      "initial_load_ms": 838.134,
+      "viewport": {
+        "width": 1600,
+        "height": 900
+      },
+      "outputs": [
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V01.png",
+          "sha256": "671b7c08ea3a98a5b3274367201b817884177998a9f0c1d26d8d7c4bd1ef063f",
+          "bytes": 199851,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V01",
+          "geometry": {
+            "schema": "TPAA_V01_ELEMENT_GEOMETRY_V1",
+            "viewport": {
+              "width": 1600,
+              "height": 900,
+              "device_pixel_ratio": 1
+            },
+            "scale": 1,
+            "boxes": {
+              "overview": {
+                "left": 30,
+                "top": 166,
+                "right": 1570,
+                "bottom": 860,
+                "width": 1540,
+                "height": 694
+              },
+              "header": {
+                "left": 30,
+                "top": 166,
+                "right": 1570,
+                "bottom": 202,
+                "width": 1540,
+                "height": 36
+              },
+              "kpis": {
+                "left": 30,
+                "top": 212,
+                "right": 1570,
+                "bottom": 280,
+                "width": 1540,
+                "height": 68
+              },
+              "row_first": {
+                "left": 30,
+                "top": 290,
+                "right": 1570,
+                "bottom": 458,
+                "width": 1540,
+                "height": 168
+              },
+              "row_second": {
+                "left": 30,
+                "top": 468,
+                "right": 1570,
+                "bottom": 636,
+                "width": 1540,
+                "height": 168
+              },
+              "row_bottom": {
+                "left": 30,
+                "top": 646,
+                "right": 1570,
+                "bottom": 838,
+                "width": 1540,
+                "height": 192
+              },
+              "footer": {
+                "left": 30,
+                "top": 848,
+                "right": 1570,
+                "bottom": 860,
+                "width": 1540,
+                "height": 12
+              }
+            },
+            "children": {
+              "kpi": [
+                {
+                  "left": 30,
+                  "top": 213.5,
+                  "right": 280,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 288,
+                  "top": 213.5,
+                  "right": 538,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 546,
+                  "top": 213.5,
+                  "right": 796,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 804,
+                  "top": 213.5,
+                  "right": 1054,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 1062,
+                  "top": 213.5,
+                  "right": 1312,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 1320,
+                  "top": 213.5,
+                  "right": 1570,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                }
+              ],
+              "row_first_panel": [
+                {
+                  "left": 30,
+                  "top": 290,
+                  "right": 849.438,
+                  "bottom": 458,
+                  "width": 819.438,
+                  "height": 168
+                },
+                {
+                  "left": 857.438,
+                  "top": 290,
+                  "right": 1569.984,
+                  "bottom": 458,
+                  "width": 712.547,
+                  "height": 168
+                }
+              ],
+              "row_second_panel": [
+                {
+                  "left": 30,
+                  "top": 468,
+                  "right": 538,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                },
+                {
+                  "left": 546,
+                  "top": 468,
+                  "right": 1054,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                },
+                {
+                  "left": 1062,
+                  "top": 468,
+                  "right": 1570,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                }
+              ],
+              "row_bottom_panel": [
+                {
+                  "left": 30,
+                  "top": 646,
+                  "right": 890.063,
+                  "bottom": 838,
+                  "width": 860.063,
+                  "height": 192
+                },
+                {
+                  "left": 898.063,
+                  "top": 646,
+                  "right": 1569.984,
+                  "bottom": 838,
+                  "width": 671.922,
+                  "height": 192
+                }
+              ]
+            },
+            "issues": []
+          }
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V02.png",
+          "sha256": "b2fc86212b3850a6ee067c3284d7325b5766becaad0a43da08b4dfd72f7d9f94",
+          "bytes": 127576,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V02"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V03.png",
+          "sha256": "4abde7b2407eb776f0ebf28593696574064ce4b34cf8d1d7eaadf44557c1d795",
+          "bytes": 124367,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V04.png",
+          "sha256": "ba1b15bdf77be76a4585df88e3a4fbde2030cdb7e16927769c085e2beb8e2ff8",
+          "bytes": 160405,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V05.png",
+          "sha256": "e71124d163ab574aba9ace746cdabf94bf2eee5ac8cd30cf11769bad76c39363",
+          "bytes": 168588,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V05"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V06.png",
+          "sha256": "155e7bcda6ec771fcace2e2ca83ed99a303567873192f72c75bef8b60e842692",
+          "bytes": 168653,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V06"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V07.png",
+          "sha256": "0cf86e12bd565eab2049cbc911e02b68c411d62bf97794b8c8475ac9c638261b",
+          "bytes": 206497,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V07"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V08.png",
+          "sha256": "a2b028743c2da14e8dd0d832b235eddae608b243a989c7380377713b29129522",
+          "bytes": 183324,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V09.png",
+          "sha256": "a1de97751227eea9293b09a9c0f6cb439dbaaf59e610ee1dab8aedd9c9678b69",
+          "bytes": 130906,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V09"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V10.png",
+          "sha256": "454e176f8a9b6eeb36e3960aade7534f525cae7e172ccca1915ac56d6104144f",
+          "bytes": 128296,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V10"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V11.png",
+          "sha256": "c860bebcd6cf86d134c5ce660edb7fc591e5918408df46b70fcdb398c2ad17ce",
+          "bytes": 157275,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V11"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V12.png",
+          "sha256": "d16eec3e53572fd57b7ac1e2d587dcafa2c3e9d59a3268f3b7c960b3c4fe5b16",
+          "bytes": 129377,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V12"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V13.png",
+          "sha256": "ec81c2c2f240f6a8afe6e61201cfddb7c58c86e6b086e820323be7814a168be7",
+          "bytes": 123156,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V13"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V14.png",
+          "sha256": "08c3afef19fa023f75570843e02ef3a6dc06b8841da43846d5ac84c0263e80a4",
+          "bytes": 122104,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V14"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V15.png",
+          "sha256": "9dcb4eeaddfbd2623b9e5146714edee80da5e96528fbef0ab76834acae1842b0",
+          "bytes": 111618,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V15"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V16.png",
+          "sha256": "74b96318996d5edb67be627bd8c42698c4ed61cd1f233b96e3310faa2cb59757",
+          "bytes": 122040,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V16"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V17.png",
+          "sha256": "649898115be78c3eb9b44d810cfac42bc29be901336902973ec1a0e58872a760",
+          "bytes": 106893,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V17"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V18.png",
+          "sha256": "923485f256d2b63cf386fb7d02891aced5ea4f16069c55412d9473a18dc50ad0",
+          "bytes": 109655,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V18"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V19.png",
+          "sha256": "9661ca70689df48df17f60d28064ecb7cdda7b20ba05dd26bd57256bc1630e6d",
+          "bytes": 174693,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V19"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V20.png",
+          "sha256": "411913127d8a285b142dbdf8e835bc265608a650b000d4ce63732ee5436509ce",
+          "bytes": 164905,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V20"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V21.png",
+          "sha256": "21b983bb21e66717008f3475bb62f2d8e616f0ed7fc306e8d1e473c39edbdfe8",
+          "bytes": 153580,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V21"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V22.png",
+          "sha256": "eaec0dd5354ea3d3ba8d909b57f03bd38615be11571062d82ede18e69c5a4b99",
+          "bytes": 120640,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V22"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V23.png",
+          "sha256": "029e63e3565574beabf8fa06b4f530301f241b65aa549510ff32c9262600e3af",
+          "bytes": 182282,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V23"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V24.png",
+          "sha256": "a512ef7e7e0792f03d7629f0a87d273c500e68e8095f55a79435a168c2233d68",
+          "bytes": 161605,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V25.png",
+          "sha256": "1801f8998a1a7ba14788be35947e906cc5af7fc73b2f02924deef60e2d8cdace",
+          "bytes": 160298,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V25"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/tactical/V26.png",
+          "sha256": "f6ea7929ea6ea448cc85d0aac09b25a235d7de2adb0b6ff7e6282c53a267bed8",
+          "bytes": 178429,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V26"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V01.png",
+          "sha256": "68a288830a5b93b3e5b9bb59af4549e3c5bafbc2feb1757b97ed016610a35514",
+          "bytes": 195921,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V01",
+          "geometry": {
+            "schema": "TPAA_V01_ELEMENT_GEOMETRY_V1",
+            "viewport": {
+              "width": 1600,
+              "height": 900,
+              "device_pixel_ratio": 1
+            },
+            "scale": 1,
+            "boxes": {
+              "overview": {
+                "left": 30,
+                "top": 166,
+                "right": 1570,
+                "bottom": 860,
+                "width": 1540,
+                "height": 694
+              },
+              "header": {
+                "left": 30,
+                "top": 166,
+                "right": 1570,
+                "bottom": 202,
+                "width": 1540,
+                "height": 36
+              },
+              "kpis": {
+                "left": 30,
+                "top": 212,
+                "right": 1570,
+                "bottom": 280,
+                "width": 1540,
+                "height": 68
+              },
+              "row_first": {
+                "left": 30,
+                "top": 290,
+                "right": 1570,
+                "bottom": 458,
+                "width": 1540,
+                "height": 168
+              },
+              "row_second": {
+                "left": 30,
+                "top": 468,
+                "right": 1570,
+                "bottom": 636,
+                "width": 1540,
+                "height": 168
+              },
+              "row_bottom": {
+                "left": 30,
+                "top": 646,
+                "right": 1570,
+                "bottom": 838,
+                "width": 1540,
+                "height": 192
+              },
+              "footer": {
+                "left": 30,
+                "top": 848,
+                "right": 1570,
+                "bottom": 860,
+                "width": 1540,
+                "height": 12
+              }
+            },
+            "children": {
+              "kpi": [
+                {
+                  "left": 30,
+                  "top": 213.5,
+                  "right": 280,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 288,
+                  "top": 213.5,
+                  "right": 538,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 546,
+                  "top": 213.5,
+                  "right": 796,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 804,
+                  "top": 213.5,
+                  "right": 1054,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 1062,
+                  "top": 213.5,
+                  "right": 1312,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 1320,
+                  "top": 213.5,
+                  "right": 1570,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                }
+              ],
+              "row_first_panel": [
+                {
+                  "left": 30,
+                  "top": 290,
+                  "right": 849.438,
+                  "bottom": 458,
+                  "width": 819.438,
+                  "height": 168
+                },
+                {
+                  "left": 857.438,
+                  "top": 290,
+                  "right": 1569.984,
+                  "bottom": 458,
+                  "width": 712.547,
+                  "height": 168
+                }
+              ],
+              "row_second_panel": [
+                {
+                  "left": 30,
+                  "top": 468,
+                  "right": 538,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                },
+                {
+                  "left": 546,
+                  "top": 468,
+                  "right": 1054,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                },
+                {
+                  "left": 1062,
+                  "top": 468,
+                  "right": 1570,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                }
+              ],
+              "row_bottom_panel": [
+                {
+                  "left": 30,
+                  "top": 646,
+                  "right": 890.063,
+                  "bottom": 838,
+                  "width": 860.063,
+                  "height": 192
+                },
+                {
+                  "left": 898.063,
+                  "top": 646,
+                  "right": 1569.984,
+                  "bottom": 838,
+                  "width": 671.922,
+                  "height": 192
+                }
+              ]
+            },
+            "issues": []
+          }
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V02.png",
+          "sha256": "d486ee56773620ac7e18f7fb91606fe1735dc2c89003bbd262ae1d7e08320eea",
+          "bytes": 120533,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V02"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V03.png",
+          "sha256": "2323ef3e94c45202ecffaa890d7981b99210c3f10f0f6a9199fb9078ded02906",
+          "bytes": 116882,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V04.png",
+          "sha256": "f6b0d5f0526b06d832fcbff2137ce1c8f3813b77b2765494b14136405a07612e",
+          "bytes": 153234,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V05.png",
+          "sha256": "55d82bf017c88c8b643a726fd75751d311988f4caeafd8f455cdba439ff4d71b",
+          "bytes": 162713,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V05"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V06.png",
+          "sha256": "b8855f79df7133853feccc5bb97f0b4ef619e13b28bd579fff0c0a030cbc1199",
+          "bytes": 161002,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V06"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V07.png",
+          "sha256": "7a1ac6e9fc4e6aad4f5950c7ca831780cbfa8d4515a6b3ddc38e8a6693c801d1",
+          "bytes": 200437,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V07"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V08.png",
+          "sha256": "05b96b549e24b842e793e46ff663639178f22d3e9c7212d2417f56bfdc23e189",
+          "bytes": 175145,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V09.png",
+          "sha256": "7ecf487be8bb94c75da651fa6cd05056410a52dbe2d60d510c9c7c376df79ca2",
+          "bytes": 125461,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V09"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V10.png",
+          "sha256": "7b341eb7f76aa3a033f6ef3958676ca329822fa1d3b10d6f5dbd45741feaf23c",
+          "bytes": 122821,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V10"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V11.png",
+          "sha256": "41a6f4fbde463da2d66923cce470cb7376cc8f25539a0f3e626e466e2dae0083",
+          "bytes": 151557,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V11"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V12.png",
+          "sha256": "bf62e72d3f11e60750f944cf1658c1c62999ef7f50968418b3f150d65b4bcba0",
+          "bytes": 124807,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V12"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V13.png",
+          "sha256": "359230f215a018cbfb7c8b4b1dc58b4daacfc0671a12ab3ab1525ff8ff347932",
+          "bytes": 118243,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V13"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V14.png",
+          "sha256": "567766c4dfa3bcbb11fb96d80a320fa86d734c499676bd373865a5c6cfd27ff8",
+          "bytes": 116780,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V14"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V15.png",
+          "sha256": "edafbe50158c7b15c1df4241ae52025f275860051554bf3f472aef32a13ad99a",
+          "bytes": 105856,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V15"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V16.png",
+          "sha256": "a5ab2a69d758e8b6bc7c049d446d4e18287ab01cb7465b0a314400d21d8d79f8",
+          "bytes": 116644,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V16"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V17.png",
+          "sha256": "ed349a3e2fc071103a82a5e78e2546c09e464442ddb83a9ce3828d0e82d64af4",
+          "bytes": 101858,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V17"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V18.png",
+          "sha256": "452b86631f6994a9e2b57ebe802c8235e903ad9ca3ec24cb70186de1412f54ce",
+          "bytes": 104548,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V18"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V19.png",
+          "sha256": "c2cf6dd46624cead6c50a7a73b2493dde9d9985e607721a196d1c0edce4fdb72",
+          "bytes": 167530,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V19"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V20.png",
+          "sha256": "bac43e9b4fe9bd94099e94b7fb9a92eba851181a04a18fedfac95e19bbe6cb64",
+          "bytes": 158273,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V20"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V21.png",
+          "sha256": "50ef06bf82263161b0a961bfd888c0defa31c12e54396054c48ead98195e80ad",
+          "bytes": 146735,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V21"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V22.png",
+          "sha256": "f52298fa4b6475efccc31aa8f00d47adf60e6a3778cd0cb5a75fa37335153470",
+          "bytes": 114586,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V22"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V23.png",
+          "sha256": "5986f6fea3b2b73330133ab94e546513c2e9d09810360fbf2684a8e580bc64e4",
+          "bytes": 175983,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V23"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V24.png",
+          "sha256": "0ea94dcdb1fcf108e3be0fbf04419ffd7184882319247935572f6ca26f33846e",
+          "bytes": 155960,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V25.png",
+          "sha256": "b2373d2b132140e4c5f7efccfa15ce68ed4e1583c450878c4e51f66a00cfa669",
+          "bytes": 154104,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V25"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/graphite/V26.png",
+          "sha256": "f093b177474a5431941bed59aab8189f515cade034b8aa41916c96436f882aec",
+          "bytes": 171245,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V26"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V01.png",
+          "sha256": "d463c3cb8a816ec841a8453d34158d20d17d22333bce11d5b503f8cf9342bd99",
+          "bytes": 192555,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V01",
+          "geometry": {
+            "schema": "TPAA_V01_ELEMENT_GEOMETRY_V1",
+            "viewport": {
+              "width": 1600,
+              "height": 900,
+              "device_pixel_ratio": 1
+            },
+            "scale": 1,
+            "boxes": {
+              "overview": {
+                "left": 30,
+                "top": 166,
+                "right": 1570,
+                "bottom": 860,
+                "width": 1540,
+                "height": 694
+              },
+              "header": {
+                "left": 30,
+                "top": 166,
+                "right": 1570,
+                "bottom": 202,
+                "width": 1540,
+                "height": 36
+              },
+              "kpis": {
+                "left": 30,
+                "top": 212,
+                "right": 1570,
+                "bottom": 280,
+                "width": 1540,
+                "height": 68
+              },
+              "row_first": {
+                "left": 30,
+                "top": 290,
+                "right": 1570,
+                "bottom": 458,
+                "width": 1540,
+                "height": 168
+              },
+              "row_second": {
+                "left": 30,
+                "top": 468,
+                "right": 1570,
+                "bottom": 636,
+                "width": 1540,
+                "height": 168
+              },
+              "row_bottom": {
+                "left": 30,
+                "top": 646,
+                "right": 1570,
+                "bottom": 838,
+                "width": 1540,
+                "height": 192
+              },
+              "footer": {
+                "left": 30,
+                "top": 848,
+                "right": 1570,
+                "bottom": 860,
+                "width": 1540,
+                "height": 12
+              }
+            },
+            "children": {
+              "kpi": [
+                {
+                  "left": 30,
+                  "top": 213.5,
+                  "right": 280,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 288,
+                  "top": 213.5,
+                  "right": 538,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 546,
+                  "top": 213.5,
+                  "right": 796,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 804,
+                  "top": 213.5,
+                  "right": 1054,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 1062,
+                  "top": 213.5,
+                  "right": 1312,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                },
+                {
+                  "left": 1320,
+                  "top": 213.5,
+                  "right": 1570,
+                  "bottom": 278.5,
+                  "width": 250,
+                  "height": 65
+                }
+              ],
+              "row_first_panel": [
+                {
+                  "left": 30,
+                  "top": 290,
+                  "right": 849.438,
+                  "bottom": 458,
+                  "width": 819.438,
+                  "height": 168
+                },
+                {
+                  "left": 857.438,
+                  "top": 290,
+                  "right": 1569.984,
+                  "bottom": 458,
+                  "width": 712.547,
+                  "height": 168
+                }
+              ],
+              "row_second_panel": [
+                {
+                  "left": 30,
+                  "top": 468,
+                  "right": 538,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                },
+                {
+                  "left": 546,
+                  "top": 468,
+                  "right": 1054,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                },
+                {
+                  "left": 1062,
+                  "top": 468,
+                  "right": 1570,
+                  "bottom": 636,
+                  "width": 508,
+                  "height": 168
+                }
+              ],
+              "row_bottom_panel": [
+                {
+                  "left": 30,
+                  "top": 646,
+                  "right": 890.063,
+                  "bottom": 838,
+                  "width": 860.063,
+                  "height": 192
+                },
+                {
+                  "left": 898.063,
+                  "top": 646,
+                  "right": 1569.984,
+                  "bottom": 838,
+                  "width": 671.922,
+                  "height": 192
+                }
+              ]
+            },
+            "issues": []
+          }
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V02.png",
+          "sha256": "2617535c06406307b4d92345d411f28d9f96d9fec99b4a8eadee965d8a00b6b9",
+          "bytes": 122990,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V02"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V03.png",
+          "sha256": "ebd08e9a0c533e8d07deb5c99c26da7a6f6a638593d79708386281475ec319ae",
+          "bytes": 119427,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V04.png",
+          "sha256": "c9d7037bb389870e8725d93c8d7fd059ca73d38ed67efe18166b0cd2e4c33e1f",
+          "bytes": 156649,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V05.png",
+          "sha256": "7fed6f670c8cfc61f3d99f038dc80a40aa219f527a1efaee1b0872e2eeff9d58",
+          "bytes": 167776,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V05"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V06.png",
+          "sha256": "8f8f1af1a70243786e8f5470340cc29d0bd97c3b5bab8d3288043fc5d601baa2",
+          "bytes": 165241,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V06"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V07.png",
+          "sha256": "9a1b36f1825828371b61705ffc04772bd352dec10debc7289a1ee9460cb113b9",
+          "bytes": 205435,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V07"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V08.png",
+          "sha256": "4917d12eac5654aea1e646a1dac0d20f1a7fea07530b6c83bbb9c6c3963c29b4",
+          "bytes": 178986,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V09.png",
+          "sha256": "b3640879083a1665ab2f829966a1e8c93b0d66cc7f45b4cb41ffd525657d6ad6",
+          "bytes": 129046,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V09"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V10.png",
+          "sha256": "49ab63e4a4a5388bfb5718618b48ac5ad0b1be9b85709bf9eafbeb1b3298ba60",
+          "bytes": 124250,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V10"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V11.png",
+          "sha256": "53f78949667f85d02d6770d3f03d0baa0db03faa30e2f757ef53aa75b233b181",
+          "bytes": 146751,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V11"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V12.png",
+          "sha256": "adc7af053eaff411b27aac2c1b2039de72321df4d301af662b062dbd7da60323",
+          "bytes": 126525,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V12"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V13.png",
+          "sha256": "a4631220d849c0646183524712b2a42ee1dbf0e993fb21d49d297e01b94654a8",
+          "bytes": 120868,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V13"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V14.png",
+          "sha256": "71435f3128c556a5d3266bac47f17e3c56db04713b2fd6c3e42280523f49dd7f",
+          "bytes": 118445,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V14"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V15.png",
+          "sha256": "ab472c40dc926081cc78c9f008073a1bd28d01b86fd94a194988edf532ca65e9",
+          "bytes": 107701,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V15"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V16.png",
+          "sha256": "9d71bf43d441314cf280fbe4415fffbad6707aa0df0485d38a162fb1d5fbea6a",
+          "bytes": 118714,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V16"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V17.png",
+          "sha256": "b3762828161563865602367ef17e0f0126974940f1c990a18b796faa4e4e756a",
+          "bytes": 103294,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V17"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V18.png",
+          "sha256": "108691f2ebd48c1faac8b22f534ab51f086ced20b9d530efccd0300a8c92fc51",
+          "bytes": 105738,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V18"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V19.png",
+          "sha256": "58685cdaf041a25e0336d52f426dfa5ef4981d0bbb1624f3ea24e7cfa8dff1bd",
+          "bytes": 170648,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V19"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V20.png",
+          "sha256": "1eaf276961ed429151b522101820b41801733425fa2e683d7dfaba1963e06955",
+          "bytes": 160033,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V20"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V21.png",
+          "sha256": "190e5b7e6f79a074cd1d34e81d5eebfa86a9cca14fc9f211107b44136cc6c8d8",
+          "bytes": 149189,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V21"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V22.png",
+          "sha256": "44e93a6d9014e70c5fd02928c2cffbe2ce4a0ae8acde592521b81e9f4fb92def",
+          "bytes": 116529,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V22"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V23.png",
+          "sha256": "7f021724fa494eb973e48785e229b342d1cb502f50c9163e222ff45a9c1d3b43",
+          "bytes": 177669,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V23"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V24.png",
+          "sha256": "7dedeb216688ab1becb8334c6dffd1776083ca30cb3a94d19fb7c23daad77685",
+          "bytes": 157647,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V25.png",
+          "sha256": "14b044d8365c15353822cb9dd26de35e42fcaa0e22f444107b95f0569f2d6b9d",
+          "bytes": 155354,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V25"
+        },
+        {
+          "path": "evidence/gui-g0-v33/webengine/light/V26.png",
+          "sha256": "9c25b40c8b01b2484feb36ffaf2b87a56f826edbed5d6c5367f3fc490b875b9c",
+          "bytes": 174996,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V26"
+        }
+      ]
+    },
+    {
+      "engine": "qml",
+      "source_sha256": "2bdf787b776d6b8ee3bf237c030a5c2d8ab04ca67c1769ff77f76493b12caf5f",
+      "mean_load_ms": 169.053,
+      "viewport": {
+        "width": 1600,
+        "height": 900
+      },
+      "outputs": [
+        {
+          "path": "evidence/gui-g0-v33/qml/tactical/V01.png",
+          "sha256": "7b5c14a667ad0ae89f1662fb18b676345cc0321064a07dab044be67970102b62",
+          "bytes": 143700,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/tactical/V04.png",
+          "sha256": "5fa58ef9de4189954dfdcc8c9b411fea993ca2c7805c5771d33dbec8d65227e7",
+          "bytes": 137632,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/tactical/V08.png",
+          "sha256": "7d22f07a4482ec5d3f9ca48f6392f35f9d1b2877a4054c216cedb26a82651f0d",
+          "bytes": 136429,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/tactical/V26.png",
+          "sha256": "bb10e756313ea58bcb3d2a005fa19e6d1e504049fb39d9e9d80f3fb6b1e11df1",
+          "bytes": 132860,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V26"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/graphite/V01.png",
+          "sha256": "c76bf6d46120b9d7db172120a60b5b601b86734f683549dad710d85eef3f7b09",
+          "bytes": 147563,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/graphite/V04.png",
+          "sha256": "3e79f54d1254d9ebe1a5e16626b91c647169c20607645c88799d4d2d0fb12a11",
+          "bytes": 141220,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/graphite/V08.png",
+          "sha256": "f1c8291be3f3e3089567493f8f32d9f02d2a6de4c7d31257a9510fc4f11f2098",
+          "bytes": 139793,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/graphite/V26.png",
+          "sha256": "7670b492da2c240a6d694225e22ea20b932346979792e7838bf3b43e8113f940",
+          "bytes": 136446,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V26"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/light/V01.png",
+          "sha256": "482e49e85f2f742099427f31db2efb21c08de1607c8d8f649e30dcc904372261",
+          "bytes": 148553,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/light/V04.png",
+          "sha256": "5eeec398871174723dc2e117b6a4e174dae07fc59a702c68ce27a0649ebacfe4",
+          "bytes": 142050,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/light/V08.png",
+          "sha256": "ef990d8179586bef1a4e8ebfd20ac041e4be2deeb171499b7de3f65d9b6c2913",
+          "bytes": 140759,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0-v33/qml/light/V26.png",
+          "sha256": "66f02088873f5a7f0e95a0fb86dc419af752ed4e9d5347fa6f1774f97cd6a09c",
+          "bytes": 137284,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V26"
+        }
+      ]
+    }
+  ],
+  "decision": "WEBENGINE_PREFERRED_QML_FALLBACK_PENDING_TARGET_GATES",
+  "release_claim": false
+}

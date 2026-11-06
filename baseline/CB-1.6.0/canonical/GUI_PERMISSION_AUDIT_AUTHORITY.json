@@ -1,0 +1,63 @@
+{
+  "authority_id": "GUI_PERMISSION_AUDIT_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.6.0",
+  "decision_id": "G1-V33-MACHINE-AUTHORITY-2026-11-06",
+  "approval_status": "APPROVED",
+  "permissions": [
+    {
+      "permission_id": "batch.history.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "batch.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "batch.register",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "batch.training_type.revise",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "context.force_formation.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "context.force_formation.revise",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "gui.view",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "replay.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "weapon_event.perspective.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "weapon_event.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "weapon_event.window.read",
+      "unknown_policy": "DENY"
+    }
+  ],
+  "audit_policy": {
+    "mutations": "ALWAYS",
+    "sensitive_reads": "ALWAYS",
+    "forbidden_fields": [
+      "authorization",
+      "bearer",
+      "desktop_nonce",
+      "absolute_path"
+    ]
+  }
+}

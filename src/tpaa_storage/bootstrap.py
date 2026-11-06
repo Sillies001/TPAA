@@ -90,8 +90,16 @@ def _schema_fingerprint(statements: Sequence[str]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _load_authority(loader: CanonicalArtifactLoader | None = None) -> _SchemaAuthority:
-    canonical_loader = loader or CanonicalArtifactLoader()
+def _load_authority(
+    loader: CanonicalArtifactLoader | None = None,
+    *,
+    authority_root: Path | None = None,
+) -> _SchemaAuthority:
+    if loader is not None and authority_root is not None:
+        raise ValueError("loader and authority_root are mutually exclusive")
+    canonical_loader = loader or CanonicalArtifactLoader(
+        None if authority_root is None else authority_root.resolve(strict=False).parent
+    )
     artifact = canonical_loader.load(
         CORE_MODEL_ARTIFACT_ID,
         expectation=ArtifactExpectation(
@@ -791,10 +799,14 @@ def _bootstrap_connection(
         raise
 
 
-def bootstrap_sqlite(path: str | Path) -> BootstrapVerification:
+def bootstrap_sqlite(
+    path: str | Path,
+    *,
+    authority_root: Path | None = None,
+) -> BootstrapVerification:
     """Bootstrap an empty SQLite database to the exact frozen schema authority."""
 
-    authority = _load_authority()
+    authority = _load_authority(authority_root=authority_root)
     db_path = Path(path)
     file_backed = str(path) != ":memory:"
     if file_backed:
@@ -808,10 +820,14 @@ def bootstrap_sqlite(path: str | Path) -> BootstrapVerification:
         connection.close()
 
 
-def verify_sqlite(path: str | Path) -> BootstrapVerification:
+def verify_sqlite(
+    path: str | Path,
+    *,
+    authority_root: Path | None = None,
+) -> BootstrapVerification:
     """Verify schema/version/provenance for an existing SQLite bootstrap."""
 
-    authority = _load_authority()
+    authority = _load_authority(authority_root=authority_root)
     if str(path) == ":memory:":
         raise BootstrapError("VERIFY_TARGET_INVALID", "verify requires a persistent SQLite database")
     db_path = Path(path)

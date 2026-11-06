@@ -36,7 +36,7 @@ from tpaa_storage.bootstrap import (  # noqa: E402
     verify_sqlite,
 )
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TRACKING_ISSUE = 141
 TASK_IDS = ("M5-DEV-003", "M5-DEV-004", "M5-TST-003")
 

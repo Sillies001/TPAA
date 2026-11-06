@@ -1,0 +1,833 @@
+{
+  "authority_id": "CROSS_LAYER_DTO_CONTRACTS",
+  "core_baseline": "CB-1.4.0",
+  "contracts": {
+    "EvaluationContextDTO": {
+      "fields": [
+        {
+          "field": "context_id",
+          "source": "context.evaluation_context.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "context.evaluation_context.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "context_version",
+          "source": "context.evaluation_context.context_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "revision_no",
+          "source": "context.evaluation_context.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "supersedes_context_id",
+          "source": "context.evaluation_context.supersedes_context_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "scenario_id",
+          "source": "context.evaluation_context.scenario_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "scenario_version",
+          "source": "context.evaluation_context.scenario_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "syllabus_id",
+          "source": "context.evaluation_context.syllabus_id",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "syllabus_version",
+          "source": "context.evaluation_context.syllabus_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "assessment_profile_id",
+          "source": "context.evaluation_context.assessment_profile_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_profile_version",
+          "source": "context.evaluation_context.assessment_profile_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "rule_set_version",
+          "source": "context.evaluation_context.rule_set_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_set_version",
+          "source": "context.evaluation_context.reference_set_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "role_model_version",
+          "source": "context.evaluation_context.role_model_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "metric_profile_version",
+          "source": "context.evaluation_context.metric_profile_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "longitudinal_profile_version",
+          "source": "context.evaluation_context.longitudinal_profile_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "valid_from_session_time_us",
+          "source": "context.evaluation_context.valid_from_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "valid_to_session_time_us",
+          "source": "context.evaluation_context.valid_to_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "status",
+          "source": "context.evaluation_context.status",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "ContextArtifactRefDTO": {
+      "fields": [
+        {
+          "field": "binding_role",
+          "source": "context.context_artifact_binding.binding_role",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "context_artifact_id",
+          "source": "registry.context_artifact.context_artifact_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "artifact_kind",
+          "source": "registry.context_artifact.artifact_kind",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_key",
+          "source": "registry.context_artifact.logical_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "artifact_version",
+          "source": "registry.context_artifact.artifact_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "object_ref_id",
+          "source": "registry.context_artifact.object_ref_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "artifact_sha256",
+          "source": "registry.context_artifact.artifact_sha256",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "schema_version",
+          "source": "registry.context_artifact.schema_version",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "CapabilityObservationDTO": {
+      "fields": [
+        {
+          "field": "aircraft_configuration_snapshot_id",
+          "source": "metric.capability_observation.aircraft_configuration_snapshot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "metric.capability_observation.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_instance_id",
+          "source": "metric.capability_observation.aircraft_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "metric.capability_observation.aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_dimension",
+          "source": "metric.capability_observation.capability_dimension",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "capability_level",
+          "source": "metric.capability_observation.capability_level",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "capability_type",
+          "source": "metric.capability_observation.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "metric.capability_observation.comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "confidence",
+          "source": "metric.capability_observation.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "context_id",
+          "source": "metric.capability_observation.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "context_tags",
+          "source": "metric.capability_observation.context_tags",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "correlation_group_id",
+          "source": "metric.capability_observation.correlation_group_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "coverage",
+          "source": "metric.capability_observation.coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "eligibility_status",
+          "source": "metric.capability_observation.eligibility_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "episode_id",
+          "source": "metric.capability_observation.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.capability_observation.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "exclusion_reason_code",
+          "source": "metric.capability_observation.exclusion_reason_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "metric_code",
+          "source": "metric_instance→immutable metric_definition.metric_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "metric_instance→immutable metric_definition.metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "metric_instance→immutable metric_definition.metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "observation_end_session_time_us",
+          "source": "metric.capability_observation.observation_end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "observation_id",
+          "source": "metric.capability_observation.observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "observation_schema_version",
+          "source": "metric.capability_observation.observation_schema_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_start_session_time_us",
+          "source": "metric.capability_observation.observation_start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "observed_metric_instance_id",
+          "source": "metric.capability_observation.observed_metric_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "pilot_id",
+          "source": "metric.capability_observation.pilot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "release_id",
+          "source": "metric.capability_observation.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "scenario_id",
+          "source": "metric.capability_observation.scenario_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "session_id",
+          "source": "metric.capability_observation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "stage_id",
+          "source": "metric.capability_observation.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "structured_output_schema_id",
+          "source": "metric_definition→immutable metric_semantic_registry.structured_output_schema_id",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "subject_entity_id",
+          "source": "metric.capability_observation.subject_entity_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "supersedes_observation_id",
+          "source": "metric.capability_observation.supersedes_observation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "unit",
+          "source": "metric.metric_instance.unit exact-copy",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "value",
+          "source": "metric_instance typed value slot selected by value_kind",
+          "required": false,
+          "transport_type": "json-union"
+        },
+        {
+          "field": "value_kind",
+          "source": "metric_definition→immutable metric_semantic_registry.value_kind",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "TPAAChainDTO": {
+      "fields": [
+        {
+          "field": "chain_id",
+          "source": "world.tpaa_m_chain.chain_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "world.tpaa_m_chain.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "world.tpaa_m_chain.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "stage_id",
+          "source": "world.tpaa_m_chain.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "refs",
+          "source": "world.tpaa_m_chain.refs",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "world.tpaa_m_chain.start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "world.tpaa_m_chain.end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "chain_status",
+          "source": "world.tpaa_m_chain.chain_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "coverage",
+          "source": "world.tpaa_m_chain.coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "confidence",
+          "source": "world.tpaa_m_chain.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "break_reason",
+          "source": "world.tpaa_m_chain.break_reason",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "chain_version",
+          "source": "world.tpaa_m_chain.chain_version",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "MetricCatalogEntryDTO": {
+      "fields": [
+        {
+          "field": "metric_code",
+          "source": "metrics[].metric_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "semantic_id",
+          "source": "metrics[].semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "semantic_version",
+          "source": "metrics[].semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "algorithm_id",
+          "source": "metrics[].algorithm_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "algorithm_version",
+          "source": "metrics[].algorithm_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "family",
+          "source": "metrics[].family",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_type",
+          "source": "metrics[].subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_lane",
+          "source": "metrics[].observation_lane",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "publication_route",
+          "source": "metrics[].publication_route",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "value_kind",
+          "source": "metrics[].value_kind",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "structured_output_schema_id",
+          "source": "metrics[].structured_output_schema_id",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "unit",
+          "source": "metrics[].unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "delivery_milestone",
+          "source": "metrics[].delivery_milestone",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "delivery_batch",
+          "source": "metrics[].delivery_batch",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "p1_longitudinal_trend_eligibility",
+          "source": "metrics[].p1_longitudinal_trend_eligibility",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "default_aggregation",
+          "source": "metrics[].default_aggregation",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "operator_bindings",
+          "source": "metrics[].operator_bindings",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "constant_bindings",
+          "source": "metrics[].constant_bindings",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "upstream_dependencies",
+          "source": "metrics[].upstream_dependencies",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "state_machine_bindings",
+          "source": "metrics[].state_machine_bindings",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "profile_parameters",
+          "source": "metrics[].profile_parameters",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "input_fields",
+          "source": "metrics[].input_fields",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "catalog_version",
+          "source": "$root.catalog_version",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "MissionSystemObservationDTO": {
+      "fields": [
+        {
+          "field": "system_observation_id",
+          "source": "system_observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "mission_system_instance_id",
+          "source": "mission_system_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "observed_metric_instance_id",
+          "source": "observed_metric_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "reference_truth_profile_version",
+          "source": "reference_truth_profile_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "reference_quality_status",
+          "source": "reference_quality_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_uncertainty_summary",
+          "source": "reference_uncertainty_summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "alignment_uncertainty_summary",
+          "source": "alignment_uncertainty_summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "observation_start_session_time_us",
+          "source": "observation_start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "observation_end_session_time_us",
+          "source": "observation_end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "context_tags",
+          "source": "context_tags",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "coverage",
+          "source": "coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "confidence",
+          "source": "confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "eligibility_status",
+          "source": "eligibility_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "exclusion_reason_code",
+          "source": "exclusion_reason_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_schema_version",
+          "source": "observation_schema_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_system_observation_id",
+          "source": "supersedes_system_observation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "EvaluationContextBundleDTO": {
+      "projection_fields": [
+        {
+          "field": "context",
+          "type": "EvaluationContextDTO",
+          "required": true
+        },
+        {
+          "field": "artifact_refs",
+          "type": "ContextArtifactRefDTO[]",
+          "required": true
+        },
+        {
+          "field": "scenario",
+          "type": "object?",
+          "required": false
+        },
+        {
+          "field": "assessment_profile",
+          "type": "object?",
+          "required": false
+        },
+        {
+          "field": "objectives",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "roles",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "stages",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "references",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "rules",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "cohort",
+          "type": "object[]",
+          "required": true
+        }
+      ],
+      "rules": [
+        "Read exact context_id; never resolve current/latest revision for historical release.",
+        "artifact_refs stable-sort by binding_role.",
+        "Missing frozen artifact => CONTEXT_ARTIFACT_UNAVAILABLE; no fallback.",
+        "Unsupported historical artifact schema => CONTEXT_ARTIFACT_SCHEMA_UNSUPPORTED; no coercion."
+      ]
+    }
+  },
+  "transport_rules": {
+    "session_time_us": "decimal-string for JS-visible API",
+    "uuid": "canonical UUID string",
+    "structured_metric": "object, never JSON string"
+  }
+}

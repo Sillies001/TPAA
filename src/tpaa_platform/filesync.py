@@ -79,7 +79,9 @@ def atomic_replace_bytes(target: Path, data: bytes) -> None:
 
     target.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
-        prefix=f".{target.name}.",
+        # Keep the sibling name short so atomic writes remain usable below a
+        # deep governed object root on legacy Windows MAX_PATH configurations.
+        prefix=".tpaa-",
         suffix=".tmp",
         dir=target.parent,
     )

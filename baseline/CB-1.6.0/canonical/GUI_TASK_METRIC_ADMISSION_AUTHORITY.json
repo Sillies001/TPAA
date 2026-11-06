@@ -1,0 +1,12 @@
+{
+  "authority_id": "GUI_TASK_METRIC_ADMISSION_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.6.0",
+  "approval_status": "NOT_ADMITTED",
+  "candidates": [
+    "KILL_RATIO",
+    "EXCHANGE_RATIO",
+    "MISSION_COMPLETION_RATE"
+  ],
+  "rule": "No candidate may be computed or displayed as authoritative before independent Metric Definition admission."
+}

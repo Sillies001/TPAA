@@ -35,7 +35,7 @@ from tpaa_longitudinal import (  # noqa: E402
 from tpaa_metric import build_m3_metric_execution_plan  # noqa: E402
 from tpaa_storage.bootstrap import bootstrap_sqlite  # noqa: E402
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_ROOT = BASELINE / "canonical"
 SCHEMA = "TPAA_M4_TST_005_STORAGE_PARITY_V1"
 TASK_ID = "M4-TST-005"

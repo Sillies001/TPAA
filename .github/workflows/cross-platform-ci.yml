@@ -50,6 +50,12 @@ jobs:
         if: ${{ matrix.platform == 'linux' }}
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libegl1
 
+      - name: Install Linux W4 Qt visual dependencies
+        if: ${{ matrix.platform == 'linux' }}
+        run: >-
+          sudo apt-get install --no-install-recommends -y fonts-dejavu-core
+          libdbus-1-3 libfontconfig1 libgl1 libglib2.0-0 libxkbcommon0
+
       - name: Synchronize frozen project dependencies
         run: uv sync --locked --python 3.13.5
 
@@ -83,6 +89,19 @@ jobs:
           --platform ${{ matrix.platform }}
           --source-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --evidence evidence/piqb-b5/${{ matrix.platform }}/desktop-replay-visualization.json
+
+      - name: Execute W4 GUI object and layout qualification
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: uv run --locked python -m pytest -p no:cacheprovider tests/unit/gui/test_w4_gui_foundation.py -q
+
+      - name: Capture W4 GUI platform visual evidence
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: >-
+          uv run --locked python tools/gui/w4_visual_regression.py
+          --output-dir evidence/w4-gui/${{ matrix.platform }}
+          --dpi 96
 
       - name: Execute PIQB B6 final product qualification
         env:
@@ -210,6 +229,7 @@ jobs:
             evidence/tests/framework-${{ matrix.platform }}.json
             evidence/cross-platform/${{ matrix.platform }}.json
             evidence/piqb-b5/${{ matrix.platform }}/desktop-replay-visualization.json
+            evidence/w4-gui/${{ matrix.platform }}
             evidence/piqb-b6/${{ matrix.platform }}/final-product.json
             evidence/devops/${{ matrix.platform }}
             evidence/m1-entry/${{ matrix.platform }}/build-manifest.json

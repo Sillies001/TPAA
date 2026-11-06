@@ -63,6 +63,7 @@ def create_m1_workspace(
     *,
     transport: M1DesktopTransport,
     diagnostics_provider: Callable[[], DiagnosticsSnapshot],
+    qualification_controls: bool = True,
 ) -> Any:
     """Create the release-bound Batch 3 workspace with stable automation object names."""
 
@@ -73,10 +74,14 @@ def create_m1_workspace(
     browser_group = qt_widgets.QGroupBox("M1 Session Browser", root)
     browser_group.setObjectName("tpaaM1SessionBrowser")
     browser = qt_widgets.QGridLayout(browser_group)
+    browser.setContentsMargins(12, 12, 12, 12)
+    browser.setHorizontalSpacing(12)
+    browser.setVerticalSpacing(10)
 
     fixture = qt_widgets.QComboBox(browser_group)
     fixture.setObjectName("tpaaM1FixtureSelector")
     fixture.addItems(["BF_M1_NOMINAL_V1"])
+    fixture.setMinimumHeight(30)
     browser.addWidget(qt_widgets.QLabel("Synthetic fixture", browser_group), 0, 0)
     browser.addWidget(fixture, 0, 1, 1, 3)
 
@@ -91,19 +96,25 @@ def create_m1_workspace(
     for row, (label, object_name) in enumerate(identity_fields, start=1):
         widget = qt_widgets.QLineEdit(browser_group)
         widget.setObjectName(object_name)
+        widget.setMinimumHeight(30)
         widget.setPlaceholderText("Explicit upstream/test binding required")
         identity_inputs[object_name] = widget
         browser.addWidget(qt_widgets.QLabel(label, browser_group), row, 0)
         browser.addWidget(widget, row, 1, 1, 3)
+        browser.setRowMinimumHeight(row, 32)
 
     run_button = qt_widgets.QPushButton("Import → Compute → Publish", browser_group)
     run_button.setObjectName("tpaaM1RunJourney")
+    run_button.setMinimumHeight(32)
     browser.addWidget(run_button, len(identity_fields) + 1, 0, 1, 2)
 
     release_selector = qt_widgets.QComboBox(browser_group)
     release_selector.setObjectName("tpaaM1ReleaseSelector")
+    release_selector.setMinimumHeight(30)
     browser.addWidget(qt_widgets.QLabel("Release", browser_group), len(identity_fields) + 1, 2)
     browser.addWidget(release_selector, len(identity_fields) + 1, 3)
+    browser.setRowMinimumHeight(0, 32)
+    browser.setRowMinimumHeight(len(identity_fields) + 1, 32)
     outer.addWidget(browser_group)
 
     header_group = qt_widgets.QGroupBox("Context / Mission Header", root)

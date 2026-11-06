@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from .local_backend import LocalBackendController, LocalBackendError
-from .shell import GuiShellConfig, run_gui
+from .shell import GuiShellConfig, GuiShellMode, run_gui
 
 
 def run_desktop(
@@ -26,14 +26,22 @@ def run_desktop(
             # Fail closed but keep the Desktop shell alive so M0-GUI-003 can
             # display the captured readiness/version diagnostics.
             pass
+        shell_config = config or GuiShellConfig()
+        binding = None
+        if shell_config.mode is GuiShellMode.WEBENGINE_V33:
+            try:
+                binding = controller.webengine_binding()
+            except LocalBackendError:
+                binding = None
         return run_gui(
             argv,
-            config=config,
+            config=shell_config,
             auto_close_ms=auto_close_ms,
             show=show,
             diagnostics_provider=lambda: controller.diagnostics,
             m1_transport=controller,
             product_transport=controller,
+            webengine_binding=binding,
         )
     finally:
         controller.shutdown()

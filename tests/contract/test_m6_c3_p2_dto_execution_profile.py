@@ -8,7 +8,7 @@ from uuid import NAMESPACE_URL, uuid5
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 PROFILE = BASELINE / "canonical" / "P2_LINEAR_REFERENCE_ADJUSTMENT_PROFILE.json"
 DTO = BASELINE / "canonical" / "CROSS_LAYER_DTO_CONTRACTS.json"
 AUTHORITY = BASELINE / "canonical" / "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY.json"
@@ -31,7 +31,7 @@ def test_m6_c3_p2_dto_profile_validator_passes() -> None:
     result = VALIDATOR.verify()
     assert result["status"] == "PASS"
     assert result["dto_sha256"] == "9d94f75031afcbfe2391bed1245c3f8d95f124a6549a8f116aa1efb879ae45b4"
-    assert result["current_dto_sha256"] == "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
+    assert result["current_dto_sha256"] == "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9"
     assert result["p2_dto_subset_sha256"] == "d79d97eb41354ad61654372310bb1a92b37914a858213f5dfc4a1287e14c6706"
     assert result["failed_checks"] == []
     assert result["task_complete"] is False

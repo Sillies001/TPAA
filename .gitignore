@@ -9,6 +9,7 @@ __pycache__/
 # Build / packaging
 build/
 dist/
+node_modules/
 *.egg-info/
 
 # IDE / OS
@@ -33,3 +34,7 @@ dist/
 
 evidence/m0-exit/*
 !evidence/m0-exit/.gitkeep
+
+# Local qualification inputs, database dumps and derived payloads stay local.
+# Only review metadata and cryptographic digests belong in tracked artifacts.
+evidence/local/

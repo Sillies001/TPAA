@@ -6,24 +6,11 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-_PRODUCTION_ROLES = frozenset(
-    {
-        "SUBJECT_SELF",
-        "INSTRUCTOR_EVALUATOR",
-        "TEAM_LEAD",
-        "ANALYST",
-        "ADMIN_AUDITOR",
-    }
-)
-_NO_PRIVILEGED_IDENTITY = frozenset({"TEAM_LEAD", "ANALYST"})
-_NO_VISIBILITY = frozenset({"TEAM_LEAD", "ANALYST"})
-_NO_EXPORT = frozenset(
-    {
-        "SUBJECT_SELF",
-        "INSTRUCTOR_EVALUATOR",
-        "TEAM_LEAD",
-        "ANALYST",
-    }
+from tpaa_storage import ObjectStore
+
+from .principal_policy import (
+    PrincipalPolicyError,
+    validate_production_principal_policy,
 )
 
 
@@ -32,6 +19,26 @@ class RuntimeProfile(StrEnum):
 
     DESKTOP = "DESKTOP"
     SERVICE = "SERVICE"
+
+
+@dataclass(frozen=True, slots=True)
+class OidcMtlsRuntimeConfig:
+    issuer: str
+    audience: str
+    jwks_uri: str
+    ca_bundle_path: Path
+    allowed_spiffe_prefixes: tuple[str, ...]
+    revocation_file: Path
+
+    def __post_init__(self) -> None:
+        if not self.issuer.startswith("https://") or not self.jwks_uri.startswith("https://"):
+            raise ValueError("OIDC issuer and JWKS URI must use HTTPS")
+        if not self.audience or not self.allowed_spiffe_prefixes:
+            raise ValueError("OIDC audience and mTLS SPIFFE prefixes are required")
+        if not self.ca_bundle_path.is_file():
+            raise ValueError("mTLS CA bundle must exist")
+        if not self.revocation_file.is_file():
+            raise ValueError("identity revocation file must exist")
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,19 +62,17 @@ class ProductionPrincipalBinding:
             or any(ch not in "0123456789abcdef" for ch in digest)
         ):
             raise ValueError("credential_sha256 must be lowercase SHA-256")
-        if self.role not in _PRODUCTION_ROLES:
-            raise ValueError("production role is not in frozen role family")
         if self.actor_id is not None and not self.actor_id.strip():
             raise ValueError("actor_id must be non-empty when configured")
-        if (
-            self.role in _NO_PRIVILEGED_IDENTITY
-            and self.privileged_identity_authorized
-        ):
-            raise ValueError("role cannot receive direct identity privilege")
-        if self.role in _NO_VISIBILITY and self.visibility_authorized:
-            raise ValueError("role cannot receive annotation visibility privilege")
-        if self.role in _NO_EXPORT and self.export_authorized:
-            raise ValueError("role cannot receive export privilege")
+        try:
+            validate_production_principal_policy(
+                role=self.role,
+                privileged_identity_authorized=(self.privileged_identity_authorized),
+                visibility_authorized=self.visibility_authorized,
+                export_authorized=self.export_authorized,
+            )
+        except PrincipalPolicyError as exc:
+            raise ValueError(str(exc)) from exc
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +94,39 @@ class ProductRuntimeConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class FormalQualificationEvidenceConfig:
+    """Trust and exact-candidate binding for signed W7-W9 evidence."""
+
+    manifest_path: Path
+    trust_root_path: Path
+    key_id: str
+    candidate_identity_sha256: str
+    source_revision: str
+
+    def __post_init__(self) -> None:
+        if not self.manifest_path.is_file():
+            raise ValueError("formal qualification manifest must exist")
+        if not self.trust_root_path.is_file():
+            raise ValueError("formal qualification trust root must exist")
+        if not self.key_id.strip():
+            raise ValueError("formal qualification key_id must be non-empty")
+        digest = self.candidate_identity_sha256
+        if (
+            len(digest) != 64
+            or digest != digest.lower()
+            or any(character not in "0123456789abcdef" for character in digest)
+        ):
+            raise ValueError("formal candidate identity must be lowercase SHA-256")
+        revision = self.source_revision
+        if (
+            len(revision) != 40
+            or revision != revision.lower()
+            or any(character not in "0123456789abcdef" for character in revision)
+        ):
+            raise ValueError("formal source revision must be a lowercase Git SHA")
+
+
+@dataclass(frozen=True, slots=True)
 class ProductionRuntimeConfig:
     """PRCB production-only runtime configuration with explicit persistence."""
 
@@ -99,6 +137,10 @@ class ProductionRuntimeConfig:
     desktop_database_path: Path | None = None
     service_conninfo: str | None = None
     service_principals: tuple[ProductionPrincipalBinding, ...] = ()
+    service_identity: OidcMtlsRuntimeConfig | None = None
+    object_store: ObjectStore | None = None
+    migration_state_root: Path | None = None
+    formal_qualification: FormalQualificationEvidenceConfig | None = None
 
     def __post_init__(self) -> None:
         if not self.product_build_version.strip():
@@ -114,17 +156,17 @@ class ProductionRuntimeConfig:
                 raise ValueError("Desktop production runtime forbids service_conninfo")
             if self.service_principals:
                 raise ValueError("Desktop runtime forbids service principal bindings")
+            if self.service_identity is not None:
+                raise ValueError("Desktop runtime forbids Service identity configuration")
+            if self.object_store is not None:
+                raise ValueError("Desktop runtime uses its governed local object store")
         else:
             if not self.service_conninfo or not self.service_conninfo.strip():
                 raise ValueError("Service production runtime requires conninfo")
             if self.desktop_database_path is not None:
-                raise ValueError(
-                    "Service production runtime forbids desktop_database_path"
-                )
-            digests = tuple(
-                item.credential_sha256 for item in self.service_principals
-            )
+                raise ValueError("Service production runtime forbids desktop_database_path")
+            if bool(self.service_principals) == (self.service_identity is not None):
+                raise ValueError("Service runtime requires exactly one identity provider")
+            digests = tuple(item.credential_sha256 for item in self.service_principals)
             if len(set(digests)) != len(digests):
-                raise ValueError(
-                    "Service principal credential fingerprints must be unique"
-                )
+                raise ValueError("Service principal credential fingerprints must be unique")

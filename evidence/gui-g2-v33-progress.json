@@ -1,0 +1,167 @@
+{
+  "schema": "TPAA_GUI_G2_V33_PROGRESS_EVIDENCE_V1",
+  "status": "IN_PROGRESS",
+  "phase_status": "IN_PROGRESS",
+  "base_revision": "b92229da8dcc23f433ab7fc87f7210adbf32485e",
+  "authority_checks": "STATIC_REVIEWED",
+  "v24_ui_and_server_guard": "STATIC_PASS; TARGETED_SERVER_TESTS_6_PASSED_PREVIOUS_REVISION",
+  "ribbon_themes_shared_state": "IMPLEMENTED_NOT_BUILT",
+  "frontend_typecheck": "PASS_WINDOWS_LOCAL_PREVIOUS_REVISION; RERUN_REQUIRED_AFTER_FAIL_CLOSED_PERMISSION_CHANGE",
+  "vite_build_and_web_dist_sync": "PENDING_AFTER_FAIL_CLOSED_PERMISSION_CHANGE",
+  "python_targeted_tests": "6_PASSED_2_WARNINGS_WINDOWS_LOCAL_PREVIOUS_REVISION; NEW_PERMISSION_FAIL_CLOSED_TEST_PENDING",
+  "webengine_visual_keyboard_hidpi_tests": "PENDING_WINDOWS_LOCAL",
+  "open_gates": [
+    "Run npm ci, npm run typecheck and npm run build after the new fail-closed navigation change; regenerate web_dist",
+    "Run Ruff, Mypy and targeted G2 pytest after the new verifier and smoke CLI changes",
+    "Run G0R/G1 verifiers and codegen checks after final web_dist build; confirm zero evidence drift",
+    "Run Windows WebEngine loopback smoke to TEMP output; do not overwrite G1 closure evidence",
+    "Create a controlled successor authority diff binding explicit permissions to all 26 views and map GUI permission IDs to TPAA security policy permissions",
+    "Execute actual GUI three-theme, keyboard, focus, ribbon and high-DPI checks after view permission authority is admitted",
+    "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading",
+    "Rerun Windows WebEngine smoke with inherited child stderr and fix the first real child startup exception",
+    "Rerun Windows WebEngine smoke and real-child lifecycle test after child PYTHONPATH propagation"
+  ],
+  "release_claim": false,
+  "implementation_revision": "55a59a661b1929aa80888b0afb82b7c0e99e7274",
+  "observed_local_failure": {
+    "command": "npm run typecheck",
+    "result": "FAILED",
+    "diagnostic": "TS18047: root is possibly null",
+    "count": 12,
+    "source": "frontend/gui-v33/src/main.ts",
+    "fixed_in": "4b5e51f2abfc3aaea63c287a94d26a4b092f3155",
+    "verification": "PENDING_WINDOWS_RERUN"
+  },
+  "dependency_audit": {
+    "npm_ci": "PASS",
+    "reported_findings": "1 high severity vulnerability",
+    "audit_fix_applied": false,
+    "next_action": "Inspect npm audit --json and evaluate the affected dependency path before any lockfile update"
+  },
+  "vite_build": "PASS_WINDOWS_LOCAL",
+  "g1_frontend_determinism": "PASS_WINDOWS_LOCAL",
+  "g2_static_verifier": "PENDING_RERUN_AFTER_PERMISSION_COVERAGE_REPORT_CHANGE",
+  "python_quality_tools": "RUFF_PASS_MYPY_PASS_WINDOWS_LOCAL_PREVIOUS_REVISION; RERUN_REQUIRED_AFTER_VERIFIER_AND_SMOKE_SCRIPT_CHANGE",
+  "observed_local_failures": [
+    {
+      "command": "python -m ruff check ...",
+      "result": "NOT_RUN",
+      "reason": "Ruff not installed in the active global Python 3.13 environment; frozen toolchain fallback required"
+    },
+    {
+      "command": "python tools/dev/tpaa_dev.py typecheck",
+      "result": "FAILED_TOOL_LAUNCH",
+      "reason": "uv run --locked --with attempted to add mypy absent from uv.lock; fixed by switching ephemeral pinned tools to --frozen"
+    },
+    {
+      "command": "python -m pytest ...",
+      "result": "BLOCKED_VERSION_MISMATCH",
+      "reason": "active global pytest 8.4.1; project toolchain requires 9.0.2"
+    },
+    {
+      "command": "python tools/dev/tpaa_dev.py typecheck",
+      "result": "FAILED_MYPY_TYPE_ERRORS",
+      "reason": "Mypy found three unsafe optional JSON array iterations in tools/gui/g2_v33_verify.py (contract.views and routes.reserved_routes)",
+      "diagnostic": "Need type annotation for v24; contract_views may be None; reserved may be None",
+      "fixed_in": "PENDING_COMMIT"
+    },
+    {
+      "command": "uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_shell_contract.py tests/unit/api/test_g2_v33_conditional_view_guard.py -q",
+      "result": "1_FAILED_5_PASSED",
+      "reason": "The reduced-motion CSS media query exists and is valid but is minified as @media(prefers-reduced-motion:reduce); the test incorrectly required a space after @media",
+      "fixed_in": "PENDING_COMMIT",
+      "scope": "test assertion only; no product CSS behavior defect observed"
+    }
+  ],
+  "toolchain_fix": {
+    "commit": "b7d2d6b4067b4e265a11d3ae5122c6ccd058c092",
+    "changed": [
+      "tools/dev/tpaa_dev.py",
+      "tests/contract/test_m0_dev_toolchain.py"
+    ],
+    "strategy": "uv run --frozen --with <exact-tool-version>; preserve canonical uv.lock while running one-off pinned quality tools",
+    "verification": "PENDING_WINDOWS_RERUN"
+  },
+  "mypy_fix": {
+    "changed": [
+      "tools/gui/g2_v33_verify.py",
+      "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
+    ],
+    "approach": "Validate untrusted JSON arrays with _object_list(value: object, label: str) -> list[dict[str, Any]] before iteration; reject null and malformed members fail-closed",
+    "verification": "PASS_WINDOWS_LOCAL",
+    "commit": "c5df327b6ed42f7f06c3d8d079f52ed63c36856a"
+  },
+  "test_fix": {
+    "changed": [
+      "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
+    ],
+    "approach": "Use whitespace-tolerant regular expression for the reduced-motion media query, accepting minified and formatted CSS without weakening the semantic requirement",
+    "verification": "PASS_WINDOWS_LOCAL",
+    "commit": "8abd5b48df4010127314be0bc5745e2e47709be8"
+  },
+  "permissioned_navigation": "BLOCKED_MISSING_VIEW_PERMISSION_BINDINGS",
+  "unbound_view_ids": [
+    "V01",
+    "V02",
+    "V03",
+    "V04",
+    "V05",
+    "V06",
+    "V07",
+    "V08",
+    "V09",
+    "V10",
+    "V11",
+    "V12",
+    "V13",
+    "V14",
+    "V15",
+    "V16",
+    "V17",
+    "V18",
+    "V19",
+    "V20",
+    "V21",
+    "V22",
+    "V23",
+    "V24",
+    "V25",
+    "V26"
+  ],
+  "permission_analysis": {
+    "view_contract_count": 26,
+    "views_with_nonempty_required_permissions": 0,
+    "views_without_nonempty_required_permissions": 26,
+    "frontend_behavior_before_fix": "V25 bypassed authorization; other views treated empty required_permissions as vacuous success after any authenticated session",
+    "frontend_behavior_after_fix": "All views including V25 require READY session and non-empty explicit required_permissions; empty/missing bindings deny navigation. This is intentionally fail-closed until a controlled authority successor supplies the bindings.",
+    "root_cause": "G1 GUI_VIEW_CONTRACT currently contains empty required_permissions arrays for all 26 views; GUI permission catalog has default-deny identifiers but no per-view bindings or mapping to TPAA_SECURITY_POLICY_V1 permissions",
+    "resolution": "Requires a controlled G2 successor authority diff, lock, compatibility and migration evidence; do not mutate CB-1.6.0 G1 candidate or invent a role matrix silently"
+  },
+  "webengine_smoke_output_option": "tools/gui/g1_webengine_smoke.py --output <TEMP path>; default output remains the original G1 evidence path",
+  "webengine_smoke_latest": "FAILED_CONTROL_CHANNEL_CLOSED_WINDOWS_LOCAL",
+  "webengine_smoke_diagnosis": {
+    "failure": "The child interpreter exited before LISTENING with ModuleNotFoundError: No module named 'tpaa_api'.",
+    "root_cause": "The parent process added the source src directory to its in-memory sys.path, but a new subprocess does not inherit that mutation. The child was invoked with -m tpaa_api.local_backend_child without the source root in PYTHONPATH.",
+    "fix_commit": "c6e81f0710040ec163ede42d1f292a7a98c9f4c7",
+    "fix": "LocalBackendController now injects the package import root into the child PYTHONPATH on all platforms while preserving existing PYTHONPATH entries and the Windows venv launcher behavior.",
+    "verification": "PENDING_WINDOWS_LOCAL"
+  },
+  "security_hardening_batch": {
+    "status": "IMPLEMENTED_PENDING_TEST",
+    "scope_match_authorization_wildcard_removed": true,
+    "non_global_wildcard_scope_denied": true,
+    "session_business_gui_permissions_separated": true,
+    "gui_permission_activation_status": "INACTIVE",
+    "frontend_consumes_gui_permissions_only": true,
+    "all_governed_permission_routes_pre_handler_audited": true,
+    "audit_failure_fail_closed": true,
+    "direct_subject_pseudonymized_before_persistent_audit": true,
+    "persistent_audit_relation": "audit.audit_log",
+    "candidate_route_security_authority": "baseline/candidates/CB-1.7.0/canonical/API_ROUTE_SECURITY_AUTHORITY.json",
+    "candidate_route_count": 71,
+    "reserved_gui_routes": 14,
+    "runtime_route_authority_switched": false,
+    "tests": "PENDING",
+    "release_claim": false
+  }
+}

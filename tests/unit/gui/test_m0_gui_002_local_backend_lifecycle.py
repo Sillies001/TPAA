@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+import subprocess
+
 import pytest
 
 from tpaa_gui.desktop import run_desktop
@@ -11,8 +14,11 @@ from tpaa_gui.local_backend import (
 )
 
 
-def test_real_child_enters_ready_then_gracefully_exits() -> None:
-    controller = LocalBackendController(startup_timeout_seconds=5)
+def test_real_child_enters_ready_then_gracefully_exits(tmp_path) -> None:
+    controller = LocalBackendController(
+        startup_timeout_seconds=10,
+        data_root=(tmp_path / "desktop-data").resolve(),
+    )
     ready = controller.start()
     try:
         assert ready.state is LocalBackendState.READY
@@ -55,8 +61,11 @@ def test_handshake_mismatch_fails_closed(monkeypatch: pytest.MonkeyPatch) -> Non
         controller._perform_http_handshake()
 
 
-def test_backend_crash_immediately_revokes_ready() -> None:
-    controller = LocalBackendController(startup_timeout_seconds=5)
+def test_backend_crash_immediately_revokes_ready(tmp_path) -> None:
+    controller = LocalBackendController(
+        startup_timeout_seconds=10,
+        data_root=(tmp_path / "desktop-data").resolve(),
+    )
     controller.start()
     process = controller._process
     assert process is not None
@@ -148,3 +157,63 @@ def test_non_windows_spawn_keeps_interpreter_and_does_not_copy_environment() -> 
 
     assert command == ["/repo/.venv/bin/python", "child.py"]
     assert child_env is None
+
+
+def test_child_stderr_is_suppressed_by_default_and_can_be_inherited() -> None:
+    production = LocalBackendController(child_command=("python", "fake-child.py"))
+    diagnostic = LocalBackendController(
+        child_command=("python", "fake-child.py"),
+        child_stderr=None,
+    )
+    assert production._child_stderr is subprocess.DEVNULL
+    assert diagnostic._child_stderr is None
+
+
+def test_child_spawn_exports_source_import_root_when_no_venv_redirector_is_needed(
+    tmp_path,
+) -> None:
+    import_root = tmp_path / "src"
+    import_root.mkdir()
+    existing_root = tmp_path / "additional-python-path"
+    existing_root.mkdir()
+    command, child_env = _prepare_child_spawn(
+        ("C:/Python313/python.exe", "-m", "tpaa_api.local_backend_child"),
+        os_name="nt",
+        executable="C:/Python313/python.exe",
+        base_executable="C:/Python313/python.exe",
+        environ={"KEEP": "1", "PYTHONPATH": str(existing_root)},
+        import_root=import_root,
+    )
+
+    assert command == ["C:/Python313/python.exe", "-m", "tpaa_api.local_backend_child"]
+    assert child_env is not None
+    assert child_env["KEEP"] == "1"
+    assert child_env["PYTHONPATH"].split(os.pathsep) == [
+        str(import_root),
+        str(existing_root),
+    ]
+
+
+def test_child_spawn_preserves_source_import_root_with_windows_venv_redirector(
+    tmp_path,
+) -> None:
+    import_root = tmp_path / "src"
+    import_root.mkdir()
+    command, child_env = _prepare_child_spawn(
+        (r"C:\repo\.venv\Scripts\python.exe", "-m", "tpaa_api.local_backend_child"),
+        os_name="nt",
+        executable=r"C:\repo\.venv\Scripts\python.exe",
+        base_executable=r"C:\Python313\python.exe",
+        environ={"KEEP": "1"},
+        import_root=import_root,
+    )
+
+    assert command == [
+        r"C:\Python313\python.exe",
+        "-m",
+        "tpaa_api.local_backend_child",
+    ]
+    assert child_env is not None
+    assert child_env["KEEP"] == "1"
+    assert child_env["__PYVENV_LAUNCHER__"] == r"C:\repo\.venv\Scripts\python.exe"
+    assert child_env["PYTHONPATH"].split(os.pathsep) == [str(import_root)]

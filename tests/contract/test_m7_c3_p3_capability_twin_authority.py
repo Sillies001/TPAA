@@ -8,7 +8,7 @@ from pathlib import Path
 from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
 
 ROOT = Path(__file__).resolve().parents[2]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY = BASELINE / "canonical" / "P3_CAPABILITY_TWIN_AUTHORITY.json"
 PROFILE = BASELINE / "canonical" / "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL_PROFILE.json"
 VALIDATOR_PATH = ROOT / "tools" / "baseline" / "validate_p3_capability_twin_authority.py"

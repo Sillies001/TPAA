@@ -36,7 +36,7 @@ from tpaa_longitudinal import (
     validate_managed_object,
 )
 from tpaa_storage.canonical_rows import CanonicalRowRepository
-from tpaa_storage.object_store import LocalObjectStore
+from tpaa_storage.object_store import ObjectStore
 
 
 class P3PersistenceError(RuntimeError):
@@ -238,7 +238,7 @@ class P3PersistenceRepository:
         self,
         rows: CanonicalRowRepository,
         *,
-        object_store: LocalObjectStore | None = None,
+        object_store: ObjectStore | None = None,
     ) -> None:
         self._rows = rows
         self._object_store = object_store

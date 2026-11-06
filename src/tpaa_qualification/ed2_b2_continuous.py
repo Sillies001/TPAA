@@ -26,13 +26,12 @@ from tpaa_application import (
 from tpaa_observation import allocate_session_release_id
 from tpaa_runtime.production import ProductionRuntime
 from tpaa_runtime.production_job_output import ProductionJobOutputRepository
+from tpaa_runtime.source_artifacts import stage_inline_source_documents
 from tpaa_storage import ComputeJobRepository, LocalObjectStore
 from tpaa_storage.canonical_rows import CanonicalRowRepository
 from tpaa_storage.hashing import canonical_request_hash
 
-ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA = (
-    "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_PLAN_V1"
-)
+ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA = "TPAA_ED2_B2_CONTINUOUS_QUALIFICATION_PLAN_V1"
 
 
 class QualificationUnitOfWork(Protocol):
@@ -97,9 +96,7 @@ class ED2B2ContinuousQualificationResult:
 
 
 def _mapping(value: object, field: str) -> dict[str, object]:
-    if not isinstance(value, Mapping) or not all(
-        isinstance(key, str) for key in value
-    ):
+    if not isinstance(value, Mapping) or not all(isinstance(key, str) for key in value):
         raise RuntimeError(f"ED2_B2_QUALIFICATION_FIELD_INVALID:{field}")
     return dict(cast(Mapping[str, object], value))
 
@@ -122,29 +119,21 @@ def _sequence_of_mappings(
 ) -> tuple[dict[str, object], ...]:
     if not isinstance(value, list):
         raise RuntimeError(f"ED2_B2_QUALIFICATION_FIELD_INVALID:{field}")
-    return tuple(
-        _mapping(item, f"{field}[{index}]")
-        for index, item in enumerate(value)
-    )
+    return tuple(_mapping(item, f"{field}[{index}]") for index, item in enumerate(value))
 
 
 def load_ed2_b2_continuous_plan(path: Path) -> dict[str, object]:
     try:
         raw: object = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise RuntimeError(
-            "ED2_B2_CONTINUOUS_QUALIFICATION_PLAN_UNREADABLE"
-        ) from exc
+        raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_PLAN_UNREADABLE") from exc
     plan = _mapping(raw, "plan")
     if plan.get("schema") != ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA:
         raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_SCHEMA_DRIFT")
     sessions = _sequence_of_mappings(plan.get("sessions"), "sessions")
     if len(sessions) != 8:
         raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_SESSION_COUNT")
-    ordinals = tuple(
-        _integer(item.get("ordinal"), "sessions.ordinal")
-        for item in sessions
-    )
+    ordinals = tuple(_integer(item.get("ordinal"), "sessions.ordinal") for item in sessions)
     if ordinals != tuple(range(1, 9)):
         raise RuntimeError("ED2_B2_CONTINUOUS_QUALIFICATION_SESSION_ORDER")
     return plan
@@ -169,9 +158,7 @@ def _submit(
         failure_reason = "NOT_FAILED"
         if submission.record.status is JobStatus.FAILED:
             with uow_factory(False) as uow:
-                failed = ComputeJobRepository(uow.canonical_rows).exact(
-                    submission.record.job_id
-                )
+                failed = ComputeJobRepository(uow.canonical_rows).exact(submission.record.job_id)
                 failure_reason = ",".join(failed.reason_codes)
                 if failed.error_detail is not None:
                     failure_reason = f"{failure_reason}:{failed.error_detail}"
@@ -185,9 +172,7 @@ def _submit(
 
 
 def _p1_release_id(session_id: str, payload: dict[str, object]) -> str:
-    request_hash = canonical_request_hash(
-        {"job_type": "BUILD_P1_RELEASE", "payload": payload}
-    )
+    request_hash = canonical_request_hash({"job_type": "BUILD_P1_RELEASE", "payload": payload})
     return allocate_session_release_id(
         session_id=session_id,
         request_hash=request_hash,
@@ -224,22 +209,16 @@ def _common_observations(
             ):
                 key = str(row["comparison_key_hash"])
                 if key in mapping:
-                    raise RuntimeError(
-                        "ED2_B2_QUALIFICATION_COMPARISON_KEY_AMBIGUOUS"
-                    )
+                    raise RuntimeError("ED2_B2_QUALIFICATION_COMPARISON_KEY_AMBIGUOUS")
                 mapping[key] = str(row["observation_id"])
         by_release.append(mapping)
     common = set(by_release[0])
     for mapping in by_release[1:]:
         common &= set(mapping)
     if not common:
-        raise RuntimeError(
-            "ED2_B2_QUALIFICATION_COMPARABLE_OBSERVATION_MISSING"
-        )
+        raise RuntimeError("ED2_B2_QUALIFICATION_COMPARABLE_OBSERVATION_MISSING")
     comparison_key = sorted(common)[0]
-    observation_ids = tuple(
-        mapping[comparison_key] for mapping in by_release
-    )
+    observation_ids = tuple(mapping[comparison_key] for mapping in by_release)
     subjects = []
     for observation_id in observation_ids:
         subject_row = rows.one(
@@ -248,14 +227,10 @@ def _common_observations(
             columns=("subject_entity_id",),
         )
         if subject_row is None:
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_OBSERVATION_NOT_FOUND"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_OBSERVATION_NOT_FOUND")
         subjects.append(str(subject_row["subject_entity_id"]))
     if len(set(subjects)) != len(release_ids):
-        raise RuntimeError(
-            "ED2_B2_QUALIFICATION_INDEPENDENT_SUBJECTS_REQUIRED"
-        )
+        raise RuntimeError("ED2_B2_QUALIFICATION_INDEPENDENT_SUBJECTS_REQUIRED")
     return comparison_key, observation_ids
 
 
@@ -277,18 +252,14 @@ def _estimate_for_job(
         order_by=("estimate_id",),
     )
     if len(estimates) != 1 or estimates[0]["status"] != "IDENTIFIABLE":
-        raise RuntimeError(
-            "ED2_B2_QUALIFICATION_P2_ESTIMATE_NOT_IDENTIFIABLE"
-        )
+        raise RuntimeError("ED2_B2_QUALIFICATION_P2_ESTIMATE_NOT_IDENTIFIABLE")
     return str(estimates[0]["estimate_id"])
 
 
 def _parse_utc(value: str) -> datetime:
     if not value.endswith("Z"):
         raise RuntimeError("ED2_B2_QUALIFICATION_TIME_INVALID")
-    return datetime.fromisoformat(value[:-1] + "+00:00").astimezone(
-        UTC
-    )
+    return datetime.fromisoformat(value[:-1] + "+00:00").astimezone(UTC)
 
 
 def _offset(value: str, minutes: int) -> str:
@@ -391,14 +362,15 @@ def run_ed2_b2_continuous_qualification(
 ) -> ED2B2ContinuousQualificationResult:
     plan = load_ed2_b2_continuous_plan(plan_path)
     sessions = _sequence_of_mappings(plan["sessions"], "sessions")
-    session_ids = tuple(
-        _text(item.get("session_id"), "session_id") for item in sessions
-    )
+    session_ids = tuple(_text(item.get("session_id"), "session_id") for item in sessions)
 
     p1_release_ids: list[str] = []
     for item in sessions:
         ordinal = _integer(item.get("ordinal"), "ordinal")
-        payload = _mapping(item.get("p1_payload"), "p1_payload")
+        payload = stage_inline_source_documents(
+            object_store,
+            _mapping(item.get("p1_payload"), "p1_payload"),
+        )
         _submit(
             runtime,
             uow_factory=uow_factory,
@@ -433,9 +405,7 @@ def run_ed2_b2_continuous_qualification(
         raise RuntimeError("ED2_B2_QUALIFICATION_FACTOR_ORDER_INVALID")
     factor_order = cast(list[str], factor_order_raw)
     factor_values_by_observation = {
-        observation_ids[index]: {
-            factor_order[0]: factors_raw[str(index + 1)]
-        }
+        observation_ids[index]: {factor_order[0]: factors_raw[str(index + 1)]}
         for index in range(len(observation_ids))
     }
     p2_as_of = _text(
@@ -495,15 +465,11 @@ def run_ed2_b2_continuous_qualification(
             actor=actor,
         )
         with uow_factory(False) as uow:
-            p2_estimate_ids.append(
-                _estimate_for_job(uow.canonical_rows, job_id)
-            )
+            p2_estimate_ids.append(_estimate_for_job(uow.canonical_rows, job_id))
             uow.commit()
 
     p3_profile = _mapping(plan["p3_profile"], "p3_profile")
-    session_order = {
-        session_ids[index]: index + 1 for index in range(4)
-    }
+    session_order = {session_ids[index]: index + 1 for index in range(4)}
     occurred = {
         session_ids[index]: _text(
             sessions[index].get("occurred_at_utc"),
@@ -559,12 +525,14 @@ def run_ed2_b2_continuous_qualification(
     )
     aircraft_id = _text(plan.get("aircraft_id"), "aircraft_id")
     with uow_factory(False) as uow:
-        p3_output = ProductionJobOutputRepository(
-            uow.canonical_rows
-        ).exact(
-            job_id=p3_job_id,
-            command="P3_BUILD_PRODUCTS",
-        ).mapping()
+        p3_output = (
+            ProductionJobOutputRepository(uow.canonical_rows)
+            .exact(
+                job_id=p3_job_id,
+                command="P3_BUILD_PRODUCTS",
+            )
+            .mapping()
+        )
         twin_id = _text(
             p3_output.get("twin_revision_id"),
             "p3_output.twin_revision_id",
@@ -575,9 +543,7 @@ def run_ed2_b2_continuous_qualification(
         )
         twin = p3_repo.exact_twin_revision(twin_id)
         if twin.aircraft_id != aircraft_id:
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_P3_TWIN_AIRCRAFT_DRIFT"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_P3_TWIN_AIRCRAFT_DRIFT")
         p3_estimate_ids = tuple(
             _text(
                 p3_output.get(f"estimate_{index}"),
@@ -586,8 +552,7 @@ def run_ed2_b2_continuous_qualification(
             for index in range(1, 5)
         )
         p3_estimates = tuple(
-            p3_repo.exact_capability_estimate(estimate_id)
-            for estimate_id in p3_estimate_ids
+            p3_repo.exact_capability_estimate(estimate_id) for estimate_id in p3_estimate_ids
         )
         ordered_p3 = tuple(
             sorted(
@@ -610,21 +575,15 @@ def run_ed2_b2_continuous_qualification(
             != (1, 2, 3, 4)
             or any(value.validity_domain_status != "IN_DOMAIN" for value in ordered_p3)
         ):
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_P3_ESTIMATE_SET_INVALID"
-            )
-        p3_estimate_ids = tuple(
-            value.estimate_id for value in ordered_p3
-        )
+            raise RuntimeError("ED2_B2_QUALIFICATION_P3_ESTIMATE_SET_INVALID")
+        p3_estimate_ids = tuple(value.estimate_id for value in ordered_p3)
         eval_episode = uow.canonical_rows.one(
             "episode.training_episode",
             where={"session_id": session_ids[4]},
             columns=("episode_id",),
         )
         if eval_episode is None:
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_EVALUATION_EPISODE_MISSING"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_EVALUATION_EPISODE_MISSING")
         eval_episode_id = str(eval_episode["episode_id"])
         action_world = uow.canonical_rows.one(
             "world.world_product_manifest",
@@ -637,9 +596,7 @@ def run_ed2_b2_continuous_qualification(
             columns=("world_product_id",),
         )
         if action_world is None:
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_ACTION_WORLD_MISSING"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_ACTION_WORLD_MISSING")
         action_world_id = str(action_world["world_product_id"])
         uow.commit()
 
@@ -683,9 +640,7 @@ def run_ed2_b2_continuous_qualification(
                         "p4.evidence_family",
                     ),
                     "evidence_availability_status": _text(
-                        p4_profile.get(
-                            "evidence_availability_status"
-                        ),
+                        p4_profile.get("evidence_availability_status"),
                         "p4.evidence_availability_status",
                     ),
                 },
@@ -699,28 +654,26 @@ def run_ed2_b2_continuous_qualification(
         )
         with uow_factory(False) as uow:
             p45 = P4P5PersistenceRepository(uow.canonical_rows)
-            p4_output = ProductionJobOutputRepository(
-                uow.canonical_rows
-            ).exact(
-                job_id=p4_job_id,
-                command="P4_ASSESSMENT",
-            ).mapping()
+            p4_output = (
+                ProductionJobOutputRepository(uow.canonical_rows)
+                .exact(
+                    job_id=p4_job_id,
+                    command="P4_ASSESSMENT",
+                )
+                .mapping()
+            )
             draft_id = _text(
                 p4_output.get("actor_assessment_id"),
                 "p4_output.actor_assessment_id",
             )
             draft = p45.exact_p4_revision(draft_id)
-            result = ED2AssessmentResultRepository(
-                uow.canonical_rows
-            ).exact(draft_id)
+            result = ED2AssessmentResultRepository(uow.canonical_rows).exact(draft_id)
             if (
                 draft.score is not None
                 or draft.grade is not None
                 or result.qualification_status != "REVIEW_REQUIRED"
             ):
-                raise RuntimeError(
-                    "ED2_B2_QUALIFICATION_P4_DRAFT_SEMANTICS"
-                )
+                raise RuntimeError("ED2_B2_QUALIFICATION_P4_DRAFT_SEMANTICS")
             uow.commit()
         p4_drafts.append(draft_id)
         approved_id = _approve_p4(
@@ -731,21 +684,17 @@ def run_ed2_b2_continuous_qualification(
             base_time=_offset(created_at, 1),
         )
         with uow_factory(False) as uow:
-            approved_revision = P4P5PersistenceRepository(
-                uow.canonical_rows
-            ).exact_p4_revision(approved_id)
-            approved_result = ED2AssessmentResultRepository(
-                uow.canonical_rows
-            ).exact(approved_id)
+            approved_revision = P4P5PersistenceRepository(uow.canonical_rows).exact_p4_revision(
+                approved_id
+            )
+            approved_result = ED2AssessmentResultRepository(uow.canonical_rows).exact(approved_id)
             if (
                 approved_revision.approval_state != "APPROVED"
                 or approved_revision.score is not None
                 or approved_revision.grade is not None
                 or approved_result.qualification_status != "QUALIFIED"
             ):
-                raise RuntimeError(
-                    "ED2_B2_QUALIFICATION_P4_APPROVAL_SEMANTICS"
-                )
+                raise RuntimeError("ED2_B2_QUALIFICATION_P4_APPROVAL_SEMANTICS")
             uow.commit()
         p4_approved.append(approved_id)
 
@@ -782,30 +731,26 @@ def run_ed2_b2_continuous_qualification(
         actor=actor,
     )
     with uow_factory(False) as uow:
-        p5_output = ProductionJobOutputRepository(
-            uow.canonical_rows
-        ).exact(
-            job_id=p5_job_id,
-            command="P5_ASSESSMENT",
-        ).mapping()
+        p5_output = (
+            ProductionJobOutputRepository(uow.canonical_rows)
+            .exact(
+                job_id=p5_job_id,
+                command="P5_ASSESSMENT",
+            )
+            .mapping()
+        )
         p5_draft = _text(
             p5_output.get("mission_assessment_id"),
             "p5_output.mission_assessment_id",
         )
-        p5_revision = P4P5PersistenceRepository(
-            uow.canonical_rows
-        ).exact_p5_revision(p5_draft)
-        p5_result = ED2AssessmentResultRepository(
-            uow.canonical_rows
-        ).exact(p5_draft)
+        p5_revision = P4P5PersistenceRepository(uow.canonical_rows).exact_p5_revision(p5_draft)
+        p5_result = ED2AssessmentResultRepository(uow.canonical_rows).exact(p5_draft)
         if (
             p5_revision.overall_score is not None
             or p5_revision.grade is not None
             or p5_result.qualification_status != "REVIEW_REQUIRED"
         ):
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_P5_DRAFT_SEMANTICS"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_P5_DRAFT_SEMANTICS")
         uow.commit()
     p5_approved = _approve_p5(
         runtime,
@@ -820,21 +765,15 @@ def run_ed2_b2_continuous_qualification(
         ),
     )
     with uow_factory(False) as uow:
-        p5_revision = P4P5PersistenceRepository(
-            uow.canonical_rows
-        ).exact_p5_revision(p5_approved)
-        p5_result = ED2AssessmentResultRepository(
-            uow.canonical_rows
-        ).exact(p5_approved)
+        p5_revision = P4P5PersistenceRepository(uow.canonical_rows).exact_p5_revision(p5_approved)
+        p5_result = ED2AssessmentResultRepository(uow.canonical_rows).exact(p5_approved)
         if (
             p5_revision.approval_state != "APPROVED"
             or p5_revision.overall_score is not None
             or p5_revision.grade is not None
             or p5_result.qualification_status != "QUALIFIED"
         ):
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_P5_APPROVAL_SEMANTICS"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_P5_APPROVAL_SEMANTICS")
         uow.commit()
 
     p6_profile = _mapping(plan["p6_profile"], "p6_profile")
@@ -916,12 +855,14 @@ def run_ed2_b2_continuous_qualification(
     )
 
     with uow_factory(False) as uow:
-        p6_output = ProductionJobOutputRepository(
-            uow.canonical_rows
-        ).exact(
-            job_id=p6_build_job_id,
-            command="P6_BUILD_PRODUCTS",
-        ).mapping()
+        p6_output = (
+            ProductionJobOutputRepository(uow.canonical_rows)
+            .exact(
+                job_id=p6_build_job_id,
+                command="P6_BUILD_PRODUCTS",
+            )
+            .mapping()
+        )
         model_id = _text(
             p6_output.get("capability_model_id"),
             "p6_output.capability_model_id",
@@ -940,13 +881,9 @@ def run_ed2_b2_continuous_qualification(
         )
         model = p6_repo.exact_model_revision(model_id)
         if model.subject_id != aircraft_id:
-            raise RuntimeError(
-                "ED2_B2_QUALIFICATION_P6_MODEL_SUBJECT_DRIFT"
-            )
+            raise RuntimeError("ED2_B2_QUALIFICATION_P6_MODEL_SUBJECT_DRIFT")
         p6_repo.exact_forecast_request(forecast_request_id)
-        p6_repo.exact_counterfactual_request(
-            counterfactual_request_id
-        )
+        p6_repo.exact_counterfactual_request(counterfactual_request_id)
         uow.commit()
 
     forecast_job = _submit(
@@ -984,18 +921,22 @@ def run_ed2_b2_continuous_qualification(
         actor=actor,
     )
     with uow_factory(False) as uow:
-        forecast_output = ProductionJobOutputRepository(
-            uow.canonical_rows
-        ).exact(
-            job_id=forecast_job,
-            command="P6_FORECAST",
-        ).mapping()
-        counterfactual_output = ProductionJobOutputRepository(
-            uow.canonical_rows
-        ).exact(
-            job_id=counterfactual_job,
-            command="P6_COUNTERFACTUAL",
-        ).mapping()
+        forecast_output = (
+            ProductionJobOutputRepository(uow.canonical_rows)
+            .exact(
+                job_id=forecast_job,
+                command="P6_FORECAST",
+            )
+            .mapping()
+        )
+        counterfactual_output = (
+            ProductionJobOutputRepository(uow.canonical_rows)
+            .exact(
+                job_id=counterfactual_job,
+                command="P6_COUNTERFACTUAL",
+            )
+            .mapping()
+        )
         forecast_result_id = _text(
             forecast_output.get("forecast_result_id"),
             "p6_forecast_output.forecast_result_id",

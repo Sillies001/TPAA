@@ -19,7 +19,7 @@ from tpaa_longitudinal import (
 from tpaa_metric import M2MetricDefinition, build_m3_metric_execution_plan
 
 ROOT = Path(__file__).resolve().parents[3]
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_ROOT = BASELINE / "canonical"
 
 RELEASE_ID = "10000000-0000-4000-8000-000000000001"

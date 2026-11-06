@@ -13,7 +13,7 @@ import tomllib
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BASELINE_LOCK = REPO_ROOT / "baseline" / "CB-1.4.0" / "BASELINE_LOCK.json"
+BASELINE_LOCK = REPO_ROOT / "baseline" / "CB-1.5.0" / "BASELINE_LOCK.json"
 UV_LOCK = REPO_ROOT / "uv.lock"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
 M5_LICENSE_REVIEW = REPO_ROOT / "tools" / "security" / "M5_LICENSE_REVIEW.json"

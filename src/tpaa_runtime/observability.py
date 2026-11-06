@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
 
 from tpaa_audit import structured_record
 
@@ -56,9 +57,7 @@ class ProductOperationalStatus:
         if not isinstance(items, list):
             raise RuntimeError("capability admission items invalid")
         available = sum(
-            1
-            for item in items
-            if isinstance(item, dict) and item.get("state") == "AVAILABLE"
+            1 for item in items if isinstance(item, dict) and item.get("state") == "AVAILABLE"
         )
         return structured_record(
             component="tpaa-product-runtime",
@@ -80,6 +79,10 @@ _PRCB_SOURCE_RUN_NUMBER = 636
 _PRCB_SOURCE_ACTIONS_RUN_ID = 37271874369
 
 
+class OperationalMetrics(Protocol):
+    def execute(self) -> dict[str, object]: ...
+
+
 @dataclass(frozen=True, slots=True)
 class PRCBQualificationStatus:
     """Truthful TPAA 1.0.1 pre-qualification state during PRCB closure."""
@@ -93,7 +96,7 @@ class PRCBQualificationStatus:
             "schema": "TPAA_PRCB_PRODUCT_QUALIFICATION_STATUS_V1",
             "runtime_profile": self.profile.value,
             "product_build_version": self.product_build_version,
-            "canonical_baseline": "CB-1.4.0",
+            "canonical_baseline": "CB-1.5.0",
             "db_schema_version": "1.9.0",
             "historical_release": {
                 "product_version": "1.0.0",
@@ -119,6 +122,7 @@ class PRCBOperationalStatus:
     """Secret-safe operational status for the not-yet-qualified PRCB runtime."""
 
     qualification: PRCBQualificationStatus
+    metrics: OperationalMetrics | None = None
 
     def execute(self) -> dict[str, object]:
         status = self.qualification.execute()
@@ -129,21 +133,22 @@ class PRCBOperationalStatus:
         if not isinstance(items, list):
             raise RuntimeError("PRCB capability admission items invalid")
         available = sum(
-            1
-            for item in items
-            if isinstance(item, dict) and item.get("state") == "AVAILABLE"
+            1 for item in items if isinstance(item, dict) and item.get("state") == "AVAILABLE"
         )
+        fields: dict[str, object] = {
+            "runtime_profile": self.qualification.profile.value,
+            "db_schema_version": "1.9.0",
+            "historical_qualification": "PIQB_1_0_QUALIFIED",
+            "target_qualification": "TPAA_1_0_1_NOT_YET_QUALIFIED",
+            "formal_release_claimed": False,
+            "available_phase_count": available,
+            "total_phase_count": 6,
+        }
+        if self.metrics is not None:
+            fields.update(self.metrics.execute())
         return structured_record(
             component="tpaa-production-runtime",
             product_version=self.qualification.product_build_version,
             reason_code="PRCB_RUNTIME_STATUS",
-            fields={
-                "runtime_profile": self.qualification.profile.value,
-                "db_schema_version": "1.9.0",
-                "historical_qualification": "PIQB_1_0_QUALIFIED",
-                "target_qualification": "TPAA_1_0_1_NOT_YET_QUALIFIED",
-                "formal_release_claimed": False,
-                "available_phase_count": available,
-                "total_phase_count": 6,
-            },
+            fields=fields,
         )

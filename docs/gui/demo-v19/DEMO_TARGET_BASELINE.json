@@ -1,0 +1,49 @@
+{
+  "schema": "TPAA_GUI_DEMO_TARGET_BASELINE_V1",
+  "baseline_id": "GUI-DEMO-V19-2026-10-29",
+  "status": "FROZEN_LOCAL",
+  "frozen_at": "2026-10-30T00:00:00+08:00",
+  "source": {
+    "workspace_relative_path": "../../../TPAA_训练复盘交互Demo_Ribbon完整版_v19_三主题_默认深色.html",
+    "sha256": "64910eb8b73b8ada44e398ac85568c887a5863d2b8272577e3e09ae857b0a706",
+    "bytes": 290724,
+    "last_modified_local": "2026-10-29T16:49:39+08:00",
+    "copy_policy": "REFERENCE_BY_HASH_DO_NOT_DUPLICATE"
+  },
+  "viewport_contract": {
+    "reference": {"width": 1600, "height": 900, "device_pixel_ratio": 1.0},
+    "required_additional": [
+      {"width": 1366, "height": 768},
+      {"width": 1920, "height": 1080}
+    ],
+    "rule": "1600x900 preserves exact geometry; smaller viewports use approved scrolling or local reflow without unreadable scaling"
+  },
+  "themes": {
+    "ids": ["tactical", "graphite", "light"],
+    "default": "graphite",
+    "persistence": "SESSION_ONLY_RESET_TO_GRAPHITE_ON_START"
+  },
+  "views": [
+    "V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09",
+    "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18",
+    "V19", "V20", "V21", "V22", "V23", "V24", "V25"
+  ],
+  "navigation_invariants": {
+    "V24": "CONDITIONAL_CHILD_OF_V08_FOR_BVR_COLLABORATIVE_ATTACK_ONLY",
+    "V24_back_target": "V08",
+    "replay_target": "V03_WITH_SOURCE_COURSE_CONTEXT",
+    "visible_view_count": 25
+  },
+  "authority_boundaries": {
+    "visual_and_interaction_target": "DEMO_TARGET_BASELINE",
+    "business_semantics": "MACHINE_AUTHORITIES_AND_APPROVED_DESIGN",
+    "demo_numeric_values": "NON_AUTHORITATIVE_LAYOUT_EXAMPLES",
+    "production_mock_values": "FORBIDDEN"
+  },
+  "predecessor_bindings": {
+    "r3_3_package_manifest_sha256": "1b70d8149975da0635b79adb1eb72e2f37743739def2ead7ade27bfb3b6db421",
+    "cb_1_4_0_baseline_lock_sha256": "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437",
+    "cb_1_5_0_baseline_lock_sha256": "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab",
+    "cb_1_5_0_source_provenance_sha256": "9f771642b32a2da3d4b5f3b88ba22302fbe05f49e5284d6d85308a6485967ce8"
+  }
+}

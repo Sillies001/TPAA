@@ -65,7 +65,7 @@ def test_snapshot_carries_frozen_authority_hash() -> None:
     payload = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
     authority = payload["x-tpaa-authority"]
     assert authority["artifact_id"] == "CROSS_LAYER_DTO_CONTRACTS"
-    assert authority["core_baseline"] == "CB-1.4.0"
+    assert authority["core_baseline"] == "CB-1.5.0"
     assert authority["sha256"] == (
-        "28f7209e40709fb4eb53ceffdfee3542e867f060c4e63605cc1ad149a8e3819a"
+        "88ee2e13a9c0eed909a89d8cf24458a47e9e9e00b4a51bd4b3551b4a13826ea9"
     )

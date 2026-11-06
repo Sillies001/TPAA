@@ -22,8 +22,9 @@ from tpaa_runtime import (
     ProductionRuntimeConfig,
     RuntimeProfile,
     build_service_production_runtime,
-    create_service_production_backup,
+    create_managed_service_production_backup,
     restore_service_production_backup,
+    stage_inline_source_documents,
 )
 from tpaa_storage import LocalObjectStore, PostgreSQLServiceUnitOfWork
 from tpaa_storage.hashing import canonical_request_hash
@@ -97,9 +98,7 @@ def _qualification_payload(
     p1_contract_path: Path,
 ) -> dict[str, object]:
     if not source_path.is_file():
-        raise RuntimeError(
-            f"production qualification source unavailable: {source_path}"
-        )
+        raise RuntimeError(f"production qualification source unavailable: {source_path}")
     source_json = source_path.read_text(encoding="utf-8")
     payload: dict[str, object] = {
         "source_json": source_json,
@@ -167,14 +166,19 @@ def run_installed_service_e2e(
     restore_conninfo: str,
     instructor_token: str,
     analyst_token: str,
+    write_drain_confirmed: bool,
+    staging_target_confirmed: bool,
 ) -> dict[str, object]:
     """Execute the real installed Service chain over live PostgreSQL."""
 
     _assert_clean_work_root(work_root)
     object_root = work_root / "primary-objects"
-    payload = _qualification_payload(
-        source_path,
-        p1_contract_path=p1_contract_path,
+    payload = stage_inline_source_documents(
+        LocalObjectStore(object_root),
+        _qualification_payload(
+            source_path,
+            p1_contract_path=p1_contract_path,
+        ),
     )
     config = _service_config(
         authority_root=authority_root,
@@ -197,9 +201,7 @@ def run_installed_service_e2e(
     if submission.reused or submission.record.status is not JobStatus.SUCCEEDED:
         raise RuntimeError("installed Service P1 job did not complete as fresh success")
 
-    request_hash = canonical_request_hash(
-        {"job_type": "BUILD_P1_RELEASE", "payload": payload}
-    )
+    request_hash = canonical_request_hash({"job_type": "BUILD_P1_RELEASE", "payload": payload})
     release_id = allocate_session_release_id(
         session_id=SESSION_ID,
         request_hash=request_hash,
@@ -217,9 +219,7 @@ def run_installed_service_e2e(
         or metric_instance_count < 116
         or len(metrics) != metric_instance_count
     ):
-        raise RuntimeError(
-            "installed Service P1 release identity/full-catalog mismatch"
-        )
+        raise RuntimeError("installed Service P1 release identity/full-catalog mismatch")
 
     with PostgreSQLServiceUnitOfWork(conninfo) as uow:
         episode_rows = uow.canonical_rows.many(
@@ -233,9 +233,7 @@ def run_installed_service_e2e(
             or episode_rows[0]["episode_type"] != "BASIC_FLIGHT"
             or episode_rows[0]["data_sufficiency_status"] != "SUFFICIENT"
         ):
-            raise RuntimeError(
-                "installed Service P1 BASIC_FLIGHT Episode authority mismatch"
-            )
+            raise RuntimeError("installed Service P1 BASIC_FLIGHT Episode authority mismatch")
         episode_id = str(episode_rows[0]["episode_id"])
         stage_rows = uow.canonical_rows.many(
             "episode.episode_stage",
@@ -274,17 +272,13 @@ def run_installed_service_e2e(
             "MACHINE",
             "TRUTH",
         ] or any(row["status"] != "READY" for row in world_rows):
-            raise RuntimeError(
-                "installed Service P1 BASIC_CORE World authority mismatch"
-            )
+            raise RuntimeError("installed Service P1 BASIC_CORE World authority mismatch")
         if (
             len(relation_rows) != 3
             or any(row["relation_type"] != "PRECEDES" for row in relation_rows)
             or any(row["relation_source"] != "OFFICIAL" for row in relation_rows)
         ):
-            raise RuntimeError(
-                "installed Service P1 Stage relation authority mismatch"
-            )
+            raise RuntimeError("installed Service P1 Stage relation authority mismatch")
 
         observation_rows = uow.canonical_rows.many(
             "metric.capability_observation",
@@ -329,9 +323,7 @@ def run_installed_service_e2e(
             order_by=("release_id",),
         )
         if len(release_rows) != 1 or release_rows[0]["status"] != "PUBLISHED":
-            raise RuntimeError(
-                "installed Service P2 release cardinality/status mismatch"
-            )
+            raise RuntimeError("installed Service P2 release cardinality/status mismatch")
         p2_release_id = str(release_rows[0]["release_id"])
         binding = uow.canonical_rows.one(
             "assessment.attribution_run_request_binding",
@@ -351,9 +343,7 @@ def run_installed_service_e2e(
         p2_estimate_id = str(estimate_rows[0]["estimate_id"])
         p2_repository = P2PersistenceRepository(uow.canonical_rows)
         p2_estimate = p2_repository.exact_adjusted_estimate(p2_estimate_id)
-        p2_source = p2_repository.exact_source_observation(
-            p2_estimate.source_observation_id
-        )
+        p2_source = p2_repository.exact_source_observation(p2_estimate.source_observation_id)
         uow.commit()
 
     qualification_store = LocalObjectStore(object_root)
@@ -464,9 +454,7 @@ def run_installed_service_e2e(
             uow.canonical_rows,
             object_store=qualification_store,
         )
-        p6_forecast_actual = p6_products.exact_forecast(
-            p6_forecast_expected.forecast_result_id
-        )
+        p6_forecast_actual = p6_products.exact_forecast(p6_forecast_expected.forecast_result_id)
         p6_counterfactual_actual = p6_products.exact_counterfactual(
             p6_counterfactual_expected.counterfactual_run_id
         )
@@ -546,24 +534,26 @@ def run_installed_service_e2e(
         and row.object_id in set(all_job_ids)
     }
     observed_security = {(row.principal_key, row.action) for row in audit_rows}
-    if (
-        submit_ids != set(all_job_ids)
-        or not expected_security.issubset(observed_security)
-    ):
+    if submit_ids != set(all_job_ids) or not expected_security.issubset(observed_security):
         raise RuntimeError("installed Service persistent audit verification failed")
 
     backup = work_root / "backup"
-    manifest = create_service_production_backup(
+    if not write_drain_confirmed or not staging_target_confirmed:
+        raise RuntimeError("Service recovery operator confirmation invalid")
+    manifest, drain_receipt = create_managed_service_production_backup(
         conninfo=conninfo,
         object_root=object_root,
         destination=backup,
     )
     restored_objects = work_root / "restored-objects"
-    restore_service_production_backup(
+    staging_receipt = restore_service_production_backup(
         backup=backup,
-        target_conninfo=restore_conninfo,
-        target_object_root=restored_objects,
+        staging_conninfo=restore_conninfo,
+        staging_object_root=restored_objects,
+        staging_target_confirmed=staging_target_confirmed,
     )
+    if staging_receipt.get("activation_state") != "NOT_ACTIVATED":
+        raise RuntimeError("installed Service staging restore receipt invalid")
     restored_config = _service_config(
         authority_root=authority_root,
         conninfo=restore_conninfo,
@@ -591,27 +581,21 @@ def run_installed_service_e2e(
 
     restored_store = LocalObjectStore(restored_objects)
     with PostgreSQLServiceUnitOfWork(restore_conninfo, read_only=True) as uow:
-        restored_p2 = P2PersistenceRepository(
-            uow.canonical_rows
-        ).exact_adjusted_estimate(p2_estimate_id)
+        restored_p2 = P2PersistenceRepository(uow.canonical_rows).exact_adjusted_estimate(
+            p2_estimate_id
+        )
         restored_p3 = P3PersistenceRepository(
             uow.canonical_rows,
             object_store=restored_store,
         ).exact_capability_estimate(p3_expected.estimate_id)
         restored_assessments = P4P5PersistenceRepository(uow.canonical_rows)
-        restored_p4 = restored_assessments.exact_p4_revision(
-            p4_expected.actor_assessment_id
-        )
-        restored_p5 = restored_assessments.exact_p5_revision(
-            p5_expected.mission_assessment_id
-        )
+        restored_p4 = restored_assessments.exact_p4_revision(p4_expected.actor_assessment_id)
+        restored_p5 = restored_assessments.exact_p5_revision(p5_expected.mission_assessment_id)
         restored_p6 = P6PersistenceRepository(
             uow.canonical_rows,
             object_store=restored_store,
         )
-        restored_forecast = restored_p6.exact_forecast(
-            p6_forecast_expected.forecast_result_id
-        )
+        restored_forecast = restored_p6.exact_forecast(p6_forecast_expected.forecast_result_id)
         restored_counterfactual = restored_p6.exact_counterfactual(
             p6_counterfactual_expected.counterfactual_run_id
         )
@@ -635,10 +619,7 @@ def run_installed_service_e2e(
         and row.object_id in set(all_job_ids)
     }
     restored_security = {(row.principal_key, row.action) for row in restored_audit}
-    if (
-        restored_submit_ids != set(all_job_ids)
-        or not expected_security.issubset(restored_security)
-    ):
+    if restored_submit_ids != set(all_job_ids) or not expected_security.issubset(restored_security):
         raise RuntimeError("installed Service backup/restore audit persistence failed")
 
     return {
@@ -654,13 +635,9 @@ def run_installed_service_e2e(
         "metric_count": len(metrics),
         "catalog_definition_count": release["catalog_definition_count"],
         "metric_code_count": release["metric_code_count"],
-        "capability_observation_count": release[
-            "capability_observation_count"
-        ],
+        "capability_observation_count": release["capability_observation_count"],
         "system_observation_count": release["system_observation_count"],
-        "evidence_only_metric_instance_count": release[
-            "evidence_only_metric_instance_count"
-        ],
+        "evidence_only_metric_instance_count": release["evidence_only_metric_instance_count"],
         "world_product_count": len(world_rows),
         "stage_count": len(stage_rows),
         "world_relation_count": len(relation_rows),
@@ -688,9 +665,7 @@ def run_installed_service_e2e(
         "p6_forecast_job_status": p6_forecast_submission.record.status.value,
         "p6_forecast_result_id": p6_forecast_expected.forecast_result_id,
         "p6_counterfactual_job_id": p6_counterfactual_submission.record.job_id,
-        "p6_counterfactual_job_status": (
-            p6_counterfactual_submission.record.status.value
-        ),
+        "p6_counterfactual_job_status": (p6_counterfactual_submission.record.status.value),
         "p6_counterfactual_run_id": p6_counterfactual_expected.counterfactual_run_id,
         "restart_exact_replay": True,
         "backup_restore_exact_replay": True,
@@ -704,6 +679,9 @@ def run_installed_service_e2e(
         "persistent_audit_verified": True,
         "security_audit_verified": True,
         "backup_manifest": manifest.relative_to(work_root).as_posix(),
+        "managed_write_drain_verified": (
+            drain_receipt.state == "MANAGED_WRITES_BLOCKED"
+        ),
         "restored_schema_version": restored_metadata.schema_version,
         "production_source": source_path.name,
         "tests_fixture_dependency": False,

@@ -13,6 +13,7 @@ from tpaa_application import (
     M8ViewerContext,
     M9ViewerContext,
 )
+from tpaa_security import ApiAuthorizationGuard, AuthorizationPrincipal, SecurityRole
 
 from .app import ActorResolver, register_base_routes
 from .ed2_upper import register_ed2_upper_routes
@@ -26,6 +27,8 @@ from .m9_app import M9PrincipalResolver, register_m9_routes
 from .product_discovery import register_product_discovery_routes
 from .product_v1 import register_product_v1_routes
 from .runtime import register_product_runtime_routes
+from .security import register_security_routes
+from .source_v1 import register_source_v1_routes
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +42,10 @@ class UnifiedPrincipal:
     privileged_identity_authorized: bool = False
     visibility_authorized: bool = False
     export_authorized: bool = False
+    security_roles: tuple[str, ...] = ()
+    resource_scopes: tuple[str, ...] = ()
+    authentication_method: str = "LEGACY_BINDING"
+    credential_id: str = "legacy"
 
     def __post_init__(self) -> None:
         if not isinstance(self.role, str) or not self.role.strip():
@@ -51,6 +58,36 @@ class UnifiedPrincipal:
     @property
     def actor_key(self) -> str:
         return self.actor_id or f"ROLE:{self.role}"
+
+    def authorization_principal(self) -> AuthorizationPrincipal:
+        """Project transport identity into the W3 business-role boundary."""
+
+        legacy_mapping: dict[str, frozenset[SecurityRole]] = {
+            "SUBJECT_SELF": frozenset({SecurityRole.TRAINEE}),
+            "INSTRUCTOR_EVALUATOR": frozenset({SecurityRole.INSTRUCTOR, SecurityRole.EVALUATOR}),
+            "TEAM_LEAD": frozenset({SecurityRole.TRAINING_MANAGER}),
+            "ANALYST": frozenset({SecurityRole.UNIT_ANALYST}),
+            "ADMIN_AUDITOR": frozenset({SecurityRole.ADMINISTRATOR}),
+            "MODEL_REVIEWER": frozenset({SecurityRole.MODEL_REVIEWER}),
+        }
+        try:
+            roles = (
+                frozenset(SecurityRole(value) for value in self.security_roles)
+                if self.security_roles
+                else legacy_mapping[self.role]
+            )
+        except (KeyError, ValueError) as exc:
+            raise PermissionError("principal business role is not authorized") from exc
+        # scope_match is a frozen M8/M9 domain-view flag, not an authorization scope.
+        # Only explicit resource scopes may cross into the W3 authorization principal.
+        scopes = frozenset(self.resource_scopes)
+        return AuthorizationPrincipal(
+            subject=self.actor_key,
+            roles=roles,
+            scopes=scopes,
+            authentication_method=self.authentication_method,
+            credential_id=self.credential_id,
+        )
 
     def m8_viewer(self) -> M8ViewerContext:
         return M8ViewerContext(
@@ -111,6 +148,7 @@ def register_unified_routes(
         actor_resolver=actor_resolver,
     )
     register_product_runtime_routes(app, application)
+    register_source_v1_routes(app, application)
     register_ed2_upper_routes(app, application)
     register_m1_routes(app, application)
     register_m3_routes(app, application)
@@ -141,6 +179,8 @@ def create_unified_service_app(
     *,
     application: ApplicationService,
     principal_resolver: UnifiedPrincipalResolver,
+    authorization_guard: ApiAuthorizationGuard | None = None,
+    approval_service: object | None = None,
 ) -> FastAPI:
     """Create default-deny Service API with one injected identity/principal resolver."""
 
@@ -170,6 +210,31 @@ def create_unified_service_app(
                 },
             )
         request.state.tpaa_principal = principal
+        if authorization_guard is not None:
+            try:
+                authorization_principal = principal.authorization_principal()
+            except PermissionError:
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={
+                        "outcome": "INVALID",
+                        "error": {"code": "BUSINESS_ROLE_REQUIRED"},
+                    },
+                )
+            decision = authorization_guard.authorize(
+                authorization_principal,
+                method=request.method,
+                path=request.url.path,
+                approval_id=request.headers.get("x-tpaa-approval-id"),
+            )
+            if not decision.allowed:
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={
+                        "outcome": "INVALID",
+                        "error": {"code": decision.code},
+                    },
+                )
         return await call_next(request)
 
     register_unified_routes(
@@ -179,6 +244,13 @@ def create_unified_service_app(
         m9_principal_resolver=_m9_from_state,
         actor_resolver=_actor_from_state,
     )
+    if approval_service is not None:
+        from tpaa_security import ApprovalService
+
+        if not isinstance(approval_service, ApprovalService):
+            raise TypeError("approval_service must be ApprovalService")
+        register_security_routes(app, approval_service)
     app.state.piqb_b4_unified_principal_required = True
     app.state.piqb_b4_transport_actor_header_authoritative = False
+    app.state.w3_authorization_enabled = authorization_guard is not None
     return app

@@ -32,7 +32,7 @@ from tpaa_longitudinal import (  # noqa: E402
     load_m4_trend_authority,
 )
 
-BASELINE = REPO_ROOT / "baseline" / "CB-1.4.0"
+BASELINE = REPO_ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_PATH = (
     BASELINE / "canonical" / "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json"
 )

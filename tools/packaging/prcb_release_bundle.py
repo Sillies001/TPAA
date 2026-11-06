@@ -80,7 +80,7 @@ def _install_runtime_entry(stage: Path, profile: str) -> None:
         qualification_root / P1_QUALIFICATION_CONTRACT,
         build_full_p1_request_contract(
             aircraft_id=P1_QUALIFICATION_AIRCRAFT_ID,
-            authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
+            authority_root=REPO_ROOT / "baseline" / "CB-1.5.0" / "canonical",
         ),
     )
     _write_json(
@@ -181,7 +181,7 @@ def build_prcb_release_bundle(profile: str, output_dir: Path) -> tuple[Path, Pat
             "product_version": TARGET_VERSION,
             "source_revision": revision,
             "profile_id": profile,
-            "canonical_baseline": "CB-1.4.0",
+            "canonical_baseline": "CB-1.5.0",
             "db_schema_version": "1.9.0",
             "tests_packaged": False,
             "fixtures_packaged": False,

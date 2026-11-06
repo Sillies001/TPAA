@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 
 from tpaa_ingest import (
@@ -8,7 +9,9 @@ from tpaa_ingest import (
     descriptor_for_interchange_family,
     production_interchange_profile,
 )
+from tpaa_runtime import stage_source_artifact
 from tpaa_runtime.durable_jobs import ProductionJobExecutor
+from tpaa_storage import LocalObjectStore
 
 SESSION_ID = "e2100000-0000-4000-8000-000000000001"
 
@@ -70,25 +73,43 @@ def _item(family: SourceFamily, ordinal: int) -> dict[str, object]:
     }
 
 
-def test_durable_p1_source_set_accepts_multiple_governed_families() -> None:
-    commands = ProductionJobExecutor._source_imports(
-        {
-            "source_documents": [
-                _item(SourceFamily.MISSION_AVIONICS, 1),
-                _item(SourceFamily.TDL, 2),
-                _item(SourceFamily.RANGE_ACMI, 3),
-                _item(SourceFamily.SCENARIO, 4),
-                _item(SourceFamily.AUDIO_VIDEO, 5),
-            ]
-        }
+def test_durable_p1_source_set_accepts_multiple_governed_families(
+    tmp_path: Path,
+) -> None:
+    store = LocalObjectStore(tmp_path / "objects")
+    documents = [
+        _item(SourceFamily.MISSION_AVIONICS, 1),
+        _item(SourceFamily.TDL, 2),
+        _item(SourceFamily.RANGE_ACMI, 3),
+        _item(SourceFamily.SCENARIO, 4),
+        _item(SourceFamily.AUDIO_VIDEO, 5),
+    ]
+    for document in documents:
+        source_json = document.pop("source_json")
+        metadata = document["source_import"]
+        assert isinstance(source_json, str)
+        assert isinstance(metadata, dict)
+        artifact_id = metadata["artifact_id"]
+        assert isinstance(artifact_id, str)
+        reference = stage_source_artifact(
+            store,
+            artifact_id=artifact_id,
+            data=source_json.encode("utf-8"),
+        )
+        document["source_artifact"] = reference.as_payload()
+        metadata["source_ref"] = reference.logical_uri
+        metadata["uri_kind"] = "MANAGED"
+
+    executor = ProductionJobExecutor(
+        authority_root=tmp_path,
+        write_uow_factory=lambda: None,  # type: ignore[arg-type,return-value]
+        object_store=store,
     )
+    commands = executor._source_imports({"source_documents": documents})
 
     assert len(commands) == 5
     assert {item.session_id for item in commands} == {SESSION_ID}
-    assert {
-        item.envelope.source_family
-        for item in commands
-    } == {
+    assert {item.envelope.source_family for item in commands} == {
         SourceFamily.MISSION_AVIONICS,
         SourceFamily.TDL,
         SourceFamily.RANGE_ACMI,

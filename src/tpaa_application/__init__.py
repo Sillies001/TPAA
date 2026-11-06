@@ -30,6 +30,14 @@ from .ed2_upper_service import (
     ED2UpperProductRepositoryPort,
     ED2UpperProductService,
 )
+from .governance_registry import (
+    ConfigurationRecord,
+    ConfigurationSnapshotRecord,
+    ContextArtifactRecord,
+    GovernanceRegistryError,
+    GovernanceRegistryService,
+    LifecycleEventRecord,
+)
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -171,6 +179,12 @@ from .p6_persistence import (
     P6PersistenceError,
     P6PersistenceRepository,
 )
+from .release_management import (
+    ManagedRelease,
+    ReleaseLifecycleReceipt,
+    ReleaseManagementError,
+    ReleaseManagementService,
+)
 from .runtime import (
     GetRuntimeBaselineStatus,
     RuntimeBaselineIdentityView,
@@ -182,7 +196,7 @@ from .security_audit import (
     SecurityAuditRecord,
     SecurityAuditSink,
 )
-from .service import ApplicationService
+from .service import ApplicationService, EpisodeRevisionReceipt, EpisodeRevisionUseCase
 from .source_import import (
     ProductionImportError,
     ProductionImportService,
@@ -190,9 +204,33 @@ from .source_import import (
     SourceProvenanceRecord,
     SourceProvenanceRepository,
 )
+from .source_workflow import (
+    SOURCE_MAX_ARTIFACT_BYTES,
+    SOURCE_STREAM_CHUNK_BYTES,
+    SourceWorkflowError,
+    SourceWorkflowService,
+    bounded_source_bytes,
+)
 from .use_cases import GetStorageBaselineStatus
+from .w7_external import (
+    W7_EXTERNAL_CAPABILITIES,
+    W7ExternalCapability,
+    W7ExternalCapabilityError,
+    W7ExternalCapabilityRegistry,
+    build_w7_external_registry,
+)
 
 __all__ = [
+    "ConfigurationRecord",
+    "ConfigurationSnapshotRecord",
+    "ContextArtifactRecord",
+    "GovernanceRegistryError",
+    "GovernanceRegistryService",
+    "LifecycleEventRecord",
+    "ManagedRelease",
+    "ReleaseLifecycleReceipt",
+    "ReleaseManagementError",
+    "ReleaseManagementService",
     "ED2UpperProduct",
     "ED2UpperProductError",
     "ED2UpperProductRepositoryPort",
@@ -212,6 +250,8 @@ __all__ = [
     "SecurityAuditRecord",
     "SecurityAuditSink",
     "ApplicationService",
+    "EpisodeRevisionReceipt",
+    "EpisodeRevisionUseCase",
     "B3_JOB_COMPONENT_VERSION",
     "DurableJobControl",
     "DurableJobControlError",
@@ -338,7 +378,17 @@ __all__ = [
     "build_trusted_runtime_status_use_case",
     "business_outcome",
     "SourceImportCommand",
+    "SOURCE_MAX_ARTIFACT_BYTES",
+    "SOURCE_STREAM_CHUNK_BYTES",
+    "SourceWorkflowError",
+    "SourceWorkflowService",
+    "bounded_source_bytes",
     "SourceProvenanceRecord",
     "SourceProvenanceRepository",
     "StorageBaselineStatus",
+    "W7_EXTERNAL_CAPABILITIES",
+    "W7ExternalCapability",
+    "W7ExternalCapabilityError",
+    "W7ExternalCapabilityRegistry",
+    "build_w7_external_registry",
 ]

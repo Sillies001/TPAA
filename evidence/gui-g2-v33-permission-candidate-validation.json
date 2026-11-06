@@ -1,0 +1,183 @@
+{
+  "schema": "TPAA_G2_PERMISSION_CANDIDATE_VALIDATION_V1",
+  "decision_id": "G2-V33-GUI-PERMISSION-MAPPING-CANDIDATE-2026-11-06",
+  "candidate_core_baseline": "CB-1.7.0",
+  "status": "PASS_STATIC_ARTIFACT_VALIDATION_WITH_RUNTIME_TEST_AND_APPROVAL_BLOCKERS",
+  "activation_status": "INACTIVE",
+  "checks": [
+    {
+      "id": "V-ROLE-ENUM-001",
+      "status": "PASS",
+      "detail": "Nine policy roles exactly match SecurityRole enum."
+    },
+    {
+      "id": "V-BUSINESS-PERM-001",
+      "status": "PASS",
+      "detail": "All policy permission IDs match Permission enum (22 values)."
+    },
+    {
+      "id": "V-GUI-PERM-001",
+      "status": "PASS",
+      "detail": "12 unique GUI permissions; each mapped or explicitly authentication-only; unknown is DENY."
+    },
+    {
+      "id": "V-GUI-VIEW-001",
+      "status": "PASS",
+      "detail": "26 views match V01-V26 and all have non-empty required_permissions."
+    },
+    {
+      "id": "V-ROLE-VIEW-001",
+      "status": "PASS",
+      "detail": "Nine-role access matrix derived without adding business grants."
+    },
+    {
+      "id": "V-V24-ENTRY-001",
+      "status": "PASS",
+      "detail": "V24 retains V08 predecessor/return and exact Release/Context/WE/Cluster/Formation context."
+    },
+    {
+      "id": "V-STRIKE-PERSPECTIVE-001",
+      "status": "PASS",
+      "detail": "V06 and V21 remain shooter-only."
+    },
+    {
+      "id": "V-SOURCE-HASH-001",
+      "status": "PASS",
+      "detail": "Inherited V33 registry and conformance matrix SHA-256 source hashes match."
+    },
+    {
+      "id": "V-SCOPE-SPEC-001",
+      "status": "PASS",
+      "detail": "Candidate specifies exact resource scopes and rejects wildcard scope for non-global roles; runtime enforcement blocked."
+    },
+    {
+      "id": "V-AUDIT-SPEC-001",
+      "status": "PASS",
+      "detail": "Sensitive read and mutation audit triggers enumerated; runtime parity blocked."
+    },
+    {
+      "id": "V-ROUTE-SCOPE-001",
+      "status": "PASS",
+      "detail": "71 API routes inspected; no missing route binding invented."
+    },
+    {
+      "id": "V-DB-COMPAT-001",
+      "status": "PASS",
+      "detail": "DB schema remains 1.10.0; no migration needed for this inactive authority-only candidate."
+    },
+    {
+      "id": "V-APPROVAL-001",
+      "status": "BLOCKED",
+      "detail": "No formal security/governance approval; candidate must remain inactive."
+    },
+    {
+      "id": "V-SCOPE-RUNTIME-001",
+      "status": "IMPLEMENTED_PENDING_TEST",
+      "detail": "UnifiedPrincipal no longer converts scope_match into an authorization wildcard; AuthorizationService denies '*' for non-global ownership-scoped reads."
+    },
+    {
+      "id": "V-SESSION-SEPARATION-001",
+      "status": "IMPLEMENTED_PENDING_TEST",
+      "detail": "security/session preserves business permissions and adds separate gui_permissions; CB-1.7.0 remains INACTIVE so the GUI list is empty."
+    },
+    {
+      "id": "V-AUDIT-PREEXEC-001",
+      "status": "IMPLEMENTED_PENDING_TEST",
+      "detail": "All governed Permission routes now write authorization audit before handler execution; audit sink failure returns AUDIT_WRITE_FAILED."
+    },
+    {
+      "id": "V-AUDIT-IDENTITY-001",
+      "status": "IMPLEMENTED_PENDING_TEST",
+      "detail": "API authorization audit subject is SHA-256 pseudonymized before the persistent audit adapter; payload/token/nonce are not added."
+    },
+    {
+      "id": "V-ROUTE-AUTHORITY-002",
+      "status": "PASS_STATIC",
+      "detail": "Inactive API_ROUTE_SECURITY_AUTHORITY explicitly covers all 71 frozen runtime routes and preserves all 14 GUI routes as RESERVED_G1_NOT_EXPOSED."
+    }
+  ],
+  "role_view_counts": {
+    "all_nine": [
+      "V01",
+      "V02",
+      "V04",
+      "V05",
+      "V06",
+      "V07",
+      "V08",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V23",
+      "V25",
+      "V26"
+    ],
+    "raw_permission_six": [
+      "V03",
+      "V24"
+    ],
+    "admin_only": [
+      "V22"
+    ]
+  },
+  "action_grants": [
+    {
+      "view_id": "V23",
+      "permission_id": "batch.register",
+      "roles": [
+        "INSTRUCTOR",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ]
+    },
+    {
+      "view_id": "V23",
+      "permission_id": "batch.training_type.revise",
+      "roles": [
+        "INSTRUCTOR",
+        "TRAINING_MANAGER",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ]
+    },
+    {
+      "view_id": "V24",
+      "permission_id": "context.force_formation.revise",
+      "roles": [
+        "INSTRUCTOR",
+        "TRAINING_MANAGER",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ]
+    }
+  ],
+  "implementation_gates": [
+    "Run Ruff and Mypy on the changed Python sources.",
+    "Run targeted pytest for W3 authorization, unified API session separation and G2 candidate contracts.",
+    "Run frontend TypeScript typecheck/build and deterministic frontend build.",
+    "Run G2 verifier; expected stage remains IN_PROGRESS until candidate activation and remaining UI gates close.",
+    "Run Windows WebEngine smoke after rebuilding web_dist.",
+    "Runtime route classifier switch to the explicit candidate authority remains blocked until formal approval and exact route-graph parity tests.",
+    "Formal security/governance approval remains outstanding."
+  ],
+  "not_run": [
+    "Ruff/Mypy for this batch",
+    "targeted pytest for this batch",
+    "frontend typecheck/build for this batch",
+    "G2 verifier after this batch",
+    "Windows WebEngine smoke after this batch",
+    "runtime explicit-route-authority switch",
+    "keyboard/focus/high-DPI/three-theme conformance"
+  ],
+  "release_claim": false
+}

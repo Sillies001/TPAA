@@ -1,0 +1,162 @@
+{
+  "authority_id": "CORE_RULES",
+  "version": "1.2.0",
+  "core_baseline": "CB-1.4.0",
+  "rules": [
+    {
+      "id": "CR-001",
+      "name": "Single Definition Authority",
+      "rule": "Every field-level fact has exactly one machine-readable authority artifact. Human documents may not create a second current-looking schema."
+    },
+    {
+      "id": "CR-002",
+      "name": "Identifier Stability",
+      "rule": "Published subject, context, metric definition, release, episode and stage identities are immutable; correction is by supersession/versioning."
+    },
+    {
+      "id": "CR-003",
+      "name": "Session Time",
+      "rule": "Computation uses authoritative Session Time; source clocks require explicit TimeTransform; JS-visible int64 time transports as decimal string."
+    },
+    {
+      "id": "CR-004",
+      "name": "Half-open Interval",
+      "rule": "All windows use [start,end); gaps, validity, source/clock/configuration boundaries split windows."
+    },
+    {
+      "id": "CR-005",
+      "name": "Missing Is Not Zero",
+      "rule": "Missing prerequisite data yields N_A or INSUFFICIENT_DATA with reason code; never fabricate zero."
+    },
+    {
+      "id": "CR-006",
+      "name": "Context Immutability",
+      "rule": "Historical computation/read uses exact immutable context_id and exact bound artifacts; no current/latest fallback."
+    },
+    {
+      "id": "CR-007",
+      "name": "Release Immutability",
+      "rule": "Published result is release-bound; historical replay resolves immutable definition/catalog/context/world/evidence provenance."
+    },
+    {
+      "id": "CR-008",
+      "name": "Typed Metric Value",
+      "rule": "value_kind determines one legal value slot; STRUCTURED is object and binds exactly one executable structured schema."
+    },
+    {
+      "id": "CR-009",
+      "name": "Stable Subjects",
+      "rule": "P1 primary subjects are AIRCRAFT and MISSION_SYSTEM_INSTANCE; TARGET_PAIR is reference/evaluation quality only and never a longitudinal subject."
+    },
+    {
+      "id": "CR-010",
+      "name": "Observation Lanes",
+      "rule": "AIRCRAFT_CAP_L1_OBSERVATION, SYSTEM_PERFORMANCE_OBSERVATION and QUALITY_EVIDENCE_ONLY are mutually governed publication lanes."
+    },
+    {
+      "id": "CR-011",
+      "name": "Longitudinal Compatibility",
+      "rule": "Only trend-eligible NUMERIC metrics enter numeric longitudinal_sample; comparison keys segment semantic/configuration/profile changes."
+    },
+    {
+      "id": "CR-012",
+      "name": "No Future Leakage",
+      "rule": "As-of joins are causal; state/config uses backward validity, command-response uses forward causal windows, and nearest is only explicit-policy."
+    },
+    {
+      "id": "CR-013",
+      "name": "Evidence First",
+      "rule": "Every metric/observation/assessment must retain evidence and provenance anchors sufficient for deterministic drill-down."
+    },
+    {
+      "id": "CR-014",
+      "name": "Safety Boundary",
+      "rule": "System does not derive weapon performance envelopes, best launch/release geometry, probability-of-kill models, tactical optimization or combat recommendations."
+    },
+    {
+      "id": "CR-015",
+      "name": "Change Closure",
+      "rule": "Authority artifact + dependent contracts + migrations + fixtures + traceability + validators change atomically; otherwise baseline build fails."
+    },
+    {
+      "id": "CR-016",
+      "name": "Semantic Product Separation",
+      "rule": "Canonical facts, World products, Metric/Observation, Assessment, adjusted/capability Estimate, and Forecast/Counterfactual are distinct product classes. A downstream interpretation never rewrites an upstream fact."
+    },
+    {
+      "id": "CR-017",
+      "name": "Scope Separation",
+      "rule": "Individual, Team, Package/Mission and Joint/LVC scopes remain explicit. Team/mission results are not copied to individual actors; individual scores are not averaged to manufacture team capability."
+    },
+    {
+      "id": "CR-018",
+      "name": "World Capability Gate",
+      "rule": "Permissible conclusions are gated by declared C/W/P/A/J/M availability and quality. Truth never substitutes for observer perception and missing adjudication never becomes an inferred official outcome."
+    },
+    {
+      "id": "CR-019",
+      "name": "Instructor Revision Integrity",
+      "rule": "Instructor annotation/override is revisioned and preserves the original automatic product, reviewer identity, reason and rubric/profile version. Human review does not mutate immutable Metric/World facts."
+    },
+    {
+      "id": "CR-020",
+      "name": "Attribution Identifiability",
+      "rule": "P2+ attribution may return NOT_IDENTIFIABLE/INSUFFICIENT_DATA. Factor effects are model-conditioned associations by default and are not personnel blame, fault diagnosis or causal proof."
+    },
+    {
+      "id": "CR-021",
+      "name": "Cohort Comparability",
+      "rule": "Longitudinal comparisons require an explicit cohort/comparison key covering material subject, configuration, scenario, role/team, world-capability and algorithm/profile semantics. Incomparable points are segmented rather than joined."
+    },
+    {
+      "id": "CR-022",
+      "name": "Knowledge-Time Integrity",
+      "rule": "When later information changes interpretation, the system distinguishes original as-known replay from retrospective revision. Backfilled labels/configuration do not masquerade as contemporaneous knowledge."
+    },
+    {
+      "id": "CR-023",
+      "name": "Evidence Independence",
+      "rule": "Record count, observation count, independent subject count and effective evidence volume are distinct. Deduplication or multiple sources do not by themselves prove statistical independence."
+    },
+    {
+      "id": "CR-024",
+      "name": "Dormant Future Contracts",
+      "rule": "P2-P6 contracts may be frozen before implementation, but UI/API must feature-gate them and may not present unimplemented/unvalidated capability as available."
+    },
+    {
+      "id": "CR-025",
+      "name": "External Interoperability Boundary",
+      "rule": "TENA/HLA/DIS or other external protocols enter through governed adapters/gateways and Canonical/World contracts; core assessment logic does not depend on a transport protocol."
+    },
+    {
+      "id": "CR-026",
+      "name": "Training Plugin Composition",
+      "rule": "New training types compose Context, World policy, Stage/Objectives, Event/Relation, Metric and Assessment contracts; plugins may not bypass the C+TPAA-M evidence spine or create source-specific business logic above reconstruction."
+    },
+    {
+      "id": "CR-027",
+      "name": "Platform-Neutral Business Core",
+      "rule": "Windows and Linux are mandatory supported OS families. Domain, Application, reconstruction, Stage/Event, Metric, Assessment, Longitudinal, Capability and Release semantics shall not branch by OS; platform differences are isolated behind explicit adapters."
+    },
+    {
+      "id": "CR-028",
+      "name": "Cross-Platform Logical Equivalence",
+      "rule": "The same frozen input and governed versions shall produce equivalent logical products on Windows and Linux: discrete identities/status/stages/events are exact and numeric results satisfy the same governed Golden tolerance/rounding policy. OS-local paths, PIDs and package bytes are not business semantics."
+    },
+    {
+      "id": "CR-029",
+      "name": "Controlled Progress/Layer Vocabulary",
+      "rule": "Project progress/layer vocabulary is restricted to P (Capability Phase), M (Development Milestone), WS (Engineering Workstream) and Episode Stage. Generic or alternate phase/stage numbering shall not create a fifth progress namespace."
+    },
+    {
+      "id": "CR-030",
+      "name": "P/M/WS/Stage Orthogonality",
+      "rule": "P describes capability claim depth, M describes project acceptance progress, WS organizes engineering work, and Stage describes training/Episode process. Completion or renaming in one namespace never changes semantic identity in another."
+    },
+    {
+      "id": "CR-031",
+      "name": "Metric Family Applicability and Product-Layer Separation",
+      "rule": "P1 metric families shall be applied only to their governed subject/product layer. In particular P1-SNS-* is the RADAR sensor detection/measurement family and is not a generic all-sensor family; passive IRST/EO, RWR/ESM, DATALINK and FUSION use their dedicated families. Local track and association/identification metrics are product-layer evaluations and shall not be substituted for raw sensor-measurement metrics."
+    }
+  ]
+}

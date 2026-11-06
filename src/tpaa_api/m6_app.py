@@ -37,9 +37,7 @@ def register_m6_routes(
 ) -> FastAPI:
     """Register exact-release read-only P2 workspace routes."""
 
-    @app.get(
-        "/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/comparison"
-    )
+    @app.get("/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/comparison")
     def comparison(
         p2_release_id: str,
         estimate_id: str,
@@ -55,9 +53,7 @@ def register_m6_routes(
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.get(
-        "/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/diagnostics"
-    )
+    @app.get("/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/diagnostics")
     def diagnostics(
         p2_release_id: str,
         estimate_id: str,

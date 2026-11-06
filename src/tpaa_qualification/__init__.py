@@ -26,6 +26,14 @@ from .m5_profiles import (
     validate_result_binding,
     validate_target_hardware,
 )
+from .w9_final import (
+    W9_EVIDENCE_CATEGORIES,
+    W9EvidenceGate,
+    W9FinalQualificationStatus,
+    W9QualificationError,
+    build_w9_final_qualification_status,
+    immutable_gate_map,
+)
 
 __all__ = [
     "M5CertificationProfile",
@@ -48,4 +56,10 @@ __all__ = [
     "validate_release_signoffs",
     "validate_signoff_contract",
     "validate_upgrade_rollback_qualification",
+    "W9_EVIDENCE_CATEGORIES",
+    "W9EvidenceGate",
+    "W9FinalQualificationStatus",
+    "W9QualificationError",
+    "build_w9_final_qualification_status",
+    "immutable_gate_map",
 ]

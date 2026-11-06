@@ -41,7 +41,7 @@ from tpaa_canonical.runtime_handshake import (  # noqa: E402
 from tpaa_metric import build_m3_metric_execution_plan  # noqa: E402
 from tpaa_qualification import load_m5_qualification_authority  # noqa: E402
 
-BASELINE = APP_ROOT / "baseline" / "CB-1.4.0"
+BASELINE = APP_ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_ROOT = BASELINE / "canonical"
 
 
@@ -66,7 +66,7 @@ def _identity() -> RuntimeBaselineIdentity:
     authority = load_m5_qualification_authority(BASELINE)
     return RuntimeBaselineIdentity(
         product_build_version="M5_OFFLINE_RUNTIME",
-        core_baseline="CB-1.4.0",
+        core_baseline="CB-1.5.0",
         baseline_lock_sha256=authority.baseline_lock_sha256,
         db_schema_version=authority.db_schema_version,
         core_authority_artifact_id="M5_FORMAL_QUALIFICATION_AUTHORITY",

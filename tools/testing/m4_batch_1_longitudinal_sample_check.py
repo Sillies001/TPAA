@@ -29,7 +29,7 @@ from tpaa_longitudinal import (  # noqa: E402
 )
 from tpaa_metric import M2MetricDefinition, build_m3_metric_execution_plan  # noqa: E402
 
-BASELINE = REPO_ROOT / "baseline" / "CB-1.4.0"
+BASELINE = REPO_ROOT / "baseline" / "CB-1.5.0"
 AUTHORITY_ROOT = BASELINE / "canonical"
 TRACKING_ISSUE = 126
 

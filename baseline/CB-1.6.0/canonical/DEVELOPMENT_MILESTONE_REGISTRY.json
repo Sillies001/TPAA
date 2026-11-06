@@ -1,0 +1,194 @@
+{
+  "registry_id": "DEVELOPMENT_MILESTONE_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "terminology": {
+    "symbol": "M",
+    "english": "Development Milestone",
+    "chinese": "项目里程碑",
+    "rule": "M0-M9 are project acceptance checkpoints. M code never changes the P identity of a product."
+  },
+  "milestones": [
+    {
+      "code": "M0",
+      "name": "Engineering Bootstrap",
+      "name_cn": "工程启动基线",
+      "objective": "Create a buildable/testable Windows+Linux software substrate; no capability Phase is admitted by M0 alone.",
+      "p_capability_impact": [],
+      "required_workstreams": [
+        "WS-CORE",
+        "WS-STORAGE",
+        "WS-API",
+        "WS-GUI",
+        "WS-TEST",
+        "WS-PLATFORM",
+        "WS-SECURITY",
+        "WS-DEVOPS",
+        "WS-GOVERNANCE"
+      ]
+    },
+    {
+      "code": "M1",
+      "name": "P1 Minimum Vertical Slice",
+      "name_cn": "P1最小端到端闭环",
+      "objective": "Run one Basic Flight synthetic vertical slice Source→Canonical→Context→Episode/Stage→World→representative metrics→Observation→Release→API→GUI on Windows and Linux.",
+      "p_capability_impact": [
+        "P1"
+      ],
+      "required_workstreams": [
+        "WS-DATA",
+        "WS-WORLD",
+        "WS-METRIC",
+        "WS-OBSERVATION",
+        "WS-STORAGE",
+        "WS-API",
+        "WS-GUI",
+        "WS-TEST",
+        "WS-PLATFORM"
+      ]
+    },
+    {
+      "code": "M2",
+      "name": "P1 Basic Flight Complete",
+      "name_cn": "P1基本飞行完整能力",
+      "objective": "Complete Basic Flight P1 capability plus the 32-item P1 foundation metric delivery batch and representative Golden evidence.",
+      "p_capability_impact": [
+        "P1"
+      ],
+      "required_workstreams": [
+        "WS-DATA",
+        "WS-WORLD",
+        "WS-METRIC",
+        "WS-OBSERVATION",
+        "WS-GUI",
+        "WS-TEST"
+      ]
+    },
+    {
+      "code": "M3",
+      "name": "P1 Four-Training-Type Complete",
+      "name_cn": "P1四类训练观测能力完整",
+      "objective": "Complete P1 Basic/WVR/BVR/Strike observed-performance capability and all 116 executable P1 metrics; P1 formulas/semantics are production candidates.",
+      "p_capability_impact": [
+        "P1"
+      ],
+      "required_workstreams": [
+        "WS-WORLD",
+        "WS-METRIC",
+        "WS-OBSERVATION",
+        "WS-API",
+        "WS-GUI",
+        "WS-TEST"
+      ]
+    },
+    {
+      "code": "M4",
+      "name": "P1 Longitudinal & Debrief Closure",
+      "name_cn": "P1长期趋势与复盘闭环",
+      "objective": "Close P1 aircraft/mission-system longitudinal trends, evidence-first debrief/analytics and historical replay without activating P4 human assessment.",
+      "p_capability_impact": [
+        "P1"
+      ],
+      "required_workstreams": [
+        "WS-LONGITUDINAL",
+        "WS-OBSERVATION",
+        "WS-GUI",
+        "WS-API",
+        "WS-TEST",
+        "WS-GOVERNANCE"
+      ]
+    },
+    {
+      "code": "M5",
+      "name": "P1 Product Qualification & Release",
+      "name_cn": "P1产品资格与正式发布",
+      "objective": "Qualify P1 on mandatory Windows/Linux profiles, target workload, security/governance, packaging, upgrade/rollback and release acceptance.",
+      "p_capability_impact": [
+        "P1"
+      ],
+      "required_workstreams": [
+        "WS-PLATFORM",
+        "WS-PERFORMANCE",
+        "WS-SECURITY",
+        "WS-DEVOPS",
+        "WS-TEST",
+        "WS-GOVERNANCE"
+      ]
+    },
+    {
+      "code": "M6",
+      "name": "P2 Attribution Activation",
+      "name_cn": "P2归因/条件调整启用",
+      "objective": "Admit P2 Context Attribution & Normalization after identifiability, leakage, uncertainty and evidence gates are validated.",
+      "p_capability_impact": [
+        "P2"
+      ],
+      "required_workstreams": [
+        "WS-CAPABILITY",
+        "WS-DATA",
+        "WS-TEST",
+        "WS-GUI",
+        "WS-GOVERNANCE"
+      ]
+    },
+    {
+      "code": "M7",
+      "name": "P3 Capability/Twin Activation",
+      "name_cn": "P3能力模型/数字孪生启用",
+      "objective": "Admit P3 capability models, aircraft twin revisions and model profiles with applicability/knowledge-time/model validation gates.",
+      "p_capability_impact": [
+        "P3"
+      ],
+      "required_workstreams": [
+        "WS-CAPABILITY",
+        "WS-LONGITUDINAL",
+        "WS-TEST",
+        "WS-GUI",
+        "WS-GOVERNANCE"
+      ]
+    },
+    {
+      "code": "M8",
+      "name": "P4/P5 Training Assessment Activation",
+      "name_cn": "P4/P5训练评价启用",
+      "objective": "Admit P4 individual/human-machine and P5 team/package/mission assessment with instructor, privacy, scope separation and longitudinal evidence gates.",
+      "p_capability_impact": [
+        "P4",
+        "P5"
+      ],
+      "required_workstreams": [
+        "WS-ASSESS",
+        "WS-WORLD",
+        "WS-LONGITUDINAL",
+        "WS-GUI",
+        "WS-SECURITY",
+        "WS-TEST",
+        "WS-GOVERNANCE"
+      ]
+    },
+    {
+      "code": "M9",
+      "name": "P6 Joint/LVC & Predictive Activation",
+      "name_cn": "P6联合/LVC与预测闭环启用",
+      "objective": "Admit P6 Joint/LVC and forecast/counterfactual/recommendation products with fact/projection separation, external interoperability and approval gates.",
+      "p_capability_impact": [
+        "P6"
+      ],
+      "required_workstreams": [
+        "WS-INTEROP",
+        "WS-CAPABILITY",
+        "WS-ASSESS",
+        "WS-GUI",
+        "WS-SECURITY",
+        "WS-TEST",
+        "WS-GOVERNANCE"
+      ]
+    }
+  ],
+  "ordering_rule": "M0→M9 is the default program roadmap; controlled tailoring may change dates/parallelism but not code meanings without registry versioning.",
+  "relationship_rules": [
+    "M and P are orthogonal: multiple M can be needed to complete one P capability.",
+    "WS spans M and P; completion of a WS task does not itself admit a P capability.",
+    "Stage never appears as a project progress checkpoint."
+  ]
+}

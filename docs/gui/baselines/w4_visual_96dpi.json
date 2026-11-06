@@ -1,0 +1,48 @@
+{
+  "qt_platform": "offscreen",
+  "records": [
+    {
+      "detail_drawer_visible": true,
+      "dpi": 96.0,
+      "image": "w4_P01_1024x720_96dpi.png",
+      "navigation_visible": true,
+      "page_object": "tpaaPageP01TrainingSessions",
+      "sha256": "99607d83ce5f6673cead545ad80c3b0de21899e4382adc1818507750b772fa07",
+      "slot": "P01",
+      "status_bar_visible": true,
+      "viewport": [
+        1024,
+        720
+      ]
+    },
+    {
+      "detail_drawer_visible": true,
+      "dpi": 96.0,
+      "image": "w4_P08_1440x900_96dpi.png",
+      "navigation_visible": true,
+      "page_object": "tpaaPageP08ContextAdjustment",
+      "sha256": "a3bfdc9931f810829d99e6fefc6abde010a45eb9bd4924be8ad3aac54285c06f",
+      "slot": "P08",
+      "status_bar_visible": true,
+      "viewport": [
+        1440,
+        900
+      ]
+    },
+    {
+      "detail_drawer_visible": true,
+      "dpi": 96.0,
+      "image": "w4_P12_1920x1080_96dpi.png",
+      "navigation_visible": true,
+      "page_object": "tpaaPageP12DataQuality",
+      "sha256": "64cba3b681896daa9e924007cdf28810e717d7909cb692f46da47b69415ddb50",
+      "slot": "P12",
+      "status_bar_visible": true,
+      "viewport": [
+        1920,
+        1080
+      ]
+    }
+  ],
+  "schema": "TPAA_W4_VISUAL_EVIDENCE_V1"
+}

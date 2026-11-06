@@ -13,6 +13,9 @@ def test_prcb_c3_identity_readiness_and_job_audit_are_production_wired() -> None
     identity = (ROOT / "src" / "tpaa_runtime" / "identity.py").read_text(
         encoding="utf-8"
     )
+    principal_policy = (
+        ROOT / "src" / "tpaa_runtime" / "principal_policy.py"
+    ).read_text(encoding="utf-8")
     production = (ROOT / "src" / "tpaa_runtime" / "production.py").read_text(
         encoding="utf-8"
     )
@@ -26,7 +29,8 @@ def test_prcb_c3_identity_readiness_and_job_audit_are_production_wired() -> None
     assert "ConfiguredBearerIdentityProvider" in identity
     assert "hashlib.sha256" in identity
     assert "hmac.compare_digest" in identity
-    assert "PRCB_C3_ROLE_NOT_AUTHORIZED" in identity
+    assert 'f"PRCB_C3_{exc.code}"' in identity
+    assert '"ROLE_NOT_AUTHORIZED"' in principal_policy
     assert "guard_production_principal_resolver" in production
 
     assert "ProductionDependencyProbe" in production

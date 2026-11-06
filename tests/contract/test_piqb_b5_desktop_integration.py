@@ -30,10 +30,13 @@ def _imports(path: Path) -> set[str]:
     return names
 
 
-def test_b5_navigation_matches_frozen_p01_p13_contract() -> None:
+def test_w4_navigation_supersedes_b5_without_mutating_frozen_contract() -> None:
     validate_product_navigation()
-    contract = json.loads(
+    frozen = json.loads(
         (BASE / "B5_DESKTOP_NAVIGATION_CONTRACT.json").read_text(encoding="utf-8")
+    )
+    contract = json.loads(
+        (ROOT / "docs" / "gui" / "W4_PAGE_CONTRACT.json").read_text(encoding="utf-8")
     )
     expected = [
         (
@@ -50,8 +53,11 @@ def test_b5_navigation_matches_frozen_p01_p13_contract() -> None:
         for item in PRODUCT_NAVIGATION
     ]
     assert actual == expected
-    assert list(PRODUCT_SPINE) == contract["spine"]
-    assert set(SEMANTIC_LAYERS) == set(contract["rules"].get("semantic_layers", SEMANTIC_LAYERS))
+    assert contract["supersedes_for_product_navigation"] == frozen["schema"]
+    assert list(PRODUCT_SPINE) == frozen["spine"]
+    assert set(SEMANTIC_LAYERS) == set(
+        frozen["rules"].get("semantic_layers", SEMANTIC_LAYERS)
+    )
 
 
 def test_product_shell_and_visualization_remain_presentation_only() -> None:

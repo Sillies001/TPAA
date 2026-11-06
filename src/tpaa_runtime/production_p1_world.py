@@ -8,9 +8,7 @@ from typing import Final, cast
 
 from tpaa_ingest import SourceFamily
 
-PRODUCTION_P1_WORLD_POLICY_SCHEMA: Final = (
-    "TPAA_ED2_P1_WORLD_AUTHORITY_POLICY_V1"
-)
+PRODUCTION_P1_WORLD_POLICY_SCHEMA: Final = "TPAA_ED2_P1_WORLD_AUTHORITY_POLICY_V1"
 PRODUCTION_P1_WORLD_POLICY_VERSION: Final = "1.0.0"
 PRODUCTION_P1_WORLD_CAPABILITY_CODE: Final = "BASIC_CORE"
 PRODUCTION_P1_REQUIRED_WORLD_LETTERS: Final = ("C", "W", "A", "M")
@@ -51,9 +49,7 @@ class ProductionP1WorldPolicyError(RuntimeError):
 
 
 def _mapping(value: object, *, field: str) -> dict[str, object]:
-    if not isinstance(value, dict) or not all(
-        isinstance(key, str) for key in value
-    ):
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
         raise ProductionP1WorldPolicyError(
             "ED2_P1_WORLD_AUTHORITY_INVALID",
             field,
@@ -96,16 +92,10 @@ def validate_production_p1_world_authority(
     )
     basic = _mapping(
         capabilities.get(PRODUCTION_P1_WORLD_CAPABILITY_CODE),
-        field=(
-            "WORLD_CAPABILITY_REGISTRY.capabilities."
-            f"{PRODUCTION_P1_WORLD_CAPABILITY_CODE}"
-        ),
+        field=(f"WORLD_CAPABILITY_REGISTRY.capabilities.{PRODUCTION_P1_WORLD_CAPABILITY_CODE}"),
     )
     required = basic.get("required")
-    if (
-        not isinstance(required, list)
-        or tuple(required) != PRODUCTION_P1_REQUIRED_WORLD_LETTERS
-    ):
+    if not isinstance(required, list) or tuple(required) != PRODUCTION_P1_REQUIRED_WORLD_LETTERS:
         raise ProductionP1WorldPolicyError(
             "ED2_P1_WORLD_CAPABILITY_DRIFT",
             repr(required),

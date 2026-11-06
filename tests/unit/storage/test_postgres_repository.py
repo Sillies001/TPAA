@@ -29,7 +29,9 @@ class FakeCursor:
 
     def execute(self, sql: str, params: tuple[object, ...] = ()) -> None:
         self.connection.executed.append((sql, params))
-        if "SELECT catalog_schema_sha256" in sql:
+        if "pg_try_advisory_xact_lock_shared" in sql:
+            self.rows = [(self.connection.write_gate_available,)]
+        elif "SELECT catalog_schema_sha256" in sql:
             self.rows = [(self.connection.catalog_hash,)]
         elif "_tpaa_bootstrap_manifest" in sql and "catalog_schema_sha256" not in sql:
             self.rows = [self.connection.manifest]
@@ -59,6 +61,7 @@ class FakeConnection:
         self.commits = 0
         self.rollbacks = 0
         self.closes = 0
+        self.write_gate_available = True
 
     def cursor(self) -> FakeCursor:
         return FakeCursor(self)
@@ -130,6 +133,38 @@ def test_read_only_transaction_is_set_before_repository_use(monkeypatch: pytest.
     ) as uow:
         uow.commit()
     assert connection.executed[0][0] == "SET TRANSACTION READ ONLY"
+
+
+def test_service_write_gate_participates_in_every_managed_write(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    connection, _ = _ready()
+    monkeypatch.setattr(module, "_postgres_catalog_hash_query", lambda: "CATALOG_HASH")
+    with PostgreSQLServiceUnitOfWork(
+        "ignored",
+        write_gate_lock_id=module.SERVICE_WRITE_GATE_LOCK_ID,
+        connection_factory=lambda _: connection,
+    ) as uow:
+        uow.commit()
+    assert connection.executed[0] == (
+        "SELECT pg_try_advisory_xact_lock_shared(%s)",
+        (module.SERVICE_WRITE_GATE_LOCK_ID,),
+    )
+
+
+def test_service_write_gate_fails_closed_while_drain_is_held() -> None:
+    connection, _ = _ready()
+    connection.write_gate_available = False
+    with pytest.raises(PostgreSQLRepositoryError) as captured:
+        with PostgreSQLServiceUnitOfWork(
+            "ignored",
+            write_gate_lock_id=module.SERVICE_WRITE_GATE_LOCK_ID,
+            connection_factory=lambda _: connection,
+        ):
+            pass
+    assert captured.value.reason == "SERVICE_WRITE_DRAINED"
+    assert connection.rollbacks == 1
+    assert connection.closes == 1
 
 
 def test_autocommit_connection_is_rejected() -> None:

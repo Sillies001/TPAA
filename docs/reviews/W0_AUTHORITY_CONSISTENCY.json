@@ -1,0 +1,14 @@
+{
+  "adoption_state": "APPROVED_BY_AUTHORITY_DECISION",
+  "baseline": {
+    "baseline_lock_sha256": "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab",
+    "controlled_artifact_count": 37,
+    "core": "CB-1.5.0",
+    "db_schema": "1.9.0",
+    "rebaseline": "R6.0_W0_CORE_1_5_0_AUTHORITY_CONVERGENCE"
+  },
+  "hard_failures": [],
+  "review_findings": [],
+  "schema": "TPAA_AUTHORITY_CONSISTENCY_V1",
+  "status": "PASS"
+}

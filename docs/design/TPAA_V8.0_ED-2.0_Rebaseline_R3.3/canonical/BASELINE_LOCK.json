@@ -1,0 +1,118 @@
+{
+  "baseline": {
+    "overall": "TPAA V8.0",
+    "methodology": "TPAA V8.0 Training Evaluation Methodology",
+    "engineering": "ED-2.0",
+    "core": "CB-1.4.0",
+    "db_schema": "1.6.0",
+    "date": "2026-09-20",
+    "rebaseline": "R3.3_METRIC_DESIGN_GUIDE"
+  },
+  "artifacts": [
+    {
+      "file": "CAPABILITY_PHASE_REGISTRY.json",
+      "sha256": "c2184ae93c08f5877372daa5e107ffa1df2b56a03c761ae568440cf72cfacb4e",
+      "bytes": 3560
+    },
+    {
+      "file": "CORE_LOGICAL_MODEL.json",
+      "sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+      "bytes": 180003
+    },
+    {
+      "file": "CORE_RULES.json",
+      "sha256": "16d804c2561c986541cc70f69123f2992e4e5e1ce1f2b6f0c7fb44ea0446107f",
+      "bytes": 8571
+    },
+    {
+      "file": "CROSS_LAYER_DTO_CONTRACTS.json",
+      "sha256": "be9e83d18427c0a71d80df6ba2a56f7f611a059c749e1e163d9b5c0140b90e1c",
+      "bytes": 25664
+    },
+    {
+      "file": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+      "sha256": "7e583a2503735a10ddd85b8ead67d5369cd34d423246c96254c4cb80eaaf1dfb",
+      "bytes": 6015
+    },
+    {
+      "file": "ENGINEERING_WORKSTREAM_REGISTRY.json",
+      "sha256": "adea6bba20fb6b9ec002e9e1d355259c594f292ef4721fb7272de0f387747e6d",
+      "bytes": 3578
+    },
+    {
+      "file": "EXTENSION_CONTRACT_REGISTRY.json",
+      "sha256": "f987ea2801557befac44aaf3b47b3953a5cdbaaa662e39c2f3970526f3371f41",
+      "bytes": 6323
+    },
+    {
+      "file": "EXTENSION_METRIC_FAMILY_REGISTRY.json",
+      "sha256": "4687377e5fb63b3a5c94fec6eeba0b0d0d395e1061ee4fa4c81fe64aa0220857",
+      "bytes": 4046
+    },
+    {
+      "file": "KNOWLEDGE_FIDELITY_MATRIX.json",
+      "sha256": "2581ad99c061cc1c0e84f10c4ab8ca30ef70c0ba3f1b8843830d3536d6f06f49",
+      "bytes": 227087
+    },
+    {
+      "file": "METRIC_INPUT_AUTHORITY_MATRIX.json",
+      "sha256": "ca99b1fb4f3f1d7af553c61e3fc9c82e815f648052899344e0dbfa89ec5158bc",
+      "bytes": 319120
+    },
+    {
+      "file": "P1_METRIC_CATALOG.json",
+      "sha256": "24ab6d06ced0b768ff16e4c945e778cc8fd2d3838be3ca30051ec8f8e0d7277d",
+      "bytes": 352115
+    },
+    {
+      "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",
+      "sha256": "d127409485588d80b75c0353725f4042f310d196892fb91005978ea57dbaf106",
+      "bytes": 8345
+    },
+    {
+      "file": "R39_KNOWLEDGE_COVERAGE.json",
+      "sha256": "18405a22423e067116981d815bf51cac0e8b68d82b0d9c1bacd77489a01bb7db",
+      "bytes": 22271
+    },
+    {
+      "file": "REVIEW_GATES.json",
+      "sha256": "af2ee2452ff02fef13bcdad93cdd8f853b80a1de762061e8c52c41403aca5698",
+      "bytes": 7129
+    },
+    {
+      "file": "SCHEMA_AUTHORITY_REGISTRY.json",
+      "sha256": "8db2c80c412d4d7521eafc7a53043238a9aad544610e2a54005b4abe0533b68e",
+      "bytes": 2932
+    },
+    {
+      "file": "SOURCE_PROVENANCE.json",
+      "sha256": "9f771642b32a2da3d4b5f3b88ba22302fbe05f49e5284d6d85308a6485967ce8",
+      "bytes": 2277
+    },
+    {
+      "file": "STAGE_REGISTRY.json",
+      "sha256": "52377c097342fd52ad7b10e771a85420f3dca24f0446d171ff285306b8245691",
+      "bytes": 6023
+    },
+    {
+      "file": "TERMINOLOGY_REGISTRY.json",
+      "sha256": "87dcd17588a5d714772eba158ff1468aef4521e167af92eaa3a4e28b5514d543",
+      "bytes": 3640
+    },
+    {
+      "file": "TRACEABILITY_MATRIX.json",
+      "sha256": "273d96d770f876710fc40d4ee4fa62786451062c52f671a122bfac8bb82778dc",
+      "bytes": 8592
+    },
+    {
+      "file": "TRAINING_EVALUATION_TAXONOMY.json",
+      "sha256": "38e83af0e20c766d37b84090fed570d72f6dc699c53a4b414030712a93b168ad",
+      "bytes": 5281
+    },
+    {
+      "file": "WORLD_CAPABILITY_REGISTRY.json",
+      "sha256": "2031ee88603131ff08e588fb55ca59552f96c1858f5d40d4e185da6e0b624b3a",
+      "bytes": 4260
+    }
+  ]
+}

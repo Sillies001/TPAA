@@ -45,7 +45,7 @@ from tpaa_qualification import (  # noqa: E402
     validate_target_hardware,
 )
 
-BASELINE = ROOT / "baseline" / "CB-1.4.0"
+BASELINE = ROOT / "baseline" / "CB-1.5.0"
 TRACKING_ISSUE = 140
 TASK_IDS = (
     "M5-DEV-001",

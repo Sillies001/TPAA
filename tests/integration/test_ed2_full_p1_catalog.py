@@ -229,6 +229,7 @@ def test_missing_scenario_source_publishes_business_insufficiency_not_job_failur
             context_id=_id("insufficient-context"),
             context_version="ED2-MISSING-SOURCE-V1",
             context_binding_hash="f" * 64,
+                comparison_context_hash="a" * 64,
             episode_id=_id("insufficient-episode"),
             stage_id=None,
             start_session_time_us=0,

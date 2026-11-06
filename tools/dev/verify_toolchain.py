@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -59,13 +60,20 @@ def _sha256(path: Path) -> str:
 
 
 def _run(args: list[str]) -> tuple[int, str]:
+    child_env = os.environ.copy()
+    uv_cache = REPO_ROOT / "evidence" / "devops" / "uv-cache"
+    uv_cache.mkdir(parents=True, exist_ok=True)
+    child_env.setdefault("UV_CACHE_DIR", str(uv_cache))
     try:
         completed = subprocess.run(
             args,
             cwd=REPO_ROOT,
+            env=child_env,
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=30,
         )
     except (OSError, subprocess.SubprocessError) as exc:

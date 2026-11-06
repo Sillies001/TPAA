@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from typing import cast
 
 from tpaa_application.m1_publication import (
@@ -11,6 +13,15 @@ from tpaa_application.m1_publication import (
     M1SessionEpisodeStageProjection,
 )
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
+from tpaa_storage import (
+    ObjectStore,
+    ParquetColumn,
+    ParquetDatasetArtifact,
+    ParquetPartition,
+    ParquetScalarType,
+    ParquetSchema,
+    PolarsParquetPlane,
+)
 from tpaa_storage.core_publication_ledger import CorePublicationLedgerError
 
 from .durable_repositories import RuntimeUnitOfWorkFactory
@@ -41,10 +52,7 @@ def _mapping(value: object, *, field: str) -> dict[str, object]:
 def _rows(value: object, *, field: str) -> list[dict[str, object]]:
     if not isinstance(value, list):
         raise M1ApplicationError("P1_DURABLE_ROW_INVALID", field)
-    return [
-        _mapping(item, field=f"{field}[{index}]")
-        for index, item in enumerate(value)
-    ]
+    return [_mapping(item, field=f"{field}[{index}]") for index, item in enumerate(value)]
 
 
 def _required_text(row: dict[str, object], field: str) -> str:
@@ -81,9 +89,11 @@ class DurableP1ReleaseReadService:
         read_uow_factory: RuntimeUnitOfWorkFactory,
         *,
         production_compute_configured: bool = False,
+        object_store: ObjectStore | None = None,
     ) -> None:
         self._read_uow_factory = read_uow_factory
         self._production_compute_configured = production_compute_configured
+        self._object_store = object_store
 
     @staticmethod
     def _c2_required(action: str) -> M1ApplicationError:
@@ -137,10 +147,7 @@ class DurableP1ReleaseReadService:
             if exc.code == "RELEASE_CARDINALITY":
                 raise M1ApplicationError("RELEASE_NOT_FOUND", release_id) from exc
             raise M1ApplicationError(exc.code, exc.detail) from exc
-        by_id = {
-            _required_text(row, "metric_definition_id"): row
-            for row in definitions
-        }
+        by_id = {_required_text(row, "metric_definition_id"): row for row in definitions}
         return membership, by_id
 
     @staticmethod
@@ -203,17 +210,12 @@ class DurableP1ReleaseReadService:
             for metric in metrics
         }
         observed_instance_ids = {
-            _required_text(item, "observed_metric_instance_id")
-            for item in capability_observations
-        } | {
-            _required_text(item, "observed_metric_instance_id")
-            for item in system_observations
-        }
+            _required_text(item, "observed_metric_instance_id") for item in capability_observations
+        } | {_required_text(item, "observed_metric_instance_id") for item in system_observations}
         evidence_only_count = sum(
             1
             for metric in metrics
-            if _required_text(metric, "metric_instance_id")
-            not in observed_instance_ids
+            if _required_text(metric, "metric_instance_id") not in observed_instance_ids
         )
         return {
             **release,
@@ -240,9 +242,9 @@ class DurableP1ReleaseReadService:
             field="metric_instances",
         ):
             definition_id = _required_text(metric, "metric_definition_id")
-            metric_definition_by_instance[
-                _required_text(metric, "metric_instance_id")
-            ] = self._definition(definitions, definition_id)
+            metric_definition_by_instance[_required_text(metric, "metric_instance_id")] = (
+                self._definition(definitions, definition_id)
+            )
 
         result: list[CapabilityObservationDTO] = []
         for row in _rows(membership.get("observations"), field="observations"):
@@ -356,9 +358,7 @@ class DurableP1ReleaseReadService:
                         "mission_system_instance_id",
                     ),
                     "value_kind": (
-                        "STRUCTURED"
-                        if row.get("value_structured") is not None
-                        else "NUMERIC"
+                        "STRUCTURED" if row.get("value_structured") is not None else "NUMERIC"
                     ),
                 }
             )
@@ -377,9 +377,7 @@ class DurableP1ReleaseReadService:
                 field="evidence_sets",
             )
         }
-        matches: list[
-            tuple[dict[str, object], dict[str, object], dict[str, object]]
-        ] = []
+        matches: list[tuple[dict[str, object], dict[str, object], dict[str, object]]] = []
         for row in _rows(
             membership.get("metric_instances"),
             field="metric_instances",
@@ -544,15 +542,117 @@ class DurableP1ReleaseReadService:
         self,
         release_id: str,
     ) -> M1SessionEpisodeStageProjection:
-        del release_id
-        raise M1ApplicationError(
-            "P1_PRODUCTION_TOPOLOGY_NOT_CONFIGURED",
-            "release-bound topology reconstruction is deferred to PRCB C2/C4",
+        membership, _definitions = self._snapshot(release_id)
+        release = _mapping(membership.get("release"), field="release")
+        session_id = _required_text(release, "session_id")
+        context_ref = self._context_ref(membership)
+        with self._read_uow_factory() as uow:
+            session = uow.canonical_rows.one(
+                "registry.training_session",
+                where={"session_id": session_id},
+                columns=(
+                    "session_id",
+                    "start_session_time_us",
+                    "end_session_time_us",
+                ),
+            )
+            episodes = uow.canonical_rows.many(
+                "episode.training_episode",
+                where={
+                    "session_id": session_id,
+                    "context_id": _required_text(context_ref, "context_id"),
+                },
+                columns=("episode_id", "session_id"),
+                order_by=("start_session_time_us", "episode_id"),
+            )
+            if len(episodes) == 1:
+                episode_id = _required_text(episodes[0], "episode_id")
+                stages = uow.canonical_rows.many(
+                    "episode.episode_stage",
+                    where={"episode_id": episode_id},
+                    columns=(
+                        "stage_id",
+                        "episode_id",
+                        "stage_type",
+                        "stage_order",
+                        "start_session_time_us",
+                        "end_session_time_us",
+                        "stage_status",
+                        "coverage",
+                        "confidence",
+                        "detector_version",
+                    ),
+                    order_by=("stage_order", "stage_id"),
+                )
+            else:
+                stages = ()
+            uow.commit()
+        if session is None:
+            raise M1ApplicationError("P1_SESSION_NOT_FOUND", session_id)
+        if len(episodes) != 1:
+            raise M1ApplicationError(
+                "P1_EPISODE_CARDINALITY",
+                f"release={release_id}:episodes={len(episodes)}",
+            )
+        return cast(
+            M1SessionEpisodeStageProjection,
+            {
+                "release_id": release_id,
+                "session": {
+                    "session_id": session_id,
+                    "start_session_time_us": str(_required_int(session, "start_session_time_us")),
+                    "end_session_time_us": str(_required_int(session, "end_session_time_us")),
+                },
+                "episode": {
+                    "episode_id": _required_text(episodes[0], "episode_id"),
+                    "session_id": session_id,
+                },
+                "stages": [
+                    {
+                        "stage_id": _required_text(row, "stage_id"),
+                        "episode_id": _required_text(row, "episode_id"),
+                        "stage_type": _required_text(row, "stage_type"),
+                        "stage_order": _required_int(row, "stage_order"),
+                        "start_session_time_us": str(_required_int(row, "start_session_time_us")),
+                        "end_session_time_us": str(_required_int(row, "end_session_time_us")),
+                        "stage_status": _required_text(row, "stage_status"),
+                        "coverage": _required_float(row, "coverage"),
+                        "confidence": _required_float(row, "confidence"),
+                        "detector_version": _required_text(row, "detector_version"),
+                    }
+                    for row in stages
+                ],
+            },
         )
 
     def replay(self, release_id: str) -> dict[str, object]:
-        del release_id
-        raise self._c2_required("replay")
+        membership, _definitions = self._snapshot(release_id)
+        release = _mapping(membership.get("release"), field="release")
+        canonical = json.dumps(
+            membership,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+        return {
+            "release_id": release_id,
+            "status": "EXACT_REPLAY",
+            "manifest_hash": _required_text(release, "manifest_hash"),
+            "logical_membership_sha256": hashlib.sha256(canonical).hexdigest(),
+            "membership": membership,
+        }
+
+    def world_graph(self, release_id: str) -> dict[str, object]:
+        membership, _definitions = self._snapshot(release_id)
+        return {
+            "release_id": release_id,
+            "world_products": _rows(membership.get("world_products", []), field="world_products"),
+            "world_relations": _rows(
+                membership.get("world_relations", []), field="world_relations"
+            ),
+            "tpaa_m_chains": _rows(membership.get("tpaa_m_chains", []), field="tpaa_m_chains"),
+        }
 
     def series_range(
         self,
@@ -562,5 +662,88 @@ class DurableP1ReleaseReadService:
         end_session_time_us: int,
         limit: int,
     ) -> dict[str, object]:
-        del release_id, start_session_time_us, end_session_time_us, limit
-        raise self._c2_required("series_range")
+        if start_session_time_us >= end_session_time_us or not 1 <= limit <= 5000:
+            raise M1ApplicationError(
+                "P1_SERIES_RANGE_INVALID",
+                f"[{start_session_time_us},{end_session_time_us}) limit={limit}",
+            )
+        if self._object_store is None:
+            raise M1ApplicationError("P1_SERIES_STORE_NOT_CONFIGURED", release_id)
+        membership, _definitions = self._snapshot(release_id)
+        locators = []
+        for evidence in _rows(membership.get("evidence_sets"), field="evidence_sets"):
+            locator = evidence.get("series_locator")
+            if isinstance(locator, dict) and locator.get("canonical_dataset_id") is not None:
+                locators.append(_mapping(locator, field="series_locator"))
+        dataset_ids = {_required_text(locator, "canonical_dataset_id") for locator in locators}
+        if len(dataset_ids) != 1:
+            raise M1ApplicationError("P1_SERIES_DATASET_CARDINALITY", str(len(dataset_ids)))
+        dataset_id = next(iter(dataset_ids))
+        with self._read_uow_factory() as uow:
+            dataset = uow.canonical_rows.one(
+                "registry.dataset_manifest",
+                where={"dataset_id": dataset_id},
+                columns=(
+                    "dataset_id",
+                    "object_ref_id",
+                    "storage_uri",
+                    "schema_version",
+                    "row_count",
+                    "min_session_time_us",
+                    "max_session_time_us",
+                    "artifact_sha256",
+                    "logical_content_hash",
+                ),
+            )
+            if dataset is None:
+                reference = None
+            else:
+                reference = uow.canonical_rows.one(
+                    "registry.object_reference",
+                    where={"object_ref_id": _required_text(dataset, "object_ref_id")},
+                    columns=("size_bytes", "artifact_sha256", "sealed"),
+                )
+            uow.commit()
+        if dataset is None or reference is None or not bool(reference.get("sealed")):
+            raise M1ApplicationError("P1_SERIES_DATASET_NOT_FOUND", dataset_id)
+        schema = ParquetSchema(
+            schema_id="CANONICAL_AIRCRAFT_STATE_V1",
+            schema_version=_required_text(dataset, "schema_version"),
+            columns=(
+                ParquetColumn("source_stream_ordinal", ParquetScalarType.INT64),
+                ParquetColumn("session_time_us", ParquetScalarType.INT64),
+                ParquetColumn("body_p_rad_s", ParquetScalarType.FLOAT64, nullable=True),
+                ParquetColumn("nz_g", ParquetScalarType.FLOAT64, nullable=True),
+                ParquetColumn("heading_true_rad", ParquetScalarType.FLOAT64, nullable=True),
+                ParquetColumn("tas_mps", ParquetScalarType.FLOAT64, nullable=True),
+                ParquetColumn("mach", ParquetScalarType.FLOAT64, nullable=True),
+                ParquetColumn("quality_mask", ParquetScalarType.INT64),
+            ),
+        )
+        artifact = ParquetDatasetArtifact(
+            logical_uri=_required_text(dataset, "storage_uri"),
+            artifact_sha256=_required_text(dataset, "artifact_sha256"),
+            logical_content_hash=_required_text(dataset, "logical_content_hash"),
+            byte_size=_required_int(reference, "size_bytes"),
+            row_count=_required_int(dataset, "row_count"),
+            schema=schema,
+            partition=ParquetPartition(),
+            min_session_time_us=_required_int(dataset, "min_session_time_us"),
+            max_session_time_us=_required_int(dataset, "max_session_time_us"),
+        )
+        candidates = [
+            row
+            for row in PolarsParquetPlane(self._object_store).scan_rows(artifact)
+            if start_session_time_us <= _required_int(row, "session_time_us") < end_session_time_us
+        ]
+        return {
+            "release_id": release_id,
+            "dataset_id": dataset_id,
+            "logical_content_hash": artifact.logical_content_hash,
+            "start_session_time_us": start_session_time_us,
+            "end_session_time_us": end_session_time_us,
+            "limit": limit,
+            "returned": min(len(candidates), limit),
+            "truncated": len(candidates) > limit,
+            "items": candidates[:limit],
+        }

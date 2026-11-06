@@ -1,0 +1,32 @@
+{
+  "schema": "TPAA_G0_VERSION_AND_COMPATIBILITY_DECISION_V1",
+  "decision_id": "G0-GUI-PRODUCTIZATION-VERSION-2026-10-30",
+  "status": "APPROVED_LOCAL",
+  "approval_basis": "Project owner explicitly authorized strict implementation of the 2026-10-29 GUI productization plan",
+  "versions": {
+    "overall": "TPAA V8.0",
+    "engineering_design": "ED-2.1",
+    "design_rebaseline": "R3.4",
+    "design_directory": "TPAA_V8.0_ED-2.1_Rebaseline_R3.4_GUI_Productization",
+    "core_successor": "CB-1.6.0",
+    "db_schema_initial": "1.9.0",
+    "api": "v1 additive",
+    "gui_view_contract": "1.0.0",
+    "cross_layer_dto_target": "1.1.0",
+    "p1_metric_catalog_initial": "1.14.0"
+  },
+  "compatibility": {
+    "r3_3_and_cb_predecessors": "BYTE_IMMUTABLE",
+    "desktop_gui": "FEATURE_FLAG_WITH_LEGACY_P_SHELL_FALLBACK",
+    "api": "ADDITIVE_V1_ROUTES_NO_EXISTING_ROUTE_REDEFINITION",
+    "database": "NO_G0_TO_G3_SCHEMA_CHANGE; LATER_OBJECTS_REQUIRE_INDEPENDENT_CAPABILITY_GATE",
+    "dto": "ADDITIVE_SUCCESSOR_AUTHORITY_WITH_GENERATED_CLIENT_TYPES",
+    "theme_preference": "NOT_PERSISTED",
+    "production_release": "NOT_AUTHORIZED"
+  },
+  "change_triggers": {
+    "db_schema_increment": "Approved persistent ImportBatch, ReportRevision, ModelProfile or governance objects",
+    "catalog_increment": "Approved metric or semantic catalog additions",
+    "api_major_increment": "Breaking public contract only; not authorized by this decision"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "schema": "TPAA_G0R_WORKTREE_BASELINE_V1",
+  "recorded_at": "2026-11-06T00:00:00+08:00",
+  "branch": "local-r8-review",
+  "head": "b113a172004c9698924fd53c14723f93670eee8a",
+  "policy": "PRESERVE_ALL_EXISTING_CHANGES_NO_RESET_NO_CHECKOUT",
+  "tracked_diff": {
+    "files": 25,
+    "insertions": 849,
+    "deletions": 171
+  },
+  "entries": [
+    {
+      "status": " M",
+      "path": "src/tpaa_api/desktop.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_api/security.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_application/w7_external.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_gui/design_system.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_gui/local_backend.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_gui/product_shell.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_gui/shell.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_gui/w5_pages.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_qualification/w9_final.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_runtime/__init__.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_runtime/config.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_runtime/entry_config.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_runtime/production.py"
+    },
+    {
+      "status": " M",
+      "path": "src/tpaa_runtime/w8_operations.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/contract/codegen/test_m0_core_004_generated_governance.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/migration/test_m0_sto_001_postgres_execution.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/migration/test_m0_sto_001_sqlite_bootstrap.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/unit/gui/test_w4_gui_foundation.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/unit/gui/test_w5_core_workflows.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/unit/runtime/test_production_entry_config.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/unit/runtime/test_w9_final_qualification.py"
+    },
+    {
+      "status": " M",
+      "path": "tools/baseline/adopt_w0_successor.py"
+    },
+    {
+      "status": " M",
+      "path": "tools/gui/w4_visual_regression.py"
+    },
+    {
+      "status": " M",
+      "path": "tools/gui/w5_acceptance.py"
+    },
+    {
+      "status": " M",
+      "path": "tools/testing/piqb_b5_desktop_replay_visualization.py"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-GUI-001-webengine-product-shell.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-GUI-002-p-v-view-contract.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-GUI-003-theme-session-semantics.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/compliance/GUI_DEMO_CONFORMANCE_MATRIX.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/gui/demo-v19/"
+    },
+    {
+      "status": "??",
+      "path": "docs/gui/demo-v33/"
+    },
+    {
+      "status": "??",
+      "path": "docs/operator/POST_CLOSE_FORMAL_EVIDENCE_AND_GUI_ACCEPTANCE.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/reviews/POST_CLOSE_REMEDIATION_WAVE_2026-10-26.md"
+    },
+    {
+      "status": "??",
+      "path": "evidence/gui-g0/"
+    },
+    {
+      "status": "??",
+      "path": "evidence/postclose-gui-workflow-acceptance-20261026.json"
+    },
+    {
+      "status": "??",
+      "path": "evidence/postclose-remediation-wave-20261026.json"
+    },
+    {
+      "status": "??",
+      "path": "evidence/postclose-role-task-acceptance-20261026.json"
+    },
+    {
+      "status": "??",
+      "path": "src/tpaa_gui/localization.py"
+    },
+    {
+      "status": "??",
+      "path": "src/tpaa_runtime/formal_evidence.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/contract/baseline/"
+    },
+    {
+      "status": "??",
+      "path": "tests/fixtures/gui/"
+    },
+    {
+      "status": "??",
+      "path": "tests/unit/gui/test_chinese_localization.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/unit/runtime/test_formal_runtime_evidence.py"
+    },
+    {
+      "status": "??",
+      "path": "tools/baseline/frozen/"
+    },
+    {
+      "status": "??",
+      "path": "tools/gui/g0_runtime_spike.py"
+    },
+    {
+      "status": "??",
+      "path": "tools/gui/role_task_acceptance.py"
+    },
+    {
+      "status": "??",
+      "path": "tools/gui/spikes/"
+    }
+  ]
+}

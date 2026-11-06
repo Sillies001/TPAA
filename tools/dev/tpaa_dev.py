@@ -10,16 +10,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOLCHAIN_PATH = REPO_ROOT / "tools" / "dev" / "TOOLCHAIN.json"
 BASELINE_VERIFY = REPO_ROOT / "tools" / "baseline" / "verify_baseline.py"
+AUTHORITY_DIFF = REPO_ROOT / "tools" / "baseline" / "authority_diff.py"
+AUTHORITY_CONSISTENCY_VERIFY = (
+    REPO_ROOT / "tools" / "baseline" / "verify_authority_consistency.py"
+)
+W0_SUCCESSOR_VERIFY = REPO_ROOT / "tools" / "baseline" / "adopt_w0_successor.py"
 CANONICAL_VERIFY = REPO_ROOT / "tools" / "canonical" / "verify_loader.py"
 CODEGEN_GENERATE = REPO_ROOT / "tools" / "codegen" / "generate.py"
 CODEGEN_VERIFY_GENERATED = REPO_ROOT / "tools" / "codegen" / "verify_generated.py"
@@ -269,6 +275,9 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("verify-repository-policy", "ADR-M0-004", "IMPLEMENTED", "Verify the frozen Repository DB access technology/UoW decision."),
     CommandSpec("verify-desktop-lifecycle-policy", "ADR-M0-005", "IMPLEMENTED", "Verify the frozen Desktop backend lifecycle/IPC/token decision."),
     CommandSpec("verify-baseline", "M0-CORE-001", "IMPLEMENTED", "Verify BASELINE_LOCK and controlled Canonical artifact hashes."),
+    CommandSpec("authority-diff", "W0-A", "IMPLEMENTED", "Compare two authority roots deterministically without adopting either root."),
+    CommandSpec("verify-authority-consistency", "W0-B", "IMPLEMENTED", "Verify Core/DB/DTO/hash closure and report unresolved historical compatibility."),
+    CommandSpec("verify-w0-successor", "W0-D/E", "IMPLEMENTED", "Reconstruct and verify the approved CB-1.5.0 successor baseline exactly."),
     CommandSpec("verify-canonical", "M0-CORE-002", "IMPLEMENTED", "Verify Canonical loader compatibility and fail-closed contracts."),
     CommandSpec("db-bootstrap", "M0-STO-001", "IMPLEMENTED", "Bootstrap an empty SQLite Desktop DB from current schema 1.9.0 authority."),
     CommandSpec("db-verify", "M0-STO-001", "IMPLEMENTED", "Verify SQLite schema/version/provenance against current schema 1.9.0 authority."),
@@ -303,8 +312,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec("fixture-check", "M0-TST-001/M0-TST-005/M0-TST-006", "IMPLEMENTED", "Run the frozen M0 fixture/Golden/replay framework smoke and emit evidence."),
     CommandSpec("platform-logical-product", "M0-TST-006", "IMPLEMENTED", "Emit the current platform logical product for cross-platform comparison."),
     CommandSpec("compare-platform-logical", "M0-TST-006", "IMPLEMENTED", "Compare Windows/Linux logical products using the shared fixture tolerance."),
-    CommandSpec("run", "M0-API-002/M0-GUI-001", "RESERVED", "Dispatch an API or GUI runtime profile."),
-    CommandSpec("run-api", "M0-API-002", "RESERVED", "Start the API profile once implemented."),
+    CommandSpec("run", "M0-API-002/M0-GUI-001", "IMPLEMENTED", "Dispatch an API or GUI runtime profile."),
+    CommandSpec("run-api", "M0-API-002", "IMPLEMENTED", "Start the durable Service API profile."),
     CommandSpec("run-gui", "M0-GUI-002", "IMPLEMENTED", "Start the composed Desktop shell with its owned local backend."),
     CommandSpec("package", "M0-DEV-005", "IMPLEMENTED", "Build a deterministic M0 development artifact for one governed profile."),
     CommandSpec("package-smoke", "M0-DEV-005", "IMPLEMENTED", "Clean-extract/install/start/stop Desktop and Service development bundles."),
@@ -322,19 +331,41 @@ def _load_toolchain() -> dict[str, object]:
     return data
 
 
-def _run(args: Sequence[str], *, cwd: Path = REPO_ROOT) -> int:
-    completed = subprocess.run(list(args), cwd=cwd, check=False)
+def _run(
+    args: Sequence[str],
+    *,
+    cwd: Path = REPO_ROOT,
+    env: Mapping[str, str] | None = None,
+) -> int:
+    completed = subprocess.run(list(args), cwd=cwd, check=False, env=env)
     return completed.returncode
 
 
+def _run_runtime_module(module: str, args: Sequence[str] = ()) -> int:
+    """Run a source-tree runtime without requiring an editable install."""
+
+    env = os.environ.copy()
+    source_root = str(REPO_ROOT / "src")
+    existing = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = source_root if not existing else source_root + os.pathsep + existing
+    return _run([sys.executable, "-m", module, *args], env=env)
+
+
 def _capture(args: Sequence[str], *, cwd: Path = REPO_ROOT) -> tuple[int, str]:
+    child_env = os.environ.copy()
+    uv_cache = REPO_ROOT / "evidence" / "devops" / "uv-cache"
+    uv_cache.mkdir(parents=True, exist_ok=True)
+    child_env.setdefault("UV_CACHE_DIR", str(uv_cache))
     try:
         completed = subprocess.run(
             list(args),
             cwd=cwd,
+            env=child_env,
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=20,
         )
     except (OSError, subprocess.SubprocessError) as exc:
@@ -366,7 +397,8 @@ def _quality_tool_command(tool: str, version: str, args: Sequence[str]) -> list[
     uv = _uv_executable()
     if uv is None:
         raise RuntimeError(f"{tool} {version} unavailable and uv is not on PATH")
-    return [uv, "run", "--locked", "--with", f"{tool}=={version}", tool, *args]
+    # --with adds a pinned one-off quality tool; --frozen keeps uv.lock untouched.
+    return [uv, "run", "--frozen", "--with", f"{tool}=={version}", tool, *args]
 
 
 def _quality_version(tool: str, version: str) -> tuple[str, str]:
@@ -536,6 +568,32 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     sub.add_parser("verify-baseline", help="Verify frozen Canonical baseline")
+    authority_diff = sub.add_parser(
+        "authority-diff",
+        help="Produce a deterministic, non-adopting diff between authority roots",
+    )
+    authority_diff.add_argument("--reference-root", type=Path, required=True)
+    authority_diff.add_argument("--candidate-root", type=Path, required=True)
+    authority_diff.add_argument("--reference-label", default="REFERENCE")
+    authority_diff.add_argument("--candidate-label", default="CANDIDATE")
+    authority_diff.add_argument("--output", type=Path)
+    authority_diff.add_argument("--fail-on-difference", action="store_true")
+    authority_consistency = sub.add_parser(
+        "verify-authority-consistency",
+        help="Verify cross-file Core/DB/DTO/hash authority consistency",
+    )
+    authority_consistency.add_argument(
+        "--authority-root",
+        type=Path,
+        default=REPO_ROOT / "baseline" / "CB-1.5.0",
+    )
+    authority_consistency.add_argument("--json", action="store_true")
+    authority_consistency.add_argument("--output", type=Path)
+    authority_consistency.add_argument("--report-only", action="store_true")
+    sub.add_parser(
+        "verify-w0-successor",
+        help="Reconstruct and verify the approved CB-1.5.0 successor baseline",
+    )
     sub.add_parser("verify-canonical", help="Verify M0-CORE-002 Canonical loader contract")
     sub.add_parser("doctor", help="Report toolchain state").add_argument("--strict", action="store_true")
     generate = sub.add_parser("generate", help="Generate deterministic Canonical projections")
@@ -617,7 +675,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     run = sub.add_parser("run", help="Dispatch runtime target")
     run.add_argument("target", choices=("api", "gui"))
-    sub.add_parser("run-api", help="Reserved for M0-API-002")
+    run.add_argument("--host", default="127.0.0.1", help="Service bind host")
+    run.add_argument("--port", type=int, default=8000, help="Service bind port")
+    run.add_argument("--check-config", action="store_true", help="Run Service preflight only")
+    run_api = sub.add_parser("run-api", help="Start the durable Service API profile")
+    run_api.add_argument("--host", default="127.0.0.1", help="Service bind host")
+    run_api.add_argument("--port", type=int, default=8000, help="Service bind port")
+    run_api.add_argument(
+        "--check-config",
+        action="store_true",
+        help="Validate Service configuration and dependencies without binding",
+    )
     sub.add_parser("run-gui", help="Start the M0-GUI-001 Desktop shell")
     gui_smoke = sub.add_parser("gui-smoke", help="Run the M0-GUI-001 PySide6 startup/exit smoke")
     gui_smoke.add_argument("--headless", action="store_true")
@@ -1197,6 +1265,40 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_bootstrap(args.check_only, args.with_quality_tools)
     if command == "verify-baseline":
         return _baseline_check()
+    if command == "authority-diff":
+        diff_args = [
+            sys.executable,
+            str(AUTHORITY_DIFF),
+            "--reference-root",
+            str(args.reference_root),
+            "--candidate-root",
+            str(args.candidate_root),
+            "--reference-label",
+            str(args.reference_label),
+            "--candidate-label",
+            str(args.candidate_label),
+        ]
+        if args.output is not None:
+            diff_args.extend(["--output", str(args.output)])
+        if args.fail_on_difference:
+            diff_args.append("--fail-on-difference")
+        return _run(diff_args)
+    if command == "verify-authority-consistency":
+        consistency_args = [
+            sys.executable,
+            str(AUTHORITY_CONSISTENCY_VERIFY),
+            "--authority-root",
+            str(args.authority_root),
+        ]
+        if args.json:
+            consistency_args.append("--json")
+        if args.output is not None:
+            consistency_args.extend(["--output", str(args.output)])
+        if args.report_only:
+            consistency_args.append("--report-only")
+        return _run(consistency_args)
+    if command == "verify-w0-successor":
+        return _run([sys.executable, str(W0_SUCCESSOR_VERIFY), "--check"])
     if command == "verify-canonical":
         return _run([sys.executable, str(CANONICAL_VERIFY)])
     if command == "doctor":
@@ -2328,15 +2430,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run(pg_args)
     if command == "run":
         if args.target == "gui":
-            return _run([sys.executable, "-m", "tpaa_gui"])
-        return _reserved("M0-API-002", "run api")
-    reserved = {
-        "run-api": "M0-API-002",
-    }
+            return _run_runtime_module("tpaa_gui")
+        service_args = ["--host", args.host, "--port", str(args.port)]
+        if args.check_config:
+            service_args.append("--check-config")
+        return _run_runtime_module(
+            "tpaa_service",
+            service_args,
+        )
+    if command == "run-api":
+        service_args = ["--host", args.host, "--port", str(args.port)]
+        if args.check_config:
+            service_args.append("--check-config")
+        return _run_runtime_module(
+            "tpaa_service",
+            service_args,
+        )
     if command == "run-gui":
-        return _run([sys.executable, "-m", "tpaa_gui"])
-    if command in reserved:
-        return _reserved(reserved[command], command)
+        return _run_runtime_module("tpaa_gui")
     parser.error(f"unknown command: {command}")
 
 

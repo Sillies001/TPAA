@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
 import sys
 import threading
@@ -16,13 +17,7 @@ if str(SRC_ROOT) not in sys.path:
 
 import uvicorn  # noqa: E402
 
-from tpaa_runtime import (  # noqa: E402
-    ProductRuntime,
-    ProductRuntimeConfig,
-    RuntimeProfile,
-    build_desktop_application,
-    create_full_desktop_app,
-)
+from tpaa_desktop import create_app  # noqa: E402
 
 CONTROL_PROTOCOL = "TPAA_LOCAL_BACKEND_CONTROL_V1"
 
@@ -42,25 +37,28 @@ def _emit(record: dict[str, object]) -> None:
     sys.stdout.flush()
 
 
-def _runtime(product_build_version: str) -> ProductRuntime:
-    return build_desktop_application(
-        ProductRuntimeConfig(
-            profile=RuntimeProfile.DESKTOP,
-            product_build_version=product_build_version,
-            authority_root=REPO_ROOT / "baseline" / "CB-1.4.0" / "canonical",
-            m1_fixture_root=REPO_ROOT / "tests" / "fixtures" / "m1",
-        )
-    )
-
-
 def main() -> int:
     start = _read_record()
     if start.get("protocol") != CONTROL_PROTOCOL or start.get("type") != "START":
         return 2
     token = start.get("bearer_token")
+    desktop_nonce = start.get("desktop_nonce")
     build = start.get("product_build_version")
-    if not isinstance(token, str) or not token or not isinstance(build, str) or not build:
+    if (
+        not isinstance(token, str)
+        or not token
+        or not isinstance(desktop_nonce, str)
+        or not desktop_nonce
+        or not isinstance(build, str)
+        or not build
+    ):
         return 2
+    raw_data_root = start.get("desktop_data_root")
+    if raw_data_root is not None and (
+        not isinstance(raw_data_root, str) or not Path(raw_data_root).is_absolute()
+    ):
+        return 2
+    desktop_data_root = None if raw_data_root is None else Path(raw_data_root).resolve(strict=False)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -68,9 +66,11 @@ def main() -> int:
     sock.listen(2048)
     port = int(sock.getsockname()[1])
 
-    app = create_full_desktop_app(
-        _runtime(build),
+    app = create_app(
         bearer_token=token,
+        product_build_version=build,
+        data_root=desktop_data_root,
+        desktop_nonce=desktop_nonce,
     )
     config = uvicorn.Config(
         app,
@@ -82,28 +82,42 @@ def main() -> int:
         date_header=False,
     )
     server = uvicorn.Server(config)
-    thread = threading.Thread(
-        target=server.run,
-        kwargs={"sockets": [sock]},
+    shutdown_requested = threading.Event()
+
+    def watch_control_channel() -> None:
+        while True:
+            try:
+                record = _read_record()
+            except (OSError, RuntimeError, json.JSONDecodeError):
+                server.should_exit = True
+                return
+            if record.get("protocol") != CONTROL_PROTOCOL:
+                continue
+            if record.get("type") == "SHUTDOWN":
+                shutdown_requested.set()
+                server.should_exit = True
+                return
+
+    control_thread = threading.Thread(
+        target=watch_control_channel,
+        name="tpaa-local-backend-control",
         daemon=True,
     )
-    thread.start()
+    control_thread.start()
     _emit({
         "protocol": CONTROL_PROTOCOL,
         "type": "LISTENING",
         "pid": __import__("os").getpid(),
         "port": port,
     })
+    # LISTENING is the only child-to-parent control record. Detach Python's
+    # stdout afterwards so multiprocessing's mandatory pre-spawn stream flush
+    # can never block on the GUI control pipe while a governed worker starts.
+    sys.stdout = open(os.devnull, "w", encoding="utf-8")  # noqa: SIM115
 
     try:
-        while True:
-            record = _read_record()
-            if record.get("protocol") != CONTROL_PROTOCOL:
-                continue
-            if record.get("type") == "SHUTDOWN":
-                server.should_exit = True
-                thread.join(timeout=4.5)
-                return 0 if not thread.is_alive() else 3
+        server.run(sockets=[sock])
+        return 0 if shutdown_requested.is_set() else 3
     finally:
         server.should_exit = True
         sock.close()

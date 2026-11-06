@@ -43,16 +43,12 @@ def register_m7_routes(
     @app.get("/m7/p3/twins/{twin_revision_id}")
     def twin(twin_revision_id: str) -> JSONResponse:
         try:
-            payload = application.m7_p3_twin(
-                M7TwinQuery(twin_revision_id=twin_revision_id)
-            )
+            payload = application.m7_p3_twin(M7TwinQuery(twin_revision_id=twin_revision_id))
         except M7ApplicationError as exc:
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.get(
-        "/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}"
-    )
+    @app.get("/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}")
     def estimate(
         twin_revision_id: str,
         estimate_id: str,
@@ -68,9 +64,7 @@ def register_m7_routes(
             return _error(exc)
         return JSONResponse(status_code=200, content=payload)
 
-    @app.get(
-        "/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}/workspace"
-    )
+    @app.get("/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}/workspace")
     def workspace(
         twin_revision_id: str,
         estimate_id: str,

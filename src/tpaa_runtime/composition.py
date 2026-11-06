@@ -32,6 +32,7 @@ from tpaa_application import (
     M8WorkspaceService,
     M9WorkspaceService,
     SecurityAuditSink,
+    W7ExternalCapabilityRegistry,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_application.m1_repository import InMemorySessionPublicationRepository
@@ -47,9 +48,7 @@ from .observability import ProductOperationalStatus, ProductQualificationStatus
 
 class _UnavailableStorageBaseline:
     def execute(self) -> Never:
-        raise RuntimeError(
-            "product storage baseline is not configured before PIQB B2 persistence"
-        )
+        raise RuntimeError("product storage baseline is not configured before PIQB B2 persistence")
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,12 +78,8 @@ def _build(
         )
     )
 
-    m3_publication = M3PublicationService(
-        InMemoryM3ReleasePublicationRepository()
-    )
-    m4_longitudinal = M4LongitudinalPublicationService(
-        InMemoryM4LongitudinalReleaseRepository()
-    )
+    m3_publication = M3PublicationService(InMemoryM3ReleasePublicationRepository())
+    m4_longitudinal = M4LongitudinalPublicationService(InMemoryM4LongitudinalReleaseRepository())
     m4_workspace = M4WorkspaceService(
         longitudinal=m4_longitudinal,
         debrief=InMemoryM4DebriefRepository(),
@@ -139,6 +134,7 @@ def _build(
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=operational_status,
+        w7_external_capabilities=W7ExternalCapabilityRegistry.local_closed(),
     )
     return ProductRuntime(
         config=config,
@@ -202,9 +198,7 @@ def create_full_service_app(
 
     if principal_resolver is not None:
         if m8_principal_resolver is not None or m9_principal_resolver is not None:
-            raise ValueError(
-                "unified principal_resolver cannot be combined with legacy resolvers"
-            )
+            raise ValueError("unified principal_resolver cannot be combined with legacy resolvers")
         app = create_unified_service_app(
             application=runtime.application,
             principal_resolver=principal_resolver,
