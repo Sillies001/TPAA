@@ -1,8 +1,8 @@
 # TPAA HTML Demo v33 驱动的 GUI 产品化重构、后端补齐与设计同步整改方案
 
-> 文档状态：`IN_PROGRESS_V33 / G0R、G1 已本地关闭，G2 待 GitHub 续接`  
+> 文档状态：`IN_PROGRESS_V33 / G0R、G1 已本地关闭，G2 已开工、尚未关闭`  
 > 编制日期：2026-11-06  
-> 当前工作指令：暂停产品代码修改；本文件完成评审前不得继续修改 `src/`、`tests/`、机器权威或打包资产。  
+> 当前工作指令：G2 已获续接授权；按本方案实施产品 Shell、导航、会话主题与共享状态。G2 关闭前不得启动 G3，不得提前暴露 G1 预留 GUI API 路由。  
 > 替代关系：本文件替代 `TPAA_HTML_Demo驱动_GUI产品化重构与后端设计同步整改方案_2026-10-29.md` 作为后续 GUI 产品化工作的唯一实施方案。  
 > 目标对象：TPAA Desktop GUI、面向 GUI 的 Application/API 投影、必要领域/存储能力、总体与工程设计后继基线。  
 > 发布边界：只允许本地修改和验证；禁止推送、签名和生产部署。W9 继续保持 `NO_GO`。
@@ -888,4 +888,4 @@ docs/gui/demo-v33 docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json
 
 本方案已覆盖 v33 基线、三份 Patch、26 视图、V01/V26、WE/Cluster/Window、双视角、后端/API/DTO、版本、设计同步、分阶段实施、测试、迁移、风险和 DoD。
 
-执行状态（2026-11-06）：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`，`G2～G12=NOT_STARTED`。G0R 关闭证据见 `docs/reviews/G0R_V33_TARGET_FREEZE_CLOSURE_2026-11-06.md`；G1 关闭证据见 `docs/reviews/G1_V33_MACHINE_AUTHORITY_AND_SCAFFOLD_CLOSURE_2026-11-06.md`。G2 将从 GitHub 候选分支续接；上述状态不代表任何生产资格通过。
+执行状态（2026-11-06）：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`，`G2=IN_PROGRESS`，`G3～G12=NOT_STARTED`。G0R 关闭证据见 `docs/reviews/G0R_V33_TARGET_FREEZE_CLOSURE_2026-11-06.md`；G1 关闭证据见 `docs/reviews/G1_V33_MACHINE_AUTHORITY_AND_SCAFFOLD_CLOSURE_2026-11-06.md`。G2 已开始实现产品 Shell、Ribbon、三主题、共享状态和 V24 受控导航；当前 Vite 构建、web_dist 同步、Python 测试与 Windows WebEngine 实机门禁尚未通过，因此不得关闭 G2 或启动 G3。上述状态不代表任何生产资格通过。
