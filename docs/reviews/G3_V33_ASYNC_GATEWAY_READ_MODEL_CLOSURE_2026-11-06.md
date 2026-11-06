@@ -90,6 +90,8 @@ GUI 和 REST 不直接读取原始文件、数据库表或 Canonical 表。Appli
 
 全仓回归使用 `--import-mode=importlib`，以避开仓库既有的 contract/unit 同名模块收集冲突。首次结果为 `1716 passed / 3 skipped / 2 failed`：一项是打包器按设计拒绝提交前脏工作树，提交后已通过；另一项是 G1 后 `run_desktop` 新增 `config` 参数而旧测试桩未同步，更新测试桩后通过。三项跳过分别需要外部 Prometheus image、S3 endpoint 和 PostgreSQL conninfo，不属于 G3 本地退出门。
 
+正式关闭提交后的最终干净工作树全量回归结果为 `1718 passed / 3 skipped / 0 failed`，耗时约 3 分 22 秒；该轮同时再次通过开发打包器的干净工作树门。
+
 Windows 临时 pytest 目录在测试全部完成后出现清理权限提示，不改变测试退出结果。Chromium 报告 GLES3 上下文不可用并回退 GLES2；G3 的 100%/150% 网关和 Shell 验收已通过，但 GPU/renderer recovery 仍留在 G11，不在本阶段伪报关闭。
 
 ## 7. 证据与下一阶段
