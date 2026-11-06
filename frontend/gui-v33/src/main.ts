@@ -308,6 +308,23 @@ function renderPageBody(view: View, status: UiState): string {
     (view.id === "V08" ? renderV08Entry() : "");
 }
 function render(): void {
+  let focusTarget: { key: "action" | "view" | "module" | "theme" | "main" | "skip"; value: string } | null = null;
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if (active && root.contains(active)) {
+    if (active.id === "main-content") {
+      focusTarget = { key: "main", value: "" };
+    } else if (active.classList.contains("skip-link")) {
+      focusTarget = { key: "skip", value: "" };
+    } else {
+      for (const key of ["action", "view", "module", "theme"] as const) {
+        const value = active.dataset[key];
+        if (value) {
+          focusTarget = { key, value };
+          break;
+        }
+      }
+    }
+  }
   const view = currentView();
   const module = modules.get(view.module);
   if (!module) throw new Error("TPAA_VIEW_MODULE_MISSING");
@@ -332,6 +349,18 @@ function render(): void {
     '<span>权限：' + esc(state.authorization.status) + " · 业务数据：未接入（G3 起）</span><span>主题：" +
       esc(state.presentation.theme) + "</span></footer></div>",
   ].join("");
+  const target = focusTarget;
+  if (target?.key === "main") {
+    root.querySelector<HTMLElement>("#main-content")?.focus();
+  } else if (target?.key === "skip") {
+    root.querySelector<HTMLAnchorElement>(".skip-link")?.focus();
+  } else if (target) {
+    const restored = Array.from(root.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => button.dataset[target.key] === target.value,
+    );
+    if (restored && !restored.disabled) restored.focus();
+    else root.querySelector<HTMLElement>("#main-content")?.focus();
+  }
   root.querySelectorAll<HTMLButtonElement>("[data-module]").forEach((button) =>
     button.addEventListener("click", () => navigateToModule(button.dataset.module as ModuleId)),
   );
