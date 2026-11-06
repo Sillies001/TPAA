@@ -64,6 +64,25 @@ _DESKTOP_ALLOWED_PREFIXES = (
 )
 
 
+
+_V24_DIRECT_QUERY_KEYS = frozenset({"view", "view_id", "route", "page"})
+
+
+def _is_direct_v24_navigation(request: Request) -> bool:
+    """Reject direct V24 URLs; only the in-memory V08 controlled entry may enter."""
+
+    path = request.url.path
+    if path != "/ui" and not path.startswith("/ui/"):
+        return False
+    if any(segment.upper() == "V24" for segment in path.split("/") if segment):
+        return True
+    return any(
+        value.strip().upper() == "V24"
+        for key in _V24_DIRECT_QUERY_KEYS
+        for value in request.query_params.getlist(key)
+    )
+
+
 def _deny_principal(_request: Request) -> None:
     raise PermissionError("runtime principal resolver is not configured")
 
