@@ -48,10 +48,19 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     assert 'unknown_policy === "DENY"' in source
     assert 'theme: "graphite"' in source
     assert all(token in source for token in ('"tactical"', '"graphite"', '"light"'))
-    assert all(token in source for token in ("domainSelection", "replayState", "returnStack", "ribbonCollapsed"))
-    assert not re.search(r"\b(?:localStorage|sessionStorage)\.(?:setItem|removeItem|clear)\s*\(", source)
+    assert all(
+        token in source
+        for token in ("domainSelection", "replayState", "returnStack", "ribbonCollapsed")
+    )
+    assert not re.search(
+        r"\b(?:localStorage|sessionStorage)\.(?:setItem|removeItem|clear)\s*\(",
+        source,
+    )
     assert "Math.random(" not in source
-    assert all(f':root[data-tpaa-theme="{theme}"]' in css for theme in ("tactical", "graphite", "light"))
+    assert all(
+        f':root[data-tpaa-theme="{theme}"]' in css
+        for theme in ("tactical", "graphite", "light")
+    )
     assert ":focus-visible" in css
     assert "@media (prefers-reduced-motion:reduce)" in css
     assert "@media(max-width:760px)" in css
