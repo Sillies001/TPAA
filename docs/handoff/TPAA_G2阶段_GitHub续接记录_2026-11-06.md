@@ -123,3 +123,14 @@ CSS 合同断言已在提交 `8abd5b48df4010127314be0bc5745e2e47709be8` 进一�
 - G1 WebEngine smoke 新增可选 `--output`，默认行为不变；G2 复验可写入 TEMP，不覆盖 `evidence/gui-g1-v33-webengine-smoke.json`。
 
 G2 仍为 `IN_PROGRESS`。本轮新增权限安全修正待 Windows npm build、Mypy、Ruff、定向 Pytest 和 G2 verifier 复验。
+
+
+## Latest remote revision and Windows test status (2026-11-06)
+
+- Latest code revision: `55a59a661b1929aa80888b0afb82b7c0e99e7274`.
+- User-confirmed previous revision checks: Ruff PASS; Mypy PASS (549 source files); targeted G2 tests `6 passed, 2 warnings`.
+- After that pass, an additional fail-closed permission correction was committed: no view (including V25) is navigable unless the session is READY and the authoritative view contract contains a non-empty permission list; V24 also requires its view permissions.
+- The G2 verifier now explicitly reports all views lacking permission bindings and records the gate as `BLOCKED_MISSING_VIEW_PERMISSION_BINDINGS`.
+- The G1 WebEngine smoke tool now accepts `--output` so a fresh smoke can write to TEMP without overwriting the original G1 closure evidence.
+- The new permission correction, verifier, tests and smoke CLI have not yet been rerun on Windows. The earlier 6-pass result applies to the previous code revision only.
+- Exact next step: sync branch and run the consolidated command block in the latest ChatGPT handoff. Do not mark G2 closed.

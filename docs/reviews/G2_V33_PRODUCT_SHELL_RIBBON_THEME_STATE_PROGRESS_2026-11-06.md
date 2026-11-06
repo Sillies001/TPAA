@@ -114,3 +114,12 @@ CSS media-query 合同断言最终正则已在 `8abd5b48df4010127314be0bc5745e2e
 静态 authority review 发现：CB-1.6.0 的 GUI_VIEW_CONTRACT 26 个 `required_permissions` 全为空；GUI_PERMISSION_AUDIT_AUTHORITY 虽有 11 个 default-deny permission IDs，但没有 per-view bindings，也没有与 TPAA_SECURITY_POLICY_V1 中实际角色权限的机器映射。前端原 `[].every(...)` 为空数组真空成立，且 V25 存在无条件放行，因此不能声称权限化导航已实现。
 
 已实施 fail-closed 修正：所有视图（包括 V25）必须处于 READY 会话并拥有非空显式权限绑定；V24 还必须满足受控 grant 和权限；G2 verifier 将记录全部缺失绑定并维持 IN_PROGRESS。后续需形成新的受控 authority successor diff、lock、兼容性与迁移证据，不得修改已关闭的 G1 CB-1.6.0。
+
+
+## 11. Latest G2 security correction and revalidation state (2026-11-06)
+
+Remote implementation revision: `55a59a661b1929aa80888b0afb82b7c0e99e7274`.
+
+Windows results on the preceding revision: Ruff PASS, Mypy PASS (549 files), G2 targeted tests 6 passed / 2 warnings. A subsequent fail-closed correction now denies navigation for any view whose machine contract has an empty or missing `required_permissions`, removes the V25 bypass, and requires V24 permission bindings in addition to its controlled grant. The verifier reports all unbound views and retains G2 as IN_PROGRESS. The G1 WebEngine smoke script gained an optional output path so the G1 closure evidence file is not overwritten during rechecks.
+
+This latest correction is not yet Windows-verified. The prior 6-pass test result must not be attributed to this new revision. A controlled G2 successor authority diff is required before populating view permissions; CB-1.6.0 must remain unchanged.
