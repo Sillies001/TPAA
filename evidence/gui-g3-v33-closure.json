@@ -1,0 +1,109 @@
+{
+  "schema": "TPAA_GUI_G3_V33_CLOSURE_EVIDENCE_V1",
+  "status": "PASS",
+  "phase_status": "CLOSED_LOCAL_WITH_GATES",
+  "verified_at": "2026-11-06T15:19:47Z",
+  "source_revision": "b29d456b67727fa04b4ef67e00c4d147437ee5c6",
+  "source_state": "LOCAL_WORKING_TREE_NO_PUSH_NO_DEPLOYMENT",
+  "approval_id": "G3-CB-1.8.0-LOCAL-CLOSURE-2026-11-06",
+  "authorities": {
+    "status": "PASS",
+    "core_baseline": "CB-1.8.0",
+    "database_schema": "1.10.0",
+    "active_route_count": 89,
+    "g3_route_count": 3,
+    "reserved_business_route_count": 12,
+    "gateway_authority_sha256": "c9208cf089e7f6b63eb150a397c7283044dff726c1b825a1251b5efa672fb596"
+  },
+  "generated_client_drift": "NONE",
+  "dynamic_gates": [
+    {
+      "command": [
+        "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "tests/unit/application/test_g3_gui_gateway_application.py",
+        "tests/unit/api/test_g3_gui_gateway_api.py",
+        "tests/contract/gui_v33/test_g3_v33_gateway_contract.py",
+        "-q"
+      ],
+      "status": "PASS",
+      "stdout_sha256": "71c086e50abf3815bd3ce736864df4ebc0dda208e481b4205700c825cfb436e2"
+    },
+    {
+      "command": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "status": "PASS",
+      "stdout_sha256": "f54ba9893ee679d0a0d11d73699ee47bbbdec28607d9c227b33af915b1e1f9f2"
+    },
+    {
+      "command": [
+        "npm.cmd",
+        "run",
+        "test:gateway"
+      ],
+      "status": "PASS",
+      "stdout_sha256": "40c89890e0c108bdf7aceb3073529a199809c777f9dbd917fdc365a1221e572f"
+    }
+  ],
+  "frontend_build": {
+    "schema": "TPAA_G1_V33_FRONTEND_BUILD_EVIDENCE_V1",
+    "status": "PASS",
+    "package_lock_sha256": "422bc9b149fdb9d364acdf003e5d3f8b19c147da998961c1724578b282492282",
+    "files": [
+      {
+        "path": ".vite/manifest.json",
+        "sha256": "29cc24990d1894bba509112ddef3f747e48c6019f0ef29766bc30075e4883b4d",
+        "bytes": 185
+      },
+      {
+        "path": "assets/index-Ck9gvWm3.css",
+        "sha256": "2d5494c1f489b4a2a0deef1ea0cf9f48f2eb1c55d2cbb4c7f0b83f61b21e1338",
+        "bytes": 11962
+      },
+      {
+        "path": "assets/index-coI03sHG.js",
+        "sha256": "b83b5dc098b6e428725515ec9aaf1a6c7987b484c24a67136435b08f9ee57871",
+        "bytes": 45146
+      },
+      {
+        "path": "index.html",
+        "sha256": "2212feac0ac18cc7171ecbeaa9bcbc6a93bfd9148a530bb49442025b881dca1c",
+        "bytes": 510
+      }
+    ],
+    "remote_resources": 0,
+    "release_claim": false
+  },
+  "webengine_acceptance": [
+    {
+      "status": "PASS",
+      "scale": 1.0,
+      "exact_origin": "http://127.0.0.1:8922",
+      "sha256": "daed9121ba0fc424f14356dc969f8aceed089fd99c36fd1e463aec3a0d35d0e6"
+    },
+    {
+      "status": "PASS",
+      "scale": 1.5,
+      "exact_origin": "http://127.0.0.1:8956",
+      "sha256": "2923ab03ed003b924767ea352135b66412a369e56c9444086fe6bc95b53794ed"
+    }
+  ],
+  "stale_response_overwrite": "REJECTED",
+  "cross_principal_cache": "FORBIDDEN",
+  "cross_release_cache": "FORBIDDEN",
+  "pagination_cancel_error_gates": "PASS",
+  "business_data_truth": "NO_DEMO_OR_RANDOM_VALUES",
+  "open_gates": [],
+  "restrictions": {
+    "push": "PROHIBITED",
+    "production_deployment": "PROHIBITED",
+    "release_claim": false
+  },
+  "release_claim": false
+}

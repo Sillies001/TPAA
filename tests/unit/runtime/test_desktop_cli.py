@@ -47,5 +47,5 @@ def test_desktop_main_forwards_packaged_root_and_data_root(
         },
         "qt_args": ["-style", "fusion"],
         "backend": backend,
-        "gui_mode": "legacy",
+        "gui_mode": "LEGACY_WIDGETS",
     }
