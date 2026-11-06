@@ -19,7 +19,7 @@
     "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading"
   ],
   "release_claim": false,
-  "implementation_revision": "92ec0434864081749213bbc0a9353aff746e7b70",
+  "implementation_revision": "c5df327b6ed42f7f06c3d8d079f52ed63c36856a",
   "observed_local_failure": {
     "command": "npm run typecheck",
     "result": "FAILED",
@@ -78,6 +78,7 @@
       "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
     ],
     "approach": "Validate untrusted JSON arrays with _object_list(value: object, label: str) -> list[dict[str, Any]] before iteration; reject null and malformed members fail-closed",
-    "verification": "PENDING_WINDOWS_RERUN"
+    "verification": "PENDING_WINDOWS_RERUN",
+    "commit": "c5df327b6ed42f7f06c3d8d079f52ed63c36856a"
   }
 }
