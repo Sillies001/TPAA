@@ -18,8 +18,13 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from tpaa_gui.design_system import Theme, theme_stylesheet  # noqa: E402
+from tpaa_gui.design_system import (  # noqa: E402
+    Theme,
+    configure_application_font,
+    theme_stylesheet,
+)
 from tpaa_gui.diagnostics import DiagnosticsSnapshot  # noqa: E402
+from tpaa_gui.localization import install_chinese_localization  # noqa: E402
 from tpaa_gui.page_contract import PAGE_CONTRACTS  # noqa: E402
 from tpaa_gui.product_shell import create_product_workspace  # noqa: E402
 
@@ -51,14 +56,7 @@ def capture(output_dir: Path, *, dpi: float) -> dict[str, object]:
 
     output_dir.mkdir(parents=True, exist_ok=True)
     app: Any = QtWidgets.QApplication.instance() or QtWidgets.QApplication(["w4-visual"])
-    if not QtGui.QFontDatabase.families():
-        for candidate in (
-            Path("C:/Windows/Fonts/segoeui.ttf"),
-            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-        ):
-            if candidate.is_file():
-                QtGui.QFontDatabase.addApplicationFont(str(candidate))
-                break
+    configure_application_font(QtGui, app)
     app.setStyleSheet(theme_stylesheet(Theme.LIGHT, dpi))
     window = QtWidgets.QMainWindow()
     window.setObjectName("tpaaW4VisualWindow")
@@ -72,12 +70,10 @@ def capture(output_dir: Path, *, dpi: float) -> dict[str, object]:
         logical_dpi=dpi,
     )
     window.setCentralWidget(root)
+    localization_filter = install_chinese_localization(QtCore, QtWidgets, app, window)
     records: list[dict[str, object]] = []
-    for width, height, slot in (
-        (1024, 720, "P01"),
-        (1440, 900, "P08"),
-        (1920, 1080, "P12"),
-    ):
+    for contract in PAGE_CONTRACTS:
+        width, height, slot = 1440, 900, contract.slot
         index = next(
             index for index, contract in enumerate(PAGE_CONTRACTS) if contract.slot == slot
         )
@@ -88,6 +84,18 @@ def capture(output_dir: Path, *, dpi: float) -> dict[str, object]:
         output = output_dir / f"w4_{slot}_{width}x{height}_{int(dpi)}dpi.png"
         if not window.grab().save(str(output), "PNG"):
             raise RuntimeError(f"W4_VISUAL_CAPTURE_FAILED:{output.name}")
+        page = root._tpaa_pages[index]
+        scroll = page._tpaa_scroll
+        content = page._tpaa_content
+        clipped_controls = []
+        for control_type in (
+            QtWidgets.QPushButton,
+            QtWidgets.QComboBox,
+            QtWidgets.QLineEdit,
+        ):
+            for control in content.findChildren(control_type):
+                if control.isVisible() and control.width() + 2 < control.minimumSizeHint().width():
+                    clipped_controls.append(control.objectName() or control_type.__name__)
         records.append(
             {
                 "slot": slot,
@@ -99,11 +107,18 @@ def capture(output_dir: Path, *, dpi: float) -> dict[str, object]:
                 "detail_drawer_visible": root._tpaa_detail_drawer.isVisible(),
                 "status_bar_visible": root._tpaa_status_bar.isVisible(),
                 "page_object": root._tpaa_pages[index].objectName(),
+                "page_visible": page.isVisible(),
+                "scroll_viewport_visible": scroll.viewport().isVisible(),
+                "content_width": content.width(),
+                "viewport_width": scroll.viewport().width(),
+                "horizontal_overflow": scroll.horizontalScrollBar().maximum() > 0,
+                "clipped_controls": sorted(set(clipped_controls)),
             }
         )
+    app.removeEventFilter(localization_filter)
     window.close()
     return {
-        "schema": "TPAA_W4_VISUAL_EVIDENCE_V1",
+        "schema": "TPAA_CURRENT_GUI_RENDER_EVIDENCE_V2",
         "qt_platform": app.platformName(),
         "records": records,
     }

@@ -1,0 +1,97 @@
+{
+  "schema": "TPAA_POST_CLOSE_REMEDIATION_WAVE_EVIDENCE_V1",
+  "date": "2026-10-26",
+  "branch": "local-r8-review",
+  "base_source_revision": "b113a172004c9698924fd53c14723f93670eee8a",
+  "status": "CLOSED_LOCAL",
+  "final_release_decision": "NO_GO",
+  "main_worktree_clean": false,
+  "pushed": false,
+  "production_signed": false,
+  "production_deployed": false,
+  "checks": {
+    "targeted_tests": {
+      "passed": 88,
+      "failed": 0
+    },
+    "unit_tests": {
+      "passed": 796,
+      "failed": 0,
+      "execution": "directory shards"
+    },
+    "contract_tests": {
+      "total": 818,
+      "full_dirty_worktree_passed": 816,
+      "full_dirty_worktree_failed": 2,
+      "codegen_clone_gate_rerun": "PASS",
+      "clean_worktree_package_gate_rerun": "PASS",
+      "clean_package_validation_location": "isolated system temporary Git copy",
+      "gate_relaxed": false
+    },
+    "migration_tests": {
+      "passed": 27,
+      "failed": 0
+    },
+    "golden_replay_e2e_platform": {
+      "passed": 21,
+      "failed": 0
+    },
+    "integration": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 3,
+      "skip_reason": "PostgreSQL, S3 and Prometheus external test endpoints are not configured"
+    },
+    "ruff": "PASS",
+    "mypy": {
+      "status": "PASS",
+      "source_file_count": 538
+    },
+    "compileall": "PASS",
+    "generated_source": "PASS",
+    "architecture": "PASS",
+    "deterministic_codegen": "PASS",
+    "dependency_lock": "PASS",
+    "visual_pages": {
+      "passed": 13,
+      "failed": 0,
+      "horizontal_overflow": 0,
+      "clipped_controls": 0,
+      "viewport": "1440x900",
+      "dpi": 96,
+      "qt_platform": "offscreen"
+    },
+    "role_tasks": {
+      "passed": 5,
+      "failed": 0
+    },
+    "real_gui_workflow": {
+      "status": "PASS",
+      "major_interactions": 4,
+      "final_gate": "NO_GO"
+    }
+  },
+  "artifacts": {
+    "gui_workflow": {
+      "path": "evidence/postclose-gui-workflow-acceptance-20261026.json",
+      "sha256": "5e7b48d848213f5a5d18ee2466bfbf3cc5bfe6095bd43a7a1410bc0f9e0a46dd"
+    },
+    "role_tasks": {
+      "path": "evidence/postclose-role-task-acceptance-20261026.json",
+      "sha256": "e287b62fcf5a820a6f3ee934c05a567d71184e47fbd51723fd7d7ff18f59117a"
+    },
+    "visual_manifest": {
+      "path": "build/postclose-visual-20261026/w4_visual_96dpi.json",
+      "sha256": "8eac752eb3bfb476827add2d34099512779892f0558a865e9941d807bc56a44b"
+    }
+  },
+  "remaining_gates": [
+    "P07_SERVER_PUBLISHED_MULTI_AIRCRAFT_MODEL_PROFILE",
+    "APPROVED_DISPLAY_HUMAN_GUI_SIGNOFF",
+    "FOUR_TARGET_PROFILE_INSTALLED_E2E_PERFORMANCE_DR_UPGRADE_ROLLBACK",
+    "INDEPENDENT_SECURITY_FINDING_ADJUDICATION",
+    "FORMAL_PROVENANCE_AND_ORGANIZATION_SIGNATURE",
+    "PROTECTED_MAIN_EXACT_SHA_AND_HOSTED_CI",
+    "PRODUCTION_DEPLOYMENT_APPROVAL"
+  ]
+}

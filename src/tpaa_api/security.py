@@ -5,7 +5,13 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict
 
-from tpaa_security import ApprovalError, ApprovalRequest, ApprovalService, Permission
+from tpaa_security import (
+    ApprovalError,
+    ApprovalRequest,
+    ApprovalService,
+    Permission,
+    load_security_policy,
+)
 
 
 class ApprovalRequestBody(BaseModel):
@@ -51,6 +57,25 @@ def _payload(value: ApprovalRequest) -> dict[str, object]:
 
 
 def register_security_routes(app: FastAPI, approvals: ApprovalService) -> None:
+    @app.get("/security/session")
+    def session_context(request: Request) -> dict[str, object]:
+        principal = _principal(request)
+        policy = load_security_policy()
+        permissions = sorted(
+            {
+                permission.value
+                for role in principal.roles
+                for permission in policy.role_permissions.get(role, frozenset())
+            }
+        )
+        return {
+            "schema": "TPAA_SECURITY_SESSION_CONTEXT_V1",
+            "roles": sorted(role.value for role in principal.roles),
+            "projection_role": policy.projection_role(principal.roles),
+            "permissions": permissions,
+            "policy_sha256": policy.sha256,
+        }
+
     @app.get("/security/approvals")
     def approval_inbox(request: Request) -> dict[str, object]:
         try:

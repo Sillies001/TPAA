@@ -335,6 +335,48 @@ def test_w1_shared_desktop_runtime_config_document(tmp_path: Path) -> None:
     assert verify_sqlite(config.desktop_database_path).schema_version == "1.9.0"
 
 
+def test_runtime_config_loads_complete_formal_qualification_binding(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "formal-evidence.json"
+    trust_root = tmp_path / "release-authority.pem"
+    manifest.write_text("{}", encoding="utf-8")
+    trust_root.write_text("placeholder", encoding="utf-8")
+    document = tmp_path / "desktop-runtime-formal.json"
+    document.write_text(
+        json.dumps(
+            {
+                "schema": "TPAA_RUNTIME_CONFIG_V1",
+                "profile": "DESKTOP",
+                "product_build_version": "test-build",
+                "core_baseline": "CB-1.5.0",
+                "db_schema_version": "1.9.0",
+                "authority_root": str(AUTHORITY),
+                "data_root": str(tmp_path / "desktop-formal-data"),
+                "formal_qualification": {
+                    "manifest": str(manifest),
+                    "trust_root": str(trust_root),
+                    "key_id": "release-authority-1",
+                    "candidate_identity_sha256": "a" * 64,
+                    "source_revision": "b" * 40,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    config = load_runtime_config_document(
+        document,
+        expected_product_build_version="test-build",
+        expected_authority_root=AUTHORITY,
+        environ={},
+    )
+
+    assert config.formal_qualification is not None
+    assert config.formal_qualification.manifest_path == manifest
+    assert config.formal_qualification.candidate_identity_sha256 == "a" * 64
+
+
 def test_w1_shared_service_config_resolves_secret_references(tmp_path: Path) -> None:
     document = tmp_path / "service-runtime.json"
     document.write_text(

@@ -94,6 +94,39 @@ class ProductRuntimeConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class FormalQualificationEvidenceConfig:
+    """Trust and exact-candidate binding for signed W7-W9 evidence."""
+
+    manifest_path: Path
+    trust_root_path: Path
+    key_id: str
+    candidate_identity_sha256: str
+    source_revision: str
+
+    def __post_init__(self) -> None:
+        if not self.manifest_path.is_file():
+            raise ValueError("formal qualification manifest must exist")
+        if not self.trust_root_path.is_file():
+            raise ValueError("formal qualification trust root must exist")
+        if not self.key_id.strip():
+            raise ValueError("formal qualification key_id must be non-empty")
+        digest = self.candidate_identity_sha256
+        if (
+            len(digest) != 64
+            or digest != digest.lower()
+            or any(character not in "0123456789abcdef" for character in digest)
+        ):
+            raise ValueError("formal candidate identity must be lowercase SHA-256")
+        revision = self.source_revision
+        if (
+            len(revision) != 40
+            or revision != revision.lower()
+            or any(character not in "0123456789abcdef" for character in revision)
+        ):
+            raise ValueError("formal source revision must be a lowercase Git SHA")
+
+
+@dataclass(frozen=True, slots=True)
 class ProductionRuntimeConfig:
     """PRCB production-only runtime configuration with explicit persistence."""
 
@@ -107,6 +140,7 @@ class ProductionRuntimeConfig:
     service_identity: OidcMtlsRuntimeConfig | None = None
     object_store: ObjectStore | None = None
     migration_state_root: Path | None = None
+    formal_qualification: FormalQualificationEvidenceConfig | None = None
 
     def __post_init__(self) -> None:
         if not self.product_build_version.strip():

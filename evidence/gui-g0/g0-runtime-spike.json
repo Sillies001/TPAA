@@ -1,0 +1,870 @@
+{
+  "schema": "TPAA_G0_RUNTIME_SPIKE_EVIDENCE_V1",
+  "status": "PASS",
+  "demo_sha256": "64910eb8b73b8ada44e398ac85568c887a5863d2b8272577e3e09ae857b0a706",
+  "fixture_sha256": "fb10a73201c9b1702a79d13c870be40a73acd384f4e4dece3fe376a4940c6871",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "results": [
+    {
+      "engine": "webengine",
+      "off_the_record": true,
+      "load_finished_signal": true,
+      "source_sha256": "64910eb8b73b8ada44e398ac85568c887a5863d2b8272577e3e09ae857b0a706",
+      "initial_load_ms": 370.666,
+      "outputs": [
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V01.png",
+          "sha256": "a808d2bc9e8fcd9facc7f98f8865a94272d7a35ae5cf6f4f508a8c94104939d8",
+          "bytes": 97810,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V02.png",
+          "sha256": "1e5631bdf42221e579d5ec0f40f468c8ad9b66c77b3e94d064203b0a45a89725",
+          "bytes": 128588,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V02"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V03.png",
+          "sha256": "0f15c4384417346aa866fd99f4bb28784e489323cff8d8ea352d26608009b1fc",
+          "bytes": 127338,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V04.png",
+          "sha256": "441826b03739130c25227458db05e44c29a34ee9f326eee2d5c8d7a90554613a",
+          "bytes": 152639,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V05.png",
+          "sha256": "71e7181827202971128032c9022b45cd76eecf013d6ad0441e0c7cfd277dd30e",
+          "bytes": 159513,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V05"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V06.png",
+          "sha256": "3788ec84d8cfdec2a8351f69d52b475c043d946c0c3a30cb67a23ecc541424f3",
+          "bytes": 161149,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V06"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V07.png",
+          "sha256": "be012fa2d2c68814fa2c2718f7bdec4bf797747809bb33376b70ad2d8f563c12",
+          "bytes": 203187,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V07"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V08.png",
+          "sha256": "ccb9462b24cd47d5000ff9ee791ffd6765507dc1462d77edaff38488c212d304",
+          "bytes": 176563,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V09.png",
+          "sha256": "b7d2b6b92c989b77e203dfa10cd012ade8941897d4e404342484aa1e9a94fd2a",
+          "bytes": 132436,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V09"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V10.png",
+          "sha256": "cfad0dbbce309f4efadba3d34b717bfdbf368091035eac5b77e290675916a9af",
+          "bytes": 130687,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V10"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V11.png",
+          "sha256": "4f9a6043ed1c7294b6be2cfd3b8a7e8621ed0d11761785c363428587d8273466",
+          "bytes": 157554,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V11"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V12.png",
+          "sha256": "f9e5d172495bd469793c05dd0015760f4a30b97f039e5ef085757bd00f443fc4",
+          "bytes": 134040,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V12"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V13.png",
+          "sha256": "840dbcbb0e8227e0256b307804ee9fdb9915e746a04a7c26ba2020c10b043b56",
+          "bytes": 128953,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V13"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V14.png",
+          "sha256": "934670fc58a1a3b6ea840e81cce3ba3058ed1dace0958d24f9026d2673c47da5",
+          "bytes": 127880,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V14"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V15.png",
+          "sha256": "8b39eb1607c910ecbc3df6bdb7ff9ffdf540e69b590dfe9e8af6f18a1a8c68e4",
+          "bytes": 119311,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V15"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V16.png",
+          "sha256": "c4e0660ebacca6f899396aeca87141cb596051a395b9ff644cab1e86415956f2",
+          "bytes": 128276,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V16"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V17.png",
+          "sha256": "0ac9cbbc273ea3aeb577161813b7f14634c7541f86853d3431a3b6aba10408ca",
+          "bytes": 112026,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V17"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V18.png",
+          "sha256": "1a31a8a2991fcae92fa282d1722a75e254691f10212a962f56c3cc98f160867d",
+          "bytes": 113330,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V18"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V19.png",
+          "sha256": "ae3fb3d75d1c981d9b812ef077ea0d56d72fb3556be706150ae17b539efdf8c7",
+          "bytes": 170882,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V19"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V20.png",
+          "sha256": "67ea0d13be1750c5ac776786719a492bc5d82b9c3f0439fd5b25afe2a8b81468",
+          "bytes": 157367,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V20"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V21.png",
+          "sha256": "21d78b4a04009ca7398e7722b717024db7e90e09d7a03b08bc4cecb9a26cf431",
+          "bytes": 144783,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V21"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V22.png",
+          "sha256": "bd0c9c14df7f2cfbe9228e1cd9e95ed7f0c4caa89ec3a305be06190ec9197516",
+          "bytes": 126254,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V22"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V23.png",
+          "sha256": "b2b03bc1a215a0de1272f6f5799f98e6d9c443b3adb27956059bee3adb05e85d",
+          "bytes": 185014,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V23"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V24.png",
+          "sha256": "9c045273d4179a76922e52d4b87d7ba4f163b7f0ada724abbefcccc924463e79",
+          "bytes": 185274,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/tactical/V25.png",
+          "sha256": "0db444aa2fbb3091b84dca338708e83627f47b3cae4f739e0e4d3201126f9aec",
+          "bytes": 166393,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "tactical",
+          "view": "V25"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V01.png",
+          "sha256": "83388246c9e44a90b55b66f0da4131f0324d8c4a6e8ad562518e9999646979af",
+          "bytes": 91982,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V02.png",
+          "sha256": "9b1fa68aca1caf09a12efd2751872dda1f9891c8c842c9591d01c2e7228bed51",
+          "bytes": 120158,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V02"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V03.png",
+          "sha256": "14ea8e627158167c84cf763de8f2e978ac1faf72a05036f2b899877d9e5a3adb",
+          "bytes": 120303,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V04.png",
+          "sha256": "b956780189a91a797ed24f99b92560a8190433e72edf9c14161ced5b47fb37f5",
+          "bytes": 143842,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V05.png",
+          "sha256": "6427ec416161b1503696f07437f3d822f82d1fd167bc49c0753db56a43f68898",
+          "bytes": 153074,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V05"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V06.png",
+          "sha256": "41a9b117bd3678714333fc8a3939ac53f57bdf9d5ec2ea08418029024364ec27",
+          "bytes": 151988,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V06"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V07.png",
+          "sha256": "3671d22ca37168406f8c6d58de89b2bcf948f3b70d45120ffda7579aee98c5d4",
+          "bytes": 196601,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V07"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V08.png",
+          "sha256": "83631b235dde8d571069889dc8bbb15eb9c1886986dd7458c4e2af1b24281c27",
+          "bytes": 168065,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V09.png",
+          "sha256": "5a7340e713b82228f53195e7c661b5ed164cef911f59e1d1add519169950f387",
+          "bytes": 126355,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V09"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V10.png",
+          "sha256": "53a8caaa6e686496b2141e6504872ce9952e5f509fd7f374a19e9c6779265826",
+          "bytes": 125243,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V10"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V11.png",
+          "sha256": "d65b05fe1f4f8e7b5be81221a3e7a6f70192630570614a21c43dfe27a79a0e1a",
+          "bytes": 151927,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V11"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V12.png",
+          "sha256": "fd6dce17450acfd6af427be7ae3e979ba9f99cc8d8b3865ed95948e2c105cbac",
+          "bytes": 128741,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V12"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V13.png",
+          "sha256": "b3f577852802769d7e77584206f0acd23edd27fdeec5be51bfc3ecab4c1457b8",
+          "bytes": 122678,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V13"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V14.png",
+          "sha256": "cfe8c3fa5da2556c86d076c11dd47ab485de77d066c709a77e2ab6f3c27e25bc",
+          "bytes": 121623,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V14"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V15.png",
+          "sha256": "f79ef3deb3ed28e9619761950cb2b3d3375f7d2f93f40a01a8f8dd70a7a470d9",
+          "bytes": 112505,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V15"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V16.png",
+          "sha256": "e446ad9c9747736099578eaf296b806bd3aa15c95f3298f2234fd551e0b349f7",
+          "bytes": 121683,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V16"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V17.png",
+          "sha256": "b8bad270f0604410d148915325ab722a83bec3f6f4c3863fedfa9787c9238fab",
+          "bytes": 105980,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V17"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V18.png",
+          "sha256": "d2362f74a93981f4e870e69ea1d416dd166408e57266881b628503f2f14363a2",
+          "bytes": 107688,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V18"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V19.png",
+          "sha256": "853f5cbf24337a79bade44d226bfb3c7fac730dbc4c775faa750f9c9b9681099",
+          "bytes": 163401,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V19"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V20.png",
+          "sha256": "124cac8795c494ea85f20b8752dacbd77db9f26de3cd69bda1d0a6e6769d88d0",
+          "bytes": 149487,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V20"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V21.png",
+          "sha256": "94fa0fcea4ea4c8b877e8be3b8fc8b6d1b85b629038f6e56441e5066b78df133",
+          "bytes": 136471,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V21"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V22.png",
+          "sha256": "6dce66e51e8147ada4ba3b81a125f964558a696725369be061b7627f98f32d74",
+          "bytes": 119270,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V22"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V23.png",
+          "sha256": "33d1e8026571f4016c59c31c0436bdb6f6b5e229058af303187cac4ae100b321",
+          "bytes": 177556,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V23"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V24.png",
+          "sha256": "9f17616bf3320a025fa1c2149c557799ebc536515b768cf427fb0cfac8042bed",
+          "bytes": 178091,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/graphite/V25.png",
+          "sha256": "5e77b832a140265b018c29ed2653412f2f1da213365562c08bcc484860bee033",
+          "bytes": 161351,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "graphite",
+          "view": "V25"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V01.png",
+          "sha256": "5a38b7eecc5e6e873a630532f880c598a97b3296db523366ccfde5ba188c850d",
+          "bytes": 95060,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V02.png",
+          "sha256": "87ef02c15354d6e7cf0d09002e8de547e5ab466af61c13f66b7513b7ef9bc7f7",
+          "bytes": 122878,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V02"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V03.png",
+          "sha256": "92f667e185eab968a3e1c3652be1a171114e7d20d9f87c0aa69547b1090724a3",
+          "bytes": 123339,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V04.png",
+          "sha256": "fab82e0a23ebc9ec70585e563a321ad4638589444d1584537c3844969955ec8e",
+          "bytes": 148517,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V04"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V05.png",
+          "sha256": "3a75e8d3a2a10fcd3b2d1027a08f6a5fa3e28faa5364bbad09c62d67b1b47d4b",
+          "bytes": 157025,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V05"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V06.png",
+          "sha256": "59168b8119442f7d67f0b5cf6734de25eaab89b2d5eab7da866bf17b8bafa68a",
+          "bytes": 156822,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V06"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V07.png",
+          "sha256": "7c6cf0fdcf38cf2e0669fce24c3012ed5bb18741969f2a411765d7df654645d1",
+          "bytes": 200704,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V07"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V08.png",
+          "sha256": "2beeea2a381e600554879755ead6a7cd00fdb3e8f8491be1774da5f694c1b0db",
+          "bytes": 172787,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V08"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V09.png",
+          "sha256": "0d5ee88b277a05ed94aa5869ab3540d6c731879170e8f429451c9c0f564e1540",
+          "bytes": 129368,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V09"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V10.png",
+          "sha256": "7aaaadbb0120aa5c73bebe80340bd753f70b06af023cd8343ba1efb0a83a4f3b",
+          "bytes": 127112,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V10"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V11.png",
+          "sha256": "ecbbd515067359e6a60ea39504369cf2ecb777313f1b5b190fc95915b58fcd6b",
+          "bytes": 148622,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V11"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V12.png",
+          "sha256": "d9f508bbe592089f055f588d1186de11fa3a36c31a06246325be4316bcee3c3d",
+          "bytes": 131149,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V12"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V13.png",
+          "sha256": "2d3b3e2911a087d6725074274263b266cfa2170ebc1cbe65925762a81f7ac56c",
+          "bytes": 126223,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V13"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V14.png",
+          "sha256": "07cd1cbc469ccd874733e3c79bd68980420877e9f01ceae54ea813be487a4cf6",
+          "bytes": 123982,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V14"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V15.png",
+          "sha256": "166cf9cc183b6206dfd57776044fafb457c0ffe4b352eb747225a5f71943b9f0",
+          "bytes": 115073,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V15"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V16.png",
+          "sha256": "7d3b5a8a7893d76fe462ac6b5ab2cbbde8a5a53d21d40c7639081c4ea48aa96a",
+          "bytes": 124999,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V16"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V17.png",
+          "sha256": "e3280ba7335720da10a617ee794c9f31768daf1718262a21c6d8a345cbc90df9",
+          "bytes": 108292,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V17"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V18.png",
+          "sha256": "22982146a8ff1ebc21cee20e758c2386be4585c9fc32bf46cb0929ae6f0edc7e",
+          "bytes": 110423,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V18"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V19.png",
+          "sha256": "9b3a2c591a22a9c5d7171d037228cc517170f0690b1e6b103a25da90c36f4341",
+          "bytes": 166531,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V19"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V20.png",
+          "sha256": "cf57f81d18dd199168dc4c87bb538f1ba2b70852c8ec716685bb9797b6f3df30",
+          "bytes": 153099,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V20"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V21.png",
+          "sha256": "73dc6e22bbf6832eaee04b7784748980cb6930de62f16737318a1cd542615f17",
+          "bytes": 140573,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V21"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V22.png",
+          "sha256": "8177575b702bafee307733d2a9ca0c0ff06cbee8a8ca3e7203ca4395d5d08686",
+          "bytes": 122500,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V22"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V23.png",
+          "sha256": "cd23defcab051533f62033ccf5d9f3f75681b6542a24b6d465060b014ff9603b",
+          "bytes": 180998,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V23"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V24.png",
+          "sha256": "f69a79e3ed50a01ecb01c17cf31b007db226a782edda6a59109de32e2ad84832",
+          "bytes": 182142,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0/webengine/light/V25.png",
+          "sha256": "b67c9c56c98cd3c84bcf63a0e42a3e300911a2c5e3d047a5cc0f146358db5ae9",
+          "bytes": 164771,
+          "width": 1600,
+          "height": 900,
+          "engine": "webengine",
+          "theme": "light",
+          "view": "V25"
+        }
+      ]
+    },
+    {
+      "engine": "qml",
+      "source_sha256": "b684d69bd24a5a438ebdf8e3ef8380ced052e20b5e92dac630e7890f8cd6a7a5",
+      "mean_load_ms": 142.0,
+      "outputs": [
+        {
+          "path": "evidence/gui-g0/qml/tactical/V01.png",
+          "sha256": "d78bfc33fc5394a5d5d9c51e7b734a21b4ae2e8f901ba3a26c2a0b4e249446ca",
+          "bytes": 105816,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0/qml/tactical/V03.png",
+          "sha256": "34a8dd5b1877ab15ac5f0b434057625f918aa3e0aa3cb5c33b187c6ed2c0c579",
+          "bytes": 118378,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0/qml/tactical/V24.png",
+          "sha256": "9b3295e0ab10d89c64e660a9d8cde28d1a733deb416f4925fe42e61301211da5",
+          "bytes": 66323,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "tactical",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0/qml/graphite/V01.png",
+          "sha256": "156d7ca034a38d67beed9d0c3875d9f40ba7d032cd20092df1d9d9b66c99a974",
+          "bytes": 107901,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0/qml/graphite/V03.png",
+          "sha256": "d56f6c9c77e7475f71965e0c2a18539b784fbc7ef84f0f409834059ccbef31ab",
+          "bytes": 121553,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0/qml/graphite/V24.png",
+          "sha256": "6098679fbda1663e0813f49278bc89d7e49a8f1acae9fd917ca32c7e49497a8e",
+          "bytes": 66618,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "graphite",
+          "view": "V24"
+        },
+        {
+          "path": "evidence/gui-g0/qml/light/V01.png",
+          "sha256": "59976de729b7743bc37847e25cf50f47a2206b3400ac9863c87a5303f269f5ec",
+          "bytes": 108675,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V01"
+        },
+        {
+          "path": "evidence/gui-g0/qml/light/V03.png",
+          "sha256": "83b4d30af8b4843f531099bb5196160f9b9684847912b814aa3f62a5886f0bca",
+          "bytes": 122166,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V03"
+        },
+        {
+          "path": "evidence/gui-g0/qml/light/V24.png",
+          "sha256": "26eaf6dd7f8fd297ea0919d10d057113ea592d5d6934501c5be9da02bb38923f",
+          "bytes": 66870,
+          "width": 1600,
+          "height": 900,
+          "engine": "qml",
+          "theme": "light",
+          "view": "V24"
+        }
+      ]
+    }
+  ],
+  "decision": "WEBENGINE_PREFERRED_QML_FALLBACK",
+  "release_claim": false
+}

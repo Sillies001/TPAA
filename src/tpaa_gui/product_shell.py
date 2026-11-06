@@ -899,6 +899,22 @@ def create_product_workspace(
     )
     outer.addWidget(mission_header)
 
+    role_bar = qt_widgets.QFrame(root)
+    role_bar.setObjectName("tpaaRoleViewBar")
+    role_bar.setProperty("tpaaSurface", True)
+    role_layout = qt_widgets.QHBoxLayout(role_bar)
+    role_status = qt_widgets.QLabel(
+        "Role view: not loaded · server authorization remains authoritative",
+        role_bar,
+    )
+    role_status.setObjectName("tpaaRoleViewStatus")
+    role_status.setProperty("tpaaMuted", True)
+    apply_role = qt_widgets.QPushButton("Apply authenticated role view", role_bar)
+    apply_role.setObjectName("tpaaApplyRoleView")
+    role_layout.addWidget(role_status, 1)
+    role_layout.addWidget(apply_role)
+    outer.addWidget(role_bar)
+
     body = qt_widgets.QSplitter(qt_core.Qt.Orientation.Horizontal, root)
     body.setObjectName("tpaaApplicationShellBody")
     body.setChildrenCollapsible(False)
@@ -980,6 +996,53 @@ def create_product_workspace(
             state.select_page(contract.slot)
 
     navigation.currentRowChanged.connect(change_page)
+
+    def apply_authenticated_role_view() -> None:
+        status_code, payload = transport.security_request_json(
+            "GET", "/security/session"
+        )
+        raw_roles = payload.get("roles")
+        if status_code != 200 or not isinstance(raw_roles, list) or not all(
+            isinstance(role, str) for role in raw_roles
+        ):
+            role_status.setProperty("tpaaState", "error")
+            role_status.setText(
+                f"Role view: unavailable (HTTP {status_code}) · fail-closed default retained"
+            )
+            return
+        roles = set(raw_roles)
+        priorities = (
+            ("ADMINISTRATOR", "P13"),
+            ("MODEL_REVIEWER", "P07"),
+            ("TRAINING_MANAGER", "P11"),
+            ("EVALUATOR", "P13"),
+            ("INSTRUCTOR", "P03"),
+            ("DATA_ENGINEER", "P12"),
+            ("MAINTENANCE_ENGINEERING", "P09"),
+            ("UNIT_ANALYST", "P10"),
+            ("TRAINEE", "P02"),
+        )
+        selected = next(
+            ((role, slot) for role, slot in priorities if role in roles),
+            None,
+        )
+        if selected is None:
+            role_status.setProperty("tpaaState", "error")
+            role_status.setText("Role view: no supported authenticated role")
+            return
+        role, slot = selected
+        index = next(
+            index
+            for index, contract in enumerate(PRODUCT_NAVIGATION)
+            if contract.slot == slot
+        )
+        navigation.setCurrentRow(index)
+        role_status.setProperty("tpaaState", "success")
+        role_status.setText(
+            f"Role view: {role} · default {slot} · authorization enforced by backend"
+        )
+
+    apply_role.clicked.connect(apply_authenticated_role_view)
     navigation.setCurrentRow(0)
     root._tpaa_navigation = navigation
     root._tpaa_stack = stack
@@ -989,4 +1052,5 @@ def create_product_workspace(
     root._tpaa_mission_header = mission_header
     root._tpaa_detail_drawer = detail_drawer
     root._tpaa_status_bar = status_bar
+    root._tpaa_apply_role_view = apply_authenticated_role_view
     return root

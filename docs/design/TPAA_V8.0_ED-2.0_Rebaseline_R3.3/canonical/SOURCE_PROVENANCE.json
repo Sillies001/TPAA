@@ -1,0 +1,44 @@
+{
+  "provenance_id": "R39_TO_REBASELINE_R3_3_METRIC_DESIGN_GUIDE",
+  "generated_date": "2026-09-20",
+  "source_archive": {
+    "label": "R39 delivered archive",
+    "sha256": "5b43c94e28af60bc566e8fb57f7d497ab38d02b192e68a57caf19c4adedbd9d7",
+    "bytes": 1076817
+  },
+  "r1_intermediate": {
+    "label": "TPAA V8.0 / ED-2.0 Rebaseline R1",
+    "sha256": "aa86239c6a47f60098e9c7aaaee5fedd2ab0a500ecf2a0c7d98c83f400a0c525"
+  },
+  "semantic_sources_reviewed": [
+    {
+      "artifact": "01_整体训练效果评估方案_TPAA_V7.2.md",
+      "sha256": "85363360f202d7e04c89a583909f024811a4c70defb6df75d857d3fc01756b40"
+    },
+    {
+      "artifact": "02_训练评估系统架构_数据结构与数据流方案_TPAA_V7.2.md",
+      "sha256": "e573b98a2ea200e20775da4fc200dff8fa96bb7449d87923ab2ed55c8a67ad21"
+    },
+    {
+      "artifact": "03_训练评估指标字典与算法规格_TPAA_V7.2.md",
+      "sha256": "cbcdc30f4f1903958638021fa8625cb68262aa8597a836c7af75bd854c8f44e9"
+    },
+    {
+      "artifact": "04_训练评估结果可视化方案_TPAA_V7.2.md",
+      "sha256": "b826c9861aab1484c56566b721d2f767e9c37148eee960b87cdefa2a959c1719"
+    }
+  ],
+  "migration_note": "R3.3 adds a complete 116-metric design-intent/interpretation guide and explicit metric-family applicability contracts. Metric codes, semantic IDs, algorithms, formulas, input_fields and the 661 binding tuples are unchanged.",
+  "notes": "R3.3 clarifies product-layer meaning, especially P1-SNS-* as RADAR-only. Historical source hashes remain evidence.",
+  "metric_authority_migration": {
+    "source_legacy_artifact": "PHASE1_METRIC_CATALOG.json",
+    "current_artifact": "P1_METRIC_CATALOG.json",
+    "source_sha256": "a394ac1e8c36945fe0c4567a4fe9358ce0deb3453a4563037ffd9b9e5d5e63e5",
+    "migration_scope": "R3.2 terminology migration retained. R3.3 adds family applicability contracts/common rules only; formulas, metric codes, semantic IDs, input_fields and algorithm versions remain unchanged."
+  },
+  "input_authority_migration": {
+    "source_sha256": "ad57d03d639dc12e5db923180c8532b7acbc898122dd64e7229b59384d81a10e",
+    "current_artifact": "METRIC_INPUT_AUTHORITY_MATRIX.json",
+    "migration_scope": "Terminology/reference-name normalization only; 661 binding tuples unchanged."
+  }
+}

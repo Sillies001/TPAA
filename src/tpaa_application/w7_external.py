@@ -32,6 +32,29 @@ class W7ExternalCapabilityError(ValueError):
     """Invalid or unsafe external-capability activation record."""
 
 
+def _text(value: object, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise W7ExternalCapabilityError(f"W7_EXTERNAL_TEXT_INVALID:{field}")
+    return value
+
+
+def _optional_text(value: object, field: str) -> str | None:
+    return None if value is None else _text(value, field)
+
+
+def _optional_sha256(value: object, field: str) -> str | None:
+    if value is None:
+        return None
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or value != value.lower()
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise W7ExternalCapabilityError(f"W7_EXTERNAL_SHA256_INVALID:{field}")
+    return value
+
+
 @dataclass(frozen=True, slots=True)
 class W7ExternalCapability:
     capability: str
@@ -45,7 +68,7 @@ class W7ExternalCapability:
             raise W7ExternalCapabilityError(f"W7_EXTERNAL_CAPABILITY_INVALID:{self.capability}")
         if self.state not in _STATES:
             raise W7ExternalCapabilityError(f"W7_EXTERNAL_STATE_INVALID:{self.capability}")
-        if not self.reason_code:
+        if not isinstance(self.reason_code, str) or not self.reason_code.strip():
             raise W7ExternalCapabilityError(f"W7_EXTERNAL_REASON_REQUIRED:{self.capability}")
         if self.state == "AVAILABLE":
             if not self.endpoint_ref or not self.endpoint_ref.strip():
@@ -121,16 +144,13 @@ def build_w7_external_registry(
     return W7ExternalCapabilityRegistry(
         tuple(
             W7ExternalCapability(
-                capability=str(record.get("capability", "")),
-                state=str(record.get("state", "")),
-                reason_code=str(record.get("reason_code", "")),
-                endpoint_ref=(
-                    None if record.get("endpoint_ref") is None else str(record["endpoint_ref"])
-                ),
-                acceptance_evidence_sha256=(
-                    None
-                    if record.get("acceptance_evidence_sha256") is None
-                    else str(record["acceptance_evidence_sha256"])
+                capability=_text(record.get("capability"), "capability"),
+                state=_text(record.get("state"), "state"),
+                reason_code=_text(record.get("reason_code"), "reason_code"),
+                endpoint_ref=_optional_text(record.get("endpoint_ref"), "endpoint_ref"),
+                acceptance_evidence_sha256=_optional_sha256(
+                    record.get("acceptance_evidence_sha256"),
+                    "acceptance_evidence_sha256",
                 ),
             )
             for record in records

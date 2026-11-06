@@ -42,8 +42,16 @@ def main() -> int:
     if start.get("protocol") != CONTROL_PROTOCOL or start.get("type") != "START":
         return 2
     token = start.get("bearer_token")
+    desktop_nonce = start.get("desktop_nonce")
     build = start.get("product_build_version")
-    if not isinstance(token, str) or not token or not isinstance(build, str) or not build:
+    if (
+        not isinstance(token, str)
+        or not token
+        or not isinstance(desktop_nonce, str)
+        or not desktop_nonce
+        or not isinstance(build, str)
+        or not build
+    ):
         return 2
     raw_data_root = start.get("desktop_data_root")
     if raw_data_root is not None and (
@@ -62,6 +70,7 @@ def main() -> int:
         bearer_token=token,
         product_build_version=build,
         data_root=desktop_data_root,
+        desktop_nonce=desktop_nonce,
     )
     config = uvicorn.Config(
         app,

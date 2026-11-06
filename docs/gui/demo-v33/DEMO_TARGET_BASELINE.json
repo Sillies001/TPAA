@@ -1,0 +1,89 @@
+{
+  "schema": "TPAA_GUI_DEMO_TARGET_BASELINE_V2",
+  "baseline_id": "GUI-DEMO-V33-2026-11-05",
+  "status": "FROZEN_LOCAL",
+  "frozen_at": "2026-11-06T00:00:00+08:00",
+  "source": {
+    "workspace_relative_path": "../../../TPAA_V33与三份文档更新/TPAA_训练复盘交互Demo_v33.html",
+    "repository_mirror_path": "docs/gui/demo-v33/source/TPAA_训练复盘交互Demo_v33.html",
+    "sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a",
+    "bytes": 575155,
+    "last_modified_local": "2026-11-05T02:12:24+08:00",
+    "copy_policy": "REPOSITORY_MIRROR_MUST_MATCH_FROZEN_HASH"
+  },
+  "design_inputs": [
+    {
+      "workspace_relative_path": "../../../TPAA_V33与三份文档更新/TPAA_V8.0_总体设计方案_Patch_历史多批次总览与攻防双视角_v1.3.md",
+      "repository_mirror_path": "docs/gui/demo-v33/source/TPAA_V8.0_总体设计方案_Patch_历史多批次总览与攻防双视角_v1.3.md",
+      "sha256": "abc6b000b846dbe2e367cb5af67efe7f152ebef1a26ab0fc104918a7b37de3bb",
+      "bytes": 35300
+    },
+    {
+      "workspace_relative_path": "../../../TPAA_V33与三份文档更新/TPAA_ED-2.0_工程设计方案_Patch_历史多批次聚合与攻防复盘_v1.3.md",
+      "repository_mirror_path": "docs/gui/demo-v33/source/TPAA_ED-2.0_工程设计方案_Patch_历史多批次聚合与攻防复盘_v1.3.md",
+      "sha256": "26be99db27d726bd25830281da0023202bcb7b048be1d02ac81278265666890f",
+      "bytes": 38685
+    },
+    {
+      "workspace_relative_path": "../../../TPAA_V33与三份文档更新/TPAA_V8.0_总体与工程设计方案_Patch差距清单_v1.3.md",
+      "repository_mirror_path": "docs/gui/demo-v33/source/TPAA_V8.0_总体与工程设计方案_Patch差距清单_v1.3.md",
+      "sha256": "402c3941c9be625b488c8e3425ed8fee7d0c3ba78f4084471e17688f231a6896",
+      "bytes": 21594
+    }
+  ],
+  "implementation_plan": {
+    "workspace_relative_path": "../../../TPAA_HTML_Demo_v33驱动_GUI产品化重构与后端设计同步整改方案_2026-11-06.md",
+    "repository_mirror_path": "docs/plans/TPAA_HTML_Demo_v33驱动_GUI产品化重构与后端设计同步整改方案_2026-11-06.md",
+    "sha256_at_freeze": "96a826ad26f32ac8d7d59af8306c1945210aa73fffa55a74ae0b20cf40c53ed3",
+    "bytes_at_freeze": 51231
+  },
+  "supersedes": {
+    "baseline_id": "GUI-DEMO-V19-2026-10-29",
+    "sha256": "64910eb8b73b8ada44e398ac85568c887a5863d2b8272577e3e09ae857b0a706",
+    "policy": "PRESERVE_AS_REFERENCE_NOT_VALID_FOR_CURRENT_ACCEPTANCE"
+  },
+  "viewport_contract": {
+    "reference": {"width": 1600, "height": 900, "device_pixel_ratio": 1.0},
+    "v01_required": [{"width": 1600, "height": 900}, {"width": 1280, "height": 720}],
+    "additional": [{"width": 1366, "height": 768}, {"width": 1920, "height": 1080}],
+    "small_window_policy": "APPROVED_LOCAL_REFLOW_OR_SCROLL_NEVER_UNREADABLE_GLOBAL_SCALE"
+  },
+  "themes": {
+    "ids": ["tactical", "graphite", "light"],
+    "default": "graphite",
+    "persistence": "SESSION_ONLY_RESET_TO_GRAPHITE_ON_START"
+  },
+  "views": [
+    "V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09",
+    "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18",
+    "V19", "V20", "V21", "V22", "V23", "V24", "V25", "V26"
+  ],
+  "runtime_spike_views": ["V01", "V04", "V08", "V26"],
+  "navigation_invariants": {
+    "training_landing": "V26",
+    "V24": "CONDITIONAL_CHILD_OF_V08_FOR_BVR_COLLABORATIVE_ATTACK_ONLY",
+    "V26": "TRAINING_MODULE_LANDING_AND_V01_DEEPLINK; REQUIRES_EXACT_BATCH_WITH_EVENT_DETAIL",
+    "target_perspective": ["V04", "V05", "V08", "V20"],
+    "shooter_only": ["V06", "V21"],
+    "basic_flight_independent": ["V07", "V19"],
+    "visible_view_count": 26
+  },
+  "internal_conflict_decisions": [
+    {"id": "V33-C01", "observed": "HTML title says V30", "decision": "FILE_HASH_AND_TPAA_V33_OBJECT_ARE_VERSION_IDENTITY"},
+    {"id": "V33-C02", "observed": "TPAA_V33.preservedPages omits V25", "decision": "V25_IS_INCLUDED_BECAUSE_FINAL_ROUTE_AND_VIEW_EXIST"},
+    {"id": "V33-C03", "observed": "V01 has earlier intermediate definitions", "decision": "LAST_EFFECTIVE_V33_DEFINITION_ONLY"},
+    {"id": "V33-C04", "observed": "red-blue relations use localStorage", "decision": "PRODUCTION_CONTEXT_SERVICE_REVISION_AND_AUDIT"}
+  ],
+  "authority_boundaries": {
+    "visual_and_interaction_target": "DEMO_TARGET_BASELINE",
+    "business_semantics": "MACHINE_AUTHORITIES_AND_APPROVED_SUCCESSOR_DESIGN",
+    "demo_numeric_values": "NON_AUTHORITATIVE_SYNTHETIC_LAYOUT_EXAMPLES",
+    "production_mock_values": "FORBIDDEN"
+  },
+  "predecessor_bindings": {
+    "r3_3_package_manifest_sha256": "1b70d8149975da0635b79adb1eb72e2f37743739def2ead7ade27bfb3b6db421",
+    "cb_1_4_0_baseline_lock_sha256": "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437",
+    "cb_1_5_0_baseline_lock_sha256": "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab",
+    "cb_1_5_0_source_provenance_sha256": "9f771642b32a2da3d4b5f3b88ba22302fbe05f49e5284d6d85308a6485967ce8"
+  }
+}

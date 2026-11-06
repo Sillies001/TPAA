@@ -90,6 +90,54 @@ def test_w9_formal_go_requires_every_gate_on_one_exact_candidate() -> None:
     assert mismatch["formal_release_allowed"] is False
 
 
+@pytest.mark.parametrize(
+    "field",
+    (
+        "protected_main_exact",
+        "hosted_ci_success",
+        "independent_approval_complete",
+    ),
+)
+def test_w9_rejects_truthy_non_boolean_release_claims(field: str) -> None:
+    arguments: dict[str, Any] = {
+        "candidate_identity_sha256": CANDIDATE,
+        "source_revision": REVISION,
+        "unwaived_blocker_count": 0,
+        "unwaived_high_count": 0,
+        "protected_main_exact": True,
+        "hosted_ci_success": True,
+        "independent_approval_complete": True,
+        "signature_sha256": SIGNATURE,
+    }
+    arguments[field] = "false"
+
+    with pytest.raises(W9QualificationError, match=f"W9_BOOLEAN_INVALID:{field}"):
+        build_w9_final_qualification_status(_accepted_records(), **arguments)
+
+
+def test_w9_rejects_boolean_finding_counts_and_invalid_record_types() -> None:
+    with pytest.raises(
+        W9QualificationError,
+        match="W9_FINDING_COUNT_INVALID:unwaived_blocker_count",
+    ):
+        build_w9_final_qualification_status(
+            _accepted_records(),
+            candidate_identity_sha256=CANDIDATE,
+            source_revision=REVISION,
+            unwaived_blocker_count=True,
+            unwaived_high_count=0,
+            protected_main_exact=True,
+            hosted_ci_success=True,
+            independent_approval_complete=True,
+            signature_sha256=SIGNATURE,
+        )
+
+    invalid = _accepted_records()
+    invalid[0]["reason_code"] = None
+    with pytest.raises(W9QualificationError, match="W9_TEXT_INVALID:reason_code"):
+        _formal_status(invalid)
+
+
 def test_w9_rejects_incomplete_or_reordered_evidence() -> None:
     missing_hash = _accepted_records()
     missing_hash[0]["evidence_sha256"] = None

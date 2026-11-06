@@ -171,7 +171,7 @@ def _string_field(payload: Mapping[str, Any], keys: Iterable[str]) -> tuple[str 
 
 
 class CanonicalArtifactLoader:
-    """Load only artifacts controlled by the approved CB-1.5.0 baseline lock."""
+    """Load artifacts controlled by one explicitly trusted baseline lock."""
 
     def __init__(
         self,
@@ -179,11 +179,15 @@ class CanonicalArtifactLoader:
         *,
         expected_core_baseline: str = EXPECTED_CORE_BASELINE,
         trusted_lock_sha256: str = EXPECTED_BASELINE_LOCK_SHA256,
+        expected_controlled_artifact_count: int = EXPECTED_CONTROLLED_ARTIFACT_COUNT,
     ) -> None:
         self.baseline_root = (baseline_root or _default_baseline_root()).resolve()
         self.canonical_root = self.baseline_root / "canonical"
         self.expected_core_baseline = expected_core_baseline
         self.trusted_lock_sha256 = trusted_lock_sha256.lower()
+        if expected_controlled_artifact_count <= 0:
+            raise ValueError("expected_controlled_artifact_count must be positive")
+        self.expected_controlled_artifact_count = expected_controlled_artifact_count
         self._baseline_metadata, self._entries = self._load_and_verify_lock()
         self._approved_core_inheritance: Mapping[str, str] = MappingProxyType({})
         self._approved_core_inheritance = self._load_approved_core_inheritance()
@@ -259,13 +263,13 @@ class CanonicalArtifactLoader:
                 artifact_id="BASELINE_LOCK",
                 detail="artifacts must be a JSON array",
             )
-        if len(artifacts) != EXPECTED_CONTROLLED_ARTIFACT_COUNT:
+        if len(artifacts) != self.expected_controlled_artifact_count:
             raise CanonicalArtifactError(
                 reason="BASELINE_LOCK_SCHEMA_MISMATCH",
                 artifact_id="BASELINE_LOCK",
                 detail=(
                     "controlled artifact count mismatch "
-                    f"expected={EXPECTED_CONTROLLED_ARTIFACT_COUNT} actual={len(artifacts)}"
+                    f"expected={self.expected_controlled_artifact_count} actual={len(artifacts)}"
                 ),
             )
 

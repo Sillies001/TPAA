@@ -1,0 +1,180 @@
+{
+  "registry_id": "WORLD_CAPABILITY_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "purpose": "Semantic authority for what may be concluded from available C/W/P/A/J/M products. Source presence alone never grants an assessment conclusion.",
+  "worlds": {
+    "C": "Versioned Context: scenario/objective/role/rule/reference/profile/standard semantics.",
+    "W": "Approved fact/reference world under declared authority.",
+    "P": "Observer-specific information objectively available to the observer.",
+    "A": "Actor-specific observed action/control/task/communication events.",
+    "J": "Approved external adjudication; absence forbids invention of official result.",
+    "M": "Machine/platform state and capability evidence, distinct from long-term capability estimates."
+  },
+  "capabilities": {
+    "BASIC_CORE": {
+      "required": [
+        "C",
+        "W",
+        "A",
+        "M"
+      ],
+      "optional": [
+        "P",
+        "J"
+      ],
+      "allows": [
+        "flight precision",
+        "handling/control evidence",
+        "procedure/task execution",
+        "safety/compliance"
+      ],
+      "forbids": [
+        "SA conclusion without P",
+        "official outcome without J"
+      ]
+    },
+    "WVR_CORE": {
+      "required": [
+        "C",
+        "W",
+        "A",
+        "M"
+      ],
+      "optional": [
+        "J"
+      ],
+      "allows": [
+        "relative geometry",
+        "control/energy",
+        "observed action"
+      ],
+      "forbids": [
+        "track/SA conclusion without P"
+      ]
+    },
+    "WVR_INFO": {
+      "required": [
+        "C",
+        "W",
+        "P",
+        "A",
+        "M"
+      ],
+      "optional": [
+        "J"
+      ],
+      "allows": [
+        "track/information/SA evidence",
+        "response",
+        "team information process"
+      ]
+    },
+    "WVR_FULL": {
+      "required": [
+        "C",
+        "W",
+        "P",
+        "A",
+        "J",
+        "M"
+      ],
+      "optional": [],
+      "allows": [
+        "process-to-approved-adjudication linkage"
+      ]
+    },
+    "BVR_PROCESS": {
+      "required": [
+        "C",
+        "W",
+        "P",
+        "A",
+        "M"
+      ],
+      "optional": [
+        "J"
+      ],
+      "allows": [
+        "information chain",
+        "track/association/identification",
+        "task/response",
+        "team process"
+      ]
+    },
+    "BVR_FULL": {
+      "required": [
+        "C",
+        "W",
+        "P",
+        "A",
+        "J",
+        "M"
+      ],
+      "optional": [],
+      "allows": [
+        "full process-to-adjudication linkage"
+      ]
+    },
+    "STRIKE_CORE": {
+      "required": [
+        "C",
+        "W",
+        "A",
+        "M"
+      ],
+      "optional": [
+        "P",
+        "J"
+      ],
+      "allows": [
+        "route/profile",
+        "procedure",
+        "safety",
+        "training attack action"
+      ],
+      "forbids": [
+        "official result without J"
+      ]
+    },
+    "STRIKE_INFO": {
+      "required": [
+        "C",
+        "W",
+        "P",
+        "A",
+        "M"
+      ],
+      "optional": [
+        "J"
+      ],
+      "allows": [
+        "target information/association",
+        "designation",
+        "team picture"
+      ]
+    },
+    "STRIKE_FULL": {
+      "required": [
+        "C",
+        "W",
+        "P",
+        "A",
+        "J",
+        "M"
+      ],
+      "optional": [],
+      "allows": [
+        "approved range/simulator adjudication and action-to-result linkage"
+      ]
+    }
+  },
+  "context_capability_rule": "If versioned C needed for correctness/qualification is missing, normative conclusions degrade to DESCRIPTIVE even if W/P/A/J/M are present.",
+  "missing_rules": [
+    "Missing P: W may not substitute for what a crew actually could observe.",
+    "Missing J: action/process may be assessed but official result is N_A/NOT_ADJUDICATED.",
+    "Missing M: human/task subsets may remain possible, but platform capability observation/claim is not allowed.",
+    "Missing mandatory World product: dependent metric/assessment is N_A or INSUFFICIENT_DATA with reason."
+  ],
+  "quality_rule": "coverage/confidence/quality are evidence-quality descriptors and are not automatically probabilities of correctness or statistical uncertainty intervals."
+}

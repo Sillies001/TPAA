@@ -1,0 +1,83 @@
+{
+  "schema": "TPAA_G1_V33_CLOSURE_EVIDENCE_V1",
+  "status": "PASS",
+  "verified_at": "2026-11-06T04:36:45Z",
+  "phase_status": "CLOSED_LOCAL_WITH_GATES",
+  "machine_authority": {
+    "predecessor_lock_sha256": "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab",
+    "candidate_lock_sha256": "68ee3fc8f75e3435f2127b41eb1d933de79d1d70a5a9bd7a1c6295321160a731",
+    "controlled_artifacts": 42,
+    "status": "PASS"
+  },
+  "authority_admission": {
+    "domain_decisions": 9,
+    "reserved_routes": 14,
+    "exposed_unimplemented_routes": 0,
+    "task_metric_admission": "NOT_ADMITTED",
+    "status": "PASS"
+  },
+  "successor_reproducibility": {
+    "directory_digest": "4185d1cc8390399098b6571d59d8672d6fcd32c4bf4906811d0739f9536589d9",
+    "status": "PASS"
+  },
+  "migration": {
+    "from": "1.9.0",
+    "to": "1.10.0",
+    "relations": [
+      "registry.batch_registration",
+      "registry.batch_training_type_revision",
+      "context.force_formation_context_revision",
+      "context.force_formation_member"
+    ],
+    "empty_rollback": "PASS",
+    "nonempty_rollback_policy": "REFUSE_FAIL_CLOSED",
+    "status": "PASS"
+  },
+  "codegen": {
+    "digest": "09461c395dd15e8f9b5b70e1af3e275a9f91d775ad8bf251a433f53610d6e918",
+    "zero_drift": true,
+    "status": "PASS"
+  },
+  "frontend": {
+    "schema": "TPAA_G1_V33_FRONTEND_BUILD_EVIDENCE_V1",
+    "status": "PASS",
+    "package_lock_sha256": "3f0c3302a62c3c15faad78582a41496d2ffd023fb66a4e54c98583d11e89d247",
+    "files": [
+      {
+        "path": ".vite/manifest.json",
+        "sha256": "3f365bb56acc270eadbfe6762791d7733b8caae2b14640935a73c895de636067",
+        "bytes": 185
+      },
+      {
+        "path": "assets/index-BQTnmsda.css",
+        "sha256": "708db047ef9d48e568a6956ca44e9f16dcb1b8a62cf121d55342c7417aef28b2",
+        "bytes": 1122
+      },
+      {
+        "path": "assets/index-D422h-DH.js",
+        "sha256": "47d26c9a7af31e3d87163dce618a55ce927c2b10bb739a142253668b1d08b937",
+        "bytes": 1735
+      },
+      {
+        "path": "index.html",
+        "sha256": "ca81c7c465a901d025d507bcccaa56d68ae0973a2535c0b67ab45a08003d663c",
+        "bytes": 510
+      }
+    ],
+    "remote_resources": 0,
+    "release_claim": false
+  },
+  "webengine": {
+    "exact_loopback_origin": true,
+    "off_the_record": true,
+    "backend_degraded_state": "PASS",
+    "shutdown_state": "EXITED",
+    "status": "PASS"
+  },
+  "open_gates": [
+    "G2-G10 functional product implementation",
+    "G11 target Windows/Linux GPU and software-rendering qualification",
+    "G12 independent design-compliance and release approval"
+  ],
+  "release_claim": false
+}

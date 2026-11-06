@@ -14,6 +14,7 @@ from .composition import (
     create_full_service_app,
 )
 from .config import (
+    FormalQualificationEvidenceConfig,
     OidcMtlsRuntimeConfig,
     ProductionPrincipalBinding,
     ProductionRuntimeConfig,
@@ -37,6 +38,13 @@ from .federated_identity import (
     OidcMtlsRequestIdentityProvider,
     desktop_local_principal_resolver,
     oidc_mtls_principal_resolver,
+)
+from .formal_evidence import (
+    FORMAL_EVIDENCE_ENVELOPE_SCHEMA,
+    FORMAL_EVIDENCE_PAYLOAD_SCHEMA,
+    FormalEvidenceError,
+    FormalRuntimeEvidence,
+    load_formal_runtime_evidence,
 )
 from .identity import (
     ConfiguredBearerIdentityProvider,
@@ -136,6 +144,11 @@ __all__ = [
     "TrainingPluginComposition",
     "TrainingPluginCompositionError",
     "ConfiguredBearerIdentityProvider",
+    "FormalQualificationEvidenceConfig",
+    "FORMAL_EVIDENCE_ENVELOPE_SCHEMA",
+    "FORMAL_EVIDENCE_PAYLOAD_SCHEMA",
+    "FormalEvidenceError",
+    "FormalRuntimeEvidence",
     "OidcMtlsRuntimeConfig",
     "OidcMtlsRequestIdentityProvider",
     "SERVICE_PRINCIPALS_SCHEMA",
@@ -201,6 +214,7 @@ __all__ = [
     "desktop_local_principal_resolver",
     "load_service_principal_bindings",
     "load_runtime_config_document",
+    "load_formal_runtime_evidence",
     "materialize_source_documents",
     "parse_source_artifact_reference",
     "prepare_desktop_production_config",

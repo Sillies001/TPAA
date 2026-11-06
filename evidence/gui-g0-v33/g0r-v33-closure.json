@@ -1,0 +1,90 @@
+{
+  "schema": "TPAA_G0R_V33_CLOSURE_EVIDENCE_V1",
+  "status": "PASS",
+  "verified_at": "2026-11-06T04:37:38Z",
+  "baseline_id": "GUI-DEMO-V33-2026-11-05",
+  "source_checks": [
+    {
+      "label": "demo",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\docs\\gui\\demo-v33\\source\\TPAA_训练复盘交互Demo_v33.html",
+      "sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a",
+      "status": "PASS"
+    },
+    {
+      "label": "overall_patch",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\docs\\gui\\demo-v33\\source\\TPAA_V8.0_总体设计方案_Patch_历史多批次总览与攻防双视角_v1.3.md",
+      "sha256": "abc6b000b846dbe2e367cb5af67efe7f152ebef1a26ab0fc104918a7b37de3bb",
+      "status": "PASS"
+    },
+    {
+      "label": "engineering_patch",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\docs\\gui\\demo-v33\\source\\TPAA_ED-2.0_工程设计方案_Patch_历史多批次聚合与攻防复盘_v1.3.md",
+      "sha256": "26be99db27d726bd25830281da0023202bcb7b048be1d02ac81278265666890f",
+      "status": "PASS"
+    },
+    {
+      "label": "gap_list",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\docs\\gui\\demo-v33\\source\\TPAA_V8.0_总体与工程设计方案_Patch差距清单_v1.3.md",
+      "sha256": "402c3941c9be625b488c8e3425ed8fee7d0c3ba78f4084471e17688f231a6896",
+      "status": "PASS"
+    },
+    {
+      "label": "r3_3_manifest",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\docs\\design\\TPAA_V8.0_ED-2.0_Rebaseline_R3.3\\PACKAGE_MANIFEST.sha256",
+      "sha256": "1b70d8149975da0635b79adb1eb72e2f37743739def2ead7ade27bfb3b6db421",
+      "status": "PASS"
+    },
+    {
+      "label": "cb_1_4_lock",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\baseline\\CB-1.4.0\\BASELINE_LOCK.json",
+      "sha256": "06fb823c8db79a19a45bb5f1da2c201644945c3967de94a312acd8f93d0ab437",
+      "status": "PASS"
+    },
+    {
+      "label": "cb_1_5_lock",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\baseline\\CB-1.5.0\\BASELINE_LOCK.json",
+      "sha256": "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab",
+      "status": "PASS"
+    },
+    {
+      "label": "cb_1_5_provenance",
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\baseline\\CB-1.5.0\\canonical\\SOURCE_PROVENANCE.json",
+      "sha256": "9f771642b32a2da3d4b5f3b88ba22302fbe05f49e5284d6d85308a6485967ce8",
+      "status": "PASS"
+    }
+  ],
+  "predecessor_manifest": {
+    "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\docs\\design\\TPAA_V8.0_ED-2.0_Rebaseline_R3.3\\PACKAGE_MANIFEST.sha256",
+    "artifacts": 50,
+    "status": "PASS"
+  },
+  "runtime_evidence": [
+    {
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\evidence\\gui-g0-v33\\g0-runtime-spike.json",
+      "webengine_outputs": 78,
+      "qml_outputs": 12,
+      "status": "PASS"
+    },
+    {
+      "path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\evidence\\gui-g0-v33\\v01-1280x720\\g0-runtime-spike.json",
+      "webengine_outputs": 3,
+      "qml_outputs": 0,
+      "status": "PASS"
+    }
+  ],
+  "view_count": 26,
+  "theme_count": 3,
+  "webengine_reference_screenshots": 81,
+  "qml_contract_screenshots": 12,
+  "v01_geometry_viewports": [
+    "1600x900",
+    "1280x720"
+  ],
+  "runtime_decision": "WEBENGINE_PREFERRED_QML_FALLBACK_PENDING_TARGET_GATES",
+  "open_external_gates": [
+    "target Windows and Linux GPU/software rendering qualification",
+    "offline package SBOM license and renderer recovery qualification",
+    "independent G12 release approval"
+  ],
+  "release_claim": false
+}

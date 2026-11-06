@@ -37,6 +37,7 @@ _LOCAL_HTTP_ALLOWED_PATHS = frozenset(
         "/runtime/qualification",
         "/runtime/observability",
         "/jobs",
+        "/ui",
     }
 )
 _LOCAL_HTTP_ALLOWED_PREFIXES = (
@@ -50,6 +51,7 @@ _LOCAL_HTTP_ALLOWED_PREFIXES = (
     "/m9/",
     "/api/v1/",
     "/security/",
+    "/ui/",
 )
 
 
@@ -125,6 +127,15 @@ class LocalBackendStatus:
     failure_code: str | None = None
 
 
+@dataclass(frozen=True)
+class WebEngineBinding:
+    """Python-only browser binding; values are never exposed to JavaScript."""
+
+    origin: str
+    authorization_header: bytes
+    desktop_nonce: bytes
+
+
 class LocalBackendController:
     """Own exactly one local FastAPI child process for the GUI process."""
 
@@ -155,6 +166,7 @@ class LocalBackendController:
         self._terminate_wait = terminate_wait_seconds
         self._process: subprocess.Popen[str] | None = None
         self._token: str | None = None
+        self._desktop_nonce: str | None = None
         self._port: int | None = None
         self._state = LocalBackendState.STOPPED
         self._failure_code: str | None = None
@@ -194,6 +206,7 @@ class LocalBackendController:
         self._port = None
         self._baseline_diagnostics = EMPTY_DIAGNOSTICS
         self._token = secrets.token_urlsafe(32)
+        self._desktop_nonce = secrets.token_urlsafe(32)
         spawn_command, spawn_env = _prepare_child_spawn(self._child_command)
         self._process = subprocess.Popen(
             spawn_command,
@@ -211,6 +224,7 @@ class LocalBackendController:
                 "protocol": CONTROL_PROTOCOL,
                 "type": "START",
                 "bearer_token": self._token,
+                "desktop_nonce": self._desktop_nonce,
                 "product_build_version": self._product_build_version,
             }
             if self._data_root is not None:
@@ -262,6 +276,23 @@ class LocalBackendController:
 
     def _clear_secret(self) -> None:
         self._token = None
+        self._desktop_nonce = None
+
+    def webengine_binding(self) -> WebEngineBinding:
+        """Return the exact loopback binding for the native request interceptor."""
+
+        if (
+            self.status.state is not LocalBackendState.READY
+            or self._port is None
+            or self._token is None
+            or self._desktop_nonce is None
+        ):
+            raise LocalBackendError("WEBENGINE_BINDING_UNAVAILABLE")
+        return WebEngineBinding(
+            origin=f"http://127.0.0.1:{self._port}",
+            authorization_header=f"Bearer {self._token}".encode("ascii"),
+            desktop_nonce=self._desktop_nonce.encode("ascii"),
+        )
 
     def _send_control(self, payload: dict[str, object]) -> None:
         process = self._process
@@ -500,7 +531,7 @@ class LocalBackendController:
 
         if method.upper() != "GET":
             raise LocalBackendError("SECURITY_HTTP_METHOD_FORBIDDEN")
-        if path != "/security/approvals":
+        if path not in {"/security/approvals", "/security/session"}:
             raise LocalBackendError("SECURITY_HTTP_PATH_FORBIDDEN")
         return self.request_json("GET", path)
 

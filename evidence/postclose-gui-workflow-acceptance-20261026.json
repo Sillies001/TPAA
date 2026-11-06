@@ -1,0 +1,59 @@
+{
+  "aircraft_metric_count": 39,
+  "current_latest_fallback_used": false,
+  "eligibility_count": 39,
+  "episode_id": "d7b8fda2-1aa0-55a2-a690-3a9c1852bd5a",
+  "gui_final_release_decision": "NO_GO",
+  "gui_role_default_page": "P03",
+  "gui_tasks": [
+    {
+      "page": "P02",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-w5-20261026-b\\tpaaP02Status_1440x900.png",
+      "status": "Exact overview ready · Aircraft 39 · Mission-System 77 · Reference Quality 9"
+    },
+    {
+      "page": "P03",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-w5-20261026-b\\tpaaP03Status_1440x900.png",
+      "status": "Replay: EXACT_REPLAY · exact Release 8ba19eab-5222-5b07-ae51-669e3845291b · 20 linked samples"
+    },
+    {
+      "page": "P13",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-w5-20261026-b\\tpaaP13Status_1440x900.png",
+      "status": "Governance ready · exact Release/Catalog/Profile/Model/Permission/Audit/Runtime/W7/W8/W9"
+    }
+  ],
+  "historical_replay_status": "EXACT_REPLAY",
+  "job_id": "8d2bf45b-f413-5c0e-8ec2-2c8d6c257357",
+  "job_status": "SUCCEEDED",
+  "manifest_path": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-w5-20261026-b\\W5_P1_REQUEST.json",
+  "manifest_sha256": "2544eaf5d2c6f7365b2e99a34202738cf1784e085b86f1bf55241b5085d70552",
+  "mission_system_metric_count": 77,
+  "observation_count": 39,
+  "production_deployed": false,
+  "pushed": false,
+  "real_file_import": true,
+  "reference_quality_metric_count": 9,
+  "release_id": "8ba19eab-5222-5b07-ae51-669e3845291b",
+  "release_status": "PUBLISHED",
+  "schema": "TPAA_W5_ACCEPTANCE_EVIDENCE_V1",
+  "session_id": "c2000000-0000-4000-8000-000000000001",
+  "source_document_count": 6,
+  "source_families": [
+    "FLIGHT",
+    "MISSION_AVIONICS",
+    "TDL",
+    "RANGE_ACMI",
+    "SCENARIO",
+    "AUDIO_VIDEO"
+  ],
+  "stage_count": 4,
+  "status": "PASS",
+  "trace_major_interaction_count": 4,
+  "trace_major_interactions": [
+    "P01_IMPORT_AND_PUBLISH",
+    "P02_LOAD_EXACT_OVERVIEW",
+    "P03_LOAD_EXACT_REPLAY",
+    "P13_LOAD_GOVERNANCE_AND_FINAL_GATE"
+  ],
+  "world_product_count": 4
+}

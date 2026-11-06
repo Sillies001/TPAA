@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
+from typing import Any
 
 
 class Theme(StrEnum):
@@ -89,48 +91,86 @@ _COLORS = {
 }
 
 
+def configure_application_font(qt_gui: Any, application: Any) -> str:
+    """Select one real platform font and avoid tofu-glyph screenshot evidence."""
+
+    candidates = (
+        (Path("C:/Windows/Fonts/msyh.ttc"), "Microsoft YaHei UI"),
+        (Path("C:/Windows/Fonts/simhei.ttf"), "SimHei"),
+        (
+            Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+            "Noto Sans CJK SC",
+        ),
+        (
+            Path("/usr/share/fonts/opentype/noto/NotoSansSC-Regular.otf"),
+            "Noto Sans SC",
+        ),
+        (Path("C:/Windows/Fonts/segoeui.ttf"), "Segoe UI"),
+        (Path("C:/Windows/Fonts/arial.ttf"), "Arial"),
+        (Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"), "DejaVu Sans"),
+    )
+    available = set(qt_gui.QFontDatabase.families())
+    for path, family in candidates:
+        if family in available:
+            application.setFont(qt_gui.QFont(family, 10))
+            return family
+        if path.is_file():
+            identifier = qt_gui.QFontDatabase.addApplicationFont(str(path))
+            if identifier >= 0:
+                families = qt_gui.QFontDatabase.applicationFontFamilies(identifier)
+                if families:
+                    application.setFont(qt_gui.QFont(families[0], 10))
+                    return str(families[0])
+    raise RuntimeError("GUI_READABLE_FONT_UNAVAILABLE")
+
+
 def theme_stylesheet(theme: Theme = Theme.LIGHT, logical_dpi: float = 96.0) -> str:
     metrics = scaled_metrics(logical_dpi)
     color = _COLORS[theme]
     return f"""
 QWidget {{
-  color: {color['text']}; background: {color['window']}; font-size: 10pt;
-  font-family: "Segoe UI", "Microsoft YaHei UI", "Noto Sans CJK SC", sans-serif;
+  color: {color["text"]}; background: {color["window"]}; font-size: 10pt;
 }}
-QMainWindow, QWidget#tpaaShellCentralWidget {{ background: {color['window']}; }}
+QMainWindow, QWidget#tpaaShellCentralWidget {{ background: {color["window"]}; }}
 QFrame[tpaaSurface="true"], QGroupBox {{
-  background: {color['surface']}; border: 1px solid {color['border']};
+  background: {color["surface"]}; border: 1px solid {color["border"]};
   border-radius: {metrics.radius}px; margin-top: {metrics.space_sm}px;
 }}
 QGroupBox::title {{ subcontrol-origin: margin; left: {metrics.space_md}px; padding: 0 4px; }}
-QLabel[tpaaMuted="true"] {{ color: {color['muted']}; }}
+QLabel[tpaaMuted="true"] {{ color: {color["muted"]}; }}
 QLabel[tpaaHeading="true"] {{ font-size: 15pt; font-weight: 650; }}
 QPushButton, QComboBox, QLineEdit {{
-  min-height: {metrics.control_height}px; background: {color['surface']};
-  border: 1px solid {color['border']}; border-radius: {metrics.radius}px;
+  min-height: {metrics.control_height}px; background: {color["surface"]};
+  border: 1px solid {color["border"]}; border-radius: {metrics.radius}px;
   padding: 0 {metrics.space_sm}px;
 }}
-QPushButton:hover, QComboBox:hover, QLineEdit:hover {{ border-color: {color['accent']}; }}
+QPushButton:hover, QComboBox:hover, QLineEdit:hover {{ border-color: {color["accent"]}; }}
 QPushButton:focus, QComboBox:focus, QLineEdit:focus, QListWidget:focus, QTableView:focus {{
-  border: 2px solid {color['focus']};
+  border: 2px solid {color["focus"]};
 }}
 QListWidget, QTableView, QPlainTextEdit {{
-  background: {color['surface']}; alternate-background-color: {color['surface_alt']};
-  border: 1px solid {color['border']}; selection-background-color: {color['accent_soft']};
-  selection-color: {color['text']};
+  background: {color["surface"]}; alternate-background-color: {color["surface_alt"]};
+  border: 1px solid {color["border"]}; selection-background-color: {color["accent_soft"]};
+  selection-color: {color["text"]};
 }}
 QListWidget::item {{ min-height: {metrics.control_height}px; padding: 0 {metrics.space_sm}px; }}
-QListWidget::item:selected {{ border-left: 4px solid {color['accent']}; font-weight: 650; }}
+QListWidget::item:selected {{ border-left: 4px solid {color["accent"]}; font-weight: 650; }}
 QHeaderView::section {{
-  background: {color['surface_alt']}; border: 0; border-right: 1px solid {color['border']};
-  border-bottom: 1px solid {color['border']}; padding: {metrics.space_sm}px;
+  background: {color["surface_alt"]}; border: 0; border-right: 1px solid {color["border"]};
+  border-bottom: 1px solid {color["border"]}; padding: {metrics.space_sm}px;
 }}
 QStatusBar, QFrame#tpaaShellStatusBar {{
-  background: {color['surface']}; border-top: 1px solid {color['border']};
+  background: {color["surface"]}; border-top: 1px solid {color["border"]};
 }}
-QLabel[tpaaState="error"] {{ color: {color['danger']}; font-weight: 650; }}
-QLabel[tpaaState="success"] {{ color: {color['success']}; font-weight: 650; }}
+QLabel[tpaaState="error"] {{ color: {color["danger"]}; font-weight: 650; }}
+QLabel[tpaaState="success"] {{ color: {color["success"]}; font-weight: 650; }}
 """.strip()
 
 
-__all__ = ["ScaledMetrics", "Theme", "scaled_metrics", "theme_stylesheet"]
+__all__ = [
+    "ScaledMetrics",
+    "Theme",
+    "configure_application_font",
+    "scaled_metrics",
+    "theme_stylesheet",
+]

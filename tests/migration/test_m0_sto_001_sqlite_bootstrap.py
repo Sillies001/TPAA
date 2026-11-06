@@ -20,7 +20,7 @@ def test_clean_file_bootstrap_and_verify(tmp_path: Path) -> None:
 
     assert created == verified
     assert created.schema_version == "1.9.0"
-    assert created.core_baseline == "CB-1.4.0"
+    assert created.core_baseline == "CB-1.5.0"
     assert created.table_count == 95
     assert created.journal_mode == "wal"
     assert len(created.authority_sha256) == 64

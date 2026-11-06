@@ -10,11 +10,14 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from enum import StrEnum
 from importlib import import_module
 from typing import Any
 
-from .design_system import Theme, theme_stylesheet
+from .design_system import Theme, configure_application_font, theme_stylesheet
 from .diagnostics import DiagnosticsSnapshot, diagnostics_lines
+from .local_backend import WebEngineBinding
+from .localization import install_chinese_localization
 from .m1_workspace import M1DesktopTransport, create_m1_workspace
 from .product_shell import ProductDesktopTransport, create_product_workspace
 
@@ -24,6 +27,11 @@ class GuiShellError(RuntimeError):
 
 
 PYSIDE6_DEPENDENCY_MISSING = "PYSIDE6_DEPENDENCY_MISSING"
+
+
+class GuiShellMode(StrEnum):
+    LEGACY_WIDGETS = "LEGACY_WIDGETS"
+    WEBENGINE_V33 = "WEBENGINE_V33"
 
 
 @dataclass(frozen=True)
@@ -37,6 +45,7 @@ class GuiShellConfig:
     minimum_width: int = 1024
     minimum_height: int = 720
     theme: Theme = Theme.LIGHT
+    mode: GuiShellMode = GuiShellMode.LEGACY_WIDGETS
 
 
 def _load_qt() -> tuple[Any, Any]:
@@ -59,6 +68,7 @@ def _create_window(
     diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
     m1_transport: M1DesktopTransport | None = None,
     product_transport: ProductDesktopTransport | None = None,
+    webengine_binding: WebEngineBinding | None = None,
 ) -> Any:
     window = qt_widgets.QMainWindow()
     window.setObjectName("tpaaMainWindow")
@@ -100,12 +110,14 @@ def _create_window(
         window._tpaa_diagnostics_timer = refresh_timer
         window._tpaa_diagnostics_labels = diagnostic_labels
 
-    if product_transport is not None and diagnostics_provider is not None:
-        logical_dpi = (
-            float(window.logicalDpiX())
-            if hasattr(window, "logicalDpiX")
-            else 96.0
-        )
+    if config.mode is GuiShellMode.WEBENGINE_V33:
+        from .webengine_shell import create_webengine_workspace
+
+        web_workspace = create_webengine_workspace(central, webengine_binding)
+        layout.addWidget(web_workspace)
+        window._tpaa_web_workspace = web_workspace
+    elif product_transport is not None and diagnostics_provider is not None:
+        logical_dpi = float(window.logicalDpiX()) if hasattr(window, "logicalDpiX") else 96.0
         product_workspace = create_product_workspace(
             qt_core,
             qt_widgets,
@@ -142,6 +154,7 @@ def run_gui(
     diagnostics_provider: Callable[[], DiagnosticsSnapshot] | None = None,
     m1_transport: M1DesktopTransport | None = None,
     product_transport: ProductDesktopTransport | None = None,
+    webengine_binding: WebEngineBinding | None = None,
 ) -> int:
     """Start the PySide6 event loop and return its process exit code.
 
@@ -159,6 +172,9 @@ def run_gui(
     existing = qt_widgets.QApplication.instance()
     app = existing if existing is not None else qt_widgets.QApplication(qt_argv)
     app.setApplicationName(shell_config.application_name)
+    if hasattr(app, "setFont"):
+        qt_gui = import_module("PySide6.QtGui")
+        configure_application_font(qt_gui, app)
     if hasattr(app, "setStyleSheet"):
         logical_dpi = 96.0
         screen_getter = getattr(app, "primaryScreen", None)
@@ -175,7 +191,9 @@ def run_gui(
         diagnostics_provider,
         m1_transport,
         product_transport,
+        webengine_binding,
     )
+    install_chinese_localization(qt_core, qt_widgets, app, window)
     if show:
         window.show()
 

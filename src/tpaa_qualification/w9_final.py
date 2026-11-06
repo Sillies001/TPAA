@@ -57,6 +57,36 @@ def _text(value: object, field: str) -> str:
     return value
 
 
+def _boolean(value: object, field: str) -> bool:
+    if type(value) is not bool:
+        raise W9QualificationError(f"W9_BOOLEAN_INVALID:{field}")
+    return value
+
+
+def _finding_count(value: object, field: str) -> int | None:
+    if value is None:
+        return None
+    if type(value) is not int or value < 0:
+        raise W9QualificationError(f"W9_FINDING_COUNT_INVALID:{field}")
+    return value
+
+
+def _source_revision(value: object) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 40
+        or value != value.lower()
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise W9QualificationError("W9_SOURCE_REVISION_INVALID")
+    return value
+
+
+def _optional_sha256(record: Mapping[str, object], field: str) -> str | None:
+    value = record.get(field)
+    return None if value is None else _sha256(value, field)
+
+
 def _canonical_hash(value: object) -> str:
     raw = json.dumps(
         value,
@@ -123,35 +153,34 @@ class W9FinalQualificationStatus:
     ) -> None:
         if tuple(gate.category for gate in gates) != W9_EVIDENCE_CATEGORIES:
             raise W9QualificationError("W9_CATEGORY_SET_OR_ORDER_INVALID")
-        if (
-            unwaived_blocker_count is not None
-            and unwaived_blocker_count < 0
-        ) or (unwaived_high_count is not None and unwaived_high_count < 0):
-            raise W9QualificationError("W9_FINDING_COUNT_INVALID")
+        blocker_count = _finding_count(
+            unwaived_blocker_count,
+            "unwaived_blocker_count",
+        )
+        high_count = _finding_count(unwaived_high_count, "unwaived_high_count")
         if candidate_identity_sha256 is not None:
             _sha256(candidate_identity_sha256, "candidate_identity_sha256")
         if source_revision is not None:
-            if (
-                len(source_revision) != 40
-                or source_revision != source_revision.lower()
-                or any(
-                    character not in "0123456789abcdef"
-                    for character in source_revision
-                )
-            ):
-                raise W9QualificationError("W9_SOURCE_REVISION_INVALID")
+            _source_revision(source_revision)
         if signature_sha256 is not None:
             _sha256(signature_sha256, "signature_sha256")
+        protected_main = _boolean(protected_main_exact, "protected_main_exact")
+        hosted_ci = _boolean(hosted_ci_success, "hosted_ci_success")
+        independent_approval = _boolean(
+            independent_approval_complete,
+            "independent_approval_complete",
+        )
+        local_closed = _boolean(local_stage_closed, "local_stage_closed")
         self._gates = tuple(gates)
         self._candidate_identity_sha256 = candidate_identity_sha256
         self._source_revision = source_revision
-        self._unwaived_blocker_count = unwaived_blocker_count
-        self._unwaived_high_count = unwaived_high_count
-        self._protected_main_exact = protected_main_exact
-        self._hosted_ci_success = hosted_ci_success
-        self._independent_approval_complete = independent_approval_complete
+        self._unwaived_blocker_count = blocker_count
+        self._unwaived_high_count = high_count
+        self._protected_main_exact = protected_main
+        self._hosted_ci_success = hosted_ci
+        self._independent_approval_complete = independent_approval
         self._signature_sha256 = signature_sha256
-        self._local_stage_closed = local_stage_closed
+        self._local_stage_closed = local_closed
 
     @classmethod
     def local_closed(cls) -> W9FinalQualificationStatus:
@@ -274,19 +303,14 @@ def build_w9_final_qualification_status(
 
     gates = tuple(
         W9EvidenceGate(
-            category=str(record.get("category", "")),
-            state=str(record.get("state", "")),
-            reason_code=str(record.get("reason_code", "")),
-            candidate_identity_sha256=(
-                None
-                if record.get("candidate_identity_sha256") is None
-                else str(record["candidate_identity_sha256"])
+            category=_text(record.get("category"), "category"),
+            state=_text(record.get("state"), "state"),
+            reason_code=_text(record.get("reason_code"), "reason_code"),
+            candidate_identity_sha256=_optional_sha256(
+                record,
+                "candidate_identity_sha256",
             ),
-            evidence_sha256=(
-                None
-                if record.get("evidence_sha256") is None
-                else str(record["evidence_sha256"])
-            ),
+            evidence_sha256=_optional_sha256(record, "evidence_sha256"),
         )
         for record in records
     )

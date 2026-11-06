@@ -1,0 +1,10 @@
+{
+  "schema": "TPAA_G1_V33_WEBENGINE_SMOKE_V1",
+  "status": "PASS",
+  "exact_origin": "http://127.0.0.1:48987",
+  "off_the_record": true,
+  "static_entry": "/ui",
+  "backend_degraded_state": "PASS",
+  "shutdown_state": "EXITED",
+  "release_claim": false
+}

@@ -9,6 +9,7 @@ __pycache__/
 # Build / packaging
 build/
 dist/
+node_modules/
 *.egg-info/
 
 # IDE / OS

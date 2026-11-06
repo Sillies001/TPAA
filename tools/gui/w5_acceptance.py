@@ -13,7 +13,9 @@ from pathlib import Path
 from typing import cast
 
 from tools.testing.ed2_p1_full_input_builder import build_full_p1_request_contract
+from tpaa_gui.design_system import Theme, configure_application_font, theme_stylesheet
 from tpaa_gui.local_backend import LocalBackendController
+from tpaa_gui.product_shell import create_product_workspace
 from tpaa_gui.w5_projection import (
     build_session_overview,
     observation_quality_rows,
@@ -72,6 +74,8 @@ def _request_manifest() -> dict[str, object]:
 
 
 def run(work_root: Path, evidence_path: Path) -> dict[str, object]:
+    work_root = work_root.resolve(strict=False)
+    evidence_path = evidence_path.resolve(strict=False)
     work_root.mkdir(parents=True, exist_ok=False)
     desktop_data = work_root / "desktop-data"
     desktop_data.mkdir()
@@ -184,6 +188,95 @@ def run(work_root: Path, evidence_path: Path) -> dict[str, object]:
         )
         replay_status = verify_exact_replay(replay, release_id)
         eligibility = observation_quality_rows(projection)
+        from PySide6 import QtCore, QtGui, QtTest, QtWidgets
+
+        app = cast(
+            "QtWidgets.QApplication",
+            QtWidgets.QApplication.instance()
+            or QtWidgets.QApplication(["tpaa-w5-gui-acceptance"]),
+        )
+        configure_application_font(QtGui, app)
+        app.setStyleSheet(theme_stylesheet(Theme.LIGHT, 96.0))
+        window = QtWidgets.QMainWindow()
+        workspace = create_product_workspace(
+            QtCore,
+            QtWidgets,
+            window,
+            transport=controller,
+            diagnostics_provider=lambda: controller.diagnostics,
+        )
+        window.setCentralWidget(workspace)
+        window.resize(1440, 900)
+        window.show()
+        app.processEvents()
+
+        def exercise_page(
+            row: int,
+            refresh_name: str,
+            load_name: str,
+            status_name: str,
+        ) -> dict[str, object]:
+            workspace._tpaa_navigation.setCurrentRow(row)
+            app.processEvents()
+            page = workspace._tpaa_pages[row]
+            refresh_button = page.findChild(QtWidgets.QPushButton, refresh_name)
+            load_button = page.findChild(QtWidgets.QPushButton, load_name)
+            QtTest.QTest.mouseClick(
+                refresh_button,
+                QtCore.Qt.MouseButton.LeftButton,
+            )
+            QtTest.QTest.mouseClick(
+                load_button,
+                QtCore.Qt.MouseButton.LeftButton,
+            )
+            app.processEvents()
+            status_widget = page.findChild(QtWidgets.QLabel, status_name)
+            status_text = status_widget.text()
+            if "FAILURE" in status_text or "ERROR" in status_text:
+                raise RuntimeError(f"W5_GUI_TASK_FAILED:{status_name}:{status_text}")
+            screenshot = work_root / f"{status_name}_1440x900.png"
+            if not window.grab().save(str(screenshot), "PNG"):
+                raise RuntimeError(f"W5_GUI_CAPTURE_FAILED:{status_name}")
+            return {
+                "page": f"P{row + 1:02d}",
+                "status": status_text,
+                "screenshot": str(screenshot),
+            }
+
+        role_button = workspace.findChild(
+            QtWidgets.QPushButton,
+            "tpaaApplyRoleView",
+        )
+        QtTest.QTest.mouseClick(role_button, QtCore.Qt.MouseButton.LeftButton)
+        app.processEvents()
+        gui_tasks = [
+            exercise_page(
+                1,
+                "tpaaP02RefreshReleases",
+                "tpaaP02LoadOverview",
+                "tpaaP02Status",
+            ),
+            exercise_page(
+                2,
+                "tpaaP03RefreshReleases",
+                "tpaaP03LoadReplay",
+                "tpaaP03Status",
+            ),
+            exercise_page(
+                12,
+                "tpaaP13RefreshGovernance",
+                "tpaaP13LoadGovernance",
+                "tpaaP13Status",
+            ),
+        ]
+        final_gate = workspace._tpaa_pages[12].findChild(
+            QtWidgets.QLabel,
+            "tpaaP13FinalDecision",
+        )
+        if final_gate.property("decision") != "NO_GO":
+            raise RuntimeError("W5_GUI_LOCAL_FINAL_GATE_MUST_BE_NO_GO")
+        window.close()
+        app.processEvents()
         result: dict[str, object] = {
             "schema": "TPAA_W5_ACCEPTANCE_EVIDENCE_V1",
             "status": "PASS",
@@ -209,12 +302,16 @@ def run(work_root: Path, evidence_path: Path) -> dict[str, object]:
             "current_latest_fallback_used": replay.get(
                 "current_latest_fallback_used", False
             ),
+            "gui_role_default_page": "P03",
+            "gui_tasks": gui_tasks,
+            "gui_final_release_decision": final_gate.property("decision"),
             "trace_major_interactions": [
                 "P01_IMPORT_AND_PUBLISH",
-                "P02_SELECT_EXACT_OBSERVATION",
-                "P03_OPEN_LINKED_EVIDENCE",
+                "P02_LOAD_EXACT_OVERVIEW",
+                "P03_LOAD_EXACT_REPLAY",
+                "P13_LOAD_GOVERNANCE_AND_FINAL_GATE",
             ],
-            "trace_major_interaction_count": 3,
+            "trace_major_interaction_count": 4,
             "pushed": False,
             "production_deployed": False,
         }

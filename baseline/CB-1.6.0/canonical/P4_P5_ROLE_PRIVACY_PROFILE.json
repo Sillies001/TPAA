@@ -1,0 +1,169 @@
+{
+  "profile_id": "P4_P5_ROLE_PRIVACY_PROFILE",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_ROLE_MODEL_PROFILE",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "tracking_issue": 181,
+  "source_bindings": {
+    "p4_p5_authority_id": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY",
+    "p4_p5_authority_version": "1.0.0",
+    "p4_p5_authority_sha256": "749360544e3e403e3a81b4992797d5186c93d1f06a92e96f1352c4ab4ed4cb77",
+    "cross_layer_dto_sha256": "2d5ff42aa3a8fee6ed7995be0e430dee18aa36bde6fc5144fd1484532d67ee47",
+    "core_logical_model_sha256": "cfde6638e6899167267375c899bff2f04a490ce12f32e0005be4e15dda956245",
+    "extension_contract_registry_sha256": "f987ea2801557befac44aaf3b47b3953a5cdbaaa662e39c2f3970526f3371f41",
+    "p3_authority_sha256": "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b"
+  },
+  "activation_rule": {
+    "profile_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "profile_adoption_does_not_admit_p4_or_p5": true,
+    "p4_p5_external_claim_requires_protected_main_m8_exit_go": true,
+    "p6_active": false
+  },
+  "scope": {
+    "role_families": [
+      "SUBJECT_SELF",
+      "INSTRUCTOR_EVALUATOR",
+      "TEAM_LEAD",
+      "ANALYST",
+      "ADMIN_AUDITOR"
+    ],
+    "default_deny": true,
+    "direct_identity_default": false,
+    "field_level_projection": true,
+    "db_schema_change": false,
+    "shadow_schema_permitted": false
+  },
+  "context_binding_contract": {
+    "carrier_table": "registry.context_artifact",
+    "binding_table": "context.context_artifact_binding",
+    "artifact_kind": "ROLE_MODEL",
+    "binding_role": "ROLE_MODEL",
+    "logical_key": "M8_ROLE_MODEL:P4_P5_LEAST_PRIVILEGE",
+    "artifact_version": "1.0.0",
+    "schema_version": "TPAA_M8_ROLE_PRIVACY_PROFILE_V1",
+    "required_status": "ACTIVE",
+    "managed_object_must_be_sealed_active": true,
+    "exact_context_binding_required": true,
+    "role_assignment_source": "ROLE_MODEL payload roles/assignments; implementation-local role mapping forbidden"
+  },
+  "pseudonymization_contract": {
+    "output_prefix": "SUBJECT_SHA256:",
+    "input_template": "TPAA-P4P5-SUBJECT\\0P4_P5_ROLE_PRIVACY_PROFILE:1.0.0\\0<lowercase_actor_uuid>",
+    "digest": "SHA256",
+    "encoding": "UTF-8",
+    "lowercase_hex": true,
+    "direct_actor_uuid_not_embedded_in_output": true,
+    "stable_within_profile_version": true,
+    "profile_version_change_requires_explicit_identity_bridge": false
+  },
+  "role_matrix": [
+    {
+      "role": "SUBJECT_SELF",
+      "read_scope": "OWN_P4_AND_PARTICIPATING_P5_ONLY",
+      "direct_actor_id": "OWN_ONLY",
+      "annotation_body": "ONLY_IF_VISIBILITY_ALSO_AUTHORIZES",
+      "annotation_write": false,
+      "approval_write": false,
+      "audit_read": false,
+      "unrestricted_export": false
+    },
+    {
+      "role": "INSTRUCTOR_EVALUATOR",
+      "read_scope": "ASSIGNED_EVALUATION_SCOPE",
+      "direct_actor_id": "ASSIGNED_SCOPE_ONLY",
+      "annotation_body": "ONLY_IF_VISIBILITY_ALSO_AUTHORIZES",
+      "annotation_write": true,
+      "approval_write": true,
+      "audit_read": "OWN_AND_ASSIGNED_WORKFLOW",
+      "unrestricted_export": false
+    },
+    {
+      "role": "TEAM_LEAD",
+      "read_scope": "ASSIGNED_TEAM_P5_WITH_PSEUDONYMOUS_PARTICIPANTS",
+      "direct_actor_id": false,
+      "annotation_body": false,
+      "annotation_write": false,
+      "approval_write": false,
+      "audit_read": false,
+      "unrestricted_export": false
+    },
+    {
+      "role": "ANALYST",
+      "read_scope": "AUTHORIZED_PSEUDONYMOUS_P4_P5_ANALYTICS",
+      "direct_actor_id": false,
+      "annotation_body": false,
+      "annotation_write": false,
+      "approval_write": false,
+      "audit_read": false,
+      "unrestricted_export": false
+    },
+    {
+      "role": "ADMIN_AUDITOR",
+      "read_scope": "AUTHORIZED_IDENTITY_AND_AUDIT_SCOPE",
+      "direct_actor_id": "AUTHORIZED_AUDIT_SCOPE_ONLY",
+      "annotation_body": "AUTHORIZED_AUDIT_SCOPE_AND_VISIBILITY_ONLY",
+      "annotation_write": false,
+      "approval_write": false,
+      "audit_read": true,
+      "unrestricted_export": "EXPLICIT_EXPORT_AUTHORIZATION_REQUIRED"
+    }
+  ],
+  "projection_contract": {
+    "default_subject_projection": "subject_key",
+    "actor_id_projection_requires": [
+      "role_authorization",
+      "scope_match"
+    ],
+    "annotation_body_projection_requires": [
+      "role_authorization",
+      "visibility_authorization",
+      "scope_match"
+    ],
+    "p5_team_lead_and_analyst_participant_identity": "subject_key_only",
+    "not_authorized_transport_behavior": "FAIL_CLOSED_NOT_AUTHORIZED_NO_BUSINESS_VALUE",
+    "client_logs_must_exclude": [
+      "actor_id",
+      "annotation_body",
+      "privileged_audit_payload"
+    ],
+    "explicit_field_omission_preferred_over_null_identity_leakage": true
+  },
+  "write_authorization_contract": {
+    "annotation_create_or_revise_role": "INSTRUCTOR_EVALUATOR",
+    "approval_transition_role": "INSTRUCTOR_EVALUATOR",
+    "assigned_scope_match_required": true,
+    "request_id_required": true,
+    "duplicate_request_id_idempotent": true,
+    "admin_auditor_business_approval_by_privilege_forbidden": true,
+    "subject_self_write_forbidden": true,
+    "team_lead_write_forbidden": true,
+    "analyst_write_forbidden": true
+  },
+  "export_audit_contract": {
+    "privileged_direct_identity_access_audited": true,
+    "privileged_annotation_body_access_audited": true,
+    "export_requires_explicit_authorization": true,
+    "unrestricted_export_of_direct_identity_forbidden": true,
+    "audit_carrier": "audit.audit_log",
+    "request_id_required_for_mutating_operations": true
+  },
+  "forbidden_fallbacks": {
+    "missing_role_model_to_default_role": false,
+    "unknown_role_to_analyst": false,
+    "admin_implies_evaluator": false,
+    "team_lead_implies_direct_identity": false,
+    "missing_visibility_to_project_read": false,
+    "current_latest_default_role_model_resolution": false
+  },
+  "contract_hashes": {
+    "context_binding_contract_sha256": "d83ec7540c1c4c1f8c255c321fc084619f01995f118c4a0d40d4b683052317c2",
+    "pseudonymization_contract_sha256": "4e6550af9bd1cd93b65d1f13cf80f04bf0da0eb75f51f6fd72650062b2a26c7f",
+    "role_matrix_sha256": "8bfe313de659611413d5dddb9a88a98c0bccbd12d154ad3dcf889a63c46cb3c8",
+    "projection_contract_sha256": "fa80e4e2aafcd5c792e299437b52eae4ef0a6490ee3bc390f77eb5b5dfc250c9",
+    "write_authorization_contract_sha256": "d5ccb827e2ac1452e135f457654972350332d83c3bb2d5c4ba073b8fdc1a6dc6",
+    "export_audit_contract_sha256": "cfd3c3c9f7b8fc7c8b0310eca28f087c8d5809f0386057adbc45b8a03527e647",
+    "forbidden_fallbacks_sha256": "ad6332ff9502cf931a7a640a2ed823d7390d1c1edfef04cb44a16215fd285b40"
+  }
+}

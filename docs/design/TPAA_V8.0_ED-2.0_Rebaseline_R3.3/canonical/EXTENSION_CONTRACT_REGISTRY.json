@@ -1,0 +1,166 @@
+{
+  "registry_id": "EXTENSION_CONTRACT_REGISTRY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "purpose": "Stable semantic contracts for P2-P6 so future implementation can expand without redefining meaning. This registry does not claim those P capability phases are implemented or validated.",
+  "longitudinal_contracts": {
+    "human_team": [
+      "competency distribution",
+      "EWMA",
+      "trend slope",
+      "MAD/variance",
+      "P10/P50/P90",
+      "comparable cohort percentile",
+      "recent valid exposure",
+      "time since last valid exposure",
+      "decline/retraining evidence",
+      "TP/PA/AJ/M/team/chain process trends"
+    ],
+    "aircraft": [
+      "current estimate",
+      "trend",
+      "stability",
+      "change point",
+      "pre/post maintenance difference",
+      "pre/post software difference",
+      "freshness",
+      "independent episode evidence count"
+    ],
+    "model_profile": [
+      "aircraft_count",
+      "independent_episode_count",
+      "mean/median",
+      "dispersion",
+      "P10/P90",
+      "trend",
+      "block/configuration difference",
+      "outlier aircraft rate"
+    ],
+    "cohort_minimum": [
+      "aircraft model/block/configuration",
+      "training/episode/stage",
+      "scenario family/mission type/role/team size",
+      "difficulty/altitude/speed/range/load",
+      "weather/threat/EW bucket",
+      "assessment/metric/attribution version",
+      "world capability code"
+    ]
+  },
+  "knowledge_time_rule": "Products distinguish valid/event time, record/revision time and information-available/as-of time when materially relevant. Backfilled knowledge may produce a retrospective revision but must not masquerade as what was known at the original time.",
+  "evidence_independence_rule": "Raw record count, observation count, independent subject count and effective evidence volume are distinct; deduplication does not prove statistical independence.",
+  "p_capability_contracts": {
+    "P2": {
+      "name": "Context Attribution & Normalization",
+      "inputs": [
+        "immutable P1 observations",
+        "frozen factor/context feature views",
+        "reference condition",
+        "cohort/specification",
+        "quality/independence metadata"
+      ],
+      "products": [
+        "assessment.factor_feature_set",
+        "assessment.attribution_run",
+        "capability.adjusted_capability_estimate"
+      ],
+      "required_outputs": [
+        "context_adjusted_value_or_status",
+        "reference_condition",
+        "factor_effects_or_candidate_contributions",
+        "unexplained_component",
+        "uncertainty_interval_or_object",
+        "identifiability_status",
+        "evidence",
+        "version"
+      ],
+      "rules": [
+        "NOT_IDENTIFIABLE is a valid result.",
+        "Contribution is association/model-conditioned unless independent causal evidence exists.",
+        "No adjusted value overwrites P1 observed value.",
+        "Future information and same-episode leakage are prohibited."
+      ]
+    },
+    "P3": {
+      "name": "Reference-condition Longitudinal Capability / Aircraft Twin",
+      "inputs": [
+        "validated P2 estimates",
+        "lifecycle/configuration history",
+        "as-of dataset snapshots",
+        "model validation evidence"
+      ],
+      "products": [
+        "capability.capability_model",
+        "capability.capability_surface",
+        "capability.aircraft_twin_revision",
+        "capability.intrinsic_capability_estimate"
+      ],
+      "rules": [
+        "Default interpretation is reference-condition longitudinal performance estimate; intrinsic wording requires additional independent evidence.",
+        "Aircraft-level and model-level statistics preserve independent aircraft counts vs episode counts.",
+        "Twin is a published capability read model, not a real-time flight-state mirror and not same-episode World truth.",
+        "Lifecycle/config/software/maintenance changes are explicit markers/segmentation inputs."
+      ]
+    },
+    "P4": {
+      "name": "Human-Machine / Individual Training Assessment",
+      "inputs": [
+        "C/W/P_i/A_i/J/M_i evidence",
+        "metrics/events/relations",
+        "assessment profile",
+        "instructor annotation/review"
+      ],
+      "products": [
+        "assessment.actor_assessment",
+        "assessment.competency_observation"
+      ],
+      "rules": [
+        "Qualification, diagnostic competency and evidence are separate output layers.",
+        "SA evidence is bounded by observable P/A evidence and validated proxies.",
+        "Human-machine metrics do not become aircraft intrinsic capability.",
+        "Automatic and instructor judgments remain revision-traceable and separate."
+      ]
+    },
+    "P5": {
+      "name": "Team / Package / Mission Assessment",
+      "inputs": [
+        "participant-specific P_i/A_i/M_i",
+        "team/package relations",
+        "objectives",
+        "events",
+        "approved adjudication",
+        "assessment profiles"
+      ],
+      "products": [
+        "assessment.mission_assessment",
+        "assessment.objective_result"
+      ],
+      "rules": [
+        "Team score is not copied to individuals.",
+        "Team composition is retained for longitudinal interpretation.",
+        "Package/mission assessment includes cross-team objective/handoff/timing relations.",
+        "System/data factors are not automatically assigned to personnel responsibility."
+      ]
+    },
+    "P6": {
+      "name": "Forecast / Counterfactual / Closed Loop",
+      "inputs": [
+        "published historical products",
+        "governed model artifacts",
+        "explicit assumptions/scenario definitions"
+      ],
+      "products": [
+        "intelligence.forecast_run",
+        "intelligence.forecast_result",
+        "intelligence.counterfactual_run",
+        "intelligence.training_recommendation",
+        "intelligence.intervention_outcome"
+      ],
+      "rules": [
+        "Forecast/counterfactual products are physically and visually separated from fact/replay products.",
+        "Recommendation requires explicit approval state and is not written back as historical truth.",
+        "Counterfactual assumptions and model refs are always visible.",
+        "Operational/tactical optimization remains outside the safety boundary."
+      ]
+    }
+  }
+}

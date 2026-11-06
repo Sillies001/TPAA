@@ -49,6 +49,7 @@ def create_app(
     data_root: Path | None = None,
     environ: Mapping[str, str] | None = None,
     app_root: Path | None = None,
+    desktop_nonce: str | None = None,
 ) -> FastAPI:
     """Create the authenticated loopback Desktop API over durable storage."""
 
@@ -67,6 +68,7 @@ def create_app(
         runtime,
         bearer_token=bearer_token,
         principal_resolver=identity,
+        desktop_nonce=desktop_nonce,
     )
 
 

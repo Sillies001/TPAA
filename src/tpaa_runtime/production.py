@@ -77,6 +77,7 @@ from .federated_identity import (
     OidcMtlsRequestIdentityProvider,
     oidc_mtls_principal_resolver,
 )
+from .formal_evidence import load_formal_runtime_evidence
 from .identity import (
     configured_service_principal_resolver,
     guard_production_principal_resolver,
@@ -311,6 +312,15 @@ def _compose(
             write_uow_factory,
         )
     )
+    m5_authority = load_m5_qualification_authority(config.authority_root.parent)
+    formal_evidence = (
+        None
+        if config.formal_qualification is None
+        else load_formal_runtime_evidence(
+            config.formal_qualification,
+            authority=m5_authority,
+        )
+    )
     application = ApplicationService(
         get_storage_baseline_status=storage_status,
         job_control=job_control,
@@ -334,11 +344,21 @@ def _compose(
         ed2_upper=ed2_upper,
         source_workflow=SourceWorkflowService(object_store),
         episode_revision=DurableEpisodeRevisionService(write_uow_factory),
-        w7_external_capabilities=W7ExternalCapabilityRegistry.local_closed(),
-        w8_operations_status=W8OperationsStatus.local_closed(
-            load_m5_qualification_authority(config.authority_root.parent)
+        w7_external_capabilities=(
+            W7ExternalCapabilityRegistry.local_closed()
+            if formal_evidence is None
+            else formal_evidence.w7_external_capabilities
         ),
-        w9_final_qualification_status=W9FinalQualificationStatus.local_closed(),
+        w8_operations_status=(
+            W8OperationsStatus.local_closed(m5_authority)
+            if formal_evidence is None
+            else formal_evidence.w8_operations_status
+        ),
+        w9_final_qualification_status=(
+            W9FinalQualificationStatus.local_closed()
+            if formal_evidence is None
+            else formal_evidence.w9_final_qualification_status
+        ),
     )
     policy = load_security_policy()
     authorization = AuthorizationService(policy)
@@ -442,6 +462,7 @@ def create_production_desktop_app(
     m8_principal_resolver: M8PrincipalResolver | None = None,
     m9_principal_resolver: M9PrincipalResolver | None = None,
     principal_resolver: UnifiedPrincipalResolver | None = None,
+    desktop_nonce: str | None = None,
 ) -> FastAPI:
     """Expose the production Desktop graph without synthetic source fallback."""
 
@@ -453,6 +474,7 @@ def create_production_desktop_app(
         principal_resolver=principal_resolver,
         authorization_guard=runtime.authorization_guard,
         approval_service=runtime.approval_service,
+        desktop_nonce=desktop_nonce,
     )
     app.version = runtime.config.product_build_version
     return app

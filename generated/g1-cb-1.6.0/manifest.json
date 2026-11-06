@@ -1,0 +1,53 @@
+{
+  "schema": "TPAA_G1_GENERATED_CANDIDATE_MANIFEST_V1",
+  "core_baseline": "CB-1.6.0",
+  "baseline_lock_sha256": "68ee3fc8f75e3435f2127b41eb1d933de79d1d70a5a9bd7a1c6295321160a731",
+  "files": [
+    {
+      "path": "api/openapi-gui-v33.json",
+      "sha256": "2c53b78a13d993cdd1b1e2137185abe9d930eb229de77b3a99fedc7248451d2c",
+      "bytes": 142975
+    },
+    {
+      "path": "src/tpaa_generated/__init__.py",
+      "sha256": "4b56aaa6b522978f568a150c5f84f7053f6970d574d96e966b511bf417dfff31",
+      "bytes": 312
+    },
+    {
+      "path": "src/tpaa_generated/_generation_manifest.json",
+      "sha256": "c8a57e2a3f7825d8d5c33500d6e0ea239b8b64a73fd9a3fecb54051fbb52316e",
+      "bytes": 4104
+    },
+    {
+      "path": "src/tpaa_generated/baseline.py",
+      "sha256": "5eb9aff77882b36e4894a3dd2916ce46bde5e0c2f6efb5e555a56960821a516c",
+      "bytes": 442
+    },
+    {
+      "path": "src/tpaa_generated/dto.py",
+      "sha256": "1826b23976273b7837d105befc2951d5857d584baf0ed4ee6c03f9618daa1ee3",
+      "bytes": 31411
+    },
+    {
+      "path": "src/tpaa_generated/metric_registry.py",
+      "sha256": "279421bb2ae84b1158b2a23896e59c9914f3c72005ca6d4ed2280845d6884570",
+      "bytes": 90340
+    },
+    {
+      "path": "src/tpaa_generated/program_registry.py",
+      "sha256": "569bd4d4f7571e81963ad8d7fb32b8cfa85455d485d2c5d19ac408e4b7085708",
+      "bytes": 12596
+    },
+    {
+      "path": "src/tpaa_generated/stage_registry.py",
+      "sha256": "854b0c2be5da9a7ecd4fc5e3971531dab5df50ddf55e4635a2e973e2ab6b38fc",
+      "bytes": 5376
+    },
+    {
+      "path": "web/contracts.ts",
+      "sha256": "49f8ddfb48257338d38be3da2fe21161417dac65cf1637899c697a151a897a05",
+      "bytes": 30542
+    }
+  ],
+  "release_claim": false
+}

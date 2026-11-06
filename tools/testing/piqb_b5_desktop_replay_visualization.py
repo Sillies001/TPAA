@@ -84,14 +84,20 @@ class _NoRequestTransport:
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]:
+        del body
         return self._unused(method, path)
 
     def m9_request_json(
         self,
         method: str,
         path: str,
+        *,
+        body: Mapping[str, object] | None = None,
     ) -> tuple[int, Mapping[str, object]]:
+        del body
         return self._unused(method, path)
 
     def runtime_request_json(

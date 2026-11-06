@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import ast
 import hashlib
 import json
 import shutil
@@ -23,6 +22,16 @@ DECISION_ID = "W0-AUTHORITY-CONVERGENCE-2026-10-19"
 REBASELINE_ID = "R6.0_W0_CORE_1_5_0_AUTHORITY_CONVERGENCE"
 APPROVAL_DATE = "2026-10-19"
 COMPATIBLE_SCHEMAS = ["1.6.0", "1.7.0", "1.8.0", "1.9.0"]
+FROZEN_API_ROUTE_AUTHORITY = (
+    REPO_ROOT
+    / "tools"
+    / "baseline"
+    / "frozen"
+    / "W0_CB_1_5_0_API_ROUTE_AUTHORITY.json"
+)
+FROZEN_API_ROUTE_AUTHORITY_SHA256 = (
+    "2f1e3b3b8e01b9ac36e211a9b499aedf1f108117b50065c2a79772bc0db65e84"
+)
 
 
 class SuccessorBuildError(RuntimeError):
@@ -206,65 +215,31 @@ def _index_authority(core: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def _decorator_route(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[dict[str, Any]]:
-    routes: list[dict[str, Any]] = []
-    for decorator in node.decorator_list:
-        if not isinstance(decorator, ast.Call) or not isinstance(decorator.func, ast.Attribute):
-            continue
-        method = decorator.func.attr.upper()
-        if method not in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
-            continue
-        if not decorator.args or not isinstance(decorator.args[0], ast.Constant):
-            raise SuccessorBuildError(f"route path must be a literal: {node.name}")
-        path = decorator.args[0].value
-        if not isinstance(path, str):
-            raise SuccessorBuildError(f"route path must be a string: {node.name}")
-        keywords = {keyword.arg: keyword.value for keyword in decorator.keywords if keyword.arg}
-        operation = keywords.get("operation_id")
-        response = keywords.get("response_model")
-        routes.append(
-            {
-                "method": method,
-                "path": path,
-                "handler": node.name,
-                "operation_id": (operation.value if isinstance(operation, ast.Constant) else None),
-                "response_model": ast.unparse(response) if response is not None else None,
-            }
-        )
-    return routes
-
-
 def _api_route_authority() -> dict[str, Any]:
-    routes: list[dict[str, Any]] = []
-    for path in sorted((REPO_ROOT / "src" / "tpaa_api").glob("*.py"), key=lambda p: p.name):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                for route in _decorator_route(node):
-                    routes.append(
-                        {
-                            **route,
-                            "module": f"tpaa_api.{path.stem}",
-                            "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
-                        }
-                    )
-    routes.sort(key=lambda item: (item["path"], item["method"], item["module"], item["handler"]))
-    identities = [(item["method"], item["path"], item["module"]) for item in routes]
-    if len(identities) != len(set(identities)):
-        raise SuccessorBuildError("duplicate API route declaration")
-    return {
-        "authority_id": "API_ROUTE_AUTHORITY",
-        "authority_version": "1.0.0",
-        "core_baseline": NEW_CORE,
-        "api_version": "v1",
-        "decision_id": DECISION_ID,
-        "approval_status": "APPROVED",
-        "scope": (
-            "All statically declared FastAPI routes under src/tpaa_api; runtime composition "
-            "and role admission remain governed by their profile and security authorities."
-        ),
-        "routes": routes,
-    }
+    """Return the route authority frozen when W0 approved CB-1.5.0.
+
+    Reconstructing an immutable predecessor from the *current* API source makes
+    every later additive route look like historical baseline drift.  The W0
+    build therefore consumes a separately hashed input snapshot.  The checked-in
+    CB-1.5.0 output remains independently verified by its own baseline lock.
+    """
+
+    if not FROZEN_API_ROUTE_AUTHORITY.is_file():
+        raise SuccessorBuildError(
+            f"frozen W0 API route authority is missing: {FROZEN_API_ROUTE_AUTHORITY}"
+        )
+    actual_hash = _sha256(FROZEN_API_ROUTE_AUTHORITY)
+    if actual_hash != FROZEN_API_ROUTE_AUTHORITY_SHA256:
+        raise SuccessorBuildError(
+            "frozen W0 API route authority hash mismatch: "
+            f"expected={FROZEN_API_ROUTE_AUTHORITY_SHA256} actual={actual_hash}"
+        )
+    authority = _load_object(FROZEN_API_ROUTE_AUTHORITY)
+    if authority.get("core_baseline") != NEW_CORE:
+        raise SuccessorBuildError("frozen W0 API route authority core baseline mismatch")
+    if authority.get("decision_id") != DECISION_ID:
+        raise SuccessorBuildError("frozen W0 API route authority decision mismatch")
+    return authority
 
 
 def _decision_authority(predecessor_hash: str) -> dict[str, Any]:

@@ -95,6 +95,22 @@ def test_w4_visual_baseline_manifest_matches_images() -> None:
         assert hashlib.sha256(image.read_bytes()).hexdigest() == record["sha256"]
 
 
+def test_current_gui_code_is_really_rendered_for_all_pages(tmp_path: Path) -> None:
+    pytest.importorskip("PySide6")
+    from tools.gui.w4_visual_regression import capture
+
+    evidence = capture(tmp_path / "current-render", dpi=96.0)
+    records = cast(list[dict[str, object]], evidence["records"])
+    assert evidence["schema"] == "TPAA_CURRENT_GUI_RENDER_EVIDENCE_V2"
+    assert [record["slot"] for record in records] == [
+        item.slot for item in PAGE_CONTRACTS
+    ]
+    assert all(record["page_visible"] is True for record in records)
+    assert all(record["scroll_viewport_visible"] is True for record in records)
+    assert all(record["clipped_controls"] == [] for record in records)
+    assert all((tmp_path / "current-render" / str(record["image"])).is_file() for record in records)
+
+
 def test_real_qt_shell_has_13_independent_scrollable_pages_and_no_fixture() -> None:
     pytest.importorskip("PySide6")
     from PySide6 import QtCore, QtWidgets
@@ -155,5 +171,42 @@ def test_m1_qualification_form_rows_have_readable_spacing() -> None:
     ):
         widget = root.findChild(QtWidgets.QLineEdit, object_name)
         assert widget is not None and widget.minimumHeight() >= 30
+    root.close()
+    app.processEvents()
+
+
+@pytest.mark.parametrize(
+    ("role", "expected_page"),
+    (
+        ("TRAINEE", "P02"),
+        ("INSTRUCTOR", "P03"),
+        ("EVALUATOR", "P13"),
+        ("TRAINING_MANAGER", "P11"),
+        ("DATA_ENGINEER", "P12"),
+    ),
+)
+def test_authenticated_role_view_selects_design_default(
+    role: str,
+    expected_page: str,
+) -> None:
+    pytest.importorskip("PySide6")
+    from PySide6 import QtCore, QtWidgets
+
+    class RoleTransport:
+        def security_request_json(self, method: str, path: str):
+            assert (method, path) == ("GET", "/security/session")
+            return 200, {"roles": [role]}
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(["w4-role-test"])
+    root = create_product_workspace(
+        QtCore,
+        QtWidgets,
+        None,
+        transport=cast(Any, RoleTransport()),
+        diagnostics_provider=_snapshot,
+    )
+    root._tpaa_apply_role_view()
+    assert root._tpaa_shell_state.selection.page_id == expected_page
+    assert role in root.findChild(QtWidgets.QLabel, "tpaaRoleViewStatus").text()
     root.close()
     app.processEvents()

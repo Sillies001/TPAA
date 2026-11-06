@@ -478,6 +478,8 @@ def create_p02_page(
     release_combo.setObjectName("tpaaP02ReleaseId")
     refresh = qt_widgets.QPushButton("Refresh exact Releases", root)
     load = qt_widgets.QPushButton("Load Session / Episode overview", root)
+    refresh.setObjectName("tpaaP02RefreshReleases")
+    load.setObjectName("tpaaP02LoadOverview")
     controls.addWidget(release_combo, 1)
     controls.addWidget(refresh)
     controls.addWidget(load)
@@ -667,6 +669,44 @@ def _draw_trajectory(scene: Any, presentation: Any) -> None:
     scene.setSceneRect(0, 0, 740, 240)
 
 
+def _draw_trajectory_3d(scene: Any, presentation: Any) -> None:
+    """Draw an altitude-aware isometric view from exact stored samples."""
+
+    scene.clear()
+    if len(presentation.samples) < 2:
+        scene.addText("3D trajectory unavailable: fewer than two exact geodetic samples")
+        return
+    xs = [item.longitude_deg for item in presentation.samples]
+    ys = [item.latitude_deg for item in presentation.samples]
+    zs = [0.0 if item.altitude_m is None else item.altitude_m for item in presentation.samples]
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+    min_z, max_z = min(zs), max(zs)
+    span_x = max(max_x - min_x, 1e-12)
+    span_y = max(max_y - min_y, 1e-12)
+    span_z = max(max_z - min_z, 1e-12)
+    points = []
+    for x, y, z in zip(xs, ys, zs, strict=True):
+        normalized_x = (x - min_x) / span_x
+        normalized_y = (y - min_y) / span_y
+        normalized_z = (z - min_z) / span_z
+        points.append(
+            (
+                55.0 + normalized_x * 590.0 + normalized_z * 85.0,
+                225.0 - normalized_y * 145.0 - normalized_z * 85.0,
+            )
+        )
+    for left, right in zip(points, points[1:], strict=False):
+        scene.addLine(left[0], left[1], right[0], right[1])
+    scene.addEllipse(points[0][0] - 5, points[0][1] - 5, 10, 10)
+    scene.addEllipse(points[-1][0] - 5, points[-1][1] - 5, 10, 10)
+    altitude_state = "exact altitude" if any(value != 0.0 for value in zs) else "altitude unavailable/zero"
+    scene.addText(
+        f"Exact 3D perspective · {len(points)} samples · {altitude_state}"
+    )
+    scene.setSceneRect(0, 0, 760, 260)
+
+
 def create_p03_page(
     qt_core: Any,
     qt_widgets: Any,
@@ -685,8 +725,10 @@ def create_p03_page(
     release_combo.setObjectName("tpaaP03ReleaseId")
     refresh = qt_widgets.QPushButton("Refresh exact Releases", root)
     load = qt_widgets.QPushButton("Load exact replay", root)
-    previous = qt_widgets.QPushButton("◀ Previous Stage", root)
-    next_button = qt_widgets.QPushButton("Next Stage ▶", root)
+    refresh.setObjectName("tpaaP03RefreshReleases")
+    load.setObjectName("tpaaP03LoadReplay")
+    previous = qt_widgets.QPushButton("< Previous Stage", root)
+    next_button = qt_widgets.QPushButton("Next Stage >", root)
     controls.addWidget(release_combo, 1)
     controls.addWidget(refresh)
     controls.addWidget(load)
@@ -701,13 +743,23 @@ def create_p03_page(
     trajectory_scene = qt_widgets.QGraphicsScene(trajectory_view)
     trajectory_view.setScene(trajectory_scene)
     trajectory_scene.addText("Select an exact Release to load 2D trajectory")
+    trajectory_3d_view = qt_widgets.QGraphicsView(replay_tabs)
+    trajectory_3d_view.setObjectName("tpaaP03Exact3DTrajectory")
+    trajectory_3d_scene = qt_widgets.QGraphicsScene(trajectory_3d_view)
+    trajectory_3d_view.setScene(trajectory_3d_scene)
+    trajectory_3d_scene.addText("Select an exact Release to load 3D trajectory")
     series_view = qt_widgets.QGraphicsView(replay_tabs)
     series_view.setObjectName("tpaaP03LinkedSeriesPlot")
     series_scene = qt_widgets.QGraphicsScene(series_view)
     series_view.setScene(series_scene)
     series_scene.addText("Linked exact series not loaded")
+    media_table = qt_widgets.QTableWidget(replay_tabs)
+    media_table.setObjectName("tpaaP03LinkedMedia")
+    configure_table(media_table, qt_widgets)
     replay_tabs.addTab(trajectory_view, "2D Replay")
+    replay_tabs.addTab(trajectory_3d_view, "3D Replay")
     replay_tabs.addTab(series_view, "Linked Flight Plot")
+    replay_tabs.addTab(media_table, "Media / Transcript")
     detail_tabs = qt_widgets.QTabWidget(top)
     metrics = _metric_table(qt_widgets, detail_tabs, "tpaaP03MetricTable")
     evidence = qt_widgets.QPlainTextEdit(detail_tabs)
@@ -783,6 +835,7 @@ def create_p03_page(
                 operation="trajectory_binding",
             )
             trajectory_scene.clear()
+            trajectory_3d_scene.clear()
             if binding.get("available") is True and isinstance(
                 binding.get("presentation"), Mapping
             ):
@@ -791,12 +844,37 @@ def create_p03_page(
                     expected_release_id=release_id,
                 )
                 _draw_trajectory(trajectory_scene, presentation)
+                _draw_trajectory_3d(trajectory_3d_scene, presentation)
+                _fill_table(
+                    media_table,
+                    qt_widgets,
+                    [
+                        {
+                            "media_type": item.media_type,
+                            "media_id": item.media_id,
+                            "uri": item.uri,
+                            "evidence_ref": item.evidence_ref,
+                        }
+                        for item in presentation.media
+                    ],
+                    (
+                        ("media_type", "Type"),
+                        ("media_id", "Media ID"),
+                        ("uri", "Governed URI"),
+                        ("evidence_ref", "Evidence"),
+                    ),
+                )
             else:
-                trajectory_scene.addText(
-                    "2D trajectory unavailable · "
-                    + str(binding.get("reason_code", "UNKNOWN"))
+                reason = str(binding.get("reason_code", "UNKNOWN"))
+                message = (
+                    "Trajectory unavailable · "
+                    + reason
                     + "\nNo inferred/current-data fallback is permitted."
                 )
+                trajectory_scene.addText("2D " + message)
+                trajectory_3d_scene.addText("3D " + message)
+                media_table.clearContents()
+                media_table.setRowCount(0)
             _fill_table(
                 timeline,
                 qt_widgets,
@@ -1141,6 +1219,8 @@ def create_p13_page(
     combo.setObjectName("tpaaP13ReleaseId")
     refresh = qt_widgets.QPushButton("Refresh governance", root)
     load = qt_widgets.QPushButton("Load exact governance snapshot", root)
+    refresh.setObjectName("tpaaP13RefreshGovernance")
+    load.setObjectName("tpaaP13LoadGovernance")
     controls.addWidget(combo, 1)
     controls.addWidget(refresh)
     controls.addWidget(load)
@@ -1149,6 +1229,9 @@ def create_p13_page(
     tabs.setObjectName("tpaaP13GovernanceTabs")
     panels: dict[str, Any] = {}
     for title, name in (
+        ("Final Release Gate", "final"),
+        ("External Capabilities", "external"),
+        ("Operations Acceptance", "operations"),
         ("Release / Publication / Provenance", "release"),
         ("Catalog / Profiles / Context", "catalog"),
         ("Models / Twins", "models"),
@@ -1162,6 +1245,15 @@ def create_p13_page(
         tabs.addTab(panel, title)
         panels[name] = panel
     layout.addWidget(tabs, 1)
+    final_decision = qt_widgets.QLabel(
+        "Formal release: NOT LOADED (fail-closed)",
+        root,
+    )
+    final_decision.setObjectName("tpaaP13FinalDecision")
+    final_decision.setProperty("decision", "UNKNOWN")
+    final_decision.setProperty("tpaaState", "error")
+    final_decision.setWordWrap(True)
+    layout.addWidget(final_decision)
     status = qt_widgets.QLabel("Governance: exact Release not loaded", root)
     status.setObjectName("tpaaP13Status")
     layout.addWidget(status)
@@ -1202,6 +1294,22 @@ def create_p13_page(
             observability = _payload(
                 transport.runtime_request_json("GET", "/runtime/observability"),
                 operation="runtime_observability",
+            )
+            external_capabilities = _payload(
+                transport.runtime_request_json(
+                    "GET", "/runtime/external-capabilities"
+                ),
+                operation="runtime_external_capabilities",
+            )
+            operations = _payload(
+                transport.runtime_request_json("GET", "/runtime/operations"),
+                operation="runtime_operations",
+            )
+            final_qualification = _payload(
+                transport.runtime_request_json(
+                    "GET", "/runtime/final-qualification"
+                ),
+                operation="runtime_final_qualification",
             )
             release_view = {
                 "release": bundle["release"],
@@ -1245,12 +1353,30 @@ def create_p13_page(
                 "release_audit_anchor": bundle["release"].get("manifest_hash"),
                 "historical_replay": replay,
             }
+            decision = final_qualification.get("decision")
+            release_allowed = final_qualification.get("formal_release_allowed")
+            if decision == "GO" and release_allowed is True:
+                final_decision.setProperty("decision", "GO")
+                final_decision.setProperty("tpaaState", "success")
+                final_decision.setText(
+                    "Formal release: GO · signed evidence and all W9 gates accepted"
+                )
+            else:
+                final_decision.setProperty("decision", "NO_GO")
+                final_decision.setProperty("tpaaState", "error")
+                stage = final_qualification.get("stage_status", "UNKNOWN")
+                final_decision.setText(
+                    f"Formal release: NO_GO · stage={stage} · activation remains blocked"
+                )
             for name, value in (
                 ("release", release_view),
                 ("catalog", catalog_view),
                 ("models", models),
                 ("permissions", permissions_view),
                 ("runtime", runtime_view),
+                ("external", external_capabilities),
+                ("operations", operations),
+                ("final", final_qualification),
             ):
                 panels[name].setPlainText(
                     json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True)
@@ -1263,9 +1389,15 @@ def create_p13_page(
                 release_id=release_id,
             )
             status.setText(
-                "Governance ready · exact Release/Catalog/Profile/Model/Permission/Audit/Runtime"
+                "Governance ready · exact Release/Catalog/Profile/Model/Permission/"
+                "Audit/Runtime/W7/W8/W9"
             )
         except (RuntimeError, W5PageError, W5ProjectionError, ValueError) as exc:
+            final_decision.setProperty("decision", "ERROR")
+            final_decision.setProperty("tpaaState", "error")
+            final_decision.setText(
+                "Formal release: NO_GO · governance evidence unavailable"
+            )
             status.setText(f"Governance: FAILURE · {exc}")
 
     refresh.clicked.connect(refresh_governance)

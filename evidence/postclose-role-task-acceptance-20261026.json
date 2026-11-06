@@ -1,0 +1,59 @@
+{
+  "production_deployed": false,
+  "pushed": false,
+  "records": [
+    {
+      "default_page": "P02",
+      "expected_default_page": "P02",
+      "passed": true,
+      "role": "TRAINEE",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-role-20261026-g\\trainee\\TRAINEE_P02_1440x900.png",
+      "security_context_status": 200,
+      "source_import_expected_http_status": 403,
+      "source_import_http_status": 403
+    },
+    {
+      "default_page": "P03",
+      "expected_default_page": "P03",
+      "passed": true,
+      "role": "INSTRUCTOR",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-role-20261026-g\\instructor\\INSTRUCTOR_P03_1440x900.png",
+      "security_context_status": 200,
+      "source_import_expected_http_status": 201,
+      "source_import_http_status": 201
+    },
+    {
+      "default_page": "P13",
+      "expected_default_page": "P13",
+      "passed": true,
+      "role": "EVALUATOR",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-role-20261026-g\\evaluator\\EVALUATOR_P13_1440x900.png",
+      "security_context_status": 200,
+      "source_import_expected_http_status": 403,
+      "source_import_http_status": 403
+    },
+    {
+      "default_page": "P11",
+      "expected_default_page": "P11",
+      "passed": true,
+      "role": "TRAINING_MANAGER",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-role-20261026-g\\training_manager\\TRAINING_MANAGER_P11_1440x900.png",
+      "security_context_status": 200,
+      "source_import_expected_http_status": 403,
+      "source_import_http_status": 403
+    },
+    {
+      "default_page": "P12",
+      "expected_default_page": "P12",
+      "passed": true,
+      "role": "DATA_ENGINEER",
+      "screenshot": "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\build\\postclose-role-20261026-g\\data_engineer\\DATA_ENGINEER_P12_1440x900.png",
+      "security_context_status": 200,
+      "source_import_expected_http_status": 201,
+      "source_import_http_status": 201
+    }
+  ],
+  "role_count": 5,
+  "schema": "TPAA_GUI_ROLE_TASK_ACCEPTANCE_V1",
+  "status": "PASS"
+}

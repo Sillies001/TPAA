@@ -209,7 +209,15 @@ class _Transport:
                             "evidence_ref": "evidence-1",
                         },
                     ],
-                    "media": [],
+                    "media": [
+                        {
+                            "media_id": "media-1",
+                            "media_type": "VIDEO",
+                            "uri": "tpaa-media://media-1",
+                            "source_release_id": RELEASE,
+                            "evidence_ref": "evidence-1",
+                        }
+                    ],
                 },
             }
         raise AssertionError(path)
@@ -285,6 +293,12 @@ class _Transport:
 
     def runtime_request_json(self, method: str, path: str):
         assert method == "GET"
+        if path == "/runtime/final-qualification":
+            return 200, {
+                "decision": "NO_GO",
+                "formal_release_allowed": False,
+                "stage_status": "CLOSED_LOCAL_WITH_RELEASE_GATES",
+            }
         return 200, {"status": "PASS", "path": path}
 
 
@@ -346,6 +360,8 @@ def test_w5_five_pages_complete_linked_workflows(tmp_path: Path) -> None:
     p03 = create_p03_page(QtCore, QtWidgets, None, transport=transport, state=state)
     p03._tpaa_refresh_releases()
     p03._tpaa_load_replay()
+    assert p03.findChild(QtWidgets.QGraphicsView, "tpaaP03Exact3DTrajectory") is not None
+    assert p03.findChild(QtWidgets.QTableWidget, "tpaaP03LinkedMedia").rowCount() == 1
     metric_table = p03.findChild(QtWidgets.QTableWidget, "tpaaP03MetricTable")
     metric_table.cellClicked.emit(0, 0)
     assert state.selection.metric_instance_id == METRIC
@@ -365,6 +381,10 @@ def test_w5_five_pages_complete_linked_workflows(tmp_path: Path) -> None:
     assert "current_latest_fallback_used" in p13.findChild(
         QtWidgets.QPlainTextEdit, "tpaaP13ReleasePanel"
     ).toPlainText()
+    assert p13.findChild(QtWidgets.QTabWidget, "tpaaP13GovernanceTabs").count() == 8
+    final_gate = p13.findChild(QtWidgets.QLabel, "tpaaP13FinalDecision")
+    assert final_gate.property("decision") == "NO_GO"
+    assert "activation remains blocked" in final_gate.text()
     for widget in (p01, p02, p03, p12, p13):
         widget.close()
     app.processEvents()

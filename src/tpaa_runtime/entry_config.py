@@ -13,6 +13,7 @@ from pathlib import Path
 from tpaa_storage import S3ObjectStore, bootstrap_sqlite, verify_sqlite
 
 from .config import (
+    FormalQualificationEvidenceConfig,
     OidcMtlsRuntimeConfig,
     ProductionPrincipalBinding,
     ProductionRuntimeConfig,
@@ -52,6 +53,7 @@ _RUNTIME_CONFIG_FIELDS = frozenset(
         "database",
         "object_store",
         "migration_state_root",
+        "formal_qualification",
     }
 )
 
@@ -105,6 +107,39 @@ def _document_mapping(values: Mapping[str, object], key: str) -> Mapping[str, ob
     if not isinstance(value, Mapping):
         raise ValueError(f"runtime config field {key} must be an object")
     return value
+
+
+def _formal_qualification_config(
+    values: Mapping[str, object],
+) -> FormalQualificationEvidenceConfig | None:
+    if "formal_qualification" not in values:
+        return None
+    document = _document_mapping(values, "formal_qualification")
+    expected = {
+        "manifest",
+        "trust_root",
+        "key_id",
+        "candidate_identity_sha256",
+        "source_revision",
+    }
+    if set(document) != expected:
+        raise ValueError("formal qualification configuration fields are invalid")
+    return FormalQualificationEvidenceConfig(
+        manifest_path=_absolute_path(
+            _document_text(document, "manifest"),
+            field="formal_qualification.manifest",
+        ),
+        trust_root_path=_absolute_path(
+            _document_text(document, "trust_root"),
+            field="formal_qualification.trust_root",
+        ),
+        key_id=_document_text(document, "key_id"),
+        candidate_identity_sha256=_document_text(
+            document,
+            "candidate_identity_sha256",
+        ),
+        source_revision=_document_text(document, "source_revision"),
+    )
 
 
 def _resolve_secret_reference(
@@ -164,6 +199,7 @@ def load_runtime_config_document(
     except ValueError as exc:
         raise ValueError("runtime configuration profile is invalid") from exc
     values = os.environ if environ is None else environ
+    formal_qualification = _formal_qualification_config(raw)
     if profile is RuntimeProfile.DESKTOP:
         forbidden = (
             "object_root",
@@ -181,6 +217,7 @@ def load_runtime_config_document(
             product_build_version=expected_product_build_version,
             authority_root=authority_root,
             data_root=data_root,
+            formal_qualification=formal_qualification,
         )
 
     if "data_root" in raw:
@@ -294,6 +331,7 @@ def load_runtime_config_document(
         service_identity=service_identity,
         object_store=object_store,
         migration_state_root=migration_state_root,
+        formal_qualification=formal_qualification,
     )
 
 
@@ -386,6 +424,7 @@ def prepare_desktop_production_config(
     product_build_version: str,
     authority_root: Path,
     data_root: Path,
+    formal_qualification: FormalQualificationEvidenceConfig | None = None,
 ) -> ProductionRuntimeConfig:
     """Create or verify one Desktop DB 1.9 runtime without fixture fallback."""
 
@@ -408,6 +447,7 @@ def prepare_desktop_production_config(
         object_root=object_root,
         desktop_database_path=database,
         migration_state_root=database.parent / ".tpaa-migrations",
+        formal_qualification=formal_qualification,
     )
 
 

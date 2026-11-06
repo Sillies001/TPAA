@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -64,3 +65,38 @@ def test_desktop_readiness_preserves_core_fail_closed_mismatch() -> None:
     assert response.status_code == 503
     assert response.json()["ready"] is False
     assert response.json()["mismatches"] == ["DB_SCHEMA_VERSION_MISMATCH"]
+
+
+def test_v33_webengine_origin_nonce_and_static_asset_gate(tmp_path: Path) -> None:
+    assets = tmp_path / "dist"
+    assets.mkdir()
+    (assets / "index.html").write_text("<main>v33</main>", encoding="utf-8")
+    app = create_desktop_app(
+        application=_application(),
+        bearer_token="secret",
+        desktop_nonce="nonce",
+        web_asset_root=assets,
+    )
+    authorization = {"Authorization": "Bearer secret"}
+    browser = {
+        **authorization,
+        "Origin": "http://127.0.0.1:8765",
+        "X-TPAA-Desktop-Nonce": "nonce",
+    }
+    with TestClient(app, base_url="http://127.0.0.1:8765") as client:
+        index = client.get("/ui", headers=authorization)
+        allowed = client.get("/health", headers=browser)
+        missing_nonce = client.get(
+            "/health",
+            headers={**authorization, "Origin": "http://127.0.0.1:8765"},
+        )
+        foreign_origin = client.get(
+            "/health",
+            headers={**browser, "Origin": "http://127.0.0.1:8766"},
+        )
+
+    assert index.status_code == 200
+    assert index.headers["content-security-policy"].startswith("default-src 'self'")
+    assert allowed.status_code == 200
+    assert missing_nonce.status_code == 403
+    assert foreign_origin.status_code == 403

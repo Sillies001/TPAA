@@ -1,0 +1,6164 @@
+{
+  "authority_id": "CORE_LOGICAL_MODEL",
+  "core_baseline": "CB-1.4.0",
+  "overall_baseline": "TPAA V8.0",
+  "engineering_baseline": "ED-2.0",
+  "db_schema_version": "1.6.0",
+  "governance": {
+    "rule": "This JSON is the single field-name/type/nullability authority for current logical persistence objects in the re-baselined document set.",
+    "document_rule": "Human documents may explain or render generated projections but shall not redefine field identity or nullability.",
+    "change_rule": "Any change requires this artifact, dependent DTO contracts, migrations, validation fixtures and baseline lock to change together."
+  },
+  "tables": {
+    "registry.training_session": {
+      "fields": [
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "session_code text NOT NULL"
+        },
+        {
+          "name": "session_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "session_type text NOT NULL CHECK (session_type IN ('LIVE','SIM','LVC'))"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "start_occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "start_occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "end_occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "end_occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "session_order",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "session_order bigint NULL"
+        },
+        {
+          "name": "session_order_source",
+          "type": "text",
+          "nullable": true,
+          "sql": "session_order_source text NULL CHECK (session_order_source IS NULL OR session_order_source IN ('SOURCE_SEQUENCE','IMPORT_MANIFEST','MANUAL_REVIEWED'))"
+        },
+        {
+          "name": "session_order_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_order_scope_id uuid NULL, -- FK 在 session_order_scope 建表后添加"
+        },
+        {
+          "name": "scenario_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "scenario_id uuid NULL"
+        },
+        {
+          "name": "scenario_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "scenario_version text NULL"
+        },
+        {
+          "name": "training_type_set",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "training_type_set text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "location_or_range_id",
+          "type": "text",
+          "nullable": true,
+          "sql": "location_or_range_id text NULL"
+        },
+        {
+          "name": "unit_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "unit_id uuid NULL"
+        },
+        {
+          "name": "data_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "data_status text NOT NULL"
+        },
+        {
+          "name": "source_count",
+          "type": "integer",
+          "nullable": false,
+          "sql": "source_count integer NOT NULL DEFAULT 0 CHECK (source_count >= 0)"
+        },
+        {
+          "name": "current_release_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "current_release_id uuid NULL, -- 仅 SESSION pointer cache；FK 在 analysis_release 建表后添加"
+        },
+        {
+          "name": "schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_version text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.data_source": {
+      "fields": [
+        {
+          "name": "source_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "source_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "source_type text NOT NULL"
+        },
+        {
+          "name": "platform_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "platform_id uuid NULL"
+        },
+        {
+          "name": "producer_system",
+          "type": "text",
+          "nullable": false,
+          "sql": "producer_system text NOT NULL"
+        },
+        {
+          "name": "schema_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_name text NOT NULL"
+        },
+        {
+          "name": "schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_version text NOT NULL"
+        },
+        {
+          "name": "time_basis",
+          "type": "text",
+          "nullable": false,
+          "sql": "time_basis text NOT NULL"
+        },
+        {
+          "name": "nominal_rate_hz",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "nominal_rate_hz double precision NULL"
+        },
+        {
+          "name": "source_quality",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "source_quality double precision NOT NULL CHECK (source_quality BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "classification_label",
+          "type": "text",
+          "nullable": true,
+          "sql": "classification_label text NULL"
+        },
+        {
+          "name": "ingest_adapter_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "ingest_adapter_id text NOT NULL"
+        },
+        {
+          "name": "ingest_adapter_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "ingest_adapter_version text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.source_stream": {
+      "fields": [
+        {
+          "name": "source_stream_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_stream_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "source_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_id uuid NOT NULL REFERENCES registry.data_source(source_id)"
+        },
+        {
+          "name": "stream_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "stream_code text NOT NULL"
+        },
+        {
+          "name": "ordinal_basis",
+          "type": "text",
+          "nullable": false,
+          "sql": "ordinal_basis text NOT NULL CHECK (ordinal_basis IN ('CAPTURE_MANIFEST','SOURCE_SEQUENCE','REVIEWED_IMPORT'))"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('ACTIVE','CLOSED','ORDER_UNRESOLVED'))"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.source_artifact": {
+      "fields": [
+        {
+          "name": "artifact_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "artifact_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "source_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_id uuid NOT NULL REFERENCES registry.data_source(source_id)"
+        },
+        {
+          "name": "source_stream_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_stream_id uuid NOT NULL"
+        },
+        {
+          "name": "source_artifact_sequence",
+          "type": "integer",
+          "nullable": false,
+          "sql": "source_artifact_sequence integer NOT NULL"
+        },
+        {
+          "name": "uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "uri text NOT NULL"
+        },
+        {
+          "name": "uri_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "uri_kind text NOT NULL CHECK (uri_kind IN ('MANAGED','EXTERNAL_FILE','EXTERNAL_OBJECT'))"
+        },
+        {
+          "name": "availability_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "availability_status text NOT NULL CHECK (availability_status IN ('AVAILABLE','MISSING','CHANGED','OFFLINE','UNKNOWN'))"
+        },
+        {
+          "name": "last_verified_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "last_verified_at timestamptz NULL"
+        },
+        {
+          "name": "media_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "media_type text NOT NULL"
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "size_bytes bigint NOT NULL"
+        },
+        {
+          "name": "sha256",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "sha256 char(64) NOT NULL"
+        },
+        {
+          "name": "mtime_source",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "mtime_source timestamptz NULL"
+        },
+        {
+          "name": "ingested_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "ingested_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "immutable",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "immutable boolean NOT NULL DEFAULT true"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.dataset_manifest": {
+      "fields": [
+        {
+          "name": "dataset_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "dataset_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "release_id uuid NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_type text NOT NULL CHECK (scope_type IN ('SESSION','LONGITUDINAL'))"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_id uuid NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "longitudinal_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "longitudinal_scope_id uuid NULL, -- FK 在 registry.longitudinal_scope 建表后添加"
+        },
+        {
+          "name": "dataset_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "dataset_kind text NOT NULL"
+        },
+        {
+          "name": "logical_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "logical_name text NOT NULL"
+        },
+        {
+          "name": "object_ref_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "object_ref_id uuid NULL REFERENCES registry.object_reference(object_ref_id)"
+        },
+        {
+          "name": "storage_uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "storage_uri text NOT NULL, -- compatibility/read model; managed dataset 必须可由 object_ref 解析"
+        },
+        {
+          "name": "partition_spec",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "partition_spec jsonb NOT NULL"
+        },
+        {
+          "name": "schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_version text NOT NULL"
+        },
+        {
+          "name": "row_count",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "row_count bigint NULL"
+        },
+        {
+          "name": "min_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "min_session_time_us bigint NULL"
+        },
+        {
+          "name": "max_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "max_session_time_us bigint NULL"
+        },
+        {
+          "name": "artifact_sha256",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "artifact_sha256 char(64) NOT NULL"
+        },
+        {
+          "name": "logical_content_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "logical_content_hash text NOT NULL"
+        },
+        {
+          "name": "producer_component",
+          "type": "text",
+          "nullable": false,
+          "sql": "producer_component text NOT NULL"
+        },
+        {
+          "name": "producer_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "producer_version text NOT NULL"
+        },
+        {
+          "name": "input_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "input_hash text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_dataset_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_dataset_id uuid NULL REFERENCES registry.dataset_manifest(dataset_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.aircraft_model": {
+      "fields": [
+        {
+          "name": "aircraft_model_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_model_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "type_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "type_code text NOT NULL"
+        },
+        {
+          "name": "model_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_name text NOT NULL"
+        },
+        {
+          "name": "manufacturer",
+          "type": "text",
+          "nullable": true,
+          "sql": "manufacturer text NULL"
+        },
+        {
+          "name": "block_family",
+          "type": "text",
+          "nullable": true,
+          "sql": "block_family text NULL"
+        },
+        {
+          "name": "valid_from",
+          "type": "date",
+          "nullable": true,
+          "sql": "valid_from date NULL"
+        },
+        {
+          "name": "valid_to",
+          "type": "date",
+          "nullable": true,
+          "sql": "valid_to date NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.aircraft": {
+      "fields": [
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "aircraft_model_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_model_id uuid NOT NULL REFERENCES master.aircraft_model(aircraft_model_id)"
+        },
+        {
+          "name": "internal_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "internal_code text NOT NULL UNIQUE"
+        },
+        {
+          "name": "tail_number_ref",
+          "type": "text",
+          "nullable": true,
+          "sql": "tail_number_ref text NULL"
+        },
+        {
+          "name": "serial_number_ref",
+          "type": "text",
+          "nullable": true,
+          "sql": "serial_number_ref text NULL"
+        },
+        {
+          "name": "unit_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "unit_id uuid NULL"
+        },
+        {
+          "name": "commission_date",
+          "type": "date",
+          "nullable": true,
+          "sql": "commission_date date NULL"
+        },
+        {
+          "name": "retirement_date",
+          "type": "date",
+          "nullable": true,
+          "sql": "retirement_date date NULL"
+        },
+        {
+          "name": "master_data_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "master_data_status text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.aircraft_configuration": {
+      "fields": [
+        {
+          "name": "aircraft_configuration_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_configuration_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "block",
+          "type": "text",
+          "nullable": true,
+          "sql": "block text NULL"
+        },
+        {
+          "name": "software_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "software_version text NULL"
+        },
+        {
+          "name": "hardware_baseline",
+          "type": "text",
+          "nullable": true,
+          "sql": "hardware_baseline text NULL"
+        },
+        {
+          "name": "sensor_configuration",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "sensor_configuration jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "ew_configuration",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "ew_configuration jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "weapon_interface_configuration",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "weapon_interface_configuration jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "load_configuration",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "load_configuration jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "valid_from",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "valid_from timestamptz NOT NULL"
+        },
+        {
+          "name": "valid_to",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "valid_to timestamptz NULL"
+        },
+        {
+          "name": "source_ref",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_ref uuid NOT NULL"
+        },
+        {
+          "name": "approval_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "approval_status text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.aircraft_configuration_snapshot": {
+      "fields": [
+        {
+          "name": "snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "snapshot_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "aircraft_configuration_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_configuration_id uuid NOT NULL"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "effective_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "effective_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "snapshot_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "snapshot_json jsonb NOT NULL"
+        },
+        {
+          "name": "snapshot_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "snapshot_hash text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.aircraft_lifecycle_event": {
+      "fields": [
+        {
+          "name": "lifecycle_event_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "lifecycle_event_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "event_type text NOT NULL"
+        },
+        {
+          "name": "start_occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "start_occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "end_occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "end_occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "flight_hours_total",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "flight_hours_total double precision NULL"
+        },
+        {
+          "name": "properties",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "properties jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "source_ref",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_ref uuid NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.entity": {
+      "fields": [
+        {
+          "name": "entity_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "entity_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_id uuid NULL"
+        },
+        {
+          "name": "entity_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "entity_type text NOT NULL"
+        },
+        {
+          "name": "parent_entity_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "parent_entity_id uuid NULL"
+        },
+        {
+          "name": "alias",
+          "type": "text",
+          "nullable": true,
+          "sql": "alias text NULL"
+        },
+        {
+          "name": "actual_side_affiliation",
+          "type": "text",
+          "nullable": true,
+          "sql": "actual_side_affiliation text NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.entity_link": {
+      "fields": [
+        {
+          "name": "entity_link_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "entity_link_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL"
+        },
+        {
+          "name": "source_entity_ref",
+          "type": "text",
+          "nullable": false,
+          "sql": "source_entity_ref text NOT NULL"
+        },
+        {
+          "name": "canonical_entity_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "canonical_entity_id uuid NOT NULL"
+        },
+        {
+          "name": "association_source",
+          "type": "text",
+          "nullable": false,
+          "sql": "association_source text NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "valid_from_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "valid_from_session_time_us bigint NULL"
+        },
+        {
+          "name": "valid_to_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "valid_to_session_time_us bigint NULL"
+        },
+        {
+          "name": "review_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "review_status text NOT NULL"
+        },
+        {
+          "name": "method_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "method_version text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.source_clock_segment": {
+      "fields": [
+        {
+          "name": "source_clock_segment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_clock_segment_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "source_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_id uuid NOT NULL REFERENCES registry.data_source(source_id)"
+        },
+        {
+          "name": "source_stream_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_stream_id uuid NOT NULL"
+        },
+        {
+          "name": "segment_seq",
+          "type": "integer",
+          "nullable": false,
+          "sql": "segment_seq integer NOT NULL"
+        },
+        {
+          "name": "first_source_stream_ordinal",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "first_source_stream_ordinal bigint NOT NULL"
+        },
+        {
+          "name": "last_source_stream_ordinal",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "last_source_stream_ordinal bigint NOT NULL"
+        },
+        {
+          "name": "start_segment_time_ns",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "start_segment_time_ns bigint NULL"
+        },
+        {
+          "name": "end_segment_time_ns",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "end_segment_time_ns bigint NULL"
+        },
+        {
+          "name": "break_reason",
+          "type": "text",
+          "nullable": false,
+          "sql": "break_reason text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.time_transform": {
+      "fields": [
+        {
+          "name": "time_transform_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "time_transform_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "source_clock_segment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_clock_segment_id uuid NOT NULL REFERENCES registry.source_clock_segment(source_clock_segment_id)"
+        },
+        {
+          "name": "reference_source_clock_segment_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "reference_source_clock_segment_id uuid NULL REFERENCES registry.source_clock_segment(source_clock_segment_id)"
+        },
+        {
+          "name": "model",
+          "type": "text",
+          "nullable": false,
+          "sql": "model text NOT NULL CHECK (model='ANCHORED_RATIONAL')"
+        },
+        {
+          "name": "anchor_segment_time_ns",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "anchor_segment_time_ns bigint NOT NULL"
+        },
+        {
+          "name": "anchor_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "anchor_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "rate_num",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "rate_num bigint NOT NULL CHECK (rate_num > 0)"
+        },
+        {
+          "name": "rate_den",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "rate_den bigint NOT NULL CHECK (rate_den > 0)"
+        },
+        {
+          "name": "valid_segment_start_ns",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "valid_segment_start_ns bigint NOT NULL"
+        },
+        {
+          "name": "valid_segment_end_ns",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "valid_segment_end_ns bigint NOT NULL"
+        },
+        {
+          "name": "residual_rms_us",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "residual_rms_us double precision NOT NULL"
+        },
+        {
+          "name": "residual_p95_us",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "residual_p95_us double precision NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "method",
+          "type": "text",
+          "nullable": false,
+          "sql": "method text NOT NULL"
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "sql": "version text NOT NULL"
+        },
+        {
+          "name": "transform_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "transform_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.time_alignment_domain": {
+      "fields": [
+        {
+          "name": "time_alignment_domain_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "time_alignment_domain_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "required_field_groups_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "required_field_groups_json jsonb NOT NULL"
+        },
+        {
+          "name": "authority_signature_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "authority_signature_hash char(64) NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('RESOLVED','UNRESOLVED','SUPERSEDED'))"
+        },
+        {
+          "name": "logical_content_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "logical_content_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.time_alignment_domain_member": {
+      "fields": [
+        {
+          "name": "time_alignment_domain_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "time_alignment_domain_id uuid NOT NULL REFERENCES registry.time_alignment_domain(time_alignment_domain_id)"
+        },
+        {
+          "name": "source_clock_segment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_clock_segment_id uuid NOT NULL REFERENCES registry.source_clock_segment(source_clock_segment_id)"
+        },
+        {
+          "name": "time_transform_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "time_transform_id uuid NOT NULL"
+        },
+        {
+          "name": "authority_role",
+          "type": "text",
+          "nullable": false,
+          "sql": "authority_role text NOT NULL"
+        },
+        {
+          "name": "field_group",
+          "type": "text",
+          "nullable": false,
+          "sql": "field_group text NOT NULL"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "required boolean NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.quality_event": {
+      "fields": [
+        {
+          "name": "quality_event_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "quality_event_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL"
+        },
+        {
+          "name": "source_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "source_id uuid NULL"
+        },
+        {
+          "name": "entity_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "entity_id uuid NULL"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "end_session_time_us bigint NULL"
+        },
+        {
+          "name": "quality_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "quality_type text NOT NULL"
+        },
+        {
+          "name": "severity",
+          "type": "text",
+          "nullable": false,
+          "sql": "severity text NOT NULL"
+        },
+        {
+          "name": "properties",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "properties jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "detector_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "detector_version text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "context.evaluation_context": {
+      "fields": [
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "context_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "context_version text NOT NULL"
+        },
+        {
+          "name": "revision_no",
+          "type": "integer",
+          "nullable": false,
+          "sql": "revision_no integer NOT NULL DEFAULT 1 CHECK (revision_no >= 1)"
+        },
+        {
+          "name": "supersedes_context_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_context_id uuid NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "scenario_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "scenario_id uuid NULL"
+        },
+        {
+          "name": "scenario_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "scenario_version text NULL"
+        },
+        {
+          "name": "syllabus_id",
+          "type": "text",
+          "nullable": true,
+          "sql": "syllabus_id text NULL"
+        },
+        {
+          "name": "syllabus_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "syllabus_version text NULL"
+        },
+        {
+          "name": "assessment_profile_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "assessment_profile_id uuid NULL"
+        },
+        {
+          "name": "assessment_profile_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "assessment_profile_version text NULL"
+        },
+        {
+          "name": "rule_set_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "rule_set_version text NOT NULL"
+        },
+        {
+          "name": "reference_set_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "reference_set_version text NULL"
+        },
+        {
+          "name": "role_model_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "role_model_version text NULL"
+        },
+        {
+          "name": "metric_profile_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_profile_version text NOT NULL"
+        },
+        {
+          "name": "longitudinal_profile_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "longitudinal_profile_version text NULL"
+        },
+        {
+          "name": "valid_from_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "valid_from_session_time_us bigint NULL"
+        },
+        {
+          "name": "valid_to_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "valid_to_session_time_us bigint NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('ACTIVE','SUPERSEDED','INVALID'))"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "episode.training_episode": {
+      "fields": [
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "episode_type text NOT NULL"
+        },
+        {
+          "name": "mission_type",
+          "type": "text",
+          "nullable": true,
+          "sql": "mission_type text NULL"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "context_id uuid NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "subject_scope",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_scope text NOT NULL"
+        },
+        {
+          "name": "primary_aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "primary_aircraft_id uuid NULL"
+        },
+        {
+          "name": "primary_pilot_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "primary_pilot_id uuid NULL"
+        },
+        {
+          "name": "primary_team_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "primary_team_id uuid NULL"
+        },
+        {
+          "name": "aircraft_configuration_snapshot_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_configuration_snapshot_id uuid NULL REFERENCES master.aircraft_configuration_snapshot(snapshot_id)"
+        },
+        {
+          "name": "world_capability_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "world_capability_code text NOT NULL"
+        },
+        {
+          "name": "episode_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "episode_status text NOT NULL"
+        },
+        {
+          "name": "detector_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "detector_version text NOT NULL"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL DEFAULT 0 CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL DEFAULT 0 CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "data_sufficiency_status",
+          "type": "text",
+          "nullable": true,
+          "sql": "data_sufficiency_status text NULL"
+        },
+        {
+          "name": "supersedes_episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "episode.episode_stage": {
+      "fields": [
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "stage_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "stage_type text NOT NULL"
+        },
+        {
+          "name": "stage_order",
+          "type": "integer",
+          "nullable": false,
+          "sql": "stage_order integer NOT NULL CHECK (stage_order >= 0)"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "detection_method",
+          "type": "text",
+          "nullable": false,
+          "sql": "detection_method text NOT NULL"
+        },
+        {
+          "name": "stage_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "stage_status text NOT NULL"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL DEFAULT 0 CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL DEFAULT 0 CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "detector_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "detector_version text NOT NULL"
+        },
+        {
+          "name": "supersedes_stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "episode.performance_window_tag": {
+      "fields": [
+        {
+          "name": "window_tag_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "window_tag_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "maneuver_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "maneuver_type text NOT NULL"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "detection_method",
+          "type": "text",
+          "nullable": false,
+          "sql": "detection_method text NOT NULL"
+        },
+        {
+          "name": "condition_tags",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "condition_tags jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "detector_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "detector_version text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "world.world_product_manifest": {
+      "fields": [
+        {
+          "name": "world_product_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "world_product_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "world_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "world_kind text NOT NULL CHECK (world_kind IN ('CONTEXT','TRUTH','PERCEPTION','ACTION','ADJUDICATION','MACHINE'))"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "subject_id uuid NULL REFERENCES master.entity(entity_id)"
+        },
+        {
+          "name": "observer_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "observer_id uuid NULL REFERENCES master.entity(entity_id)"
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "actor_id uuid NULL REFERENCES master.entity(entity_id)"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_id uuid NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "aircraft_instance_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_instance_id uuid NULL"
+        },
+        {
+          "name": "dataset_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "dataset_id uuid NULL REFERENCES registry.dataset_manifest(dataset_id)"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('READY','PARTIAL','MISSING','INVALID','NOT_REQUESTED'))"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "reason_codes",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "reason_codes text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "source_authority_signature",
+          "type": "text",
+          "nullable": true,
+          "sql": "source_authority_signature text NULL"
+        },
+        {
+          "name": "world_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "world_version text NOT NULL"
+        },
+        {
+          "name": "policy_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "policy_version text NOT NULL"
+        },
+        {
+          "name": "artifact_sha256",
+          "type": "char(64)",
+          "nullable": true,
+          "sql": "artifact_sha256 char(64) NULL"
+        },
+        {
+          "name": "logical_content_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "logical_content_hash char(64) NOT NULL"
+        },
+        {
+          "name": "request_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "request_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_id uuid NULL REFERENCES world.world_product_manifest(world_product_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "world.world_product_series_ref": {
+      "fields": [
+        {
+          "name": "world_product_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "world_product_id uuid NOT NULL REFERENCES world.world_product_manifest(world_product_id) ON DELETE CASCADE"
+        },
+        {
+          "name": "series_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "series_id uuid NOT NULL"
+        },
+        {
+          "name": "ref_order",
+          "type": "integer",
+          "nullable": false,
+          "sql": "ref_order integer NOT NULL DEFAULT 0 CHECK (ref_order >= 0)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "world.world_relation": {
+      "fields": [
+        {
+          "name": "relation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "relation_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "relation_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "relation_type text NOT NULL"
+        },
+        {
+          "name": "subject_ref",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_ref uuid NOT NULL"
+        },
+        {
+          "name": "object_ref",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "object_ref uuid NOT NULL"
+        },
+        {
+          "name": "subject_series_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "subject_series_id uuid NULL"
+        },
+        {
+          "name": "object_series_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "object_series_id uuid NULL"
+        },
+        {
+          "name": "cross_series",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "cross_series boolean NOT NULL DEFAULT false"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "start_session_time_us bigint NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "end_session_time_us bigint NULL"
+        },
+        {
+          "name": "properties",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "properties jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "relation_source",
+          "type": "text",
+          "nullable": false,
+          "sql": "relation_source text NOT NULL CHECK (relation_source IN ('OFFICIAL','DERIVED','INSTRUCTOR'))"
+        },
+        {
+          "name": "method_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "method_version text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "world.tpaa_m_chain": {
+      "fields": [
+        {
+          "name": "chain_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "chain_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "refs",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "refs jsonb NOT NULL"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "chain_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "chain_status text NOT NULL"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "break_reason",
+          "type": "text",
+          "nullable": true,
+          "sql": "break_reason text NULL"
+        },
+        {
+          "name": "chain_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "chain_version text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.structured_output_schema_registry": {
+      "fields": [
+        {
+          "name": "schema_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_id text PRIMARY KEY"
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "sql": "version text NOT NULL"
+        },
+        {
+          "name": "metric_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_code text NOT NULL"
+        },
+        {
+          "name": "schema_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "schema_json jsonb NOT NULL"
+        },
+        {
+          "name": "schema_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_hash text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('ACTIVE','RETIRED'))"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.metric_semantic_registry": {
+      "fields": [
+        {
+          "name": "metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "metric_semantic_version integer NOT NULL CHECK (metric_semantic_version > 0)"
+        },
+        {
+          "name": "canonical_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "canonical_name text NOT NULL"
+        },
+        {
+          "name": "semantic_definition",
+          "type": "text",
+          "nullable": false,
+          "sql": "semantic_definition text NOT NULL"
+        },
+        {
+          "name": "value_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "value_kind text NOT NULL CHECK (value_kind IN ('NUMERIC','TEXT','BOOLEAN','STRUCTURED'))"
+        },
+        {
+          "name": "canonical_unit",
+          "type": "text",
+          "nullable": true,
+          "sql": "canonical_unit text NULL"
+        },
+        {
+          "name": "structured_output_schema_id",
+          "type": "text",
+          "nullable": true,
+          "sql": "structured_output_schema_id text NULL REFERENCES metric.structured_output_schema_registry(schema_id)"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('DRAFT','ACTIVE','RETIRED'))"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.metric_definition": {
+      "fields": [
+        {
+          "name": "metric_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "metric_definition_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "metric_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_code text NOT NULL"
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "sql": "version text NOT NULL"
+        },
+        {
+          "name": "catalog_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "catalog_version text NOT NULL"
+        },
+        {
+          "name": "catalog_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "catalog_hash char(64) NOT NULL"
+        },
+        {
+          "name": "metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "metric_semantic_version integer NOT NULL"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "sql": "name text NOT NULL"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL CHECK (subject_type IN ('AIRCRAFT','MISSION_SYSTEM_INSTANCE','TARGET_PAIR'))"
+        },
+        {
+          "name": "observation_lane",
+          "type": "text",
+          "nullable": false,
+          "sql": "observation_lane text NOT NULL CHECK (observation_lane IN ('AIRCRAFT_CAP_L1_OBSERVATION','SYSTEM_PERFORMANCE_OBSERVATION','QUALITY_EVIDENCE_ONLY'))"
+        },
+        {
+          "name": "publication_route",
+          "type": "text",
+          "nullable": false,
+          "sql": "publication_route text NOT NULL CHECK (publication_route IN ('CAPABILITY_OBSERVATION','SYSTEM_PERFORMANCE_OBSERVATION','METRIC_INSTANCE_EVIDENCE_ONLY'))"
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "nullable": false,
+          "sql": "category text NOT NULL"
+        },
+        {
+          "name": "calculation_layer",
+          "type": "text",
+          "nullable": false,
+          "sql": "calculation_layer text NOT NULL"
+        },
+        {
+          "name": "capability_level",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_level text NOT NULL"
+        },
+        {
+          "name": "capability_dimension",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_dimension text NOT NULL"
+        },
+        {
+          "name": "required_world_products",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "required_world_products jsonb NOT NULL DEFAULT '[]' CHECK (jsonb_typeof(required_world_products)='array')"
+        },
+        {
+          "name": "scope",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope text NOT NULL"
+        },
+        {
+          "name": "spec_uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "spec_uri text NOT NULL"
+        },
+        {
+          "name": "spec_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "spec_hash text NOT NULL"
+        },
+        {
+          "name": "definition_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "definition_hash char(64) NOT NULL"
+        },
+        {
+          "name": "plugin_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "plugin_name text NOT NULL"
+        },
+        {
+          "name": "plugin_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "plugin_version text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.metric_instance": {
+      "fields": [
+        {
+          "name": "metric_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "metric_instance_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "metric_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "metric_definition_id uuid NOT NULL REFERENCES metric.metric_definition(metric_definition_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "metric_scope",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_scope text NOT NULL CHECK (metric_scope IN ('SESSION','EPISODE','STAGE'))"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "subject_entity_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "subject_entity_id uuid NULL REFERENCES master.entity(entity_id)"
+        },
+        {
+          "name": "mission_system_instance_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "mission_system_instance_id uuid NULL REFERENCES master.mission_system_instance(mission_system_instance_id)"
+        },
+        {
+          "name": "tpaa_chain_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "tpaa_chain_id uuid NULL REFERENCES world.tpaa_m_chain(chain_id)"
+        },
+        {
+          "name": "value_numeric",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "value_numeric double precision NULL"
+        },
+        {
+          "name": "value_text",
+          "type": "text",
+          "nullable": true,
+          "sql": "value_text text NULL"
+        },
+        {
+          "name": "value_boolean",
+          "type": "boolean",
+          "nullable": true,
+          "sql": "value_boolean boolean NULL"
+        },
+        {
+          "name": "value_structured",
+          "type": "jsonb",
+          "nullable": true,
+          "sql": "value_structured jsonb NULL"
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": false,
+          "sql": "unit text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('VALID','N_A','INSUFFICIENT_DATA','INVALID','REVIEW_REQUIRED'))"
+        },
+        {
+          "name": "reason_codes",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "reason_codes text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence_components",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "confidence_components jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "world_product_versions",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "world_product_versions jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "compute_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "compute_version text NOT NULL"
+        },
+        {
+          "name": "input_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "input_hash text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.evidence_set": {
+      "fields": [
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "start_session_time_us bigint NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "end_session_time_us bigint NULL"
+        },
+        {
+          "name": "series_locator",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "series_locator jsonb NOT NULL DEFAULT '[]'"
+        },
+        {
+          "name": "algorithm_versions",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "algorithm_versions jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.evidence_world_ref": {
+      "fields": [
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL REFERENCES metric.evidence_set(evidence_set_id) ON DELETE CASCADE"
+        },
+        {
+          "name": "world_product_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "world_product_id uuid NOT NULL REFERENCES world.world_product_manifest(world_product_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.evidence_relation_ref": {
+      "fields": [
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL REFERENCES metric.evidence_set(evidence_set_id) ON DELETE CASCADE"
+        },
+        {
+          "name": "relation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "relation_id uuid NOT NULL REFERENCES world.world_relation(relation_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.evidence_dataset_ref": {
+      "fields": [
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL REFERENCES metric.evidence_set(evidence_set_id) ON DELETE CASCADE"
+        },
+        {
+          "name": "dataset_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "dataset_id uuid NOT NULL REFERENCES registry.dataset_manifest(dataset_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.capability_observation": {
+      "fields": [
+        {
+          "name": "observation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "observation_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "aircraft_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_instance_id uuid NOT NULL"
+        },
+        {
+          "name": "subject_entity_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_entity_id uuid NOT NULL REFERENCES master.entity(entity_id)"
+        },
+        {
+          "name": "aircraft_model_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_model_id uuid NOT NULL REFERENCES master.aircraft_model(aircraft_model_id)"
+        },
+        {
+          "name": "aircraft_configuration_snapshot_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_configuration_snapshot_id uuid NULL REFERENCES master.aircraft_configuration_snapshot(snapshot_id)"
+        },
+        {
+          "name": "pilot_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "pilot_id uuid NULL"
+        },
+        {
+          "name": "scenario_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "scenario_id uuid NULL"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "capability_dimension",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_dimension text NOT NULL"
+        },
+        {
+          "name": "capability_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_type text NOT NULL"
+        },
+        {
+          "name": "capability_level",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_level text NOT NULL CHECK (capability_level = 'CAP_L1_OBSERVED')"
+        },
+        {
+          "name": "observed_metric_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "observed_metric_instance_id uuid NOT NULL UNIQUE REFERENCES metric.metric_instance(metric_instance_id)"
+        },
+        {
+          "name": "observed_value_numeric",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "observed_value_numeric double precision NULL"
+        },
+        {
+          "name": "observed_value_text",
+          "type": "text",
+          "nullable": true,
+          "sql": "observed_value_text text NULL"
+        },
+        {
+          "name": "observed_value_boolean",
+          "type": "boolean",
+          "nullable": true,
+          "sql": "observed_value_boolean boolean NULL"
+        },
+        {
+          "name": "observed_value_structured",
+          "type": "jsonb",
+          "nullable": true,
+          "sql": "observed_value_structured jsonb NULL"
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": false,
+          "sql": "unit text NOT NULL"
+        },
+        {
+          "name": "observation_start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "observation_start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "observation_end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "observation_end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "context_tags",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "context_tags jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL REFERENCES metric.evidence_set(evidence_set_id)"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "eligibility_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "eligibility_status text NOT NULL CHECK (eligibility_status IN ('ELIGIBLE','EXCLUDED','REVIEW_REQUIRED'))"
+        },
+        {
+          "name": "exclusion_reason_code",
+          "type": "text",
+          "nullable": true,
+          "sql": "exclusion_reason_code text NULL"
+        },
+        {
+          "name": "correlation_group_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "correlation_group_id uuid NULL"
+        },
+        {
+          "name": "comparison_key_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "comparison_key_hash char(64) NOT NULL"
+        },
+        {
+          "name": "observation_schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "observation_schema_version text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_observation_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_observation_id uuid NULL REFERENCES metric.capability_observation(observation_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.system_performance_observation": {
+      "fields": [
+        {
+          "name": "system_observation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "system_observation_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "mission_system_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mission_system_instance_id uuid NOT NULL REFERENCES master.mission_system_instance(mission_system_instance_id)"
+        },
+        {
+          "name": "observed_metric_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "observed_metric_instance_id uuid NOT NULL UNIQUE REFERENCES metric.metric_instance(metric_instance_id)"
+        },
+        {
+          "name": "reference_truth_profile_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "reference_truth_profile_version text NULL"
+        },
+        {
+          "name": "reference_quality_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "reference_quality_status text NOT NULL"
+        },
+        {
+          "name": "reference_uncertainty_summary",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "reference_uncertainty_summary jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "alignment_uncertainty_summary",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "alignment_uncertainty_summary jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "observation_start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "observation_start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "observation_end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "observation_end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "context_tags",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "context_tags jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL REFERENCES metric.evidence_set(evidence_set_id)"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "eligibility_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "eligibility_status text NOT NULL CHECK (eligibility_status IN ('ELIGIBLE','EXCLUDED','REVIEW_REQUIRED'))"
+        },
+        {
+          "name": "exclusion_reason_code",
+          "type": "text",
+          "nullable": true,
+          "sql": "exclusion_reason_code text NULL"
+        },
+        {
+          "name": "comparison_key_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "comparison_key_hash char(64) NOT NULL"
+        },
+        {
+          "name": "observation_schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "observation_schema_version text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_system_observation_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_system_observation_id uuid NULL REFERENCES metric.system_performance_observation(system_observation_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.performance_trend_series": {
+      "fields": [
+        {
+          "name": "trend_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "trend_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL"
+        },
+        {
+          "name": "longitudinal_scope_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "longitudinal_scope_id uuid NOT NULL"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL CHECK (subject_type IN ('AIRCRAFT','MISSION_SYSTEM_INSTANCE'))"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_id uuid NOT NULL"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_id uuid NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "mission_system_instance_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "mission_system_instance_id uuid NULL REFERENCES master.mission_system_instance(mission_system_instance_id)"
+        },
+        {
+          "name": "metric_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "metric_definition_id uuid NOT NULL REFERENCES metric.metric_definition(metric_definition_id)"
+        },
+        {
+          "name": "metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "metric_semantic_version integer NOT NULL CHECK (metric_semantic_version > 0)"
+        },
+        {
+          "name": "comparison_key_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "comparison_key_hash text NOT NULL"
+        },
+        {
+          "name": "trend_semantics",
+          "type": "text",
+          "nullable": false,
+          "sql": "trend_semantics text NOT NULL CHECK (trend_semantics='OBSERVED_PERFORMANCE')"
+        },
+        {
+          "name": "x_axis_semantics",
+          "type": "text",
+          "nullable": false,
+          "sql": "x_axis_semantics text NOT NULL CHECK (x_axis_semantics IN ('SESSION_ORDER','CALENDAR_TIME'))"
+        },
+        {
+          "name": "session_order_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_order_scope_id uuid NULL REFERENCES registry.session_order_scope(session_order_scope_id)"
+        },
+        {
+          "name": "as_of_session_order",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "as_of_session_order bigint NULL"
+        },
+        {
+          "name": "as_of_occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "as_of_occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "sample_count_total",
+          "type": "integer",
+          "nullable": false,
+          "sql": "sample_count_total integer NOT NULL"
+        },
+        {
+          "name": "sample_count_valid",
+          "type": "integer",
+          "nullable": false,
+          "sql": "sample_count_valid integer NOT NULL"
+        },
+        {
+          "name": "current_value",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "current_value double precision NULL"
+        },
+        {
+          "name": "ewma_value",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "ewma_value double precision NULL"
+        },
+        {
+          "name": "slope",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "slope double precision NULL"
+        },
+        {
+          "name": "slope_unit",
+          "type": "text",
+          "nullable": true,
+          "sql": "slope_unit text NULL"
+        },
+        {
+          "name": "stability_mad",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "stability_mad double precision NULL"
+        },
+        {
+          "name": "trend_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "trend_status text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "reason_codes",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "reason_codes jsonb NOT NULL DEFAULT '[]'"
+        },
+        {
+          "name": "trend_profile_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "trend_profile_version text NOT NULL"
+        },
+        {
+          "name": "input_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "input_hash text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_trend_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_trend_id uuid NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.performance_trend_point": {
+      "fields": [
+        {
+          "name": "trend_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "trend_id uuid NOT NULL"
+        },
+        {
+          "name": "point_order",
+          "type": "integer",
+          "nullable": false,
+          "sql": "point_order integer NOT NULL"
+        },
+        {
+          "name": "sample_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "sample_id uuid NOT NULL"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL CHECK (subject_type IN ('AIRCRAFT','MISSION_SYSTEM_INSTANCE'))"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_id uuid NOT NULL"
+        },
+        {
+          "name": "session_order",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "session_order bigint NULL"
+        },
+        {
+          "name": "occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "value",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "value double precision NULL"
+        },
+        {
+          "name": "sample_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "sample_status text NOT NULL"
+        },
+        {
+          "name": "configuration_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "configuration_key text NOT NULL"
+        },
+        {
+          "name": "lifecycle_marker_refs",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "lifecycle_marker_refs jsonb NOT NULL DEFAULT '[]'"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.compute_job": {
+      "fields": [
+        {
+          "name": "job_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "job_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "job_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "job_type text NOT NULL"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_id uuid NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "job_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "job_key text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "component_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "component_version text NOT NULL"
+        },
+        {
+          "name": "input_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "input_hash text NOT NULL"
+        },
+        {
+          "name": "progress",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "progress double precision NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "reason_codes",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "reason_codes text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "error_detail",
+          "type": "text",
+          "nullable": true,
+          "sql": "error_detail text NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "started_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "started_at timestamptz NULL"
+        },
+        {
+          "name": "finished_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "finished_at timestamptz NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "audit.audit_log": {
+      "fields": [
+        {
+          "name": "audit_id",
+          "type": "bigserial",
+          "nullable": false,
+          "sql": "audit_id bigserial PRIMARY KEY"
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "actor_id uuid NULL"
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "nullable": false,
+          "sql": "action text NOT NULL"
+        },
+        {
+          "name": "object_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "object_type text NOT NULL"
+        },
+        {
+          "name": "object_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "object_id text NOT NULL"
+        },
+        {
+          "name": "old_value",
+          "type": "jsonb",
+          "nullable": true,
+          "sql": "old_value jsonb NULL"
+        },
+        {
+          "name": "new_value",
+          "type": "jsonb",
+          "nullable": true,
+          "sql": "new_value jsonb NULL"
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": true,
+          "sql": "reason text NULL"
+        },
+        {
+          "name": "request_id",
+          "type": "text",
+          "nullable": true,
+          "sql": "request_id text NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "debrief.annotation": {
+      "fields": [
+        {
+          "name": "annotation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "annotation_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "base_release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "base_release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "episode_id uuid NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "stage_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "stage_id uuid NULL REFERENCES episode.episode_stage(stage_id)"
+        },
+        {
+          "name": "author_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "author_id uuid NOT NULL"
+        },
+        {
+          "name": "annotation_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "annotation_type text NOT NULL"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "start_session_time_us bigint NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "end_session_time_us bigint NULL"
+        },
+        {
+          "name": "body_text",
+          "type": "text",
+          "nullable": false,
+          "sql": "body_text text NOT NULL"
+        },
+        {
+          "name": "visibility",
+          "type": "text",
+          "nullable": false,
+          "sql": "visibility text NOT NULL DEFAULT 'PROJECT'"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('ACTIVE','SUPERSEDED','DELETED'))"
+        },
+        {
+          "name": "revision_no",
+          "type": "integer",
+          "nullable": false,
+          "sql": "revision_no integer NOT NULL DEFAULT 1 CHECK (revision_no >= 1)"
+        },
+        {
+          "name": "supersedes_annotation_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_annotation_id uuid NULL REFERENCES debrief.annotation(annotation_id)"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "evidence_set_id uuid NULL REFERENCES metric.evidence_set(evidence_set_id)"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "assessment.factor_feature_set": {
+      "fields": [
+        {
+          "name": "factor_feature_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "factor_feature_set_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "feature_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "feature_spec_id text NOT NULL"
+        },
+        {
+          "name": "feature_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "feature_spec_version text NOT NULL"
+        },
+        {
+          "name": "source_observation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_observation_id uuid NOT NULL REFERENCES metric.capability_observation(observation_id)"
+        },
+        {
+          "name": "reference_condition_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "reference_condition_id uuid NULL"
+        },
+        {
+          "name": "feature_values",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "feature_values jsonb NOT NULL"
+        },
+        {
+          "name": "missing_mask",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "missing_mask jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "world_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "world_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "input_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "input_hash text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "assessment.attribution_run": {
+      "fields": [
+        {
+          "name": "attribution_run_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "attribution_run_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "attribution_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "attribution_spec_id text NOT NULL"
+        },
+        {
+          "name": "attribution_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "attribution_spec_version text NOT NULL"
+        },
+        {
+          "name": "model_plugin",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_plugin text NOT NULL"
+        },
+        {
+          "name": "model_plugin_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_plugin_version text NOT NULL"
+        },
+        {
+          "name": "training_dataset_snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "training_dataset_snapshot_id uuid NOT NULL"
+        },
+        {
+          "name": "reference_condition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "reference_condition_id uuid NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "diagnostics",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "diagnostics jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "model_artifact_uri",
+          "type": "text",
+          "nullable": true,
+          "sql": "model_artifact_uri text NULL"
+        },
+        {
+          "name": "model_artifact_hash",
+          "type": "text",
+          "nullable": true,
+          "sql": "model_artifact_hash text NULL"
+        },
+        {
+          "name": "started_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "started_at timestamptz NOT NULL"
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "completed_at timestamptz NULL"
+        },
+        {
+          "name": "created_by",
+          "type": "text",
+          "nullable": true,
+          "sql": "created_by text NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "capability.adjusted_capability_estimate": {
+      "fields": [
+        {
+          "name": "estimate_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "estimate_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "source_observation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_observation_id uuid NOT NULL REFERENCES metric.capability_observation(observation_id)"
+        },
+        {
+          "name": "attribution_run_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "attribution_run_id uuid NOT NULL REFERENCES assessment.attribution_run(attribution_run_id)"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL"
+        },
+        {
+          "name": "capability_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_type text NOT NULL"
+        },
+        {
+          "name": "reference_condition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "reference_condition_id uuid NOT NULL"
+        },
+        {
+          "name": "adjusted_value",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "adjusted_value double precision NULL"
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": false,
+          "sql": "unit text NOT NULL"
+        },
+        {
+          "name": "uncertainty_lower",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "uncertainty_lower double precision NULL"
+        },
+        {
+          "name": "uncertainty_upper",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "uncertainty_upper double precision NULL"
+        },
+        {
+          "name": "residual",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "residual double precision NULL"
+        },
+        {
+          "name": "factor_effects",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "factor_effects jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "claim_level",
+          "type": "text",
+          "nullable": false,
+          "sql": "claim_level text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL"
+        },
+        {
+          "name": "estimate_time",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "estimate_time timestamptz NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_estimate_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_estimate_id uuid NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "capability.capability_model": {
+      "fields": [
+        {
+          "name": "capability_model_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "capability_model_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "model_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_spec_id text NOT NULL"
+        },
+        {
+          "name": "model_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_spec_version text NOT NULL"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "subject_id uuid NULL"
+        },
+        {
+          "name": "capability_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_type text NOT NULL"
+        },
+        {
+          "name": "training_dataset_snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "training_dataset_snapshot_id uuid NOT NULL"
+        },
+        {
+          "name": "plugin_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "plugin_name text NOT NULL"
+        },
+        {
+          "name": "plugin_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "plugin_version text NOT NULL"
+        },
+        {
+          "name": "model_artifact_uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_artifact_uri text NOT NULL"
+        },
+        {
+          "name": "model_artifact_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_artifact_hash text NOT NULL"
+        },
+        {
+          "name": "validity_domain",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "validity_domain jsonb NOT NULL"
+        },
+        {
+          "name": "validation_metrics",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "validation_metrics jsonb NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "trained_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "trained_at timestamptz NOT NULL"
+        },
+        {
+          "name": "published_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "published_at timestamptz NULL"
+        },
+        {
+          "name": "supersedes_model_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_model_id uuid NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "capability.capability_surface": {
+      "fields": [
+        {
+          "name": "surface_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "surface_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "capability_model_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "capability_model_id uuid NOT NULL REFERENCES capability.capability_model(capability_model_id)"
+        },
+        {
+          "name": "surface_semantics",
+          "type": "text",
+          "nullable": false,
+          "sql": "surface_semantics text NOT NULL"
+        },
+        {
+          "name": "axes",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "axes jsonb NOT NULL"
+        },
+        {
+          "name": "dataset_uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "dataset_uri text NOT NULL"
+        },
+        {
+          "name": "dataset_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "dataset_hash text NOT NULL"
+        },
+        {
+          "name": "uncertainty_dataset_uri",
+          "type": "text",
+          "nullable": true,
+          "sql": "uncertainty_dataset_uri text NULL"
+        },
+        {
+          "name": "validity_domain",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "validity_domain jsonb NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "capability.aircraft_twin_revision": {
+      "fields": [
+        {
+          "name": "twin_revision_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "twin_revision_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "revision_no",
+          "type": "integer",
+          "nullable": false,
+          "sql": "revision_no integer NOT NULL"
+        },
+        {
+          "name": "component_model_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "component_model_refs uuid[] NOT NULL"
+        },
+        {
+          "name": "config_snapshot_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "config_snapshot_id uuid NULL"
+        },
+        {
+          "name": "valid_from",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "valid_from timestamptz NOT NULL"
+        },
+        {
+          "name": "valid_to",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "valid_to timestamptz NULL"
+        },
+        {
+          "name": "as_of_data_time",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "as_of_data_time timestamptz NOT NULL"
+        },
+        {
+          "name": "published_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "published_at timestamptz NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "uncertainty_summary",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "uncertainty_summary jsonb NOT NULL"
+        },
+        {
+          "name": "evidence_snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_snapshot_id uuid NOT NULL"
+        },
+        {
+          "name": "supersedes_twin_revision_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_twin_revision_id uuid NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "capability.intrinsic_capability_estimate": {
+      "fields": [
+        {
+          "name": "estimate_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "estimate_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "twin_revision_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "twin_revision_id uuid NOT NULL REFERENCES capability.aircraft_twin_revision(twin_revision_id)"
+        },
+        {
+          "name": "capability_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "capability_type text NOT NULL"
+        },
+        {
+          "name": "condition_point",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "condition_point jsonb NOT NULL"
+        },
+        {
+          "name": "value",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "value double precision NULL"
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": false,
+          "sql": "unit text NOT NULL"
+        },
+        {
+          "name": "uncertainty",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "uncertainty jsonb NOT NULL"
+        },
+        {
+          "name": "validity_domain_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "validity_domain_status text NOT NULL"
+        },
+        {
+          "name": "as_of_time",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "as_of_time timestamptz NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "assessment.actor_assessment": {
+      "fields": [
+        {
+          "name": "actor_assessment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "actor_assessment_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL"
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "actor_id uuid NOT NULL"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_id uuid NULL"
+        },
+        {
+          "name": "assessment_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "assessment_spec_id text NOT NULL"
+        },
+        {
+          "name": "assessment_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "assessment_spec_version text NOT NULL"
+        },
+        {
+          "name": "world_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "world_refs uuid[] NOT NULL"
+        },
+        {
+          "name": "metric_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "metric_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "capability_projection_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "capability_projection_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "score",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "score double precision NULL"
+        },
+        {
+          "name": "grade",
+          "type": "text",
+          "nullable": true,
+          "sql": "grade text NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_id uuid NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "assessment.competency_observation": {
+      "fields": [
+        {
+          "name": "competency_observation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "competency_observation_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "actor_id uuid NOT NULL"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL"
+        },
+        {
+          "name": "competency_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "competency_code text NOT NULL"
+        },
+        {
+          "name": "value",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "value double precision NULL"
+        },
+        {
+          "name": "grade",
+          "type": "text",
+          "nullable": true,
+          "sql": "grade text NULL"
+        },
+        {
+          "name": "component_assessment_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "component_assessment_refs uuid[] NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "observation_session_order",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "observation_session_order bigint NULL"
+        },
+        {
+          "name": "observation_occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "observation_occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "aggregation_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "aggregation_version text NOT NULL"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "assessment.mission_assessment": {
+      "fields": [
+        {
+          "name": "mission_assessment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mission_assessment_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL"
+        },
+        {
+          "name": "mission_episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mission_episode_id uuid NOT NULL"
+        },
+        {
+          "name": "team_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "team_id uuid NULL"
+        },
+        {
+          "name": "assessment_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "assessment_spec_id text NOT NULL"
+        },
+        {
+          "name": "assessment_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "assessment_spec_version text NOT NULL"
+        },
+        {
+          "name": "participant_ids",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "participant_ids uuid[] NOT NULL"
+        },
+        {
+          "name": "world_snapshot_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "world_snapshot_refs uuid[] NOT NULL"
+        },
+        {
+          "name": "adjudication_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "adjudication_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "overall_score",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "overall_score double precision NULL"
+        },
+        {
+          "name": "grade",
+          "type": "text",
+          "nullable": true,
+          "sql": "grade text NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "supersedes_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_id uuid NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "assessment.objective_result": {
+      "fields": [
+        {
+          "name": "objective_result_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "objective_result_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "mission_assessment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mission_assessment_id uuid NOT NULL REFERENCES assessment.mission_assessment(mission_assessment_id)"
+        },
+        {
+          "name": "objective_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "objective_code text NOT NULL"
+        },
+        {
+          "name": "achieved",
+          "type": "boolean",
+          "nullable": true,
+          "sql": "achieved boolean NULL"
+        },
+        {
+          "name": "score",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "score double precision NULL"
+        },
+        {
+          "name": "reason_codes",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "reason_codes text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "metric_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "metric_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "adjudication_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "adjudication_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "evidence_set_id uuid NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "intelligence.forecast_run": {
+      "fields": [
+        {
+          "name": "forecast_run_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "forecast_run_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "forecast_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "forecast_spec_id text NOT NULL"
+        },
+        {
+          "name": "forecast_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "forecast_spec_version text NOT NULL"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_id uuid NOT NULL"
+        },
+        {
+          "name": "input_snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "input_snapshot_id uuid NOT NULL"
+        },
+        {
+          "name": "model_artifact_uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_artifact_uri text NOT NULL"
+        },
+        {
+          "name": "model_artifact_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "model_artifact_hash text NOT NULL"
+        },
+        {
+          "name": "horizon_spec",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "horizon_spec jsonb NOT NULL"
+        },
+        {
+          "name": "backtest_metrics",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "backtest_metrics jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "intelligence.forecast_result": {
+      "fields": [
+        {
+          "name": "forecast_result_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "forecast_result_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "forecast_run_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "forecast_run_id uuid NOT NULL REFERENCES intelligence.forecast_run(forecast_run_id)"
+        },
+        {
+          "name": "target_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "target_code text NOT NULL"
+        },
+        {
+          "name": "target_time",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "target_time timestamptz NULL"
+        },
+        {
+          "name": "distribution",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "distribution jsonb NOT NULL"
+        },
+        {
+          "name": "threshold_probabilities",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "threshold_probabilities jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "intelligence.counterfactual_run": {
+      "fields": [
+        {
+          "name": "counterfactual_run_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "counterfactual_run_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "spec_id text NOT NULL"
+        },
+        {
+          "name": "spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "spec_version text NOT NULL"
+        },
+        {
+          "name": "base_product_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "base_product_refs uuid[] NOT NULL"
+        },
+        {
+          "name": "scenario_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "scenario_definition_id uuid NOT NULL"
+        },
+        {
+          "name": "assumptions",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "assumptions jsonb NOT NULL"
+        },
+        {
+          "name": "model_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "model_refs uuid[] NOT NULL"
+        },
+        {
+          "name": "projection_dataset_uri",
+          "type": "text",
+          "nullable": true,
+          "sql": "projection_dataset_uri text NULL"
+        },
+        {
+          "name": "projection_dataset_hash",
+          "type": "text",
+          "nullable": true,
+          "sql": "projection_dataset_hash text NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "intelligence.training_recommendation": {
+      "fields": [
+        {
+          "name": "recommendation_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "recommendation_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_id uuid NOT NULL"
+        },
+        {
+          "name": "recommendation_spec_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "recommendation_spec_id text NOT NULL"
+        },
+        {
+          "name": "recommendation_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "recommendation_spec_version text NOT NULL"
+        },
+        {
+          "name": "rationale",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "rationale jsonb NOT NULL"
+        },
+        {
+          "name": "source_gap_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "source_gap_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "proposed_training_items",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "proposed_training_items jsonb NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "approval_state",
+          "type": "text",
+          "nullable": false,
+          "sql": "approval_state text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "intelligence.intervention_outcome": {
+      "fields": [
+        {
+          "name": "intervention_outcome_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "intervention_outcome_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "recommendation_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "recommendation_id uuid NULL REFERENCES intelligence.training_recommendation(recommendation_id)"
+        },
+        {
+          "name": "intervention_event_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "intervention_event_id uuid NOT NULL"
+        },
+        {
+          "name": "followup_episode_ids",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "followup_episode_ids uuid[] NOT NULL"
+        },
+        {
+          "name": "observed_outcome",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "observed_outcome jsonb NOT NULL"
+        },
+        {
+          "name": "evaluation_spec_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "evaluation_spec_version text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.dataset_snapshot": {
+      "fields": [
+        {
+          "name": "dataset_snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "dataset_snapshot_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "snapshot_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "snapshot_type text NOT NULL"
+        },
+        {
+          "name": "query_or_manifest",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "query_or_manifest jsonb NOT NULL"
+        },
+        {
+          "name": "input_refs",
+          "type": "uuid[]",
+          "nullable": false,
+          "sql": "input_refs uuid[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "data_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "data_hash text NOT NULL"
+        },
+        {
+          "name": "schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_version text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "frozen",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "frozen boolean NOT NULL DEFAULT true"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.longitudinal_scope": {
+      "fields": [
+        {
+          "name": "longitudinal_scope_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "longitudinal_scope_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "longitudinal_scope_key",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "longitudinal_scope_key char(64) NOT NULL UNIQUE"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL CHECK (subject_type IN ('AIRCRAFT','MISSION_SYSTEM_INSTANCE'))"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_id uuid NOT NULL"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_id uuid NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "mission_system_instance_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "mission_system_instance_id uuid NULL REFERENCES master.mission_system_instance(mission_system_instance_id)"
+        },
+        {
+          "name": "metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "metric_semantic_version integer NOT NULL CHECK (metric_semantic_version > 0)"
+        },
+        {
+          "name": "comparison_key_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "comparison_key_hash char(64) NOT NULL"
+        },
+        {
+          "name": "session_order_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_order_scope_id uuid NULL REFERENCES registry.session_order_scope(session_order_scope_id)"
+        },
+        {
+          "name": "trend_profile_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "trend_profile_version text NOT NULL"
+        },
+        {
+          "name": "descriptor_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "descriptor_json jsonb NOT NULL"
+        },
+        {
+          "name": "descriptor_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "descriptor_hash char(64) NOT NULL UNIQUE"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.analysis_release": {
+      "fields": [
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_type text NOT NULL CHECK (scope_type IN ('SESSION','LONGITUDINAL'))"
+        },
+        {
+          "name": "scope_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_key text NOT NULL"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_id uuid NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "longitudinal_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "longitudinal_scope_id uuid NULL REFERENCES registry.longitudinal_scope(longitudinal_scope_id)"
+        },
+        {
+          "name": "release_no",
+          "type": "integer",
+          "nullable": false,
+          "sql": "release_no integer NOT NULL"
+        },
+        {
+          "name": "compute_job_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "compute_job_id uuid NOT NULL REFERENCES registry.compute_job(job_id)"
+        },
+        {
+          "name": "catalog_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "catalog_version text NOT NULL"
+        },
+        {
+          "name": "catalog_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "catalog_hash char(64) NOT NULL"
+        },
+        {
+          "name": "context_binding_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "context_binding_hash char(64) NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('STAGING','VALIDATED','PUBLISHED','WITHDRAWN','SUPERSEDED'))"
+        },
+        {
+          "name": "parent_release_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "parent_release_id uuid NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "manifest_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "manifest_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL"
+        },
+        {
+          "name": "published_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "published_at timestamptz NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.session_release_context_ref": {
+      "fields": [
+        {
+          "name": "release_context_ref_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_context_ref_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL"
+        },
+        {
+          "name": "release_scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "release_scope_type text NOT NULL DEFAULT 'SESSION' CHECK (release_scope_type='SESSION')"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL"
+        },
+        {
+          "name": "context_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "context_version text NOT NULL"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "ref_order",
+          "type": "integer",
+          "nullable": false,
+          "sql": "ref_order integer NOT NULL CHECK (ref_order >= 0)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.release_scope_pointer": {
+      "fields": [
+        {
+          "name": "scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_type text NOT NULL CHECK (scope_type IN ('SESSION','LONGITUDINAL'))"
+        },
+        {
+          "name": "scope_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_key text NOT NULL"
+        },
+        {
+          "name": "current_release_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "current_release_id uuid NULL"
+        },
+        {
+          "name": "version_token",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "version_token bigint NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "updated_at timestamptz NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.longitudinal_release_input": {
+      "fields": [
+        {
+          "name": "longitudinal_release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "longitudinal_release_id uuid NOT NULL"
+        },
+        {
+          "name": "longitudinal_release_scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "longitudinal_release_scope_type text NOT NULL DEFAULT 'LONGITUDINAL' CHECK (longitudinal_release_scope_type='LONGITUDINAL')"
+        },
+        {
+          "name": "input_session_release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "input_session_release_id uuid NOT NULL"
+        },
+        {
+          "name": "input_release_scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "input_release_scope_type text NOT NULL DEFAULT 'SESSION' CHECK (input_release_scope_type='SESSION')"
+        },
+        {
+          "name": "input_sample_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "input_sample_id uuid NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.session_order_scope": {
+      "fields": [
+        {
+          "name": "session_order_scope_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_order_scope_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "scope_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_code text NOT NULL"
+        },
+        {
+          "name": "scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "scope_type text NOT NULL CHECK (scope_type IN ('AIRCRAFT_PROGRAM','COHORT','TRAINING_SEQUENCE','CUSTOM_APPROVED'))"
+        },
+        {
+          "name": "subject_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_kind text NOT NULL"
+        },
+        {
+          "name": "selector_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "selector_json jsonb NOT NULL"
+        },
+        {
+          "name": "selector_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "selector_hash char(64) NOT NULL"
+        },
+        {
+          "name": "selector_language_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "selector_language_version text NOT NULL"
+        },
+        {
+          "name": "scope_revision",
+          "type": "integer",
+          "nullable": false,
+          "sql": "scope_revision integer NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('DRAFT','ACTIVE','RETIRED'))"
+        },
+        {
+          "name": "supersedes_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_scope_id uuid NULL REFERENCES registry.session_order_scope(session_order_scope_id)"
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true,
+          "sql": "description text NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.session_order_assignment": {
+      "fields": [
+        {
+          "name": "assignment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "assignment_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_order_scope_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_order_scope_id uuid NOT NULL REFERENCES registry.session_order_scope(session_order_scope_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "order_value",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "order_value bigint NOT NULL"
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "nullable": false,
+          "sql": "source text NOT NULL CHECK (source IN ('SOURCE_SEQUENCE','IMPORT_MANIFEST','MANUAL_REVIEWED'))"
+        },
+        {
+          "name": "revision_no",
+          "type": "integer",
+          "nullable": false,
+          "sql": "revision_no integer NOT NULL"
+        },
+        {
+          "name": "supersedes_assignment_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "supersedes_assignment_id uuid NULL REFERENCES registry.session_order_assignment(assignment_id)"
+        },
+        {
+          "name": "is_current",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "is_current boolean NOT NULL"
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": true,
+          "sql": "reason text NULL"
+        },
+        {
+          "name": "operator_ref",
+          "type": "text",
+          "nullable": true,
+          "sql": "operator_ref text NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.aircraft_instance": {
+      "fields": [
+        {
+          "name": "aircraft_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_instance_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_id uuid NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "entity_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "entity_id uuid NULL REFERENCES master.entity(entity_id)"
+        },
+        {
+          "name": "instance_seq",
+          "type": "integer",
+          "nullable": false,
+          "sql": "instance_seq integer NOT NULL"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "end_session_time_us bigint NULL"
+        },
+        {
+          "name": "start_reason",
+          "type": "text",
+          "nullable": false,
+          "sql": "start_reason text NOT NULL"
+        },
+        {
+          "name": "end_reason",
+          "type": "text",
+          "nullable": true,
+          "sql": "end_reason text NULL"
+        },
+        {
+          "name": "identity_scope",
+          "type": "text",
+          "nullable": false,
+          "sql": "identity_scope text NOT NULL CHECK (identity_scope IN ('PERSISTENT_SOURCE','USER_LINKED','SESSION_ONLY'))"
+        },
+        {
+          "name": "identity_confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "identity_confidence double precision NOT NULL CHECK (identity_confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "master.mission_system_instance": {
+      "fields": [
+        {
+          "name": "mission_system_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mission_system_instance_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_id uuid NOT NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "system_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "system_type text NOT NULL CHECK (system_type IN ('RADAR','IRST','EO','RWR','ESM','DATALINK','FUSION','MISSION_COMPUTER','OTHER'))"
+        },
+        {
+          "name": "system_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "system_code text NOT NULL"
+        },
+        {
+          "name": "hardware_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "hardware_version text NULL"
+        },
+        {
+          "name": "software_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "software_version text NULL"
+        },
+        {
+          "name": "installation_id",
+          "type": "text",
+          "nullable": true,
+          "sql": "installation_id text NULL"
+        },
+        {
+          "name": "alignment_profile_version",
+          "type": "text",
+          "nullable": true,
+          "sql": "alignment_profile_version text NULL"
+        },
+        {
+          "name": "valid_from",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "valid_from timestamptz NULL"
+        },
+        {
+          "name": "valid_to",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "valid_to timestamptz NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE','INACTIVE','RETIRED'))"
+        },
+        {
+          "name": "configuration_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "configuration_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.mapping_manifest": {
+      "fields": [
+        {
+          "name": "mapping_manifest_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mapping_manifest_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "source_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_id uuid NOT NULL REFERENCES registry.data_source(source_id)"
+        },
+        {
+          "name": "adapter_name",
+          "type": "text",
+          "nullable": false,
+          "sql": "adapter_name text NOT NULL"
+        },
+        {
+          "name": "adapter_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "adapter_version text NOT NULL"
+        },
+        {
+          "name": "source_schema_fingerprint",
+          "type": "text",
+          "nullable": false,
+          "sql": "source_schema_fingerprint text NOT NULL"
+        },
+        {
+          "name": "canonical_schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "canonical_schema_version text NOT NULL"
+        },
+        {
+          "name": "mapping_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "mapping_json jsonb NOT NULL"
+        },
+        {
+          "name": "unit_conversion_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "unit_conversion_json jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "semantic_mapping_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "semantic_mapping_json jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "manifest_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "manifest_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.measurement_semantics": {
+      "fields": [
+        {
+          "name": "measurement_semantics_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "measurement_semantics_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "semantic_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "semantic_code text NOT NULL"
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "sql": "version text NOT NULL"
+        },
+        {
+          "name": "quantity",
+          "type": "text",
+          "nullable": false,
+          "sql": "quantity text NOT NULL"
+        },
+        {
+          "name": "reference_frame",
+          "type": "text",
+          "nullable": true,
+          "sql": "reference_frame text NULL"
+        },
+        {
+          "name": "axis_convention",
+          "type": "text",
+          "nullable": true,
+          "sql": "axis_convention text NULL"
+        },
+        {
+          "name": "altitude_datum",
+          "type": "text",
+          "nullable": true,
+          "sql": "altitude_datum text NULL"
+        },
+        {
+          "name": "heading_reference",
+          "type": "text",
+          "nullable": true,
+          "sql": "heading_reference text NULL"
+        },
+        {
+          "name": "sampling_semantics",
+          "type": "text",
+          "nullable": false,
+          "sql": "sampling_semantics text NOT NULL"
+        },
+        {
+          "name": "source_definition",
+          "type": "text",
+          "nullable": false,
+          "sql": "source_definition text NOT NULL"
+        },
+        {
+          "name": "canonical_definition",
+          "type": "text",
+          "nullable": false,
+          "sql": "canonical_definition text NOT NULL"
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": true,
+          "sql": "unit text NULL"
+        },
+        {
+          "name": "semantics_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "semantics_hash char(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "episode.analysis_series": {
+      "fields": [
+        {
+          "name": "series_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "series_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "aircraft_instance_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "aircraft_instance_id uuid NOT NULL REFERENCES master.aircraft_instance(aircraft_instance_id)"
+        },
+        {
+          "name": "time_alignment_domain_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "time_alignment_domain_id uuid NOT NULL REFERENCES registry.time_alignment_domain(time_alignment_domain_id)"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "source_authority_signature",
+          "type": "text",
+          "nullable": false,
+          "sql": "source_authority_signature text NOT NULL"
+        },
+        {
+          "name": "config_signature",
+          "type": "text",
+          "nullable": true,
+          "sql": "config_signature text NULL"
+        },
+        {
+          "name": "measurement_semantics_signature",
+          "type": "text",
+          "nullable": false,
+          "sql": "measurement_semantics_signature text NOT NULL"
+        },
+        {
+          "name": "break_reason",
+          "type": "text",
+          "nullable": false,
+          "sql": "break_reason text NOT NULL"
+        },
+        {
+          "name": "quality_summary_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "quality_summary_json jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "logical_content_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "logical_content_hash text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "episode.analysis_series_source_member": {
+      "fields": [
+        {
+          "name": "series_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "series_id uuid NOT NULL REFERENCES episode.analysis_series(series_id)"
+        },
+        {
+          "name": "source_clock_segment_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "source_clock_segment_id uuid NOT NULL REFERENCES registry.source_clock_segment(source_clock_segment_id)"
+        },
+        {
+          "name": "time_transform_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "time_transform_id uuid NOT NULL"
+        },
+        {
+          "name": "authority_role",
+          "type": "text",
+          "nullable": false,
+          "sql": "authority_role text NOT NULL"
+        },
+        {
+          "name": "field_group",
+          "type": "text",
+          "nullable": false,
+          "sql": "field_group text NOT NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.longitudinal_sample": {
+      "fields": [
+        {
+          "name": "sample_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "sample_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL"
+        },
+        {
+          "name": "release_scope_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "release_scope_type text NOT NULL DEFAULT 'SESSION' CHECK (release_scope_type='SESSION')"
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_type text NOT NULL CHECK (subject_type IN ('AIRCRAFT','MISSION_SYSTEM_INSTANCE'))"
+        },
+        {
+          "name": "subject_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_id uuid NOT NULL"
+        },
+        {
+          "name": "aircraft_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "aircraft_id uuid NULL REFERENCES master.aircraft(aircraft_id)"
+        },
+        {
+          "name": "mission_system_instance_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "mission_system_instance_id uuid NULL REFERENCES master.mission_system_instance(mission_system_instance_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "session_order_scope_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "session_order_scope_id uuid NULL REFERENCES registry.session_order_scope(session_order_scope_id)"
+        },
+        {
+          "name": "session_order",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "session_order bigint NULL"
+        },
+        {
+          "name": "occurred_at_utc",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "occurred_at_utc timestamptz NULL"
+        },
+        {
+          "name": "configuration_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "configuration_key text NOT NULL"
+        },
+        {
+          "name": "metric_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "metric_definition_id uuid NOT NULL REFERENCES metric.metric_definition(metric_definition_id)"
+        },
+        {
+          "name": "metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "metric_semantic_version integer NOT NULL CHECK (metric_semantic_version > 0)"
+        },
+        {
+          "name": "comparison_key_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "comparison_key_hash text NOT NULL"
+        },
+        {
+          "name": "sample_unit",
+          "type": "text",
+          "nullable": false,
+          "sql": "sample_unit text NOT NULL CHECK (sample_unit='SESSION_CONFIG')"
+        },
+        {
+          "name": "aggregation_method",
+          "type": "text",
+          "nullable": false,
+          "sql": "aggregation_method text NOT NULL CHECK (aggregation_method IN ('MEDIAN','QUALITY_WEIGHTED_MEDIAN','MAX_RISK_APPROVED','CUSTOM_APPROVED'))"
+        },
+        {
+          "name": "value_numeric",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "value_numeric double precision NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL"
+        },
+        {
+          "name": "reason_codes_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "reason_codes_json jsonb NOT NULL DEFAULT '[]'"
+        },
+        {
+          "name": "source_observation_refs_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "source_observation_refs_json jsonb NOT NULL DEFAULT '[]', -- typed refs: CAPABILITY_OBSERVATION | SYSTEM_PERFORMANCE_OBSERVATION"
+        },
+        {
+          "name": "source_episode_count",
+          "type": "integer",
+          "nullable": false,
+          "sql": "source_episode_count integer NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL"
+        },
+        {
+          "name": "sample_profile_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "sample_profile_version text NOT NULL"
+        },
+        {
+          "name": "logical_content_hash",
+          "type": "text",
+          "nullable": false,
+          "sql": "logical_content_hash text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.object_reference": {
+      "fields": [
+        {
+          "name": "object_ref_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "object_ref_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "managed_uri",
+          "type": "text",
+          "nullable": false,
+          "sql": "managed_uri text NOT NULL UNIQUE"
+        },
+        {
+          "name": "media_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "media_type text NOT NULL"
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "size_bytes bigint NOT NULL"
+        },
+        {
+          "name": "artifact_sha256",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "artifact_sha256 char(64) NOT NULL"
+        },
+        {
+          "name": "logical_content_hash",
+          "type": "text",
+          "nullable": true,
+          "sql": "logical_content_hash text NULL"
+        },
+        {
+          "name": "storage_backend",
+          "type": "text",
+          "nullable": false,
+          "sql": "storage_backend text NOT NULL"
+        },
+        {
+          "name": "sealed",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "sealed boolean NOT NULL DEFAULT false"
+        },
+        {
+          "name": "gc_state",
+          "type": "text",
+          "nullable": false,
+          "sql": "gc_state text NOT NULL DEFAULT 'ACTIVE' CHECK (gc_state IN ('ACTIVE','GC_CANDIDATE','DELETING','DELETED'))"
+        },
+        {
+          "name": "gc_state_version",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "gc_state_version bigint NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "gc_marked_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "gc_marked_at timestamptz NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        },
+        {
+          "name": "deleted_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "deleted_at timestamptz NULL"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.object_binding": {
+      "fields": [
+        {
+          "name": "binding_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "binding_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "object_ref_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "object_ref_id uuid NOT NULL REFERENCES registry.object_reference(object_ref_id)"
+        },
+        {
+          "name": "owner_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "owner_type text NOT NULL"
+        },
+        {
+          "name": "owner_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "owner_id uuid NOT NULL"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "release_id uuid NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "nullable": false,
+          "sql": "role text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "registry.context_artifact": {
+      "fields": [
+        {
+          "name": "context_artifact_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_artifact_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "artifact_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "artifact_kind text NOT NULL CHECK (artifact_kind IN ('SCENARIO','ASSESSMENT_PROFILE','SYLLABUS','ROLE_MODEL','REFERENCE_SET','RULE_SET','METRIC_PROFILE','LONGITUDINAL_PROFILE'))"
+        },
+        {
+          "name": "logical_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "logical_key text NOT NULL"
+        },
+        {
+          "name": "artifact_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "artifact_version text NOT NULL"
+        },
+        {
+          "name": "object_ref_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "object_ref_id uuid NOT NULL REFERENCES registry.object_reference(object_ref_id)"
+        },
+        {
+          "name": "artifact_sha256",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "artifact_sha256 char(64) NOT NULL"
+        },
+        {
+          "name": "schema_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "schema_version text NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('ACTIVE','RETIRED'))"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "context.context_artifact_binding": {
+      "fields": [
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL REFERENCES context.evaluation_context(context_id) ON DELETE CASCADE"
+        },
+        {
+          "name": "binding_role",
+          "type": "text",
+          "nullable": false,
+          "sql": "binding_role text NOT NULL CHECK (binding_role IN ('SCENARIO','ASSESSMENT_PROFILE','SYLLABUS','ROLE_MODEL','REFERENCE_SET','RULE_SET','METRIC_PROFILE','LONGITUDINAL_PROFILE'))"
+        },
+        {
+          "name": "context_artifact_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_artifact_id uuid NOT NULL REFERENCES registry.context_artifact(context_artifact_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.trend_bridge": {
+      "fields": [
+        {
+          "name": "trend_bridge_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "trend_bridge_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "bridge_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "bridge_code text NOT NULL"
+        },
+        {
+          "name": "bridge_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "bridge_version text NOT NULL"
+        },
+        {
+          "name": "from_metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "from_metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "from_metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "from_metric_semantic_version integer NOT NULL CHECK (from_metric_semantic_version > 0)"
+        },
+        {
+          "name": "to_metric_semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "to_metric_semantic_id text NOT NULL"
+        },
+        {
+          "name": "to_metric_semantic_version",
+          "type": "integer",
+          "nullable": false,
+          "sql": "to_metric_semantic_version integer NOT NULL CHECK (to_metric_semantic_version > 0)"
+        },
+        {
+          "name": "conversion_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "conversion_kind text NOT NULL CHECK (conversion_kind IN ('IDENTITY','AFFINE','APPROVED_FUNCTION'))"
+        },
+        {
+          "name": "conversion_spec_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "conversion_spec_json jsonb NOT NULL"
+        },
+        {
+          "name": "applicability_json",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "applicability_json jsonb NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "validation_dataset_snapshot_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "validation_dataset_snapshot_id uuid NOT NULL"
+        },
+        {
+          "name": "validation_result_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "validation_result_hash char(64) NOT NULL"
+        },
+        {
+          "name": "approved_by",
+          "type": "text",
+          "nullable": false,
+          "sql": "approved_by text NOT NULL"
+        },
+        {
+          "name": "approved_at_utc",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "approved_at_utc timestamptz NOT NULL"
+        },
+        {
+          "name": "bridge_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "bridge_hash char(64) NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('DRAFT','APPROVED','RETIRED'))"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    },
+    "metric.trend_input_bridge": {
+      "fields": [
+        {
+          "name": "trend_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "trend_id uuid NOT NULL REFERENCES metric.performance_trend_series(trend_id)"
+        },
+        {
+          "name": "trend_bridge_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "trend_bridge_id uuid NOT NULL REFERENCES metric.trend_bridge(trend_bridge_id)"
+        }
+      ],
+      "source": "R39 Engineering 05 DDL",
+      "schema_version": "1.6.0"
+    }
+  }
+}

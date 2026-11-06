@@ -77,8 +77,8 @@ def _projection_schema(declared: str, contracts: dict[str, object]) -> dict[str,
     return _nullable(schema) if nullable else schema
 
 
-def build_snapshot() -> dict[str, object]:
-    artifact = CanonicalArtifactLoader().load(
+def build_snapshot(loader: CanonicalArtifactLoader | None = None) -> dict[str, object]:
+    artifact = (loader or CanonicalArtifactLoader()).load(
         ARTIFACT_ID,
         expectation=ArtifactExpectation(required_top_level_keys=("contracts", "transport_rules")),
     )

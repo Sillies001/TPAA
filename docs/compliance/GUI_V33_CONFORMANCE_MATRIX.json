@@ -1,0 +1,910 @@
+{
+  "schema": "TPAA_GUI_V33_CONFORMANCE_MATRIX_V1",
+  "baseline": "GUI-DEMO-V33-2026-11-05",
+  "status": "TARGET_FROZEN_IMPLEMENTATION_PENDING",
+  "coverage": {
+    "views": 26,
+    "themes": 3,
+    "mapped_views": 26,
+    "reference_screenshots_required": 78,
+    "qml_spike_screenshots_required": 12
+  },
+  "common_contract": {
+    "shell": [
+      "标题栏",
+      "五模块 Ribbon",
+      "共享上下文条",
+      "内容画布",
+      "状态栏"
+    ],
+    "themes": [
+      "tactical",
+      "graphite",
+      "light"
+    ],
+    "states": [
+      "加载",
+      "空",
+      "就绪",
+      "降级",
+      "错误",
+      "无权限",
+      "不适用"
+    ],
+    "interaction": [
+      "键盘焦点",
+      "鼠标",
+      "滚动",
+      "筛选",
+      "下钻",
+      "回放联动",
+      "返回"
+    ],
+    "language": "中文为主，必要缩写必须有中文释义或提示",
+    "authorization": "隐藏控件不构成授权；服务端 route permission 必须独立拒绝",
+    "data": "生产路径禁止 mock、随机业务值和前端推导业务结论",
+    "exact_context": "Batch/Session/Release/Context/Policy/Catalog/Model; no latest/current fallback",
+    "event_context": "Episode/Stage/WE/Cluster/Perspective/Scope/Master Time Cursor",
+    "production_truth": "No random, synthetic batch, inferred adjudication or browser business calculation",
+    "storage": "No localStorage for business facts, context, permissions or results"
+  },
+  "views": [
+    {
+      "id": "V01",
+      "module": "overview",
+      "p_mapping": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "title": "历史多批次训练综合总览",
+      "entry": "Ribbon/总览",
+      "controls": [
+        "起始日期",
+        "结束日期",
+        "机型",
+        "Batch训练类型",
+        "V09训练成长入口",
+        "V16装备趋势入口",
+        "历史批次选择",
+        "进入V26"
+      ],
+      "sections": [
+        "六张KPI",
+        "任务级指标趋势",
+        "历史训练活动趋势",
+        "裁决状态趋势",
+        "WE类别构成",
+        "装备性能历史趋势",
+        "历史批次列表",
+        "选中批次摘要"
+      ],
+      "semantic_rules": [
+        "所有面板使用同一exact Batch集合",
+        "Batch训练类型与WE类别/训练科目分离",
+        "任务比值由批准Metric/J计算",
+        "仅有exact明细的Batch可进入V26",
+        "1600x900与1280x720元素级几何门"
+      ],
+      "target": "G6"
+    },
+    {
+      "id": "V02",
+      "module": "training",
+      "p_mapping": [
+        "P02",
+        "P03",
+        "P05"
+      ],
+      "title": "架次复盘",
+      "entry": "Ribbon/训练评估/架次复盘",
+      "controls": [
+        "单位-日期-架次级联选择",
+        "事件选择",
+        "阶段选择",
+        "指标证据下钻",
+        "进入回放"
+      ],
+      "sections": [
+        "架次信息",
+        "覆盖率",
+        "事件与阶段时间线",
+        "指标证据",
+        "教员发现",
+        "证据片段"
+      ],
+      "semantic_rules": [
+        "不制造综合总分",
+        "所有发现可追溯证据"
+      ],
+      "target": "G6"
+    },
+    {
+      "id": "V03",
+      "module": "replay",
+      "p_mapping": [
+        "P03"
+      ],
+      "title": "同步回放",
+      "entry": "Ribbon/回放及评估页下钻",
+      "controls": [
+        "科目-架次-事件选择",
+        "播放暂停",
+        "倍速",
+        "时间滑块",
+        "区间刷选",
+        "图层开关",
+        "二维三维切换"
+      ],
+      "sections": [
+        "二维航迹",
+        "BVR 三维态势",
+        "HUD",
+        "通话文本",
+        "事件轨",
+        "曲线"
+      ],
+      "semantic_rules": [
+        "仅精确历史回放",
+        "禁止 current/latest fallback",
+        "三维仅 BVR 可用"
+      ],
+      "target": "G5"
+    },
+    {
+      "id": "V04",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "超视距空战·单机",
+      "entry": "Ribbon/训练评估/BVR单机或V26 WE下钻",
+      "controls": [
+        "WE选择",
+        "射手/目标视角",
+        "事件窗口",
+        "回放",
+        "证据下钻",
+        "Master Cursor"
+      ],
+      "sections": [
+        "射手杀伤链/发射质量",
+        "目标侧来袭态势",
+        "威胁信息来源",
+        "离散事件链",
+        "目标动作/状态曲线",
+        "结果证据条"
+      ],
+      "semantic_rules": [
+        "同一WE不同投影",
+        "不得以W替代目标P_i",
+        "目标页不重复窗口甘特图"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V05",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "视距内空战·单机",
+      "entry": "Ribbon/训练评估/WVR单机或V26 WE下钻",
+      "controls": [
+        "WE选择",
+        "射手/目标视角",
+        "事件窗口",
+        "回放",
+        "区间联刷",
+        "证据下钻"
+      ],
+      "sections": [
+        "射手优势/能量/射击机会",
+        "目标侧近距态势",
+        "威胁信息",
+        "离散事件链",
+        "目标动作曲线",
+        "结果证据条"
+      ],
+      "semantic_rules": [
+        "同一WE不同投影",
+        "缺P_i/A_i/J fail-closed",
+        "目标页不重复窗口甘特图"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V06",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "对地攻击·单机",
+      "entry": "Ribbon/训练评估/Strike",
+      "controls": [
+        "WE选择",
+        "事件窗口",
+        "回放",
+        "目标选择",
+        "证据下钻"
+      ],
+      "sections": [
+        "CEP",
+        "投放包线",
+        "高度剖面",
+        "攻击航路",
+        "防空暴露",
+        "TOT 与完成状态"
+      ],
+      "semantic_rules": [
+        "只允许shooter perspective",
+        "目标效果/J作为攻击过程证据",
+        "target perspective服务端拒绝"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V07",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "起降与航线",
+      "entry": "Ribbon/训练评估/起降航线",
+      "controls": [
+        "架次阶段选择",
+        "游标联动",
+        "证据下钻",
+        "回放"
+      ],
+      "sections": [
+        "高度速度",
+        "计划航迹横纵误差",
+        "XTE",
+        "下滑道",
+        "接地点",
+        "安全门"
+      ],
+      "semantic_rules": [
+        "不展示编队位置"
+      ],
+      "target": "G7"
+    },
+    {
+      "id": "V08",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "超视距空战·编队",
+      "entry": "Ribbon/训练评估/BVR编队或V26 WE下钻",
+      "controls": [
+        "WE选择",
+        "射手/目标视角",
+        "成员选择",
+        "事件窗口",
+        "条件式V24入口",
+        "回放"
+      ],
+      "sections": [
+        "射手任务分配/杀伤链/交战网络",
+        "目标编队关系",
+        "成员P_i/A_i矩阵",
+        "成员动作时序",
+        "信息共享关系",
+        "成员/团队结果证据"
+      ],
+      "semantic_rules": [
+        "共享边必须有通信/TDL/Relation证据",
+        "团队结果不复制成员",
+        "V24仅合格同目标协同事件"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V09",
+      "module": "training",
+      "p_mapping": [
+        "P05"
+      ],
+      "title": "多架次趋势",
+      "entry": "Ribbon/训练评估/多架次",
+      "controls": [
+        "时间范围",
+        "科目",
+        "单位",
+        "可比性筛选",
+        "异常架次下钻"
+      ],
+      "sections": [
+        "区间趋势",
+        "频次",
+        "优先级",
+        "分布",
+        "可比性",
+        "异常架次"
+      ],
+      "semantic_rules": [
+        "禁止无权威综合总分",
+        "不可比样本不得混合"
+      ],
+      "target": "G7"
+    },
+    {
+      "id": "V10",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "装备能力总览",
+      "entry": "Ribbon/装备性能/总览",
+      "controls": [
+        "装备型号",
+        "构型",
+        "时间范围",
+        "样本门槛",
+        "详情下钻"
+      ],
+      "sections": [
+        "七维能力画像",
+        "关键指标",
+        "机队排名",
+        "手册偏差",
+        "样本摘要"
+      ],
+      "semantic_rules": [
+        "必须加载受控 P3 Model Profile"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V11",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "机动性能",
+      "entry": "Ribbon/装备性能/机动",
+      "controls": [
+        "高度",
+        "马赫数",
+        "重量构型",
+        "nz 选择",
+        "证据下钻"
+      ],
+      "sections": [
+        "E-M/Ps",
+        "转弯率",
+        "nz 1-9 步长 0.5",
+        "能量"
+      ],
+      "semantic_rules": [
+        "模型域外明确不可用"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V12",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "探测性能",
+      "entry": "Ribbon/装备性能/探测",
+      "controls": [
+        "型号构型",
+        "目标类型",
+        "方位",
+        "样本筛选"
+      ],
+      "sections": [
+        "探测概率",
+        "ECDF",
+        "方位分布",
+        "提示增益",
+        "样本"
+      ],
+      "semantic_rules": [
+        "概率区间与样本量同时显示"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V13",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "告警性能",
+      "entry": "Ribbon/装备性能/告警",
+      "controls": [
+        "型号构型",
+        "威胁类型",
+        "告警类型",
+        "时间范围"
+      ],
+      "sections": [
+        "告警 ECDF",
+        "混淆矩阵",
+        "事件",
+        "虚警漏警趋势",
+        "威胁响应",
+        "样本"
+      ],
+      "semantic_rules": [
+        "混淆矩阵口径与资格状态可见"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V14",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "武器性能",
+      "entry": "Ribbon/装备性能/武器",
+      "controls": [
+        "武器型号",
+        "构型",
+        "目标类型",
+        "发射条件"
+      ],
+      "sections": [
+        "DLZ",
+        "命中热图",
+        "链路可靠性",
+        "发射距离散点",
+        "偏差",
+        "样本"
+      ],
+      "semantic_rules": [
+        "示例包线不得作为规则"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V15",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "条件因素",
+      "entry": "Ribbon/装备性能/条件因素",
+      "controls": [
+        "因素选择",
+        "分层筛选",
+        "置信区间",
+        "样本下钻"
+      ],
+      "sections": [
+        "因素分层差异",
+        "分布",
+        "样本资格",
+        "证据"
+      ],
+      "semantic_rules": [
+        "明确非因果分析",
+        "禁止因果措辞"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V16",
+      "module": "equipment",
+      "p_mapping": [
+        "P06",
+        "P07"
+      ],
+      "title": "漂移监测",
+      "entry": "Ribbon/装备性能/漂移",
+      "controls": [
+        "指标选择",
+        "时间范围",
+        "构型维护过滤",
+        "告警确认"
+      ],
+      "sections": [
+        "EWMA",
+        "CUSUM",
+        "构型与维护标记",
+        "告警"
+      ],
+      "semantic_rules": [
+        "阈值来自受控配置"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V17",
+      "module": "quality",
+      "p_mapping": [
+        "P02",
+        "P12"
+      ],
+      "title": "数据可信度",
+      "entry": "Ribbon/数据可信度",
+      "controls": [
+        "架次选择",
+        "数据源选择",
+        "质量维度",
+        "证据下钻",
+        "重新资格"
+      ],
+      "sections": [
+        "健康矩阵",
+        "时间漂移",
+        "DQ",
+        "观察资格",
+        "影响范围"
+      ],
+      "semantic_rules": [
+        "TIME/REFERENCE/ASSOCIATION/WORLD/ELIGIBILITY 五维完整"
+      ],
+      "target": "G4"
+    },
+    {
+      "id": "V18",
+      "module": "report",
+      "p_mapping": [
+        "P05",
+        "P08",
+        "P09"
+      ],
+      "title": "训练复盘报告",
+      "entry": "Ribbon/报告",
+      "controls": [
+        "报告版本",
+        "固定工具栏",
+        "正文缩放",
+        "章节导航",
+        "证据下钻",
+        "导出 PDF"
+      ],
+      "sections": [
+        "事实",
+        "问题",
+        "证据",
+        "建议",
+        "审批与版本"
+      ],
+      "semantic_rules": [
+        "事实与建议分离",
+        "禁止无权威综合总分",
+        "正式版本不可覆盖"
+      ],
+      "target": "G9"
+    },
+    {
+      "id": "V19",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "编队飞行",
+      "entry": "Ribbon/训练评估/编队飞行",
+      "controls": [
+        "架次事件选择",
+        "事件轨",
+        "成员选择",
+        "证据下钻",
+        "回放"
+      ],
+      "sections": [
+        "编队误差",
+        "相对位置",
+        "队形转换",
+        "口令响应"
+      ],
+      "semantic_rules": [
+        "相对位置绑定同一时间基准"
+      ],
+      "target": "G7"
+    },
+    {
+      "id": "V20",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "视距内空战·编队",
+      "entry": "Ribbon/训练评估/WVR编队或V26 WE下钻",
+      "controls": [
+        "WE选择",
+        "射手/目标视角",
+        "成员选择",
+        "事件窗口",
+        "回放"
+      ],
+      "sections": [
+        "射手角色/目标/掩护/解冲突",
+        "目标编队关系",
+        "成员P_i/A_i矩阵",
+        "成员动作时序",
+        "信息共享关系",
+        "结果证据"
+      ],
+      "semantic_rules": [
+        "成员缺失不得由团队态势填补",
+        "同一WE不同Scope/Perspective"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V21",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "对地攻击·编队",
+      "entry": "Ribbon/训练评估/协同对地",
+      "controls": [
+        "WE选择",
+        "事件窗口",
+        "目标轴线",
+        "回放",
+        "证据下钻"
+      ],
+      "sections": [
+        "TOT",
+        "目标轴线",
+        "投放撤离",
+        "威胁重叠"
+      ],
+      "semantic_rules": [
+        "只允许shooter perspective",
+        "target perspective服务端拒绝",
+        "威胁重叠绑定时间空间"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V22",
+      "module": "admin",
+      "p_mapping": [
+        "P13"
+      ],
+      "title": "系统治理",
+      "entry": "Ribbon/管理/系统治理",
+      "controls": [
+        "任务筛选",
+        "规则版本",
+        "用户角色",
+        "审计检索",
+        "存储队列",
+        "备份恢复",
+        "W7-W9 门禁"
+      ],
+      "sections": [
+        "任务",
+        "规则与版本",
+        "用户角色",
+        "审计",
+        "存储",
+        "队列",
+        "备份",
+        "资格门禁"
+      ],
+      "semantic_rules": [
+        "写操作必须权限与审计双门禁"
+      ],
+      "target": "G9"
+    },
+    {
+      "id": "V23",
+      "module": "admin",
+      "p_mapping": [
+        "P01",
+        "P12",
+        "P13"
+      ],
+      "title": "数据管理与批次导入",
+      "entry": "Ribbon/管理/数据导入",
+      "controls": [
+        "数据类型",
+        "训练日期",
+        "Batch训练类型显式确认",
+        "机号/编队",
+        "架次/任务标识",
+        "文件",
+        "目录",
+        "批量导入",
+        "异常重试",
+        "红蓝/编队Context管理"
+      ],
+      "sections": [
+        "五组数据源卡片",
+        "导入队列",
+        "归并覆盖",
+        "预检",
+        "训练类型revision",
+        "Force/Formation Context",
+        "受治理补充数据"
+      ],
+      "semantic_rules": [
+        "训练类型不得由默认值或WE类别推断",
+        "登记/修改持久化并审计",
+        "解析/资格前不纳入正式V01",
+        "文件使用Desktop ticket"
+      ],
+      "target": "G4"
+    },
+    {
+      "id": "V24",
+      "module": "training",
+      "p_mapping": [
+        "P03",
+        "P04"
+      ],
+      "title": "协同攻击分析",
+      "entry": "V08/BVR/同目标协同攻击条件入口",
+      "controls": [
+        "返回 V08",
+        "当前事件目标武器",
+        "区间刷选",
+        "关系下钻",
+        "证据卡",
+        "回放"
+      ],
+      "sections": [
+        "五维分析",
+        "感知攻击关系",
+        "被动几何",
+        "单武器制导",
+        "四条时序泳道",
+        "四张证据卡"
+      ],
+      "semantic_rules": [
+        "仅V08合格BVR协同事件进入",
+        "无独立Ribbon入口",
+        "不形成总分",
+        "actor/gap来自证据",
+        "可回V08"
+      ],
+      "target": "G8"
+    },
+    {
+      "id": "V25",
+      "module": "admin",
+      "p_mapping": [
+        "P13"
+      ],
+      "title": "界面主题",
+      "entry": "Ribbon/管理/界面设置",
+      "controls": [
+        "战术主题",
+        "Graphite 深色",
+        "冰川浅色",
+        "应用主题"
+      ],
+      "sections": [
+        "主题预览",
+        "语义色说明",
+        "应用范围"
+      ],
+      "semantic_rules": [
+        "默认 Graphite",
+        "仅会话内生效",
+        "主题不改变业务语义"
+      ],
+      "target": "G10"
+    },
+    {
+      "id": "V26",
+      "module": "training",
+      "p_mapping": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P12",
+        "P13"
+      ],
+      "title": "批次发射事件总览",
+      "entry": "训练评估模块landing或V01 exact Batch下钻",
+      "controls": [
+        "Batch选择/导入",
+        "被评估方",
+        "WE类别",
+        "飞机/目标",
+        "架次",
+        "编队",
+        "裁决状态",
+        "发射方向",
+        "重置",
+        "WE选择",
+        "单机复盘",
+        "编队复盘",
+        "事件窗口",
+        "回放",
+        "Context管理"
+      ],
+      "sections": [
+        "筛选上下文",
+        "WE/Cluster/裁决统计",
+        "全批次发射时间线",
+        "每枚武器独立WE列表",
+        "未发射行为列表",
+        "分类例外"
+      ],
+      "semantic_rules": [
+        "每枚发射一个WE",
+        "齐射由Cluster关联不合并",
+        "未发射行为不创建虚假WE",
+        "exact Batch/Release/Context",
+        "无明细Batch fail-closed",
+        "分类几何不得静默覆盖武器规则"
+      ],
+      "target": "G7"
+    }
+  ],
+  "conflict_decisions": [
+    {
+      "id": "V33-C01",
+      "conflict": "HTML title still V30",
+      "decision": "File hash and TPAA_V33 object identify v33"
+    },
+    {
+      "id": "V33-C02",
+      "conflict": "TPAA_V33 preservedPages omits V25",
+      "decision": "Include V25 because final route/view exists"
+    },
+    {
+      "id": "V33-C03",
+      "conflict": "V27 appears as patch label",
+      "decision": "V27 is not a product view; target perspectives stay inside V04/V05/V08/V20"
+    },
+    {
+      "id": "V33-C04",
+      "conflict": "Red-blue relations stored in localStorage",
+      "decision": "Use governed Context revision and audit"
+    },
+    {
+      "id": "V33-C05",
+      "conflict": "Synthetic history, metrics, geometry and series",
+      "decision": "Layout only; production values come from authoritative APIs"
+    },
+    {
+      "id": "V33-C06",
+      "conflict": "Intermediate V01 definitions remain in file",
+      "decision": "Only last effective v33 V01 is target"
+    },
+    {
+      "id": "V33-C07",
+      "conflict": "V01 exact pixels vs small windows",
+      "decision": "Strict 1600x900 reference; approved local reflow/scroll at 1280x720 and smaller"
+    }
+  ],
+  "source_inputs": [
+    {
+      "kind": "DEMO",
+      "sha256": "7aa5ff433fcaa49c3a54ac592acb43c42ee98fd944d4fb66de6e75bac2401a9a"
+    },
+    {
+      "kind": "OVERALL_PATCH",
+      "sha256": "abc6b000b846dbe2e367cb5af67efe7f152ebef1a26ab0fc104918a7b37de3bb"
+    },
+    {
+      "kind": "ENGINEERING_PATCH",
+      "sha256": "26be99db27d726bd25830281da0023202bcb7b048be1d02ac81278265666890f"
+    },
+    {
+      "kind": "GAP_LIST",
+      "sha256": "402c3941c9be625b488c8e3425ed8fee7d0c3ba78f4084471e17688f231a6896"
+    }
+  ]
+}

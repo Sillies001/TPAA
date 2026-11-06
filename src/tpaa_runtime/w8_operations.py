@@ -61,6 +61,14 @@ def _text(value: object, field: str) -> str:
     return value
 
 
+def _optional_text(value: object, field: str) -> str | None:
+    return None if value is None else _text(value, field)
+
+
+def _optional_sha256(value: object, field: str) -> str | None:
+    return None if value is None else _sha256(value, field)
+
+
 def _canonical_hash(value: object) -> str:
     encoded = json.dumps(
         value,
@@ -249,19 +257,17 @@ def build_w8_operations_status(
             raise W8OperationsError("W8_EVIDENCE_CATEGORIES_INVALID")
         evidence.append(
             W8TargetProfileEvidence(
-                profile_id=str(record.get("profile_id", "")),
-                state=str(record.get("state", "")),
-                endpoint_ref=(
-                    None
-                    if record.get("endpoint_ref") is None
-                    else str(record["endpoint_ref"])
+                profile_id=_text(record.get("profile_id"), "profile_id"),
+                state=_text(record.get("state"), "state"),
+                endpoint_ref=_optional_text(record.get("endpoint_ref"), "endpoint_ref"),
+                evidence_sha256=_optional_sha256(
+                    record.get("evidence_sha256"),
+                    "evidence_sha256",
                 ),
-                evidence_sha256=(
-                    None
-                    if record.get("evidence_sha256") is None
-                    else str(record["evidence_sha256"])
-                ),
-                categories={str(key): str(value) for key, value in raw_categories.items()},
+                categories={
+                    _text(key, "category"): _text(value, "category_state")
+                    for key, value in raw_categories.items()
+                },
             )
         )
     return W8OperationsStatus(authority, evidence)

@@ -1,0 +1,35 @@
+{
+  "schema": "TPAA_GUI_G0_SPIKE_FIXTURE_V1",
+  "fixture_kind": "CONTRACT_SHAPED_NON_RANDOM",
+  "authority_bindings": [
+    "docs/gui/W5_CORE_WORKFLOW_CONTRACT.json",
+    "baseline/CB-1.5.0/canonical/CROSS_LAYER_DTO_CONTRACTS.json"
+  ],
+  "context": {
+    "session_id": "G0-CONTRACT-SESSION-001",
+    "episode_id": "G0-CONTRACT-EPISODE-001",
+    "release_id": "G0-CONTRACT-RELEASE-001",
+    "course": "BVR",
+    "readiness": "READY",
+    "workflow": "IDLE"
+  },
+  "V01": {
+    "title": "训练总览",
+    "states": ["READY", "N_A", "INSUFFICIENT", "INVALID", "SYSTEM_ERROR"],
+    "sections": ["课程架次", "回放覆盖", "装备快照", "待处理事实"]
+  },
+  "V03": {
+    "title": "同步回放",
+    "replay_mode": "EXACT_HISTORICAL_ONLY",
+    "fallback_policy": "FORBIDDEN",
+    "course_modes": ["BF", "WVR", "BVR", "STRIKE"],
+    "sections": ["二维航迹", "三维态势", "HUD", "通话文本", "事件轨", "参数曲线"]
+  },
+  "V24": {
+    "title": "协同攻击分析",
+    "entry_policy": "V08_BVR_COLLABORATIVE_ATTACK_ONLY",
+    "back_target": "V08",
+    "dimensions": ["目标信息形成", "感知攻击关系", "攻击制导方式", "同目标攻击时序", "角色关系"],
+    "aggregate_score": "FORBIDDEN"
+  }
+}

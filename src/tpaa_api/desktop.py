@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import hmac
+from pathlib import Path
 from typing import Annotated, cast
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from tpaa_application import ApplicationService
@@ -29,6 +30,7 @@ _DESKTOP_ALLOWED_PATHS = frozenset(
         "/runtime/qualification",
         "/runtime/observability",
         "/runtime/metrics",
+        "/ui",
         "/jobs",
     }
 )
@@ -44,6 +46,7 @@ _DESKTOP_IDENTITY_OPTIONAL_PATHS = frozenset(
         "/runtime/qualification",
         "/runtime/observability",
         "/runtime/metrics",
+        "/ui",
     }
 )
 _DESKTOP_ALLOWED_PREFIXES = (
@@ -56,6 +59,8 @@ _DESKTOP_ALLOWED_PREFIXES = (
     "/m8/",
     "/m9/",
     "/api/v1/",
+    "/security/",
+    "/ui/",
 )
 
 
@@ -72,6 +77,8 @@ def create_desktop_app(
     principal_resolver: UnifiedPrincipalResolver | None = None,
     authorization_guard: ApiAuthorizationGuard | None = None,
     approval_service: ApprovalService | None = None,
+    desktop_nonce: str | None = None,
+    web_asset_root: Path | None = None,
 ) -> FastAPI:
     """Create the loopback-only Desktop surface over one composed Application graph."""
 
@@ -115,11 +122,25 @@ def create_desktop_app(
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "PATH_NOT_ALLOWED"},
             )
-        if request.headers.get("origin") is not None:
-            return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN,
-                content={"detail": "ORIGIN_FORBIDDEN"},
+        origin = request.headers.get("origin")
+        if origin is not None:
+            server = request.scope.get("server")
+            server_port = (
+                server[1]
+                if isinstance(server, (tuple, list)) and len(server) == 2
+                else None
             )
+            expected_origin = f"http://127.0.0.1:{server_port}"
+            supplied_nonce = request.headers.get("x-tpaa-desktop-nonce", "")
+            if (
+                desktop_nonce is None
+                or origin != expected_origin
+                or not hmac.compare_digest(supplied_nonce, desktop_nonce)
+            ):
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": "ORIGIN_FORBIDDEN"},
+                )
         authorization = request.headers.get("authorization", "")
         scheme, separator, supplied = authorization.partition(" ")
         if (
@@ -146,6 +167,7 @@ def create_desktop_app(
             principal is None
             and not qualification_projection
             and path not in _DESKTOP_IDENTITY_OPTIONAL_PATHS
+            and not path.startswith("/ui/")
         ):
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -166,6 +188,35 @@ def create_desktop_app(
                         content={"detail": decision.code},
                     )
         return await call_next(request)
+
+    if desktop_nonce is not None:
+        assets = (web_asset_root or Path(__file__).resolve().parents[1] / "tpaa_gui" / "web_dist").resolve()
+        if not (assets / "index.html").is_file():
+            raise ValueError("WebEngine static asset root is unavailable")
+
+        def static_response(relative: str) -> FileResponse:
+            candidate = (assets / relative).resolve()
+            if assets not in candidate.parents and candidate != assets:
+                raise HTTPException(status_code=404, detail="STATIC_ASSET_NOT_FOUND")
+            if not candidate.is_file():
+                raise HTTPException(status_code=404, detail="STATIC_ASSET_NOT_FOUND")
+            response = FileResponse(candidate)
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; script-src 'self'; style-src 'self'; "
+                "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+                "object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"
+            )
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["Referrer-Policy"] = "no-referrer"
+            return response
+
+        @app.get("/ui", include_in_schema=False)
+        def web_index() -> FileResponse:
+            return static_response("index.html")
+
+        @app.get("/ui/{asset_path:path}", include_in_schema=False)
+        def web_asset(asset_path: str) -> FileResponse:
+            return static_response(asset_path or "index.html")
 
     def desktop_m8_principal(request: Request):  # type: ignore[no-untyped-def]
         principal = getattr(request.state, "tpaa_principal", None)

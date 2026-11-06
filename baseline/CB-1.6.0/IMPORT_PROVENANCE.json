@@ -1,0 +1,11 @@
+{
+  "record_type": "G1_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G1-V33-MACHINE-AUTHORITY-2026-11-06",
+  "source_baseline": "CB-1.5.0",
+  "source_baseline_lock_sha256": "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab",
+  "core_baseline": "CB-1.6.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 42,
+  "release_claim": false
+}
