@@ -70,3 +70,21 @@
 已在提交 `4b5e51f2abfc3aaea63c287a94d26a4b092f3155` 修复：将元素查询结果命名为 `rootElement`，执行 fail-fast 空值检查后，显式建立 `const root: HTMLDivElement = rootElement`；并增加 G2 合同测试断言。没有关闭 strictNullChecks、没有使用 `@ts-ignore`，也没有修改依赖版本。
 
 修复后的 Windows typecheck / Vite build 尚待用户重新执行。npm audit 同时报告 1 项 high severity vulnerability；尚未执行 `npm audit fix` 或 `--force`，待取得 `npm audit --json` 并评估依赖影响后再决定处理。
+
+
+## 7. Windows 本地验证与质量工具链修复（2026-11-06）
+
+用户已在 Windows 指定工作分支报告以下通过结果：
+- `npm ci`、`npm run typecheck`、`npm run build` 均通过。
+- `tools/gui/g1_frontend_build.py --output <TEMP>` 通过，4 个文件，两次干净构建及当前 dist 一致。
+- `tools/gui/g2_v33_verify.py --output <TEMP>` 返回 `status=IN_PROGRESS`，静态检查成功且未关闭阶段。
+- 前端构建更新了 `src/tpaa_gui/web_dist` 的 manifest、index、JS/CSS hashed assets；这些变更是正式构建产物，不得清理或丢弃。
+
+Python 门禁未通过启动：
+- Ruff 不在用户当前全局 Python 环境。
+- 全局 pytest 为 8.4.1，低于冻结的 9.0.2。
+- `tpaa_dev.py typecheck` 原 fallback 使用 `uv run --locked --with`，与未列入运行时 `uv.lock` 的临时 pinned quality tool 冲突。
+
+已提交 `b7d2d6b4067b4e265a11d3ae5122c6ccd058c092`：fallback 改为 `uv run --frozen --with <exact-version>`，不会要求改写 canonical uv.lock；更新 `tests/contract/test_m0_dev_toolchain.py` 的期望命令。待用户同步并复验 lint/mypy/pytest。
+
+npm audit 仍报告 1 项 high severity；尚未获得 `npm audit --json`，不得盲目升级依赖。

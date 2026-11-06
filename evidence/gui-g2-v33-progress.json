@@ -6,20 +6,20 @@
   "authority_checks": "STATIC_REVIEWED",
   "v24_ui_and_server_guard": "IMPLEMENTED_NOT_EXECUTED",
   "ribbon_themes_shared_state": "IMPLEMENTED_NOT_BUILT",
-  "frontend_typecheck": "PENDING_RERUN_AFTER_TS18047_FIX",
+  "frontend_typecheck": "PASS_WINDOWS_LOCAL",
   "vite_build_and_web_dist_sync": "PENDING",
-  "python_targeted_tests": "NOT_RUN",
+  "python_targeted_tests": "BLOCKED_GLOBAL_PYTEST_8_4_1_BELOW_REQUIRED_9_0_2",
   "webengine_visual_keyboard_hidpi_tests": "PENDING",
   "open_gates": [
-    "Run npm ci, npm run typecheck and npm run build on the Windows workspace",
-    "Regenerate src/tpaa_gui/web_dist and pass tools/gui/g1_frontend_build.py",
-    "Run targeted Ruff and pytest for the new G2 contract and V24 server guard tests",
-    "Run the G0R/G1 verifier commands after the frontend build and confirm zero drift",
+    "Run frozen Ruff/mypy/pytest quality tools after syncing toolchain fallback fix b7d2d6b4067b4e265a11d3ae5122c6ccd058c092",
+    "Run targeted G2 contract and V24 server guard tests under pytest 9.0.2",
+    "Run G0R/G1 verifiers and codegen checks after the final web_dist build; confirm no evidence drift",
     "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon and DPI checks",
-    "Confirm the actual desktop principal/permission matrix; do not invent view permissions absent from GUI_VIEW_CONTRACT"
+    "Confirm actual desktop principal/permission matrix; do not invent view permissions absent from GUI_VIEW_CONTRACT",
+    "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading"
   ],
   "release_claim": false,
-  "implementation_revision": "4b5e51f2abfc3aaea63c287a94d26a4b092f3155",
+  "implementation_revision": "b7d2d6b4067b4e265a11d3ae5122c6ccd058c092",
   "observed_local_failure": {
     "command": "npm run typecheck",
     "result": "FAILED",
@@ -34,5 +34,35 @@
     "reported_findings": "1 high severity vulnerability",
     "audit_fix_applied": false,
     "next_action": "Inspect npm audit --json and evaluate the affected dependency path before any lockfile update"
+  },
+  "vite_build": "PASS_WINDOWS_LOCAL",
+  "g1_frontend_determinism": "PASS_WINDOWS_LOCAL",
+  "g2_static_verifier": "PASS_IN_PROGRESS_WINDOWS_LOCAL",
+  "python_quality_tools": "BLOCKED_TOOLCHAIN_FALLBACK_FIX_COMMITTED_PENDING_RERUN",
+  "observed_local_failures": [
+    {
+      "command": "python -m ruff check ...",
+      "result": "NOT_RUN",
+      "reason": "Ruff not installed in the active global Python 3.13 environment; frozen toolchain fallback required"
+    },
+    {
+      "command": "python tools/dev/tpaa_dev.py typecheck",
+      "result": "FAILED_TOOL_LAUNCH",
+      "reason": "uv run --locked --with attempted to add mypy absent from uv.lock; fixed by switching ephemeral pinned tools to --frozen"
+    },
+    {
+      "command": "python -m pytest ...",
+      "result": "BLOCKED_VERSION_MISMATCH",
+      "reason": "active global pytest 8.4.1; project toolchain requires 9.0.2"
+    }
+  ],
+  "toolchain_fix": {
+    "commit": "b7d2d6b4067b4e265a11d3ae5122c6ccd058c092",
+    "changed": [
+      "tools/dev/tpaa_dev.py",
+      "tests/contract/test_m0_dev_toolchain.py"
+    ],
+    "strategy": "uv run --frozen --with <exact-tool-version>; preserve canonical uv.lock while running one-off pinned quality tools",
+    "verification": "PENDING_WINDOWS_RERUN"
   }
 }
