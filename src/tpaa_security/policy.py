@@ -218,8 +218,14 @@ class AuthorizationService:
             return AuthorizationDecision(False, "PERMISSION_DENIED", self.policy.sha256)
         if permission in self.policy.ownership_required:
             global_scope = bool(principal.roles & self.policy.global_scope_roles)
-            owned = resource is not None and (
-                "*" in principal.scopes or bool(resource.scope_keys() & principal.scopes)
+            if not global_scope and "*" in principal.scopes:
+                return AuthorizationDecision(
+                    False,
+                    "RESOURCE_SCOPE_WILDCARD_DENIED",
+                    self.policy.sha256,
+                )
+            owned = resource is not None and bool(
+                resource.scope_keys() & principal.scopes
             )
             if not global_scope and not owned:
                 return AuthorizationDecision(False, "RESOURCE_SCOPE_DENIED", self.policy.sha256)

@@ -67,7 +67,11 @@ class ApplicationApiAuthorizationAudit:
     sink: SecurityAuditSink
 
     def record(self, event: ApiAuthorizationEvent) -> None:
-        principal_key = "principal:" + hashlib.sha256(event.subject.encode()).hexdigest()
+        principal_key = (
+            event.subject
+            if event.subject.startswith("SUBJECT_SHA256:")
+            else "SUBJECT_SHA256:" + hashlib.sha256(event.subject.encode()).hexdigest()
+        )
         object_id = "api-path:" + hashlib.sha256(event.path.encode()).hexdigest()
         self.sink.record(
             SecurityAuditRecord(

@@ -78,9 +78,9 @@ class UnifiedPrincipal:
             )
         except (KeyError, ValueError) as exc:
             raise PermissionError("principal business role is not authorized") from exc
+        # scope_match is a frozen M8/M9 domain-view flag, not an authorization scope.
+        # Only explicit resource scopes may cross into the W3 authorization principal.
         scopes = frozenset(self.resource_scopes)
-        if not scopes and self.scope_match:
-            scopes = frozenset({"*"})
         return AuthorizationPrincipal(
             subject=self.actor_key,
             roles=roles,

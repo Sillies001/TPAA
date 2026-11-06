@@ -424,12 +424,18 @@ async function loadAuthorization(): Promise<void> {
     const payload: unknown = await response.json();
     if (typeof payload !== "object" || payload === null || !("schema" in payload) ||
       payload.schema !== "TPAA_SECURITY_SESSION_CONTEXT_V1" || !("permissions" in payload) ||
-      !Array.isArray(payload.permissions) || !("roles" in payload) || !Array.isArray(payload.roles)) {
+      !Array.isArray(payload.permissions) || !("gui_permissions" in payload) ||
+      !Array.isArray(payload.gui_permissions) || !("roles" in payload) || !Array.isArray(payload.roles) ||
+      !("gui_permission_authority_id" in payload) ||
+      payload.gui_permission_authority_id !== "GUI_PERMISSION_AUDIT_AUTHORITY" ||
+      !("gui_permission_activation_status" in payload)) {
       state.authorization.status = "ERROR";
       render();
       return;
     }
-    state.authorization.permissions = new Set(payload.permissions.filter((item): item is string => typeof item === "string"));
+    state.authorization.permissions = new Set(
+      payload.gui_permissions.filter((item): item is string => typeof item === "string"),
+    );
     state.authorization.roles = payload.roles.filter((item): item is string => typeof item === "string");
     state.authorization.status = "READY";
   } catch {

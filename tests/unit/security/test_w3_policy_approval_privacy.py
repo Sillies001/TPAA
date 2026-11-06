@@ -30,7 +30,7 @@ def _principal(subject: str, role: SecurityRole) -> AuthorizationPrincipal:
     return AuthorizationPrincipal(
         subject=subject,
         roles=frozenset({role}),
-        scopes=frozenset({"*"}),
+        scopes=frozenset({"resource:SESSION:S-1"}),
         authentication_method="TEST",
         credential_id=f"credential-{subject}",
     )
@@ -222,3 +222,30 @@ def test_break_glass_is_admin_only_short_lived_and_policy_limited() -> None:
             ttl=timedelta(minutes=15),
             now=NOW,
         )
+
+
+def test_non_global_wildcard_scope_is_denied_but_exact_scope_is_allowed() -> None:
+    authorization = AuthorizationService(load_security_policy())
+    resource = ResourceContext(resource_type="SESSION", resource_id="S-1")
+    wildcard = AuthorizationPrincipal(
+        subject="wildcard-instructor",
+        roles=frozenset({SecurityRole.INSTRUCTOR}),
+        scopes=frozenset({"*"}),
+        authentication_method="TEST",
+        credential_id="wildcard-instructor",
+    )
+    exact = AuthorizationPrincipal(
+        subject="exact-instructor",
+        roles=frozenset({SecurityRole.INSTRUCTOR}),
+        scopes=frozenset({"resource:SESSION:S-1"}),
+        authentication_method="TEST",
+        credential_id="exact-instructor",
+    )
+
+    denied = authorization.decide(wildcard, Permission.RAW_DATA_READ, resource=resource)
+    allowed = authorization.decide(exact, Permission.RAW_DATA_READ, resource=resource)
+
+    assert denied.allowed is False
+    assert denied.code == "RESOURCE_SCOPE_WILDCARD_DENIED"
+    assert allowed.allowed is True
+    assert allowed.code == "ALLOW"

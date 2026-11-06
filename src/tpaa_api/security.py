@@ -14,6 +14,11 @@ from tpaa_security import (
 )
 
 
+_GUI_PERMISSION_AUTHORITY_ID = "GUI_PERMISSION_AUDIT_AUTHORITY"
+_GUI_PERMISSION_AUTHORITY_VERSION = "1.1.0-candidate"
+_GUI_PERMISSION_ACTIVATION_STATUS = "INACTIVE"
+
+
 class ApprovalRequestBody(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
@@ -73,6 +78,10 @@ def register_security_routes(app: FastAPI, approvals: ApprovalService) -> None:
             "roles": sorted(role.value for role in principal.roles),
             "projection_role": policy.projection_role(principal.roles),
             "permissions": permissions,
+            "gui_permissions": [],
+            "gui_permission_authority_id": _GUI_PERMISSION_AUTHORITY_ID,
+            "gui_permission_authority_version": _GUI_PERMISSION_AUTHORITY_VERSION,
+            "gui_permission_activation_status": _GUI_PERMISSION_ACTIVATION_STATUS,
             "policy_sha256": policy.sha256,
         }
 

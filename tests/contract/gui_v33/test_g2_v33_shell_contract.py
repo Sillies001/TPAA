@@ -52,6 +52,9 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     assert 'view.id !== "V24"' in source
     assert "V24_REQUIRES_V08_CONTEXT" in source
     assert 'fetch("/security/session"' in source
+    assert '"gui_permissions" in payload' in source
+    assert "payload.gui_permissions.filter" in source
+    assert "payload.permissions.filter" not in source
     assert "required_permissions.every" in source
     assert 'unknown_policy === "DENY"' in source
     assert "function hasViewPermissions" in source

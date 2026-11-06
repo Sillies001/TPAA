@@ -16,6 +16,12 @@ from tpaa_application import (
     M0JobControl,
 )
 from tpaa_canonical import RuntimeBaselineIdentity, evaluate_runtime_baseline_handshake
+from tpaa_security import (
+    ApprovalService,
+    AuthorizationService,
+    InMemoryApprovalEventRepository,
+    load_security_policy,
+)
 
 
 class _UnusedStorageUseCase:
@@ -162,3 +168,39 @@ def test_desktop_and_service_share_one_governed_route_graph() -> None:
         }
 
     assert governed_paths(desktop) == governed_paths(service)
+
+
+def test_scope_match_domain_flag_does_not_create_authorization_wildcard() -> None:
+    principal = _principal()
+
+    authorization_principal = principal.authorization_principal()
+
+    assert principal.scope_match is True
+    assert authorization_principal.scopes == frozenset()
+
+
+def test_security_session_keeps_business_and_gui_permissions_separate() -> None:
+    principal = _principal()
+    policy = load_security_policy()
+    approvals = ApprovalService(
+        AuthorizationService(policy),
+        InMemoryApprovalEventRepository(),
+    )
+    app = create_unified_service_app(
+        application=_application(),
+        principal_resolver=lambda _request: principal,
+        approval_service=approvals,
+    )
+
+    with TestClient(app) as client:
+        response = client.get("/security/session")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema"] == "TPAA_SECURITY_SESSION_CONTEXT_V1"
+    assert "DERIVED_DATA_READ" in body["permissions"]
+    assert body["gui_permissions"] == []
+    assert body["gui_permission_authority_id"] == "GUI_PERMISSION_AUDIT_AUTHORITY"
+    assert body["gui_permission_authority_version"] == "1.1.0-candidate"
+    assert body["gui_permission_activation_status"] == "INACTIVE"
+    assert "batch.read" not in body["permissions"]

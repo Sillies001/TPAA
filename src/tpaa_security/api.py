@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -49,6 +50,11 @@ class InMemoryApiAuthorizationAudit:
         self.events.append(event)
 
 
+def _audit_subject(subject: str) -> str:
+    digest = hashlib.sha256(subject.encode("utf-8")).hexdigest()
+    return f"SUBJECT_SHA256:{digest}"
+
+
 _STATUS_PATHS = frozenset(
     {
         "/health",
@@ -58,6 +64,7 @@ _STATUS_PATHS = frozenset(
         "/runtime/qualification",
         "/runtime/observability",
         "/runtime/metrics",
+        "/security/session",
     }
 )
 
@@ -155,25 +162,25 @@ class ApiAuthorizationGuard:
                 resource=target,
                 approval_id=validated_approval,
             )
-        audited_permissions = HIGH_RISK_PERMISSIONS | {
-            Permission.DIRECT_IDENTITY_READ,
-            Permission.EXPORT_DEIDENTIFIED,
-            Permission.EXPORT_IDENTIFIED,
-            Permission.REIDENTIFY,
-            Permission.WITHDRAW_RELEASE,
-        }
-        if not decision.allowed or permission in audited_permissions:
-            self.audit.record(
-                ApiAuthorizationEvent(
-                    subject=principal.subject,
-                    method=method.upper(),
-                    path=path,
-                    permission=None if permission is None else permission.value,
-                    allowed=decision.allowed,
-                    code=decision.code,
+        if permission is not None or not decision.allowed:
+            try:
+                self.audit.record(
+                    ApiAuthorizationEvent(
+                        subject=_audit_subject(principal.subject),
+                        method=method.upper(),
+                        path=path,
+                        permission=None if permission is None else permission.value,
+                        allowed=decision.allowed,
+                        code=decision.code,
+                        policy_sha256=decision.policy_sha256,
+                    )
+                )
+            except Exception:
+                return AuthorizationDecision(
+                    allowed=False,
+                    code="AUDIT_WRITE_FAILED",
                     policy_sha256=decision.policy_sha256,
                 )
-            )
         return decision
 
 
