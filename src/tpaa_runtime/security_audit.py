@@ -83,6 +83,7 @@ class ApplicationApiAuthorizationAudit:
                 outcome="ALLOW" if event.allowed else "DENY",
                 reason=event.code,
                 details={
+                    "route_id": event.route_id,
                     "method": event.method,
                     "permission": event.permission,
                     "policy_sha256": event.policy_sha256,

@@ -6,17 +6,16 @@ from fastapi import FastAPI, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict
 
 from tpaa_security import (
+    GUI_ACTIVATION_STATUS,
+    GUI_AUTHORITY_ID,
+    GUI_AUTHORITY_VERSION,
     ApprovalError,
     ApprovalRequest,
     ApprovalService,
     Permission,
+    derive_gui_permissions,
     load_security_policy,
 )
-
-
-_GUI_PERMISSION_AUTHORITY_ID = "GUI_PERMISSION_AUDIT_AUTHORITY"
-_GUI_PERMISSION_AUTHORITY_VERSION = "1.1.0-candidate"
-_GUI_PERMISSION_ACTIVATION_STATUS = "INACTIVE"
 
 
 class ApprovalRequestBody(BaseModel):
@@ -73,15 +72,17 @@ def register_security_routes(app: FastAPI, approvals: ApprovalService) -> None:
                 for permission in policy.role_permissions.get(role, frozenset())
             }
         )
+        permission_values = frozenset(Permission(value) for value in permissions)
+        gui_permissions = derive_gui_permissions(principal.roles, permission_values)
         return {
             "schema": "TPAA_SECURITY_SESSION_CONTEXT_V1",
             "roles": sorted(role.value for role in principal.roles),
             "projection_role": policy.projection_role(principal.roles),
             "permissions": permissions,
-            "gui_permissions": [],
-            "gui_permission_authority_id": _GUI_PERMISSION_AUTHORITY_ID,
-            "gui_permission_authority_version": _GUI_PERMISSION_AUTHORITY_VERSION,
-            "gui_permission_activation_status": _GUI_PERMISSION_ACTIVATION_STATUS,
+            "gui_permissions": list(gui_permissions),
+            "gui_permission_authority_id": GUI_AUTHORITY_ID,
+            "gui_permission_authority_version": GUI_AUTHORITY_VERSION,
+            "gui_permission_activation_status": GUI_ACTIVATION_STATUS,
             "policy_sha256": policy.sha256,
         }
 

@@ -1,7 +1,7 @@
 import "./style.css";
 import registryJson from "../../../docs/gui/demo-v33/V33_FINAL_VIEW_REGISTRY.json";
-import contractJson from "../../../baseline/CB-1.6.0/canonical/GUI_VIEW_CONTRACT.json";
-import permissionJson from "../../../baseline/CB-1.6.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json";
+import contractJson from "../../../baseline/CB-1.7.0/canonical/GUI_VIEW_CONTRACT.json";
+import permissionJson from "../../../baseline/CB-1.7.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json";
 
 type Theme = "tactical" | "graphite" | "light";
 type UiState = "LOADING" | "EMPTY" | "READY" | "DEGRADED" | "ERROR" | "FORBIDDEN" | "N_A";
@@ -371,7 +371,7 @@ function render(): void {
       '</h2><p class="page-description">产品视图由 v33 视图注册表驱动；业务语义、权限与数据真实性以机器权威和后端合同为准。</p></div>',
     '<div class="page-actions"><button type="button" class="secondary-button" data-action="back"' +
       (state.navigation.returnStack.length ? "" : " disabled") + '>返回</button><button type="button" class="secondary-button" data-action="home">总览</button></div></div>',
-    renderPageBody(view, status), '</main></div><footer class="statusbar"><span>GUI-DEMO-V33-2026-11-05 · CB-1.6.0 候选</span>',
+    renderPageBody(view, status), '</main></div><footer class="statusbar"><span>GUI-DEMO-V33-2026-11-05 · CB-1.7.0 已激活</span>',
     '<span>权限：' + esc(state.authorization.status) + " · 业务数据：未接入（G3 起）</span><span>主题：" +
       esc(state.presentation.theme) + "</span></footer></div>",
   ].join("");
@@ -428,7 +428,10 @@ async function loadAuthorization(): Promise<void> {
       !Array.isArray(payload.gui_permissions) || !("roles" in payload) || !Array.isArray(payload.roles) ||
       !("gui_permission_authority_id" in payload) ||
       payload.gui_permission_authority_id !== "GUI_PERMISSION_AUDIT_AUTHORITY" ||
-      !("gui_permission_activation_status" in payload)) {
+      !("gui_permission_authority_version" in payload) ||
+      payload.gui_permission_authority_version !== "1.1.0" ||
+      !("gui_permission_activation_status" in payload) ||
+      payload.gui_permission_activation_status !== "ACTIVE") {
       state.authorization.status = "ERROR";
       render();
       return;

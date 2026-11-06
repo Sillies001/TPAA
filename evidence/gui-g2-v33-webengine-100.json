@@ -1,0 +1,164 @@
+{
+  "schema": "TPAA_G2_V33_WEBENGINE_ACCEPTANCE_V1",
+  "status": "PASS",
+  "scale": 1.0,
+  "device_pixel_ratio": 1.0,
+  "session_authority": {
+    "id": "GUI_PERMISSION_AUDIT_AUTHORITY",
+    "version": "1.1.0",
+    "activation": "ACTIVE",
+    "role": "ADMINISTRATOR",
+    "gui_permission_count": 12
+  },
+  "exact_origin": "http://127.0.0.1:14016",
+  "off_the_record": true,
+  "direct_v24_http_status": 403,
+  "initial": {
+    "session": "会话已核验",
+    "view": "总览 / V01",
+    "currentView": "V01",
+    "currentModule": "overview",
+    "title": "历史多批次训练综合总览",
+    "theme": "graphite",
+    "state": "state-panel state-n_a",
+    "disabledModules": 0,
+    "ribbonExpanded": "true",
+    "subnavHidden": false,
+    "activeModule": null,
+    "activeView": null,
+    "activeClass": "",
+    "viewport": [
+      1280,
+      720
+    ],
+    "dpr": 1,
+    "horizontalOverflow": false,
+    "mainWithinViewport": true,
+    "clippedButtons": []
+  },
+  "themes": [
+    {
+      "theme": "tactical",
+      "path": "evidence/gui-g2-v33/screenshots/g2_tactical_100pct.png",
+      "sha256": "0d9dc853d10c22d7d4c92aa05a489528b9701f7e7558dea60992cd48b7d698f9",
+      "bytes": 74506
+    },
+    {
+      "theme": "graphite",
+      "path": "evidence/gui-g2-v33/screenshots/g2_graphite_100pct.png",
+      "sha256": "c6957f5246ff1e424b495adecb88f1b4b757e5803336b1c42f63a9c042891b70",
+      "bytes": 74601
+    },
+    {
+      "theme": "light",
+      "path": "evidence/gui-g2-v33/screenshots/g2_light_100pct.png",
+      "sha256": "39d4b7299b517c5bb33ec3cc46c2b931639dd0e29472cc19e259cc4625661c2c",
+      "bytes": 74435
+    }
+  ],
+  "ribbon_collapsed": {
+    "session": "会话已核验",
+    "view": "数据与系统 / V25",
+    "currentView": "V25",
+    "currentModule": "support",
+    "title": "主题管理",
+    "theme": "light",
+    "state": "",
+    "disabledModules": 0,
+    "ribbonExpanded": "false",
+    "subnavHidden": true,
+    "activeModule": null,
+    "activeView": null,
+    "activeClass": "",
+    "viewport": [
+      1280,
+      720
+    ],
+    "dpr": 1,
+    "horizontalOverflow": false,
+    "mainWithinViewport": true,
+    "clippedButtons": []
+  },
+  "keyboard_training_landing": {
+    "session": "会话已核验",
+    "view": "训练评估 / V26",
+    "currentView": "V26",
+    "currentModule": "training",
+    "title": "批次发射事件总览",
+    "theme": "light",
+    "state": "state-panel state-n_a",
+    "disabledModules": 0,
+    "ribbonExpanded": "false",
+    "subnavHidden": true,
+    "activeModule": null,
+    "activeView": null,
+    "activeClass": "",
+    "viewport": [
+      1280,
+      720
+    ],
+    "dpr": 1,
+    "horizontalOverflow": false,
+    "mainWithinViewport": true,
+    "clippedButtons": []
+  },
+  "focus_restored": {
+    "session": "会话已核验",
+    "view": "总览 / V01",
+    "currentView": "V01",
+    "currentModule": "overview",
+    "title": "历史多批次训练综合总览",
+    "theme": "light",
+    "state": "state-panel state-n_a",
+    "disabledModules": 0,
+    "ribbonExpanded": "false",
+    "subnavHidden": true,
+    "activeModule": "overview",
+    "activeView": null,
+    "activeClass": "module-tab is-active",
+    "viewport": [
+      1280,
+      720
+    ],
+    "dpr": 1,
+    "horizontalOverflow": false,
+    "mainWithinViewport": true,
+    "clippedButtons": []
+  },
+  "focus_transaction": {
+    "before": "overview",
+    "after": "overview",
+    "currentView": "V01"
+  },
+  "v24_ui_guard": {
+    "disabled": true,
+    "ariaDisabled": "true",
+    "directNavPresent": false,
+    "currentView": "V08"
+  },
+  "final_geometry": {
+    "session": "会话已核验",
+    "view": "训练评估 / V08",
+    "currentView": "V08",
+    "currentModule": "training",
+    "title": "超视距空战·编队",
+    "theme": "light",
+    "state": "state-panel state-n_a",
+    "disabledModules": 0,
+    "ribbonExpanded": "false",
+    "subnavHidden": true,
+    "activeModule": "overview",
+    "activeView": null,
+    "activeClass": "module-tab",
+    "viewport": [
+      1280,
+      720
+    ],
+    "dpr": 1,
+    "horizontalOverflow": false,
+    "mainWithinViewport": true,
+    "clippedButtons": []
+  },
+  "release_claim": false,
+  "shutdown_state": "EXITED"
+}

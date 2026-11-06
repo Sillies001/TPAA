@@ -74,8 +74,8 @@ def _git_head() -> str:
 
 def verify() -> dict[str, Any]:
     registry = _load(ROOT / "docs/gui/demo-v33/V33_FINAL_VIEW_REGISTRY.json")
-    contract = _load(ROOT / "baseline/CB-1.6.0/canonical/GUI_VIEW_CONTRACT.json")
-    permissions = _load(ROOT / "baseline/CB-1.6.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json")
+    contract = _load(ROOT / "baseline/CB-1.7.0/canonical/GUI_VIEW_CONTRACT.json")
+    permissions = _load(ROOT / "baseline/CB-1.7.0/canonical/GUI_PERMISSION_AUDIT_AUTHORITY.json")
     routes = _load(ROOT / "baseline/CB-1.6.0/canonical/API_ROUTE_AUTHORITY.json")
     openapi = _load(ROOT / "generated/g1-cb-1.6.0/api/openapi-gui-v33.json")
     g0r = _load(ROOT / "evidence/gui-g0-v33/g0r-v33-closure.json")

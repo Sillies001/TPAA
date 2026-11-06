@@ -4,7 +4,10 @@ from .api import (
     ApiAuthorizationEvent,
     ApiAuthorizationGuard,
     InMemoryApiAuthorizationAudit,
+    RouteSecurityAuthorityError,
+    RouteSecurityBinding,
     route_permission,
+    route_security,
 )
 from .approval import (
     ApprovalError,
@@ -22,6 +25,13 @@ from .desktop_identity import (
     DesktopIdentityProvider,
     LocalAccount,
     sign_assignment,
+)
+from .gui_authority import (
+    GUI_ACTIVATION_STATUS,
+    GUI_AUTHORITY_ID,
+    GUI_AUTHORITY_VERSION,
+    GuiPermissionAuthorityError,
+    derive_gui_permissions,
 )
 from .identity import (
     AuthenticatedIdentity,
@@ -81,11 +91,15 @@ __all__ = [
     "BreakGlassService",
     "DataClassification",
     "EnvironmentSecretManager",
+    "GUI_ACTIVATION_STATUS",
+    "GUI_AUTHORITY_ID",
+    "GUI_AUTHORITY_VERSION",
     "HIGH_RISK_PERMISSIONS",
     "ExportManifest",
     "HttpsJwksProvider",
     "HighRiskRule",
     "IdentityVerificationError",
+    "GuiPermissionAuthorityError",
     "InMemoryRevocationRegistry",
     "JsonRevocationRegistry",
     "InMemoryApprovalEventRepository",
@@ -101,6 +115,8 @@ __all__ = [
     "PrivacyError",
     "PrivacyService",
     "ResourceContext",
+    "RouteSecurityAuthorityError",
+    "RouteSecurityBinding",
     "RetentionDecision",
     "SecurityPolicy",
     "SecurityPolicyError",
@@ -110,6 +126,8 @@ __all__ = [
     "StaticJwksProvider",
     "VerifiedClientCertificate",
     "load_security_policy",
+    "derive_gui_permissions",
     "route_permission",
+    "route_security",
     "sign_assignment",
 ]

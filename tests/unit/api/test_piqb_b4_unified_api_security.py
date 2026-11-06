@@ -199,8 +199,11 @@ def test_security_session_keeps_business_and_gui_permissions_separate() -> None:
     body = response.json()
     assert body["schema"] == "TPAA_SECURITY_SESSION_CONTEXT_V1"
     assert "DERIVED_DATA_READ" in body["permissions"]
-    assert body["gui_permissions"] == []
+    assert "gui.view" in body["gui_permissions"]
+    assert "batch.read" in body["gui_permissions"]
+    assert "replay.read" in body["gui_permissions"]
+    assert "DERIVED_DATA_READ" not in body["gui_permissions"]
     assert body["gui_permission_authority_id"] == "GUI_PERMISSION_AUDIT_AUTHORITY"
-    assert body["gui_permission_authority_version"] == "1.1.0-candidate"
-    assert body["gui_permission_activation_status"] == "INACTIVE"
+    assert body["gui_permission_authority_version"] == "1.1.0"
+    assert body["gui_permission_activation_status"] == "ACTIVE"
     assert "batch.read" not in body["permissions"]

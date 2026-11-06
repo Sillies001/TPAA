@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from typing import Protocol
 
+from .generated_g2_authority import ROUTE_SECURITY_BINDINGS
 from .permissions import HIGH_RISK_PERMISSIONS, Permission
 from .policy import (
     AuthorizationDecision,
@@ -34,6 +36,7 @@ class ApiAuthorizationAudit(Protocol):
 @dataclass(frozen=True, slots=True)
 class ApiAuthorizationEvent:
     subject: str
+    route_id: str
     method: str
     path: str
     permission: str | None
@@ -55,62 +58,70 @@ def _audit_subject(subject: str) -> str:
     return f"SUBJECT_SHA256:{digest}"
 
 
-_STATUS_PATHS = frozenset(
-    {
-        "/health",
-        "/readiness",
-        "/version",
-        "/runtime/features",
-        "/runtime/qualification",
-        "/runtime/observability",
-        "/runtime/metrics",
-        "/security/session",
-    }
+@dataclass(frozen=True, slots=True)
+class RouteSecurityBinding:
+    route_id: str
+    method: str
+    template: str
+    permission: Permission | None
+    audit_mode: str
+
+
+class RouteSecurityAuthorityError(LookupError):
+    """No approved exact route binding exists for an incoming request."""
+
+
+def _route_pattern(template: str) -> re.Pattern[str]:
+    segments = template.split("/")
+    pattern = "/".join(
+        (
+            ".+"
+            if segment.startswith("{") and segment.endswith(":path}")
+            else "[^/]+"
+            if segment.startswith("{") and segment.endswith("}")
+            else re.escape(segment)
+        )
+        for segment in segments
+    )
+    return re.compile(f"^{pattern}$")
+
+
+_ROUTE_TABLE = tuple(
+    (
+        RouteSecurityBinding(
+            route_id=route_id,
+            method=method,
+            template=template,
+            permission=None if permission_id is None else Permission(permission_id),
+            audit_mode=audit_mode,
+        ),
+        _route_pattern(template),
+    )
+    for route_id, method, template, permission_id, audit_mode in ROUTE_SECURITY_BINDINGS
 )
 
 
-def route_permission(method: str, path: str) -> Permission | None:
-    """Classify every production route; unknown writes never become public."""
+def route_security(method: str, path: str) -> RouteSecurityBinding | None:
+    """Return the one approved exact binding, or ``None`` for an unknown route."""
 
     normalized_method = method.upper()
-    lowered = path.lower()
-    if path in _STATUS_PATHS:
-        return None
-    if lowered == "/security/approvals" and normalized_method == "POST":
-        return None
-    if lowered.startswith("/security/approvals"):
-        return Permission.APPROVAL_REVIEW
-    if "export" in lowered:
-        return Permission.EXPORT_DEIDENTIFIED
-    if "plugin" in lowered and normalized_method != "GET":
-        return Permission.PLUGIN_INSTALL if "install" in lowered else Permission.PLUGIN_ENABLE
-    if "override" in lowered and normalized_method != "GET":
-        return Permission.PUBLICATION_OVERRIDE
-    if "model" in lowered and any(term in lowered for term in ("publish", "release")):
-        return Permission.MODEL_RELEASE
-    if normalized_method != "GET" and lowered.endswith("/replay"):
-        return Permission.COMPUTE_EXECUTE
-    if normalized_method == "DELETE" and "release" in lowered:
-        return Permission.WITHDRAW_RELEASE
-    if normalized_method != "GET" and any(
-        term in lowered for term in ("publish", "/release", "/releases")
-    ):
-        return Permission.PRODUCT_PUBLISH
-    if "annotation" in lowered and normalized_method != "GET":
-        return Permission.ANNOTATION_WRITE
-    if normalized_method != "GET" and any(
-        term in lowered for term in ("/source", "/import", "/ingest")
-    ):
-        return Permission.SOURCE_IMPORT
-    if normalized_method != "GET" and any(
-        term in lowered for term in ("/config", "/context", "/profile", "/rule")
-    ):
-        return Permission.CONFIGURATION_WRITE
-    if normalized_method != "GET":
-        return Permission.COMPUTE_EXECUTE
-    if any(term in lowered for term in ("/source", "/raw")):
-        return Permission.RAW_DATA_READ
-    return Permission.DERIVED_DATA_READ
+    matches = [
+        binding
+        for binding, pattern in _ROUTE_TABLE
+        if binding.method == normalized_method and pattern.fullmatch(path)
+    ]
+    if len(matches) > 1:
+        raise RouteSecurityAuthorityError(f"ambiguous route authority: {method} {path}")
+    return matches[0] if matches else None
+
+
+def route_permission(method: str, path: str) -> Permission | None:
+    """Return the explicit permission; unknown routes fail closed."""
+
+    binding = route_security(method, path)
+    if binding is None:
+        raise RouteSecurityAuthorityError(f"unknown route: {method.upper()} {path}")
+    return binding.permission
 
 
 class ApiAuthorizationGuard:
@@ -134,14 +145,23 @@ class ApiAuthorizationGuard:
         approval_id: str | None = None,
         resource: ResourceContext | None = None,
     ) -> AuthorizationDecision:
-        permission = route_permission(method, path)
-        if permission is None:
+        binding = route_security(method, path)
+        if binding is None:
+            permission = None
+            decision = AuthorizationDecision(
+                allowed=False,
+                code="ROUTE_NOT_AUTHORIZED",
+                policy_sha256=self.authorization.policy.sha256,
+            )
+        elif binding.permission is None:
+            permission = None
             decision = AuthorizationDecision(
                 allowed=True,
                 code="AUTHENTICATED_STATUS_ACCESS",
                 policy_sha256=self.authorization.policy.sha256,
             )
         else:
+            permission = binding.permission
             validated_approval: str | None = None
             if permission in HIGH_RISK_PERMISSIONS and approval_id:
                 if self.approval_validator is not None and self.approval_validator.validate(
@@ -162,11 +182,14 @@ class ApiAuthorizationGuard:
                 resource=target,
                 approval_id=validated_approval,
             )
-        if permission is not None or not decision.allowed:
+        if binding is None or binding.audit_mode == "ALWAYS" or not decision.allowed:
             try:
                 self.audit.record(
                     ApiAuthorizationEvent(
                         subject=_audit_subject(principal.subject),
+                        route_id=(
+                            "UNREGISTERED" if binding is None else binding.route_id
+                        ),
                         method=method.upper(),
                         path=path,
                         permission=None if permission is None else permission.value,
@@ -189,5 +212,8 @@ __all__ = [
     "ApiAuthorizationGuard",
     "ApprovalValidator",
     "InMemoryApiAuthorizationAudit",
+    "RouteSecurityAuthorityError",
+    "RouteSecurityBinding",
     "route_permission",
+    "route_security",
 ]

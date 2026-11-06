@@ -15,8 +15,8 @@ from tools.gui.g2_v33_verify import (
 ROOT = Path(__file__).resolve().parents[3]
 FRONTEND = ROOT / "frontend" / "gui-v33" / "src"
 REGISTRY = ROOT / "docs" / "gui" / "demo-v33" / "V33_FINAL_VIEW_REGISTRY.json"
-VIEW_CONTRACT = ROOT / "baseline" / "CB-1.6.0" / "canonical" / "GUI_VIEW_CONTRACT.json"
-PERMISSIONS = ROOT / "baseline" / "CB-1.6.0" / "canonical" / "GUI_PERMISSION_AUDIT_AUTHORITY.json"
+VIEW_CONTRACT = ROOT / "baseline" / "CB-1.7.0" / "canonical" / "GUI_VIEW_CONTRACT.json"
+PERMISSIONS = ROOT / "baseline" / "CB-1.7.0" / "canonical" / "GUI_PERMISSION_AUDIT_AUTHORITY.json"
 
 
 def _load(path: Path) -> dict[str, object]:
@@ -54,6 +54,8 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     assert 'fetch("/security/session"' in source
     assert '"gui_permissions" in payload' in source
     assert "payload.gui_permissions.filter" in source
+    assert 'payload.gui_permission_authority_version !== "1.1.0"' in source
+    assert 'payload.gui_permission_activation_status !== "ACTIVE"' in source
     assert "payload.permissions.filter" not in source
     assert "required_permissions.every" in source
     assert 'unknown_policy === "DENY"' in source
@@ -105,6 +107,8 @@ def test_g2_verifier_rejects_missing_or_malformed_json_object_arrays() -> None:
 
 
 def test_g2_permission_coverage_fails_closed_for_unbound_views() -> None:
+    active_views = _object_list(_load(VIEW_CONTRACT)["views"], "active.views")
+    assert _unbound_view_permissions(active_views) == []
     assert _unbound_view_permissions(
         [
             {"view_id": "V01", "required_permissions": []},
