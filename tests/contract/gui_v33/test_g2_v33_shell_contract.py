@@ -4,6 +4,10 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
+from tools.gui.g2_v33_verify import G2VerificationError, _object_list
+
 ROOT = Path(__file__).resolve().parents[3]
 FRONTEND = ROOT / "frontend" / "gui-v33" / "src"
 REGISTRY = ROOT / "docs" / "gui" / "demo-v33" / "V33_FINAL_VIEW_REGISTRY.json"
@@ -80,3 +84,11 @@ def test_g2_permission_catalog_keeps_unknown_policy_default_deny() -> None:
     permissions = _load(PERMISSIONS)["permissions"]
     assert isinstance(permissions, list) and permissions
     assert all(item["unknown_policy"] == "DENY" for item in permissions)
+
+
+def test_g2_verifier_rejects_missing_or_malformed_json_object_arrays() -> None:
+    assert _object_list([{"view_id": "V24"}], "contract.views") == [{"view_id": "V24"}]
+    with pytest.raises(G2VerificationError, match="contract.views"):
+        _object_list(None, "contract.views")
+    with pytest.raises(G2VerificationError, match="contract.views"):
+        _object_list([None], "contract.views")

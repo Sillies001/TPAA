@@ -76,3 +76,14 @@ python tools/dev/tpaa_dev.py lint
 python tools/dev/tpaa_dev.py typecheck
 uv run --frozen --with pytest==9.0.2 pytest tests/contract/gui_v33/test_g2_v33_shell_contract.py tests/unit/api/test_g2_v33_conditional_view_guard.py -q
 ```
+
+
+## Mypy 复验反馈与 G2 验证器修复（2026-11-06）
+
+用户报告：
+- `python tools/dev/tpaa_dev.py lint`：PASS。
+- `python tools/dev/tpaa_dev.py typecheck`：Mypy 在 `tools/gui/g2_v33_verify.py` 报告 3 处类型错误：`contract_views` / V24 的动态 JSON 列表可能为 None，且 `reserved_routes` 可能为 None。
+
+修复方案：新增 `_object_list(value: object, label: str) -> list[dict[str, Any]]`，对 registry.views、contract.views、registry.modules、routes.reserved_routes 和 permissions.permissions 进行运行时对象数组校验；对 null、非数组、非对象成员 fail-closed 报错。V24 和保留路由循环现在只消费经过校验的对象列表。新增合同测试覆盖正常对象数组、null 和非法成员。
+
+当前结果：Ruff 用户报告 PASS；本次 Mypy 修复尚未在 Windows 复验。G2 继续保持 `IN_PROGRESS`。

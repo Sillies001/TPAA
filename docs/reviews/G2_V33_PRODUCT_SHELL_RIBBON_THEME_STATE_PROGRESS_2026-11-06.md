@@ -88,3 +88,10 @@ Python 门禁未通过启动：
 已提交 `b7d2d6b4067b4e265a11d3ae5122c6ccd058c092`：fallback 改为 `uv run --frozen --with <exact-version>`，不会要求改写 canonical uv.lock；更新 `tests/contract/test_m0_dev_toolchain.py` 的期望命令。待用户同步并复验 lint/mypy/pytest。
 
 npm audit 仍报告 1 项 high severity；尚未获得 `npm audit --json`，不得盲目升级依赖。
+
+
+## 8. Mypy 严格类型检查反馈及修复（2026-11-06）
+
+用户在 Windows 执行 `python tools/dev/tpaa_dev.py lint` 成功；`typecheck` 报告 3 处错误，全部位于 `tools/gui/g2_v33_verify.py`，根因是从 JSON `dict.get` 取出的数组值未先校验为非空对象数组。
+
+已准备修复：新增 `_object_list(value: object, label: str) -> list[dict[str, Any]]`，明确校验值为数组、成员为字符串键 JSON 对象；将 registry.views、contract.views、registry.modules、routes.reserved_routes、permissions.permissions 全部通过该 helper 验证后再迭代。新增 G2 合同测试覆盖有效数组、null 和非对象成员。此修复仍待 Windows Mypy / pytest 复验，不得标记为 PASS。

@@ -11,7 +11,7 @@
   "python_targeted_tests": "BLOCKED_GLOBAL_PYTEST_8_4_1_BELOW_REQUIRED_9_0_2",
   "webengine_visual_keyboard_hidpi_tests": "PENDING",
   "open_gates": [
-    "Run frozen Ruff/mypy/pytest quality tools after syncing toolchain fallback fix b7d2d6b4067b4e265a11d3ae5122c6ccd058c092",
+    "Re-run python tools/dev/tpaa_dev.py typecheck after the G2 verifier JSON typing fix",
     "Run targeted G2 contract and V24 server guard tests under pytest 9.0.2",
     "Run G0R/G1 verifiers and codegen checks after the final web_dist build; confirm no evidence drift",
     "Execute Windows WebEngine loopback, three-theme, keyboard, focus, ribbon and DPI checks",
@@ -19,7 +19,7 @@
     "Inspect npm audit high severity advisory and assess dependency impact without force-upgrading"
   ],
   "release_claim": false,
-  "implementation_revision": "b7d2d6b4067b4e265a11d3ae5122c6ccd058c092",
+  "implementation_revision": "92ec0434864081749213bbc0a9353aff746e7b70",
   "observed_local_failure": {
     "command": "npm run typecheck",
     "result": "FAILED",
@@ -38,7 +38,7 @@
   "vite_build": "PASS_WINDOWS_LOCAL",
   "g1_frontend_determinism": "PASS_WINDOWS_LOCAL",
   "g2_static_verifier": "PASS_IN_PROGRESS_WINDOWS_LOCAL",
-  "python_quality_tools": "BLOCKED_TOOLCHAIN_FALLBACK_FIX_COMMITTED_PENDING_RERUN",
+  "python_quality_tools": "RUFF_PASS_MYPY_FIX_COMMITTED_PENDING_RERUN",
   "observed_local_failures": [
     {
       "command": "python -m ruff check ...",
@@ -54,6 +54,13 @@
       "command": "python -m pytest ...",
       "result": "BLOCKED_VERSION_MISMATCH",
       "reason": "active global pytest 8.4.1; project toolchain requires 9.0.2"
+    },
+    {
+      "command": "python tools/dev/tpaa_dev.py typecheck",
+      "result": "FAILED_MYPY_TYPE_ERRORS",
+      "reason": "Mypy found three unsafe optional JSON array iterations in tools/gui/g2_v33_verify.py (contract.views and routes.reserved_routes)",
+      "diagnostic": "Need type annotation for v24; contract_views may be None; reserved may be None",
+      "fixed_in": "PENDING_COMMIT"
     }
   ],
   "toolchain_fix": {
@@ -63,6 +70,14 @@
       "tests/contract/test_m0_dev_toolchain.py"
     ],
     "strategy": "uv run --frozen --with <exact-tool-version>; preserve canonical uv.lock while running one-off pinned quality tools",
+    "verification": "PENDING_WINDOWS_RERUN"
+  },
+  "mypy_fix": {
+    "changed": [
+      "tools/gui/g2_v33_verify.py",
+      "tests/contract/gui_v33/test_g2_v33_shell_contract.py"
+    ],
+    "approach": "Validate untrusted JSON arrays with _object_list(value: object, label: str) -> list[dict[str, Any]] before iteration; reject null and malformed members fail-closed",
     "verification": "PENDING_WINDOWS_RERUN"
   }
 }

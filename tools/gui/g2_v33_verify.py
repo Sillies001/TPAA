@@ -28,6 +28,19 @@ def _load(path: Path) -> dict[str, Any]:
     return value
 
 
+def _object_list(value: object, label: str) -> list[dict[str, Any]]:
+    """Validate a JSON array of objects before iterating over its members."""
+
+    if not isinstance(value, list):
+        raise G2VerificationError(f"expected JSON object array: {label}")
+    items: list[dict[str, Any]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict) or not all(isinstance(key, str) for key in item):
+            raise G2VerificationError(f"expected JSON object at {label}[{index}]")
+        items.append(item)
+    return items
+
+
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise G2VerificationError(message)
@@ -54,8 +67,8 @@ def verify() -> dict[str, Any]:
     desktop = (ROOT / "src/tpaa_api/desktop.py").read_text(encoding="utf-8")
 
     ids = [f"V{index:02d}" for index in range(1, 27)]
-    registry_views = registry.get("views")
-    contract_views = contract.get("views")
+    registry_views = _object_list(registry.get("views"), "registry.views")
+    contract_views = _object_list(contract.get("views"), "contract.views")
     _require(registry.get("view_count") == 26, "registry count drift")
     _require(
         isinstance(registry_views, list) and [item.get("id") for item in registry_views] == ids,
@@ -66,7 +79,8 @@ def verify() -> dict[str, Any]:
         and [item.get("view_id") for item in contract_views] == ids,
         "view contract IDs drift",
     )
-    modules = {item.get("id"): item for item in registry.get("modules", [])}
+    registry_modules = _object_list(registry.get("modules"), "registry.modules")
+    modules = {item.get("id"): item for item in registry_modules}
     _require(
         len(modules) == 5 and modules.get("training", {}).get("landing") == "V26",
         "module landing drift",
@@ -115,8 +129,8 @@ def verify() -> dict[str, Any]:
         "server V24 direct guard missing",
     )
 
-    reserved = routes.get("reserved_routes")
-    _require(isinstance(reserved, list) and len(reserved) == 14, "G1 reserved route count drift")
+    reserved = _object_list(routes.get("reserved_routes"), "routes.reserved_routes")
+    _require(len(reserved) == 14, "G1 reserved route count drift")
     paths = openapi.get("paths", {})
     _require(
         not any(item.get("path") in paths for item in reserved),
@@ -127,8 +141,9 @@ def verify() -> dict[str, Any]:
         "G0R evidence invalid",
     )
     _require(g1.get("status") == "PASS" and g1.get("release_claim") is False, "G1 evidence invalid")
+    permission_records = _object_list(permissions.get("permissions"), "permissions.permissions")
     _require(
-        all(item.get("unknown_policy") == "DENY" for item in permissions.get("permissions", [])),
+        all(item.get("unknown_policy") == "DENY" for item in permission_records),
         "permission unknown policy is not deny",
     )
 
