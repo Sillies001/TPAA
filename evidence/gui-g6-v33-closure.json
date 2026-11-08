@@ -1,0 +1,57 @@
+{
+  "schema": "TPAA_G6_V33_CLOSURE_EVIDENCE_V1",
+  "phase": "G6",
+  "phase_status": "IN_PROGRESS_REMEDIATION",
+  "superseded_by": "docs/reviews/G6_G12_POST_CLOSURE_REVIEW_SUPERSESSION_2026-11-08.md",
+  "closed_at": "2026-11-07",
+  "core_baseline": "CB-1.11.0",
+  "parent_core_baseline": "CB-1.10.0",
+  "baseline_lock_sha256": "7b8783bd7a61012862ec90ed64882d3f435d3a274f6237f309e6208a62105915",
+  "authority_sha256": "1874d98906daefb2441157d569fc516eea730630efd5cffb4d0d9e6742be1fcc",
+  "route_count": 100,
+  "g6_route_ids": [
+    "api.route.100"
+  ],
+  "reserved_routes": [
+    "gui.batch.events",
+    "gui.replay"
+  ],
+  "webengine_captures": 12,
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS 597 source files",
+    "g4_successor_check": "PASS",
+    "g5_successor_check": "PASS",
+    "g6_successor_check": "PASS",
+    "g4_codegen_check": "PASS routes=7 security_routes=96",
+    "g5_codegen_check": "PASS routes=3 security_routes=99",
+    "g6_codegen_check": "PASS routes=1 security_routes=100 files=3",
+    "g5_closure_recheck": "PASS routes=99 CLOSED_LOCAL_WITH_GATES",
+    "contract_and_application_pytest": "PASS 162 tests",
+    "unit_api_and_runtime_pytest": "PASS 195 tests (1 pre-existing installed-desktop e2e env failure unrelated to G6)",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "webengine_visual_acceptance": "PASS 12 captures, box_model no overlap/overflow",
+    "api_negative_tests": "PASS 403 scope-denied + reverse-date fail-closed empty + malformed 422",
+    "sqlite_g5_to_g6_no_migration_reuse": "PASS trusted pin CB-1.11.0, lineage CB-1.10.0 lock accepted"
+  },
+  "invariants": {
+    "no_latest_fallback": true,
+    "no_cross_batch_borrowing": true,
+    "single_exact_batch_workset": true,
+    "ratio_recompute_no_simple_average": true,
+    "zero_denominator_fail_closed": true,
+    "honest_empty_task_equipment_metrics": true,
+    "category_detail_owned_by_v26": true,
+    "linear_supersession_chain": true,
+    "canonical_dto_python_typescript_codegen": true,
+    "atomic_construct_before_publish": true,
+    "g5_routes_unchanged_under_successor": true
+  },
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  },
+  "next_phase": "G7"
+}

@@ -1,0 +1,16 @@
+{
+  "authority_id": "G12_DESIGN_FREEZE_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.17.0",
+  "parent_core_baseline": "CB-1.16.0",
+  "decision_id": "G12-V33-DESIGN_FREEZE-2026-11-07",
+  "approval_id": "G12-CB-1.17.0-LOCAL-DESIGN_FREEZE-2026-11-07",
+  "activation_status": "ACTIVE",
+  "rules": {
+    "view_registry_frozen_26": true,
+    "full_visual_matrix_required": "26x3x2",
+    "design_docs_sync": "03/03A/04/05A/B/E/F/G/H/I/06/07/09",
+    "migration_upgrade_rollback": "LINEAGE_CHAIN_CB-1.5.0_to_CB-1.17.0"
+  },
+  "release_claim": false
+}

@@ -1,0 +1,20 @@
+{
+  "authority_id": "GUI_P3_PROFILE_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.15.0",
+  "parent_core_baseline": "CB-1.14.0",
+  "decision_id": "G10-V33-VIEW-CLOSURE-2026-11-07",
+  "approval_id": "G10-CB-1.15.0-LOCAL-VIEW-CLOSURE-2026-11-07",
+  "admission_status": "NOT_ADMITTED",
+  "rules": {
+    "controlled_unavailable_only": true,
+    "no_synthetic_profile": true,
+    "no_synthetic_report_revision": true,
+    "no_governance_mutation_without_authority": true
+  },
+  "single_owner_rules": {
+    "read_model_owner": "tpaa_application.p3_profile"
+  },
+  "not_admitted_reason": "P3 Model Profile 读模型未准入：V10~V16 仅以受控不可用呈现，不合成 Profile。",
+  "release_claim": false
+}

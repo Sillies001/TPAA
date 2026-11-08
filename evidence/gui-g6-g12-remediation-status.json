@@ -1,0 +1,29 @@
+{
+  "schema": "TPAA_GUI_G6_G12_REMEDIATION_STATUS_V1",
+  "recorded_at": "2026-11-08",
+  "latest_wave": 2,
+  "plan": "docs/plans/TPAA_G6至G12关闭后复核缺口全面整改与再关闭方案_2026-11-08.md",
+  "stages": {
+    "G6": "IN_PROGRESS_REMEDIATION",
+    "G7": "IN_PROGRESS_REMEDIATION",
+    "G8": "IN_PROGRESS_REMEDIATION",
+    "G9": "IN_PROGRESS_REMEDIATION",
+    "G10": "IN_PROGRESS_REMEDIATION",
+    "G11": "IN_PROGRESS_REMEDIATION",
+    "G12": "IN_PROGRESS_EXTERNAL_DOORS_OPEN"
+  },
+  "w9_status": "NO_GO",
+  "product_complete": false,
+  "release_ready": false,
+  "visual_matrix_status": "AUTOMATED_STRUCTURAL_RECAPTURE_PASS_MANUAL_AND_FUNCTIONAL_GATES_OPEN",
+  "historical_visual_matrix": "INVALIDATED_AND_REPLACED_2026-11-08",
+  "open_authority_decisions": [
+    "G6_TASK_AND_EQUIPMENT_METRIC_DEFINITIONS",
+    "G7_NON_LAUNCH_BEHAVIOUR_SOURCE_AND_TAXONOMY"
+  ],
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  }
+}

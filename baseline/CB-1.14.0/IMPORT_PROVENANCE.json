@@ -1,0 +1,11 @@
+{
+  "record_type": "G9_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G9-V33-REPLAY-2026-11-07",
+  "source_baseline": "CB-1.13.0",
+  "source_baseline_lock_sha256": "69ba7e442eafcaeb22072e42c4d078a6a5a1baa03393e478ac6f664a2e8e8b84",
+  "core_baseline": "CB-1.14.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 59,
+  "release_claim": false
+}

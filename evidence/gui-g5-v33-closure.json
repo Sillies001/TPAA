@@ -1,0 +1,64 @@
+{
+  "schema": "TPAA_G5_V33_CLOSURE_EVIDENCE_V1",
+  "phase": "G5",
+  "phase_status": "CLOSED_LOCAL_WITH_GATES",
+  "closed_at": "2026-11-07",
+  "core_baseline": "CB-1.10.0",
+  "parent_core_baseline": "CB-1.9.0",
+  "baseline_lock_sha256": "a4864b36ef571b3582c97606ca33a3bd633e0561f776ad4383c9ff6a14dac3d0",
+  "authority_sha256": "d9fcca2b3889c28c125bd12cdbb236ff09de25036fb81477d164ed50c9d0fe4e",
+  "route_count": 99,
+  "g5_route_ids": [
+    "api.route.097",
+    "api.route.098",
+    "api.route.099"
+  ],
+  "capability_status": {
+    "we_detection_identity_linker_category_cluster": "ACTIVE",
+    "event_window_resolver": "ACTIVE",
+    "perspective_projection": "ACTIVE",
+    "cross_batch_ingress_rejection": "ACTIVE",
+    "identity_supersession": "ACTIVE",
+    "four_state_read_model": "ACTIVE",
+    "cluster_stability_and_query": "ACTIVE",
+    "cross_batch_rejection_audit": "ACTIVE",
+    "dto_single_source_generation": "ACTIVE",
+    "trusted_capability_resolver": "ACTIVE",
+    "exact_we_release_context_scope": "ACTIVE",
+    "canonical_source_store_adapter": "ACTIVE",
+    "api_routes_registration": "ACTIVE",
+    "atomic_activation_rollback": "ACTIVE",
+    "direct_api_negative_tests": "ACTIVE"
+  },
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS 588 source files",
+    "g4_successor_check": "PASS",
+    "g5_successor_check": "PASS",
+    "g4_codegen_check": "PASS routes=7 security_routes=96",
+    "g5_codegen_check": "PASS routes=3 security_routes=99 files=4",
+    "python_regression": "PASS 329 tests; one transient Windows file-lock case passed on isolated retry",
+    "g5_targeted": "PASS 69 tests",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "frontend_resource_consistency": "PASS",
+    "sqlite_g4_to_g5_no_migration_reuse": "PASS manifest unchanged",
+    "postgres_lineage_lock_verifier": "PASS explicit exact lock allow-list"
+  },
+  "invariants": {
+    "no_latest_fallback": true,
+    "no_cross_batch_borrowing": true,
+    "exact_weapon_event_scope": true,
+    "persistent_rejection_audit_adapter": true,
+    "linear_supersession_chain": true,
+    "canonical_dto_python_typescript_codegen": true,
+    "atomic_construct_before_publish": true,
+    "honest_empty_state": true
+  },
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  },
+  "next_phase": "G6"
+}

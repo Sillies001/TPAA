@@ -1,0 +1,54 @@
+{
+  "authority_id": "GUI_BATCH_IMPORT_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.9.0",
+  "parent_core_baseline": "CB-1.8.0",
+  "decision_id": "G4-V33-BATCH-IMPORT-2026-11-06",
+  "approval_id": "G4-CB-1.9.0-LOCAL-IMPLEMENTATION-2026-11-06",
+  "activation_status": "ACTIVE",
+  "training_types": [
+    "SIMPLE_OPPOSITION",
+    "MIXED_OPPOSITION",
+    "COMPREHENSIVE_OPPOSITION",
+    "UNCLASSIFIED"
+  ],
+  "qualification_states": [
+    "PENDING_CONFIRMATION",
+    "PARSING",
+    "QUALIFIED",
+    "FAILED"
+  ],
+  "state_transitions": {
+    "PENDING_CONFIRMATION": [
+      "PARSING"
+    ],
+    "PARSING": [
+      "QUALIFIED",
+      "FAILED"
+    ],
+    "FAILED": [
+      "PARSING"
+    ],
+    "QUALIFIED": []
+  },
+  "rules": {
+    "training_type_explicit_confirmation": true,
+    "default_training_type_forbidden": true,
+    "unconfirmed_training_type": "UNCLASSIFIED",
+    "stable_batch_id": "UUID5(actor,idempotency_key)",
+    "ticket_storage": "PROCESS_MEMORY_ONLY",
+    "ticket_ttl_seconds": 600,
+    "ticket_max_bytes": 67108864,
+    "local_path_exposure": "FORBIDDEN",
+    "v01_admission": "QUALIFIED_ONLY",
+    "failure_retry": "SAME_IDEMPOTENCY_KEY_AND_IMMUTABLE_MANIFEST",
+    "training_type_revision": "AUDITED_APPEND_ONLY",
+    "force_formation_revision": "AUDITED_EFFECTIVE_TIME_APPEND_ONLY"
+  },
+  "database": {
+    "schema": "1.10.0",
+    "migration_required": false,
+    "reason": "G1 DB 1.10.0 already admitted all four G4 physical tables."
+  },
+  "release_claim": false
+}

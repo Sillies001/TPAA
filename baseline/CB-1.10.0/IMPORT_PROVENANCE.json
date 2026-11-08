@@ -1,0 +1,11 @@
+{
+  "record_type": "G5_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G5-V33-WEAPON-EVENT-2026-11-07",
+  "source_baseline": "CB-1.9.0",
+  "source_baseline_lock_sha256": "2b83df248d92137aafde2b0f3934051218929e843afccd9bfd6b3aa63c8582a1",
+  "core_baseline": "CB-1.10.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 51,
+  "release_claim": false
+}

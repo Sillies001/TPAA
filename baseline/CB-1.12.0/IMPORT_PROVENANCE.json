@@ -1,0 +1,11 @@
+{
+  "record_type": "G7_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G7-V33-BATCH-EVENTS-2026-11-07",
+  "source_baseline": "CB-1.11.0",
+  "source_baseline_lock_sha256": "7b8783bd7a61012862ec90ed64882d3f435d3a274f6237f309e6208a62105915",
+  "core_baseline": "CB-1.12.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 55,
+  "release_claim": false
+}

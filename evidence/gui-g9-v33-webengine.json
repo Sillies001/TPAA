@@ -1,0 +1,156 @@
+{
+  "schema": "TPAA_G9_V33_WEBENGINE_ACCEPTANCE_V1",
+  "status": "PASS",
+  "core_baseline": "CB-1.14.0",
+  "view": "V03",
+  "entry": "weapon page -> exact replay deep-link",
+  "captures": [
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1600x900_graphite_ribbon_expanded.png",
+      "resolution": "1600x900",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "becba984d2832cbb1880bcea10f32bc703380a824f5764424d14e903a4e88426"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1600x900_graphite_ribbon_collapsed.png",
+      "resolution": "1600x900",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "2f7bc00d8ae83b768cfc1f3d25e4d132b6e21b2924bd4bf3dbdd5263f4295844"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1600x900_tactical_ribbon_expanded.png",
+      "resolution": "1600x900",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "a74e2df4a158fc0b1849029393a9a99ba4077212a1bb3d147e3fda3956fb45c2"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1600x900_tactical_ribbon_collapsed.png",
+      "resolution": "1600x900",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "93d5457ef2a7bb53def4e8c2fc3c9e8232c416ba49ec8599089c85200346267f"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1600x900_light_ribbon_expanded.png",
+      "resolution": "1600x900",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "dc807af003e4e55460a7d8a963d9158f56fc48c0dbf5929877c21614a0c85bc7"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1600x900_light_ribbon_collapsed.png",
+      "resolution": "1600x900",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "58eaa1dca422f3b731e90a5abd0350fdd46a4e46c599202beb76fad31c5fd027"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1280x720_graphite_ribbon_expanded.png",
+      "resolution": "1280x720",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "e72e29ea49b033da39d81ad14dcd990a7abd0b226fb8e41dff356bd96e84fd2d"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1280x720_graphite_ribbon_collapsed.png",
+      "resolution": "1280x720",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "ae5163f0cae70bb58e943d3bf144cea0e44d0ca23f5bbd3bd7178194e57adeb4"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1280x720_tactical_ribbon_expanded.png",
+      "resolution": "1280x720",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "7042e79a7874fe195c89ecf21aad24e4d6f299d0a9a59dfe9ebe605bf35a704f"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1280x720_tactical_ribbon_collapsed.png",
+      "resolution": "1280x720",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "03b936e223a6cc796741c01892c5048dde25da5830339e7e1fbbe7a8d263d149"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1280x720_light_ribbon_expanded.png",
+      "resolution": "1280x720",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "73bf9c6de0610d2bd421ed652ee03527fe3959aa512f89135fdf952b2c9bc58c"
+    },
+    {
+      "file": "evidence/gui-g9-v33-webengine/g9_v03_1280x720_light_ribbon_collapsed.png",
+      "resolution": "1280x720",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "6418405e8268accb86010ab998ce64630247e56e4aed9154afe2eb52730f9bf3"
+    }
+  ],
+  "box_model_no_overlap": true,
+  "exact_origin": "http://127.0.0.1:27359",
+  "release_claim": false
+}

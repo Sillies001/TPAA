@@ -1,7 +1,7 @@
 {
   "schema": "TPAA_G0R_V33_CLOSURE_EVIDENCE_V1",
   "status": "PASS",
-  "verified_at": "2026-11-06T04:37:38Z",
+  "verified_at": "2026-11-08T05:16:21Z",
   "baseline_id": "GUI-DEMO-V33-2026-11-05",
   "source_checks": [
     {

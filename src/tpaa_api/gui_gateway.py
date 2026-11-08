@@ -50,7 +50,7 @@ def _error(exc: GuiGatewayError, request_id: str) -> JSONResponse:
             "provenance": {
                 "authority_id": "GUI_ASYNC_GATEWAY_AUTHORITY",
                 "authority_version": "1.0.0",
-                "core_baseline": "CB-1.8.0",
+                "core_baseline": "CB-1.14.0",
             },
         },
         headers={"Cache-Control": "private, no-store"},

@@ -1,0 +1,47 @@
+{
+  "schema": "TPAA_G7_V33_CLOSURE_EVIDENCE_V1",
+  "phase": "G7",
+  "phase_status": "IN_PROGRESS_REMEDIATION",
+  "superseded_by": "docs/reviews/G6_G12_POST_CLOSURE_REVIEW_SUPERSESSION_2026-11-08.md",
+  "closed_at": "2026-11-07",
+  "core_baseline": "CB-1.12.0",
+  "parent_core_baseline": "CB-1.11.0",
+  "baseline_lock_sha256": "387fe31e8e29958dba7a5aa8cafb0b4ad381f84e2440a87c684d518e3d484fc1",
+  "authority_sha256": "2382bb2616d4fd23f2bb6896e3dc40c094c1dd2e8e719e66e1857403c9e4e47c",
+  "route_count": 101,
+  "g7_route_ids": [
+    "api.route.101"
+  ],
+  "reserved_routes": [
+    "gui.replay"
+  ],
+  "webengine_captures": 12,
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS 608 source files",
+    "g7_successor_check": "PASS",
+    "g7_codegen_check": "PASS routes=1 security_routes=101 files=3",
+    "contract_pytest": "PASS 46 tests (gui_v33)",
+    "application_pytest": "PASS 169 tests (incl. 7 G7 domain)",
+    "unit_api_runtime_pytest": "PASS 199 tests (1 pre-existing installed-desktop e2e env failure unrelated to G7)",
+    "frontend_typecheck_build": "PASS",
+    "webengine_visual_acceptance": "PASS 12 captures V26, box_model no overlap",
+    "api_negative_tests": "PASS 403 scope-denied / unknown-batch 404 / filter 422 / cursor-tamper 400"
+  },
+  "invariants": {
+    "single_exact_batch_scope": true,
+    "no_cross_batch_borrowing": true,
+    "no_latest_fallback": true,
+    "unknown_batch_404": true,
+    "cluster_relation_only": true,
+    "linear_supersession_chain": true,
+    "atomic_construct_before_publish": true,
+    "honest_empty_non_launch_behavior": true
+  },
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  },
+  "next_phase": "G8"
+}

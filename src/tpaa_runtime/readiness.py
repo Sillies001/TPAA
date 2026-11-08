@@ -57,6 +57,8 @@ class ProductionDependencyProbe:
         worker_handler: str = "tpaa_runtime.production_worker:execute",
         identity_ready: bool | Callable[[], bool] = True,
         migration_ready: Callable[[], bool] | None = None,
+        expected_schema_version: str = _MIGRATION_HEAD,
+        expected_core_baseline: str = _CORE_BASELINE,
     ) -> None:
         self._storage_status = storage_status
         self._object_root = object_root
@@ -64,6 +66,8 @@ class ProductionDependencyProbe:
         self._worker_handler = worker_handler
         self._identity_ready = identity_ready
         self._migration_ready = migration_ready
+        self._expected_schema_version = expected_schema_version
+        self._expected_core_baseline = expected_core_baseline
 
     def _storage_status_value(self) -> object | None:
         try:
@@ -71,13 +75,12 @@ class ProductionDependencyProbe:
         except Exception:
             return None
 
-    @staticmethod
-    def _migration_head_ready(status: object | None) -> bool:
+    def _migration_head_ready(self, status: object | None) -> bool:
         if status is None:
             return False
         return (
-            getattr(status, "schema_version", None) == _MIGRATION_HEAD
-            and getattr(status, "core_baseline", None) == _CORE_BASELINE
+            getattr(status, "schema_version", None) == self._expected_schema_version
+            and getattr(status, "core_baseline", None) == self._expected_core_baseline
         )
 
     @staticmethod

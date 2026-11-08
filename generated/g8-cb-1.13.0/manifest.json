@@ -1,0 +1,26 @@
+{
+  "schema": "TPAA_G8_CO_ATTACK_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.13.0",
+  "baseline_lock_sha256": "69ba7e442eafcaeb22072e42c4d078a6a5a1baa03393e478ac6f664a2e8e8b84",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g8-co-attack.ts",
+      "sha256": "7f6b1731a7d7f2fcd621a3380f1527bdf312e3b4dc7121efc651729b7062f60e",
+      "bytes": 2462
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g8_gateway.py",
+      "sha256": "92d7e9c76b5cc0bdc10e4382fb52fe1d3d6bd27d8ac3c0773579d636be70ee7b",
+      "bytes": 12086
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g8_authority.py",
+      "sha256": "a2eed81cc81f563eceff2838406e79594fe08d961c6bf7c4ea41102201b1c720",
+      "bytes": 12800
+    }
+  ],
+  "release_claim": false
+}

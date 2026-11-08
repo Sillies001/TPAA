@@ -1,0 +1,11 @@
+{
+  "record_type": "G12_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G12-V33-DESIGN_FREEZE-2026-11-07",
+  "source_baseline": "CB-1.16.0",
+  "source_baseline_lock_sha256": "69798bcf62ab930f7dc523c9a90d0a7271567475f2aeac7d7d3476aecd4d62d8",
+  "core_baseline": "CB-1.17.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 69,
+  "release_claim": false
+}

@@ -10,7 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from tpaa_canonical.loader import CanonicalArtifactLoader
+from tpaa_canonical.loader import trusted_loader_for_baseline
 from tpaa_canonical.runtime_handshake import (
     RuntimeBaselineHandshake,
     RuntimeBaselineIdentity,
@@ -93,7 +93,7 @@ def build_trusted_runtime_status_use_case(
     loader = (
         None
         if authority_root is None
-        else CanonicalArtifactLoader(authority_root.resolve(strict=False).parent)
+        else trusted_loader_for_baseline(authority_root.resolve(strict=False).parent)
     )
     return GetRuntimeBaselineStatus(
         lambda: load_trusted_runtime_baseline_handshake(

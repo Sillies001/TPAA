@@ -1,0 +1,34 @@
+{
+  "authority_id": "GUI_CO_ATTACK_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.16.0",
+  "parent_core_baseline": "CB-1.15.0",
+  "decision_id": "G11-V33-HARDENING-2026-11-07",
+  "approval_id": "G11-CB-1.16.0-LOCAL-HARDENING-2026-11-07",
+  "activation_status": "ACTIVE",
+  "rules": {
+    "cluster_scope": "EXACT_CLUSTER_RELATION_ONLY",
+    "cross_batch_cluster": "FORBIDDEN",
+    "bvr_only": true,
+    "strike_cluster_rejected": "FAIL_CLOSED",
+    "missing_context": "HONEST_EMPTY_FORMATION",
+    "no_total_score": true,
+    "latest_fallback": "FORBIDDEN",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "single_owner_rules": {
+    "co_attack_analysis_query": "tpaa_application.co_attack",
+    "attack_cluster_resolver": "tpaa_application.weapon_event",
+    "force_formation_context": "tpaa_application.batch_import",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "database": {
+    "schema": "1.10.0",
+    "migration_required": false,
+    "reason": "Co-attack analysis is an exact cluster read model over existing Cluster/WE/Context relations; no new physical tables."
+  },
+  "release_claim": false,
+  "approval_status": "APPROVED_LOCAL"
+}

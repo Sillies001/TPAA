@@ -3,6 +3,7 @@
 from .api import (
     ApiAuthorizationEvent,
     ApiAuthorizationGuard,
+    ApiResourceResolver,
     InMemoryApiAuthorizationAudit,
     RouteSecurityAuthorityError,
     RouteSecurityBinding,
@@ -84,6 +85,7 @@ __all__ = [
     "ApprovalStatus",
     "ApiAuthorizationEvent",
     "ApiAuthorizationGuard",
+    "ApiResourceResolver",
     "AuthenticatedIdentity",
     "DesktopIdentityError",
     "DesktopIdentityProvider",

@@ -7,6 +7,34 @@ import {
   type MediaTicketDTO,
   type SeriesRangeRequest,
 } from "../generated/g3-gateway.ts";
+import {
+  G4_BATCH_ROUTES,
+  type BatchListDTO,
+  type BatchRegistrationDTO,
+  type ForceFormationContextDTO,
+} from "../generated/g4-batch.ts";
+import {
+  G5_WEAPON_EVENT_ROUTES,
+  type WeaponEventDetailDTO,
+  type WeaponEventPerspectiveDTO,
+  type WeaponEventWindowDTO,
+} from "../generated/g5-weapon-event.ts";
+import {
+  G6_HISTORICAL_ROUTES,
+  type HistoricalTrainingOverviewDTO,
+} from "../generated/g6-historical.ts";
+import {
+  G7_BATCH_EVENTS_ROUTES,
+  type BatchEventWorkbenchDTO,
+} from "../generated/g7-batch-events.ts";
+import {
+  G8_CO_ATTACK_ROUTES,
+  type CoAttackAnalysisDTO,
+} from "../generated/g8-co-attack.ts";
+import {
+  G9_REPLAY_ROUTES,
+  type ReplayContextDTO,
+} from "../generated/g9-replay.ts";
 
 export type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
@@ -41,6 +69,7 @@ export interface GatewayRequest<T> {
   readonly method?: "GET" | "POST";
   readonly query?: Readonly<Record<string, string | number | null | undefined>>;
   readonly body?: unknown;
+  readonly headers?: Readonly<Record<string, string>>;
   readonly timeoutMs?: number;
   readonly cacheTtlMs?: number;
   readonly channel?: string;
@@ -172,6 +201,7 @@ export class AsyncGateway {
           headers: {
             Accept: "application/json",
             ...(body ? { "Content-Type": "application/json" } : {}),
+            ...spec.headers,
           },
           body: body || undefined,
           signal: controller.signal,
@@ -312,5 +342,209 @@ export const createGuiClient = (gateway: AsyncGateway) => ({
       && value.schema === "TPAA_GUI_SELECTOR_V1"
       && value.selector_id === selectorId
       && Array.isArray(value.items),
+  }),
+  batches: (): Promise<BatchListDTO> => gateway.latest("g4:batches", {
+    path: G4_BATCH_ROUTES["gui.batches"].path,
+    validate: (value): value is BatchListDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G4_BATCH_LIST_V1"
+      && Array.isArray(value.items)
+      && typeof value.total_count === "number",
+  }),
+  registerBatch: (
+    idempotencyKey: string,
+    body: Readonly<Record<string, unknown>>,
+  ): Promise<BatchRegistrationDTO> => gateway.latest("g4:batch-register", {
+    path: G4_BATCH_ROUTES["gui.batch.register"].path,
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body,
+    validate: (value): value is BatchRegistrationDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G4_BATCH_REGISTRATION_V1"
+      && typeof value.batch_id === "string"
+      && typeof value.training_type_confirmed === "boolean",
+  }),
+  reviseBatchTrainingType: (
+    batchId: string,
+    body: Readonly<Record<string, unknown>>,
+  ): Promise<BatchRegistrationDTO> => gateway.latest(`g4:batch-revise:${batchId}`, {
+    path: G4_BATCH_ROUTES["gui.batch.training_type"].path.replace(
+      "{batch_id}",
+      encodeURIComponent(batchId),
+    ),
+    method: "POST",
+    body,
+    validate: (value): value is BatchRegistrationDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G4_BATCH_REGISTRATION_V1"
+      && typeof value.batch_id === "string"
+      && value.training_type_confirmed === true,
+  }),
+  context: (contextId: string): Promise<ForceFormationContextDTO> => gateway.latest(
+    `g4:context:${contextId}`,
+    {
+      path: G4_BATCH_ROUTES["gui.context"].path.replace(
+        "{context_id}",
+        encodeURIComponent(contextId),
+      ),
+      validate: (value): value is ForceFormationContextDTO =>
+        isRecord(value)
+        && value.schema === "TPAA_G4_FORCE_FORMATION_CONTEXT_V1"
+        && typeof value.context_id === "string"
+        && Array.isArray(value.members),
+    },
+  ),
+  reviseContext: (
+    contextId: string,
+    body: Readonly<Record<string, unknown>>,
+  ): Promise<ForceFormationContextDTO> => gateway.latest(`g4:context-revise:${contextId}`, {
+    path: G4_BATCH_ROUTES["gui.context.revise"].path.replace(
+      "{context_id}",
+      encodeURIComponent(contextId),
+    ),
+    method: "POST",
+    body,
+    validate: (value): value is ForceFormationContextDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G4_FORCE_FORMATION_CONTEXT_V1"
+      && typeof value.context_id === "string"
+      && Array.isArray(value.members),
+  }),
+  weaponEvent: (weaponEventId: string): Promise<WeaponEventDetailDTO> => gateway.latest(
+    `g5:weapon-event:${weaponEventId}`,
+    {
+      path: G5_WEAPON_EVENT_ROUTES["gui.event.detail"].path.replace(
+        "{weapon_event_id}",
+        encodeURIComponent(weaponEventId),
+      ),
+      validate: (value): value is WeaponEventDetailDTO =>
+        isRecord(value)
+        && value.schema === "TPAA_G5_WEAPON_EVENT_DETAIL_V1"
+        && value.weapon_event_id === weaponEventId,
+    },
+  ),
+  weaponEventWindow: (
+    weaponEventId: string,
+    perspective: "shooter" | "target",
+  ): Promise<WeaponEventWindowDTO> => gateway.latest(`g5:window:${weaponEventId}:${perspective}`, {
+    path: G5_WEAPON_EVENT_ROUTES["gui.event.window"].path
+      .replace("{weapon_event_id}", encodeURIComponent(weaponEventId))
+      .replace("{perspective}", perspective),
+    validate: (value): value is WeaponEventWindowDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G5_WEAPON_EVENT_WINDOW_V1"
+      && value.weapon_event_id === weaponEventId
+      && value.perspective === perspective,
+  }),
+  weaponEventPerspective: (
+    weaponEventId: string,
+    perspective: "shooter" | "target",
+  ): Promise<WeaponEventPerspectiveDTO> => gateway.latest(
+    `g5:perspective:${weaponEventId}:${perspective}`,
+    {
+      path: G5_WEAPON_EVENT_ROUTES["gui.event.perspective"].path
+        .replace("{weapon_event_id}", encodeURIComponent(weaponEventId))
+        .replace("{perspective}", perspective),
+      validate: (value): value is WeaponEventPerspectiveDTO =>
+        isRecord(value)
+        && value.schema === "TPAA_G5_WEAPON_EVENT_PERSPECTIVE_V1"
+        && value.weapon_event_id === weaponEventId
+        && value.perspective === perspective,
+    },
+  ),
+  historicalOverview: (
+    query: {
+      readonly startDate?: string;
+      readonly endDate?: string;
+      readonly model?: string;
+      readonly trainingType?: string;
+    } = {},
+  ): Promise<HistoricalTrainingOverviewDTO> => gateway.latest("g6:overview", {
+    path: G6_HISTORICAL_ROUTES["gui.overview"].path,
+    query: {
+      start_date: query.startDate,
+      end_date: query.endDate,
+      model: query.model,
+      training_type: query.trainingType,
+    },
+    validate: (value): value is HistoricalTrainingOverviewDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G6_HISTORICAL_OVERVIEW_V1"
+      && Array.isArray(value.batches)
+      && typeof value.batch_set_fingerprint === "string",
+  }),
+  batchEvents: (
+    batchId: string,
+    query: {
+      readonly category?: string;
+      readonly adjudication?: string;
+      readonly clusterId?: string;
+      readonly entityId?: string;
+      readonly episodeId?: string;
+      readonly startTimeUs?: string;
+      readonly endTimeUs?: string;
+      readonly cursor?: string;
+      readonly limit?: number;
+    } = {},
+  ): Promise<BatchEventWorkbenchDTO> => gateway.latest(`g7:batch-events:${batchId}`, {
+    path: G7_BATCH_EVENTS_ROUTES["gui.batch.events"].path.replace(
+      "{batch_id}",
+      encodeURIComponent(batchId),
+    ),
+    query: {
+      category: query.category,
+      adjudication: query.adjudication,
+      cluster_id: query.clusterId,
+      entity_id: query.entityId,
+      episode_id: query.episodeId,
+      start_time_us: query.startTimeUs,
+      end_time_us: query.endTimeUs,
+      cursor: query.cursor,
+      limit: query.limit,
+    },
+    validate: (value): value is BatchEventWorkbenchDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G7_BATCH_EVENT_WORKBENCH_V1"
+      && typeof value.batch_id === "string"
+      && Array.isArray(value.items),
+  }),
+  replayContext: (
+    weaponEventId: string,
+    query: { readonly releaseId: string; readonly contextId: string; readonly perspective: "shooter" | "target" },
+  ): Promise<ReplayContextDTO> => gateway.latest(
+    `g9:replay:${weaponEventId}:${query.releaseId}:${query.contextId}:${query.perspective}`,
+    {
+      path: G9_REPLAY_ROUTES["gui.replay"].path.replace(
+        "{weapon_event_id}",
+        encodeURIComponent(weaponEventId),
+      ),
+      query: {
+        release_id: query.releaseId,
+        context_id: query.contextId,
+        perspective: query.perspective,
+      },
+      validate: (value): value is ReplayContextDTO =>
+        isRecord(value)
+        && value.schema === "TPAA_G9_REPLAY_CONTEXT_V1"
+        && value.weapon_event_id === weaponEventId
+        && value.release_id === query.releaseId
+        && value.context_id === query.contextId
+        && value.perspective === query.perspective,
+    },
+  ),
+  coAttackAnalysis: (
+    clusterId: string,
+    query: { readonly contextId?: string } = {},
+  ): Promise<CoAttackAnalysisDTO> => gateway.latest(`g8:co-attack:${clusterId}`, {
+    path: G8_CO_ATTACK_ROUTES["gui.coattack"].path.replace(
+      "{cluster_id}",
+      encodeURIComponent(clusterId),
+    ),
+    query: { context_id: query.contextId },
+    validate: (value): value is CoAttackAnalysisDTO =>
+      isRecord(value)
+      && value.schema === "TPAA_G8_CO_ATTACK_ANALYSIS_V1"
+      && typeof value.cluster_id === "string",
   }),
 });

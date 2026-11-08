@@ -1,0 +1,89 @@
+{
+  "schema": "TPAA_G5_V33_FOUNDATION_PROGRESS_V1",
+  "phase": "G5",
+  "phase_status": "IN_PROGRESS",
+  "status": "IN_PROGRESS",
+  "core_baseline": "CB-1.10.0",
+  "parent_core_baseline": "CB-1.9.0",
+  "verified_at": "2026-11-07",
+  "release_claim": false,
+  "foundation_delivered": {
+    "successor_baseline": "baseline/CB-1.10.0 (immutable parent CB-1.9.0; adopt_g5_successor --check PASS)",
+    "g5_authority": "canonical/GUI_WEAPON_EVENT_AUTHORITY.json + G5_WEAPON_EVENT_APPROVAL.json ACTIVE",
+    "security_routes": "99 active (96 G4 + 3 G5 read-model: gui.event.detail/gui.event.window/gui.event.perspective)",
+    "remaining_reserved": ["gui.overview (G6)", "gui.batch.events (G7)", "gui.replay (G9)"],
+    "domain_services": [
+      "src/tpaa_application/weapon_event.py (detector/identity/episode-linker/category/cluster single owners)",
+      "src/tpaa_application/event_window.py (side-specific window resolver, half-open, overlap, state separation)",
+      "src/tpaa_application/perspective.py (shooter/target projection, Strike target fail-closed)"
+    ],
+    "golden_fixtures": "tests/fixtures/weapon_events.py (in-memory store/source + launch_fact/shooter_anchors builders)",
+    "exit_gate_tests": "tests/unit/application/test_g5_weapon_event.py (18 tests)"
+  },
+  "invariants_verified": [
+    "ONE_WE_PER_WEAPON_LAUNCH",
+    "CLUSTER_RELATION_ONLY_NO_WE_MERGE",
+    "EPISODE_MULTI_AND_INTERLEAVED_WE_EXACT_LINK",
+    "TERMINAL_ADJUDICATION_WINDOW_INDEPENDENT",
+    "WINDOW_HALF_OPEN_OVERLAP_ALLOWED",
+    "T2_UNKNOWN_TERMINAL_UNKNOWN_OPEN_WINDOW",
+    "CLOCK_GAP_AND_ALIGNMENT_UNRESOLVED_DISTINCT",
+    "CATEGORY_GEOMETRY_FLAGS_NEVER_RECLASSIFIES",
+    "STRIKE_TARGET_PERSPECTIVE_FAIL_CLOSED",
+    "STABLE_IDENTITY_IDEMPOTENT_UUID5"
+  ],
+  "gates": {
+    "ruff": "PASS",
+    "mypy_source_files": 582,
+    "mypy": "PASS",
+    "g4_successor_check": "PASS",
+    "g4_codegen_check": "PASS",
+    "g5_successor_check": "PASS",
+    "g5_codegen_check": "PASS routes=3 security_routes=99",
+    "cb_1_10_0_storage_bootstrap_load": "PASS schema=1.10.0 tables=99 (trusted pin; CB-1.9.0 byte-unchanged)",
+    "contract_tests_gui_v33": "36 passed",
+    "g5_domain_and_readmodel_tests": "26 passed",
+    "combined_selection": "143 passed"
+  },
+  "codex_first_review_reject_fixes_applied": {
+    "permission_mapping": "detail=DDR+weapon_event.read; window=RAW+weapon_event.window.read; perspective=DDR+weapon_event.perspective.read (matches GUI_PERMISSION_AUDIT_AUTHORITY)",
+    "storage_bootstrap_cb_1_10_0": "_TRUSTED_BASELINE_PINS keyed by baseline name; CanonicalArtifactLoader validates lock/lineage; CB-1.10.0 loads; CB-1.9.0 unchanged",
+    "dto_drift": "canonical WeaponEventWindowDTO gains start/end_session_time_us; all three TS DTOs gain provenance: GuiProvenanceDTO",
+    "cross_batch_fail_closed": "_require_exact_batch rejects mismatched fact at detector+identity (CROSS_BATCH_WEAPON_EVENT_FORBIDDEN) with negative test",
+    "cluster_uuid_stability": "cluster_id derived from sorted WE id set only (order-free) with test",
+    "cluster_query_source": "detail resolves cluster relation from store, not the null event.cluster_id",
+    "identity_supersession": "source revision yields new UUID superseding old (no in-place mutation) with test",
+    "four_state_semantics": "capability_state() = CAPABILITY_DISABLED(403)/ADAPTER_UNAVAILABLE(503)/READY; 404 only for exact-absent WE under READY backend",
+    "contract_test_fixed": "test_g5 contract now asserts per-route permission mapping + the review-regression authority rules"
+  },
+  "codex_second_review_reject_fixes_applied": {
+    "data_root_reuse_no_migration": "bootstrap.py _COMPATIBLE_SCHEMA_LOCKS + lineage-aware manifest validation (schema-authority provenance separated from active product baseline); CB-1.9.0 root reused by CB-1.10.0 without migration (verified); 58 storage tests + G4 regression PASS",
+    "supersession_relation": "WeaponEventStore.publish_supersession/supersession_of/superseded_by_of; identity creates queryable relation on revision (not just coexistence); test",
+    "cross_batch_rejection_audit": "WeaponEventAuditSink port; detector/identity emit CROSS_BATCH_WEAPON_EVENT_REJECTED on rejection; test",
+    "four_state_empty": "batch_read_state(batch_id) returns EMPTY for READY backend with zero WEs; capability_state() covers capability level; all four states reachable; test",
+    "capability_status_honesty": "authority adds capability_status separating ACTIVE (implemented+tested) from PLANNED (declared, not built); DTO single-source generation etc. marked PLANNED"
+  },
+  "remaining_activation_work_planned": [
+    "trusted_capability_resolver", "exact_we_release_context_scope", "canonical_source_store_adapter",
+    "api_routes_registration", "atomic_activation_rollback", "direct_api_negative_tests",
+    "dto_single_source_generation"
+  ],
+  "codegen_delivered": {
+    "tool": "tools/codegen/g5_weapon_event_generate.py",
+    "outputs": [
+      "src/tpaa_security/generated_g5_authority.py (99 routes, CB-1.10.0)",
+      "src/tpaa_application/generated_g5_gateway.py",
+      "frontend/gui-v33/src/generated/g5-weapon-event.ts",
+      "generated/g5-cb-1.10.0/manifest.json"
+    ],
+    "contract_test": "tests/contract/gui_v33/test_g5_v33_weapon_event_contract.py (6 tests, incl. G5 routes NOT yet exposed in runtime graph)"
+  },
+  "open_gates_for_g5_closure": [
+    "runtime activation: tpaa_security api/gui_authority load generated_g5_authority; bootstrap/catalog provenance to CB-1.10.0; frontend main.ts bootstrap CB-1.9.0->CB-1.10.0 (with G2 contract token sync)",
+    "tpaa_api/gui_weapon_event.py 3 read-model routes + Application service methods + app factory registration",
+    "canonical-backed WeaponEventSource/Store adapters (not only in-memory fixtures)",
+    "evidence + Chinese closure report marking G5 CLOSED_LOCAL_WITH_GATES"
+  ],
+  "push": false,
+  "production_deployment": false
+}

@@ -1,0 +1,11 @@
+{
+  "record_type": "G11_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G11-V33-HARDENING-2026-11-07",
+  "source_baseline": "CB-1.15.0",
+  "source_baseline_lock_sha256": "ff7c32f12fd33d5f396fc68362cbc8fae2a107e063f88723b1171467ee1e0273",
+  "core_baseline": "CB-1.16.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 65,
+  "release_claim": false
+}

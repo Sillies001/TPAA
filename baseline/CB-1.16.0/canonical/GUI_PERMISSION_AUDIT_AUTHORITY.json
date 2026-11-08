@@ -1,0 +1,232 @@
+{
+  "authority_id": "GUI_PERMISSION_AUDIT_AUTHORITY",
+  "authority_version": "1.1.0",
+  "core_baseline": "CB-1.16.0",
+  "decision_id": "G11-V33-HARDENING-2026-11-07",
+  "approval_status": "APPROVED_LOCAL",
+  "permissions": [
+    {
+      "permission_id": "batch.history.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "batch.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "batch.register",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "batch.training_type.revise",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "context.force_formation.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "context.force_formation.revise",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "gui.view",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "replay.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "weapon_event.perspective.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "weapon_event.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "weapon_event.window.read",
+      "unknown_policy": "DENY"
+    },
+    {
+      "permission_id": "governance.audit.read",
+      "unknown_policy": "DENY"
+    }
+  ],
+  "audit_policy": {
+    "mutations": "ALWAYS",
+    "sensitive_reads": "ALWAYS",
+    "forbidden_fields": [
+      "authorization",
+      "bearer",
+      "desktop_nonce",
+      "absolute_path"
+    ],
+    "sensitive_read_permission_ids": [
+      "batch.history.read",
+      "batch.read",
+      "context.force_formation.read",
+      "governance.audit.read",
+      "replay.read",
+      "weapon_event.perspective.read",
+      "weapon_event.read",
+      "weapon_event.window.read"
+    ],
+    "mutation_permission_ids": [
+      "batch.register",
+      "batch.training_type.revise",
+      "context.force_formation.revise"
+    ],
+    "granularity": "ONE_AUDIT_EVENT_PER_AUTHORIZED_OR_DENIED_API_OPERATION_NOT_PER_RESULT_ROW",
+    "audit_before_response_completion": true,
+    "audit_failure_policy": "FAIL_CLOSED_FOR_MUTATIONS_AND_SENSITIVE_READS"
+  },
+  "parent_core_baseline": "CB-1.15.0",
+  "activation_status": "ACTIVE",
+  "role_authority": {
+    "source": "src/tpaa_security/permissions.py::SecurityRole",
+    "policy_source": "src/tpaa_security/TPAA_SECURITY_POLICY_V1.json#role_permissions",
+    "role_ids": [
+      "TRAINEE",
+      "INSTRUCTOR",
+      "EVALUATOR",
+      "TRAINING_MANAGER",
+      "UNIT_ANALYST",
+      "MAINTENANCE_ENGINEERING",
+      "DATA_ENGINEER",
+      "ADMINISTRATOR",
+      "MODEL_REVIEWER"
+    ],
+    "multi_role_semantics": "UNION_OF_EXPLICIT_AUTHENTICATED_ROLE_GRANTS",
+    "unknown_role_policy": "DENY",
+    "projection_role_mapping_is_authoritative_for_grants": false
+  },
+  "business_permission_bindings": [
+    {
+      "permission_id": "gui.view",
+      "binding_type": "AUTHENTICATED_KNOWN_ROLE",
+      "business_permissions": [],
+      "scope_policy_id": "AUTHENTICATED_SESSION_ONLY"
+    },
+    {
+      "permission_id": "batch.history.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "DERIVED_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_BATCH_SET_SCOPE"
+    },
+    {
+      "permission_id": "batch.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "DERIVED_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_BATCH_SCOPE"
+    },
+    {
+      "permission_id": "batch.register",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "SOURCE_IMPORT"
+      ],
+      "scope_policy_id": "IMPORT_TICKET_AND_PROVENANCE"
+    },
+    {
+      "permission_id": "batch.training_type.revise",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "CONFIGURATION_WRITE"
+      ],
+      "scope_policy_id": "EXACT_BATCH_REVISION_SCOPE"
+    },
+    {
+      "permission_id": "context.force_formation.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "DERIVED_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_CONTEXT_SCOPE"
+    },
+    {
+      "permission_id": "context.force_formation.revise",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "CONFIGURATION_WRITE"
+      ],
+      "scope_policy_id": "EXACT_CONTEXT_REVISION_SCOPE"
+    },
+    {
+      "permission_id": "replay.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "RAW_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_RELEASE_CONTEXT_SCOPE"
+    },
+    {
+      "permission_id": "weapon_event.perspective.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "DERIVED_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_WE_RELEASE_CONTEXT_SCOPE"
+    },
+    {
+      "permission_id": "weapon_event.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "DERIVED_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_WE_RELEASE_CONTEXT_SCOPE"
+    },
+    {
+      "permission_id": "weapon_event.window.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "RAW_DATA_READ"
+      ],
+      "scope_policy_id": "EXACT_WE_RELEASE_CONTEXT_SCOPE"
+    },
+    {
+      "permission_id": "governance.audit.read",
+      "binding_type": "ANY_BUSINESS_PERMISSION",
+      "business_permissions": [
+        "SECURITY_AUDIT_READ"
+      ],
+      "scope_policy_id": "SECURITY_AUDIT_AUTHORITY_SCOPE"
+    }
+  ],
+  "evaluation": {
+    "required_view_permissions": "ALL_OF",
+    "action_permissions": "ALL_OF",
+    "capability_permissions": "ALL_OF",
+    "unknown_gui_permission": "DENY",
+    "gui_view_semantics": "AUTHENTICATED_KNOWN_ROLE_ONLY",
+    "gui_permissions_are_not_api_authorization": true
+  },
+  "resource_scope_policy": {
+    "ownership_required_business_permissions": [
+      "DERIVED_DATA_READ",
+      "RAW_DATA_READ"
+    ],
+    "global_scope_roles": [
+      "ADMINISTRATOR"
+    ],
+    "exact_resource_context_required": true,
+    "non_global_role_scope": "EXACT_RESOURCE_SCOPE_KEYS_ONLY",
+    "wildcard_scope_for_non_global_roles": "DENY",
+    "batch_history_scope": "ALL_BATCHES_IN_EXACT_QUERY_SET_OR_DENY",
+    "no_silent_partial_filtering": true,
+    "administrator_global_scope_bypasses_ownership_match_only": true
+  },
+  "source_bindings": {
+    "parent_gui_view_contract_git_blob_sha": "df887271581aef2e608410b988f989e0bd36b913",
+    "parent_gui_permission_authority_git_blob_sha": "fa3b104dc7b6cf3092b6b75e22e8eec86966da9e",
+    "business_policy_git_blob_sha": "a26f0336de4d53e917b7d1ada37038b238945743",
+    "security_role_and_permission_enum_git_blob_sha": "00a044f24b692e2e72dd552e2c8740b30c62c114"
+  },
+  "approval_id": "G11-CB-1.16.0-LOCAL-HARDENING-2026-11-07",
+  "release_claim": false
+}

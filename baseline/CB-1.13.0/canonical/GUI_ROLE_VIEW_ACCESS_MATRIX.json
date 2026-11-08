@@ -1,0 +1,2641 @@
+{
+  "authority_id": "GUI_ROLE_VIEW_ACCESS_MATRIX",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.13.0",
+  "parent_core_baseline": "CB-1.12.0",
+  "decision_id": "G8-V33-CO-ATTACK-2026-11-07",
+  "approval_status": "APPROVED_LOCAL",
+  "derivation": {
+    "roles_source": "SecurityRole enum",
+    "grants_source": "TPAA_SECURITY_POLICY_V1.role_permissions",
+    "semantics": "Role-capable iff all required GUI permissions resolve to business permissions held by the authenticated role set. Exact scope, context, feature and backend route gates remain mandatory."
+  },
+  "role_ids": [
+    "TRAINEE",
+    "INSTRUCTOR",
+    "EVALUATOR",
+    "TRAINING_MANAGER",
+    "UNIT_ANALYST",
+    "MAINTENANCE_ENGINEERING",
+    "DATA_ENGINEER",
+    "ADMINISTRATOR",
+    "MODEL_REVIEWER"
+  ],
+  "views": [
+    {
+      "view_id": "V01",
+      "title": "历史多批次训练综合总览",
+      "module": "overview",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V02",
+      "title": "架次综合复盘",
+      "module": "training",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V03",
+      "title": "同步战术回放",
+      "module": "replay",
+      "entry_type": "DIRECT_AND_DEEPLINK",
+      "required_permissions": [
+        "gui.view",
+        "replay.read"
+      ],
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "replay.read"
+          ]
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "replay.read"
+          ]
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "replay.read"
+          ]
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V04",
+      "title": "超视距空战·单机",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V05",
+      "title": "视距内空战·单机",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V06",
+      "title": "对地攻击·单机",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V07",
+      "title": "基本飞行·单机",
+      "module": "training",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V08",
+      "title": "超视距空战·编队",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V09",
+      "title": "分类长期成长",
+      "module": "training",
+      "entry_type": "DIRECT_AND_V01",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V10",
+      "title": "型号与机体性能总览",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V11",
+      "title": "机动包线 E-M",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V12",
+      "title": "探测性能",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V13",
+      "title": "告警性能",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V14",
+      "title": "攻击系统性能",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V15",
+      "title": "条件因子分离",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V16",
+      "title": "性能趋势与告警",
+      "module": "equipment",
+      "entry_type": "DIRECT_AND_V01",
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V17",
+      "title": "数据质量与资格",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V18",
+      "title": "报告：架次复盘",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V19",
+      "title": "基本飞行·编队",
+      "module": "training",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V20",
+      "title": "视距内空战·编队",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V21",
+      "title": "对地攻击·编队",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V22",
+      "title": "管理与版本治理",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "governance.audit.read"
+      ],
+      "authorized_role_ids": [
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "MODEL_REVIEWER"
+      ],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "governance.audit.read"
+          ]
+        }
+      ],
+      "resource_scope_policy_id": "SECURITY_AUDIT_AUTHORITY_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V23",
+      "title": "数据管理与批次导入",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "module": "training",
+      "entry_type": "CONDITIONAL_V08_ONLY",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read",
+        "weapon_event.window.read",
+        "context.force_formation.read"
+      ],
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "weapon_event.window.read"
+          ]
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "weapon_event.window.read"
+          ]
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "DENY_MISSING_PERMISSION",
+          "missing_gui_permissions": [
+            "weapon_event.window.read"
+          ]
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_RELEASE_CONTEXT_WE_CLUSTER_FORMATION_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V25",
+      "title": "主题管理",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_permissions": [
+        "gui.view"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "AUTHENTICATED_PRESENTATION_ONLY",
+      "exact_context_and_feature_gates_still_required": true
+    },
+    {
+      "view_id": "V26",
+      "title": "批次发射事件总览",
+      "module": "training",
+      "entry_type": "MODULE_LANDING_AND_V01_DEEPLINK",
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read"
+      ],
+      "authorized_role_ids": [
+        "TRAINEE",
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR",
+        "MODEL_REVIEWER"
+      ],
+      "denied_role_ids": [],
+      "role_access": [
+        {
+          "role_id": "TRAINEE",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "INSTRUCTOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "EVALUATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "TRAINING_MANAGER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "UNIT_ANALYST",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MAINTENANCE_ENGINEERING",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "DATA_ENGINEER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "ADMINISTRATOR",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        },
+        {
+          "role_id": "MODEL_REVIEWER",
+          "decision": "ROLE_GRANT_PRESENT",
+          "missing_gui_permissions": []
+        }
+      ],
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "exact_context_and_feature_gates_still_required": true
+    }
+  ],
+  "optional_capabilities": [
+    {
+      "view_id": "V04",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V04",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V05",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V05",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V06",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V06",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V08",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V08",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V20",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V20",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V21",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V21",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V26",
+      "capability_id": "event_window",
+      "permission_id": "weapon_event.window.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    },
+    {
+      "view_id": "V26",
+      "capability_id": "replay_deeplink",
+      "permission_id": "replay.read",
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "MAINTENANCE_ENGINEERING",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "UNIT_ANALYST",
+        "MODEL_REVIEWER"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "view_id": "V23",
+      "permission_id": "batch.register",
+      "business_permissions": [
+        "SOURCE_IMPORT"
+      ],
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "EVALUATOR",
+        "TRAINING_MANAGER",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "MODEL_REVIEWER"
+      ],
+      "backend_route_binding": "PENDING_G3_ROUTE_AUTHORITY",
+      "disabled_until_route_and_audit_gate": true
+    },
+    {
+      "view_id": "V23",
+      "permission_id": "batch.training_type.revise",
+      "business_permissions": [
+        "CONFIGURATION_WRITE"
+      ],
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "TRAINING_MANAGER",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "EVALUATOR",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "MODEL_REVIEWER"
+      ],
+      "backend_route_binding": "PENDING_G3_ROUTE_AUTHORITY",
+      "disabled_until_route_and_audit_gate": true
+    },
+    {
+      "view_id": "V24",
+      "permission_id": "context.force_formation.revise",
+      "business_permissions": [
+        "CONFIGURATION_WRITE"
+      ],
+      "authorized_role_ids": [
+        "INSTRUCTOR",
+        "TRAINING_MANAGER",
+        "DATA_ENGINEER",
+        "ADMINISTRATOR"
+      ],
+      "denied_role_ids": [
+        "TRAINEE",
+        "EVALUATOR",
+        "UNIT_ANALYST",
+        "MAINTENANCE_ENGINEERING",
+        "MODEL_REVIEWER"
+      ],
+      "backend_route_binding": "PENDING_G3_ROUTE_AUTHORITY",
+      "disabled_until_route_and_audit_gate": true
+    }
+  ],
+  "role_summary": [
+    {
+      "role_id": "TRAINEE",
+      "view_count": 23,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [],
+      "optional_capability_ids": []
+    },
+    {
+      "role_id": "INSTRUCTOR",
+      "view_count": 25,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [
+        "V23:batch.register",
+        "V23:batch.training_type.revise",
+        "V24:context.force_formation.revise"
+      ],
+      "optional_capability_ids": [
+        "V04:event_window",
+        "V04:replay_deeplink",
+        "V05:event_window",
+        "V05:replay_deeplink",
+        "V06:event_window",
+        "V06:replay_deeplink",
+        "V08:event_window",
+        "V08:replay_deeplink",
+        "V20:event_window",
+        "V20:replay_deeplink",
+        "V21:event_window",
+        "V21:replay_deeplink",
+        "V26:event_window",
+        "V26:replay_deeplink"
+      ]
+    },
+    {
+      "role_id": "EVALUATOR",
+      "view_count": 25,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [],
+      "optional_capability_ids": [
+        "V04:event_window",
+        "V04:replay_deeplink",
+        "V05:event_window",
+        "V05:replay_deeplink",
+        "V06:event_window",
+        "V06:replay_deeplink",
+        "V08:event_window",
+        "V08:replay_deeplink",
+        "V20:event_window",
+        "V20:replay_deeplink",
+        "V21:event_window",
+        "V21:replay_deeplink",
+        "V26:event_window",
+        "V26:replay_deeplink"
+      ]
+    },
+    {
+      "role_id": "TRAINING_MANAGER",
+      "view_count": 25,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [
+        "V23:batch.training_type.revise",
+        "V24:context.force_formation.revise"
+      ],
+      "optional_capability_ids": [
+        "V04:event_window",
+        "V04:replay_deeplink",
+        "V05:event_window",
+        "V05:replay_deeplink",
+        "V06:event_window",
+        "V06:replay_deeplink",
+        "V08:event_window",
+        "V08:replay_deeplink",
+        "V20:event_window",
+        "V20:replay_deeplink",
+        "V21:event_window",
+        "V21:replay_deeplink",
+        "V26:event_window",
+        "V26:replay_deeplink"
+      ]
+    },
+    {
+      "role_id": "UNIT_ANALYST",
+      "view_count": 23,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [],
+      "optional_capability_ids": []
+    },
+    {
+      "role_id": "MAINTENANCE_ENGINEERING",
+      "view_count": 25,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [],
+      "optional_capability_ids": [
+        "V04:event_window",
+        "V04:replay_deeplink",
+        "V05:event_window",
+        "V05:replay_deeplink",
+        "V06:event_window",
+        "V06:replay_deeplink",
+        "V08:event_window",
+        "V08:replay_deeplink",
+        "V20:event_window",
+        "V20:replay_deeplink",
+        "V21:event_window",
+        "V21:replay_deeplink",
+        "V26:event_window",
+        "V26:replay_deeplink"
+      ]
+    },
+    {
+      "role_id": "DATA_ENGINEER",
+      "view_count": 25,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [
+        "V23:batch.register",
+        "V23:batch.training_type.revise",
+        "V24:context.force_formation.revise"
+      ],
+      "optional_capability_ids": [
+        "V04:event_window",
+        "V04:replay_deeplink",
+        "V05:event_window",
+        "V05:replay_deeplink",
+        "V06:event_window",
+        "V06:replay_deeplink",
+        "V08:event_window",
+        "V08:replay_deeplink",
+        "V20:event_window",
+        "V20:replay_deeplink",
+        "V21:event_window",
+        "V21:replay_deeplink",
+        "V26:event_window",
+        "V26:replay_deeplink"
+      ]
+    },
+    {
+      "role_id": "ADMINISTRATOR",
+      "view_count": 26,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V22",
+        "V23",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [
+        "V23:batch.register",
+        "V23:batch.training_type.revise",
+        "V24:context.force_formation.revise"
+      ],
+      "optional_capability_ids": [
+        "V04:event_window",
+        "V04:replay_deeplink",
+        "V05:event_window",
+        "V05:replay_deeplink",
+        "V06:event_window",
+        "V06:replay_deeplink",
+        "V08:event_window",
+        "V08:replay_deeplink",
+        "V20:event_window",
+        "V20:replay_deeplink",
+        "V21:event_window",
+        "V21:replay_deeplink",
+        "V26:event_window",
+        "V26:replay_deeplink"
+      ]
+    },
+    {
+      "role_id": "MODEL_REVIEWER",
+      "view_count": 23,
+      "view_ids": [
+        "V01",
+        "V02",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V25",
+        "V26"
+      ],
+      "action_ids": [],
+      "optional_capability_ids": []
+    }
+  ],
+  "activation_status": "ACTIVE",
+  "approval_id": "G8-CB-1.13.0-LOCAL-IMPLEMENTATION-2026-11-07",
+  "release_claim": false
+}

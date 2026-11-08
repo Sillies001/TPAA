@@ -1,0 +1,427 @@
+{
+  "authority_id": "M5_FORMAL_QUALIFICATION_AUTHORITY",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_SEMANTIC_CONTRACT",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "effective_milestone": "M5",
+  "decision_record": "https://github.com/Sillies001/TPAA/issues/136",
+  "activation_rule": "This artifact becomes active machine authority only through an approved BASELINE_LOCK on protected main with exact merge-SHA Hosted CI PASS.",
+  "source_basis": {
+    "type": "NEW_C3_AUTHORITY_DECISION",
+    "statement": "These values close formal M5 qualification gaps identified after M4 Exit. They are new governed qualification decisions, not recovered R3.5 source facts and must not be inferred from Issue prose.",
+    "protected_main_parent_sha": "de5dfb528156428eee93ce4d022350382cbf4127",
+    "prior_baseline_lock_sha256": "8bc1834502561992e9aef64d73186c7854ef293e4ec57f658b4e9f72828e0cab",
+    "prior_controlled_artifact_count": 23,
+    "sdib_1_4_sha256": "00ab4ac1ef9c3fa3c0a85bd0466dcc2f6174cc7e921af5759bd5c42d22aaa5e6",
+    "m5_task_baseline_sha256": "89eb4b69cb5af94476983b957584807fb62eb48ffa435a1fc79f00c8b9a348cc",
+    "platform_compatibility_registry_sha256": "d127409485588d80b75c0353725f4042f310d196892fb91005978ea57dbaf106",
+    "development_milestone_registry_sha256": "7e583a2503735a10ddd85b8ead67d5369cd34d423246c96254c4cb80eaaf1dfb"
+  },
+  "scope": {
+    "admitted_capability_phase": [
+      "P1"
+    ],
+    "excluded_capability_phases": [
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "mandatory_certification_profiles": [
+      "WINDOWS_DESKTOP_X64",
+      "LINUX_DESKTOP_X64",
+      "WINDOWS_SERVICE_X64",
+      "LINUX_SERVICE_X64"
+    ],
+    "required_workstreams": [
+      "WS-PLATFORM",
+      "WS-PERFORMANCE",
+      "WS-SECURITY",
+      "WS-DEVOPS",
+      "WS-TEST",
+      "WS-GOVERNANCE"
+    ],
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "m5_formal_release_claim_active_before_exit_go": false
+  },
+  "target_hardware_profile": {
+    "profile_id": "M5_TARGET_HARDWARE_V1",
+    "profile_version": "1.0.0",
+    "architecture": "X86_64",
+    "logical_cpu_min": 4,
+    "memory_gib_min": 8,
+    "free_storage_gib_min": 20,
+    "persistent_storage_class": [
+      "SSD",
+      "ENTERPRISE_BLOCK_STORAGE"
+    ],
+    "gpu_required": false,
+    "network_required_for_install_or_runtime": false,
+    "clock_requirements": {
+      "system_time": "UTC_CAPABLE",
+      "monotonic_clock_required_for_performance_measurement": true,
+      "business_time_must_remain_SESSION_TIME_OR_EXPLICIT_UTC": true
+    },
+    "identity_manifest_required_fields": [
+      "certification_profile_id",
+      "os_family",
+      "os_release",
+      "os_build_or_kernel",
+      "machine_architecture",
+      "cpu_model",
+      "logical_cpu_count",
+      "memory_gib",
+      "persistent_storage_class",
+      "free_storage_gib",
+      "python_runtime_version",
+      "source_revision",
+      "semantic_build_version"
+    ],
+    "qualification_rule": "A result is admissible only when all minimums are met and the exact hardware identity manifest is retained in evidence. Better hardware does not relax or redefine thresholds."
+  },
+  "workload_profile": {
+    "workload_id": "M5_P1_QUALIFICATION_WORKLOAD_V1",
+    "workload_version": "1.0.0",
+    "generator_schema": "TPAA_M5_SYNTHETIC_WORKLOAD_SPEC_V1",
+    "deterministic_seed": 20260928,
+    "data_classification": "SYNTHETIC",
+    "session_count": 50,
+    "p1_metric_catalog_count": 116,
+    "longitudinal_eligible_metric_count": 104,
+    "observations_per_session": 116,
+    "total_observation_target": 5800,
+    "longitudinal_point_target": 5200,
+    "api_query_count": 1000,
+    "replay_repetitions": 3,
+    "query_measurement_warmup_count": 20,
+    "desktop_concurrency": 2,
+    "service_concurrency": 8,
+    "scenario_mix": [
+      {
+        "scenario_id": "NOMINAL",
+        "weight": 0.6
+      },
+      {
+        "scenario_id": "GAP_AND_INSUFFICIENT",
+        "weight": 0.15
+      },
+      {
+        "scenario_id": "INVALID_AND_REVIEW_REQUIRED",
+        "weight": 0.1
+      },
+      {
+        "scenario_id": "REPLAY_ORIGINAL_AS_KNOWN",
+        "weight": 0.1
+      },
+      {
+        "scenario_id": "RETROSPECTIVE_EXPLICIT_RELEASE",
+        "weight": 0.05
+      }
+    ],
+    "required_products": [
+      "P1_RELEASE_REPLAY",
+      "P1_LONGITUDINAL_TREND",
+      "P1_EVIDENCE_FIRST_DEBRIEF",
+      "EXACT_RELEASE_API_QUERY"
+    ],
+    "generation_contract": [
+      "The generator is deterministic for this exact spec and seed.",
+      "Generated input and expected membership manifests are canonical JSON with SHA-256.",
+      "No operational or sensitive data may be substituted.",
+      "A benchmark result must bind source revision, workload spec hash, generated workload manifest hash, profile, hardware manifest and dependency lock."
+    ]
+  },
+  "performance_resource_profile": {
+    "profile_id": "M5_PERFORMANCE_RESOURCE_V1",
+    "profile_version": "1.0.0",
+    "workload_id": "M5_P1_QUALIFICATION_WORKLOAD_V1",
+    "workload_spec_hash": "1cb0b2d6b241262f2af6c7dd05abe300da724b4508a98c57c184a0cfcb70970f",
+    "measurement_rule": "Wall time uses a monotonic clock. Query latency excludes one-time package install and warmup. p50/p95 are nearest-rank percentiles over the governed measurement set. No failed request may be omitted.",
+    "common_thresholds": {
+      "full_workload_wall_seconds_max": 900,
+      "replay_session_throughput_per_second_min": 0.1,
+      "peak_rss_mib_max": 8192,
+      "normalized_cpu_utilization_p95_pct_max": 95,
+      "workspace_disk_growth_mib_max": 10240,
+      "request_error_count_max": 0
+    },
+    "desktop_thresholds": {
+      "concurrency": 2,
+      "api_query_latency_p50_ms_max": 500,
+      "api_query_latency_p95_ms_max": 2000,
+      "api_query_throughput_per_second_min": 2,
+      "longitudinal_scope_latency_p95_ms_max": 3000
+    },
+    "service_thresholds": {
+      "concurrency": 8,
+      "api_query_latency_p50_ms_max": 250,
+      "api_query_latency_p95_ms_max": 1000,
+      "api_query_throughput_per_second_min": 8,
+      "longitudinal_scope_latency_p95_ms_max": 1500
+    },
+    "threshold_rule": "All applicable thresholds are conjunctive. Equality at a maximum/minimum boundary passes. Any threshold widening requires a new C3 authority version."
+  },
+  "security_release_readiness_profile": {
+    "profile_id": "M5_SECURITY_RELEASE_READINESS_V1",
+    "profile_version": "1.0.0",
+    "sbom": {
+      "format": "CycloneDX JSON",
+      "spec_version": "1.6",
+      "dependency_authority": "uv.lock",
+      "native_dependency_manifest_required": true,
+      "unknown_unreviewed_license_count_max": 0
+    },
+    "vulnerability_acceptance": {
+      "severity_model": "CVSS_V3_1",
+      "critical_unwaived_count_max": 0,
+      "high_unwaived_count_max": 0,
+      "medium_unwaived_count_max": 0,
+      "low_unwaived_count_max": null,
+      "advisory_snapshot_hash_required": true,
+      "waiver_allowed_severities": [
+        "MEDIUM"
+      ],
+      "waiver_max_days": 90,
+      "waiver_required_fields": [
+        "waiver_id",
+        "advisory_id",
+        "component",
+        "version",
+        "mitigation",
+        "expires_at_utc",
+        "security_approver",
+        "release_manager"
+      ],
+      "expired_waiver_rule": "FAIL_CLOSED"
+    },
+    "secret_and_configuration": {
+      "high_confidence_secret_findings_max": 0,
+      "default_credentials_permitted": false,
+      "forbidden_secret_fields": [
+        "authorization",
+        "cookie",
+        "password",
+        "secret",
+        "token",
+        "private_key",
+        "credential"
+      ],
+      "service_profiles_require_authentication": true,
+      "service_profiles_require_default_deny_authorization": true,
+      "desktop_remote_bind_without_authentication_permitted": false
+    },
+    "artifact_integrity": {
+      "hash_algorithm": "SHA-256",
+      "every_release_artifact_hash_required": true,
+      "dependency_lock_hash_required": true,
+      "baseline_lock_hash_required": true,
+      "package_manifest_hash_required": true,
+      "native_platform_code_signing_required": false,
+      "native_code_signing_policy_reason": "M5 v1 has no approved enterprise PKI/code-signing trust chain in Canonical authority. Integrity is governed by SHA-256 package/evidence manifests, exact protected-main source provenance and multi-role release signoff. A future requirement for native code signing is a C3 change.",
+      "release_evidence_cryptographic_signature_required": false
+    }
+  },
+  "package_lifecycle_profile": {
+    "profile_id": "M5_OFFLINE_PACKAGE_LIFECYCLE_V1",
+    "profile_version": "1.0.0",
+    "semantic_build_rule": "All four mandatory profile artifacts use one source revision, one semantic build version and one dependency lock.",
+    "package_forms": {
+      "WINDOWS_DESKTOP_X64": "DETERMINISTIC_ZIP_OFFLINE_RUNTIME_BUNDLE",
+      "WINDOWS_SERVICE_X64": "DETERMINISTIC_ZIP_OFFLINE_RUNTIME_BUNDLE",
+      "LINUX_DESKTOP_X64": "DETERMINISTIC_TAR_GZ_OFFLINE_RUNTIME_BUNDLE",
+      "LINUX_SERVICE_X64": "DETERMINISTIC_TAR_GZ_OFFLINE_RUNTIME_BUNDLE"
+    },
+    "target_prerequisites": {
+      "preexisting_project_virtualenv_required": false,
+      "preexisting_uv_required": false,
+      "preexisting_python_required": false,
+      "network_access_required": false
+    },
+    "required_package_evidence": [
+      "build-manifest.json",
+      "package-manifest.json",
+      "sbom.cdx.json",
+      "license-report.json",
+      "native-dependencies.json",
+      "third-party-dependencies.json"
+    ],
+    "lifecycle_thresholds_seconds": {
+      "build_max": 600,
+      "clean_install_max": 300,
+      "ready_start_max": 60,
+      "graceful_stop_max": 30,
+      "uninstall_max": 120
+    },
+    "lifecycle_rule": "Install into a clean target, reach READY, run governed component smoke, stop, uninstall, and verify no product-owned mutable runtime state remains outside explicitly retained backup/evidence locations. Any partial install/start/uninstall failure must fail closed with diagnostics.",
+    "archive_rule": "Archive bytes may differ by OS/profile; package manifest logical identities and governed source/dependency/baseline hashes must remain exact."
+  },
+  "upgrade_backup_restore_profile": {
+    "profile_id": "M5_UPGRADE_RECOVERY_V1",
+    "profile_version": "1.0.0",
+    "upgrade": {
+      "first_m5_release_rule": "NOT_APPLICABLE_FIRST_M5_RELEASE is allowed only when no prior accepted M5-qualified release exists for the same certification profile. Failed-install rollback to the pre-install state remains mandatory.",
+      "subsequent_supported_source": "IMMEDIATE_PRIOR_ACCEPTED_M5_RELEASE_SAME_PROFILE",
+      "minimum_supported_prior_release_count": 1,
+      "db_schema_compatibility_required": true,
+      "immutable_release_replay_preservation_required": true,
+      "failed_upgrade_rollback_required": true,
+      "rollback_target": "EXACT_PRIOR_ACCEPTED_PACKAGE_AND_MANIFEST",
+      "current_pointer_corruption_permitted": false
+    },
+    "backup_restore": {
+      "covered_state": [
+        "SQLite",
+        "PostgreSQL",
+        "Parquet/object artifacts",
+        "analysis_release membership",
+        "evidence manifests"
+      ],
+      "consistency_rule": "Backup is an explicit consistent set identified by manifest hashes; in-flight/uncommitted state is excluded and reported, never silently promoted.",
+      "committed_published_release_rpo_seconds": 0,
+      "restore_rto_seconds_max": 1800,
+      "integrity_hash": "SHA-256",
+      "clean_target_restore_required": true,
+      "exact_release_membership_and_replay_required": true,
+      "one_byte_corruption_must_fail_before_target_mutation": true,
+      "partial_cross_store_restore_permitted": false
+    }
+  },
+  "formal_release_acceptance_profile": {
+    "profile_id": "M5_FORMAL_RELEASE_ACCEPTANCE_V1",
+    "profile_version": "1.0.0",
+    "required_certification_profiles": [
+      "WINDOWS_DESKTOP_X64",
+      "LINUX_DESKTOP_X64",
+      "WINDOWS_SERVICE_X64",
+      "LINUX_SERVICE_X64"
+    ],
+    "same_candidate_source_revision_required": true,
+    "same_semantic_build_version_required": true,
+    "mandatory_profile_failure_blocks_release": true,
+    "exact_release_references_required": true,
+    "current_latest_substitution_forbidden": true,
+    "required_evidence_categories": [
+      "M5_AUTHORITY_HASHES",
+      "HARDWARE_IDENTITY",
+      "WORKLOAD_MANIFEST",
+      "PERFORMANCE_RESOURCE_REPORT",
+      "SECURITY_VULNERABILITY_REPORT",
+      "PACKAGE_LIFECYCLE",
+      "SBOM_LICENSE_NATIVE_MANIFEST",
+      "GOLDEN_REPLAY_LOGICAL_EQUIVALENCE",
+      "UPGRADE_ROLLBACK",
+      "BACKUP_RESTORE",
+      "COLD_START_RECONSTRUCTION",
+      "FORMAL_RC_MANIFEST"
+    ],
+    "required_signoff_roles": [
+      "RELEASE_MANAGER",
+      "INDEPENDENT_QA",
+      "SECURITY_APPROVER"
+    ],
+    "signoff_actor_ids_must_be_distinct": true,
+    "all_waivers_must_be_unexpired_at_release_time": true,
+    "protected_main_m5_exit_go_required": true,
+    "formal_claim_rule": "An artifact is M5-qualified only when the exact protected-main source revision is bound to a complete formal RC evidence manifest, every mandatory profile is PASS, all applicable qualification profiles are PASS, required signoffs are distinct and present, and M5 Exit Review is GO on that same protected-main revision."
+  },
+  "profile_hashes": {
+    "target_hardware_profile_sha256": "236e1e1d5c74ce68717f6808346b997f58df6c6c5bccbd37323fe82fa8339d92",
+    "workload_profile_sha256": "1cb0b2d6b241262f2af6c7dd05abe300da724b4508a98c57c184a0cfcb70970f",
+    "performance_profile_sha256": "4de0aa56f961994b2063e503e0f3128d37a8e743980f33dea900fab6af53ab1e",
+    "security_profile_sha256": "ea999324ebc576c26fc905cf117f086eecc1389e9e3588cb303a4b3d3dd4c7b2",
+    "package_profile_sha256": "698f918307cd68ae16be2224a3b82853c805d98744343722b3d23a02fee0bc2b",
+    "recovery_profile_sha256": "c35c59fd29491c98e09c4ff3001adcd102003d8d735ba9727f35065900348350",
+    "release_acceptance_profile_sha256": "5bbeb9e02d8426ad8983c027123c4f9f8ff364beeb38af1efb4998a75b566a3f"
+  },
+  "fail_closed_error_codes": {
+    "authority_missing": "FAIL_CLOSED_M5_QUALIFICATION_AUTHORITY_REQUIRED",
+    "authority_hash_mismatch": "FAIL_CLOSED_M5_AUTHORITY_HASH_MISMATCH",
+    "unsupported_profile": "FAIL_CLOSED_M5_CERTIFICATION_PROFILE_REQUIRED",
+    "hardware_below_minimum": "FAIL_CLOSED_M5_TARGET_HARDWARE_NOT_MET",
+    "workload_mismatch": "FAIL_CLOSED_M5_WORKLOAD_IDENTITY_MISMATCH",
+    "performance_threshold": "FAIL_CLOSED_M5_PERFORMANCE_THRESHOLD",
+    "security_acceptance": "FAIL_CLOSED_M5_SECURITY_ACCEPTANCE",
+    "package_online_dependency": "FAIL_CLOSED_M5_OFFLINE_PACKAGE_REQUIRED",
+    "upgrade_rollback": "FAIL_CLOSED_M5_UPGRADE_ROLLBACK_REQUIRED",
+    "backup_restore": "FAIL_CLOSED_M5_BACKUP_RESTORE_REQUIRED",
+    "release_evidence_incomplete": "FAIL_CLOSED_M5_RELEASE_EVIDENCE_INCOMPLETE",
+    "signoff_missing_or_not_distinct": "FAIL_CLOSED_M5_SIGNOFF_REQUIRED",
+    "m5_exit_not_go": "FAIL_CLOSED_M5_EXIT_GO_REQUIRED"
+  },
+  "golden_vectors": {
+    "performance_boundary_pass": {
+      "profile_id": "WINDOWS_SERVICE_X64",
+      "api_query_latency_p95_ms": 1000,
+      "api_query_throughput_per_second": 8,
+      "peak_rss_mib": 8192,
+      "full_workload_wall_seconds": 900,
+      "expected_status": "PASS"
+    },
+    "performance_over_limit_fail": {
+      "profile_id": "WINDOWS_SERVICE_X64",
+      "api_query_latency_p95_ms": 1000.001,
+      "expected_error": "FAIL_CLOSED_M5_PERFORMANCE_THRESHOLD"
+    },
+    "security_critical_fail": {
+      "critical_unwaived_count": 1,
+      "high_unwaived_count": 0,
+      "medium_unwaived_count": 0,
+      "expected_error": "FAIL_CLOSED_M5_SECURITY_ACCEPTANCE"
+    },
+    "security_medium_with_valid_waiver_pass": {
+      "medium_unwaived_count": 0,
+      "approved_waiver_count": 1,
+      "waiver_days": 30,
+      "expected_status": "PASS"
+    },
+    "package_network_dependency_fail": {
+      "target_network_access_required": true,
+      "expected_error": "FAIL_CLOSED_M5_OFFLINE_PACKAGE_REQUIRED"
+    },
+    "first_release_upgrade_na_pass": {
+      "prior_accepted_m5_release_exists": false,
+      "upgrade_result": "NOT_APPLICABLE_FIRST_M5_RELEASE",
+      "failed_install_rollback_verified": true,
+      "expected_status": "PASS"
+    },
+    "backup_corruption_fail": {
+      "one_byte_corruption_detected": true,
+      "target_mutated_before_detection": false,
+      "expected_error": "FAIL_CLOSED_M5_BACKUP_RESTORE_REQUIRED"
+    },
+    "release_missing_profile_fail": {
+      "passed_profiles": [
+        "WINDOWS_DESKTOP_X64",
+        "LINUX_DESKTOP_X64",
+        "WINDOWS_SERVICE_X64"
+      ],
+      "expected_error": "FAIL_CLOSED_M5_RELEASE_EVIDENCE_INCOMPLETE"
+    },
+    "release_duplicate_signoff_actor_fail": {
+      "signoffs": [
+        {
+          "role": "RELEASE_MANAGER",
+          "actor_id": "actor-a"
+        },
+        {
+          "role": "INDEPENDENT_QA",
+          "actor_id": "actor-a"
+        },
+        {
+          "role": "SECURITY_APPROVER",
+          "actor_id": "actor-c"
+        }
+      ],
+      "expected_error": "FAIL_CLOSED_M5_SIGNOFF_REQUIRED"
+    },
+    "release_exit_not_go_fail": {
+      "m5_exit_decision": "PENDING",
+      "expected_error": "FAIL_CLOSED_M5_EXIT_GO_REQUIRED"
+    }
+  }
+}

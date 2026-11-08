@@ -1,0 +1,34 @@
+{
+  "authority_id": "GUI_BATCH_EVENTS_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.12.0",
+  "parent_core_baseline": "CB-1.11.0",
+  "decision_id": "G7-V33-BATCH-EVENTS-2026-11-07",
+  "approval_id": "G7-CB-1.12.0-LOCAL-IMPLEMENTATION-2026-11-07",
+  "activation_status": "ACTIVE",
+  "rules": {
+    "single_exact_batch_scope": true,
+    "cross_batch_borrowing": "FORBIDDEN",
+    "unknown_batch": "HTTP_404_UNDER_READY_BACKEND",
+    "cursor": "OPAQUE_VERSIONED_CHECKSUMMED",
+    "latest_fallback": "FORBIDDEN",
+    "cluster_relation_only": true,
+    "non_launch_behavior_source": "NOT_ADMITTED_G10_SOURCE_MATRIX",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "single_owner_rules": {
+    "batch_events_query": "tpaa_application.batch_events",
+    "weapon_event_detector": "tpaa_application.weapon_event",
+    "weapon_event_identity": "tpaa_application.weapon_event",
+    "attack_cluster_resolver": "tpaa_application.weapon_event",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "database": {
+    "schema": "1.10.0",
+    "migration_required": false,
+    "reason": "Batch events is an exact-batch read model over existing Batch/WE/Cluster relations; no new physical tables."
+  },
+  "release_claim": false
+}

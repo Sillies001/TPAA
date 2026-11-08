@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from .generated_g3_authority import (
+from .generated_g9_authority import (
     GUI_ACTIVATION_STATUS,
     GUI_AUTHORITY_ID,
     GUI_AUTHORITY_VERSION,

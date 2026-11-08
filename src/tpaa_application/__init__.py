@@ -3,6 +3,26 @@
 M0-API-001 establishes the only business-entry layer for GUI and REST transports.
 """
 
+from .batch_events import (
+    BatchEventRecord,
+    BatchEventsError,
+    BatchEventsFilter,
+    BatchEventsQuery,
+)
+from .batch_events_application import BatchEventsApplicationService
+from .batch_import import (
+    BatchImportError,
+    BatchImportService,
+    BatchQualificationStatus,
+    BatchRegistrationRecord,
+    BatchRepository,
+    BatchTrainingType,
+    ForceFormationMember,
+    ForceFormationRevision,
+    ImportTicketStore,
+)
+from .co_attack import CoAttackError
+from .co_attack_application import CoAttackApplicationService
 from .durable_job_control import (
     B3_JOB_COMPONENT_VERSION,
     DurableJobControl,
@@ -39,6 +59,14 @@ from .governance_registry import (
     LifecycleEventRecord,
 )
 from .gui_gateway import GuiGatewayError, GuiGatewayPrincipal, GuiGatewayService
+from .historical_overview import (
+    BatchOverviewRecord,
+    BatchWorksetSource,
+    HistoricalOverviewError,
+    HistoricalTrainingOverviewQuery,
+    OverviewQuery,
+)
+from .historical_overview_application import HistoricalOverviewApplicationService
 from .job_control import (
     BusinessStatus,
     IdempotencyConflict,
@@ -186,6 +214,7 @@ from .release_management import (
     ReleaseManagementError,
     ReleaseManagementService,
 )
+from .replay_context import ReplayContextApplicationService, ReplayContextError
 from .runtime import (
     GetRuntimeBaselineStatus,
     RuntimeBaselineIdentityView,
@@ -220,8 +249,24 @@ from .w7_external import (
     W7ExternalCapabilityRegistry,
     build_w7_external_registry,
 )
+from .weapon_event_application import (
+    WeaponEventApplicationError,
+    WeaponEventApplicationService,
+    WeaponEventReadAdapter,
+    WeaponEventScope,
+    WeaponEventSnapshot,
+)
 
 __all__ = [
+    "BatchImportError",
+    "BatchImportService",
+    "BatchQualificationStatus",
+    "BatchRegistrationRecord",
+    "BatchRepository",
+    "BatchTrainingType",
+    "ForceFormationMember",
+    "ForceFormationRevision",
+    "ImportTicketStore",
     "ConfigurationRecord",
     "ConfigurationSnapshotRecord",
     "ContextArtifactRecord",
@@ -390,6 +435,26 @@ __all__ = [
     "SourceProvenanceRecord",
     "SourceProvenanceRepository",
     "StorageBaselineStatus",
+    "WeaponEventApplicationError",
+    "WeaponEventApplicationService",
+    "BatchOverviewRecord",
+    "BatchWorksetSource",
+    "HistoricalOverviewError",
+    "BatchEventsApplicationService",
+    "CoAttackApplicationService",
+    "CoAttackError",
+    "ReplayContextApplicationService",
+    "ReplayContextError",
+    "BatchEventsError",
+    "BatchEventsFilter",
+    "BatchEventsQuery",
+    "BatchEventRecord",
+    "HistoricalOverviewApplicationService",
+    "HistoricalTrainingOverviewQuery",
+    "OverviewQuery",
+    "WeaponEventReadAdapter",
+    "WeaponEventScope",
+    "WeaponEventSnapshot",
     "W7_EXTERNAL_CAPABILITIES",
     "W7ExternalCapability",
     "W7ExternalCapabilityError",

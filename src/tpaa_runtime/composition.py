@@ -135,7 +135,7 @@ def _build(
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=operational_status,
-        gui_gateway=GuiGatewayService(),
+        gui_gateway=GuiGatewayService(core_baseline=config.authority_root.resolve().parent.name),
         w7_external_capabilities=W7ExternalCapabilityRegistry.local_closed(),
     )
     return ProductRuntime(

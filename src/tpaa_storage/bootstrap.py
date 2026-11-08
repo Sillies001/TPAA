@@ -19,11 +19,82 @@ from typing import Any
 from tpaa_canonical.loader import ArtifactExpectation, CanonicalArtifactLoader
 
 EXPECTED_DB_SCHEMA_VERSION = "1.9.0"
+G4_CORE_BASELINE = "CB-1.9.0"
+G4_DB_SCHEMA_VERSION = "1.10.0"
+G4_BASELINE_LOCK_SHA256 = "2b83df248d92137aafde2b0f3934051218929e843afccd9bfd6b3aa63c8582a1"
+G4_CONTROLLED_ARTIFACT_COUNT = 49
+G5_CORE_BASELINE = "CB-1.10.0"
+G5_DB_SCHEMA_VERSION = "1.10.0"
+G5_BASELINE_LOCK_SHA256 = "a4864b36ef571b3582c97606ca33a3bd633e0561f776ad4383c9ff6a14dac3d0"
+G5_CONTROLLED_ARTIFACT_COUNT = 51
+G6_CORE_BASELINE = "CB-1.11.0"
+G6_DB_SCHEMA_VERSION = "1.10.0"
+G6_BASELINE_LOCK_SHA256 = "7b8783bd7a61012862ec90ed64882d3f435d3a274f6237f309e6208a62105915"
+G6_CONTROLLED_ARTIFACT_COUNT = 53
+G7_CORE_BASELINE = "CB-1.12.0"
+G7_DB_SCHEMA_VERSION = "1.10.0"
+G7_BASELINE_LOCK_SHA256 = "387fe31e8e29958dba7a5aa8cafb0b4ad381f84e2440a87c684d518e3d484fc1"
+G7_CONTROLLED_ARTIFACT_COUNT = 55
+G8_CORE_BASELINE = "CB-1.13.0"
+G8_DB_SCHEMA_VERSION = "1.10.0"
+G8_BASELINE_LOCK_SHA256 = "69ba7e442eafcaeb22072e42c4d078a6a5a1baa03393e478ac6f664a2e8e8b84"
+G8_CONTROLLED_ARTIFACT_COUNT = 57
+G9_CORE_BASELINE = "CB-1.14.0"
+G9_DB_SCHEMA_VERSION = "1.10.0"
+G9_BASELINE_LOCK_SHA256 = "9d0904b750a498c3e78d3ee7eb272ea6be3728ba55230f9b37f444513ab24f1d"
+G9_CONTROLLED_ARTIFACT_COUNT = 59
+G10_CORE_BASELINE = "CB-1.15.0"
+G10_DB_SCHEMA_VERSION = "1.10.0"
+G10_BASELINE_LOCK_SHA256 = "ff7c32f12fd33d5f396fc68362cbc8fae2a107e063f88723b1171467ee1e0273"
+G10_CONTROLLED_ARTIFACT_COUNT = 63
+G11_CORE_BASELINE = "CB-1.16.0"
+G11_DB_SCHEMA_VERSION = "1.10.0"
+G11_BASELINE_LOCK_SHA256 = "69798bcf62ab930f7dc523c9a90d0a7271567475f2aeac7d7d3476aecd4d62d8"
+G11_CONTROLLED_ARTIFACT_COUNT = 65
+G12_CORE_BASELINE = "CB-1.17.0"
+G12_DB_SCHEMA_VERSION = "1.10.0"
+G12_BASELINE_LOCK_SHA256 = "2e84be2c5b859a767f587333dd696130ff9f6af003d8cecb79e57ea929405946"
+G12_CONTROLLED_ARTIFACT_COUNT = 69
 CORE_MODEL_ARTIFACT_ID = "CORE_LOGICAL_MODEL"
 BOOTSTRAP_MANIFEST_TABLE = "_tpaa_bootstrap_manifest"
 SQLITE_ENGINE_PROFILE = "sqlite-desktop"
 POSTGRES_ENGINE_PROFILE = "postgresql-service"
 POSTGRES_MANIFEST_SCHEMA = "public"
+
+# Trusted baseline pinning: map an active core baseline to its validated lock hash and
+# controlled artifact count.  Activation is keyed by the baseline directory name and the
+# CanonicalArtifactLoader then re-validates the lock/lineage (not a bare string match).
+# CB-1.10.0 is the immutable direct successor of CB-1.9.0 and shares DB schema 1.10.0;
+# CB-1.11.0 is the immutable direct successor of CB-1.10.0 on the same DB schema 1.10.0;
+# CB-1.12.0 is the immutable direct successor of CB-1.11.0 on the same DB schema 1.10.0.
+_TRUSTED_BASELINE_PINS: Mapping[str, tuple[str, str, int]] = {
+    G4_CORE_BASELINE: (G4_DB_SCHEMA_VERSION, G4_BASELINE_LOCK_SHA256, G4_CONTROLLED_ARTIFACT_COUNT),
+    G5_CORE_BASELINE: (G5_DB_SCHEMA_VERSION, G5_BASELINE_LOCK_SHA256, G5_CONTROLLED_ARTIFACT_COUNT),
+    G6_CORE_BASELINE: (G6_DB_SCHEMA_VERSION, G6_BASELINE_LOCK_SHA256, G6_CONTROLLED_ARTIFACT_COUNT),
+    G7_CORE_BASELINE: (G7_DB_SCHEMA_VERSION, G7_BASELINE_LOCK_SHA256, G7_CONTROLLED_ARTIFACT_COUNT),
+    G8_CORE_BASELINE: (G8_DB_SCHEMA_VERSION, G8_BASELINE_LOCK_SHA256, G8_CONTROLLED_ARTIFACT_COUNT),
+    G9_CORE_BASELINE: (G9_DB_SCHEMA_VERSION, G9_BASELINE_LOCK_SHA256, G9_CONTROLLED_ARTIFACT_COUNT),
+    G10_CORE_BASELINE: (G10_DB_SCHEMA_VERSION, G10_BASELINE_LOCK_SHA256, G10_CONTROLLED_ARTIFACT_COUNT),
+    G11_CORE_BASELINE: (G11_DB_SCHEMA_VERSION, G11_BASELINE_LOCK_SHA256, G11_CONTROLLED_ARTIFACT_COUNT),
+    G12_CORE_BASELINE: (G12_DB_SCHEMA_VERSION, G12_BASELINE_LOCK_SHA256, G12_CONTROLLED_ARTIFACT_COUNT),
+}
+
+# Schema-authority provenance is separate from the active product baseline.  A physical
+# database manifest records the lock that CREATED its schema; a successor may reuse that
+# data root only when (a) the physical schema fingerprint is byte-identical and (b) the
+# stored lock is in the successor's legal lineage.  This is never a blanket ignore of a
+# lock mismatch — only explicitly lineage-related schema predecessors are accepted.
+_COMPATIBLE_SCHEMA_LOCKS: Mapping[str, tuple[str, ...]] = {
+    G4_CORE_BASELINE: (G4_BASELINE_LOCK_SHA256,),
+    G5_CORE_BASELINE: (G5_BASELINE_LOCK_SHA256, G4_BASELINE_LOCK_SHA256),
+    G6_CORE_BASELINE: (G6_BASELINE_LOCK_SHA256, G5_BASELINE_LOCK_SHA256),
+    G7_CORE_BASELINE: (G7_BASELINE_LOCK_SHA256, G6_BASELINE_LOCK_SHA256),
+    G8_CORE_BASELINE: (G8_BASELINE_LOCK_SHA256, G7_BASELINE_LOCK_SHA256),
+    G9_CORE_BASELINE: (G9_BASELINE_LOCK_SHA256, G8_BASELINE_LOCK_SHA256),
+    G10_CORE_BASELINE: (G10_BASELINE_LOCK_SHA256, G9_BASELINE_LOCK_SHA256),
+    G11_CORE_BASELINE: (G11_BASELINE_LOCK_SHA256, G10_BASELINE_LOCK_SHA256),
+    G12_CORE_BASELINE: (G12_BASELINE_LOCK_SHA256, G11_BASELINE_LOCK_SHA256),
+}
 
 _REFERENCE_RE = re.compile(
     r"\bREFERENCES\s+([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE
@@ -65,6 +136,7 @@ class _SchemaAuthority:
     authority_sha256: str
     baseline_lock_sha256: str
     tables: Mapping[str, Mapping[str, Any]]
+    compatible_schema_lock_shas: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -97,13 +169,29 @@ def _load_authority(
 ) -> _SchemaAuthority:
     if loader is not None and authority_root is not None:
         raise ValueError("loader and authority_root are mutually exclusive")
-    canonical_loader = loader or CanonicalArtifactLoader(
-        None if authority_root is None else authority_root.resolve(strict=False).parent
-    )
+    expected_schema_version = EXPECTED_DB_SCHEMA_VERSION
+    if loader is not None:
+        canonical_loader = loader
+    elif authority_root is not None:
+        baseline_name = authority_root.resolve(strict=False).parent.name
+        pin = _TRUSTED_BASELINE_PINS.get(baseline_name)
+        if pin is not None:
+            db_schema_version, trusted_lock_sha256, controlled_artifact_count = pin
+            canonical_loader = CanonicalArtifactLoader(
+                authority_root.resolve(strict=False).parent,
+                expected_core_baseline=baseline_name,
+                trusted_lock_sha256=trusted_lock_sha256,
+                expected_controlled_artifact_count=controlled_artifact_count,
+            )
+            expected_schema_version = db_schema_version
+        else:
+            canonical_loader = CanonicalArtifactLoader(authority_root.resolve(strict=False).parent)
+    else:
+        canonical_loader = CanonicalArtifactLoader()
     artifact = canonical_loader.load(
         CORE_MODEL_ARTIFACT_ID,
         expectation=ArtifactExpectation(
-            schema_version=EXPECTED_DB_SCHEMA_VERSION,
+            schema_version=expected_schema_version,
             required_top_level_keys=(
                 "authority_id",
                 "core_baseline",
@@ -121,11 +209,11 @@ def _load_authority(
         )
     schema_version = payload.get("db_schema_version")
     lock_schema_version = canonical_loader.baseline_metadata.get("db_schema")
-    if schema_version != EXPECTED_DB_SCHEMA_VERSION or lock_schema_version != schema_version:
+    if schema_version != expected_schema_version or lock_schema_version != schema_version:
         raise BootstrapError(
             "SCHEMA_VERSION_MISMATCH",
             (
-                f"expected={EXPECTED_DB_SCHEMA_VERSION} "
+                f"expected={expected_schema_version} "
                 f"core_model={schema_version!r} baseline_lock={lock_schema_version!r}"
             ),
         )
@@ -175,12 +263,18 @@ def _load_authority(
                     "FIELD_SQL_INVALID", f"table={table_name} field={field_name}"
                 )
         _canonical_table_constraints(table_name, raw_table, seen_fields=seen)
+    compatible_locks: tuple[str, ...] = ()
+    if authority_root is not None:
+        compatible_locks = _COMPATIBLE_SCHEMA_LOCKS.get(
+            authority_root.resolve(strict=False).parent.name, ()
+        )
     return _SchemaAuthority(
         schema_version=schema_version,
         core_baseline=core_baseline,
         authority_sha256=artifact.sha256,
         baseline_lock_sha256=artifact.baseline_lock_sha256,
         tables=tables,
+        compatible_schema_lock_shas=compatible_locks,
     )
 
 
@@ -539,14 +633,20 @@ SELECT 1, {_sql_literal(POSTGRES_ENGINE_PROFILE)}, {_sql_literal(authority.schem
     return meta_command + "\n" + ";\n\n".join(sql_statements) + ";\n"
 
 
-def postgres_verify_script() -> str:
+def postgres_verify_script(*, authority_root: Path | None = None) -> str:
     """Build read-only fail-closed PostgreSQL schema/provenance verification SQL."""
 
-    authority = _load_authority()
+    authority = _load_authority(authority_root=authority_root)
     create_statements = _postgres_create_statements(authority)
     projection_hash = _schema_fingerprint(create_statements)
     catalog_hash_query = _postgres_catalog_hash_query()
     manifest = _postgres_manifest_qualified_name()
+    acceptable_locks = tuple(
+        dict.fromkeys(
+            (authority.baseline_lock_sha256, *authority.compatible_schema_lock_shas)
+        )
+    )
+    acceptable_lock_sql = ", ".join(_sql_literal(value) for value in acceptable_locks)
     return f'''\\set ON_ERROR_STOP on
 BEGIN READ ONLY;
 
@@ -570,7 +670,7 @@ BEGIN
      OR core_baseline <> {_sql_literal(authority.core_baseline)}
      OR authority_artifact_id <> {_sql_literal(CORE_MODEL_ARTIFACT_ID)}
      OR authority_sha256 <> {_sql_literal(authority.authority_sha256)}
-     OR baseline_lock_sha256 <> {_sql_literal(authority.baseline_lock_sha256)}
+     OR baseline_lock_sha256 NOT IN ({acceptable_lock_sql})
      OR physical_schema_sha256 <> {_sql_literal(projection_hash)};
   IF mismatch_count <> 0 THEN
     RAISE EXCEPTION 'TPAA_BOOTSTRAP_MANIFEST_MISMATCH';
@@ -720,10 +820,19 @@ def _verify_connection(
         authority.baseline_lock_sha256,
         expected_fingerprint,
     )
-    if tuple(row) != expected_manifest:
+    # Schema-authority provenance vs active product baseline: every manifest field is
+    # exact-except-baseline_lock.  The stored schema-creating lock is accepted only when
+    # it equals the active baseline lock or a lock in its legal lineage (and the physical
+    # fingerprint above already matched byte-for-byte).  This is never a blanket ignore.
+    acceptable_locks = {authority.baseline_lock_sha256, *authority.compatible_schema_lock_shas}
+    actual = tuple(row)
+    actual_lock = actual[5] if len(actual) == 7 else None
+    expected_without_lock = expected_manifest[:5] + expected_manifest[6:]
+    actual_without_lock = actual[:5] + actual[6:]
+    if actual_without_lock != expected_without_lock or actual_lock not in acceptable_locks:
         raise BootstrapError(
             "BOOTSTRAP_MANIFEST_MISMATCH",
-            f"expected={expected_manifest!r} actual={tuple(row)!r}",
+            f"expected={expected_manifest!r} actual={actual!r} acceptable_locks={sorted(acceptable_locks)!r}",
         )
     count = connection.execute(
         f'SELECT COUNT(*) FROM "{BOOTSTRAP_MANIFEST_TABLE}"'

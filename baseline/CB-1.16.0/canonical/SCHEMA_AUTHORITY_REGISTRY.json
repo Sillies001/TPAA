@@ -1,0 +1,84 @@
+{
+  "registry_id": "SCHEMA_AUTHORITY_REGISTRY",
+  "version": "1.3.0",
+  "core_baseline": "CB-1.4.0",
+  "authorities": [
+    {
+      "domain": "logical persistence objects",
+      "artifact": "CORE_LOGICAL_MODEL.json"
+    },
+    {
+      "domain": "cross-layer DTO field contracts",
+      "artifact": "CROSS_LAYER_DTO_CONTRACTS.json"
+    },
+    {
+      "domain": "episode stage taxonomy/method",
+      "artifact": "STAGE_REGISTRY.json"
+    },
+    {
+      "domain": "P capability maturity semantics (P1-P6)",
+      "artifact": "CAPABILITY_PHASE_REGISTRY.json"
+    },
+    {
+      "domain": "P1 metric algorithms/semantic identities/structured schemas",
+      "artifact": "P1_METRIC_CATALOG.json"
+    },
+    {
+      "domain": "P1 metric input binding authority",
+      "artifact": "METRIC_INPUT_AUTHORITY_MATRIX.json"
+    },
+    {
+      "domain": "cross-cutting invariants",
+      "artifact": "CORE_RULES.json"
+    },
+    {
+      "domain": "training/evaluation taxonomy and assessment semantics",
+      "artifact": "TRAINING_EVALUATION_TAXONOMY.json"
+    },
+    {
+      "domain": "world capability and conclusion eligibility semantics",
+      "artifact": "WORLD_CAPABILITY_REGISTRY.json"
+    },
+    {
+      "domain": "P2-P6 extension product/P capability semantic contracts",
+      "artifact": "EXTENSION_CONTRACT_REGISTRY.json"
+    },
+    {
+      "domain": "P2-P6/training-assessment metric-family semantic reservations",
+      "artifact": "EXTENSION_METRIC_FAMILY_REGISTRY.json"
+    },
+    {
+      "domain": "runtime platform compatibility, OS portability and cross-platform equivalence",
+      "artifact": "PLATFORM_COMPATIBILITY_REGISTRY.json"
+    },
+    {
+      "domain": "project development milestone semantics (M0-M9)",
+      "artifact": "DEVELOPMENT_MILESTONE_REGISTRY.json"
+    },
+    {
+      "domain": "engineering workstream semantics (WS-*)",
+      "artifact": "ENGINEERING_WORKSTREAM_REGISTRY.json"
+    },
+    {
+      "domain": "progress/layer terminology namespace and separation",
+      "artifact": "TERMINOLOGY_REGISTRY.json"
+    }
+  ],
+  "forbidden_patterns": [
+    "Second current-looking field table for an object already in authority",
+    "DTO inferred ad hoc from UI",
+    "latest/current fallback for historical interpretation",
+    "free-form JSON response in place of versioned DTO",
+    "manual copied metric formula as independent authority",
+    "Team score copied to individual actors",
+    "Truth substituted for observer perception",
+    "Forecast/counterfactual rendered as historical fact",
+    "Instructor override overwrites immutable automatic result",
+    "OS-specific business logic above platform adapter",
+    "Windows/Linux results diverge in governed logical semantics",
+    "Unqualified development phase numbering outside M0-M9",
+    "Episode Stage used as project progress",
+    "P capability code used as project milestone",
+    "M milestone code used as product capability identity"
+  ]
+}

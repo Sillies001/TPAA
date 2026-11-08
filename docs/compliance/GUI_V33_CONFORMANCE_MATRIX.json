@@ -1,7 +1,20 @@
 {
   "schema": "TPAA_GUI_V33_CONFORMANCE_MATRIX_V1",
   "baseline": "GUI-DEMO-V33-2026-11-05",
-  "status": "TARGET_FROZEN_IMPLEMENTATION_PENDING",
+  "status": "IMPLEMENTATION_REMEDIATION_IN_PROGRESS",
+  "remediation": {
+    "plan": "docs/plans/TPAA_G6至G12关闭后复核缺口全面整改与再关闭方案_2026-11-08.md",
+    "reviewed_at": "2026-11-08",
+    "g6": "IN_PROGRESS_REMEDIATION",
+    "g7": "IN_PROGRESS_REMEDIATION",
+    "g8": "IN_PROGRESS_REMEDIATION",
+    "g9": "IN_PROGRESS_REMEDIATION",
+    "g10": "IN_PROGRESS_REMEDIATION",
+    "g11": "IN_PROGRESS_REMEDIATION",
+    "g12": "IN_PROGRESS_EXTERNAL_DOORS_OPEN",
+    "visual_matrix": "AUTOMATED_STRUCTURAL_RECAPTURE_PASS_MANUAL_AND_FUNCTIONAL_GATES_OPEN",
+    "w9": "NO_GO"
+  },
   "coverage": {
     "views": 26,
     "themes": 3,

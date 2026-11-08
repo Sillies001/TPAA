@@ -1,0 +1,31 @@
+{
+  "schema": "TPAA_G11_V33_HARDENING_EVIDENCE_V1",
+  "status": "PASS",
+  "core_baseline": "CB-1.16.0",
+  "checks": {
+    "content_security_policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'",
+    "csp_present": true,
+    "csp_style_self": true,
+    "csp_script_self": true,
+    "nosniff": true,
+    "no_store": true,
+    "frame_ancestors_self": true,
+    "static_entry": true,
+    "wrong_token_rejected": true,
+    "wrong_nonce_rejected": true,
+    "lang_zh": true,
+    "skip_link": true,
+    "main_labelled": true,
+    "main_tabindex": true,
+    "focusables_present": true,
+    "ribbon_aria": true,
+    "chinese_copy": true,
+    "off_the_record": true,
+    "exact_origin_loopback": true,
+    "degraded_fail_closed": true,
+    "shutdown_state": "EXITED",
+    "no_orphan_backend_process": true,
+    "renderer_crash_fail_closed": true
+  },
+  "release_claim": false
+}

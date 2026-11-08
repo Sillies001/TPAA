@@ -1,0 +1,32 @@
+{
+  "schema": "TPAA_G5_WEAPON_EVENT_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.10.0",
+  "baseline_lock_sha256": "a4864b36ef571b3582c97606ca33a3bd633e0561f776ad4383c9ff6a14dac3d0",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g5-weapon-event.ts",
+      "sha256": "602654576b8cd6e9040edde16bceff9b8303f05234afc7fb7306f8694113947b",
+      "bytes": 5847
+    },
+    {
+      "key": "python_dto",
+      "path": "src/tpaa_application/generated_g5_dto.py",
+      "sha256": "c88a7a418f28393568aa1dfa30cfec39d23c600e279f479b9b3b5c65229980de",
+      "bytes": 1503
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g5_gateway.py",
+      "sha256": "98b187b6062eb47db61c021f37f2249b51c8a3b0a8dcf28d6685269c6a0c8342",
+      "bytes": 12086
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g5_authority.py",
+      "sha256": "562d7ffd8c8d4ddb6385401f7d897c802906dd693c365351e215efe39be81e2b",
+      "bytes": 12407
+    }
+  ],
+  "release_claim": false
+}

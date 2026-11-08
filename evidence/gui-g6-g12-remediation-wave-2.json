@@ -1,0 +1,47 @@
+{
+  "schema": "TPAA_GUI_G6_G12_REMEDIATION_WAVE_V1",
+  "wave": 2,
+  "recorded_at": "2026-11-08",
+  "status": "R3_R4_PARTIAL_PASS_STAGES_OPEN",
+  "implemented": [
+    "V26_EXACT_ENTITY_EPISODE_TIME_FILTERS",
+    "FILTER_BOUND_CURSOR_FINGERPRINT",
+    "CANONICAL_RELATION_CORRUPTION_FAIL_CLOSED",
+    "V26_DESKTOP_WEBENGINE_REACCEPTANCE",
+    "V24_EXACT_CONTEXT_AND_COMPLETE_BVR_CLUSTER",
+    "V24_FACTS_ONLY_TIMING_AND_FORMATION_ROLES",
+    "CO_ATTACK_CANONICAL_CORRUPTION_FAIL_CLOSED"
+  ],
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS_644_SOURCE_FILES",
+    "python_full_regression": "PASS_558",
+    "g7_targeted": "PASS_18",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "g7_webengine": "PASS_12_CAPTURES",
+    "g8_targeted": "PASS_18",
+    "g8_webengine": "PASS_12_CAPTURES",
+    "g12_automated_structural_matrix": "PASS_156_CAPTURES_26_VIEWS_156_UNIQUE"
+  },
+  "visual_matrix": {
+    "schema": "TPAA_G12_V33_VISUAL_MATRIX_V2",
+    "status": "AUTOMATED_STRUCTURAL_PASS",
+    "sha256": "c2fc089fbd2afae0a29ee4410f4587690156cb35f320dd8afb9a7772536ab0bd",
+    "manual_and_functional_gates_open": true
+  },
+  "open_authority_decisions": [
+    "G6_TASK_AND_EQUIPMENT_METRIC_DEFINITIONS",
+    "G7_NON_LAUNCH_BEHAVIOUR_SOURCE_AND_TAXONOMY",
+    "G8_PERCEPTION_GEOMETRY_SUPPORT_EVIDENCE"
+  ],
+  "stages_reclosed": [],
+  "w9_status": "NO_GO",
+  "product_complete": false,
+  "release_ready": false,
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  }
+}

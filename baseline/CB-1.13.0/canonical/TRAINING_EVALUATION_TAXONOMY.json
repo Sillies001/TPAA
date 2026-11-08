@@ -1,0 +1,153 @@
+{
+  "registry_id": "TRAINING_EVALUATION_TAXONOMY",
+  "version": "1.0.0",
+  "core_baseline": "CB-1.4.0",
+  "purpose": "Machine-readable semantic authority for training types, assessment scopes, competency domains, assessment output layers, attribution-candidate classes and instructor-review governance. It is semantic authority, not a field-level persistence schema.",
+  "training_types": {
+    "BASIC_FLIGHT": {
+      "display_name": "Basic Flight",
+      "episode_type": "BASIC_FLIGHT",
+      "reference_stage_profile": "BASIC_FLIGHT_V1"
+    },
+    "WVR": {
+      "display_name": "WVR",
+      "episode_type": "WVR_ENGAGEMENT",
+      "reference_stage_profile": "WVR_ENGAGEMENT_V1"
+    },
+    "BVR": {
+      "display_name": "BVR",
+      "episode_type": "BVR_KILL_CHAIN",
+      "reference_stage_profile": "BVR_KILL_CHAIN_V1"
+    },
+    "STRIKE": {
+      "display_name": "Air-to-Surface / Strike Training",
+      "episode_type": "STRIKE_MISSION",
+      "reference_stage_profile": "STRIKE_MISSION_V1"
+    }
+  },
+  "assessment_scopes": {
+    "INDIVIDUAL": {
+      "subjects": [
+        "PILOT",
+        "CREW",
+        "AIRCRAFT",
+        "HUMAN_MACHINE_LINK"
+      ],
+      "rule": "Individual and platform products remain separable; a team result is not copied to individuals."
+    },
+    "TEAM": {
+      "subjects": [
+        "ELEMENT",
+        "FLIGHT",
+        "TEAM"
+      ],
+      "rule": "Team capability is evaluated from shared picture, roles, handoff, communication, synchronization, separation and team objectives; it is not the arithmetic mean of member scores."
+    },
+    "PACKAGE": {
+      "subjects": [
+        "PACKAGE",
+        "MISSION_GROUP"
+      ],
+      "rule": "Package assessment covers cross-team objectives, information consistency, task handoff, cross-domain timing and overall mission result."
+    },
+    "JOINT_LVC": {
+      "subjects": [
+        "JOINT_FORCE",
+        "LIVE_VIRTUAL_CONSTRUCTIVE_PARTICIPANTS"
+      ],
+      "rule": "Joint/LVC extends entity/relation/source/plugin vocabularies while preserving the same C+TPAA-M evidence semantics."
+    }
+  },
+  "competency_domains": [
+    "SAFETY_DISCIPLINE",
+    "AIRCRAFT_CONTROL",
+    "FLIGHT_TASK_EXECUTION",
+    "INFORMATION_SYSTEM_MANAGEMENT",
+    "SITUATIONAL_AWARENESS_EVIDENCE",
+    "DECISION_TASK_MANAGEMENT",
+    "COMMUNICATION",
+    "TEAM_COORDINATION",
+    "TRAINING_ENGAGEMENT_EXECUTION",
+    "MISSION_OUTCOME_EVIDENCE"
+  ],
+  "assessment_output_layers": [
+    {
+      "code": "QUALIFICATION",
+      "semantics": "Q/Q-/U/N_A or governed equivalent; controlled by critical gates and mandatory evidence."
+    },
+    {
+      "code": "DIAGNOSTIC_COMPETENCY",
+      "semantics": "Profile-governed competency diagnostics derived from eligible metric/event evidence."
+    },
+    {
+      "code": "EVIDENCE",
+      "semantics": "Traceable events, relations, windows, trajectories, series, media, versions and provenance."
+    }
+  ],
+  "situational_awareness_boundary": "P_i proves information availability, not subjective comprehension. Automated SA conclusions require validated observable proxies; higher-level understanding/prediction/judgment may require instructor rubric.",
+  "event_responsibility": {
+    "attributes": [
+      "actor",
+      "owner",
+      "affected_entity",
+      "team",
+      "controllability",
+      "contribution_confidence"
+    ],
+    "rule": "System/data/external factors are not automatically attributed to an individual."
+  },
+  "root_cause_candidate_categories": [
+    "FLIGHT_CONTROL",
+    "INFORMATION_AVAILABILITY",
+    "TRACK_ASSOCIATION",
+    "PROCEDURE",
+    "DECISION_TASK_MANAGEMENT",
+    "COMMUNICATION",
+    "TEAM_COORDINATION",
+    "TRAINING_SYSTEM",
+    "DATA_QUALITY",
+    "EXTERNAL_SCENARIO",
+    "INSTRUCTOR_DETERMINATION"
+  ],
+  "instructor_review": {
+    "separation_rule": "Automatic results and instructor judgments are stored as separate evidence/assessment products.",
+    "override_rule": "Instructor override creates a revision and preserves the original automatic result, actor, time, reason and rubric/profile version.",
+    "agreement_metrics": [
+      "COHEN_KAPPA",
+      "FLEISS_KAPPA",
+      "ICC"
+    ],
+    "governance": "Agreement metrics support rubric calibration/standardization and are not an automatic ranking or punitive score."
+  },
+  "assessment_profile_minimum_contract": [
+    "training_type",
+    "platform_family",
+    "scenario_family",
+    "syllabus_or_standard_ref",
+    "stage_or_event_rules",
+    "world_requirements",
+    "metric_versions",
+    "thresholds",
+    "critical_gates",
+    "competency_weights",
+    "minimum_quality_or_confidence",
+    "missing_policy",
+    "instructor_review_policy",
+    "validity",
+    "publication_rule"
+  ],
+  "training_plugin_contract": [
+    "ContextApplicabilityProfile",
+    "WorldReconstructionPolicySet",
+    "StageObjectiveProjector",
+    "TPAAMChainBuilder",
+    "EventRelationComplianceDetectors",
+    "MetricSet",
+    "AssessmentProfile"
+  ],
+  "rules": [
+    "Outcome evidence does not replace competency or platform capability.",
+    "Missing mandatory evidence invalidates or makes assessment insufficient; it is not silently renormalized.",
+    "Individual, team, package and joint/LVC scopes remain explicit throughout API, UI and longitudinal products."
+  ]
+}

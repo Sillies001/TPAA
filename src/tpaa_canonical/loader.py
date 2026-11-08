@@ -22,6 +22,51 @@ EXPECTED_BASELINE_LOCK_SHA256 = (
     "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab"
 )
 EXPECTED_CONTROLLED_ARTIFACT_COUNT = 37
+G4_LOCAL_CORE_BASELINE = "CB-1.9.0"
+G4_LOCAL_BASELINE_LOCK_SHA256 = (
+    "2b83df248d92137aafde2b0f3934051218929e843afccd9bfd6b3aa63c8582a1"
+)
+G4_LOCAL_CONTROLLED_ARTIFACT_COUNT = 49
+G5_LOCAL_CORE_BASELINE = "CB-1.10.0"
+G5_LOCAL_BASELINE_LOCK_SHA256 = (
+    "a4864b36ef571b3582c97606ca33a3bd633e0561f776ad4383c9ff6a14dac3d0"
+)
+G5_LOCAL_CONTROLLED_ARTIFACT_COUNT = 51
+G6_LOCAL_CORE_BASELINE = "CB-1.11.0"
+G6_LOCAL_BASELINE_LOCK_SHA256 = (
+    "7b8783bd7a61012862ec90ed64882d3f435d3a274f6237f309e6208a62105915"
+)
+G6_LOCAL_CONTROLLED_ARTIFACT_COUNT = 53
+G7_LOCAL_CORE_BASELINE = "CB-1.12.0"
+G7_LOCAL_BASELINE_LOCK_SHA256 = (
+    "387fe31e8e29958dba7a5aa8cafb0b4ad381f84e2440a87c684d518e3d484fc1"
+)
+G7_LOCAL_CONTROLLED_ARTIFACT_COUNT = 55
+G8_LOCAL_CORE_BASELINE = "CB-1.13.0"
+G8_LOCAL_BASELINE_LOCK_SHA256 = (
+    "69ba7e442eafcaeb22072e42c4d078a6a5a1baa03393e478ac6f664a2e8e8b84"
+)
+G8_LOCAL_CONTROLLED_ARTIFACT_COUNT = 57
+G9_LOCAL_CORE_BASELINE = "CB-1.14.0"
+G9_LOCAL_BASELINE_LOCK_SHA256 = (
+    "9d0904b750a498c3e78d3ee7eb272ea6be3728ba55230f9b37f444513ab24f1d"
+)
+G9_LOCAL_CONTROLLED_ARTIFACT_COUNT = 59
+G10_LOCAL_CORE_BASELINE = "CB-1.15.0"
+G10_LOCAL_BASELINE_LOCK_SHA256 = (
+    "ff7c32f12fd33d5f396fc68362cbc8fae2a107e063f88723b1171467ee1e0273"
+)
+G10_LOCAL_CONTROLLED_ARTIFACT_COUNT = 63
+G11_LOCAL_CORE_BASELINE = "CB-1.16.0"
+G11_LOCAL_BASELINE_LOCK_SHA256 = (
+    "69798bcf62ab930f7dc523c9a90d0a7271567475f2aeac7d7d3476aecd4d62d8"
+)
+G11_LOCAL_CONTROLLED_ARTIFACT_COUNT = 65
+G12_LOCAL_CORE_BASELINE = "CB-1.17.0"
+G12_LOCAL_BASELINE_LOCK_SHA256 = (
+    "2e84be2c5b859a767f587333dd696130ff9f6af003d8cecb79e57ea929405946"
+)
+G12_LOCAL_CONTROLLED_ARTIFACT_COUNT = 69
 UNVERSIONED_BY_AUTHORITY = "UNVERSIONED_BY_AUTHORITY"
 UNTRUSTED_NOT_PARSED = "UNTRUSTED_NOT_PARSED"
 NOT_REQUESTED = "NOT_REQUESTED"
@@ -655,3 +700,79 @@ class CanonicalArtifactLoader:
             self.load(artifact_id, expectation=requested.get(artifact_id))
             for artifact_id in self.artifact_ids
         )
+
+
+def trusted_loader_for_baseline(baseline_root: Path | None) -> CanonicalArtifactLoader:
+    """Return the exact pinned loader for a supported local candidate baseline.
+
+    The default remains CB-1.5.0.  Candidate support is explicit and hash pinned;
+    a directory name alone can never expand the trust boundary.
+    """
+
+    if baseline_root is None:
+        return CanonicalArtifactLoader()
+    resolved = baseline_root.expanduser().resolve(strict=False)
+    if resolved.name == G4_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G4_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G4_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G4_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G5_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G5_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G5_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G5_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G6_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G6_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G6_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G6_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G7_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G7_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G7_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G7_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G8_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G8_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G8_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G8_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G9_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G9_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G9_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G9_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G10_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G10_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G10_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G10_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G11_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G11_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G11_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G11_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == G12_LOCAL_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=G12_LOCAL_CORE_BASELINE,
+            trusted_lock_sha256=G12_LOCAL_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=G12_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    return CanonicalArtifactLoader(resolved)

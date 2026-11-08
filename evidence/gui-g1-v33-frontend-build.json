@@ -1,26 +1,26 @@
 {
   "schema": "TPAA_G1_V33_FRONTEND_BUILD_EVIDENCE_V1",
   "status": "PASS",
-  "package_lock_sha256": "3f0c3302a62c3c15faad78582a41496d2ffd023fb66a4e54c98583d11e89d247",
+  "package_lock_sha256": "422bc9b149fdb9d364acdf003e5d3f8b19c147da998961c1724578b282492282",
   "files": [
     {
       "path": ".vite/manifest.json",
-      "sha256": "3f365bb56acc270eadbfe6762791d7733b8caae2b14640935a73c895de636067",
+      "sha256": "1859f9d7fd616b6799cfd14e9ce1504f1e2c09a4c291ca5187c24e293f9089a0",
       "bytes": 185
     },
     {
-      "path": "assets/index-BQTnmsda.css",
-      "sha256": "708db047ef9d48e568a6956ca44e9f16dcb1b8a62cf121d55342c7417aef28b2",
-      "bytes": 1122
+      "path": "assets/index-B9ArwtDs.js",
+      "sha256": "36c03882037f9cf3fc2dab2424cbb44a8f834dc224a287bd42776646138dbc10",
+      "bytes": 109492
     },
     {
-      "path": "assets/index-D422h-DH.js",
-      "sha256": "47d26c9a7af31e3d87163dce618a55ce927c2b10bb739a142253668b1d08b937",
-      "bytes": 1735
+      "path": "assets/index-ZzfVKTTr.css",
+      "sha256": "f2ecbf9aac4e243412a5b305053f47f0d2435e1809f2010f016e4e7669d700e5",
+      "bytes": 31216
     },
     {
       "path": "index.html",
-      "sha256": "ca81c7c465a901d025d507bcccaa56d68ae0973a2535c0b67ab45a08003d663c",
+      "sha256": "ca63c7e786df191f1404938e403018d08c2cb629e8834e475b9a036659102d1e",
       "bytes": 510
     }
   ],

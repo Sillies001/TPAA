@@ -1,8 +1,8 @@
 # TPAA HTML Demo v33 驱动的 GUI 产品化重构、后端补齐与设计同步整改方案
 
-> 文档状态：`IN_PROGRESS_V33 / G0R、G1、G2、G3 已本地关闭，G4 尚未启动`
+> 文档状态：`IN_PROGRESS_V33 / G0R～G5 已本地关闭；G6～G11 处于关闭后整改；G12 外部门开放`
 > 编制日期：2026-11-06  
-> 当前工作指令：G3 已按本地授权正式关闭；下一阶段从 G4 开始，启动前仍须单独确认范围，不得提前暴露未实现的 GUI 业务 API 路由。
+> 当前工作指令：2026-11-08 关闭后复核否决 G6～G11 的既有关闭声明；严格执行 `TPAA_G6至G12关闭后复核缺口全面整改与再关闭方案_2026-11-08.md`，不得以占位页、NOT_ADMITTED 或硬编码 PASS 冒充关闭。
 > 替代关系：本文件替代 `TPAA_HTML_Demo驱动_GUI产品化重构与后端设计同步整改方案_2026-10-29.md` 作为后续 GUI 产品化工作的唯一实施方案。  
 > 目标对象：TPAA Desktop GUI、面向 GUI 的 Application/API 投影、必要领域/存储能力、总体与工程设计后继基线。  
 > 发布边界：只允许本地修改和验证；禁止推送、签名和生产部署。W9 继续保持 `NO_GO`。
@@ -888,7 +888,7 @@ docs/gui/demo-v33 docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json
 
 本方案已覆盖 v33 基线、三份 Patch、26 视图、V01/V26、WE/Cluster/Window、双视角、后端/API/DTO、版本、设计同步、分阶段实施、测试、迁移、风险和 DoD。
 
-执行状态（2026-11-06）：`G0R=CLOSED_LOCAL_WITH_GATES`，`G1=CLOSED_LOCAL_WITH_GATES`，`G2=CLOSED_LOCAL_WITH_GATES`，`G3=CLOSED_LOCAL_WITH_GATES`，`G4～G12=NOT_STARTED`。G0R/G1/G2 证据沿用既有关闭记录。项目所有者已授权 G3 仅在本地实施；受控后继 `baseline/CB-1.8.0/`（DB 继续为 1.10.0）、生成式 Python/TypeScript client、Application 所有的 catalog/bootstrap/selectors 组合读模型及三条受 `gui.view` 独立保护并强制审计的 GUI 基础读取路由现均为 `APPROVED_LOCAL / ACTIVE`。异步网关已实现请求去重、超时、取消、stale response 丢弃、principal/release 双分区内存缓存、版本化游标分页、统一错误/原因/来源、range/LOD 与短期媒体 ticket 校验。12 条 G4+ GUI 业务路由仍保持未注册、未暴露；动态业务 selector 在 G4 前只返回空集合和 `CONTEXT_REQUIRED`，不得生成 Demo/随机值。确定性前端构建、Ruff、Mypy、Python/TypeScript 动态门、100%/150% DPI 真实 WebEngine exact-loopback/off-the-record 验收均通过，统一证据为 `evidence/gui-g3-v33-closure.json`。该关闭仅适用于本地 G3 阶段，不代表 `PRODUCT_COMPLETE`、`RELEASE_READY` 或生产部署批准。
+执行状态（2026-11-08 关闭后复核）：`G0R～G5=CLOSED_LOCAL_WITH_GATES`；`G6～G11=IN_PROGRESS_REMEDIATION`；`G12=IN_PROGRESS_EXTERNAL_DOORS_OPEN`；`W9=NO_GO`；`PRODUCT_COMPLETE=false`；`RELEASE_READY=false`。G6～G12 的本地实现与历史证据保留作为整改输入，但旧关闭声明不再构成当前阶段关闭依据。阻断项包括任务/装备指标与多项视图能力未准入、V03/V11/V18/V22 等页面不完整、V24/V26 真实布局和交互缺陷、回放精确上下文丢失、视觉矩阵错误映射/重复截图、关闭器未实际运行所声明门禁，以及安装包、Linux/Service、SBOM/许可证/漏洞、目标 workload 和人工角色视觉门开放。唯一整改方案为 `docs/plans/TPAA_G6至G12关闭后复核缺口全面整改与再关闭方案_2026-11-08.md`。
 
 
 ### G2 安全授权整改增量（2026-11-06）
@@ -898,3 +898,7 @@ docs/gui/demo-v33 docs/compliance/GUI_V33_CONFORMANCE_MATRIX.json
 ### G3 异步 Gateway 与组合读模型关闭增量（2026-11-06）
 
 已完成并关闭：CB-1.8.0 以不可变 CB-1.7.0 为直接父基线，DB schema 保持 1.10.0；`GUI_ASYNC_GATEWAY_AUTHORITY`、跨层 DTO、API 路由与安全权威同步激活。Desktop/Service 共用 Application Gateway；UI/REST 不读取原始文件或 Canonical 表。前端通过 bootstrap 获取经角色过滤的 catalog 和 GUI 权限，主体标识不回传，缓存分区键仅以不可逆摘要传输。三条基础路由采用 `AUTHENTICATED_GUI_PERMISSION`，统一守卫实际校验 `gui.view` 并写稳定 route ID 审计，避免业务权限误绑导致学员角色被提前拒绝。取消、超时、去重、stale 丢弃、双分区缓存、游标循环/篡改、分页、统一错误、range/LOD、媒体 ticket 和真实 WebEngine 门均通过。G4 尚未启动；Batch 登记、导入、训练类型修订和其他真实业务投影不得在 G4 机器权威与退出门完成前开放。
+
+### G4 批次登记、V23 导入与质量闭环关闭增量（2026-11-07）
+
+已完成并关闭：G5 在 CB-1.10.0 下激活 WE detector/identity/episode linker/category/Attack Cluster、Event Window、Perspective 和三条只读 API。三次以上源修订形成线性 supersession 链；Cluster 仅为关系且 ID 只由排序后的 WE ID 集合派生；terminal/adjudication/window 三维状态独立；T2 缐失保持 `TERMINAL_UNKNOWN`；Strike target 视角恒失败关闭。运行时能力不再按目录名字符串激活，G4 在 CB-1.9.0/CB-1.10.0 均保持有效。剩余 `gui.overview`、`gui.batch.events`、`gui.replay` 继续保留给 G6/G7/G9，G5 不得冒充后续页面已经完成。

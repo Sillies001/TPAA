@@ -1,0 +1,5672 @@
+{
+  "authority_id": "CROSS_LAYER_DTO_CONTRACTS",
+  "core_baseline": "CB-1.11.0",
+  "contracts": {
+    "EvaluationContextDTO": {
+      "fields": [
+        {
+          "field": "context_id",
+          "source": "context.evaluation_context.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "context.evaluation_context.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "context_version",
+          "source": "context.evaluation_context.context_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "revision_no",
+          "source": "context.evaluation_context.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "supersedes_context_id",
+          "source": "context.evaluation_context.supersedes_context_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "scenario_id",
+          "source": "context.evaluation_context.scenario_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "scenario_version",
+          "source": "context.evaluation_context.scenario_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "syllabus_id",
+          "source": "context.evaluation_context.syllabus_id",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "syllabus_version",
+          "source": "context.evaluation_context.syllabus_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "assessment_profile_id",
+          "source": "context.evaluation_context.assessment_profile_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_profile_version",
+          "source": "context.evaluation_context.assessment_profile_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "rule_set_version",
+          "source": "context.evaluation_context.rule_set_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_set_version",
+          "source": "context.evaluation_context.reference_set_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "role_model_version",
+          "source": "context.evaluation_context.role_model_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "metric_profile_version",
+          "source": "context.evaluation_context.metric_profile_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "longitudinal_profile_version",
+          "source": "context.evaluation_context.longitudinal_profile_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "valid_from_session_time_us",
+          "source": "context.evaluation_context.valid_from_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "valid_to_session_time_us",
+          "source": "context.evaluation_context.valid_to_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "status",
+          "source": "context.evaluation_context.status",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "ContextArtifactRefDTO": {
+      "fields": [
+        {
+          "field": "binding_role",
+          "source": "context.context_artifact_binding.binding_role",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "context_artifact_id",
+          "source": "registry.context_artifact.context_artifact_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "artifact_kind",
+          "source": "registry.context_artifact.artifact_kind",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_key",
+          "source": "registry.context_artifact.logical_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "artifact_version",
+          "source": "registry.context_artifact.artifact_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "object_ref_id",
+          "source": "registry.context_artifact.object_ref_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "artifact_sha256",
+          "source": "registry.context_artifact.artifact_sha256",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "schema_version",
+          "source": "registry.context_artifact.schema_version",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "CapabilityObservationDTO": {
+      "fields": [
+        {
+          "field": "aircraft_configuration_snapshot_id",
+          "source": "metric.capability_observation.aircraft_configuration_snapshot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "metric.capability_observation.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_instance_id",
+          "source": "metric.capability_observation.aircraft_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "metric.capability_observation.aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_dimension",
+          "source": "metric.capability_observation.capability_dimension",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "capability_level",
+          "source": "metric.capability_observation.capability_level",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "capability_type",
+          "source": "metric.capability_observation.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "metric.capability_observation.comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "confidence",
+          "source": "metric.capability_observation.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "context_id",
+          "source": "metric.capability_observation.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "context_tags",
+          "source": "metric.capability_observation.context_tags",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "correlation_group_id",
+          "source": "metric.capability_observation.correlation_group_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "coverage",
+          "source": "metric.capability_observation.coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "eligibility_status",
+          "source": "metric.capability_observation.eligibility_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "episode_id",
+          "source": "metric.capability_observation.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.capability_observation.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "exclusion_reason_code",
+          "source": "metric.capability_observation.exclusion_reason_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "metric_code",
+          "source": "metric_instance→immutable metric_definition.metric_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "metric_instance→immutable metric_definition.metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "metric_instance→immutable metric_definition.metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "observation_end_session_time_us",
+          "source": "metric.capability_observation.observation_end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "observation_id",
+          "source": "metric.capability_observation.observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "observation_schema_version",
+          "source": "metric.capability_observation.observation_schema_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_start_session_time_us",
+          "source": "metric.capability_observation.observation_start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "observed_metric_instance_id",
+          "source": "metric.capability_observation.observed_metric_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "pilot_id",
+          "source": "metric.capability_observation.pilot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "release_id",
+          "source": "metric.capability_observation.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "scenario_id",
+          "source": "metric.capability_observation.scenario_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "session_id",
+          "source": "metric.capability_observation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "stage_id",
+          "source": "metric.capability_observation.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "structured_output_schema_id",
+          "source": "metric_definition→immutable metric_semantic_registry.structured_output_schema_id",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "subject_entity_id",
+          "source": "metric.capability_observation.subject_entity_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "supersedes_observation_id",
+          "source": "metric.capability_observation.supersedes_observation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "unit",
+          "source": "metric.metric_instance.unit exact-copy",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "value",
+          "source": "metric_instance typed value slot selected by value_kind",
+          "required": false,
+          "transport_type": "json-union"
+        },
+        {
+          "field": "value_kind",
+          "source": "metric_definition→immutable metric_semantic_registry.value_kind",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "TPAAChainDTO": {
+      "fields": [
+        {
+          "field": "chain_id",
+          "source": "world.tpaa_m_chain.chain_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "world.tpaa_m_chain.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "world.tpaa_m_chain.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "stage_id",
+          "source": "world.tpaa_m_chain.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "refs",
+          "source": "world.tpaa_m_chain.refs",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "world.tpaa_m_chain.start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "world.tpaa_m_chain.end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "chain_status",
+          "source": "world.tpaa_m_chain.chain_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "coverage",
+          "source": "world.tpaa_m_chain.coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "confidence",
+          "source": "world.tpaa_m_chain.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "break_reason",
+          "source": "world.tpaa_m_chain.break_reason",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "chain_version",
+          "source": "world.tpaa_m_chain.chain_version",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "MetricCatalogEntryDTO": {
+      "fields": [
+        {
+          "field": "metric_code",
+          "source": "metrics[].metric_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "semantic_id",
+          "source": "metrics[].semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "semantic_version",
+          "source": "metrics[].semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "algorithm_id",
+          "source": "metrics[].algorithm_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "algorithm_version",
+          "source": "metrics[].algorithm_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "family",
+          "source": "metrics[].family",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_type",
+          "source": "metrics[].subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_lane",
+          "source": "metrics[].observation_lane",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "publication_route",
+          "source": "metrics[].publication_route",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "value_kind",
+          "source": "metrics[].value_kind",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "structured_output_schema_id",
+          "source": "metrics[].structured_output_schema_id",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "unit",
+          "source": "metrics[].unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "delivery_milestone",
+          "source": "metrics[].delivery_milestone",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "delivery_batch",
+          "source": "metrics[].delivery_batch",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "p1_longitudinal_trend_eligibility",
+          "source": "metrics[].p1_longitudinal_trend_eligibility",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "default_aggregation",
+          "source": "metrics[].default_aggregation",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "operator_bindings",
+          "source": "metrics[].operator_bindings",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "constant_bindings",
+          "source": "metrics[].constant_bindings",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "upstream_dependencies",
+          "source": "metrics[].upstream_dependencies",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "state_machine_bindings",
+          "source": "metrics[].state_machine_bindings",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "profile_parameters",
+          "source": "metrics[].profile_parameters",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "input_fields",
+          "source": "metrics[].input_fields",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "catalog_version",
+          "source": "$root.catalog_version",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "MissionSystemObservationDTO": {
+      "fields": [
+        {
+          "field": "system_observation_id",
+          "source": "system_observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "mission_system_instance_id",
+          "source": "mission_system_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "observed_metric_instance_id",
+          "source": "observed_metric_instance_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "reference_truth_profile_version",
+          "source": "reference_truth_profile_version",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "reference_quality_status",
+          "source": "reference_quality_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_uncertainty_summary",
+          "source": "reference_uncertainty_summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "alignment_uncertainty_summary",
+          "source": "alignment_uncertainty_summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "observation_start_session_time_us",
+          "source": "observation_start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "observation_end_session_time_us",
+          "source": "observation_end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "context_tags",
+          "source": "context_tags",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "coverage",
+          "source": "coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "confidence",
+          "source": "confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "eligibility_status",
+          "source": "eligibility_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "exclusion_reason_code",
+          "source": "exclusion_reason_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_schema_version",
+          "source": "observation_schema_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_system_observation_id",
+          "source": "supersedes_system_observation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "source": "R39 Engineering 06 FIELD_CONTRACT",
+      "authority": "cross-layer exact contract"
+    },
+    "EvaluationContextBundleDTO": {
+      "projection_fields": [
+        {
+          "field": "context",
+          "type": "EvaluationContextDTO",
+          "required": true
+        },
+        {
+          "field": "artifact_refs",
+          "type": "ContextArtifactRefDTO[]",
+          "required": true
+        },
+        {
+          "field": "scenario",
+          "type": "object?",
+          "required": false
+        },
+        {
+          "field": "assessment_profile",
+          "type": "object?",
+          "required": false
+        },
+        {
+          "field": "objectives",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "roles",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "stages",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "references",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "rules",
+          "type": "object[]",
+          "required": true
+        },
+        {
+          "field": "cohort",
+          "type": "object[]",
+          "required": true
+        }
+      ],
+      "rules": [
+        "Read exact context_id; never resolve current/latest revision for historical release.",
+        "artifact_refs stable-sort by binding_role.",
+        "Missing frozen artifact => CONTEXT_ARTIFACT_UNAVAILABLE; no fallback.",
+        "Unsupported historical artifact schema => CONTEXT_ARTIFACT_SCHEMA_UNSUPPORTED; no coercion."
+      ]
+    },
+    "P2EligibleObservationDTO": {
+      "fields": [
+        {
+          "field": "observation_id",
+          "source": "metric.capability_observation.observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "metric.capability_observation.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "metric.capability_observation.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "subject_entity_id",
+          "source": "metric.capability_observation.subject_entity_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "metric.capability_observation.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "metric.capability_observation.aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_configuration_snapshot_id",
+          "source": "metric.capability_observation.aircraft_configuration_snapshot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "context_id",
+          "source": "metric.capability_observation.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_type",
+          "source": "metric.capability_observation.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "metric.capability_observation.observed_metric_instance_id -> metric.metric_instance.metric_definition_id -> metric.metric_definition.metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "metric.capability_observation.observed_metric_instance_id -> metric.metric_instance.metric_definition_id -> metric.metric_definition.metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "metric.capability_observation.comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.capability_observation.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "observed_value",
+          "source": "metric.capability_observation.observed_value_numeric",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "unit",
+          "source": "metric.capability_observation.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "coverage",
+          "source": "metric.capability_observation.coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "confidence",
+          "source": "metric.capability_observation.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "knowledge_time_utc",
+          "source": "metric.capability_observation.release_id -> registry.analysis_release.published_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Exact joined registry.analysis_release.status must be PUBLISHED.",
+        "metric.capability_observation.eligibility_status must be ELIGIBLE.",
+        "observed_value_numeric must be finite and non-null.",
+        "Joined metric semantic value_kind must be NUMERIC.",
+        "knowledge_time_utc is exact release published_at; compute/read time is not a substitute.",
+        "Historical resolution never falls back to current/latest."
+      ],
+      "source": "M6 P2 authority #151 / #161 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "FactorFeatureSetDTO": {
+      "fields": [
+        {
+          "field": "factor_feature_set_id",
+          "source": "assessment.factor_feature_set.factor_feature_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "feature_spec_id",
+          "source": "assessment.factor_feature_set.feature_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "feature_spec_version",
+          "source": "assessment.factor_feature_set.feature_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_observation_id",
+          "source": "assessment.factor_feature_set.source_observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "assessment.factor_feature_set.reference_condition_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "feature_values",
+          "source": "assessment.factor_feature_set.feature_values",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "missing_mask",
+          "source": "assessment.factor_feature_set.missing_mask",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "world_refs",
+          "source": "assessment.factor_feature_set.world_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "coverage",
+          "source": "assessment.factor_feature_set.coverage",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "confidence",
+          "source": "assessment.factor_feature_set.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "input_hash",
+          "source": "assessment.factor_feature_set.input_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "assessment.factor_feature_set.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "world_refs elements are canonical UUID strings in governed stable order.",
+        "input_hash is lowercase 64-character SHA-256.",
+        "created_at is RFC3339 UTC."
+      ],
+      "source": "M6 P2 authority #151 / #161 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "AttributionRunDTO": {
+      "fields": [
+        {
+          "field": "attribution_run_id",
+          "source": "assessment.attribution_run.attribution_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "attribution_spec_id",
+          "source": "assessment.attribution_run.attribution_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "attribution_spec_version",
+          "source": "assessment.attribution_run.attribution_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_plugin",
+          "source": "assessment.attribution_run.model_plugin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_plugin_version",
+          "source": "assessment.attribution_run.model_plugin_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "assessment.attribution_run.training_dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "assessment.attribution_run.reference_condition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "status",
+          "source": "assessment.attribution_run.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "diagnostics",
+          "source": "assessment.attribution_run.diagnostics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "model_artifact_uri",
+          "source": "assessment.attribution_run.model_artifact_uri",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "model_artifact_hash",
+          "source": "assessment.attribution_run.model_artifact_hash",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "started_at",
+          "source": "assessment.attribution_run.started_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "completed_at",
+          "source": "assessment.attribution_run.completed_at",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "created_by",
+          "source": "assessment.attribution_run.created_by",
+          "required": false,
+          "transport_type": "string?"
+        }
+      ],
+      "rules": [
+        "diagnostics.reason_codes is the canonical cross-layer reason-code location.",
+        "diagnostics carries exact uncertainty_method and uncertainty_level from the adopted attribution spec.",
+        "Completed IDENTIFIABLE runs require model_artifact_hash.",
+        "model_artifact_uri may be null unless an existing managed-object path is used."
+      ],
+      "source": "M6 P2 authority #151 / #161 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "AdjustedCapabilityEstimateDTO": {
+      "fields": [
+        {
+          "field": "estimate_id",
+          "source": "capability.adjusted_capability_estimate.estimate_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_observation_id",
+          "source": "capability.adjusted_capability_estimate.source_observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_release_id",
+          "source": "capability.adjusted_capability_estimate.source_observation_id -> metric.capability_observation.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "p2_release_id",
+          "source": "capability.adjusted_capability_estimate.evidence_set_id -> metric.evidence_set.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "attribution_run_id",
+          "source": "capability.adjusted_capability_estimate.attribution_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "capability.adjusted_capability_estimate.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.adjusted_capability_estimate.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "capability.adjusted_capability_estimate.reference_condition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "adjusted_value",
+          "source": "capability.adjusted_capability_estimate.adjusted_value",
+          "required": true,
+          "transport_type": "number?"
+        },
+        {
+          "field": "unit",
+          "source": "capability.adjusted_capability_estimate.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "capability.adjusted_capability_estimate.uncertainty_lower/uncertainty_upper + assessment.attribution_run.diagnostics uncertainty method/level",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "residual",
+          "source": "capability.adjusted_capability_estimate.residual",
+          "required": true,
+          "transport_type": "number?"
+        },
+        {
+          "field": "factor_effects",
+          "source": "capability.adjusted_capability_estimate.factor_effects",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "claim_level",
+          "source": "capability.adjusted_capability_estimate.claim_level",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.adjusted_capability_estimate.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "assessment.attribution_run.diagnostics.reason_codes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "capability.adjusted_capability_estimate.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "estimate_time",
+          "source": "capability.adjusted_capability_estimate.estimate_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.adjusted_capability_estimate.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_estimate_id",
+          "source": "capability.adjusted_capability_estimate.supersedes_estimate_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "source_release_id and p2_release_id remain distinct exact immutable release identities.",
+        "NOT_IDENTIFIABLE requires adjusted_value null and governed non-empty reason_codes.",
+        "NOT_IDENTIFIABLE does not fabricate uncertainty bounds or an adjusted numeric value.",
+        "factor_effects default to model-conditioned association unless independent causal evidence is bound.",
+        "Historical resolution never falls back to current/latest."
+      ],
+      "source": "M6 P2 authority #151 / #161 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P2AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M6 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M6 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M6 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M6 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m6_exit_decision",
+          "source": "M6 protected-main Exit evidence.m6_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M6 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M6 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M6 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p3_p6_inactive",
+          "source": "M6 protected-main Exit evidence.p3_p6_inactive",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; it is not persisted as a P2 product.",
+        "P2 external claims require protected-main M6 Exit GO and all required jobs success.",
+        "P3-P6 remain inactive."
+      ],
+      "source": "M6 P2 authority #151 / #161 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3EligibleAdjustedEstimateDTO": {
+      "fields": [
+        {
+          "field": "estimate_id",
+          "source": "capability.adjusted_capability_estimate.estimate_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "p2_release_id",
+          "source": "capability.adjusted_capability_estimate.evidence_set_id -> metric.evidence_set.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_observation_id",
+          "source": "capability.adjusted_capability_estimate.source_observation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_release_id",
+          "source": "source_observation_id -> metric.capability_observation.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "attribution_run_id",
+          "source": "capability.adjusted_capability_estimate.attribution_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "capability.adjusted_capability_estimate.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "source_observation_id -> metric.capability_observation.aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "configuration_snapshot_id",
+          "source": "source_observation_id -> metric.capability_observation.aircraft_configuration_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "configuration_snapshot_hash",
+          "source": "configuration_snapshot_id -> master.aircraft_configuration_snapshot.snapshot_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "configuration_key",
+          "source": "AIRCRAFT_CONFIG_SHA256:<configuration_snapshot_hash>",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "source_observation_id -> metric.capability_observation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "source_observation_id -> metric.capability_observation.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_occurred_at_utc",
+          "source": "session_id -> registry.training_session.start_occurred_at_utc",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_order_scope_id",
+          "source": "exact ACTIVE registry.session_order_scope",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_order",
+          "source": "exact current registry.session_order_assignment.order_value",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.adjusted_capability_estimate.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "source_observation_id -> metric definition semantic id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "source_observation_id -> metric definition semantic version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "comparison_key_hash",
+          "source": "source_observation_id -> metric.capability_observation.comparison_key_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "capability.adjusted_capability_estimate.reference_condition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "adjusted_value",
+          "source": "capability.adjusted_capability_estimate.adjusted_value",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "unit",
+          "source": "capability.adjusted_capability_estimate.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "adjusted estimate bounds + attribution diagnostics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "factor_effects",
+          "source": "capability.adjusted_capability_estimate.factor_effects",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "claim_level",
+          "source": "capability.adjusted_capability_estimate.claim_level",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.adjusted_capability_estimate.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "capability.adjusted_capability_estimate.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "knowledge_time_utc",
+          "source": "max exact published source P1/P2 release time available to P3",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "estimate_time",
+          "source": "capability.adjusted_capability_estimate.estimate_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.adjusted_capability_estimate.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Numeric P3 eligibility requires exact published immutable P2 product status IDENTIFIABLE.",
+        "NOT_IDENTIFIABLE remains valid P2 evidence but is excluded from numeric P3 input.",
+        "configuration_snapshot_id is exact provenance; longitudinal segmentation uses configuration_key derived from snapshot_hash.",
+        "session_order_scope must be ACTIVE and assignment current.",
+        "source_release_id and p2_release_id remain distinct immutable identities.",
+        "Historical resolution never falls back to current/latest/default."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3LifecycleSegmentDTO": {
+      "fields": [
+        {
+          "field": "segment_snapshot_id",
+          "source": "registry.dataset_snapshot.dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "segment manifest aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_model_id",
+          "source": "segment manifest aircraft_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "configuration_key",
+          "source": "segment manifest AIRCRAFT_CONFIG_SHA256 key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "configuration_snapshot_ids",
+          "source": "ordered exact input configuration snapshot ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "lifecycle_event_ids",
+          "source": "sorted exact lifecycle event ids bound at segment start",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "session_order_scope_id",
+          "source": "registry.session_order_scope.session_order_scope_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "first_session_order",
+          "source": "segment manifest first_session_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "last_session_order",
+          "source": "segment manifest last_session_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "as_of_session_order",
+          "source": "segment manifest as_of_session_order",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "capability_type",
+          "source": "segment manifest capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_id",
+          "source": "segment manifest metric_semantic_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "metric_semantic_version",
+          "source": "segment manifest metric_semantic_version",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "reference_condition_id",
+          "source": "segment manifest reference_condition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "unit",
+          "source": "segment manifest unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_count",
+          "source": "segment manifest observation_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "episode_count",
+          "source": "segment manifest episode_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "independent_aircraft_count",
+          "source": "segment manifest independent_aircraft_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "effective_evidence_count",
+          "source": "segment manifest effective_evidence_count",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "knowledge_cutoff_utc",
+          "source": "segment manifest knowledge_cutoff_utc",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "segment_hash",
+          "source": "registry.dataset_snapshot.data_hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "snapshot_type is P3_LONGITUDINAL_SEGMENT and frozen=true.",
+        "Profile v1 segments on exact aircraft/configuration_key/reference-condition/capability/semantic/unit/session-order-scope identity.",
+        "Exact per-session configuration snapshot ids remain provenance and are not themselves the cross-session segment key.",
+        "Any lifecycle event occurring after the first selected session and on/before the last selected session forces a new segment in profile v1.",
+        "Observation, episode, independent-aircraft and effective-evidence counts remain distinct."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3ModelValidationSnapshotDTO": {
+      "fields": [
+        {
+          "field": "validation_snapshot_id",
+          "source": "registry.dataset_snapshot.dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "exact P3 training dataset snapshot id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "profile_id",
+          "source": "adopted P3 execution profile id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "profile_version",
+          "source": "adopted P3 execution profile version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "validation manifest aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_type",
+          "source": "validation manifest capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "segment_snapshot_id",
+          "source": "exact P3 lifecycle segment snapshot",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "training_estimate_ids",
+          "source": "ordered exact P2 training estimate ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "validation_estimate_ids",
+          "source": "ordered exact P2 validation estimate ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "independent_aircraft_count",
+          "source": "validation manifest independent_aircraft_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "observation_count",
+          "source": "validation manifest observation_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "effective_evidence_count",
+          "source": "validation manifest effective_evidence_count",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "claim_evidence_tier",
+          "source": "governed P3 claim evidence tier",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "validation knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "data_hash",
+          "source": "registry.dataset_snapshot.data_hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "snapshot_type is P3_MODEL_VALIDATION and frozen=true.",
+        "Training and validation estimate identities and episode identities are disjoint.",
+        "Profile v1 uses temporal last-point holdout and supports AIRCRAFT subject only.",
+        "Stronger intrinsic claim is not supported by profile v1."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "CapabilityModelDTO": {
+      "fields": [
+        {
+          "field": "capability_model_id",
+          "source": "capability.capability_model.capability_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "model_spec_id",
+          "source": "capability.capability_model.model_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_spec_version",
+          "source": "capability.capability_model.model_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_type",
+          "source": "capability.capability_model.subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "capability.capability_model.subject_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.capability_model.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "capability.capability_model.training_dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "plugin_name",
+          "source": "capability.capability_model.plugin_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "plugin_version",
+          "source": "capability.capability_model.plugin_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_uri",
+          "source": "capability.capability_model.model_artifact_uri",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_hash",
+          "source": "capability.capability_model.model_artifact_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_object_ref_id",
+          "source": "registry.object_reference resolved by exact managed_uri",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "validity_domain",
+          "source": "capability.capability_model.validity_domain",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "validation_metrics",
+          "source": "capability.capability_model.validation_metrics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "capability.capability_model.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "trained_at",
+          "source": "capability.capability_model.trained_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "published_at",
+          "source": "capability.capability_model.published_at",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "supersedes_model_id",
+          "source": "capability.capability_model.supersedes_model_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "model_artifact_uri must resolve to one sealed ACTIVE non-deleted registry.object_reference.",
+        "model_artifact_hash must exactly match registry.object_reference.artifact_sha256.",
+        "Historical model resolution never uses current/latest/default aliases."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "CapabilitySurfaceDTO": {
+      "fields": [
+        {
+          "field": "surface_id",
+          "source": "capability.capability_surface.surface_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_model_id",
+          "source": "capability.capability_surface.capability_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "surface_semantics",
+          "source": "capability.capability_surface.surface_semantics",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "axes",
+          "source": "capability.capability_surface.axes",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "dataset_uri",
+          "source": "capability.capability_surface.dataset_uri",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "dataset_hash",
+          "source": "capability.capability_surface.dataset_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "dataset_object_ref_id",
+          "source": "registry.object_reference resolved by dataset_uri",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "uncertainty_dataset_uri",
+          "source": "capability.capability_surface.uncertainty_dataset_uri",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "uncertainty_dataset_object_ref_id",
+          "source": "resolved registry.object_reference when uncertainty dataset exists",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "validity_domain",
+          "source": "capability.capability_surface.validity_domain",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.capability_surface.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "dataset_uri and optional uncertainty_dataset_uri require sealed ACTIVE non-deleted object references.",
+        "dataset_hash must match exact object artifact_sha256.",
+        "Profile v1 surface axis is observed SESSION_ORDER within the exact lifecycle segment; extrapolation is forbidden."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "AircraftTwinRevisionDTO": {
+      "fields": [
+        {
+          "field": "twin_revision_id",
+          "source": "capability.aircraft_twin_revision.twin_revision_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "capability.aircraft_twin_revision.aircraft_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "revision_no",
+          "source": "capability.aircraft_twin_revision.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "component_model_refs",
+          "source": "capability.aircraft_twin_revision.component_model_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "config_snapshot_id",
+          "source": "capability.aircraft_twin_revision.config_snapshot_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "valid_from",
+          "source": "capability.aircraft_twin_revision.valid_from",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "valid_to",
+          "source": "capability.aircraft_twin_revision.valid_to",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "as_of_data_time",
+          "source": "capability.aircraft_twin_revision.as_of_data_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "published_at",
+          "source": "capability.aircraft_twin_revision.published_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.aircraft_twin_revision.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty_summary",
+          "source": "capability.aircraft_twin_revision.uncertainty_summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "evidence_snapshot_id",
+          "source": "capability.aircraft_twin_revision.evidence_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "supersedes_twin_revision_id",
+          "source": "capability.aircraft_twin_revision.supersedes_twin_revision_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "component_model_refs preserve governed stable order and exact model identities.",
+        "as_of_data_time is the knowledge/data cutoff; published_at is not a substitute.",
+        "Twin is a published capability read model, not same-episode World state."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "IntrinsicCapabilityEstimateDTO": {
+      "fields": [
+        {
+          "field": "estimate_id",
+          "source": "capability.intrinsic_capability_estimate.estimate_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "twin_revision_id",
+          "source": "capability.intrinsic_capability_estimate.twin_revision_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "capability_type",
+          "source": "capability.intrinsic_capability_estimate.capability_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "condition_point",
+          "source": "capability.intrinsic_capability_estimate.condition_point",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "value",
+          "source": "capability.intrinsic_capability_estimate.value",
+          "required": true,
+          "transport_type": "number?"
+        },
+        {
+          "field": "unit",
+          "source": "capability.intrinsic_capability_estimate.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "capability.intrinsic_capability_estimate.uncertainty",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "validity_domain_status",
+          "source": "capability.intrinsic_capability_estimate.validity_domain_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "claim_level",
+          "source": "governed P3 authority/profile interpretation",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_time",
+          "source": "capability.intrinsic_capability_estimate.as_of_time",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "capability.intrinsic_capability_estimate.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Profile v1 claim_level is REFERENCE_CONDITION_LONGITUDINAL_ESTIMATE.",
+        "Out-of-domain/unsupported estimates carry null value; zero is never a substitute.",
+        "P1 observed and P2 adjusted products remain separately addressable."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P3AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M7 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M7 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M7 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M7 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m7_exit_decision",
+          "source": "M7 protected-main Exit evidence.m7_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M7 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M7 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M7 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p4_p6_inactive",
+          "source": "M7 protected-main Exit evidence.p4_p6_inactive",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; not persisted as a P3 product.",
+        "P3 external claims require protected-main M7 Exit GO and all required jobs success.",
+        "P4-P6 remain inactive."
+      ],
+      "source": "M7 P3 authority #169 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P4SubjectContextDTO": {
+      "fields": [
+        {
+          "field": "subject_context_id",
+          "source": "P4/P5 authority deterministic subject-context identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_key",
+          "source": "P4/P5 role/privacy profile pseudonymous subject projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "actor_id",
+          "source": "assessment.actor_assessment.actor_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "role_code",
+          "source": "ROLE_MODEL context artifact assignment.role_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "seat_code",
+          "source": "ROLE_MODEL context artifact assignment.seat_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "function_code",
+          "source": "ROLE_MODEL context artifact assignment.function_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.actor_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "assessment.actor_assessment.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "stage_id",
+          "source": "exact World/evidence scope stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "assessment.actor_assessment.aircraft_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "twin_revision_id",
+          "source": "assessment.actor_assessment.capability_projection_refs exact AIRCRAFT_TWIN_REVISION ref",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "p3_estimate_id",
+          "source": "assessment.actor_assessment.capability_projection_refs exact P3 estimate ref",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.actor_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.actor_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "role_model_context_artifact_id",
+          "source": "context.context_artifact_binding ROLE_MODEL -> registry.context_artifact.context_artifact_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "role_model_version",
+          "source": "registry.context_artifact.artifact_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "world_refs",
+          "source": "assessment.actor_assessment.world_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "assessment.actor_assessment.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "knowledge_time_utc",
+          "source": "latest permissible source evidence time at or before as_of_utc",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "subject_key is the default cross-role identity; actor_id is projected only when the exact role/privacy profile authorizes it.",
+        "twin_revision_id is exact; current/latest/default resolution and hidden P3 recomputation are forbidden.",
+        "subject_context_id changes when any governed identity/scope/configuration input changes."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "HumanMachineEvidenceDTO": {
+      "fields": [
+        {
+          "field": "evidence_id",
+          "source": "M8 authority deterministic human-machine evidence identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_context_id",
+          "source": "P4SubjectContextDTO.subject_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_key",
+          "source": "P4SubjectContextDTO.subject_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_family",
+          "source": "P4/P5 authority approved evidence family",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "origin",
+          "source": "M8 authority MACHINE origin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.evidence_set.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "world_refs",
+          "source": "exact World/relation refs carried by evidence set",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "metric_refs",
+          "source": "assessment.actor_assessment.metric_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "capability_projection_refs",
+          "source": "assessment.actor_assessment.capability_projection_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "source_refs",
+          "source": "authority-governed exact source identifiers",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "availability_status",
+          "source": "M8 authority evidence availability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "authority-governed nonnumeric reason codes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_payload",
+          "source": "authority-approved evidence payload without implicit score",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_hash",
+          "source": "M8 authority canonical evidence content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Machine evidence never carries instructor origin.",
+        "UNAVAILABLE, OUT_OF_DOMAIN and NOT_IDENTIFIABLE never coerce to numeric zero.",
+        "Evidence family membership does not authorize a metric formula, threshold, weight or score."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "InstructorAnnotationDTO": {
+      "fields": [
+        {
+          "field": "annotation_id",
+          "source": "debrief.annotation.annotation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "base_release_id",
+          "source": "debrief.annotation.base_release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "debrief.annotation.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "debrief.annotation.episode_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "stage_id",
+          "source": "debrief.annotation.stage_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "author_subject_key",
+          "source": "M8 role/privacy pseudonymous projection of debrief.annotation.author_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "author_id",
+          "source": "debrief.annotation.author_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "annotation_type",
+          "source": "debrief.annotation.annotation_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "debrief.annotation.start_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "debrief.annotation.end_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "body_text",
+          "source": "debrief.annotation.body_text role/visibility-authorized projection",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "visibility",
+          "source": "debrief.annotation.visibility",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "debrief.annotation.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "revision_no",
+          "source": "debrief.annotation.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "supersedes_annotation_id",
+          "source": "debrief.annotation.supersedes_annotation_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "debrief.annotation.evidence_set_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "created_at",
+          "source": "debrief.annotation.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Annotation content is human evidence and never overwrites machine evidence.",
+        "A revision creates a new annotation row; prior body/evidence content is preserved.",
+        "body_text is omitted unless both role and annotation visibility authorize projection."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "ApprovalStateDTO": {
+      "fields": [
+        {
+          "field": "assessment_scope",
+          "source": "M8 authority P4 or P5 assessment scope",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_revision_id",
+          "source": "assessment.actor_assessment.actor_assessment_id or assessment.mission_assessment.mission_assessment_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "state",
+          "source": "M8 authority governed approval state carried by assessment status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_revision_id",
+          "source": "assessment supersedes_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "audit_id",
+          "source": "audit.audit_log.audit_id",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "reviewer_subject_key",
+          "source": "M8 role/privacy pseudonymous projection of audit.audit_log.actor_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reviewer_actor_id",
+          "source": "audit.audit_log.actor_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "reason",
+          "source": "audit.audit_log.reason",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "request_id",
+          "source": "audit.audit_log.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "created_at",
+          "source": "audit.audit_log.created_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Every state transition creates an immutable assessment revision and an audit record.",
+        "APPROVED and REJECTED are terminal for that revision; later correction creates a new revision.",
+        "Administrator/auditor privilege alone does not imply evaluator approval authority."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P4AssessmentRevisionDTO": {
+      "fields": [
+        {
+          "field": "actor_assessment_id",
+          "source": "assessment.actor_assessment.actor_assessment_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "subject_context_id",
+          "source": "P4SubjectContextDTO.subject_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_key",
+          "source": "P4SubjectContextDTO.subject_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "actor_id",
+          "source": "assessment.actor_assessment.actor_id authorized direct-identity projection",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.actor_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "episode_id",
+          "source": "assessment.actor_assessment.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "aircraft_id",
+          "source": "assessment.actor_assessment.aircraft_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.actor_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.actor_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "world_refs",
+          "source": "assessment.actor_assessment.world_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "metric_refs",
+          "source": "assessment.actor_assessment.metric_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "capability_projection_refs",
+          "source": "assessment.actor_assessment.capability_projection_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "score",
+          "source": "assessment.actor_assessment.score",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "grade",
+          "source": "assessment.actor_assessment.grade",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "status",
+          "source": "assessment.actor_assessment.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "confidence",
+          "source": "assessment.actor_assessment.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "assessment.actor_assessment.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "created_at",
+          "source": "assessment.actor_assessment.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_id",
+          "source": "assessment.actor_assessment.supersedes_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "approval_state",
+          "source": "ApprovalStateDTO.state exact projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "score and grade may be non-null only when an exact adopted assessment profile authorizes them.",
+        "Unsupported evidence remains explicit and never becomes zero.",
+        "Published revisions are historical exact-ID products and are not mutated in place."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P5CompositionSnapshotDTO": {
+      "fields": [
+        {
+          "field": "composition_id",
+          "source": "M8 authority deterministic P5 composition identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.mission_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "mission_episode_id",
+          "source": "assessment.mission_assessment.mission_episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "team_id",
+          "source": "assessment.mission_assessment.team_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "participant_subject_keys",
+          "source": "pseudonymous projection of assessment.mission_assessment.participant_ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "participant_bindings",
+          "source": "ROLE_MODEL plus exact aircraft/twin/P4 revision bindings keyed by subject_key",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "world_snapshot_refs",
+          "source": "assessment.mission_assessment.world_snapshot_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "scenario_context_artifact_id",
+          "source": "exact SCENARIO context artifact when bound",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "role_model_context_artifact_id",
+          "source": "exact ROLE_MODEL context artifact",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.mission_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.mission_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "composition_hash",
+          "source": "M8 authority canonical composition content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Participant bindings are stable-sorted by subject_key before hashing.",
+        "Membership, role, aircraft, twin revision, relevant P4 revision or governed context change creates a new composition_id.",
+        "Direct participant actor IDs are not part of unrestricted projections."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "TeamMissionEvidenceDTO": {
+      "fields": [
+        {
+          "field": "evidence_id",
+          "source": "M8 authority deterministic team/mission evidence identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "composition_id",
+          "source": "P5CompositionSnapshotDTO.composition_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_family",
+          "source": "P4/P5 authority approved team/mission evidence family",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "metric.evidence_set.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "participant_subject_keys",
+          "source": "P5CompositionSnapshotDTO.participant_subject_keys",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "contributing_p4_revision_ids",
+          "source": "exact P4 assessment revision refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "world_snapshot_refs",
+          "source": "assessment.mission_assessment.world_snapshot_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "objective_result_refs",
+          "source": "assessment.objective_result exact refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "availability_status",
+          "source": "M8 authority evidence availability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "authority-governed nonnumeric reason codes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "evidence_payload",
+          "source": "authority-approved evidence payload without implicit aggregate score",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "evidence_hash",
+          "source": "M8 authority canonical evidence content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Team evidence remains bound to exact composition.",
+        "Missing member evidence stays explicit.",
+        "Mission objective outcome and team performance evidence remain separate semantics."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P5AssessmentRevisionDTO": {
+      "fields": [
+        {
+          "field": "mission_assessment_id",
+          "source": "assessment.mission_assessment.mission_assessment_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "composition_id",
+          "source": "P5CompositionSnapshotDTO.composition_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "assessment.mission_assessment.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "mission_episode_id",
+          "source": "assessment.mission_assessment.mission_episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "team_id",
+          "source": "assessment.mission_assessment.team_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "assessment_spec_id",
+          "source": "assessment.mission_assessment.assessment_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assessment_spec_version",
+          "source": "assessment.mission_assessment.assessment_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "participant_subject_keys",
+          "source": "P5CompositionSnapshotDTO.participant_subject_keys",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "world_snapshot_refs",
+          "source": "assessment.mission_assessment.world_snapshot_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "adjudication_refs",
+          "source": "assessment.mission_assessment.adjudication_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "overall_score",
+          "source": "assessment.mission_assessment.overall_score",
+          "required": false,
+          "transport_type": "number?"
+        },
+        {
+          "field": "grade",
+          "source": "assessment.mission_assessment.grade",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "status",
+          "source": "assessment.mission_assessment.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "confidence",
+          "source": "assessment.mission_assessment.confidence",
+          "required": true,
+          "transport_type": "number"
+        },
+        {
+          "field": "evidence_set_id",
+          "source": "assessment.mission_assessment.evidence_set_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "created_at",
+          "source": "assessment.mission_assessment.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "supersedes_id",
+          "source": "assessment.mission_assessment.supersedes_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "approval_state",
+          "source": "ApprovalStateDTO.state exact projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "aggregation_profile_ref",
+          "source": "exact adopted assessment/aggregation profile identity or null",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "M8 authority explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "overall_score and grade remain null when no exact adopted aggregation profile authorizes them.",
+        "A composition change requires a different composition_id and therefore a new assessment revision.",
+        "P5 team result is never copied to an individual P4 product."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P4P5AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M8 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M8 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M8 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M8 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m8_exit_decision",
+          "source": "M8 protected-main Exit evidence.m8_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M8 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M8 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M8 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p4_admitted",
+          "source": "M8 protected-main Exit evidence.p4_admitted",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "p5_admitted",
+          "source": "M8 protected-main Exit evidence.p5_admitted",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "p6_inactive",
+          "source": "M8 protected-main Exit evidence.p6_inactive",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; not persisted as a P4/P5 product.",
+        "P4/P5 external claims require protected-main M8 Exit GO and all required jobs success.",
+        "P6 remains inactive."
+      ],
+      "source": "M8 P4/P5 authority #181 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6InputSnapshotDTO": {
+      "fields": [
+        {
+          "field": "input_snapshot_id",
+          "source": "registry.dataset_snapshot.dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "snapshot_type",
+          "source": "registry.dataset_snapshot.snapshot_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "factual_source_refs",
+          "source": "ordered exact P4/P5 published revision refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "p3_model_refs",
+          "source": "ordered exact P3 model/twin/estimate refs when explicitly required",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "scenario_context_refs",
+          "source": "ordered exact scenario/context artifact refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "target_scope",
+          "source": "governed SUBJECT|COMPOSITION|MISSION scope",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_or_composition_ref",
+          "source": "exact governed subject/composition/mission identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_origin_utc",
+          "source": "knowledge-time forecast origin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "data_hash",
+          "source": "registry.dataset_snapshot.data_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "availability_status",
+          "source": "governed input availability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_codes",
+          "source": "explicit unavailable/OOD/not-identifiable reasons",
+          "required": true,
+          "transport_type": "array[string]"
+        }
+      ],
+      "rules": [
+        "snapshot_type is P6_INPUT and frozen=true.",
+        "Every factual_source_ref is an exact published P4/P5 revision; P3 refs are exact when present.",
+        "All inputs must be available by as_of_utc; future and same-outcome leakage are forbidden.",
+        "Historical resolution never falls back to current/latest/default."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6ModelRevisionDTO": {
+      "fields": [
+        {
+          "field": "capability_model_id",
+          "source": "capability.capability_model.capability_model_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "model_spec_id",
+          "source": "capability.capability_model.model_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_spec_version",
+          "source": "capability.capability_model.model_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_type",
+          "source": "capability.capability_model.subject_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "capability.capability_model.subject_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "training_dataset_snapshot_id",
+          "source": "capability.capability_model.training_dataset_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "validation_dataset_snapshot_id",
+          "source": "exact frozen P6 validation dataset snapshot id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "plugin_name",
+          "source": "capability.capability_model.plugin_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "plugin_version",
+          "source": "capability.capability_model.plugin_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_uri",
+          "source": "capability.capability_model.model_artifact_uri",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_artifact_hash",
+          "source": "capability.capability_model.model_artifact_hash",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "model_object_ref_id",
+          "source": "registry.object_reference resolved by exact managed_uri",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "validity_domain",
+          "source": "capability.capability_model.validity_domain",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "validation_metrics",
+          "source": "capability.capability_model.validation_metrics",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "applicability_profile_ref",
+          "source": "exact adopted applicability profile identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty_profile_ref",
+          "source": "exact adopted uncertainty/calibration profile identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "status",
+          "source": "capability.capability_model.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "trained_at",
+          "source": "capability.capability_model.trained_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "published_at",
+          "source": "capability.capability_model.published_at",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "supersedes_model_id",
+          "source": "capability.capability_model.supersedes_model_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ],
+      "rules": [
+        "P6 reuses capability.capability_model and sealed registry.object_reference; no parallel model registry is created.",
+        "Training and validation snapshots are exact, frozen and leakage-disjoint.",
+        "A model is projection-eligible only under exact adopted model/applicability/uncertainty profiles.",
+        "Historical model resolution never uses current/latest/default aliases."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6ForecastRequestDTO": {
+      "fields": [
+        {
+          "field": "forecast_request_id",
+          "source": "M9 authority deterministic forecast request identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_run_id",
+          "source": "intelligence.forecast_run.forecast_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "input_snapshot_id",
+          "source": "intelligence.forecast_run.input_snapshot_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "forecast_spec_id",
+          "source": "intelligence.forecast_run.forecast_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_spec_version",
+          "source": "intelligence.forecast_run.forecast_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "target_scope",
+          "source": "governed SUBJECT|COMPOSITION|MISSION scope",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_ref",
+          "source": "exact subject/composition/mission reference",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "target_code",
+          "source": "governed projection target code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "forecast_origin_utc",
+          "source": "explicit forecast origin",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "horizon_spec",
+          "source": "intelligence.forecast_run.horizon_spec",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "capability_model_id",
+          "source": "exact P6 model revision",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "assumption_profile_id",
+          "source": "exact assumption profile id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "assumption_profile_version",
+          "source": "exact assumption profile version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_hash",
+          "source": "M9 canonical request content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "forecast_request_id is deterministic over exact source, model, target, horizon, assumptions and as_of_utc.",
+        "Forecast origin/horizon cannot be silently shifted by runtime defaults.",
+        "Current/latest/default model or source resolution is forbidden."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6ForecastResultDTO": {
+      "fields": [
+        {
+          "field": "forecast_result_id",
+          "source": "intelligence.forecast_result.forecast_result_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "forecast_run_id",
+          "source": "intelligence.forecast_result.forecast_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "target_code",
+          "source": "intelligence.forecast_result.target_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "target_time",
+          "source": "intelligence.forecast_result.target_time",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "distribution",
+          "source": "intelligence.forecast_result.distribution",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "threshold_probabilities",
+          "source": "intelligence.forecast_result.threshold_probabilities",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed P6 applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "governed uncertainty/calibration projection",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "intelligence.forecast_result.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "factual_source_refs",
+          "source": "ordered exact source revision refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "model_revision_id",
+          "source": "exact capability model revision",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "original request knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical forecast result hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Forecast result is a projection and never an observed/adjusted/capability/assessment fact.",
+        "Numeric projection is invalid when applicability is OUT_OF_DOMAIN, INSUFFICIENT_EVIDENCE or NOT_IDENTIFIABLE.",
+        "threshold_probabilities may be populated only when the exact adopted model profile authorizes them."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6CounterfactualRequestDTO": {
+      "fields": [
+        {
+          "field": "counterfactual_request_id",
+          "source": "M9 authority deterministic counterfactual request identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "counterfactual_run_id",
+          "source": "intelligence.counterfactual_run.counterfactual_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "base_product_refs",
+          "source": "intelligence.counterfactual_run.base_product_refs exact factual refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "scenario_definition_id",
+          "source": "intelligence.counterfactual_run.scenario_definition_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "interventions",
+          "source": "typed governed intervention set",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "held_fixed_assumptions",
+          "source": "explicit invariant assumptions",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "model_refs",
+          "source": "intelligence.counterfactual_run.model_refs exact model refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "applicability_profile_ref",
+          "source": "exact applicability profile identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_hash",
+          "source": "M9 canonical request content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Interventions and held-fixed assumptions are explicit and hash-bound.",
+        "Association-only models cannot be upgraded to causal claims.",
+        "Base products and models use exact identities only."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6CounterfactualResultDTO": {
+      "fields": [
+        {
+          "field": "counterfactual_run_id",
+          "source": "intelligence.counterfactual_run.counterfactual_run_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "projection_dataset_uri",
+          "source": "intelligence.counterfactual_run.projection_dataset_uri",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "projection_dataset_hash",
+          "source": "intelligence.counterfactual_run.projection_dataset_hash",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed P6 applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "identifiability_status",
+          "source": "governed intervention identifiability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "causal_claim_level",
+          "source": "governed causal-claim boundary",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "governed uncertainty projection",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "assumptions",
+          "source": "intelligence.counterfactual_run.assumptions",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "model_refs",
+          "source": "ordered exact model refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "status",
+          "source": "intelligence.counterfactual_run.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "original request knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical counterfactual result hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Default claim level is SCENARIO_PROJECTION_NON_CAUSAL.",
+        "A stronger causal claim requires separately adopted causal authority and identifiable intervention evidence.",
+        "Projection output never mutates the factual baseline."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6RecommendationDTO": {
+      "fields": [
+        {
+          "field": "recommendation_id",
+          "source": "intelligence.training_recommendation.recommendation_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "subject_key",
+          "source": "authorized pseudonymous subject projection",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "subject_id",
+          "source": "intelligence.training_recommendation.subject_id authorized direct identity",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "recommendation_spec_id",
+          "source": "intelligence.training_recommendation.recommendation_spec_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "recommendation_spec_version",
+          "source": "intelligence.training_recommendation.recommendation_spec_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_forecast_result_ids",
+          "source": "exact source forecast result ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "source_counterfactual_run_ids",
+          "source": "exact source counterfactual run ids",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "objective_constraints",
+          "source": "governed objective and constraint set",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "allowed_action_space",
+          "source": "governed advisory action space",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "rationale",
+          "source": "intelligence.training_recommendation.rationale",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "source_gap_refs",
+          "source": "intelligence.training_recommendation.source_gap_refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "proposed_training_items",
+          "source": "intelligence.training_recommendation.proposed_training_items",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed recommendation applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "source projection uncertainty summary",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "intelligence.training_recommendation.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "approval_state",
+          "source": "intelligence.training_recommendation.approval_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reviewer_subject_key",
+          "source": "authorized reviewer pseudonymous identity",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "audit_ref",
+          "source": "exact audit evidence reference",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "created_at",
+          "source": "intelligence.training_recommendation.created_at",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical recommendation content hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "Recommendation is advisory only; it is never fact, historical truth or an automatic command.",
+        "Approval/release does not upgrade source forecast/counterfactual claims.",
+        "Direct subject identity is projected only under exact role and scope authorization."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6InteropSnapshotDTO": {
+      "fields": [
+        {
+          "field": "interop_snapshot_id",
+          "source": "M9 authority deterministic interoperability snapshot identity",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "session_id",
+          "source": "registry.training_session.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_type",
+          "source": "registry.training_session.session_type LIVE|SIM|LVC",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_id",
+          "source": "registry.data_source.source_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "source_stream_id",
+          "source": "registry.source_stream.source_stream_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "artifact_refs",
+          "source": "ordered exact registry.source_artifact/object references",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "producer_system",
+          "source": "registry.data_source.producer_system",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "external_profile_id",
+          "source": "exact external schema/profile id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "external_profile_version",
+          "source": "exact external schema/profile version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "adapter_id",
+          "source": "exact ingest/egress adapter id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "adapter_version",
+          "source": "exact ingest/egress adapter version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "unit_basis",
+          "source": "explicit unit mapping contract",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "time_basis",
+          "source": "registry.data_source.time_basis",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_or_projection_class",
+          "source": "FACT_SOURCE|P6_PROJECTION classification",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "canonical_entity_refs",
+          "source": "ordered canonical entity/relation refs",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "object_hashes",
+          "source": "ordered exact artifact/object hashes",
+          "required": true,
+          "transport_type": "array[string]"
+        },
+        {
+          "field": "applicability_status",
+          "source": "governed interoperability applicability state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "uncertainty",
+          "source": "preserved uncertainty metadata",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "release_state",
+          "source": "governed external release state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "as_of_utc",
+          "source": "explicit knowledge cutoff",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "logical_content_hash",
+          "source": "canonical interoperability snapshot hash",
+          "required": true,
+          "transport_type": "string"
+        }
+      ],
+      "rules": [
+        "External mappings are exact-profile/version and preserve fact-versus-projection class.",
+        "Lossy phase conversion, unknown/unversioned profile and source/projection conflation fail closed.",
+        "Joint/LVC extends source/entity/relation/plugin vocabularies without creating a second fact model."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "P6AdmissionStateDTO": {
+      "fields": [
+        {
+          "field": "source_revision",
+          "source": "M9 protected-main Exit evidence.source_revision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "event_name",
+          "source": "M9 protected-main Exit evidence.event_name",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "git_ref",
+          "source": "M9 protected-main Exit evidence.git_ref",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "protected_main",
+          "source": "M9 protected-main Exit evidence.protected_main",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "m9_exit_decision",
+          "source": "M9 protected-main Exit evidence.m9_exit_decision",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "run_conclusion",
+          "source": "M9 protected-main Exit evidence.run_conclusion",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "required_jobs_success",
+          "source": "M9 protected-main Exit evidence.required_jobs_success",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "required_jobs_total",
+          "source": "M9 protected-main Exit evidence.required_jobs_total",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "p6_admitted",
+          "source": "M9 protected-main Exit evidence.p6_admitted",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ],
+      "rules": [
+        "Application/governance DTO only; not persisted as a P6 product.",
+        "P6 external claims require protected-main M9 Exit GO and all required jobs success.",
+        "Authority/profile adoption and development projections do not admit P6."
+      ],
+      "source": "M9 P6 authority #194 exact projection",
+      "authority": "cross-layer exact contract"
+    },
+    "GuiCatalogDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "catalog_version",
+          "source": "g3.catalog_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "views",
+          "source": "g3.views",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "modules",
+          "source": "g3.modules",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "features",
+          "source": "g3.features",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "selectors",
+          "source": "g3.selectors",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "routes",
+          "source": "g3.routes",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "GuiBootstrapDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "catalog",
+          "source": "g3.catalog",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "principal",
+          "source": "g3.principal",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "cache_partition_key",
+          "source": "g3.cache_partition_key",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "selectors",
+          "source": "g3.selectors",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "GuiSelectorDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "selector_id",
+          "source": "g3.selector_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "query_context_id",
+          "source": "g3.query_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "items",
+          "source": "g3.items",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "next_cursor",
+          "source": "g3.next_cursor",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "total_count",
+          "source": "g3.total_count",
+          "required": true,
+          "transport_type": "integer"
+        }
+      ]
+    },
+    "HistoricalTrainingOverviewDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g6.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g6.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "query_context_id",
+          "source": "g6.query_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "filter",
+          "source": "g6.filter",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "kpi",
+          "source": "g6.kpi",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "task_metric_trends",
+          "source": "g6.task_metric_trends",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "activity_trend",
+          "source": "g6.activity_trend",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "outcome_trend",
+          "source": "g6.outcome_trend",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "category_composition",
+          "source": "g6.category_composition",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "equipment_trends",
+          "source": "g6.equipment_trends",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "batches",
+          "source": "g6.batches",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "batch_set_fingerprint",
+          "source": "g6.batch_set_fingerprint",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "aggregation_cutoff",
+          "source": "g6.aggregation_cutoff",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "BatchOverviewSummaryDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g6.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g6.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "batch_id",
+          "source": "g6.batch_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "batch_date",
+          "source": "g6.batch_date",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "batch_training_type",
+          "source": "g6.batch_training_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "sortie_count",
+          "source": "g6.sortie_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "episode_count",
+          "source": "g6.episode_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "weapon_event_count",
+          "source": "g6.weapon_event_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "adjudicated_event_count",
+          "source": "g6.adjudicated_event_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "qualification_status",
+          "source": "g6.qualification_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "has_event_detail",
+          "source": "g6.has_event_detail",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ]
+    },
+    "BatchListItemDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "batch_id",
+          "source": "g1.batch_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "batch_training_type",
+          "source": "g1.batch_training_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "qualification_status",
+          "source": "g1.qualification_status",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "TaskMetricTrendDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g6.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g6.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "metric_id",
+          "source": "g6.metric_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "label",
+          "source": "g6.label",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "unit",
+          "source": "g6.unit",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "definition_version",
+          "source": "g6.definition_version",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "status",
+          "source": "g6.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "numerator",
+          "source": "g6.numerator",
+          "required": true,
+          "transport_type": "integer?"
+        },
+        {
+          "field": "denominator",
+          "source": "g6.denominator",
+          "required": true,
+          "transport_type": "integer?"
+        },
+        {
+          "field": "value",
+          "source": "g6.value",
+          "required": true,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "reason",
+          "source": "g6.reason",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "points",
+          "source": "g6.points",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "EquipmentMetricTrendDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g6.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g6.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "metric_id",
+          "source": "g6.metric_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "label",
+          "source": "g6.label",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "unit",
+          "source": "g6.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "comparable",
+          "source": "g6.comparable",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "eligibility",
+          "source": "g6.eligibility",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason",
+          "source": "g6.reason",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "points",
+          "source": "g6.points",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "BatchEventSummaryDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "batch_id",
+          "source": "g1.batch_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "weapon_event_count",
+          "source": "g1.weapon_event_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "cluster_count",
+          "source": "g1.cluster_count",
+          "required": true,
+          "transport_type": "integer"
+        }
+      ]
+    },
+    "WeaponEventListItemDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "weapon_event_id",
+          "source": "g1.weapon_event_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "revision_no",
+          "source": "g1.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "cluster_id",
+          "source": "g1.cluster_id",
+          "required": true,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "category",
+          "source": "g1.category",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "WeaponEventDetailDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g5.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g5.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "weapon_event_id",
+          "source": "g5.weapon_event_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "batch_id",
+          "source": "g5.batch_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "release_id",
+          "source": "g5.release_id",
+          "required": true,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "category",
+          "source": "g5.category",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "category_rule_version",
+          "source": "g5.category_rule_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "classification_exception",
+          "source": "g5.classification_exception",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "shooter_entity_id",
+          "source": "g5.shooter_entity_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "target_entity_id",
+          "source": "g5.target_entity_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "episode_id",
+          "source": "g5.episode_id",
+          "required": true,
+          "transport_type": "uuid-string?"
+        },
+        {
+          "field": "t1_session_time_us",
+          "source": "g5.t1_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "weapon_terminal_state",
+          "source": "g5.weapon_terminal_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "adjudication_state",
+          "source": "g5.adjudication_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "observation_window_state",
+          "source": "g5.observation_window_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "cluster_id",
+          "source": "g5.cluster_id",
+          "required": false,
+          "transport_type": "uuid-string?"
+        }
+      ]
+    },
+    "WeaponEventPerspectiveDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g5.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g5.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "weapon_event_id",
+          "source": "g5.weapon_event_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "perspective",
+          "source": "g5.perspective",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "projection_version",
+          "source": "g5.projection_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "allowed",
+          "source": "g5.allowed",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "denial_reason",
+          "source": "g5.denial_reason",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "geometry_available",
+          "source": "g5.geometry_available",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "series_available",
+          "source": "g5.series_available",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ]
+    },
+    "WeaponEventWindowDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g5.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g5.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "weapon_event_id",
+          "source": "g5.weapon_event_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "perspective",
+          "source": "g5.perspective",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "resolver_version",
+          "source": "g5.resolver_version",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "g5.start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "g5.end_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "t0s_session_time_us",
+          "source": "g5.t0s_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "t0t_session_time_us",
+          "source": "g5.t0t_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "t1_session_time_us",
+          "source": "g5.t1_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "t2_session_time_us",
+          "source": "g5.t2_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "t3_session_time_us",
+          "source": "g5.t3_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "cue_session_time_us",
+          "source": "g5.cue_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "response_session_time_us",
+          "source": "g5.response_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "j_session_time_us",
+          "source": "g5.j_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "terminal_state",
+          "source": "g5.terminal_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "adjudication_state",
+          "source": "g5.adjudication_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "window_state",
+          "source": "g5.window_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "alignment_state",
+          "source": "g5.alignment_state",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "coverage",
+          "source": "g5.coverage",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason",
+          "source": "g5.reason",
+          "required": true,
+          "transport_type": "string?"
+        }
+      ]
+    },
+    "EpisodeEventRelationDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "episode_id",
+          "source": "g1.episode_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "weapon_event_id",
+          "source": "g1.weapon_event_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "relation",
+          "source": "g1.relation",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "TargetDebriefProjectionDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "weapon_event_id",
+          "source": "g1.weapon_event_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "geometry",
+          "source": "g1.geometry",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "cues",
+          "source": "g1.cues",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "responses",
+          "source": "g1.responses",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "series",
+          "source": "g1.series",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "outcome",
+          "source": "g1.outcome",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "BatchRegistrationDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g4.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g4.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "batch_id",
+          "source": "g4.batch_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "session_id",
+          "source": "g4.session_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "batch_date",
+          "source": "g4.batch_date",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "batch_training_type",
+          "source": "g4.batch_training_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "training_type_confirmed",
+          "source": "g4.training_type_confirmed",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "qualification_status",
+          "source": "g4.qualification_status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "source_manifest_sha256",
+          "source": "g4.source_manifest_sha256",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "revision_no",
+          "source": "g4.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "reason_code",
+          "source": "g4.reason_code",
+          "required": false,
+          "transport_type": "string?"
+        },
+        {
+          "field": "v01_eligible",
+          "source": "g4.v01_eligible",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ]
+    },
+    "BatchTrainingTypeRevisionDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "revision_id",
+          "source": "g1.revision_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "batch_id",
+          "source": "g1.batch_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "old_value",
+          "source": "g1.old_value",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "new_value",
+          "source": "g1.new_value",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "ForceFormationContextDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g4.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g4.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "context_revision_id",
+          "source": "g4.context_revision_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "context_id",
+          "source": "g4.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "revision_no",
+          "source": "g4.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "valid_from_session_time_us",
+          "source": "g4.valid_from_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "valid_to_session_time_us",
+          "source": "g4.valid_to_session_time_us",
+          "required": false,
+          "transport_type": "decimal-string?"
+        },
+        {
+          "field": "members",
+          "source": "g4.members",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "ContextRevisionDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "context_id",
+          "source": "g1.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "revision_no",
+          "source": "g1.revision_no",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "valid_from_session_time_us",
+          "source": "g1.valid_from_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        }
+      ]
+    },
+    "ReplayContextDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "release_id",
+          "source": "g1.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "context_id",
+          "source": "g1.context_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "ranges",
+          "source": "g1.ranges",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "SeriesRangeDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "release_id",
+          "source": "g3.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "parameter",
+          "source": "g3.parameter",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "unit",
+          "source": "g3.unit",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "time_base",
+          "source": "g3.time_base",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "start_session_time_us",
+          "source": "g3.start_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "end_session_time_us",
+          "source": "g3.end_session_time_us",
+          "required": true,
+          "transport_type": "decimal-string"
+        },
+        {
+          "field": "lod",
+          "source": "g3.lod",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "max_points",
+          "source": "g3.max_points",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "coverage",
+          "source": "g3.coverage",
+          "required": true,
+          "transport_type": "number?"
+        },
+        {
+          "field": "points",
+          "source": "g3.points",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "MediaManifestDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g1.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g1.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "release_id",
+          "source": "g1.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "items",
+          "source": "g1.items",
+          "required": true,
+          "transport_type": "object"
+        }
+      ]
+    },
+    "UnavailableStateDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g5.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g5.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "g5.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g5.reason_code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "detail",
+          "source": "g5.detail",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "GuiGatewayErrorDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "g3.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "code",
+          "source": "g3.code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "retryable",
+          "source": "g3.retryable",
+          "required": true,
+          "transport_type": "boolean"
+        }
+      ]
+    },
+    "GuiCursorPageDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "query_context_id",
+          "source": "g3.query_context_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "items",
+          "source": "g3.items",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "next_cursor",
+          "source": "g3.next_cursor",
+          "required": true,
+          "transport_type": "string?"
+        },
+        {
+          "field": "total_count",
+          "source": "g3.total_count",
+          "required": true,
+          "transport_type": "integer"
+        }
+      ]
+    },
+    "MediaTicketDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g3.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "request_id",
+          "source": "g3.request_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "reason_code",
+          "source": "g3.reason_code",
+          "required": false,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g3.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "ticket",
+          "source": "g3.ticket",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "release_id",
+          "source": "g3.release_id",
+          "required": true,
+          "transport_type": "uuid-string"
+        },
+        {
+          "field": "media_id",
+          "source": "g3.media_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "content_type",
+          "source": "g3.content_type",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "size_bytes",
+          "source": "g3.size_bytes",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "range_supported",
+          "source": "g3.range_supported",
+          "required": true,
+          "transport_type": "boolean"
+        },
+        {
+          "field": "expires_at",
+          "source": "g3.expires_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "ImportTicketDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g4.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g4.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "ticket_id",
+          "source": "g4.ticket_id",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "kind",
+          "source": "g4.kind",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "entry_count",
+          "source": "g4.entry_count",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "size_bytes",
+          "source": "g4.size_bytes",
+          "required": true,
+          "transport_type": "integer"
+        },
+        {
+          "field": "manifest_sha256",
+          "source": "g4.manifest_sha256",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "expires_at",
+          "source": "g4.expires_at",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    },
+    "BatchListDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g4.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g4.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "items",
+          "source": "g4.items",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "total_count",
+          "source": "g4.total_count",
+          "required": true,
+          "transport_type": "integer"
+        }
+      ]
+    },
+    "BatchImportErrorDTO": {
+      "fields": [
+        {
+          "field": "schema",
+          "source": "g4.schema",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "provenance",
+          "source": "g4.provenance",
+          "required": true,
+          "transport_type": "object"
+        },
+        {
+          "field": "status",
+          "source": "g4.status",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "code",
+          "source": "g4.code",
+          "required": true,
+          "transport_type": "string"
+        },
+        {
+          "field": "detail",
+          "source": "g4.detail",
+          "required": true,
+          "transport_type": "string"
+        }
+      ]
+    }
+  },
+  "transport_rules": {
+    "session_time_us": "decimal-string for JS-visible API",
+    "uuid": "canonical UUID string",
+    "structured_metric": "object, never JSON string",
+    "utc_timestamp": "RFC3339 UTC ending in Z",
+    "sha256": "lowercase 64-character hexadecimal string",
+    "uuid_array": "array[string] with canonical UUID elements",
+    "g3_async_gateway": {
+      "session_time_us": "decimal-string",
+      "cursor": "opaque-versioned-string",
+      "error_shape": "GuiGatewayErrorDTO",
+      "reason_and_provenance_required": true,
+      "absolute_local_path_forbidden": true
+    },
+    "g4_batch_import": {
+      "local_path": "FORBIDDEN",
+      "training_type_default": "FORBIDDEN",
+      "unconfirmed_value": "UNCLASSIFIED",
+      "v01_admission_status": "QUALIFIED_ONLY",
+      "session_time_us": "decimal-string"
+    },
+    "g5_weapon_event": {
+      "session_time_us": "decimal-string",
+      "latest_fallback": "FORBIDDEN",
+      "gui_business_recomputation": "FORBIDDEN",
+      "cross_batch_we_borrowing": "FORBIDDEN",
+      "terminal_adjudication_window_states": "INDEPENDENT"
+    },
+    "g6_historical_overview": {
+      "single_batch_workset": "REQUIRED",
+      "ratio_recompute": "AGGREGATE_NUMERATOR_DENOMINATOR",
+      "simple_average": "FORBIDDEN",
+      "zero_denominator": "FAIL_CLOSED_NULL_REASON",
+      "missing_j": "EXCLUDED_FROM_ADJUDICATED",
+      "invalid_date_range": "FAIL_CLOSED_EMPTY_WITH_WARNING",
+      "equipment_comparability": "FAIL_CLOSED",
+      "latest_fallback": "FORBIDDEN"
+    }
+  },
+  "authority_version": "1.5.0",
+  "decision_id": "G6-V33-HISTORICAL-OVERVIEW-2026-11-07"
+}

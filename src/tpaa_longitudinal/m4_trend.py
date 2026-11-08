@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import cast
 from uuid import UUID, uuid5
 
-from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
+from tpaa_canonical import ArtifactExpectation, trusted_loader_for_baseline
 
 from .m4_sample import (
     M4LongitudinalError,
@@ -320,7 +320,7 @@ def _json_object(value: str, *, field: str) -> dict[str, object]:
 
 
 def load_m4_trend_authority(baseline_root: Path) -> M4TrendAuthority:
-    artifact = CanonicalArtifactLoader(baseline_root).load(
+    artifact = trusted_loader_for_baseline(baseline_root).load(
         "M4_LONGITUDINAL_DEBRIEF_AUTHORITY",
         expectation=ArtifactExpectation(
             version="1.0.0",

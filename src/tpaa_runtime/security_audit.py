@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -87,6 +88,35 @@ class ApplicationApiAuthorizationAudit:
                     "method": event.method,
                     "permission": event.permission,
                     "policy_sha256": event.policy_sha256,
+                },
+            )
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class WeaponEventSecurityAuditAdapter:
+    """Persist G5 detector/identity rejection events through the shared ledger."""
+
+    sink: SecurityAuditSink
+
+    def record(self, event_type: str, details: Mapping[str, object]) -> None:
+        requested_batch = str(details.get("requested_batch_id", "UNKNOWN"))
+        source_launch = str(details.get("source_launch_id", "UNKNOWN"))
+        self.sink.record(
+            SecurityAuditRecord(
+                actor_id=None,
+                principal_key="COMPONENT:" + str(details.get("actor", "weapon_event")),
+                action=event_type,
+                object_type="WEAPON_EVENT_SOURCE_FACT",
+                object_id=(
+                    "source-launch-sha256:"
+                    + hashlib.sha256(source_launch.encode("utf-8")).hexdigest()
+                ),
+                outcome="DENY",
+                reason="CROSS_BATCH_WEAPON_EVENT_FORBIDDEN",
+                details={
+                    "requested_batch_id": requested_batch,
+                    "fact_batch_id": str(details.get("fact_batch_id", "UNKNOWN")),
                 },
             )
         )

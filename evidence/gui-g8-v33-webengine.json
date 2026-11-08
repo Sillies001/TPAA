@@ -1,0 +1,156 @@
+{
+  "schema": "TPAA_G8_V33_WEBENGINE_ACCEPTANCE_V1",
+  "status": "PASS",
+  "core_baseline": "CB-1.13.0",
+  "view": "V24",
+  "entry": "V08 controlled grant (cluster + context + formation)",
+  "captures": [
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1600x900_graphite_ribbon_expanded.png",
+      "resolution": "1600x900",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "2af3ec29bf8c2908fb304c3f8f8cfade6c80c5e8505f41ef2c5f9e885a07e0b4"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1600x900_graphite_ribbon_collapsed.png",
+      "resolution": "1600x900",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "4b11cda38e25ff985a56228d77e0b6afdd7ae5b33659481ac4f5fc1121db3f70"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1600x900_tactical_ribbon_expanded.png",
+      "resolution": "1600x900",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "dfe8910dae78ce75d9fc42a0c3d0f48992e131a229b576891f7158a1fbe00cd6"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1600x900_tactical_ribbon_collapsed.png",
+      "resolution": "1600x900",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "9ec0c0e7400b409ce6ad9b631650942effd7f48c5b64fad3f9c2c72eafb893a8"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1600x900_light_ribbon_expanded.png",
+      "resolution": "1600x900",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "ab8aab13eebb2467f695bff80a14226166d6e4c7e715c2292f0179904b7b70e0"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1600x900_light_ribbon_collapsed.png",
+      "resolution": "1600x900",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "6ea4c0e729116e674b3e76c8d959f1931fef4bf072551a3c2acc8c38084dca76"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1280x720_graphite_ribbon_expanded.png",
+      "resolution": "1280x720",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "9d497ece303f8c5e124316587de084fc0ed41ef2f9cc39fb0e532a56e170e65a"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1280x720_graphite_ribbon_collapsed.png",
+      "resolution": "1280x720",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "graphite"
+      },
+      "sha256": "24f0107b3e5880ad62c6efa396f706e6c8b06e538778eb44c7d8653dc6e070c3"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1280x720_tactical_ribbon_expanded.png",
+      "resolution": "1280x720",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "6b8f3a55dc4fd697765e31bacf19f20680ca61bd5f11effb45fb165d9b6f6ffd"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1280x720_tactical_ribbon_collapsed.png",
+      "resolution": "1280x720",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "tactical"
+      },
+      "sha256": "d918c7c78d5e7c424493ee76c2fa57c1968c22c08ce1dd599099387d2967e13c"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1280x720_light_ribbon_expanded.png",
+      "resolution": "1280x720",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "0d7326921527f3e74cc40cb635fb6464cb70066004c4d4b90eb4a8064e42b28b"
+    },
+    {
+      "file": "evidence/gui-g8-v33-webengine/g8_v24_1280x720_light_ribbon_collapsed.png",
+      "resolution": "1280x720",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "overlapCount": 0,
+        "overflow": false,
+        "themeAttr": "light"
+      },
+      "sha256": "94ffb0f988ebeec3e99d6b3f3f802ebedb49e6f5fd64d928dce141e1c354f722"
+    }
+  ],
+  "box_model_no_overlap": true,
+  "exact_origin": "http://127.0.0.1:38639",
+  "release_claim": false
+}

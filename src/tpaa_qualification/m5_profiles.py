@@ -20,6 +20,7 @@ from tpaa_canonical import (
     ArtifactExpectation,
     CanonicalArtifactError,
     CanonicalArtifactLoader,
+    trusted_loader_for_baseline,
 )
 
 M5_AUTHORITY_ID = "M5_FORMAL_QUALIFICATION_AUTHORITY"
@@ -245,7 +246,7 @@ def load_m5_qualification_authority(
     """Load and project exact M5 qualification authority from the trusted baseline."""
 
     try:
-        canonical = loader or CanonicalArtifactLoader(baseline_root)
+        canonical = loader or trusted_loader_for_baseline(baseline_root)
         authority_artifact = canonical.load(
             M5_AUTHORITY_ID,
             expectation=ArtifactExpectation(
@@ -444,7 +445,8 @@ def load_m5_qualification_authority(
 
     baseline_schema = canonical.baseline_metadata.get("db_schema")
     if (
-        baseline_schema not in {authority_artifact.schema_version, "1.7.0", "1.8.0", "1.9.0"}
+        baseline_schema
+        not in {authority_artifact.schema_version, "1.7.0", "1.8.0", "1.9.0", "1.10.0"}
         or scope.get("db_schema_version") != authority_artifact.schema_version
         or scope.get("db_schema_change") is not False
         or scope.get("shadow_schema_permitted") is not False

@@ -1,0 +1,26 @@
+{
+  "schema": "TPAA_G4_BATCH_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.9.0",
+  "baseline_lock_sha256": "2b83df248d92137aafde2b0f3934051218929e843afccd9bfd6b3aa63c8582a1",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g4-batch.ts",
+      "sha256": "d8433f106955d8b976d53da6e01611ed91272fd83b74e812aa193338eeff3553",
+      "bytes": 4731
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g4_gateway.py",
+      "sha256": "ba4c177d75e601c33b1f322b2ba70c48cad50d24861c75464e46be8cfa82ac87",
+      "bytes": 12085
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g4_authority.py",
+      "sha256": "3bc41c1ad59a63cfa2ca8b567cbc94b494cad95cf9f30b239f65d07aec7d9cfd",
+      "bytes": 11954
+    }
+  ],
+  "release_claim": false
+}

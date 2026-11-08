@@ -1,0 +1,26 @@
+{
+  "schema": "TPAA_G7_BATCH_EVENTS_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.12.0",
+  "baseline_lock_sha256": "387fe31e8e29958dba7a5aa8cafb0b4ad381f84e2440a87c684d518e3d484fc1",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g7-batch-events.ts",
+      "sha256": "afaf015427c99dbef46a4a6f073ed603641757ee9ce883b4beed3676d28941af",
+      "bytes": 3056
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g7_gateway.py",
+      "sha256": "b3abc4485632cc460a9c538ae1f059862d419489d17f645bd811d7f18dcc8ca8",
+      "bytes": 12086
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g7_authority.py",
+      "sha256": "2eb1a18dbf877fd2b26e7d36c22a7d7b87e2dbfa0bedada3c2f3a83141dcc382",
+      "bytes": 12655
+    }
+  ],
+  "release_claim": false
+}

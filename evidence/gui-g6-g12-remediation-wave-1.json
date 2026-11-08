@@ -1,0 +1,37 @@
+{
+  "schema": "TPAA_GUI_G6_G12_REMEDIATION_WAVE_V1",
+  "wave": 1,
+  "recorded_at": "2026-11-08",
+  "status": "IMPLEMENTED_GATES_PASS_STAGES_OPEN",
+  "plan": "docs/plans/TPAA_G6至G12关闭后复核缺口全面整改与再关闭方案_2026-11-08.md",
+  "review": "docs/reviews/G6_G12_REMEDIATION_WAVE_1_REVIEW_2026-11-08.md",
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS_644_SOURCE_FILES",
+    "python": "PASS_542",
+    "targeted_regression": "PASS_30",
+    "successor_checks": "PASS_G4_TO_G12",
+    "codegen_checks": "PASS_G4_TO_G9",
+    "frontend_typecheck": "PASS",
+    "gateway_tests": "PASS_7",
+    "frontend_build": "PASS",
+    "g8_webengine": "PASS_12_CAPTURES",
+    "g9_webengine": "PASS_12_CAPTURES",
+    "g12_automated_structural_matrix": "PASS_156_CAPTURES_26_VIEWS_156_UNIQUE"
+  },
+  "visual_matrix": {
+    "schema": "TPAA_G12_V33_VISUAL_MATRIX_V2",
+    "status": "AUTOMATED_STRUCTURAL_PASS",
+    "sha256": "4e831ef042164203f30835e19778b8de06326b1a0094e3dde05c86f03bb3c9b5",
+    "manual_and_functional_gates_open": true
+  },
+  "stages_reclosed": [],
+  "w9_status": "NO_GO",
+  "product_complete": false,
+  "release_ready": false,
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  }
+}

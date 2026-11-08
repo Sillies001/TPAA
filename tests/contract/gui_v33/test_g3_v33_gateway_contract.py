@@ -101,7 +101,9 @@ def test_g3_security_authority_matches_the_runtime_route_graph_exactly() -> None
         for item in routes
         if isinstance(item, dict)
     }
-    assert _runtime_graph() == expected
+    # G3 is a closed historical parent. Later governed stages may append routes,
+    # but every G3 route must remain present with the same handler identity.
+    assert expected.issubset(_runtime_graph())
     assert len({item["route_id"] for item in routes if isinstance(item, dict)}) == 89
     for number, path in enumerate(
         (

@@ -1,0 +1,18 @@
+{
+  "schema": "TPAA_G4_V33_WEBENGINE_ACCEPTANCE_V1",
+  "status": "PASS",
+  "scale": 1.5,
+  "exact_origin": "http://127.0.0.1:54027",
+  "off_the_record": true,
+  "core_baseline": "CB-1.9.0",
+  "batch_id": "19579af8-05d0-5daa-ab34-dee21939b36a",
+  "batch_status": "QUALIFIED",
+  "training_type_revision": 2,
+  "native_path_exposed": false,
+  "v23_to_v01_loop": "PASS",
+  "force_formation_revision": "PASS",
+  "screenshot": "evidence/gui-g4-v33-webengine-150.png",
+  "screenshot_sha256": "638712ed5f17b52ef1fee1e3d07be63d704e847788873c9f8470b94053a87ae7",
+  "release_claim": false,
+  "shutdown_state": "EXITED"
+}

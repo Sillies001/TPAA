@@ -1,0 +1,134 @@
+{
+  "registry_id": "STAGE_REGISTRY",
+  "version": "1.1.0",
+  "core_baseline": "CB-1.4.0",
+  "governance": {
+    "authority": "Episode Stage semantics and Stage-code sets are defined here and selected by immutable Evaluation Context artifacts. Stage is exclusively training/Episode process vocabulary and never denotes project progress or P capability maturity.",
+    "time_interval": "half-open [start_session_time_us,end_session_time_us)",
+    "persistence_object": "episode.episode_stage in CORE_LOGICAL_MODEL.json",
+    "precedence": [
+      "CONTEXT_OFFICIAL_MARKER",
+      "NORMALIZED_AUTHORITY_EVENT",
+      "CONTEXT_RULE_WORLD_DERIVATION",
+      "MODEL_INFERENCE",
+      "MANUAL_REVIEW"
+    ],
+    "detection_method_mapping": {
+      "CONTEXT_OFFICIAL_MARKER": "CONTEXT",
+      "NORMALIZED_AUTHORITY_EVENT": "MARKER",
+      "CONTEXT_RULE_WORLD_DERIVATION": "RULE",
+      "MODEL_INFERENCE": "RULE",
+      "MANUAL_REVIEW": "MANUAL"
+    },
+    "conflict_rule": "Higher precedence wins only within an overlapping candidate interval; lower-precedence candidates remain evidence but are not published as current stage.",
+    "revision_rule": "Corrections create a new stage row linked by supersedes_stage_id; never mutate published historical stages.",
+    "boundary_rule": "Stage must be wholly inside its Episode and must not cross an Episode revision boundary.",
+    "quality_rule": "Each stage carries status, coverage, confidence and detector_version.",
+    "profile_extension_rule": "New training types add a versioned profile here; they do not create an alternate Stage schema. Profile activation is controlled by immutable Context artifacts and P capability maturity/feature gates."
+  },
+  "profiles": {
+    "BASIC_FLIGHT_V1": {
+      "episode_type": "BASIC_FLIGHT",
+      "ordered_stages": [
+        "SETUP_ENTRY",
+        "EXECUTION",
+        "STABILIZATION_RECOVERY",
+        "COMPLETION"
+      ],
+      "semantics": {
+        "SETUP_ENTRY": "Subject/configuration/reference readiness and entry-condition interval.",
+        "EXECUTION": "Primary maneuver/task execution interval.",
+        "STABILIZATION_RECOVERY": "Post-execution stabilization or recovery interval.",
+        "COMPLETION": "Completion-rule and terminal-state interval."
+      }
+    },
+    "WVR_ENGAGEMENT_V1": {
+      "episode_type": "WVR_ENGAGEMENT",
+      "ordered_stages": [
+        "MERGE",
+        "POSITION_ADVANTAGE",
+        "MANEUVER",
+        "WEAPON_ENVELOPE",
+        "LAUNCH",
+        "KILL_ASSESSMENT"
+      ],
+      "semantics": {
+        "MERGE": "Configured engagement entry and initial relative-state interval.",
+        "POSITION_ADVANTAGE": "Training-defined relative geometry advantage-development interval.",
+        "MANEUVER": "High-dynamic maneuver and energy/control interval.",
+        "WEAPON_ENVELOPE": "Training-rule-defined engagement-opportunity interval; not a real-world weapon optimization product.",
+        "LAUNCH": "Observed training launch/engagement action interval.",
+        "KILL_ASSESSMENT": "External approved adjudication/result-association interval."
+      }
+    },
+    "BVR_KILL_CHAIN_V1": {
+      "episode_type": "BVR_KILL_CHAIN",
+      "ordered_stages": [
+        "DETECTION",
+        "TRACK",
+        "IDENTIFICATION",
+        "DECISION",
+        "WEAPON_EMPLOYMENT",
+        "ASSESSMENT"
+      ],
+      "semantics": {
+        "DETECTION": "Training-relevant information acquisition opportunity and detection interval.",
+        "TRACK": "Track establishment/maintenance interval.",
+        "IDENTIFICATION": "Reference association/classification/identification interval.",
+        "DECISION": "Training-script task/coordination/response interval.",
+        "WEAPON_EMPLOYMENT": "Observed training engagement action and support interval.",
+        "ASSESSMENT": "Approved adjudication, recovery and post-event evidence interval."
+      }
+    },
+    "STRIKE_MISSION_V1": {
+      "episode_type": "STRIKE_MISSION",
+      "ordered_stages": [
+        "MISSION_SETUP",
+        "ROUTE_TASK_EXECUTION",
+        "TARGET_INFORMATION_AVAILABLE",
+        "TARGET_ASSOCIATION",
+        "DESIGNATION_TRACK",
+        "TRAINING_ATTACK_EVENT",
+        "RANGE_SIM_ADJUDICATION",
+        "POST_EVENT_TASK_TRANSITION",
+        "RECOVERY"
+      ],
+      "semantics": {
+        "MISSION_SETUP": "Mission/context/role/route/target/reference readiness interval.",
+        "ROUTE_TASK_EXECUTION": "Scenario-defined route/profile/task execution interval; system does not synthesize an optimal attack route.",
+        "TARGET_INFORMATION_AVAILABLE": "Target information becomes relevant/available under declared P/world capability.",
+        "TARGET_ASSOCIATION": "Truth-to-perception/assignment association and task-target linkage interval.",
+        "DESIGNATION_TRACK": "Observed designation/track continuity and target-ID stability interval.",
+        "TRAINING_ATTACK_EVENT": "Observed training release/trigger/attempt action interval; not an official result.",
+        "RANGE_SIM_ADJUDICATION": "Approved range/simulator adjudication association interval; absent J yields no official outcome claim.",
+        "POST_EVENT_TASK_TRANSITION": "Observed post-event action, handoff or task-transition interval.",
+        "RECOVERY": "Recovery/egress/completion interval under training context."
+      }
+    }
+  },
+  "legacy_reference_mappings": {
+    "WVR_STATE_MACHINE_SET": [
+      "SETUP",
+      "CONTACT_RELEVANT",
+      "MANEUVERING",
+      "ADVANTAGE",
+      "DISADVANTAGE",
+      "NEUTRAL",
+      "TRAINING_ENGAGEMENT_EVENT",
+      "ADJUDICATION",
+      "RESET"
+    ],
+    "BVR_EXTENDED_SET": [
+      "MISSION_SETUP",
+      "INFORMATION_BUILD",
+      "TRACK_ESTABLISHMENT",
+      "CORRELATION_IDENTIFICATION",
+      "SITUATION_DEVELOPMENT",
+      "DECISION_COORDINATION",
+      "TRAINING_ENGAGEMENT",
+      "ADJUDICATION",
+      "POST_EVENT_RESET"
+    ],
+    "rule": "Legacy sets are analysis/event-state vocabulary only. They are not alternate current episode_stage schemas or stage-code authorities."
+  }
+}

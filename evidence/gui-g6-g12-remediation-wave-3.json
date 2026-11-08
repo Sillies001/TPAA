@@ -1,0 +1,35 @@
+{
+  "schema": "TPAA_GUI_G6_G12_REMEDIATION_WAVE_V1",
+  "wave": 3,
+  "date": "2026-11-08",
+  "status": "PASS_WITH_EXTERNAL_DOORS_OPEN",
+  "implemented": [
+    "G9 exact-release presentation source boundary",
+    "Weapon Event anchor-window trajectory projection",
+    "raw media URI suppression and ticket-required reference",
+    "V03 real-data-only 2D and 3D trajectory rendering"
+  ],
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS 644 source files",
+    "python_contract_unit": "PASS 559 tests",
+    "g9_codegen_check": "PASS",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS"
+  },
+  "stage_state": {
+    "G6": "IN_PROGRESS_REMEDIATION",
+    "G7": "IN_PROGRESS_REMEDIATION",
+    "G8": "IN_PROGRESS_REMEDIATION",
+    "G9": "IN_PROGRESS_REMEDIATION",
+    "G10": "IN_PROGRESS_REMEDIATION",
+    "G11": "IN_PROGRESS_REMEDIATION",
+    "G12": "IN_PROGRESS_EXTERNAL_DOORS_OPEN"
+  },
+  "w9": "NO_GO",
+  "product_complete": false,
+  "release_ready": false,
+  "push": false,
+  "production_deployment": false,
+  "release_claim": false
+}

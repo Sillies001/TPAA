@@ -1,0 +1,11 @@
+{
+  "record_type": "G6_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G6-V33-HISTORICAL-OVERVIEW-2026-11-07",
+  "source_baseline": "CB-1.10.0",
+  "source_baseline_lock_sha256": "a4864b36ef571b3582c97606ca33a3bd633e0561f776ad4383c9ff6a14dac3d0",
+  "core_baseline": "CB-1.11.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 53,
+  "release_claim": false
+}

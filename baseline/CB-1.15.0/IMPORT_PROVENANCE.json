@@ -1,0 +1,11 @@
+{
+  "record_type": "G10_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G10-V33-VIEW-CLOSURE-2026-11-07",
+  "source_baseline": "CB-1.14.0",
+  "source_baseline_lock_sha256": "9d0904b750a498c3e78d3ee7eb272ea6be3728ba55230f9b37f444513ab24f1d",
+  "core_baseline": "CB-1.15.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 63,
+  "release_claim": false
+}

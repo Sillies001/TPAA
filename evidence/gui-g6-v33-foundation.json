@@ -1,0 +1,30 @@
+{
+  "schema": "TPAA_G6_V33_HISTORICAL_OVERVIEW_PROGRESS_V1",
+  "phase": "G6",
+  "phase_status": "IN_PROGRESS",
+  "core_baseline": "CB-1.11.0",
+  "parent_core_baseline": "CB-1.10.0",
+  "verified_at": "2026-11-07",
+  "release_claim": false,
+  "delivered": {
+    "authority_successor": "tools/baseline/adopt_g6_successor.py -> baseline/CB-1.11.0 (GUI_HISTORICAL_OVERVIEW_AUTHORITY + G6 approval; 100 security routes = 99 + gui.overview api.route.100; gui.batch.events/gui.replay stay RESERVED_G6_NOT_EXPOSED; DB 1.10.0 no migration)",
+    "dto_contracts": "BatchOverviewSummaryDTO / TaskMetricTrendDTO / EquipmentMetricTrendDTO / HistoricalTrainingOverviewDTO (single_batch_workset, ratio_recompute, zero_denominator fail-closed, missing_j excluded, equipment comparability fail-closed)",
+    "domain_service": "src/tpaa_application/historical_overview.py HistoricalTrainingOverviewQuery (single exact batch workset; ratios recomputed from aggregated numerator/denominator; reverse date range -> empty+warning; no synthetic data)",
+    "application_service": "src/tpaa_application/historical_overview_application.py (4-state, fail-closed errors)",
+    "durable_adapter": "src/tpaa_runtime/durable_historical_overview.py (QUALIFIED-batch workset + WE-relation counts; honest empty task/equipment until Metric Authority admission)",
+    "api_route": "src/tpaa_api/gui_historical.py register_gui_historical_routes (guarded by has_historical_overview(); fail-closed until activation)",
+    "runtime_wiring": "ApplicationService.historical_overview()/has_historical_overview(); production.py g6_active + DurableHistoricalOverviewAdapter + validate_g6_activation; gui_capabilities _PHASE_APPROVALS + G6",
+    "exit_gate_tests": "tests/unit/application/test_g6_historical_overview.py (8) + tests/contract/gui_v33/test_g6_v33_historical_contract.py (5)"
+  },
+  "gates": {
+    "ruff": "PASS", "mypy_source_files": 594, "mypy": "PASS",
+    "g5_regression": "PASS (G5 closure re-verified CLOSED_LOCAL_WITH_GATES/99 routes)",
+    "g6_successor_check": "PASS", "g6_domain_tests": "8 passed", "g6_contract_tests": "5 passed"
+  },
+  "remaining_for_g6_closure": [
+    "CB-1.11.0 runtime activation: g6 codegen (generated_g6_authority/gateway/TS + manifest) + flip security/gui_authority/gui_gateway to generated_g6 + storage trusted pin CB-1.11.0 (_TRUSTED_BASELINE_PINS/_COMPATIBLE_SCHEMA_LOCKS) + authority_root to CB-1.11.0 + frontend bootstrap CB-1.11.0",
+    "Frontend V01 page (v29 markup: header+filters, 6 KPI, task/activity, outcome/category/equipment, batch list/detail) via generated g6 client",
+    "Visual evidence: V01 demo-fidelity screenshots (2 resolutions x 3 themes x Ribbon 2 states); closure report + tools/gui/g6_v33_close.py"
+  ],
+  "push": false, "production_deployment": false, "w9": "NO_GO"
+}

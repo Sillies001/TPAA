@@ -114,6 +114,7 @@ def test_regenerate_diff_blocks_committed_manual_edit_in_clean_git_checkout(tmp_
             ".pytest_cache",
             ".mypy_cache",
             ".ruff_cache",
+                ".tmp",
             "build",
             "evidence",
         ),

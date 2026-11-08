@@ -24,16 +24,27 @@ def _application() -> ApplicationService:
     )
 
 
-def _principal(role: str = "ADMIN_AUDITOR") -> UnifiedPrincipal:
-    return UnifiedPrincipal(
+def _principal(role: str, security_roles: tuple[str, ...] = ()) -> UnifiedPrincipal:
+    principal = UnifiedPrincipal(
         role=role,
         actor_id="11111111-1111-4111-8111-111111111111",
         scope_match=True,
         resource_scopes=("release:allowed",),
     )
+    if security_roles:
+        principal = UnifiedPrincipal(
+            role=role,
+            actor_id="11111111-1111-4111-8111-111111111111",
+            scope_match=True,
+            security_roles=security_roles,
+            resource_scopes=("*",),
+        )
+    return principal
 
 
-def _client(*, role: str = "ADMIN_AUDITOR") -> tuple[TestClient, InMemoryApiAuthorizationAudit]:
+def _client(
+    *, role: str = "ADMIN_AUDITOR", security_roles: tuple[str, ...] = ()
+) -> tuple[TestClient, InMemoryApiAuthorizationAudit]:
     audit = InMemoryApiAuthorizationAudit()
     guard = ApiAuthorizationGuard(
         AuthorizationService(load_security_policy()),
@@ -41,7 +52,7 @@ def _client(*, role: str = "ADMIN_AUDITOR") -> tuple[TestClient, InMemoryApiAuth
     )
     app = create_unified_service_app(
         application=_application(),
-        principal_resolver=lambda _request: _principal(role),
+        principal_resolver=lambda _request: _principal(role, security_roles),
         authorization_guard=guard,
     )
     return TestClient(app), audit
@@ -59,7 +70,7 @@ def test_bootstrap_catalog_and_selector_use_one_authorized_application_boundary(
     body = bootstrap.json()
     assert body["schema"] == "TPAA_GUI_BOOTSTRAP_V1"
     assert body["request_id"] == "boot-1"
-    assert body["provenance"]["core_baseline"] == "CB-1.8.0"
+    assert body["provenance"]["core_baseline"] == "CB-1.14.0"
     assert len(body["catalog"]["views"]) == 26
     assert "11111111-1111-4111-8111-111111111111" not in bootstrap.text
     assert catalog.status_code == 200
@@ -94,14 +105,23 @@ def test_selector_errors_keep_stable_reason_and_provenance() -> None:
     assert response.json()["provenance"] == {
         "authority_id": "GUI_ASYNC_GATEWAY_AUTHORITY",
         "authority_version": "1.0.0",
-        "core_baseline": "CB-1.8.0",
+        "core_baseline": "CB-1.14.0",
     }
 
 
-def test_reserved_g4_business_route_is_not_exposed_and_fails_closed() -> None:
-    client, audit = _client()
+def test_overview_route_stays_unregistered_until_g6_service_is_composed() -> None:
+    """CB-1.11.0 authority knows api.route.100, but without the G6 service no handler
+    is registered: an authorized principal receives 404, never a synthetic response."""
+    client, audit = _client(security_roles=("ADMINISTRATOR",))
     with client:
         response = client.get("/api/v1/gui/historical-overview")
+    assert response.status_code == 404
+
+
+def test_unregistered_path_fails_closed_with_audit() -> None:
+    client, audit = _client()
+    with client:
+        response = client.get("/api/v1/gui/not-a-registered-route")
     assert response.status_code == 403
     assert response.json()["error"]["code"] == "ROUTE_NOT_AUTHORIZED"
     assert audit.events[-1].route_id == "UNREGISTERED"

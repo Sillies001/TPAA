@@ -56,7 +56,12 @@ def test_g2_shell_is_fail_closed_and_has_no_browser_business_persistence() -> No
     assert "principal.gui_permissions.filter" in source
     assert 'provenance.authority_id !== "GUI_ASYNC_GATEWAY_AUTHORITY"' in source
     assert 'provenance.authority_version !== "1.0.0"' in source
-    assert 'provenance.core_baseline !== "CB-1.8.0"' in source
+    # The shell must trust the runtime-authoritative successor baseline rather
+    # than pinning an obsolete phase-specific baseline in frontend code.
+    assert 'String(provenance.core_baseline ?? "")' in source
+    assert r"/^CB-\d+\.\d+\.\d+$/" in source
+    assert 'payload.catalog.catalog_version !== `${runtimeBaseline}:1.0.0`' in source
+    assert 'provenance.core_baseline !== "CB-1.14.0"' not in source
     assert "asyncGateway.setPartition" in source
     assert "payload.permissions.filter" not in source
     assert "required_permissions.every" in source

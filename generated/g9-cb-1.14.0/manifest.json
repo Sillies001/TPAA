@@ -1,0 +1,26 @@
+{
+  "schema": "TPAA_G9_REPLAY_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.14.0",
+  "baseline_lock_sha256": "9d0904b750a498c3e78d3ee7eb272ea6be3728ba55230f9b37f444513ab24f1d",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g9-replay.ts",
+      "sha256": "d7c34e3ae5e7fb4907141fbbacf7fb8cb999835deaa5e9013d1b3c2f28591e22",
+      "bytes": 2347
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g9_gateway.py",
+      "sha256": "a09a7389e85fae0ae15e892ea2ac8800b5200bbcd3e1dda3af61f466d24cdcae",
+      "bytes": 12086
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g9_authority.py",
+      "sha256": "736917a7af357a16cc11ebd4ed409d8e1ecd592d93cfb4f96f13a82a64f38734",
+      "bytes": 12934
+    }
+  ],
+  "release_claim": false
+}

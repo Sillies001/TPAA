@@ -1,0 +1,11 @@
+{
+  "record_type": "G8_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G8-V33-CO-ATTACK-2026-11-07",
+  "source_baseline": "CB-1.12.0",
+  "source_baseline_lock_sha256": "387fe31e8e29958dba7a5aa8cafb0b4ad381f84e2440a87c684d518e3d484fc1",
+  "core_baseline": "CB-1.13.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 57,
+  "release_claim": false
+}

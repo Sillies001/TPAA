@@ -1,0 +1,11 @@
+{
+  "record_type": "G4_SUCCESSOR_IMPORT_PROVENANCE",
+  "authority": false,
+  "decision_id": "G4-V33-BATCH-IMPORT-2026-11-06",
+  "source_baseline": "CB-1.8.0",
+  "source_baseline_lock_sha256": "25b299410c9e1c3ffda9eee38c8ebc1e35111d8775058f8f5b028297cefd2a4c",
+  "core_baseline": "CB-1.9.0",
+  "db_schema_target": "1.10.0",
+  "controlled_artifact_count": 49,
+  "release_claim": false
+}

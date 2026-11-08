@@ -1,0 +1,26 @@
+{
+  "schema": "TPAA_G6_HISTORICAL_GENERATION_MANIFEST_V1",
+  "core_baseline": "CB-1.11.0",
+  "baseline_lock_sha256": "7b8783bd7a61012862ec90ed64882d3f435d3a274f6237f309e6208a62105915",
+  "files": [
+    {
+      "key": "typescript",
+      "path": "frontend/gui-v33/src/generated/g6-historical.ts",
+      "sha256": "fbb4d4e0c2a982b34fe8c2ac80ca147499b5ac34d9529d0805d4228a3e4769dc",
+      "bytes": 4065
+    },
+    {
+      "key": "application",
+      "path": "src/tpaa_application/generated_g6_gateway.py",
+      "sha256": "cf065a1d40789852d9b1a02239a5bda2af457e6a409c5bd2f53185128dc650e0",
+      "bytes": 12086
+    },
+    {
+      "key": "security",
+      "path": "src/tpaa_security/generated_g6_authority.py",
+      "sha256": "7aa4a652bc56485ed9d609eebc4d90d7863e41a7c76a2d30e49fe4f2c6c86507",
+      "bytes": 12525
+    }
+  ],
+  "release_claim": false
+}

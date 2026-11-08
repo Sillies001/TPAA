@@ -7,7 +7,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 
-from .generated_g3_gateway import (
+from .generated_g9_gateway import (
     CORE_BASELINE,
     GATEWAY_ACTIVATION_STATUS,
     GATEWAY_AUTHORITY_ID,
@@ -61,11 +61,11 @@ class GuiGatewayPrincipal:
         return f"principal:{hashlib.sha256(material).hexdigest()}"
 
 
-def _provenance() -> dict[str, object]:
+def _provenance(core_baseline: str) -> dict[str, object]:
     return {
         "authority_id": GATEWAY_AUTHORITY_ID,
         "authority_version": GATEWAY_AUTHORITY_VERSION,
-        "core_baseline": CORE_BASELINE,
+        "core_baseline": core_baseline,
         "activation_status": GATEWAY_ACTIVATION_STATUS,
     }
 
@@ -135,6 +135,11 @@ def _decode_cursor(cursor: str, selector_id: str, query_context_id: str) -> int:
 class GuiGatewayService:
     """Compose safe GUI read models without reading Canonical data from transport/UI."""
 
+    def __init__(self, *, core_baseline: str = CORE_BASELINE) -> None:
+        if not core_baseline.startswith("CB-"):
+            raise ValueError("GUI_GATEWAY_CORE_BASELINE_INVALID")
+        self._core_baseline = core_baseline
+
     def _authorized_views(self, principal: GuiGatewayPrincipal) -> list[dict[str, object]]:
         grants = set(principal.gui_permissions)
         result = []
@@ -158,8 +163,8 @@ class GuiGatewayService:
         return {
             "schema": "TPAA_GUI_CATALOG_V1",
             "request_id": request_id,
-            "provenance": _provenance(),
-            "catalog_version": f"{CORE_BASELINE}:{GATEWAY_AUTHORITY_VERSION}",
+            "provenance": _provenance(self._core_baseline),
+            "catalog_version": f"{self._core_baseline}:{GATEWAY_AUTHORITY_VERSION}",
             "views": views,
             "modules": modules,
             "features": [
@@ -184,7 +189,7 @@ class GuiGatewayService:
         return {
             "schema": "TPAA_GUI_BOOTSTRAP_V1",
             "request_id": request_id,
-            "provenance": _provenance(),
+            "provenance": _provenance(self._core_baseline),
             "catalog": self.catalog(principal, request_id=request_id),
             "principal": {
                 "roles": list(principal.roles),
@@ -250,7 +255,7 @@ class GuiGatewayService:
         result: dict[str, object] = {
             "schema": "TPAA_GUI_SELECTOR_V1",
             "request_id": request_id,
-            "provenance": _provenance(),
+            "provenance": _provenance(self._core_baseline),
             "selector_id": selector_id,
             "query_context_id": query_context_id,
             "items": page,

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import cast
 
 from fastapi import FastAPI
@@ -13,18 +16,25 @@ from tpaa_api.m9_app import M9PrincipalResolver
 from tpaa_api.unified import UnifiedPrincipalResolver, create_unified_service_app
 from tpaa_application import (
     ApplicationService,
+    BatchEventsApplicationService,
+    BatchImportService,
+    CoAttackApplicationService,
     ED2UpperProductService,
     GetStorageBaselineStatus,
     GuiGatewayService,
+    HistoricalOverviewApplicationService,
     M4WorkspaceService,
     M6WorkspaceService,
     M7AircraftContextAdapter,
     M7WorkspaceService,
     M8WorkspaceService,
     M9WorkspaceService,
+    ReplayContextApplicationService,
     SecurityAuditSink,
     SourceWorkflowService,
     W7ExternalCapabilityRegistry,
+    WeaponEventApplicationError,
+    WeaponEventApplicationService,
     build_trusted_runtime_status_use_case,
 )
 from tpaa_longitudinal import M4LongitudinalPublicationService
@@ -39,6 +49,7 @@ from tpaa_security import (
     MtlsConfiguration,
     OidcConfiguration,
     OidcTokenVerifier,
+    ResourceContext,
     load_security_policy,
 )
 from tpaa_storage import (
@@ -58,8 +69,12 @@ from .approval_repository import (
 )
 from .config import ProductionRuntimeConfig, RuntimeProfile
 from .consistency import desktop_write_quiescence_lock
+from .durable_batch import DurableBatchRepository
+from .durable_batch_events import DurableBatchEventSource
+from .durable_co_attack import DurableCoAttackSource
 from .durable_discovery import DurableProductDiscovery
 from .durable_episode import DurableEpisodeRevisionService
+from .durable_historical_overview import DurableHistoricalOverviewAdapter
 from .durable_longitudinal import (
     DurableM4DebriefRepository,
     DurableM4LongitudinalReleaseRepository,
@@ -73,12 +88,22 @@ from .durable_repositories import (
     RuntimeCanonicalUnitOfWork,
     RuntimeUnitOfWorkFactory,
 )
+from .durable_weapon_event import DurableWeaponEventReadAdapter
 from .ed2_upper_repository import DurableED2UpperProductRepository
 from .federated_identity import (
     OidcMtlsRequestIdentityProvider,
     oidc_mtls_principal_resolver,
 )
 from .formal_evidence import load_formal_runtime_evidence
+from .g5_activation import validate_g5_activation
+from .g6_activation import validate_g6_activation
+from .g7_activation import validate_g7_activation
+from .g8_activation import validate_g8_activation
+from .g9_activation import validate_g9_activation
+from .g10_activation import validate_g10_activation
+from .g11_activation import validate_g11_activation
+from .g12_activation import validate_g12_activation
+from .gui_capabilities import resolve_gui_capabilities
 from .identity import (
     configured_service_principal_resolver,
     guard_production_principal_resolver,
@@ -90,6 +115,7 @@ from .security_audit import (
     ApplicationApiAuthorizationAudit,
     PostgreSQLSecurityAuditSink,
     SQLiteSecurityAuditSink,
+    WeaponEventSecurityAuditAdapter,
 )
 from .w8_operations import W8OperationsStatus
 
@@ -107,17 +133,67 @@ class ProductionRuntime:
     approval_service: ApprovalService
 
 
+_WEAPON_EVENT_PATH = re.compile(r"^/api/v1/gui/weapon-events/([^/]+)(?:/.*)?$")
+
+
+@dataclass(frozen=True, slots=True)
+class _WeaponEventResourceResolver:
+    application: ApplicationService
+
+    def resolve(self, method: str, path: str) -> ResourceContext | None:
+        if method != "GET":
+            return None
+        match = _WEAPON_EVENT_PATH.fullmatch(path)
+        if match is None:
+            return None
+        weapon_event_id = match.group(1)
+        try:
+            scope = self.application.weapon_event().resource_scope(weapon_event_id)
+        except WeaponEventApplicationError as exc:
+            if exc.code != "WEAPON_EVENT_NOT_FOUND":
+                raise
+            return ResourceContext(
+                resource_type="WEAPON_EVENT",
+                resource_id=weapon_event_id,
+                weapon_event_id=weapon_event_id,
+            )
+        return ResourceContext(
+            resource_type="WEAPON_EVENT",
+            resource_id=scope.weapon_event_id,
+            weapon_event_id=scope.weapon_event_id,
+            batch_id=scope.batch_id,
+            release_id=scope.release_id,
+            context_id=scope.context_id,
+        )
+
+
 def _validate_storage_status(
     application_status: GetStorageBaselineStatus,
+    *,
+    authority_root: Path,
 ) -> None:
     status = application_status.execute()
-    if status.schema_version != "1.9.0":
+    lock_path = authority_root.parent / "BASELINE_LOCK.json"
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    baseline = lock.get("baseline")
+    if not isinstance(baseline, dict):
+        raise RuntimeError("production baseline lock is invalid")
+    expected_schema = baseline.get("db_schema")
+    logical_model = json.loads(
+        (authority_root / "CORE_LOGICAL_MODEL.json").read_text(encoding="utf-8")
+    )
+    expected_core = logical_model.get("core_baseline")
+    if not isinstance(expected_schema, str) or not isinstance(expected_core, str):
+        raise RuntimeError("production baseline identity is invalid")
+    if status.schema_version != expected_schema:
         raise RuntimeError(
-            f"production storage schema mismatch expected=1.9.0 observed={status.schema_version}"
+            "production storage schema mismatch "
+            f"expected={expected_schema} observed={status.schema_version}"
         )
-    if status.core_baseline != "CB-1.5.0":
+    if status.core_baseline != expected_core:
         raise RuntimeError(
-            f"production Core baseline mismatch expected=CB-1.5.0 observed={status.core_baseline}"
+            "production Core baseline mismatch "
+            f"expected={expected_core} observed={status.core_baseline}"
         )
 
 
@@ -131,7 +207,7 @@ def _compose(
     object_store.ensure_ready()
 
     storage_status = GetStorageBaselineStatus(read_uow_factory)
-    _validate_storage_status(storage_status)
+    _validate_storage_status(storage_status, authority_root=config.authority_root)
 
     admission = ProductAdmissionResolver()
     from .durable_jobs import DurableApplicationJobControl, ProductionJobExecutor
@@ -249,6 +325,23 @@ def _compose(
         "P5": True,
         "P6": True,
     }
+    baseline_lock = json.loads(
+        (config.authority_root.parent / "BASELINE_LOCK.json").read_text(encoding="utf-8")
+    )
+    baseline_identity = baseline_lock.get("baseline")
+    migration_target_schema = (
+        baseline_identity.get("db_schema")
+        if isinstance(baseline_identity, dict)
+        else None
+    )
+    if not isinstance(migration_target_schema, str):
+        raise RuntimeError("production migration target is missing from baseline lock")
+    core_model = json.loads(
+        (config.authority_root / "CORE_LOGICAL_MODEL.json").read_text(encoding="utf-8")
+    )
+    expected_storage_core = core_model.get("core_baseline")
+    if not isinstance(expected_storage_core, str):
+        raise RuntimeError("production storage Core is missing from logical model")
     migration_authority_root = config.authority_root.parents[2] / "migrations" / "authority"
     if config.profile is RuntimeProfile.DESKTOP:
         assert config.desktop_database_path is not None
@@ -256,6 +349,7 @@ def _compose(
             config.desktop_database_path,
             current_authority_root=config.authority_root,
             migration_authority_root=migration_authority_root,
+            target_schema_version=migration_target_schema,
         )
 
         def migration_ready() -> bool:
@@ -270,6 +364,7 @@ def _compose(
             state_root=state_root,
             current_authority_root=config.authority_root,
             migration_authority_root=migration_authority_root,
+            target_schema_version=migration_target_schema,
         )
         migration_ready = service_migration.ready
     dependency_probe = ProductionDependencyProbe(
@@ -280,6 +375,8 @@ def _compose(
             config.profile is RuntimeProfile.DESKTOP or service_principal_resolver is not None
         ),
         migration_ready=migration_ready,
+        expected_schema_version=migration_target_schema,
+        expected_core_baseline=expected_storage_core,
     )
     feature_availability = ProductFeatureAvailability(
         admission,
@@ -322,6 +419,29 @@ def _compose(
             authority=m5_authority,
         )
     )
+    source_workflow = SourceWorkflowService(object_store)
+    gui_capabilities = resolve_gui_capabilities(config.authority_root)
+    g4_active = "G4" in gui_capabilities.active
+    g5_active = "G5" in gui_capabilities.active
+    g6_active = "G6" in gui_capabilities.active
+    g7_active = "G7" in gui_capabilities.active
+    g8_active = "G8" in gui_capabilities.active
+    g9_active = "G9" in gui_capabilities.active
+    _ = "G10" in gui_capabilities.active  # G10 adds no new service; gate validated below
+    _ = "G11" in gui_capabilities.active  # G11 hardening adds no new service
+    _ = "G12" in gui_capabilities.active  # G12 design freeze adds no new service
+    weapon_event_audit = WeaponEventSecurityAuditAdapter(audit_sink)
+    _ = weapon_event_audit
+    weapon_event_service = (
+        WeaponEventApplicationService(
+            adapter=DurableWeaponEventReadAdapter(read_uow_factory),
+            capability_enabled=True,
+            adapter_ready=True,
+        )
+        if g5_active
+        else None
+    )
+    product_discovery = DurableProductDiscovery(read_uow_factory)
     application = ApplicationService(
         get_storage_baseline_status=storage_status,
         job_control=job_control,
@@ -335,16 +455,60 @@ def _compose(
         m7_workspace=m7_workspace,
         m8_workspace=m8_workspace,
         m9_workspace=m9_workspace,
-        product_discovery=DurableProductDiscovery(read_uow_factory),
+        product_discovery=product_discovery,
         feature_availability=feature_availability,
         qualification_status=qualification_status,
         operational_status=PRCBOperationalStatus(
             qualification_status,
             metrics=operational_metrics,
         ),
-        gui_gateway=GuiGatewayService(),
+        gui_gateway=GuiGatewayService(core_baseline=gui_capabilities.core_baseline),
         ed2_upper=ed2_upper,
-        source_workflow=SourceWorkflowService(object_store),
+        source_workflow=source_workflow,
+        batch_import=(
+            BatchImportService(
+                DurableBatchRepository(read_uow_factory, write_uow_factory),
+                source_workflow,
+            )
+            if g4_active
+            else None
+        ),
+        weapon_event=weapon_event_service,
+        historical_overview=(
+            HistoricalOverviewApplicationService(
+                adapter=DurableHistoricalOverviewAdapter(read_uow_factory),
+                capability_enabled=True,
+                adapter_ready=True,
+            )
+            if g6_active
+            else None
+        ),
+        batch_events=(
+            BatchEventsApplicationService(
+                adapter=DurableBatchEventSource(read_uow_factory),
+                capability_enabled=True,
+                adapter_ready=True,
+            )
+            if g7_active
+            else None
+        ),
+        co_attack=(
+            CoAttackApplicationService(
+                adapter=DurableCoAttackSource(read_uow_factory),
+                capability_enabled=True,
+                adapter_ready=True,
+            )
+            if g8_active
+            else None
+        ),
+        replay_context=(
+            ReplayContextApplicationService(
+                weapon_event_service,
+                presentation_source=product_discovery,
+            )
+            if g9_active and weapon_event_service is not None
+            else None
+        ),
         episode_revision=DurableEpisodeRevisionService(write_uow_factory),
         w7_external_capabilities=(
             W7ExternalCapabilityRegistry.local_closed()
@@ -368,6 +532,15 @@ def _compose(
         authorization,
         PersistentApprovalEventRepository(read_uow_factory, write_uow_factory),
     )
+    # Read-only gate: any mismatch raises before a ProductionRuntime or HTTP app is published.
+    validate_g5_activation(gui_capabilities, application)
+    validate_g6_activation(gui_capabilities, application)
+    validate_g7_activation(gui_capabilities, application)
+    validate_g8_activation(gui_capabilities, application)
+    validate_g9_activation(gui_capabilities, application)
+    validate_g10_activation(gui_capabilities, application)
+    validate_g11_activation(gui_capabilities, application)
+    validate_g12_activation(gui_capabilities, application)
     return ProductionRuntime(
         config=config,
         admission=admission,
@@ -378,6 +551,7 @@ def _compose(
             authorization,
             audit=ApplicationApiAuthorizationAudit(audit_sink),
             approval_validator=ApprovalExecutionValidator(approval_service),
+            resource_resolver=_WeaponEventResourceResolver(application),
         ),
         approval_service=approval_service,
     )

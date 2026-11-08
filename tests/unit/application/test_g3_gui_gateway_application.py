@@ -29,10 +29,17 @@ def test_catalog_filters_views_by_approved_role_permissions() -> None:
     assert trainee["provenance"] == {
         "authority_id": "GUI_ASYNC_GATEWAY_AUTHORITY",
         "authority_version": "1.0.0",
-        "core_baseline": "CB-1.8.0",
+        "core_baseline": "CB-1.14.0",
         "activation_status": "ACTIVE",
     }
     assert all("required_permissions" in view for view in administrator["views"])
+
+
+def test_gateway_projects_trusted_runtime_successor_baseline() -> None:
+    gateway = GuiGatewayService(core_baseline="CB-1.17.0")
+    catalog = gateway.catalog(_principal(SecurityRole.ADMINISTRATOR), request_id="successor")
+    assert catalog["provenance"]["core_baseline"] == "CB-1.17.0"
+    assert catalog["catalog_version"] == "CB-1.17.0:1.0.0"
 
 
 def test_bootstrap_redacts_subject_and_uses_distinct_principal_partitions() -> None:

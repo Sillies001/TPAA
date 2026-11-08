@@ -94,6 +94,9 @@ class ResourceContext:
     session_id: str | None = None
     release_id: str | None = None
     unit_id: str | None = None
+    batch_id: str | None = None
+    context_id: str | None = None
+    weapon_event_id: str | None = None
     classification: str = "INTERNAL"
 
     def scope_keys(self) -> frozenset[str]:
@@ -108,6 +111,12 @@ class ResourceContext:
             values.add(f"release:{self.release_id}")
         if self.unit_id:
             values.add(f"unit:{self.unit_id}")
+        if self.batch_id:
+            values.add(f"batch:{self.batch_id}")
+        if self.context_id:
+            values.add(f"context:{self.context_id}")
+        if self.weapon_event_id:
+            values.add(f"weapon_event:{self.weapon_event_id}")
         return frozenset(values)
 
 

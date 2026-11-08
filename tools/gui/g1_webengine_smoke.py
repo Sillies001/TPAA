@@ -10,6 +10,7 @@ import sys
 import tempfile
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("POLARS_SKIP_CPU_CHECK", "1")
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -67,18 +68,38 @@ def main() -> int:
             profile = workspace._tpaa_web_profile
             if view is None or profile is None:
                 raise RuntimeError("WebEngine workspace did not retain native objects")
+            page = workspace._tpaa_web_page
+            if page is None:
+                raise RuntimeError("WebEngine workspace did not retain its page")
             loop = QEventLoop()
             loaded: list[bool] = []
+            loading_diagnostics: list[dict[str, object]] = []
+            navigation_blocked: list[str] = []
+
+            def capture_loading(info: Any) -> None:
+                loading_diagnostics.append(
+                    {
+                        "status": str(info.status()),
+                        "url": info.url().toString(),
+                        "error_code": int(info.errorCode()),
+                        "error": info.errorString(),
+                    }
+                )
 
             def finish_loading(ok: bool) -> None:
                 loaded.append(ok)
                 loop.quit()
 
             view.loadFinished.connect(finish_loading)
+            view.page().loadingChanged.connect(capture_loading)
+            page.navigation_blocked.connect(navigation_blocked.append)
             QTimer.singleShot(15_000, loop.quit)
             loop.exec()
             if loaded != [True]:
-                raise RuntimeError(f"WebEngine load failed or timed out: {loaded}")
+                raise RuntimeError(
+                    "WebEngine load failed or timed out: "
+                    f"{loaded} {loading_diagnostics} blocked={navigation_blocked}"
+                )
             if view.url().toString() != f"{binding.origin}/ui":
                 raise RuntimeError("WebEngine exact origin drift")
             if not profile.isOffTheRecord():

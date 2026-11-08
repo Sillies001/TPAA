@@ -1,0 +1,43 @@
+{
+  "schema": "TPAA_G12_V33_DESIGN_FREEZE_EVIDENCE_V1",
+  "phase": "G12",
+  "phase_status": "IN_PROGRESS_EXTERNAL_DOORS_OPEN",
+  "recorded_at": "2026-11-07",
+  "core_baseline": "CB-1.17.0",
+  "parent_core_baseline": "CB-1.16.0",
+  "baseline_lock_sha256": "2e84be2c5b859a767f587333dd696130ff9f6af003d8cecb79e57ea929405946",
+  "visual_matrix": {
+    "views": 26,
+    "captures": 156,
+    "schema": "TPAA_G12_V33_VISUAL_MATRIX_V2",
+    "status": "AUTOMATED_STRUCTURAL_RECAPTURE_PASS_MANUAL_AND_FUNCTIONAL_GATES_OPEN",
+    "sha256": "c2fc089fbd2afae0a29ee4410f4587690156cb35f320dd8afb9a7772536ab0bd"
+  },
+  "w9": {
+    "status": "NO_GO",
+    "product_complete": false,
+    "release_ready": false,
+    "external_doors_open": [
+      "C5 installed-desktop e2e 缺口（致安装包 smoke 顺延）",
+      "Linux/Service profile 证据",
+      "SBOM/license/vulnerability 扫描",
+      "目标 workload 压测（阈值来自实测 authority）"
+    ]
+  },
+  "delivered": [
+    "CB-1.17.0 设计冻结后继（路由 103 冻结；G12_DESIGN_FREEZE_AUTHORITY）",
+    "2026-11-08 已重建自动结构视觉矩阵：26 视图、三主题、Ribbon 双状态，共 156 张唯一截图；仅证明视图身份与结构检查通过，不替代 Demo 区域级一致性、完整功能及真实角色验收",
+    "W9 重新聚合记录（NO_GO，外部门清单固化）"
+  ],
+  "remaining_external_doors": [
+    "C5 installed-desktop e2e 缺口（致安装包 smoke 顺延）",
+    "Linux/Service profile 证据",
+    "SBOM/license/vulnerability 扫描",
+    "目标 workload 压测（阈值来自实测 authority）"
+  ],
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  }
+}

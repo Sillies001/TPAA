@@ -227,10 +227,12 @@ def create_desktop_app(
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; script-src 'self'; style-src 'self'; "
                 "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
-                "object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"
+                "object-src 'none'; frame-src 'none'; frame-ancestors 'self'; "
+                "base-uri 'none'; form-action 'none'"
             )
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["Referrer-Policy"] = "no-referrer"
+            response.headers["Cache-Control"] = "private, no-store"
             return response
 
         @app.get("/ui", include_in_schema=False)

@@ -1,0 +1,2515 @@
+{
+  "schema": "TPAA_G12_V33_VISUAL_MATRIX_V2",
+  "status": "AUTOMATED_STRUCTURAL_PASS",
+  "core_baseline": "CB-1.17.0",
+  "view_count": 26,
+  "captures": [
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V01_graphite_ribbon_expanded.png",
+      "view": "V01",
+      "title": "历史多批次训练综合总览",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V01",
+        "title": "历史多批次训练综合总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "17954a8fa65a2d1f20476ef3b38eb5366ff48622d2df6302940da1906f5be267"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V01_graphite_ribbon_collapsed.png",
+      "view": "V01",
+      "title": "历史多批次训练综合总览",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V01",
+        "title": "历史多批次训练综合总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "63ca2de6ed969012d562836dc853b470407f69ecc3c763395850596cfc1c3d55"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V01_tactical_ribbon_expanded.png",
+      "view": "V01",
+      "title": "历史多批次训练综合总览",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V01",
+        "title": "历史多批次训练综合总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "a282a8f609611caf6f56d493b0fc8e730bfe0bdf173b0d860e3d76410c2a18a4"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V01_tactical_ribbon_collapsed.png",
+      "view": "V01",
+      "title": "历史多批次训练综合总览",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V01",
+        "title": "历史多批次训练综合总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "accdf2c9a2c25becd68589d84e1f6d67bd903a7c872557cc552c4602fed46c15"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V01_light_ribbon_expanded.png",
+      "view": "V01",
+      "title": "历史多批次训练综合总览",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V01",
+        "title": "历史多批次训练综合总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "d2bdba3152af76d6db4748c2d30d38d7b935d91ed2e23e5dab9d119f10fa6f31"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V01_light_ribbon_collapsed.png",
+      "view": "V01",
+      "title": "历史多批次训练综合总览",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V01",
+        "title": "历史多批次训练综合总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "7ca8a5561175c25db56a7d215647940df46880502b62e74bcab3157091bd4b84"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V02_graphite_ribbon_expanded.png",
+      "view": "V02",
+      "title": "架次综合复盘",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V02",
+        "title": "架次综合复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "61daad21b135dec996bc93b8ae5f3a18394272f64371f061ae67c853bd8ef18c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V02_graphite_ribbon_collapsed.png",
+      "view": "V02",
+      "title": "架次综合复盘",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V02",
+        "title": "架次综合复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c99e94293ccd19184d159e827dd2c950950489d6530525ca27957d8c870ff554"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V02_tactical_ribbon_expanded.png",
+      "view": "V02",
+      "title": "架次综合复盘",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V02",
+        "title": "架次综合复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8da944df3731a77a4f569c7111195011c4721a3c9fda1dac92de6ba9b9b65b59"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V02_tactical_ribbon_collapsed.png",
+      "view": "V02",
+      "title": "架次综合复盘",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V02",
+        "title": "架次综合复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8ec87bef7b5b47100b3060ae694b2817cd7dbce342c2b36566ca24e7674d9cf3"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V02_light_ribbon_expanded.png",
+      "view": "V02",
+      "title": "架次综合复盘",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V02",
+        "title": "架次综合复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "bf6746ba5f41aba30f32fae73f75d4a258c0843607227d9889166c27e77be899"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V02_light_ribbon_collapsed.png",
+      "view": "V02",
+      "title": "架次综合复盘",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V02",
+        "title": "架次综合复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "19dc8e2cf71b29a7448b34fdbc3dfbdf10e328c87f35a00b854154ff765b896a"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V03_graphite_ribbon_expanded.png",
+      "view": "V03",
+      "title": "同步战术回放",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V03",
+        "title": "同步战术回放",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "cdb6892cf6c559a866811c594175683ebd232722b7822ec2c890ce6c4c8c89dd"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V03_graphite_ribbon_collapsed.png",
+      "view": "V03",
+      "title": "同步战术回放",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V03",
+        "title": "同步战术回放",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "925cedf2055f74dc0f1308ee85ac43ab0db05f5440ef5d340cf68ac0642f5da4"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V03_tactical_ribbon_expanded.png",
+      "view": "V03",
+      "title": "同步战术回放",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V03",
+        "title": "同步战术回放",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "31cc8448a3b32d8d2862c16c938931cea7012fd96fcde2e00efa75e394b0d49e"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V03_tactical_ribbon_collapsed.png",
+      "view": "V03",
+      "title": "同步战术回放",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V03",
+        "title": "同步战术回放",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b8c094a4244eb024e0af784f61dfb818a217e2528894fd5aa962b87ce1feb62e"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V03_light_ribbon_expanded.png",
+      "view": "V03",
+      "title": "同步战术回放",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V03",
+        "title": "同步战术回放",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "1b8579b2fb0180bc41a95205bf006e69f9644afa0864cf30c5cf17f81dec8a59"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V03_light_ribbon_collapsed.png",
+      "view": "V03",
+      "title": "同步战术回放",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V03",
+        "title": "同步战术回放",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "fdff580593975a2c2a89af07e059ab6c524770501adc526839aae147fb7aad16"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V04_graphite_ribbon_expanded.png",
+      "view": "V04",
+      "title": "超视距空战·单机",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V04",
+        "title": "超视距空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "e901e549431e561a98d63d139f922a5b502404b16b8a0227c89382e2c77c2c80"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V04_graphite_ribbon_collapsed.png",
+      "view": "V04",
+      "title": "超视距空战·单机",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V04",
+        "title": "超视距空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8f4d02410e0fd3a051fdea09003aec811abf5bd49fe5c0595704b65a9697ab76"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V04_tactical_ribbon_expanded.png",
+      "view": "V04",
+      "title": "超视距空战·单机",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V04",
+        "title": "超视距空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "360ccd0cb93cc04318c7da4bbc06dbb58f6310021f0fbf01793f30a602061be1"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V04_tactical_ribbon_collapsed.png",
+      "view": "V04",
+      "title": "超视距空战·单机",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V04",
+        "title": "超视距空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "058acc8c03d0f71b52d6e280b230abeb9ea2a8b3efb4d403ea49d65de50cb9ce"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V04_light_ribbon_expanded.png",
+      "view": "V04",
+      "title": "超视距空战·单机",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V04",
+        "title": "超视距空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "72b509f51083b75dc75901373bdaff58b55f7f62dc19ba623d4b07682dc30f7c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V04_light_ribbon_collapsed.png",
+      "view": "V04",
+      "title": "超视距空战·单机",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V04",
+        "title": "超视距空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "6e8259582117aabadab5f7a00fb2b592b111ecf57bfcce42d30d624448b29f89"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V05_graphite_ribbon_expanded.png",
+      "view": "V05",
+      "title": "视距内空战·单机",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V05",
+        "title": "视距内空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "86cec4b183eb0ec0cf98429174de2f5a28abf4c566baf022ddc0d16813b61c73"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V05_graphite_ribbon_collapsed.png",
+      "view": "V05",
+      "title": "视距内空战·单机",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V05",
+        "title": "视距内空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8a2634679e6cd888183964ed7ff36e530abad4f96edf62974a9f7dbda492cc98"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V05_tactical_ribbon_expanded.png",
+      "view": "V05",
+      "title": "视距内空战·单机",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V05",
+        "title": "视距内空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "3e19df0fdb7fec6aa0564c10a10853c2ae9e9246282308a4c5d3c029111ee22e"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V05_tactical_ribbon_collapsed.png",
+      "view": "V05",
+      "title": "视距内空战·单机",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V05",
+        "title": "视距内空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "68cddf2f36a3270ea08940f93207bad414cc063c2301a43827619216837e2800"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V05_light_ribbon_expanded.png",
+      "view": "V05",
+      "title": "视距内空战·单机",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V05",
+        "title": "视距内空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b8d527355a0aef205bdb4643f8f11786d0fa668124877d46b2977228a35e527c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V05_light_ribbon_collapsed.png",
+      "view": "V05",
+      "title": "视距内空战·单机",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V05",
+        "title": "视距内空战·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4d1149505f640411779e2b0450e2680d56bc7e1a89910793bcbcfeb4fa4bbc97"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V06_graphite_ribbon_expanded.png",
+      "view": "V06",
+      "title": "对地攻击·单机",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V06",
+        "title": "对地攻击·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "262bc3d9841ee410a0c08958609408a23c7588e88837c020da0b10a0b829c86a"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V06_graphite_ribbon_collapsed.png",
+      "view": "V06",
+      "title": "对地攻击·单机",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V06",
+        "title": "对地攻击·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "40d5846340d93f32a7d58465940befe80e0c3ce24a7b04cdd2571dcb935f4ed8"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V06_tactical_ribbon_expanded.png",
+      "view": "V06",
+      "title": "对地攻击·单机",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V06",
+        "title": "对地攻击·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "97bd5449ecbb09c9eee0d3e943e4da46d02e65a6a8a8de8caa9ef42919c790bb"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V06_tactical_ribbon_collapsed.png",
+      "view": "V06",
+      "title": "对地攻击·单机",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V06",
+        "title": "对地攻击·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "93d3b4e59b9b7634601b81632b25a02e36c328b9fdd883b3c541cd82a638ff16"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V06_light_ribbon_expanded.png",
+      "view": "V06",
+      "title": "对地攻击·单机",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V06",
+        "title": "对地攻击·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "584b9d1753d9074cacbb4f7912c97f3d017207b50a7c23020e0db8d40097bce5"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V06_light_ribbon_collapsed.png",
+      "view": "V06",
+      "title": "对地攻击·单机",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V06",
+        "title": "对地攻击·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "e3fa19eaa071bda1544e9e43fbde4b473ddce12b20de64c4267de954eeb51a8a"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V07_graphite_ribbon_expanded.png",
+      "view": "V07",
+      "title": "基本飞行·单机",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V07",
+        "title": "基本飞行·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "03a3a20e88fd2e1f51fd36100686d5c3f60e252f600f4e6089ef86ecc1dd7e72"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V07_graphite_ribbon_collapsed.png",
+      "view": "V07",
+      "title": "基本飞行·单机",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V07",
+        "title": "基本飞行·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "e4290512683e06ff6cf08bdc31808cd733a2225384e3ff264ce87cd0ec7ea8e1"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V07_tactical_ribbon_expanded.png",
+      "view": "V07",
+      "title": "基本飞行·单机",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V07",
+        "title": "基本飞行·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "33dbc76dc23a3c39d312f901fee9ad86afe8491a9e830bc21593e5ac2d54eade"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V07_tactical_ribbon_collapsed.png",
+      "view": "V07",
+      "title": "基本飞行·单机",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V07",
+        "title": "基本飞行·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "80e94107deb0d3d82dfd77a1b767ab56df036ec21e470dc0df4b19fcc8cca919"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V07_light_ribbon_expanded.png",
+      "view": "V07",
+      "title": "基本飞行·单机",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V07",
+        "title": "基本飞行·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b9eb68951bfa17c854d542a01383f9785c575f39535f8e9a76d570238d053a43"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V07_light_ribbon_collapsed.png",
+      "view": "V07",
+      "title": "基本飞行·单机",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V07",
+        "title": "基本飞行·单机",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4e07f57fae485e1ee1be0e9d64b305c96f294874aea2a51872ceb97164557bee"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V08_graphite_ribbon_expanded.png",
+      "view": "V08",
+      "title": "超视距空战·编队",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V08",
+        "title": "超视距空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "2f42109c2c22d2810115c61fc51172e1b81a1d6efc33d05666807067a8f929bb"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V08_graphite_ribbon_collapsed.png",
+      "view": "V08",
+      "title": "超视距空战·编队",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V08",
+        "title": "超视距空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "84a7d58854d3fc5b6d24f7a2ac86f94266811f47e27e0c970c5ebca7c11d50e4"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V08_tactical_ribbon_expanded.png",
+      "view": "V08",
+      "title": "超视距空战·编队",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V08",
+        "title": "超视距空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "ad2c0096fab4e301a1e6c2fe6d01b6d824caa9df0f68f66213dce9475c9bb8a7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V08_tactical_ribbon_collapsed.png",
+      "view": "V08",
+      "title": "超视距空战·编队",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V08",
+        "title": "超视距空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "620ce231b405bbd11820360e0269d03f80daf19b6b1214de7288290b79b43fbf"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V08_light_ribbon_expanded.png",
+      "view": "V08",
+      "title": "超视距空战·编队",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V08",
+        "title": "超视距空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "73f5f5e42b567da367aed89ad0756737ce39a02f1e93b02392a461720e38f54d"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V08_light_ribbon_collapsed.png",
+      "view": "V08",
+      "title": "超视距空战·编队",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V08",
+        "title": "超视距空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "81b4998b0ede64811dd7d646133c6d94e7a33825508d0fccc40b31ca23b8c476"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V09_graphite_ribbon_expanded.png",
+      "view": "V09",
+      "title": "分类长期成长",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V09",
+        "title": "分类长期成长",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "6e01873b6b10a8ef13a73ba545640136b06864ab694791f084fe757b2453e5e0"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V09_graphite_ribbon_collapsed.png",
+      "view": "V09",
+      "title": "分类长期成长",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V09",
+        "title": "分类长期成长",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8bc28c6d146fcaf71935faf38466c863a6b3c4b8c4bbd185584cc4e0eb337e09"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V09_tactical_ribbon_expanded.png",
+      "view": "V09",
+      "title": "分类长期成长",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V09",
+        "title": "分类长期成长",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4a3bd7e4ea22c49d365228f2230083db2fdfcd7637bdcfc7da0ffbe03454ecad"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V09_tactical_ribbon_collapsed.png",
+      "view": "V09",
+      "title": "分类长期成长",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V09",
+        "title": "分类长期成长",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b91d3d8a60087f2afb4f9ea8eb6fc0511eb35e2d4d18b0449a366e42a85039dd"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V09_light_ribbon_expanded.png",
+      "view": "V09",
+      "title": "分类长期成长",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V09",
+        "title": "分类长期成长",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "d12c733aaf5f73c915eab738fd671ecdc9e9801b67eb75d6aa5c54e90e56d073"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V09_light_ribbon_collapsed.png",
+      "view": "V09",
+      "title": "分类长期成长",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V09",
+        "title": "分类长期成长",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "bdc2bc9cb698e43ad23415456f6ee88792bbfd71dee8584cf1f2718a421b056d"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V10_graphite_ribbon_expanded.png",
+      "view": "V10",
+      "title": "型号与机体性能总览",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V10",
+        "title": "型号与机体性能总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "77d89b289a9559613c0916491bdba7467384dd4b1499b0375468797553cad0ae"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V10_graphite_ribbon_collapsed.png",
+      "view": "V10",
+      "title": "型号与机体性能总览",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V10",
+        "title": "型号与机体性能总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "970205a955fff27a0ee39532ca7f6d4ac259ded2e08508fb887fb7a3cb11a482"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V10_tactical_ribbon_expanded.png",
+      "view": "V10",
+      "title": "型号与机体性能总览",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V10",
+        "title": "型号与机体性能总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "21fc1dd01184be38a604d210142863922a0d24686fce03c30daff427eb0382c8"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V10_tactical_ribbon_collapsed.png",
+      "view": "V10",
+      "title": "型号与机体性能总览",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V10",
+        "title": "型号与机体性能总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "f19dfd9f259ba49380dc25897a89f4e58fc3858d921b52f0fee1fe883690d536"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V10_light_ribbon_expanded.png",
+      "view": "V10",
+      "title": "型号与机体性能总览",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V10",
+        "title": "型号与机体性能总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "73b22c45e4500effc793dc4cd24d804f0aaa65a5a31c95c53eff3293ba886d06"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V10_light_ribbon_collapsed.png",
+      "view": "V10",
+      "title": "型号与机体性能总览",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V10",
+        "title": "型号与机体性能总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "a01b0cf71e5f0dad15f134e501800277cac4dca742dc14f83b2d6a8c796acdd4"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V11_graphite_ribbon_expanded.png",
+      "view": "V11",
+      "title": "机动包线 E-M",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V11",
+        "title": "机动包线 E-M",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c714f8f737cbe789330f1537873e7f4f771ca6f9ea83912dd475d21212e0d572"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V11_graphite_ribbon_collapsed.png",
+      "view": "V11",
+      "title": "机动包线 E-M",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V11",
+        "title": "机动包线 E-M",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8aa54587f5ab9a1c06ea2dfa4ab4df5083ae2f3113b9b57c20eac77b5f92702f"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V11_tactical_ribbon_expanded.png",
+      "view": "V11",
+      "title": "机动包线 E-M",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V11",
+        "title": "机动包线 E-M",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "481f8a43908e616de825ab682eadbbe0e10d3d188a7c65cae134725e4ffe90c7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V11_tactical_ribbon_collapsed.png",
+      "view": "V11",
+      "title": "机动包线 E-M",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V11",
+        "title": "机动包线 E-M",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "3bdfd9625a674931de6a5f41a13d4ef50f6b2ac263db8f8fb8fe4c7dc6d432f3"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V11_light_ribbon_expanded.png",
+      "view": "V11",
+      "title": "机动包线 E-M",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V11",
+        "title": "机动包线 E-M",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4a732d91fe15a4b50db5361eccde8725892045c262f03d833f26f78c7ac68695"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V11_light_ribbon_collapsed.png",
+      "view": "V11",
+      "title": "机动包线 E-M",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V11",
+        "title": "机动包线 E-M",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c4beb7f65f4ac2eabc0ea42f79545f96c149fd48639ddc90053680bcd49b31d7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V12_graphite_ribbon_expanded.png",
+      "view": "V12",
+      "title": "探测性能",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V12",
+        "title": "探测性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8a90ca05134f0ee88bbc91005123ad9ad7dfab385a14120f65e2c321f80baa15"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V12_graphite_ribbon_collapsed.png",
+      "view": "V12",
+      "title": "探测性能",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V12",
+        "title": "探测性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "67907d5562d0770d64a31dcafe23b99add43b6e8a02f7ef00ed4ba4013c7deb0"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V12_tactical_ribbon_expanded.png",
+      "view": "V12",
+      "title": "探测性能",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V12",
+        "title": "探测性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "7a7edde342261963578ea7ec75ac582bdb074f1b8d20b1ab715be38213681c7b"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V12_tactical_ribbon_collapsed.png",
+      "view": "V12",
+      "title": "探测性能",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V12",
+        "title": "探测性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "5c974613f876abf6987d6d74740f3748a0e3cb58de9d903662aa964c81e89292"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V12_light_ribbon_expanded.png",
+      "view": "V12",
+      "title": "探测性能",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V12",
+        "title": "探测性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "f1da74ee83612f7cc3ba317b2e5fdba682df5335291193c371e6f7209830af3d"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V12_light_ribbon_collapsed.png",
+      "view": "V12",
+      "title": "探测性能",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V12",
+        "title": "探测性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b95c8331c4cd607899fd993282c4b88bbc27c3ed34f8558bfd3e46f878bcf432"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V13_graphite_ribbon_expanded.png",
+      "view": "V13",
+      "title": "告警性能",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V13",
+        "title": "告警性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "0c5870668358b5620ee28025da8471a4cb7ede52c58d3e9b90a6beabbdc914ea"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V13_graphite_ribbon_collapsed.png",
+      "view": "V13",
+      "title": "告警性能",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V13",
+        "title": "告警性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "481ff2d4d9cc0c88763ede04df5ed2d2955a31607cc8521f85cdb4f8da6a0962"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V13_tactical_ribbon_expanded.png",
+      "view": "V13",
+      "title": "告警性能",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V13",
+        "title": "告警性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "1b89baa6ac179a6d14a16d9bf1353a4cafc5a3f3a1b588a1dedf8ef9af2eb791"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V13_tactical_ribbon_collapsed.png",
+      "view": "V13",
+      "title": "告警性能",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V13",
+        "title": "告警性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "99046b319f5277eeb9fac4c642d891199a0bd4a3bff277906eef83fb6947ab92"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V13_light_ribbon_expanded.png",
+      "view": "V13",
+      "title": "告警性能",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V13",
+        "title": "告警性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "07e4d19e20aaac3fb9d8872eb9df41e5fd80b263172604bc579c76b3b986ad14"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V13_light_ribbon_collapsed.png",
+      "view": "V13",
+      "title": "告警性能",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V13",
+        "title": "告警性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "448df8480d56353ffb53f2118286402b9e6dca34054040cd18c6e47ac4de16c7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V14_graphite_ribbon_expanded.png",
+      "view": "V14",
+      "title": "攻击系统性能",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V14",
+        "title": "攻击系统性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "9ba046f9b216f81ca93bf7e6bcc1a0a80de1f75fa678ea217d803742f9565d5e"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V14_graphite_ribbon_collapsed.png",
+      "view": "V14",
+      "title": "攻击系统性能",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V14",
+        "title": "攻击系统性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "156a6474421c0b2796d5dafbd8b92a54b7a940980ecb886194f914d54cbb9d7b"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V14_tactical_ribbon_expanded.png",
+      "view": "V14",
+      "title": "攻击系统性能",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V14",
+        "title": "攻击系统性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c1453287417005dccae31746a109463a44ab5245a3fca39652d179fe37d081a9"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V14_tactical_ribbon_collapsed.png",
+      "view": "V14",
+      "title": "攻击系统性能",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V14",
+        "title": "攻击系统性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "99a42fcdd8b92d7ca88392b9d841985d91029bd4257c93fab5e63aaad73f5df8"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V14_light_ribbon_expanded.png",
+      "view": "V14",
+      "title": "攻击系统性能",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V14",
+        "title": "攻击系统性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "6f4c5eac430a937f34bb6bd8751502c3455987ed4b4628e454d1cf03d2220376"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V14_light_ribbon_collapsed.png",
+      "view": "V14",
+      "title": "攻击系统性能",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V14",
+        "title": "攻击系统性能",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "f370ece28818c88dc30621fab2b09211891ba55e179e78e6cc29413da92872ac"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V15_graphite_ribbon_expanded.png",
+      "view": "V15",
+      "title": "条件因子分离",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V15",
+        "title": "条件因子分离",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "3b552cc68e355e5e9f56479b93a77ae08d777152177a36b212fedcd7729bc79e"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V15_graphite_ribbon_collapsed.png",
+      "view": "V15",
+      "title": "条件因子分离",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V15",
+        "title": "条件因子分离",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8d68c912b14597767225f58cff48619ae4b23df1c541bc0267794b1a09d6de0c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V15_tactical_ribbon_expanded.png",
+      "view": "V15",
+      "title": "条件因子分离",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V15",
+        "title": "条件因子分离",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "d08b22a8e3604211a16af1effce72c5df969d15d0a7612f9bff6bc2269df0560"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V15_tactical_ribbon_collapsed.png",
+      "view": "V15",
+      "title": "条件因子分离",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V15",
+        "title": "条件因子分离",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "238774a6a14d5f044239dab460eb1f7d2b02bb1204217c6312577da85eb652a5"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V15_light_ribbon_expanded.png",
+      "view": "V15",
+      "title": "条件因子分离",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V15",
+        "title": "条件因子分离",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "2be72047d24d92d49eb2f7e7d2078142a8161e927b05f2f110a69dc2d3b3788c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V15_light_ribbon_collapsed.png",
+      "view": "V15",
+      "title": "条件因子分离",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V15",
+        "title": "条件因子分离",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4a8bc5745a21e4e71d51b40344d477c1da736bc6f159572de2fd031cdb46f576"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V16_graphite_ribbon_expanded.png",
+      "view": "V16",
+      "title": "性能趋势与告警",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V16",
+        "title": "性能趋势与告警",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "fcadb8556a9552ad3a6ef5159499918ca871f7d3dab246e90f502dd500061a33"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V16_graphite_ribbon_collapsed.png",
+      "view": "V16",
+      "title": "性能趋势与告警",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V16",
+        "title": "性能趋势与告警",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "409befb3989ad4146ac0b32ad577b28d6f55e7aa75c0eff5a2a674daf472df4c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V16_tactical_ribbon_expanded.png",
+      "view": "V16",
+      "title": "性能趋势与告警",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V16",
+        "title": "性能趋势与告警",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b02ba25a70db78a60ca22547cb7229d88d546522a80b83dc69a6cdb496472523"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V16_tactical_ribbon_collapsed.png",
+      "view": "V16",
+      "title": "性能趋势与告警",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V16",
+        "title": "性能趋势与告警",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "be0a23f43b6619484c9d82deb17a25baf3361903e861e7bed8b6aa4b46a37b68"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V16_light_ribbon_expanded.png",
+      "view": "V16",
+      "title": "性能趋势与告警",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V16",
+        "title": "性能趋势与告警",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "7e70bde1cf76d3c0b1c15d0bebfcd9e0be2a270d60e5e1c40f87dfa21ce2278a"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V16_light_ribbon_collapsed.png",
+      "view": "V16",
+      "title": "性能趋势与告警",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V16",
+        "title": "性能趋势与告警",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "03ab54a733b35b389b5cf70c6cafa163b05d8dfe3f8f663e57d1141ffa4ad9f9"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V17_graphite_ribbon_expanded.png",
+      "view": "V17",
+      "title": "数据质量与资格",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V17",
+        "title": "数据质量与资格",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "2b3aba1621d712451bf0eceb1fa19e050917851cb26fa31f781c59636ba68ddb"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V17_graphite_ribbon_collapsed.png",
+      "view": "V17",
+      "title": "数据质量与资格",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V17",
+        "title": "数据质量与资格",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "ae9409f95933a971698d275a6413ea853d2bc1ef4c1c5935f3a7aaeb63dc9a0f"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V17_tactical_ribbon_expanded.png",
+      "view": "V17",
+      "title": "数据质量与资格",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V17",
+        "title": "数据质量与资格",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b837c1617ca5827cd921dcb84065eed897828b454c920c731caf6f7d75e04547"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V17_tactical_ribbon_collapsed.png",
+      "view": "V17",
+      "title": "数据质量与资格",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V17",
+        "title": "数据质量与资格",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "83ca0843459fefcefa2b868c561b6449b37cc375ef2a437a3945bbee4249176e"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V17_light_ribbon_expanded.png",
+      "view": "V17",
+      "title": "数据质量与资格",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V17",
+        "title": "数据质量与资格",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4135a42483a6b48c33739823f4cff17b4353879035922c7b98bf52370614cce2"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V17_light_ribbon_collapsed.png",
+      "view": "V17",
+      "title": "数据质量与资格",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V17",
+        "title": "数据质量与资格",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "de53639ab232b92b3e639f1d6685fee7e868647804cab2d4f3d21b4fcd15d652"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V18_graphite_ribbon_expanded.png",
+      "view": "V18",
+      "title": "报告：架次复盘",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V18",
+        "title": "报告：架次复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "060b9c0f1ec805da919d23494b97f42456edfdcbcf6c2d5d975823436c8c4f42"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V18_graphite_ribbon_collapsed.png",
+      "view": "V18",
+      "title": "报告：架次复盘",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V18",
+        "title": "报告：架次复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "f57e12bca893e9e52b1e066727e15ff170e02cfb90f1594a8c68f9d40eb745a0"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V18_tactical_ribbon_expanded.png",
+      "view": "V18",
+      "title": "报告：架次复盘",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V18",
+        "title": "报告：架次复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "ea6c0370a1898fbf124806cbc57861de24ee02a7c4d4ff5134079a7ad23864ae"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V18_tactical_ribbon_collapsed.png",
+      "view": "V18",
+      "title": "报告：架次复盘",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V18",
+        "title": "报告：架次复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "d3aaed4f0603f933b91b65ff0463071d90d1817ecafd8ffcdf35618713fda98a"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V18_light_ribbon_expanded.png",
+      "view": "V18",
+      "title": "报告：架次复盘",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V18",
+        "title": "报告：架次复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "3511595959efb51c3d30519ffb3cf190667d2c22ef265bd0fa938d3786b02675"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V18_light_ribbon_collapsed.png",
+      "view": "V18",
+      "title": "报告：架次复盘",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V18",
+        "title": "报告：架次复盘",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "643f68db709f65d785c732525164bd7bb725db5325429aa411c6c7fb3457d128"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V19_graphite_ribbon_expanded.png",
+      "view": "V19",
+      "title": "基本飞行·编队",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V19",
+        "title": "基本飞行·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b204e6ada43da146ade90aef234e1440d3c158101cee33cd03807160f63969fa"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V19_graphite_ribbon_collapsed.png",
+      "view": "V19",
+      "title": "基本飞行·编队",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V19",
+        "title": "基本飞行·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "16f14063bc7e6a1829f14f43e503148543df5672afd2806a9c4db00588a20fc5"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V19_tactical_ribbon_expanded.png",
+      "view": "V19",
+      "title": "基本飞行·编队",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V19",
+        "title": "基本飞行·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "36b5ac261f7aa4b60daf115c11a077b052cf5558629fe0bda761ecae2eb7e8fa"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V19_tactical_ribbon_collapsed.png",
+      "view": "V19",
+      "title": "基本飞行·编队",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V19",
+        "title": "基本飞行·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "dc9dedf4fbe857701216d836b87aa09573165dcc4eeb1978bb64d6d88d30b819"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V19_light_ribbon_expanded.png",
+      "view": "V19",
+      "title": "基本飞行·编队",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V19",
+        "title": "基本飞行·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "fef99c2b5887fcce85cc6ed163b5b56f6c619fdc1fc4bcc2961a47c6779bf649"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V19_light_ribbon_collapsed.png",
+      "view": "V19",
+      "title": "基本飞行·编队",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V19",
+        "title": "基本飞行·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "a13b1a73d3a97908acf5c776738f0aeae485be06159157e76209649127b3c0a3"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V20_graphite_ribbon_expanded.png",
+      "view": "V20",
+      "title": "视距内空战·编队",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V20",
+        "title": "视距内空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "de779735ee1a1b13a2df8411e1cb76dc4fc5905a7b43a10c71427afefeef05bb"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V20_graphite_ribbon_collapsed.png",
+      "view": "V20",
+      "title": "视距内空战·编队",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V20",
+        "title": "视距内空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4e1bfa4a0010a4da67e9cd5c1453ea9088bb9696ffc9c4d60a007b3a11201e40"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V20_tactical_ribbon_expanded.png",
+      "view": "V20",
+      "title": "视距内空战·编队",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V20",
+        "title": "视距内空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "cb8fc0ed5157cc5cebebc66fdb0d6cd40cb1e573e621c30a9bfbc4605f5241f5"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V20_tactical_ribbon_collapsed.png",
+      "view": "V20",
+      "title": "视距内空战·编队",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V20",
+        "title": "视距内空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "e0f47b99b8bd6de0663b66af8f09bcaa2763f3b7623166552c6d58a5db81b5fd"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V20_light_ribbon_expanded.png",
+      "view": "V20",
+      "title": "视距内空战·编队",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V20",
+        "title": "视距内空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "0e8f49d1856ba234a837e8ef1186e878cfffbddb09a59737625fd3afa8b1687d"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V20_light_ribbon_collapsed.png",
+      "view": "V20",
+      "title": "视距内空战·编队",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V20",
+        "title": "视距内空战·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "86ec89c46ab3a536629a2fcbc85cb9d6758e7bacf2c988c9f4af25e897d8d9f2"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V21_graphite_ribbon_expanded.png",
+      "view": "V21",
+      "title": "对地攻击·编队",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V21",
+        "title": "对地攻击·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "bc22354f3d380d1c82018d1b7aa4162cc4b6b8a7db93a8fcbc231f3327b658a9"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V21_graphite_ribbon_collapsed.png",
+      "view": "V21",
+      "title": "对地攻击·编队",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V21",
+        "title": "对地攻击·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c79c8d56788b2322affa63aba9875ae41a057adc6b5a51981b390b3257ea0553"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V21_tactical_ribbon_expanded.png",
+      "view": "V21",
+      "title": "对地攻击·编队",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V21",
+        "title": "对地攻击·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "e2b7eb5511348bca9f5caa4756f0e522f630c2adf4ef1fdd73bac5424fb79647"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V21_tactical_ribbon_collapsed.png",
+      "view": "V21",
+      "title": "对地攻击·编队",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V21",
+        "title": "对地攻击·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "283f46b8d6b627704c301e72a8a94999d20538c1459b2dd4415b3533b33378a9"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V21_light_ribbon_expanded.png",
+      "view": "V21",
+      "title": "对地攻击·编队",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V21",
+        "title": "对地攻击·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "4b8c6a39bb8e9a642d5d2f9ae555483dbb014598abf29f80c3cfbed328e64ecd"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V21_light_ribbon_collapsed.png",
+      "view": "V21",
+      "title": "对地攻击·编队",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V21",
+        "title": "对地攻击·编队",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "92ddc6e27f57b7eed05c3880800e8bc2114f9ee7f17ddf841bba9d3ef0a70bcf"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V22_graphite_ribbon_expanded.png",
+      "view": "V22",
+      "title": "管理与版本治理",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V22",
+        "title": "管理与版本治理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "e56ec0ea6c023398519cabe7f7b8272d3b16713185685e05728388b711fe1791"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V22_graphite_ribbon_collapsed.png",
+      "view": "V22",
+      "title": "管理与版本治理",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V22",
+        "title": "管理与版本治理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c5922ae91c5f53fac39c200d54136b7caed44b9e1a691d04b630972c67ba43a1"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V22_tactical_ribbon_expanded.png",
+      "view": "V22",
+      "title": "管理与版本治理",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V22",
+        "title": "管理与版本治理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "85e5a6aa2189f0360a61705d52dc79d17d2940f0bdd2ad71efdb645b1e3232ec"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V22_tactical_ribbon_collapsed.png",
+      "view": "V22",
+      "title": "管理与版本治理",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V22",
+        "title": "管理与版本治理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "b25dfcee7be4127e6274f6ba57a333656c6db3d9a92bb01ba06fe8e5f97480b3"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V22_light_ribbon_expanded.png",
+      "view": "V22",
+      "title": "管理与版本治理",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V22",
+        "title": "管理与版本治理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "860401ee533445cbb4e9b5c7e48b2078720953c9161bd399cfb8de4e22c13aa7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V22_light_ribbon_collapsed.png",
+      "view": "V22",
+      "title": "管理与版本治理",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V22",
+        "title": "管理与版本治理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "69947416cc4ac3cd70507cbc2f548e86c99ca26fc7f9177362a251bf713caa93"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V23_graphite_ribbon_expanded.png",
+      "view": "V23",
+      "title": "数据管理与批次导入",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V23",
+        "title": "数据管理与批次导入",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "a2125a9b567ca17b3efc9dc063bbd56fc002dc9050ced3fd5ef306c1ad1cd2fd"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V23_graphite_ribbon_collapsed.png",
+      "view": "V23",
+      "title": "数据管理与批次导入",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V23",
+        "title": "数据管理与批次导入",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "398da49aecd3a2e319209c1473a3be72cffddb3ea657ec711d0efa8a13e765e8"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V23_tactical_ribbon_expanded.png",
+      "view": "V23",
+      "title": "数据管理与批次导入",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V23",
+        "title": "数据管理与批次导入",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "fb818097884f960e4972fefb0aa2de7bf3ed98cca4f785cc9a4854edac748ccf"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V23_tactical_ribbon_collapsed.png",
+      "view": "V23",
+      "title": "数据管理与批次导入",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V23",
+        "title": "数据管理与批次导入",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "1fafc9d76660ebf349c7ab13828d8a9283b829b5e415e1ee4ca2d5ded7dcf431"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V23_light_ribbon_expanded.png",
+      "view": "V23",
+      "title": "数据管理与批次导入",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V23",
+        "title": "数据管理与批次导入",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c821b0e0fe48c22d34881a21f31787dfd48395916316fc94fb95e4a19282519c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V23_light_ribbon_collapsed.png",
+      "view": "V23",
+      "title": "数据管理与批次导入",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V23",
+        "title": "数据管理与批次导入",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "d25e94f907c30eb54d1510b5fd57b1b209b773c5fda0109e48dc69f095ddb893"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V24_graphite_ribbon_expanded.png",
+      "view": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V24",
+        "title": "超视距编队·协同攻击分析",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "44a83f05522b9446d271bef6019e458747d86f7c5b358ef7b6137818db500363"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V24_graphite_ribbon_collapsed.png",
+      "view": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V24",
+        "title": "超视距编队·协同攻击分析",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "2cc9e70e928f2fac2ec2656f2c76522ffed6b2d18ee051c2ba3fc10278dfc33c"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V24_tactical_ribbon_expanded.png",
+      "view": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V24",
+        "title": "超视距编队·协同攻击分析",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "191037dd8eb061a2ce9d7cb7f6f4bc38c850db9c0db0967b4bdad7ee14efe0fc"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V24_tactical_ribbon_collapsed.png",
+      "view": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V24",
+        "title": "超视距编队·协同攻击分析",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "24d83d64f76a4a551d1f2f7f073dd63a50fc271c40501f3bdd43f3d5852839a0"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V24_light_ribbon_expanded.png",
+      "view": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V24",
+        "title": "超视距编队·协同攻击分析",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "5e6239328d63fc0910a05f1c8cb1a0485bda0854866d904d9f08439f10db3ea6"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V24_light_ribbon_collapsed.png",
+      "view": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V24",
+        "title": "超视距编队·协同攻击分析",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "bb43e2be8d20f715ed2ae0eaedfd41c82ff2c3e8241cbdbe6bd1408058ea1f0d"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V25_graphite_ribbon_expanded.png",
+      "view": "V25",
+      "title": "主题管理",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V25",
+        "title": "主题管理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "5af1c3b2aaf433acc07926a0a3830528ac00f279d1eea0cc112ecb060fc062d7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V25_graphite_ribbon_collapsed.png",
+      "view": "V25",
+      "title": "主题管理",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V25",
+        "title": "主题管理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "3741fd07d3790debd0ca3f0e3568a68d231b78e81b8619a8e3fb14e0ca908336"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V25_tactical_ribbon_expanded.png",
+      "view": "V25",
+      "title": "主题管理",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V25",
+        "title": "主题管理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c4f98a73c6fc59cc75c077e8c3fd8f2e660df2d6c61737ae276c72770a3ceae7"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V25_tactical_ribbon_collapsed.png",
+      "view": "V25",
+      "title": "主题管理",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V25",
+        "title": "主题管理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "dc6c7f78a417dd18f0ea909c655d5ed3fae6649ea340fa946ce9d367f8381f71"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V25_light_ribbon_expanded.png",
+      "view": "V25",
+      "title": "主题管理",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V25",
+        "title": "主题管理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "c797c22a25d79550d0030c0b501c2365c0e1df3077a8c62a46c1316705567246"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V25_light_ribbon_collapsed.png",
+      "view": "V25",
+      "title": "主题管理",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V25",
+        "title": "主题管理",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "2f34080d360b040e2095a5f250590727595fd0211cc918ad85e550115d3e4683"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V26_graphite_ribbon_expanded.png",
+      "view": "V26",
+      "title": "批次发射事件总览",
+      "theme": "graphite",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V26",
+        "title": "批次发射事件总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "866e6cf716a5c6c16d947b1a951ba7270beb16a21d92baff6ef3756f20d276af"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V26_graphite_ribbon_collapsed.png",
+      "view": "V26",
+      "title": "批次发射事件总览",
+      "theme": "graphite",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V26",
+        "title": "批次发射事件总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "8cf25e3e83ac58c6b4d6de7c533e2efa72b889b264ecd006cf23eccf1d5bec5d"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V26_tactical_ribbon_expanded.png",
+      "view": "V26",
+      "title": "批次发射事件总览",
+      "theme": "tactical",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V26",
+        "title": "批次发射事件总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "64dc6060ca4db0940c3aa323645b591e13e68aaf80268c3f4223c27cb54abcc6"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V26_tactical_ribbon_collapsed.png",
+      "view": "V26",
+      "title": "批次发射事件总览",
+      "theme": "tactical",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V26",
+        "title": "批次发射事件总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "a10a1fb957be43cc16289204f1493036b6ec4a514b419253ce956b7a3e580725"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V26_light_ribbon_expanded.png",
+      "view": "V26",
+      "title": "批次发射事件总览",
+      "theme": "light",
+      "ribbon": "expanded",
+      "box_model": {
+        "currentView": "V26",
+        "title": "批次发射事件总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "60c4225b46f39b500dccb7870fc6d36b1209a920be1df5e8f162fa81c73675e9"
+    },
+    {
+      "file": "evidence/gui-g12-v33-visual-matrix/g12_V26_light_ribbon_collapsed.png",
+      "view": "V26",
+      "title": "批次发射事件总览",
+      "theme": "light",
+      "ribbon": "collapsed",
+      "box_model": {
+        "currentView": "V26",
+        "title": "批次发射事件总览",
+        "overlapCount": 0,
+        "clippedControls": 0,
+        "overflow": false
+      },
+      "navigation_asserted": true,
+      "sha256": "dc399224833f1a2c4a7cf2f9851dece3fce3151e4c6823f99831ae057fe2e70d"
+    }
+  ],
+  "box_model_no_overlap": true,
+  "navigation_identity_asserted": true,
+  "cross_view_duplicate_hashes": [],
+  "scope": "view identity, title, theme, ribbon, top-level overlap, control clipping, viewport overflow, screenshot uniqueness",
+  "does_not_prove": [
+    "Demo v33 pixel/region fidelity",
+    "complete business capability admission",
+    "real-role task acceptance",
+    "product completeness or release readiness"
+  ],
+  "release_claim": false
+}

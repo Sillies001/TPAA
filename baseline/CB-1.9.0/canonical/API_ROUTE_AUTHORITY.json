@@ -1,0 +1,850 @@
+{
+  "authority_id": "API_ROUTE_AUTHORITY",
+  "authority_version": "1.3.0",
+  "core_baseline": "CB-1.9.0",
+  "api_version": "v1",
+  "decision_id": "G4-V33-BATCH-IMPORT-2026-11-06",
+  "approval_status": "APPROVED_LOCAL",
+  "scope": "All implemented FastAPI routes plus G3 GUI catalog/bootstrap/selector reads; remaining GUI business routes stay reserved and unexposed.",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/v1/discovery/products/{kind}",
+      "handler": "products",
+      "operation_id": "discoverExactProducts",
+      "response_model": null,
+      "module": "tpaa_api.product_discovery",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/discovery/releases/{release_id}/presentation",
+      "handler": "presentation",
+      "operation_id": "discoverExactReleasePresentation",
+      "response_model": null,
+      "module": "tpaa_api.product_discovery",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/discovery/sessions",
+      "handler": "sessions",
+      "operation_id": "discoverProductSessions",
+      "response_model": null,
+      "module": "tpaa_api.product_discovery",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/discovery/sessions/{session_id}/releases",
+      "handler": "releases",
+      "operation_id": "discoverProductSessionReleases",
+      "response_model": null,
+      "module": "tpaa_api.product_discovery",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p1/releases/{release_id}",
+      "handler": "p1_release",
+      "operation_id": "getProductV1P1Release",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p2/releases/{p2_release_id}/estimates/{estimate_id}",
+      "handler": "p2_estimate",
+      "operation_id": "getProductV1P2Estimate",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p3/twins/{twin_revision_id}",
+      "handler": "p3_twin",
+      "operation_id": "getProductV1P3Twin",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p3/twins/{twin_revision_id}/estimates/{estimate_id}",
+      "handler": "p3_estimate",
+      "operation_id": "getProductV1P3Estimate",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p4/assessments/{actor_assessment_id}",
+      "handler": "p4_assessment",
+      "operation_id": "getProductV1P4Assessment",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p5/assessments/{mission_assessment_id}",
+      "handler": "p5_assessment",
+      "operation_id": "getProductV1P5Assessment",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p6/counterfactuals/{counterfactual_run_id}",
+      "handler": "p6_counterfactual",
+      "operation_id": "getProductV1P6Counterfactual",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p6/forecasts/{forecast_result_id}",
+      "handler": "p6_forecast",
+      "operation_id": "getProductV1P6Forecast",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p6/models/{capability_model_id}",
+      "handler": "p6_model",
+      "operation_id": "getProductV1P6Model",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/p6/recommendations/{recommendation_id}",
+      "handler": "p6_recommendation",
+      "operation_id": "getProductV1P6Recommendation",
+      "response_model": "ProductV1Envelope",
+      "module": "tpaa_api.product_v1",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/upper/{kind}",
+      "handler": "list_upper",
+      "operation_id": "listED2UpperProducts",
+      "response_model": "None",
+      "module": "tpaa_api.ed2_upper",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/upper/{kind}/{snapshot_id}",
+      "handler": "exact_upper",
+      "operation_id": "getED2UpperProduct",
+      "response_model": "None",
+      "module": "tpaa_api.ed2_upper",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "handler": "health",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/jobs",
+      "handler": "submit_job",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/jobs/{job_id}",
+      "handler": "get_job",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/jobs/{job_id}/cancel",
+      "handler": "cancel_job",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m1/commands/compute-session",
+      "handler": "compute_session",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m1/commands/import-session",
+      "handler": "import_session",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m1/commands/publish-session",
+      "handler": "publish_session",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}",
+      "handler": "get_release",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/context",
+      "handler": "get_context",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/metrics",
+      "handler": "get_metrics",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/metrics/{metric_code}",
+      "handler": "get_metric",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/metrics/{metric_code}/evidence",
+      "handler": "get_metric_evidence",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/observations",
+      "handler": "get_observations",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m1/releases/{release_id}/replay",
+      "handler": "replay",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/series",
+      "handler": "series",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m1/releases/{release_id}/topology",
+      "handler": "get_session_episode_stages",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m1_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m3/releases/{release_id}",
+      "handler": "get_release",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m3_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m3/releases/{release_id}/metrics",
+      "handler": "get_metrics",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m3_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m3/releases/{release_id}/metrics/{metric_code}",
+      "handler": "get_metric",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m3_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m3/releases/{release_id}/metrics/{metric_code}/evidence",
+      "handler": "get_metric_evidence",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m3_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m3/releases/{release_id}/workspace",
+      "handler": "get_workspace",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m3_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m4/debrief/annotations",
+      "handler": "mutate_annotation",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m4_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m4/debrief/releases/{base_release_id}",
+      "handler": "get_debrief",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m4_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m4/longitudinal/releases/{release_id}/trend",
+      "handler": "get_longitudinal_trend",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m4_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/comparison",
+      "handler": "comparison",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m6_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m6/p2/releases/{p2_release_id}/estimates/{estimate_id}/diagnostics",
+      "handler": "diagnostics",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m6_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m7/p3/twins/{twin_revision_id}",
+      "handler": "twin",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m7_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}",
+      "handler": "estimate",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m7_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m7/p3/twins/{twin_revision_id}/estimates/{estimate_id}/workspace",
+      "handler": "workspace",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m7_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m8/export/p4/{actor_assessment_id}/p5/{mission_assessment_id}",
+      "handler": "export",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m8/p4/assessments/{actor_assessment_id}",
+      "handler": "p4",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m8/p4/assessments/{actor_assessment_id}/annotations",
+      "handler": "annotate",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m8/p4/assessments/{actor_assessment_id}/approval",
+      "handler": "p4_approval",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m8/p5/assessments/{mission_assessment_id}",
+      "handler": "p5",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m8/p5/assessments/{mission_assessment_id}/approval",
+      "handler": "p5_approval",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m8/workspace/p4/{actor_assessment_id}/p5/{mission_assessment_id}",
+      "handler": "workspace",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m8_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/counterfactual-requests/{counterfactual_request_id}",
+      "handler": "counterfactual_request",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m9/counterfactual-requests/{counterfactual_request_id}/run",
+      "handler": "run_counterfactual",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/counterfactuals/{counterfactual_run_id}",
+      "handler": "counterfactual",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/export/forecast/{forecast_result_id}/counterfactual/{counterfactual_run_id}/recommendation/{recommendation_id}",
+      "handler": "export",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/forecast-requests/{forecast_request_id}",
+      "handler": "forecast_request",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m9/forecast-requests/{forecast_request_id}/run",
+      "handler": "run_forecast",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/forecasts/{forecast_result_id}",
+      "handler": "forecast",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/models/{capability_model_id}",
+      "handler": "model",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m9/models/{capability_model_id}/release",
+      "handler": "release_model",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m9/recommendations",
+      "handler": "create_recommendation",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/recommendations/{recommendation_id}",
+      "handler": "recommendation",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "POST",
+      "path": "/m9/recommendations/{recommendation_id}/approval",
+      "handler": "approve_recommendation",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/m9/workspace/forecast/{forecast_result_id}/counterfactual/{counterfactual_run_id}/recommendation/{recommendation_id}",
+      "handler": "workspace",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.m9_app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/readiness",
+      "handler": "readiness",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/runtime/features",
+      "handler": "runtime_features",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.runtime",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/runtime/metrics",
+      "handler": "runtime_metrics",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.runtime",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/runtime/observability",
+      "handler": "runtime_observability",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.runtime",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/runtime/qualification",
+      "handler": "runtime_qualification",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.runtime",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/version",
+      "handler": "version",
+      "operation_id": null,
+      "response_model": null,
+      "module": "tpaa_api.app",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gui/bootstrap",
+      "handler": "bootstrap",
+      "operation_id": "getGuiBootstrap",
+      "response_model": "GuiBootstrapDTO",
+      "module": "tpaa_api.gui_gateway",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.bootstrap",
+      "gui_permission_id": "gui.view",
+      "implementation_status": "IMPLEMENTED_G3"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gui/catalog",
+      "handler": "catalog",
+      "operation_id": "getGuiCatalog",
+      "response_model": "GuiCatalogDTO",
+      "module": "tpaa_api.gui_gateway",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.catalog",
+      "gui_permission_id": "gui.view",
+      "implementation_status": "IMPLEMENTED_G3"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gui/selectors/{selector_id}",
+      "handler": "selector",
+      "operation_id": "getGuiSelector",
+      "response_model": "GuiSelectorDTO",
+      "module": "tpaa_api.gui_gateway",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.selector",
+      "gui_permission_id": "gui.view",
+      "implementation_status": "IMPLEMENTED_G3"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gui/batches",
+      "handler": "list_batches",
+      "operation_id": "listGuiBatches",
+      "response_model": "BatchListDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.batches",
+      "gui_permission_id": "batch.read",
+      "implementation_status": "IMPLEMENTED_G4"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gui/batches/{batch_id}",
+      "handler": "batch_detail",
+      "operation_id": "getGuiBatch",
+      "response_model": "BatchRegistrationDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.batch.detail",
+      "gui_permission_id": "batch.read",
+      "implementation_status": "IMPLEMENTED_G4"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gui/batches",
+      "handler": "register_batch",
+      "operation_id": "registerGuiBatch",
+      "response_model": "BatchRegistrationDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.batch.register",
+      "gui_permission_id": "batch.register",
+      "implementation_status": "IMPLEMENTED_G4"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gui/batches/{batch_id}/training-type-revisions",
+      "handler": "revise_training_type",
+      "operation_id": "reviseGuiBatchTrainingType",
+      "response_model": "BatchRegistrationDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.batch.training_type",
+      "gui_permission_id": "batch.training_type.revise",
+      "implementation_status": "IMPLEMENTED_G4"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gui/contexts/{context_id}/force-formation",
+      "handler": "get_context",
+      "operation_id": "getGuiForceFormationContext",
+      "response_model": "ForceFormationContextDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.context",
+      "gui_permission_id": "context.force_formation.read",
+      "implementation_status": "IMPLEMENTED_G4"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gui/contexts/{context_id}/force-formation-revisions",
+      "handler": "revise_context",
+      "operation_id": "reviseGuiForceFormationContext",
+      "response_model": "ForceFormationContextDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.context.revise",
+      "gui_permission_id": "context.force_formation.revise",
+      "implementation_status": "IMPLEMENTED_G4"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gui/import-tickets",
+      "handler": "issue_ticket",
+      "operation_id": "issueGuiImportTicket",
+      "response_model": "ImportTicketDTO",
+      "module": "tpaa_api.gui_batch",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "route_id": "gui.import.ticket",
+      "gui_permission_id": "batch.register",
+      "implementation_status": "IMPLEMENTED_G4"
+    }
+  ],
+  "reserved_routes": [
+    {
+      "route_id": "gui.overview",
+      "method": "GET",
+      "path": "/api/v1/gui/historical-overview",
+      "permission_id": "batch.history.read",
+      "audit_event": "gui.overview.read",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "implementation_status": "RESERVED_G4_NOT_EXPOSED",
+      "profile_exposure": [
+        "DESKTOP",
+        "SERVICE"
+      ]
+    },
+    {
+      "route_id": "gui.batch.events",
+      "method": "GET",
+      "path": "/api/v1/gui/batches/{batch_id}/weapon-events",
+      "permission_id": "weapon_event.read",
+      "audit_event": "gui.batch.events.read",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "implementation_status": "RESERVED_G4_NOT_EXPOSED",
+      "profile_exposure": [
+        "DESKTOP",
+        "SERVICE"
+      ]
+    },
+    {
+      "route_id": "gui.event.detail",
+      "method": "GET",
+      "path": "/api/v1/gui/weapon-events/{weapon_event_id}",
+      "permission_id": "weapon_event.read",
+      "audit_event": "gui.event.detail.read",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "implementation_status": "RESERVED_G4_NOT_EXPOSED",
+      "profile_exposure": [
+        "DESKTOP",
+        "SERVICE"
+      ]
+    },
+    {
+      "route_id": "gui.event.perspective",
+      "method": "GET",
+      "path": "/api/v1/gui/weapon-events/{weapon_event_id}/perspectives/{perspective}",
+      "permission_id": "weapon_event.perspective.read",
+      "audit_event": "gui.event.perspective.read",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "implementation_status": "RESERVED_G4_NOT_EXPOSED",
+      "profile_exposure": [
+        "DESKTOP",
+        "SERVICE"
+      ]
+    },
+    {
+      "route_id": "gui.event.window",
+      "method": "GET",
+      "path": "/api/v1/gui/weapon-events/{weapon_event_id}/windows/{perspective}",
+      "permission_id": "weapon_event.window.read",
+      "audit_event": "gui.event.window.read",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "implementation_status": "RESERVED_G4_NOT_EXPOSED",
+      "profile_exposure": [
+        "DESKTOP",
+        "SERVICE"
+      ]
+    },
+    {
+      "route_id": "gui.replay",
+      "method": "GET",
+      "path": "/api/v1/gui/weapon-events/{weapon_event_id}/replay-context",
+      "permission_id": "replay.read",
+      "audit_event": "gui.replay.read",
+      "dto_authority": "CROSS_LAYER_DTO_CONTRACTS",
+      "implementation_status": "RESERVED_G4_NOT_EXPOSED",
+      "profile_exposure": [
+        "DESKTOP",
+        "SERVICE"
+      ]
+    }
+  ]
+}

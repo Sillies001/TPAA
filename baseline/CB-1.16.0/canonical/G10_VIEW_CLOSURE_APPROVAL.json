@@ -1,0 +1,15 @@
+{
+  "schema": "TPAA_G10_VIEW_CLOSURE_APPROVAL_V1",
+  "approval_id": "G10-CB-1.15.0-LOCAL-VIEW-CLOSURE-2026-11-07",
+  "decision_id": "G10-V33-VIEW-CLOSURE-2026-11-07",
+  "status": "APPROVED_LOCAL",
+  "activation_status": "ACTIVE",
+  "approved_core_baseline": "CB-1.15.0",
+  "approved_at": "2026-11-07T00:00:00+08:00",
+  "approver": "PROJECT_OWNER_G10_VIEW_CLOSURE_DIRECTIVE",
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "TPAA_G8_V33_CLOSURE_EVIDENCE_V1",
+  "phase": "G8",
+  "phase_status": "IN_PROGRESS_REMEDIATION",
+  "superseded_by": "docs/reviews/G6_G12_POST_CLOSURE_REVIEW_SUPERSESSION_2026-11-08.md",
+  "closed_at": "2026-11-07",
+  "core_baseline": "CB-1.13.0",
+  "parent_core_baseline": "CB-1.12.0",
+  "baseline_lock_sha256": "69ba7e442eafcaeb22072e42c4d078a6a5a1baa03393e478ac6f664a2e8e8b84",
+  "authority_sha256": "cbfffd9c54179c2f140cd2c80f07cfe4c44047f63c01019b861cb03d3bfd8a1f",
+  "route_count": 102,
+  "g8_route_ids": [
+    "api.route.102"
+  ],
+  "reserved_routes": [
+    "gui.replay"
+  ],
+  "webengine_captures": 12,
+  "gates": {
+    "ruff": "PASS",
+    "mypy": "PASS 620 source files",
+    "g8_successor_check": "PASS",
+    "g8_codegen_check": "PASS routes=1 security_routes=102 files=3",
+    "contract_pytest": "PASS 55 tests (gui_v33)",
+    "g8_domain_api_pytest": "PASS 9 tests",
+    "frontend_typecheck_build": "PASS",
+    "webengine_visual_acceptance": "PASS 12 captures V24 via V08 controlled grant",
+    "api_negative_tests": "PASS 403 scope-denied / cluster-404 / strike-422 / cross-batch-422",
+    "sqlite_busy_timeout_fix": "PASS timeout=30.0 (WAL concurrent audit writes)"
+  },
+  "invariants": {
+    "exact_cluster_scope": true,
+    "bvr_only_strike_rejected": true,
+    "no_cross_batch_cluster": true,
+    "no_latest_fallback": true,
+    "no_total_score": true,
+    "honest_empty_formation": true,
+    "geometry_not_fabricated": true,
+    "linear_supersession_chain": true,
+    "atomic_construct_before_publish": true
+  },
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  },
+  "next_phase": "G9"
+}

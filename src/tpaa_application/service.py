@@ -7,8 +7,12 @@ from typing import Protocol
 
 from tpaa_generated.dto import CapabilityObservationDTO, EvaluationContextDTO
 
+from .batch_events_application import BatchEventsApplicationService
+from .batch_import import BatchImportError, BatchImportService
+from .co_attack_application import CoAttackApplicationService
 from .ed2_upper_service import ED2UpperProductService
 from .gui_gateway import GuiGatewayError, GuiGatewayPrincipal, GuiGatewayService
+from .historical_overview_application import HistoricalOverviewApplicationService
 from .job_control import JobControl, JobRecord, JobSubmission, M0JobControl
 from .m1_publication import (
     M1PublishSessionCommand,
@@ -50,8 +54,10 @@ from .m9_workspace import (
     M9WorkspaceService,
 )
 from .models import StorageBaselineStatus
+from .replay_context import ReplayContextApplicationService
 from .runtime import RuntimeBaselineStatus
 from .source_workflow import SourceWorkflowService
+from .weapon_event_application import WeaponEventApplicationService
 
 
 @dataclass(frozen=True, slots=True)
@@ -264,11 +270,17 @@ class ApplicationService:
         operational_status: OperationalStatusUseCase | None = None,
         ed2_upper: ED2UpperProductService | None = None,
         source_workflow: SourceWorkflowService | None = None,
+        batch_import: BatchImportService | None = None,
         episode_revision: EpisodeRevisionUseCase | None = None,
         w7_external_capabilities: W7ExternalCapabilityUseCase | None = None,
         w8_operations_status: W8OperationsStatusUseCase | None = None,
         w9_final_qualification_status: W9FinalQualificationStatusUseCase | None = None,
         gui_gateway: GuiGatewayService | None = None,
+        weapon_event: WeaponEventApplicationService | None = None,
+        historical_overview: HistoricalOverviewApplicationService | None = None,
+        batch_events: BatchEventsApplicationService | None = None,
+        co_attack: CoAttackApplicationService | None = None,
+        replay_context: ReplayContextApplicationService | None = None,
     ) -> None:
         self._get_storage_baseline_status = get_storage_baseline_status
         self._get_runtime_baseline_status = get_runtime_baseline_status
@@ -286,11 +298,17 @@ class ApplicationService:
         self._operational_status = operational_status
         self._ed2_upper = ed2_upper
         self._source_workflow = source_workflow
+        self._batch_import = batch_import
         self._episode_revision = episode_revision
         self._w7_external_capabilities = w7_external_capabilities
         self._w8_operations_status = w8_operations_status
         self._w9_final_qualification_status = w9_final_qualification_status
         self._gui_gateway = gui_gateway
+        self._weapon_event = weapon_event
+        self._historical_overview = historical_overview
+        self._batch_events = batch_events
+        self._co_attack = co_attack
+        self._replay_context = replay_context
 
     def _gui(self) -> GuiGatewayService:
         if self._gui_gateway is None:
@@ -338,6 +356,63 @@ class ApplicationService:
         if self._source_workflow is None:
             raise RuntimeError("source workflow use case is not configured")
         return self._source_workflow
+
+    def batch_import(self) -> BatchImportService:
+        """Return the configured G4 Batch import/application owner."""
+
+        if self._batch_import is None:
+            raise BatchImportError("G4_BATCH_SERVICE_UNAVAILABLE", "batch_import", http_status=503)
+        return self._batch_import
+
+    def weapon_event(self) -> WeaponEventApplicationService:
+        """Return the G5 exact Weapon Event Application owner."""
+
+        if self._weapon_event is None:
+            raise RuntimeError("G5_WEAPON_EVENT_SERVICE_UNAVAILABLE")
+        return self._weapon_event
+
+    def has_weapon_event(self) -> bool:
+        return self._weapon_event is not None
+
+    def historical_overview(self) -> HistoricalOverviewApplicationService:
+        """Return the G6 V01 Historical Overview Application owner."""
+
+        if self._historical_overview is None:
+            raise RuntimeError("G6_HISTORICAL_OVERVIEW_SERVICE_UNAVAILABLE")
+        return self._historical_overview
+
+    def has_historical_overview(self) -> bool:
+        return self._historical_overview is not None
+
+    def batch_events(self) -> BatchEventsApplicationService:
+        """Return the G7 V26 Batch Events Application owner."""
+
+        if self._batch_events is None:
+            raise RuntimeError("G7_BATCH_EVENTS_SERVICE_UNAVAILABLE")
+        return self._batch_events
+
+    def has_batch_events(self) -> bool:
+        return self._batch_events is not None
+
+    def co_attack(self) -> CoAttackApplicationService:
+        """Return the G8 V24 Co-attack Analysis Application owner."""
+
+        if self._co_attack is None:
+            raise RuntimeError("G8_CO_ATTACK_SERVICE_UNAVAILABLE")
+        return self._co_attack
+
+    def has_co_attack(self) -> bool:
+        return self._co_attack is not None
+
+    def replay_context(self) -> ReplayContextApplicationService:
+        """Return the G9 V03 Replay Context Application owner."""
+
+        if self._replay_context is None:
+            raise RuntimeError("G9_REPLAY_CONTEXT_SERVICE_UNAVAILABLE")
+        return self._replay_context
+
+    def has_replay_context(self) -> bool:
+        return self._replay_context is not None
 
     def revise_episode(
         self,

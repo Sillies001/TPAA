@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QUrl, Signal
+import json
+
+from PySide6.QtCore import QUrl, QUrlQuery, Signal
 from PySide6.QtWebEngineCore import (
     QWebEnginePage,
     QWebEngineProfile,
@@ -14,6 +16,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QLabel, QStackedWidget, QVBoxLayout, QWidget
 
 from .local_backend import WebEngineBinding
+from .native_import import NativeImportBridge
 
 
 class _ExactOriginInterceptor(QWebEngineUrlRequestInterceptor):
@@ -37,6 +40,17 @@ class _ExactOriginPage(QWebEnginePage):
     def __init__(self, profile: QWebEngineProfile, origin: str, parent: QWidget) -> None:
         super().__init__(profile, parent)
         self._origin = origin
+        self._native_import: NativeImportBridge | None = None
+
+    def bind_native_import(self, bridge: NativeImportBridge) -> None:
+        self._native_import = bridge
+
+    def _dispatch_native_import_result(self, result: str) -> None:
+        encoded = json.dumps(result, ensure_ascii=False)
+        self.runJavaScript(
+            "window.dispatchEvent(new CustomEvent('tpaa-native-import-result',"
+            f"{{detail:{encoded}}}));"
+        )
 
     def acceptNavigationRequest(  # noqa: N802
         self,
@@ -47,8 +61,30 @@ class _ExactOriginPage(QWebEnginePage):
         del navigation_type
         target = QUrl(url) if isinstance(url, str) else url
         if is_main_frame:
-            origin = f"{target.scheme()}://{target.host()}:{target.port()}"
-            if origin != self._origin:
+            target_origin = f"{target.scheme()}://{target.host()}:{target.port()}"
+            query = QUrlQuery(target)
+            native_action = (
+                query.queryItemValue("tpaa_native_action")
+                if query.hasQueryItem("tpaa_native_action")
+                else None
+            )
+            if native_action is not None:
+                bridge = self._native_import
+                if (
+                    target_origin != self._origin
+                    or native_action not in {"select-file", "select-directory"}
+                    or bridge is None
+                ):
+                    self.navigation_blocked.emit(target.toString())
+                    return False
+                result = (
+                    bridge.selectFile()
+                    if native_action == "select-file"
+                    else bridge.selectDirectory()
+                )
+                self._dispatch_native_import_result(result)
+                return False
+            if target_origin != self._origin:
                 self.navigation_blocked.emit(target.toString())
                 return False
         return True
@@ -63,6 +99,7 @@ class WebEngineWorkspace(QStackedWidget):
         self._tpaa_web_interceptor: _ExactOriginInterceptor | None = None
         self._tpaa_web_page: _ExactOriginPage | None = None
         self._tpaa_web_view: QWebEngineView | None = None
+        self._tpaa_native_import: NativeImportBridge | None = None
 
 
 def create_webengine_workspace(
@@ -99,6 +136,8 @@ def create_webengine_workspace(
     view = QWebEngineView(stack)
     view.setObjectName("tpaaV33WebEngineView")
     page = _ExactOriginPage(profile, binding.origin, view)
+    native_import = NativeImportBridge(binding, view)
+    page.bind_native_import(native_import)
     settings = page.settings()
     settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanOpenWindows, False)
     settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, False)
@@ -124,6 +163,7 @@ def create_webengine_workspace(
     stack._tpaa_web_interceptor = interceptor
     stack._tpaa_web_page = page
     stack._tpaa_web_view = view
+    stack._tpaa_native_import = native_import
     return stack
 
 

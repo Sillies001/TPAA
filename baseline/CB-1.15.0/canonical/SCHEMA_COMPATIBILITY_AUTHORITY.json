@@ -1,0 +1,322 @@
+{
+  "authority_id": "SCHEMA_COMPATIBILITY_AUTHORITY",
+  "authority_version": "1.8.0",
+  "core_baseline": "CB-1.15.0",
+  "current_db_schema": "1.10.0",
+  "decision_id": "G10-V33-VIEW-CLOSURE-2026-11-07",
+  "approval_status": "APPROVED",
+  "approval_date": "2026-11-07",
+  "approval_basis": "G10 local successor inherits unchanged CB-1.14.0 artifacts; no DB schema change.",
+  "compatibility_policy": "API v1 additive; schema 1.10.0 requires governed migration and non-empty downgrade refusal.",
+  "core_inheritance": [
+    {
+      "file": "API_ROUTE_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "API_ROUTE_SECURITY_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "CAPABILITY_PHASE_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "CORE_LOGICAL_MODEL.json",
+      "declared_core_baseline": "CB-1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "CORE_RULES.json",
+      "declared_core_baseline": "CB-1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "CROSS_LAYER_DTO_CONTRACTS.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "DEVELOPMENT_MILESTONE_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "ENGINEERING_WORKSTREAM_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "EXTENSION_CONTRACT_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "EXTENSION_METRIC_FAMILY_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_ASYNC_GATEWAY_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_BATCH_EVENTS_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_BATCH_IMPORT_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_CO_ATTACK_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_DOMAIN_ADMISSION_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_HISTORICAL_OVERVIEW_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_PERMISSION_AUDIT_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_REPLAY_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_ROLE_VIEW_ACCESS_MATRIX.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_STATE_REASON_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_TASK_METRIC_ADMISSION_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_VIEW_CONTRACT.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "GUI_WEAPON_EVENT_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.14.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "KNOWLEDGE_FIDELITY_MATRIX.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "M2_QA_SNS_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "M4_LONGITUDINAL_DEBRIEF_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "M5_FORMAL_QUALIFICATION_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P1_METRIC_CATALOG.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P2_ATTRIBUTION_NORMALIZATION_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P2_LINEAR_REFERENCE_ADJUSTMENT_PROFILE.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P3_CAPABILITY_TWIN_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P3_REFERENCE_CONDITION_OLS_MAD_LONGITUDINAL_PROFILE.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P4_P5_ROLE_PRIVACY_PROFILE.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P6_P3_CAPABILITY_OLS_MAD_FORECAST_PROFILE.json",
+      "declared_core_baseline": "CB-1.5.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "P6_ROLE_PRIVACY_RELEASE_PROFILE.json",
+      "declared_core_baseline": "CB-1.5.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "PHYSICAL_INDEX_AUTHORITY.json",
+      "declared_core_baseline": "CB-1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "PLATFORM_COMPATIBILITY_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "R39_KNOWLEDGE_COVERAGE.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "REVIEW_GATES.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "SCHEMA_AUTHORITY_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "STAGE_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "TERMINOLOGY_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "TRACEABILITY_MATRIX.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "TRAINING_EVALUATION_TAXONOMY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    },
+    {
+      "file": "WORLD_CAPABILITY_REGISTRY.json",
+      "declared_core_baseline": "CB-1.4.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "approval_status": "APPROVED"
+    }
+  ],
+  "entries": [
+    {
+      "schema_version": "1.6.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "status": "HISTORICAL_READABLE"
+    },
+    {
+      "schema_version": "1.7.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "status": "HISTORICAL_READABLE"
+    },
+    {
+      "schema_version": "1.8.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "status": "HISTORICAL_READABLE"
+    },
+    {
+      "schema_version": "1.9.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "status": "HISTORICAL_READABLE"
+    },
+    {
+      "schema_version": "1.10.0",
+      "compatible_core_baseline": "CB-1.15.0",
+      "status": "CURRENT"
+    }
+  ]
+}

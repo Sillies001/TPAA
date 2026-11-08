@@ -7,7 +7,7 @@ import re
 from dataclasses import dataclass
 from typing import Protocol
 
-from .generated_g3_authority import ROUTE_SECURITY_BINDINGS
+from .generated_g9_authority import ROUTE_SECURITY_BINDINGS
 from .gui_authority import derive_gui_permissions
 from .permissions import HIGH_RISK_PERMISSIONS, Permission
 from .policy import (
@@ -32,6 +32,12 @@ class ApprovalValidator(Protocol):
 
 class ApiAuthorizationAudit(Protocol):
     def record(self, event: ApiAuthorizationEvent) -> None: ...
+
+
+class ApiResourceResolver(Protocol):
+    """Resolve an exact resource context before authorization."""
+
+    def resolve(self, method: str, path: str) -> ResourceContext | None: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,10 +147,12 @@ class ApiAuthorizationGuard:
         *,
         audit: ApiAuthorizationAudit,
         approval_validator: ApprovalValidator | None = None,
+        resource_resolver: ApiResourceResolver | None = None,
     ) -> None:
         self.authorization = authorization
         self.audit = audit
         self.approval_validator = approval_validator
+        self.resource_resolver = resource_resolver
 
     def authorize(
         self,
@@ -182,16 +190,27 @@ class ApiAuthorizationGuard:
                     target_id=path,
                 ):
                     validated_approval = approval_id
-            target = resource or ResourceContext(
+            resolved = resource
+            if resolved is None and self.resource_resolver is not None:
+                resolved = self.resource_resolver.resolve(method.upper(), path)
+            target = resolved or ResourceContext(
                 resource_type="API_PATH",
                 resource_id=path,
             )
-            decision = self.authorization.decide(
-                principal,
-                permission,
-                resource=target,
-                approval_id=validated_approval,
-            )
+            if binding.route_id in {"api.route.097", "api.route.098", "api.route.099"}:
+                decision = self._authorize_exact_weapon_event(
+                    principal,
+                    permission,
+                    target,
+                    approval_id=validated_approval,
+                )
+            else:
+                decision = self.authorization.decide(
+                    principal,
+                    permission,
+                    resource=target,
+                    approval_id=validated_approval,
+                )
         if binding is not None and decision.allowed and binding.gui_permission_id is not None:
             business_permissions = frozenset(
                 permission
@@ -232,10 +251,49 @@ class ApiAuthorizationGuard:
                 )
         return decision
 
+    def _authorize_exact_weapon_event(
+        self,
+        principal: AuthorizationPrincipal,
+        permission: Permission,
+        resource: ResourceContext,
+        *,
+        approval_id: str | None,
+    ) -> AuthorizationDecision:
+        """Require exact WE scope or the complete release/context scope tuple."""
+
+        policy = self.authorization.policy
+        if resource.resource_type != "WEAPON_EVENT" or resource.weapon_event_id is None:
+            return AuthorizationDecision(False, "WEAPON_EVENT_SCOPE_UNRESOLVED", policy.sha256)
+        if principal.roles & policy.global_scope_roles:
+            return self.authorization.decide(
+                principal,
+                permission,
+                resource=resource,
+                approval_id=approval_id,
+            )
+        if "*" in principal.scopes:
+            return AuthorizationDecision(False, "RESOURCE_SCOPE_WILDCARD_DENIED", policy.sha256)
+        exact = f"weapon_event:{resource.weapon_event_id}" in principal.scopes
+        required = {f"batch:{resource.batch_id}"} if resource.batch_id else set()
+        if resource.release_id:
+            required.add(f"release:{resource.release_id}")
+        if resource.context_id:
+            required.add(f"context:{resource.context_id}")
+        complete_context = bool(required) and required <= principal.scopes
+        if not exact and not complete_context:
+            return AuthorizationDecision(False, "WEAPON_EVENT_EXACT_SCOPE_DENIED", policy.sha256)
+        return self.authorization.decide(
+            principal,
+            permission,
+            resource=resource,
+            approval_id=approval_id,
+        )
+
 
 __all__ = [
     "ApiAuthorizationEvent",
     "ApiAuthorizationGuard",
+    "ApiResourceResolver",
     "ApprovalValidator",
     "InMemoryApiAuthorizationAudit",
     "RouteSecurityAuthorityError",

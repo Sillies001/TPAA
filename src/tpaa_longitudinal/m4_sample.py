@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Protocol, cast
 from uuid import UUID
 
-from tpaa_canonical import ArtifactExpectation, CanonicalArtifactLoader
+from tpaa_canonical import ArtifactExpectation, trusted_loader_for_baseline
 from tpaa_metric import M2MetricDefinition, M2MetricExecutionPlan
 
 M4_AUTHORITY_ID = "M4_LONGITUDINAL_DEBRIEF_AUTHORITY"
@@ -365,7 +365,7 @@ def _canonical_hash(value: object) -> str:
 def load_m4_longitudinal_authority(
     baseline_root: Path,
 ) -> M4LongitudinalAuthority:
-    loader = CanonicalArtifactLoader(baseline_root)
+    loader = trusted_loader_for_baseline(baseline_root)
     artifact = loader.load(
         M4_AUTHORITY_ID,
         expectation=ArtifactExpectation(

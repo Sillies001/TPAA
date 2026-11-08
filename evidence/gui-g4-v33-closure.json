@@ -1,0 +1,128 @@
+{
+  "schema": "TPAA_GUI_G4_V33_CLOSURE_EVIDENCE_V1",
+  "status": "PASS",
+  "phase_status": "CLOSED_LOCAL_WITH_GATES",
+  "verified_at": "2026-11-07T01:37:25Z",
+  "source_revision": "e0a9677090ea6249c4883e6d503035aea9cd801a",
+  "source_state": "LOCAL_WORKING_TREE_NO_PUSH_NO_DEPLOYMENT",
+  "approval_id": "G4-CB-1.9.0-LOCAL-IMPLEMENTATION-2026-11-06",
+  "authorities": {
+    "status": "PASS",
+    "core_baseline": "CB-1.9.0",
+    "parent_core_baseline": "CB-1.8.0",
+    "database_schema": "1.10.0",
+    "active_route_count": 96,
+    "g4_route_count": 7,
+    "reserved_later_route_count": 6,
+    "batch_authority_sha256": "a8d7010f1cfb0f56bd412bb1e9753c5579830a8d1196b4bc22eccca62a0c1f69"
+  },
+  "generated_client_drift": "NONE",
+  "dynamic_gates": [
+    {
+      "command": [
+        "F:\\SoftwareData\\Pycharm\\PythonProject\\Evaluation\\2_SoftwareDevelopment\\TPAA_AUDIT_a00ed06\\TPAA-a00ed06f8ef862ad28ad7c7e1197a99ade8c7713\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "--import-mode=importlib",
+        "-p",
+        "no:cacheprovider",
+        "tests/unit/application/test_g4_batch_import.py",
+        "tests/unit/runtime/test_g4_durable_batch.py",
+        "tests/unit/api/test_g4_gui_batch_api.py",
+        "tests/unit/gui/test_g4_native_import.py",
+        "tests/unit/storage/test_g4_migration_head.py",
+        "tests/contract/gui_v33/test_g4_v33_batch_contract.py",
+        "tests/contract/gui_v33/test_g3_v33_gateway_contract.py",
+        "-q"
+      ],
+      "status": "PASS",
+      "stdout_sha256": "d70201178b7ab65818d8146232aa40ef090c32f66e90ac0150b44379833cbcf8"
+    },
+    {
+      "command": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "status": "PASS",
+      "stdout_sha256": "f54ba9893ee679d0a0d11d73699ee47bbbdec28607d9c227b33af915b1e1f9f2"
+    },
+    {
+      "command": [
+        "npm.cmd",
+        "run",
+        "test:gateway"
+      ],
+      "status": "PASS",
+      "stdout_sha256": "931fd3441082a00a567008ebf90bfa40b431fc3d52d480fc099eabd549e36856"
+    }
+  ],
+  "frontend_build": {
+    "schema": "TPAA_G1_V33_FRONTEND_BUILD_EVIDENCE_V1",
+    "status": "PASS",
+    "package_lock_sha256": "422bc9b149fdb9d364acdf003e5d3f8b19c147da998961c1724578b282492282",
+    "files": [
+      {
+        "path": ".vite/manifest.json",
+        "sha256": "5229e9066ef57b93b978a78437ecb35b5f9ca62d6d5ca1acf14ade8ee0426dbd",
+        "bytes": 185
+      },
+      {
+        "path": "assets/index-BHYj9SOz.css",
+        "sha256": "a44fa8473754d71d28c0b2cda24c2c942908e620d0a236464cf92b39c85d029c",
+        "bytes": 14453
+      },
+      {
+        "path": "assets/index-CdvMpd4O.js",
+        "sha256": "c51578b276845ee4f6570fd06a05dc486a835b04600cbc08602c6f4655cbca8e",
+        "bytes": 59604
+      },
+      {
+        "path": "index.html",
+        "sha256": "8c3851a757a80e5d08915629f837bcec4f828adf70d0ac323753b50b47265f25",
+        "bytes": 510
+      }
+    ],
+    "remote_resources": 0,
+    "release_claim": false
+  },
+  "webengine_acceptance": [
+    {
+      "status": "PASS",
+      "scale": 1.0,
+      "exact_origin": "http://127.0.0.1:53993",
+      "evidence_sha256": "4835dbe80d5d0b02bd4fb3ee6895b0f99be169677ef8bef9dfa8fa09135d7fbf",
+      "screenshot_sha256": "474505d07b7344f29eb80f28ee3078f2c04fb6708b39f35e93106a8a2c71923b"
+    },
+    {
+      "status": "PASS",
+      "scale": 1.5,
+      "exact_origin": "http://127.0.0.1:54027",
+      "evidence_sha256": "8bb2386403d57b50b91920f7f33d35829b7bff73dca67e0afe48f0de32a57411",
+      "screenshot_sha256": "638712ed5f17b52ef1fee1e3d07be63d704e847788873c9f8470b94053a87ae7"
+    }
+  ],
+  "batch_idempotency": "STABLE_UUID5_ACTOR_AND_KEY",
+  "training_type_default": "FORBIDDEN",
+  "v01_admission": "QUALIFIED_ONLY",
+  "native_path_exposure": "FORBIDDEN",
+  "audited_revisions": "TRAINING_TYPE_AND_FORCE_FORMATION_PASS",
+  "business_data_truth": "NO_DEMO_OR_RANDOM_VALUES",
+  "regression": {
+    "status": "PASS",
+    "passed": 1723,
+    "skipped_external_dependencies": 3,
+    "failed": 0,
+    "collection_mode": "importlib",
+    "excluded_suite": "tests/contract/test_m0_dev_toolchain.py",
+    "exclusion_reason": "development package intentionally requires a clean tracked worktree",
+    "post_commit_package_gate": "REQUIRED_BEFORE_CANDIDATE_PACKAGING"
+  },
+  "open_gates": [],
+  "restrictions": {
+    "push": "PROHIBITED",
+    "production_deployment": "PROHIBITED",
+    "release_claim": false
+  },
+  "release_claim": false
+}

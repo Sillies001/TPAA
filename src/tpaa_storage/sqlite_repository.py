@@ -51,7 +51,9 @@ def _open_existing(path: Path) -> sqlite3.Connection:
         raise SQLiteRepositoryError("TARGET_DB_MISSING", f"path={path}")
     uri = path.resolve().as_uri() + "?mode=rw"
     try:
-        connection = sqlite3.connect(uri, uri=True, isolation_level=None, timeout=0.0)
+        # WAL 下单写者持有写锁时，并发读连接（含 ALWAYS 审计写）需要非零忙等；
+        # 0.0 会把正常的写锁持有误判为瞬时 "database is locked"。
+        connection = sqlite3.connect(uri, uri=True, isolation_level=None, timeout=30.0)
     except sqlite3.DatabaseError as exc:
         raise SQLiteRepositoryError("SQLITE_CONNECT_ERROR", str(exc)) from exc
     connection.row_factory = sqlite3.Row

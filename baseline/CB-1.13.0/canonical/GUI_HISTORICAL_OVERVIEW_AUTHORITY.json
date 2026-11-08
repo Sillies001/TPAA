@@ -1,0 +1,35 @@
+{
+  "authority_id": "GUI_HISTORICAL_OVERVIEW_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.13.0",
+  "parent_core_baseline": "CB-1.12.0",
+  "decision_id": "G8-V33-CO-ATTACK-2026-11-07",
+  "approval_id": "G8-CB-1.13.0-LOCAL-IMPLEMENTATION-2026-11-07",
+  "activation_status": "ACTIVE",
+  "task_metric_authority": "SEPARATE_METRIC_ADMISSION_NOT_AUTO_P1",
+  "single_owner_rules": {
+    "historical_overview_query": "tpaa_application.historical_overview",
+    "task_metric_aggregation": "tpaa_application.historical_overview",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "rules": {
+    "single_batch_workset": true,
+    "ratio_recompute": "AGGREGATE_NUMERATOR_DENOMINATOR",
+    "simple_average": "FORBIDDEN",
+    "zero_denominator": "FAIL_CLOSED_NULL_REASON",
+    "missing_j": "EXCLUDED_FROM_ADJUDICATED",
+    "invalid_date_range": "FAIL_CLOSED_EMPTY_WITH_WARNING",
+    "equipment_comparability": "FAIL_CLOSED",
+    "unclassified_batch_type": "LISTED_SEPARATELY",
+    "latest_fallback": "FORBIDDEN",
+    "query_context_traceable": true
+  },
+  "database": {
+    "schema": "1.10.0",
+    "migration_required": false,
+    "reason": "Historical overview is an exact-batch-set read model over existing Batch/WE tables; no new physical tables."
+  },
+  "release_claim": false,
+  "approval_status": "APPROVED_LOCAL"
+}

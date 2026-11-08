@@ -1,0 +1,23 @@
+{
+  "schema": "TPAA_G2_GUI_SECURITY_APPROVAL_V1",
+  "approval_id": "G2-CB-1.7.0-LOCAL-ACTIVATION-2026-11-06",
+  "decision_id": "G2-V33-GUI-PERMISSION-MAPPING-CANDIDATE-2026-11-06",
+  "status": "APPROVED_LOCAL",
+  "activation_status": "ACTIVE",
+  "approved_core_baseline": "CB-1.7.0",
+  "approved_at": "2026-11-06T00:00:00+08:00",
+  "approver": "PROJECT_OWNER_DIRECT_AUTHORIZATION",
+  "authorization_text": "正式批准 TPAA CB-1.7.0 G2 GUI 权限与 API 路由安全权威候选，并授权仅在本地激活、验收及关闭 G2。",
+  "scope": {
+    "gui_permissions": true,
+    "role_view_matrix": true,
+    "api_route_security_authority": true,
+    "runtime_route_count": 86,
+    "g2_local_closure": true
+  },
+  "restrictions": {
+    "push": false,
+    "production_deployment": false,
+    "release_claim": false
+  }
+}
