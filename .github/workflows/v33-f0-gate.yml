@@ -264,7 +264,7 @@ jobs:
           mkdir -p evidence/f0-baseline/postgres
           uv run --locked python tools/dev/tpaa_dev.py db-postgres-acceptance \
             --user tpaa --host 127.0.0.1 --port 5432 \
-            --admin-database postgres --database tpaa_f0_handoff_bootstrap \
+            --admin-database postgres --database tpaa_m0_sto_001_exit_acceptance \
             > evidence/f0-baseline/postgres/bootstrap.json
 
       - name: Run handoff PostgreSQL Repository acceptance
@@ -274,7 +274,7 @@ jobs:
         run: |
           uv run --locked python tools/dev/tpaa_dev.py db-postgres-repository-acceptance \
             --user tpaa --host 127.0.0.1 --port 5432 \
-            --admin-database postgres --database tpaa_f0_handoff_repository \
+            --admin-database postgres --database tpaa_m0_sto_003_exit_acceptance \
             --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}" \
             > evidence/f0-baseline/postgres/repository.json
 
@@ -285,7 +285,7 @@ jobs:
         run: >-
           uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-storage-parity
           --user tpaa --host 127.0.0.1 --port 5432 --admin-database postgres
-          --database tpaa_f0_handoff_m1_batch_2
+          --database tpaa_m1_batch_2_parity
           --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
           --source-revision 0c332a319d0853841d8158cf6d40f2690acc665b
           --evidence evidence/f0-baseline/postgres/m1-batch-2-parity.json
