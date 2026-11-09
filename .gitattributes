@@ -7,5 +7,6 @@
 *.html text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.sha256 text eol=lf
 uv.lock text eol=lf
 .editorconfig text eol=lf
