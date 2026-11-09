@@ -45,8 +45,7 @@ from .postgres_repository import SERVICE_WRITE_GATE_LOCK_ID
 MIGRATION_RESULT_SCHEMA = "TPAA_MIGRATION_RESULT_V1"
 MIGRATION_JOURNAL_SCHEMA = "TPAA_MIGRATION_JOURNAL_V1"
 TARGET_SCHEMA_VERSION = "1.9.0"
-G4_TARGET_SCHEMA_VERSION = "1.10.0"
-SUPPORTED_SCHEMA_VERSIONS = ("1.6.0", "1.7.0", "1.8.0", "1.9.0", "1.10.0")
+SUPPORTED_SCHEMA_VERSIONS = ("1.6.0", "1.7.0", "1.8.0", "1.9.0")
 
 _HISTORICAL_AUTHORITY: Mapping[str, tuple[str, str, str]] = {
     "1.6.0": (
@@ -148,7 +147,6 @@ _STEPS = (
     _Step("ACP-216", "1.6.0", "1.7.0"),
     _Step("ACP-219", "1.7.0", "1.8.0"),
     _Step("ACP-221", "1.8.0", "1.9.0"),
-    _Step("G1-V33-DB-1.10.0", "1.9.0", "1.10.0"),
 )
 
 
@@ -175,14 +173,9 @@ def _load_migration_authority(
     *,
     current_authority_root: Path,
     migration_authority_root: Path,
-    current_schema_version: str = TARGET_SCHEMA_VERSION,
 ) -> _SchemaAuthority:
-    if version == current_schema_version:
+    if version == TARGET_SCHEMA_VERSION:
         authority = _load_authority(authority_root=current_authority_root)
-    elif version == TARGET_SCHEMA_VERSION and current_schema_version == G4_TARGET_SCHEMA_VERSION:
-        # DB 1.9.0 is the immutable direct migration parent of the G1/G4
-        # 1.10.0 authority.  Its loader remains pinned to CB-1.5.0.
-        authority = _load_authority()
     else:
         metadata = _HISTORICAL_AUTHORITY.get(version)
         if metadata is None:
@@ -231,7 +224,6 @@ class SQLiteMigrationService:
         *,
         current_authority_root: Path,
         migration_authority_root: Path,
-        target_schema_version: str = TARGET_SCHEMA_VERSION,
     ) -> None:
         self.database = database.expanduser().resolve(strict=False)
         self.current_authority_root = current_authority_root.expanduser().resolve(
@@ -240,9 +232,6 @@ class SQLiteMigrationService:
         self.migration_authority_root = migration_authority_root.expanduser().resolve(
             strict=False
         )
-        if target_schema_version not in SUPPORTED_SCHEMA_VERSIONS:
-            raise ValueError("target_schema_version is unsupported")
-        self.target_schema_version = target_schema_version
         state_root = self.database.parent / ".tpaa-migrations"
         self.journal_path = state_root / f"{self.database.name}.journal.json"
         self.lock_path = state_root / f"{self.database.name}.lock"
@@ -262,7 +251,6 @@ class SQLiteMigrationService:
             return cached
         authority = _load_migration_authority(
             version,
-            current_schema_version=self.target_schema_version,
             current_authority_root=self.current_authority_root,
             migration_authority_root=self.migration_authority_root,
         )
@@ -319,8 +307,7 @@ class SQLiteMigrationService:
             )
         return relations
 
-    def plan(self, target_version: str | None = None) -> MigrationPlan:
-        target_version = target_version or self.target_schema_version
+    def plan(self, target_version: str = TARGET_SCHEMA_VERSION) -> MigrationPlan:
         if target_version not in SUPPORTED_SCHEMA_VERSIONS:
             raise MigrationServiceError(
                 "UNSUPPORTED_TARGET_VERSION", f"target={target_version}"
@@ -391,11 +378,12 @@ class SQLiteMigrationService:
 
                     msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
                 else:
-                    fcntl = import_module("fcntl")
-                    flock = getattr(fcntl, "flock")
-                    lock_ex = getattr(fcntl, "LOCK_EX")
-                    lock_nb = getattr(fcntl, "LOCK_NB")
-                    flock(stream.fileno(), lock_ex | lock_nb)
+                    import fcntl
+
+                    fcntl.flock(  # type: ignore[attr-defined]
+                        stream.fileno(),
+                        fcntl.LOCK_EX | fcntl.LOCK_NB,  # type: ignore[attr-defined]
+                    )
                 locked = True
             except OSError as exc:
                 raise MigrationServiceError(
@@ -411,10 +399,11 @@ class SQLiteMigrationService:
 
                         msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
                     else:
-                        fcntl = import_module("fcntl")
-                        flock = getattr(fcntl, "flock")
-                        lock_un = getattr(fcntl, "LOCK_UN")
-                        flock(stream.fileno(), lock_un)
+                        import fcntl
+
+                        fcntl.flock(  # type: ignore[attr-defined]
+                            stream.fileno(), fcntl.LOCK_UN  # type: ignore[attr-defined]
+                        )
             finally:
                 stream.close()
 
@@ -588,8 +577,7 @@ class SQLiteMigrationService:
             "authority_verified": True,
         }
 
-    def apply(self, target_version: str | None = None) -> dict[str, object]:
-        target_version = target_version or self.target_schema_version
+    def apply(self, target_version: str = TARGET_SCHEMA_VERSION) -> dict[str, object]:
         with self._exclusive_lock():
             existing = self._read_journal()
             if existing is not None and existing.get("state") in {
@@ -679,8 +667,8 @@ class SQLiteMigrationService:
         return MigrationStatus(
             schema_version=version,
             verified=verified,
-            target_version=self.target_schema_version,
-            at_head=version == self.target_schema_version and journal_state not in {
+            target_version=TARGET_SCHEMA_VERSION,
+            at_head=version == TARGET_SCHEMA_VERSION and journal_state not in {
                 "PREPARED",
                 "APPLYING",
                 "FAILED",
@@ -711,7 +699,6 @@ class PostgreSQLMigrationService:
         state_root: Path,
         current_authority_root: Path,
         migration_authority_root: Path,
-        target_schema_version: str = TARGET_SCHEMA_VERSION,
         backup_provider: PostgreSQLBackupProvider | None = None,
         connection_factory: PostgreSQLConnectionFactory | None = None,
     ) -> None:
@@ -721,9 +708,6 @@ class PostgreSQLMigrationService:
         self.state_root = state_root.expanduser().resolve(strict=False)
         self.current_authority_root = current_authority_root.expanduser().resolve(strict=False)
         self.migration_authority_root = migration_authority_root.expanduser().resolve(strict=False)
-        if target_schema_version not in SUPPORTED_SCHEMA_VERSIONS:
-            raise ValueError("target_schema_version is unsupported")
-        self.target_schema_version = target_schema_version
         identity = hashlib.sha256(conninfo.encode("utf-8")).hexdigest()[:16]
         self.journal_path = self.state_root / f"postgres-{identity}.journal.json"
         self._backup_provider = backup_provider
@@ -736,7 +720,6 @@ class PostgreSQLMigrationService:
             return cached
         authority = _load_migration_authority(
             version,
-            current_schema_version=self.target_schema_version,
             current_authority_root=self.current_authority_root,
             migration_authority_root=self.migration_authority_root,
         )
@@ -869,8 +852,7 @@ class PostgreSQLMigrationService:
             raise MigrationServiceError("NON_ADDITIVE_AUTHORITY_STEP", f"removed={removed!r}")
         return relations
 
-    def plan(self, target_version: str | None = None) -> MigrationPlan:
-        target_version = target_version or self.target_schema_version
+    def plan(self, target_version: str = TARGET_SCHEMA_VERSION) -> MigrationPlan:
         if target_version not in SUPPORTED_SCHEMA_VERSIONS:
             raise MigrationServiceError("UNSUPPORTED_TARGET_VERSION", f"target={target_version}")
         observed = self._observed_version()
@@ -1140,8 +1122,7 @@ class PostgreSQLMigrationService:
             self._write_journal(journal)
             return self._run(connection, plan, journal)
 
-    def apply(self, target_version: str | None = None) -> dict[str, object]:
-        target_version = target_version or self.target_schema_version
+    def apply(self, target_version: str = TARGET_SCHEMA_VERSION) -> dict[str, object]:
         return self._mutate(target_version, rollback=False)
 
     def rollback(self, target_version: str) -> dict[str, object]:
@@ -1181,8 +1162,8 @@ class PostgreSQLMigrationService:
         return MigrationStatus(
             schema_version=version,
             verified=verified,
-            target_version=self.target_schema_version,
-            at_head=version == self.target_schema_version and journal_state not in {
+            target_version=TARGET_SCHEMA_VERSION,
+            at_head=version == TARGET_SCHEMA_VERSION and journal_state not in {
                 "PREPARED",
                 "APPLYING",
                 "FAILED",
