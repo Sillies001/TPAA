@@ -47,7 +47,7 @@ jobs:
 
       - name: Lint F0 baseline trust implementation
         run: >-
-          uv run --locked python -m ruff check
+          uv run --frozen --with ruff==0.16.8 ruff check
           src/tpaa_canonical/byte_stability.py
           src/tpaa_canonical/loader.py
           tools/baseline/adopt_g12_successor.py
