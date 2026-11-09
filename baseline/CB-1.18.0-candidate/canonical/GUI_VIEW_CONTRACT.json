@@ -1,0 +1,1240 @@
+{
+  "authority_id": "GUI_VIEW_CONTRACT",
+  "authority_version": "1.1.0",
+  "core_baseline": "CB-1.17.0",
+  "baseline_id": "GUI-DEMO-V33-2026-11-05",
+  "source_hashes": {
+    "registry": "bd386c6f04fe60b22045ef0099ec05417be7a4fe8269ec26ff1153706a075b81",
+    "matrix": "a7b151aa777e5f5d22577d6df6f68d9b98042f090e81e3a0eae82441a16dbf5c"
+  },
+  "views": [
+    {
+      "view_id": "V01",
+      "title": "历史多批次训练综合总览",
+      "module": "overview",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id",
+        "batch_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "overview"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V02",
+      "title": "架次综合复盘",
+      "module": "training",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P02",
+        "P03",
+        "P05"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "assessment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V03",
+      "title": "同步战术回放",
+      "module": "replay",
+      "entry_type": "DIRECT_AND_DEEPLINK",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "replay.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "replay"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V04",
+      "title": "超视距空战·单机",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "shooter",
+        "target"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    },
+    {
+      "view_id": "V05",
+      "title": "视距内空战·单机",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "shooter",
+        "target"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    },
+    {
+      "view_id": "V06",
+      "title": "对地攻击·单机",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "shooter"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    },
+    {
+      "view_id": "V07",
+      "title": "基本飞行·单机",
+      "module": "training",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "assessment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V08",
+      "title": "超视距空战·编队",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "shooter",
+        "target"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    },
+    {
+      "view_id": "V09",
+      "title": "分类长期成长",
+      "module": "training",
+      "entry_type": "DIRECT_AND_V01",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P05"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "longitudinal"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V10",
+      "title": "型号与机体性能总览",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "equipment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V11",
+      "title": "机动包线 E-M",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "equipment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V12",
+      "title": "探测性能",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "equipment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V13",
+      "title": "告警性能",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "equipment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V14",
+      "title": "攻击系统性能",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "equipment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V15",
+      "title": "条件因子分离",
+      "module": "equipment",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "non_causal"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V16",
+      "title": "性能趋势与告警",
+      "module": "equipment",
+      "entry_type": "DIRECT_AND_V01",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P06",
+        "P07"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.history.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "trend"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_SET_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V17",
+      "title": "数据质量与资格",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P02",
+        "P12"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "quality"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V18",
+      "title": "报告：架次复盘",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P05",
+        "P08",
+        "P09"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "report"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V19",
+      "title": "基本飞行·编队",
+      "module": "training",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "assessment"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V20",
+      "title": "视距内空战·编队",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "shooter",
+        "target"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    },
+    {
+      "view_id": "V21",
+      "title": "对地攻击·编队",
+      "module": "training",
+      "entry_type": "DIRECT_AND_WE",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "shooter"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    },
+    {
+      "view_id": "V22",
+      "title": "管理与版本治理",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P13"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "governance.audit.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "governance"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "SECURITY_AUDIT_AUTHORITY_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V23",
+      "title": "数据管理与批次导入",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P01",
+        "P12",
+        "P13"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "data_admin"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [
+        {
+          "permission_id": "batch.register",
+          "evaluation_mode": "ALL_OF",
+          "backend_route_binding": "PENDING_G3_ROUTE_AUTHORITY",
+          "disabled_until_route_and_audit_gate": true
+        },
+        {
+          "permission_id": "batch.training_type.revise",
+          "evaluation_mode": "ALL_OF",
+          "backend_route_binding": "PENDING_G3_ROUTE_AUTHORITY",
+          "disabled_until_route_and_audit_gate": true
+        }
+      ],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V24",
+      "title": "超视距编队·协同攻击分析",
+      "module": "training",
+      "entry_type": "CONDITIONAL_V08_ONLY",
+      "required_context": [
+        "release_id",
+        "context_id",
+        "weapon_event_id",
+        "attack_cluster_id",
+        "formation_id"
+      ],
+      "allowed_predecessor": [
+        "V08"
+      ],
+      "return_target": "V08",
+      "p_capabilities": [
+        "P03",
+        "P04"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read",
+        "weapon_event.perspective.read",
+        "weapon_event.window.read",
+        "context.force_formation.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "collaborative"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_RELEASE_CONTEXT_WE_CLUSTER_FORMATION_SCOPE",
+      "action_permissions": [
+        {
+          "permission_id": "context.force_formation.revise",
+          "evaluation_mode": "ALL_OF",
+          "backend_route_binding": "PENDING_G3_ROUTE_AUTHORITY",
+          "disabled_until_route_and_audit_gate": true
+        }
+      ],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V25",
+      "title": "主题管理",
+      "module": "support",
+      "entry_type": "DIRECT",
+      "required_context": [
+        "release_id",
+        "context_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P13"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "presentation"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "AUTHENTICATED_PRESENTATION_ONLY",
+      "action_permissions": [],
+      "capability_permissions": []
+    },
+    {
+      "view_id": "V26",
+      "title": "批次发射事件总览",
+      "module": "training",
+      "entry_type": "MODULE_LANDING_AND_V01_DEEPLINK",
+      "required_context": [
+        "release_id",
+        "context_id",
+        "batch_id"
+      ],
+      "allowed_predecessor": [],
+      "return_target": null,
+      "p_capabilities": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P12",
+        "P13"
+      ],
+      "query_route_ids": [],
+      "mutation_route_ids": [],
+      "required_permissions": [
+        "gui.view",
+        "batch.read",
+        "weapon_event.read"
+      ],
+      "feature_gates": [
+        "TPAA_GUI_SHELL=WEBENGINE_V33"
+      ],
+      "states": [
+        "LOADING",
+        "EMPTY",
+        "READY",
+        "DEGRADED",
+        "ERROR",
+        "FORBIDDEN",
+        "N_A"
+      ],
+      "perspectives": [
+        "batch"
+      ],
+      "visual_baseline_id": "GUI-DEMO-V33-2026-11-05",
+      "resource_scope_policy_id": "EXACT_BATCH_RELEASE_CONTEXT_SCOPE",
+      "action_permissions": [],
+      "capability_permissions": [
+        {
+          "capability_id": "event_window",
+          "permission_id": "weapon_event.window.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        },
+        {
+          "capability_id": "replay_deeplink",
+          "permission_id": "replay.read",
+          "evaluation_mode": "ALL_OF",
+          "denial_state": "FORBIDDEN",
+          "no_view_entry_grant": true
+        }
+      ]
+    }
+  ],
+  "parent_core_baseline": "CB-1.16.0",
+  "decision_id": "G12-V33-DESIGN_FREEZE-2026-11-07",
+  "approval_status": "APPROVED_LOCAL",
+  "permission_evaluation_mode": "ALL_OF",
+  "unknown_permission_policy": "DENY",
+  "activation_status": "ACTIVE",
+  "approval_id": "G12-CB-1.17.0-LOCAL-DESIGN_FREEZE-2026-11-07",
+  "release_claim": false
+}

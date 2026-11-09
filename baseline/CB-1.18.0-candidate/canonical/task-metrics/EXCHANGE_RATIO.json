@@ -1,0 +1,147 @@
+{
+  "schema": "TPAA_TASK_METRIC_DEFINITION_V1",
+  "definition_id": "TPAA-TASK-EXCHANGE-RATIO-1.0.0-candidate",
+  "semantic_id": "EXCHANGE_RATIO",
+  "definition_version": "1.0.0",
+  "algorithm_id": "tpaa.assessment.task.exchange_ratio",
+  "algorithm_version": "1.0.0",
+  "algorithm_contract_sha256": "932bf28aa7985aa72b8a41be9a69bbef702368ec80a76087e07762d82afe1b28",
+  "name_zh": "交换比（任务评估）",
+  "name_en": "Task Exchange Ratio",
+  "value_kind": "DECIMAL_RATIO",
+  "unit": "1",
+  "direction": "HIGHER_IS_BETTER",
+  "display_decimal_places": 3,
+  "applicable_training_types": [
+    "BVR",
+    "WVR"
+  ],
+  "evaluated_subject": {
+    "kind": "SIDE",
+    "field": "evaluated_side",
+    "required": true,
+    "allowed_values": [
+      "RED",
+      "BLUE"
+    ]
+  },
+  "scope_contract": {
+    "required": [
+      "batch_id",
+      "session_id",
+      "release_id",
+      "context_id",
+      "evaluated_side",
+      "opponent_side",
+      "phase_scope",
+      "start_session_time_us",
+      "end_session_time_us"
+    ],
+    "interval": "[start_session_time_us,end_session_time_us)",
+    "latest_fallback": "FORBIDDEN",
+    "cross_batch_borrowing": "FORBIDDEN",
+    "evaluated_side_required": true
+  },
+  "input_binding": [
+    {
+      "field": "loss_id/side/final_j_state",
+      "owner": "assessment.adjudicated_loss",
+      "required": true
+    },
+    {
+      "field": "batch_id/session_id/release_id/context_id",
+      "owner": "exact_scope",
+      "required": true
+    }
+  ],
+  "numerator_rule": {
+    "source": "assessment.adjudicated_loss",
+    "count": "unique loss_id",
+    "where": [
+      "FINAL_CONFIRMED_LOSS",
+      "final_j_state=APPROVED",
+      "side=opponent_side",
+      "exact_scope",
+      "not_superseded"
+    ]
+  },
+  "denominator_rule": {
+    "source": "assessment.adjudicated_loss",
+    "count": "unique loss_id",
+    "where": [
+      "FINAL_CONFIRMED_LOSS",
+      "final_j_state=APPROVED",
+      "side=evaluated_side",
+      "exact_scope",
+      "not_superseded"
+    ]
+  },
+  "deduplication_rule": {
+    "identity": "loss_id",
+    "multiple_evidence_refs_one_loss": "COUNT_ONCE",
+    "superseded": "EXCLUDE"
+  },
+  "zero_denominator_rule": {
+    "status": "N_A",
+    "reason_code": "ZERO_EVALUATED_SIDE_CONFIRMED_LOSS",
+    "value": null
+  },
+  "missing_rule": {
+    "pending": "PENDING",
+    "missing_required_source": "INSUFFICIENT",
+    "conflicting_adjudication": "INVALID",
+    "unknown_not_zero": true
+  },
+  "j_state_rule": {
+    "pending": "PENDING",
+    "conflict": "INVALID",
+    "final_approved": "ELIGIBLE_FOR_CALCULATION",
+    "unknown": "PENDING"
+  },
+  "qualification_rule": {
+    "both_sides_use_same_final_j_gate": true,
+    "exact_scope_required": true,
+    "unknown_side_excluded": true
+  },
+  "aggregation_rule": {
+    "mode": "SUM_NUMERATOR_AND_DENOMINATOR_THEN_DIVIDE",
+    "simple_average": "FORBIDDEN",
+    "comparison_authority": "TASK_METRIC_COMPARABILITY_AUTHORITY",
+    "comparison_keys": [
+      "semantic_id",
+      "definition_version",
+      "definition_sha256",
+      "algorithm_id",
+      "algorithm_version",
+      "evaluated_side",
+      "training_type",
+      "phase_scope",
+      "quality_gate_version"
+    ]
+  },
+  "evidence_requirements": [
+    "evaluated_side_loss_ids",
+    "opponent_loss_ids",
+    "adjudication_refs",
+    "release_id",
+    "context_id",
+    "source_refs",
+    "evidence_refs"
+  ],
+  "permission_contract": [
+    "task_metric.definition.read",
+    "task_metric.result.read",
+    "task_metric.compare",
+    "task_metric.admission.read"
+  ],
+  "audit_contract": [
+    "TASK_METRIC_DEFINITION_READ",
+    "TASK_METRIC_RESULT_READ",
+    "TASK_METRIC_COMPARE",
+    "TASK_METRIC_CANDIDATE_EXPORTED"
+  ],
+  "admission_status": "CANDIDATE_TEST_ONLY",
+  "business_approval_required": true,
+  "release_claim": false,
+  "definition_sha256": "8b48cafaff405624fb7f6fcd12756d1a3166bb51a8edf71a0e1dccc59d995d02"
+}

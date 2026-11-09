@@ -1,0 +1,24 @@
+{
+  "authority_id": "TASK_METRIC_COMPARABILITY_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "decision_id": "F1-V33-ASSESSMENT-METRIC-2026-11-09",
+  "status": "CANDIDATE_TEST_ONLY",
+  "required_equal_keys": [
+    "semantic_id",
+    "definition_version",
+    "definition_sha256",
+    "algorithm_id",
+    "algorithm_version",
+    "evaluated_side",
+    "training_type",
+    "phase_scope",
+    "quality_gate_version"
+  ],
+  "aggregate_rule": "SUM_NUMERATOR_AND_DENOMINATOR_THEN_DIVIDE",
+  "simple_average": "FORBIDDEN",
+  "cross_batch_scope": "Explicit batch list only; each batch/release/context named and authorized.",
+  "incomparable_status": "INCOMPARABLE",
+  "zero_denominator_status": "N_A",
+  "release_claim": false
+}

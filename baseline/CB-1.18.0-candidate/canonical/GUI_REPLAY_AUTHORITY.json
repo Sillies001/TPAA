@@ -1,0 +1,32 @@
+{
+  "authority_id": "GUI_REPLAY_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.17.0",
+  "parent_core_baseline": "CB-1.16.0",
+  "decision_id": "G12-V33-DESIGN_FREEZE-2026-11-07",
+  "approval_id": "G12-CB-1.17.0-LOCAL-DESIGN_FREEZE-2026-11-07",
+  "activation_status": "ACTIVE",
+  "rules": {
+    "exact_we_scope": true,
+    "latest_fallback": "FORBIDDEN",
+    "unknown_we": "HTTP_404_UNDER_READY_BACKEND",
+    "media_unavailable": "HONEST_EMPTY_RANGES",
+    "drift": "EXPLICIT_STATE",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "single_owner_rules": {
+    "replay_context_query": "tpaa_application.replay_context",
+    "weapon_event_read_model": "tpaa_application.weapon_event",
+    "event_window_resolver": "tpaa_application.event_window",
+    "gui_business_recomputation": "FORBIDDEN",
+    "browser_business_storage": "FORBIDDEN"
+  },
+  "database": {
+    "schema": "1.10.0",
+    "migration_required": false,
+    "reason": "Replay context is an exact-WE read model over existing WE/Window facts; media ranges are honest-empty until the media pipeline is admitted."
+  },
+  "release_claim": false,
+  "approval_status": "APPROVED_LOCAL"
+}

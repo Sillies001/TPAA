@@ -1,0 +1,20 @@
+{
+  "authority_id": "GUI_DESIGN_FREEZE_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.17.0",
+  "parent_core_baseline": "CB-1.16.0",
+  "decision_id": "G12-V33-DESIGN_FREEZE-2026-11-07",
+  "approval_id": "G12-CB-1.17.0-LOCAL-DESIGN_FREEZE-2026-11-07",
+  "activation_status": "ACTIVE",
+  "rules": {
+    "csp_self_only": true,
+    "exact_origin_loopback": true,
+    "desktop_nonce_enforced": true,
+    "off_the_record_profile": true,
+    "no_orphan_backend_process": true,
+    "renderer_crash_fail_closed": true,
+    "wcag_keyboard_focus": true,
+    "chinese_copy_complete": true
+  },
+  "release_claim": false
+}

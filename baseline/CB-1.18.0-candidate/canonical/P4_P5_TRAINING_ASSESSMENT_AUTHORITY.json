@@ -1,0 +1,504 @@
+{
+  "authority_id": "P4_P5_TRAINING_ASSESSMENT_AUTHORITY",
+  "version": "1.0.0",
+  "db_schema_version": "1.6.0",
+  "core_baseline": "CB-1.4.0",
+  "change_class": "C3_SEMANTIC_CONTRACT",
+  "status": "APPROVED_FOR_PROTECTED_MAIN_ADOPTION",
+  "effective_milestone": "M8",
+  "tracking_issue": 181,
+  "activation_rule": {
+    "authority_effective_only_after_exact_head_ci_guarded_merge_and_protected_main_ci": true,
+    "authority_adoption_does_not_admit_p4_or_p5": true,
+    "p4_p5_admission_requires_protected_main_m8_exit_go": true,
+    "p6_remains_inactive": true
+  },
+  "source_basis": {
+    "sdib_task_baseline": "docs/baseline/SDIB-1.7/M8_TASK_BASELINE.json",
+    "extension_contract": "EXTENSION_CONTRACT_REGISTRY.json:P4/P5",
+    "capability_phase": "CAPABILITY_PHASE_REGISTRY.json:P4/P5",
+    "p3_authority": "P3_CAPABILITY_TWIN_AUTHORITY.json:1.0.0",
+    "p3_authority_sha256": "76726fc533cde7b0a183a1575cb50276e166081cc37ebe4857ed3324ab913e3b",
+    "m8_entry_protected_main_sha": "4b5e0e6f47e6ca7291f941bc873d2b8054a15d62",
+    "m8_entry_run_number": 512,
+    "core_products": [
+      "assessment.actor_assessment",
+      "assessment.competency_observation",
+      "assessment.mission_assessment",
+      "assessment.objective_result",
+      "debrief.annotation",
+      "audit.audit_log",
+      "metric.evidence_set",
+      "registry.context_artifact",
+      "context.context_artifact_binding"
+    ],
+    "decision_scope": "freeze exact P4/P5 identity, evidence, instructor workflow, role/privacy projection and aggregation boundaries without inventing assessment scoring formulas"
+  },
+  "scope": {
+    "p1_observed_layer_immutable": true,
+    "p2_adjusted_layer_immutable": true,
+    "p3_capability_layer_immutable": true,
+    "p4_p5_authority_frozen_not_admitted": true,
+    "p6_active": false,
+    "db_schema_change": false,
+    "db_schema_version": "1.6.0",
+    "shadow_schema_permitted": false,
+    "direct_identity_default_projection": false,
+    "implementation_selected_metric_formula_threshold_weight_or_role_rule_forbidden": true,
+    "gui_direct_persistence_access_permitted": false,
+    "api_gui_business_recomputation_permitted": false
+  },
+  "table_bindings": {
+    "p4_assessment": "assessment.actor_assessment",
+    "p4_competency_observation": "assessment.competency_observation",
+    "p5_assessment": "assessment.mission_assessment",
+    "p5_objective_result": "assessment.objective_result",
+    "instructor_annotation": "debrief.annotation",
+    "audit_log": "audit.audit_log",
+    "evidence_set": "metric.evidence_set",
+    "world_relation": "world.world_relation",
+    "evaluation_context": "context.evaluation_context",
+    "context_artifact": "registry.context_artifact",
+    "context_artifact_binding": "context.context_artifact_binding",
+    "managed_object": "registry.object_reference",
+    "p3_twin_revision": "capability.aircraft_twin_revision",
+    "p3_estimate": "capability.intrinsic_capability_estimate"
+  },
+  "exact_identity_rules": {
+    "forbidden_pointer_tokens": [
+      "CURRENT",
+      "LATEST",
+      "DEFAULT"
+    ],
+    "version_and_identity_resolution": "EXACT_ONLY",
+    "historical_fallback_to_current_latest_default": false,
+    "p4_subject_context_identity_prefix": "P4_SUBJECT_CONTEXT_SHA256:",
+    "p5_composition_identity_prefix": "P5_COMPOSITION_SHA256:",
+    "identity_hash_serialization": "UTF8_CANONICAL_JSON_SORTED_KEYS_NO_NAN",
+    "p4_subject_context_identity_fields": [
+      "subject_key",
+      "role_code",
+      "seat_code",
+      "function_code",
+      "session_id",
+      "episode_id",
+      "stage_id",
+      "aircraft_id",
+      "twin_revision_id",
+      "p3_estimate_id",
+      "assessment_spec_id",
+      "assessment_spec_version",
+      "role_model_context_artifact_id",
+      "as_of_utc"
+    ],
+    "p5_composition_participant_order": "subject_key,role_code,aircraft_id,twin_revision_id,p4_revision_id",
+    "p5_composition_identity_fields": [
+      "session_id",
+      "mission_episode_id",
+      "team_id",
+      "participant_bindings",
+      "world_snapshot_refs",
+      "scenario_context_artifact_id",
+      "role_model_context_artifact_id",
+      "assessment_spec_id",
+      "assessment_spec_version",
+      "as_of_utc"
+    ],
+    "composition_change_creates_new_identity": true
+  },
+  "subject_context_contract": {
+    "internal_actor_identity_field": "assessment.actor_assessment.actor_id",
+    "default_transport_identity": "subject_key",
+    "exact_role_model_binding_required": true,
+    "exact_twin_revision_required": true,
+    "p3_estimate_optional_but_exact_when_present": true,
+    "world_and_evidence_refs_exact": true,
+    "explicit_as_of_utc_required": true,
+    "current_latest_default_p3_resolution_forbidden": true,
+    "hidden_p3_recomputation_forbidden": true,
+    "same_episode_future_information_leakage_forbidden": true,
+    "subject_context_hash_required": true
+  },
+  "composition_contract": {
+    "composition_scope": "TEAM_PACKAGE_MISSION",
+    "participant_source": "assessment.mission_assessment.participant_ids",
+    "pseudonymous_participant_projection_required": true,
+    "exact_role_binding_required": true,
+    "exact_aircraft_and_twin_binding_required_when_applicable": true,
+    "exact_relevant_p4_revision_refs_required": true,
+    "scenario_mission_context_exact": true,
+    "explicit_as_of_utc_required": true,
+    "stable_participant_order_required": true,
+    "membership_or_role_or_aircraft_or_twin_or_p4_or_context_change_creates_new_identity": true,
+    "direct_participant_identity_unrestricted_projection_forbidden": true
+  },
+  "evidence_boundary_contract": {
+    "machine_and_human_evidence_distinct": true,
+    "machine_origin_label": "MACHINE",
+    "human_origin_label": "INSTRUCTOR",
+    "approved_evidence_families": [
+      "ACTION_TIMING",
+      "TACTICAL_DECISION",
+      "PROCEDURE_COMPLIANCE",
+      "WORKLOAD_ATTENTION_PROXY",
+      "HMI_SEQUENCE",
+      "INSTRUCTOR_ANNOTATION",
+      "OUTCOME_CONTEXT"
+    ],
+    "workload_attention_proxy_requires_exact_validated_profile": true,
+    "evidence_family_does_not_authorize_formula_threshold_weight_or_score": true,
+    "p1_p2_p3_fact_mutation_forbidden": true,
+    "zero_fill_for_unavailable_ood_not_identifiable_forbidden": true,
+    "exact_evidence_set_and_source_refs_required": true
+  },
+  "instructor_annotation_contract": {
+    "carrier_table": "debrief.annotation",
+    "machine_evidence_overwrite_forbidden": true,
+    "annotation_body_and_evidence_content_immutable_after_creation": true,
+    "revision_creates_new_annotation_id": true,
+    "revision_no_strictly_increases": true,
+    "supersedes_annotation_id_exact": true,
+    "prior_revision_body_preserved": true,
+    "lifecycle_status_transition_allowed_only": "ACTIVE_TO_SUPERSEDED_WITH_NEW_REVISION",
+    "physical_delete_forbidden": true,
+    "author_role_time_target_visibility_audit_required": true,
+    "role_and_visibility_both_required_for_body_projection": true
+  },
+  "approval_workflow_contract": {
+    "p4_carrier": "assessment.actor_assessment.status",
+    "p5_carrier": "assessment.mission_assessment.status",
+    "allowed_states": [
+      "DRAFT",
+      "IN_REVIEW",
+      "APPROVED",
+      "REJECTED"
+    ],
+    "allowed_transitions": [
+      "DRAFT->IN_REVIEW",
+      "IN_REVIEW->APPROVED",
+      "IN_REVIEW->REJECTED"
+    ],
+    "transition_creates_new_assessment_revision": true,
+    "prior_revision_mutation_forbidden": true,
+    "approved_and_rejected_revision_terminal": true,
+    "correction_after_terminal_creates_new_draft_revision": true,
+    "audit_action_p4": "P4_APPROVAL_TRANSITION",
+    "audit_action_p5": "P5_APPROVAL_TRANSITION",
+    "audit_request_id_required": true,
+    "duplicate_request_id_replays_same_result": true,
+    "evaluator_role_required": true,
+    "admin_auditor_role_alone_does_not_grant_approval": true
+  },
+  "status_contract": {
+    "evidence_availability_states": [
+      "AVAILABLE",
+      "UNAVAILABLE",
+      "OUT_OF_DOMAIN",
+      "NOT_IDENTIFIABLE"
+    ],
+    "transport_access_denial_state": "NOT_AUTHORIZED",
+    "transport_access_denial_is_business_value": false,
+    "numeric_payload_allowed_only_when_available": true,
+    "unavailable_numeric_zero_substitution_forbidden": true,
+    "approval_states_distinct_from_evidence_availability": true
+  },
+  "role_privacy_contract": {
+    "required_profile_id": "P4_P5_ROLE_PRIVACY_PROFILE",
+    "required_profile_version": "1.0.0",
+    "required_context_artifact_kind": "ROLE_MODEL",
+    "exact_context_artifact_binding_required": true,
+    "default_deny": true,
+    "default_identity_projection": "PSEUDONYMOUS_SUBJECT_KEY",
+    "direct_identity_requires_role_and_scope": true,
+    "field_level_projection_required": true,
+    "unrestricted_client_log_identity_payload_forbidden": true,
+    "privileged_access_audit_required": true
+  },
+  "aggregation_contract": {
+    "default_aggregation_profile": null,
+    "implementation_default_formula_forbidden": true,
+    "implementation_default_weight_forbidden": true,
+    "implementation_default_threshold_forbidden": true,
+    "exact_assessment_spec_id_and_version_required": true,
+    "exact_profile_formula_weight_threshold_required_for_numeric_aggregate": true,
+    "no_profile_behavior": "EVIDENCE_ONLY_SCORE_AND_GRADE_NULL",
+    "incompatible_reference_condition_twin_or_configuration_pooling_forbidden": true,
+    "team_result_copy_to_individual_forbidden": true,
+    "mission_objective_outcome_distinct_from_team_performance": true
+  },
+  "knowledge_time_contract": {
+    "explicit_as_of_utc_required": true,
+    "all_inputs_must_be_available_by_as_of": true,
+    "future_information_forbidden": true,
+    "same_episode_leakage_forbidden": true,
+    "historical_current_latest_default_fallback_forbidden": true,
+    "role_model_and_assessment_profile_must_be_effective_at_as_of": true
+  },
+  "release_replay_contract": {
+    "exact_assessment_revision_required": true,
+    "exact_role_model_context_artifact_required": true,
+    "exact_p3_twin_and_estimate_refs_required": true,
+    "exact_world_evidence_refs_required": true,
+    "historical_p1_p2_p3_mutation_forbidden": true,
+    "retrospective_recompute_creates_new_p4_or_p5_revision": true,
+    "composition_change_never_silently_follows_under_old_identity": true
+  },
+  "admission_guard": {
+    "required_event": "push",
+    "required_git_ref": "refs/heads/main",
+    "required_m8_exit_decision": "GO",
+    "required_run_conclusion": "success",
+    "required_job_count": 14,
+    "p4_p5_external_claim_before_gate_forbidden": true,
+    "p6_claim_before_m9_exit_forbidden": true
+  },
+  "dto_transport_rules": {
+    "uuid": "canonical lowercase UUID string",
+    "sha256": "lowercase 64-character hex",
+    "utc": "RFC3339 UTC ending in Z",
+    "number": "finite JSON number",
+    "arrays": "stable governed logical order",
+    "nullable": "null only where explicitly permitted"
+  },
+  "dto_contracts": {
+    "P4SubjectContextDTO": {
+      "fields": [
+        "subject_context_id",
+        "subject_key",
+        "actor_id",
+        "role_code",
+        "seat_code",
+        "function_code",
+        "session_id",
+        "episode_id",
+        "stage_id",
+        "aircraft_id",
+        "twin_revision_id",
+        "p3_estimate_id",
+        "assessment_spec_id",
+        "assessment_spec_version",
+        "role_model_context_artifact_id",
+        "role_model_version",
+        "world_refs",
+        "evidence_set_id",
+        "as_of_utc",
+        "knowledge_time_utc"
+      ]
+    },
+    "HumanMachineEvidenceDTO": {
+      "fields": [
+        "evidence_id",
+        "subject_context_id",
+        "subject_key",
+        "evidence_family",
+        "origin",
+        "evidence_set_id",
+        "world_refs",
+        "metric_refs",
+        "capability_projection_refs",
+        "source_refs",
+        "availability_status",
+        "reason_codes",
+        "evidence_payload",
+        "as_of_utc",
+        "evidence_hash"
+      ]
+    },
+    "InstructorAnnotationDTO": {
+      "fields": [
+        "annotation_id",
+        "base_release_id",
+        "session_id",
+        "episode_id",
+        "stage_id",
+        "author_subject_key",
+        "author_id",
+        "annotation_type",
+        "start_session_time_us",
+        "end_session_time_us",
+        "body_text",
+        "visibility",
+        "status",
+        "revision_no",
+        "supersedes_annotation_id",
+        "evidence_set_id",
+        "created_at"
+      ]
+    },
+    "ApprovalStateDTO": {
+      "fields": [
+        "assessment_scope",
+        "assessment_revision_id",
+        "state",
+        "supersedes_revision_id",
+        "audit_id",
+        "reviewer_subject_key",
+        "reviewer_actor_id",
+        "reason",
+        "request_id",
+        "created_at"
+      ]
+    },
+    "P4AssessmentRevisionDTO": {
+      "fields": [
+        "actor_assessment_id",
+        "subject_context_id",
+        "subject_key",
+        "actor_id",
+        "session_id",
+        "episode_id",
+        "aircraft_id",
+        "assessment_spec_id",
+        "assessment_spec_version",
+        "world_refs",
+        "metric_refs",
+        "capability_projection_refs",
+        "score",
+        "grade",
+        "status",
+        "confidence",
+        "evidence_set_id",
+        "created_at",
+        "supersedes_id",
+        "approval_state",
+        "as_of_utc"
+      ]
+    },
+    "P5CompositionSnapshotDTO": {
+      "fields": [
+        "composition_id",
+        "session_id",
+        "mission_episode_id",
+        "team_id",
+        "participant_subject_keys",
+        "participant_bindings",
+        "world_snapshot_refs",
+        "scenario_context_artifact_id",
+        "role_model_context_artifact_id",
+        "assessment_spec_id",
+        "assessment_spec_version",
+        "as_of_utc",
+        "composition_hash"
+      ]
+    },
+    "TeamMissionEvidenceDTO": {
+      "fields": [
+        "evidence_id",
+        "composition_id",
+        "evidence_family",
+        "evidence_set_id",
+        "participant_subject_keys",
+        "contributing_p4_revision_ids",
+        "world_snapshot_refs",
+        "objective_result_refs",
+        "availability_status",
+        "reason_codes",
+        "evidence_payload",
+        "as_of_utc",
+        "evidence_hash"
+      ]
+    },
+    "P5AssessmentRevisionDTO": {
+      "fields": [
+        "mission_assessment_id",
+        "composition_id",
+        "session_id",
+        "mission_episode_id",
+        "team_id",
+        "assessment_spec_id",
+        "assessment_spec_version",
+        "participant_subject_keys",
+        "world_snapshot_refs",
+        "adjudication_refs",
+        "overall_score",
+        "grade",
+        "status",
+        "confidence",
+        "evidence_set_id",
+        "created_at",
+        "supersedes_id",
+        "approval_state",
+        "aggregation_profile_ref",
+        "as_of_utc"
+      ]
+    },
+    "P4P5AdmissionStateDTO": {
+      "fields": [
+        "source_revision",
+        "event_name",
+        "git_ref",
+        "protected_main",
+        "m8_exit_decision",
+        "run_conclusion",
+        "required_jobs_success",
+        "required_jobs_total",
+        "p4_admitted",
+        "p5_admitted",
+        "p6_inactive"
+      ]
+    }
+  },
+  "error_codes": [
+    "FAIL_CLOSED_P4_P5_AUTHORITY_REQUIRED",
+    "FAIL_CLOSED_P4_P5_EXACT_IDENTITY_REQUIRED",
+    "FAIL_CLOSED_P4_P5_CURRENT_LATEST_DEFAULT_FORBIDDEN",
+    "FAIL_CLOSED_P4_P5_ROLE_MODEL_REQUIRED",
+    "FAIL_CLOSED_P4_P5_DIRECT_IDENTITY_NOT_AUTHORIZED",
+    "FAIL_CLOSED_P4_P5_FUTURE_INFORMATION",
+    "FAIL_CLOSED_P4_P5_SAME_EPISODE_LEAKAGE",
+    "FAIL_CLOSED_P4_P5_COMPOSITION_DRIFT",
+    "FAIL_CLOSED_P4_P5_MACHINE_HUMAN_EVIDENCE_CONFLATION",
+    "FAIL_CLOSED_P4_P5_UNAVAILABLE_ZERO_COERCION",
+    "FAIL_CLOSED_P4_P5_APPROVAL_TRANSITION_INVALID",
+    "FAIL_CLOSED_P4_P5_APPROVAL_NOT_AUTHORIZED",
+    "FAIL_CLOSED_P4_P5_AGGREGATION_PROFILE_REQUIRED",
+    "FAIL_CLOSED_P4_P5_INCOMPATIBLE_POOLING",
+    "FAIL_CLOSED_P4_P5_TEAM_TO_INDIVIDUAL_COPY",
+    "FAIL_CLOSED_P4_P5_NOT_ADMITTED",
+    "FAIL_CLOSED_P6_NOT_ADMITTED"
+  ],
+  "contract_hashes": {
+    "exact_identity_rules_sha256": "4a30a407c8d0f958d632f298ac9af1d304c9885b10584fc73daaba7dce096b07",
+    "subject_context_contract_sha256": "4815d930bb627997bef3a82262a49ed3644d5c75565bd913c8d10ae254cc1fd7",
+    "composition_contract_sha256": "5b239485ad3193a130a49b3a2194f57a6785e4d08cbb203e2c01468d76109b1f",
+    "evidence_boundary_contract_sha256": "b6528a022a16845d4fc81e1e659a4e30f6e36e29a0b2bdb43b91a14a085ccb3c",
+    "instructor_annotation_contract_sha256": "9203c2343cca81b75f95c95171bf555334eba603c3f0475de71b219d191e3424",
+    "approval_workflow_contract_sha256": "9fa7952fdbf9b5195727b89ac3fb1fc6da5d87286afce2692366ba8788d80990",
+    "status_contract_sha256": "e91552771ab67bd77bb98c5551d03a1a99d8881dd70d80c528fc2a2814c6a2c3",
+    "role_privacy_contract_sha256": "77149b25ff12fd21dfccd4902cf6fa4c88bff83482e7d20f59807ba4e80a37d3",
+    "aggregation_contract_sha256": "424056539c80c8019d0a20ac6a1cb9828e7490a583dbfbbb8941e7287cb021ee",
+    "knowledge_time_contract_sha256": "4a8926d5b5333a1f549fc11857444dea48a6fd0145b6ba2261ec55324ca58cef",
+    "release_replay_contract_sha256": "cfad4b87c00a7cca2730f4b699277634734c064177b7169adb560848d05a1c1a",
+    "admission_guard_sha256": "dcda3f62eba44902317d83bc78e9be47d6ede4fa268f0132d819c203521dfc3c",
+    "dto_contracts_sha256": "ac93def322a07cfc2718eca3385b6cdab378b09c5ea92f4524d491b77247990d"
+  },
+  "golden_vectors": {
+    "current_latest_fail": {
+      "value": "LATEST",
+      "expected_error": "FAIL_CLOSED_P4_P5_CURRENT_LATEST_DEFAULT_FORBIDDEN"
+    },
+    "direct_identity_analyst_fail": {
+      "role": "ANALYST",
+      "expected_error": "FAIL_CLOSED_P4_P5_DIRECT_IDENTITY_NOT_AUTHORIZED"
+    },
+    "composition_drift_fail": {
+      "expected_error": "FAIL_CLOSED_P4_P5_COMPOSITION_DRIFT"
+    },
+    "unavailable_zero_fail": {
+      "status": "UNAVAILABLE",
+      "value": 0,
+      "expected_error": "FAIL_CLOSED_P4_P5_UNAVAILABLE_ZERO_COERCION"
+    },
+    "unprofiled_team_score_fail": {
+      "aggregation_profile_ref": null,
+      "overall_score": 0,
+      "expected_error": "FAIL_CLOSED_P4_P5_AGGREGATION_PROFILE_REQUIRED"
+    },
+    "team_to_individual_fail": {
+      "expected_error": "FAIL_CLOSED_P4_P5_TEAM_TO_INDIVIDUAL_COPY"
+    },
+    "pre_exit_claim_fail": {
+      "expected_error": "FAIL_CLOSED_P4_P5_NOT_ADMITTED"
+    }
+  }
+}
