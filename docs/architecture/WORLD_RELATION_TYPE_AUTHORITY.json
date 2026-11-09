@@ -1,0 +1,180 @@
+{
+  "authority_id": "WORLD_RELATION_TYPE_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "parent_core_baseline": "CB-1.17.0",
+  "decision_id": "F1-V33-METRIC-DB-1.11.0-CANDIDATE-2026-11-09",
+  "approval_status": "CANDIDATE_LOCAL",
+  "time_interval": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+  "coordinate_reference": "WGS84_FOR_GEOMETRIC_RELATIONS_WHEN_COORDINATES_APPLY",
+  "properties_validation": "STRICT_VERSIONED_SCHEMA",
+  "types": [
+    {
+      "id": "MANEUVER_SEGMENT",
+      "subject_types": [
+        "AIRCRAFT",
+        "FORMATION"
+      ],
+      "object_types": [
+        "MANEUVER_CLASS"
+      ],
+      "owner": "BasicFlightApplication",
+      "allowed_sources": [
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "BASIC_FLIGHT_DEVIATION",
+      "subject_types": [
+        "AIRCRAFT"
+      ],
+      "object_types": [
+        "REFERENCE_PROFILE",
+        "FLIGHT_PARAMETER"
+      ],
+      "owner": "BasicFlightApplication",
+      "allowed_sources": [
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "FORMATION_RELATION",
+      "subject_types": [
+        "AIRCRAFT",
+        "FORMATION"
+      ],
+      "object_types": [
+        "AIRCRAFT",
+        "FORMATION"
+      ],
+      "owner": "BasicFlightApplication",
+      "allowed_sources": [
+        "OFFICIAL",
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "PERCEPTION_EVENT",
+      "subject_types": [
+        "SENSOR",
+        "AIRCRAFT",
+        "MISSION_SYSTEM"
+      ],
+      "object_types": [
+        "TARGET",
+        "THREAT",
+        "TRACK"
+      ],
+      "owner": "PerceptionApplication",
+      "allowed_sources": [
+        "OFFICIAL",
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "SENSOR_TRACK_ASSOCIATION",
+      "subject_types": [
+        "SENSOR_TRACK"
+      ],
+      "object_types": [
+        "GROUND_TRUTH_ENTITY",
+        "TRACK"
+      ],
+      "owner": "PerceptionApplication",
+      "allowed_sources": [
+        "OFFICIAL",
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "ENGAGEMENT_GEOMETRY",
+      "subject_types": [
+        "AIRCRAFT",
+        "WEAPON_EVENT",
+        "ENGAGEMENT"
+      ],
+      "object_types": [
+        "AIRCRAFT",
+        "TARGET",
+        "ENGAGEMENT"
+      ],
+      "owner": "EngagementGeometryApplication",
+      "allowed_sources": [
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "ATTACK_SUPPORT_RELATION",
+      "subject_types": [
+        "AIRCRAFT",
+        "WEAPON_EVENT"
+      ],
+      "object_types": [
+        "AIRCRAFT",
+        "TARGET",
+        "WEAPON_EVENT"
+      ],
+      "owner": "AttackSupportApplication",
+      "allowed_sources": [
+        "OFFICIAL",
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "WEAPON_EVENT",
+      "subject_types": [
+        "WEAPON_EVENT"
+      ],
+      "object_types": [
+        "WEAPON_EVENT",
+        "TARGET",
+        "AIRCRAFT"
+      ],
+      "owner": "WeaponEventApplication",
+      "allowed_sources": [
+        "OFFICIAL",
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    },
+    {
+      "id": "ATTACK_CLUSTER",
+      "subject_types": [
+        "WEAPON_EVENT",
+        "AIRCRAFT"
+      ],
+      "object_types": [
+        "WEAPON_EVENT",
+        "TARGET"
+      ],
+      "owner": "AttackClusterApplication",
+      "allowed_sources": [
+        "DERIVED",
+        "INSTRUCTOR"
+      ],
+      "time_required": true
+    }
+  ],
+  "rules": {
+    "no_automatic_causal_claims": true,
+    "missing_coordinates": "EXPLICITLY_UNAVAILABLE",
+    "invalid_time_interval": "REJECT",
+    "relation_owner_single": true
+  },
+  "release_claim": false
+}

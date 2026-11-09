@@ -16,9 +16,17 @@ from typing import Any, cast
 os.environ.setdefault("POLARS_SKIP_CPU_CHECK", "1")
 
 from tpaa_security import Permission  # noqa: E402
+from tpaa_canonical.byte_stability import (  # noqa: E402
+    GovernedTextRepresentation,
+    canonicalize_governed_text_bytes,
+    match_governed_text_bytes,
+    normalize_governed_text_to_lf,
+    write_utf8_lf,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 PARENT = ROOT / "baseline" / "CB-1.6.0"
+PARENT_LOCK_SHA256 = "68ee3fc8f75e3435f2127b41eb1d933de79d1d70a5a9bd7a1c6295321160a731"
 PROPOSAL = ROOT / "baseline" / "candidates" / "CB-1.7.0"
 TARGET = ROOT / "baseline" / "CB-1.7.0"
 DECISION_ID = "G2-V33-GUI-PERMISSION-MAPPING-CANDIDATE-2026-11-06"
@@ -37,16 +45,50 @@ def _load(path: Path) -> dict[str, Any]:
 
 
 def _write(path: Path, value: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(value, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+    write_utf8_lf(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+
+def _parent_artifact_entry(filename: str) -> dict[str, Any] | None:
+    artifacts = _load(PARENT / "BASELINE_LOCK.json").get("artifacts")
+    if not isinstance(artifacts, list):
+        raise ValueError("parent BASELINE_LOCK artifacts must be a list")
+    for raw in artifacts:
+        if not isinstance(raw, dict):
+            raise ValueError("parent BASELINE_LOCK artifact entry must be an object")
+        if raw.get("file") == filename:
+            return cast(dict[str, Any], raw)
+    return None
+
+
+def _parent_representation(filename: str) -> GovernedTextRepresentation:
+    entry = _parent_artifact_entry(filename)
+    if entry is None:
+        return "CRLF"
+    expected_sha = entry.get("sha256")
+    expected_bytes = entry.get("bytes")
+    if not isinstance(expected_sha, str) or not isinstance(expected_bytes, int):
+        raise ValueError(f"invalid parent lock entry for {filename}")
+    _, matched = match_governed_text_bytes(
+        (PARENT / "canonical" / filename).read_bytes(),
+        expected_sha,
+        expected_bytes,
     )
+    return "CRLF" if matched == "CRLF" else "LF"
+
+
+def _locked_bytes(path: Path) -> bytes:
+    representation = _parent_representation(path.name)
+    return canonicalize_governed_text_bytes(path.read_bytes(), representation)
+
+
+def _locked_size(path: Path) -> int:
+    return len(_locked_bytes(path))
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
+    if path == PARENT / "BASELINE_LOCK.json":
+        canonical, _ = match_governed_text_bytes(path.read_bytes(), PARENT_LOCK_SHA256)
+        return hashlib.sha256(canonical).hexdigest()
+    return hashlib.sha256(_locked_bytes(path)).hexdigest()
 
 def _directory_digest(root: Path) -> str:
     digest = hashlib.sha256()
@@ -55,7 +97,7 @@ def _directory_digest(root: Path) -> str:
             continue
         digest.update(path.relative_to(root).as_posix().encode("utf-8"))
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        digest.update(normalize_governed_text_to_lf(path.read_bytes()))
         digest.update(b"\0")
     return digest.hexdigest()
 
@@ -367,7 +409,7 @@ def build_successor(output: Path) -> None:
     )
     artifacts = []
     for path in sorted(canonical.glob("*.json"), key=lambda item: item.name):
-        artifacts.append({"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size})
+        artifacts.append({"file": path.name, "sha256": _sha256(path), "bytes": _locked_size(path)})
     lock = {
         "baseline": {
             "overall": "TPAA V8.0",

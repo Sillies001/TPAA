@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import shutil
 from pathlib import Path
@@ -15,6 +14,7 @@ from tpaa_canonical import (
     CanonicalArtifactError,
     CanonicalArtifactLoader,
 )
+from tpaa_canonical.byte_stability import governed_text_sha256, governed_text_size
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_ROOT = REPO_ROOT / "baseline" / EXPECTED_CORE_BASELINE
@@ -159,14 +159,14 @@ def test_unapproved_predecessor_core_identity_still_fails_closed(tmp_path: Path)
         for item in lock["artifacts"]
         if item["file"] == "SCHEMA_COMPATIBILITY_AUTHORITY.json"
     )
-    entry["sha256"] = hashlib.sha256(authority_bytes).hexdigest()
-    entry["bytes"] = len(authority_bytes)
+    entry["sha256"] = governed_text_sha256(authority_bytes)
+    entry["bytes"] = governed_text_size(authority_bytes)
     lock_bytes = (json.dumps(lock, indent=2) + "\n").encode()
     lock_path.write_bytes(lock_bytes)
 
     loader = CanonicalArtifactLoader(
         copied,
-        trusted_lock_sha256=hashlib.sha256(lock_bytes).hexdigest(),
+        trusted_lock_sha256=governed_text_sha256(lock_bytes),
     )
     with pytest.raises(CanonicalArtifactError) as captured:
         loader.load("P1_METRIC_CATALOG")

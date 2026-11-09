@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib import import_module
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol, cast
 
 from tpaa_platform.filesync import atomic_replace_bytes
 
@@ -66,6 +66,38 @@ _HISTORICAL_AUTHORITY: Mapping[str, tuple[str, str, str]] = {
     ),
 }
 
+
+class _MsvcrtLockModule(Protocol):
+    LK_NBLCK: int
+    LK_UNLCK: int
+
+    def locking(self, fd: int, mode: int, nbytes: int, /) -> None: ...
+
+
+class _FcntlLockModule(Protocol):
+    LOCK_EX: int
+    LOCK_NB: int
+    LOCK_UN: int
+
+    def flock(self, fd: int, operation: int, /) -> None: ...
+
+
+def _acquire_process_file_lock(fd: int) -> None:
+    if os.name == "nt":
+        msvcrt = cast(_MsvcrtLockModule, import_module("msvcrt"))
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+        return
+    fcntl = cast(_FcntlLockModule, import_module("fcntl"))
+    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _release_process_file_lock(fd: int) -> None:
+    if os.name == "nt":
+        msvcrt = cast(_MsvcrtLockModule, import_module("msvcrt"))
+        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        return
+    fcntl = cast(_FcntlLockModule, import_module("fcntl"))
+    fcntl.flock(fd, fcntl.LOCK_UN)
 
 class MigrationServiceError(RuntimeError):
     """A migration operation failed closed."""
@@ -386,17 +418,7 @@ class SQLiteMigrationService:
                 stream.flush()
             stream.seek(0)
             try:
-                if os.name == "nt":
-                    import msvcrt
-
-                    msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
-                else:
-                    import fcntl
-
-                    fcntl.flock(  # type: ignore[attr-defined]
-                        stream.fileno(),
-                        fcntl.LOCK_EX | fcntl.LOCK_NB,  # type: ignore[attr-defined]
-                    )
+                _acquire_process_file_lock(stream.fileno())
                 locked = True
             except OSError as exc:
                 raise MigrationServiceError(
@@ -407,16 +429,7 @@ class SQLiteMigrationService:
             try:
                 if locked:
                     stream.seek(0)
-                    if os.name == "nt":
-                        import msvcrt
-
-                        msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
-                    else:
-                        import fcntl
-
-                        fcntl.flock(  # type: ignore[attr-defined]
-                            stream.fileno(), fcntl.LOCK_UN  # type: ignore[attr-defined]
-                        )
+                    _release_process_file_lock(stream.fileno())
             finally:
                 stream.close()
 

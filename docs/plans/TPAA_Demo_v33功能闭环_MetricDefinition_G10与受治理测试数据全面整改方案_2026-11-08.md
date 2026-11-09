@@ -503,11 +503,13 @@ V03 必须实现：播放/暂停、速度、时间轴、逐事件跳转、2D/3D�
 
 ## 11. 分阶段实施顺序与退出门
 
-### F0：状态冻结与基线脚手架
+### F0：基线信任与跨平台可复现性修复
 
-工作：保存当前 dirty-tree 清单和 hash；建立本方案状态 JSON、successor/codegen 框架、差异清单；确认 CB-1.17.0 不变。
+工作：冻结 F0 工作分支的 exact HEAD/tree；保留 CB-1.17.0 及全部历史 Baseline Lock/Canonical 原始仓库对象不变；引入唯一的受控文本字节规范化模块；修复 Canonical Loader、G1 DB 1.10.0 迁移 authority 读取、G2～G12 successor 生成器和证据工具；建立 `adopt_demo_function_successor.py` 与 `task_metric_generate.py` 的 F0 只读/确定性脚手架；使用独立 `V33 F0 Gate` 在实施分支 push 上执行通用复验命令和 Windows/Linux 专项验证，不改写既有 M0～M9 CI 编排。
 
-退出门：父基线全字节 hash 一致；新计划与状态源可读；未执行 git 写操作、推送或部署。
+历史工件必须遵循各自已受信任 Baseline Lock 中的 SHA-256 与 bytes。CB-1.17.0 当前 69 个工件包含 27 个 LF 锁定表示和 42 个 CRLF 锁定表示；不得把所有工件强制改成同一种表示。Git checkout 由 `.gitattributes` 统一为 LF，校验时仅在锁定 SHA-256 与 bytes 精确匹配的前提下接受 LF 或 CRLF。G12 successor 对继承工件保留 CB-1.16.0 对应文件的锁定表示，新增加的工件采用 CRLF 锁定表示。混合换行和裸 CR 一律 fail-closed。
+
+退出门：CB-1.5.0 与 CB-1.9.0～CB-1.17.0 全部受支持锁定基线及其受控工件通过；同一内容的 LF/CRLF 检出形式均能匹配原有锁定值；混合或裸 CR/LF 明确拒绝；内容篡改仍 fail-closed；标准 `tpaa_dev.py verify-baseline` 入口通过；G1 DB 1.10.0 迁移、DB 1.9.0 SQLite bootstrap 与完整迁移链回归在 Windows/Linux 均通过；G12 successor 在 Windows/Linux 重建摘要一致且 `--check` 通过；`adopt_demo_function_successor.py --check` 与 `task_metric_generate.py --check` 通过；独立 `V33 F0 Gate` 在 Windows/Linux 上完成 Ruff、typecheck、规定 pytest、前端 typecheck/gateway/build、`g1_frontend_build.py` 及 F0 专项验证。既有 Cross-platform CI 的历史失败必须与直接基线 Run 对照并登记，禁止把继承故障伪报为 F0 回归或通过修改旧门绕过。CB-1.17.0 的历史锁、工件 Git Blob SHA 和 lineage 未被修改。不得因 F0 通过而关闭 G6～G12、改变 W9 或作出发布声明。
 
 ### F1：Canonical、Metric Definition 与 DB 1.11.0
 

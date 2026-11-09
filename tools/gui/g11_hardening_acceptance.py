@@ -147,21 +147,12 @@ def run() -> dict[str, object]:
         degraded = create_webengine_workspace(None, None)
         degraded_closed = degraded.currentIndex() == 0
         degraded.close()
-        child_pid = controller._process.pid if controller._process is not None else None
+        child_process = controller._process
         workspace.close()
         stopped = controller.shutdown()
         import time as _time
         _time.sleep(2.0)
-        orphan = False
-        if child_pid is not None:
-            import ctypes
-
-            handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, child_pid)
-            if handle:
-                exit_code = ctypes.c_ulong()
-                ctypes.windll.kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code))
-                orphan = exit_code.value == 259  # STILL_ACTIVE
-                ctypes.windll.kernel32.CloseHandle(handle)
+        orphan = child_process is not None and child_process.poll() is None
         checks = {
             **header_checks,
             **auth_checks,

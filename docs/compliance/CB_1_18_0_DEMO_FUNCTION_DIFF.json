@@ -1,0 +1,14 @@
+{
+  "schema": "TPAA_CB_1_18_0_DEMO_FUNCTION_DIFF_V1",
+  "status": "F0_SCAFFOLD_ONLY",
+  "parent_core_baseline": "CB-1.17.0",
+  "candidate_core_baseline": "CB-1.18.0-candidate",
+  "parent_immutable": true,
+  "candidate_materialized": false,
+  "canonical_additions": [],
+  "canonical_modifications": [],
+  "db_schema_change": "PENDING_F1",
+  "dto_codegen_change": "PENDING_F1",
+  "admission_change": "NONE_F0",
+  "release_claim": false
+}

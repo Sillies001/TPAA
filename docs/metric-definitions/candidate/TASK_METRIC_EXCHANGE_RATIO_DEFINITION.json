@@ -1,0 +1,121 @@
+{
+  "authority_id": "TASK_METRIC_EXCHANGE_RATIO_DEFINITION",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "parent_core_baseline": "CB-1.17.0",
+  "decision_id": "F1-V33-METRIC-DB-1.11.0-CANDIDATE-2026-11-09",
+  "semantic_id": "TPAA-TASK-EXCHANGE_RATIO",
+  "definition_version": "1.0.0",
+  "candidate_id": "TPAA-TASK-EXCHANGE_RATIO-1.0.0-candidate",
+  "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL",
+  "algorithm": {
+    "algorithm_id": "TPAA_TASK_EXCHANGE_RATIO_V1",
+    "algorithm_version": "1.0.0"
+  },
+  "name": {
+    "zh": "交换比（任务评估）",
+    "en": "Task Exchange Ratio"
+  },
+  "value": {
+    "kind": "DECIMAL_RATIO",
+    "unit": "1",
+    "direction": "HIGHER_IS_BETTER",
+    "display_precision": 3,
+    "storage_representation": "DECIMAL_STRING"
+  },
+  "formula_expression": "unique_confirmed_opponent_losses / unique_confirmed_evaluated_side_losses",
+  "scope_contract": {
+    "exact_scope_fields": [
+      "batch_id",
+      "session_id",
+      "release_id",
+      "context_id",
+      "evaluated_side",
+      "opponent_side",
+      "mission_phase",
+      "start_session_time_us",
+      "end_session_time_us"
+    ],
+    "time_interval": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+    "latest_fallback": "FORBIDDEN",
+    "cross_batch_borrowing": "FORBIDDEN"
+  },
+  "input_binding": {
+    "numerator": {
+      "table": "assessment.adjudicated_loss",
+      "filters": [
+        "final_j_status=CONFIRMED_LOSS",
+        "subject_side=opponent_side",
+        "effective_session_time_us within exact half-open scope",
+        "not superseded"
+      ]
+    },
+    "denominator": {
+      "table": "assessment.adjudicated_loss",
+      "filters": [
+        "final_j_status=CONFIRMED_LOSS",
+        "subject_side=evaluated_side",
+        "effective_session_time_us within exact half-open scope",
+        "not superseded"
+      ]
+    }
+  },
+  "numerator_rule": {
+    "entity": "adjudicated_loss.loss_id",
+    "count": "distinct",
+    "eligibility": "unique confirmed opponent losses in exact scope"
+  },
+  "denominator_rule": {
+    "entity": "adjudicated_loss.loss_id",
+    "count": "distinct",
+    "eligibility": "unique confirmed evaluated-side losses in exact scope"
+  },
+  "deduplication_rule": {
+    "loss_key": "loss_id",
+    "superseded_records": "EXCLUDE",
+    "multiple_weapon_events_or_evidence_for_one_loss": "COUNT_ONCE"
+  },
+  "qualification_rule": {
+    "required_adjudication": "FINAL",
+    "unknown_side": "INVALID",
+    "unresolved_loss": "PENDING",
+    "only_final_confirmed_losses_count": true
+  },
+  "missing_rule": {
+    "pending_j": "PENDING",
+    "missing_required_source": "INSUFFICIENT",
+    "conflicting_final_adjudication": "INVALID",
+    "pending_scope_rule": "Any in-scope unresolved adjudication on either side that could change either count makes the result PENDING."
+  },
+  "zero_denominator_rule": {
+    "status": "N_A",
+    "reason_code": "ZERO_EVALUATED_SIDE_CONFIRMED_LOSSES",
+    "numeric_value": null
+  },
+  "aggregation_rule": {
+    "strategy": "SUM_NUMERATOR_AND_DENOMINATOR_THEN_DIVIDE",
+    "simple_average": false,
+    "require_same_definition_hash": true,
+    "require_comparison_key": true,
+    "ratio": "sum(unique_confirmed_opponent_losses)/sum(unique_confirmed_evaluated_side_losses)"
+  },
+  "evidence_requirements": [
+    "definition_sha256",
+    "exact_scope",
+    "source_refs",
+    "evidence_set_refs",
+    "algorithm_sha256"
+  ],
+  "permission_ids": [
+    "task_metric.definition.read",
+    "task_metric.result.read",
+    "task_metric.compare"
+  ],
+  "audit_events": [
+    "task_metric.definition.candidate.read",
+    "task_metric.result.read",
+    "task_metric.compare"
+  ],
+  "release_claim": false,
+  "definition_sha256": "dd2b47165bb80b7bd5438b2a1f7b690b7a590e0883c0f7aba4fa3c18c0d92ae1"
+}

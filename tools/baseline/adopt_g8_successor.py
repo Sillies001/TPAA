@@ -12,8 +12,17 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, cast
 
+from tpaa_canonical.byte_stability import (
+    GovernedTextRepresentation,
+    canonicalize_governed_text_bytes,
+    match_governed_text_bytes,
+    normalize_governed_text_to_lf,
+    write_utf8_lf,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 PARENT = ROOT / "baseline" / "CB-1.12.0"
+PARENT_LOCK_SHA256 = "387fe31e8e29958dba7a5aa8cafb0b4ad381f84e2440a87c684d518e3d484fc1"
 TARGET = ROOT / "baseline" / "CB-1.13.0"
 CORE = "CB-1.13.0"
 DECISION_ID = "G8-V33-CO-ATTACK-2026-11-07"
@@ -36,13 +45,50 @@ def _clone(value: object) -> Any:
 
 
 def _write(path: Path, value: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_utf8_lf(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+
+def _parent_artifact_entry(filename: str) -> dict[str, Any] | None:
+    artifacts = _load(PARENT / "BASELINE_LOCK.json").get("artifacts")
+    if not isinstance(artifacts, list):
+        raise ValueError("parent BASELINE_LOCK artifacts must be a list")
+    for raw in artifacts:
+        if not isinstance(raw, dict):
+            raise ValueError("parent BASELINE_LOCK artifact entry must be an object")
+        if raw.get("file") == filename:
+            return cast(dict[str, Any], raw)
+    return None
+
+
+def _parent_representation(filename: str) -> GovernedTextRepresentation:
+    entry = _parent_artifact_entry(filename)
+    if entry is None:
+        return "CRLF"
+    expected_sha = entry.get("sha256")
+    expected_bytes = entry.get("bytes")
+    if not isinstance(expected_sha, str) or not isinstance(expected_bytes, int):
+        raise ValueError(f"invalid parent lock entry for {filename}")
+    _, matched = match_governed_text_bytes(
+        (PARENT / "canonical" / filename).read_bytes(),
+        expected_sha,
+        expected_bytes,
+    )
+    return "CRLF" if matched == "CRLF" else "LF"
+
+
+def _locked_bytes(path: Path) -> bytes:
+    representation = _parent_representation(path.name)
+    return canonicalize_governed_text_bytes(path.read_bytes(), representation)
+
+
+def _locked_size(path: Path) -> int:
+    return len(_locked_bytes(path))
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
+    if path == PARENT / "BASELINE_LOCK.json":
+        canonical, _ = match_governed_text_bytes(path.read_bytes(), PARENT_LOCK_SHA256)
+        return hashlib.sha256(canonical).hexdigest()
+    return hashlib.sha256(_locked_bytes(path)).hexdigest()
 
 def _field(name: str, transport: str, *, source: str | None = None) -> dict[str, Any]:
     return {"field": name, "source": source or f"g8.{name}", "required": True, "transport_type": transport}
@@ -292,7 +338,7 @@ def build_successor(output: Path) -> None:
     for name, document in replacements.items():
         _write(canonical / name, document)
     artifacts = [
-        {"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}
+        {"file": path.name, "sha256": _sha256(path), "bytes": _locked_size(path)}
         for path in sorted(canonical.glob("*.json"), key=lambda item: item.name)
     ]
     _write(
@@ -344,7 +390,7 @@ def _digest(root: Path) -> str:
         if path.is_file():
             digest.update(path.relative_to(root).as_posix().encode())
             digest.update(b"\0")
-            digest.update(path.read_bytes())
+            digest.update(normalize_governed_text_to_lf(path.read_bytes()))
             digest.update(b"\0")
     return digest.hexdigest()
 

@@ -1,0 +1,51 @@
+{
+  "authority_id": "TASK_METRIC_CATALOG",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "parent_core_baseline": "CB-1.17.0",
+  "decision_id": "F1-V33-METRIC-DB-1.11.0-CANDIDATE-2026-11-09",
+  "catalog_version": "1.0.0-candidate",
+  "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL",
+  "definitions": [
+    {
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "definition_version": "1.0.0",
+      "candidate_id": "TPAA-TASK-KILL_RATIO-1.0.0-candidate",
+      "definition_file": "TASK_METRIC_KILL_RATIO_DEFINITION.json",
+      "definition_sha256": "fa49baf195337524ffa949b757ff2007657325a88fbe22841de56cc22c88a527",
+      "algorithm_id": "TPAA_TASK_KILL_RATIO_V1",
+      "algorithm_version": "1.0.0",
+      "value_kind": "DECIMAL_RATIO",
+      "unit": "1",
+      "direction": "HIGHER_IS_BETTER",
+      "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL"
+    },
+    {
+      "semantic_id": "TPAA-TASK-EXCHANGE_RATIO",
+      "definition_version": "1.0.0",
+      "candidate_id": "TPAA-TASK-EXCHANGE_RATIO-1.0.0-candidate",
+      "definition_file": "TASK_METRIC_EXCHANGE_RATIO_DEFINITION.json",
+      "definition_sha256": "dd2b47165bb80b7bd5438b2a1f7b690b7a590e0883c0f7aba4fa3c18c0d92ae1",
+      "algorithm_id": "TPAA_TASK_EXCHANGE_RATIO_V1",
+      "algorithm_version": "1.0.0",
+      "value_kind": "DECIMAL_RATIO",
+      "unit": "1",
+      "direction": "HIGHER_IS_BETTER",
+      "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL"
+    },
+    {
+      "semantic_id": "TPAA-TASK-MISSION_COMPLETION_RATE",
+      "definition_version": "1.0.0",
+      "candidate_id": "TPAA-TASK-MISSION_COMPLETION_RATE-1.0.0-candidate",
+      "definition_file": "TASK_METRIC_MISSION_COMPLETION_RATE_DEFINITION.json",
+      "definition_sha256": "2df8778ce7a2ccd3117d509953d4a8a8241b0429789d9c53e2bac073046f3450",
+      "algorithm_id": "TPAA_TASK_MISSION_COMPLETION_RATE_V1",
+      "algorithm_version": "1.0.0",
+      "value_kind": "DECIMAL_PERCENTAGE",
+      "unit": "%",
+      "direction": "HIGHER_IS_BETTER",
+      "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL"
+    }
+  ],
+  "release_claim": false
+}

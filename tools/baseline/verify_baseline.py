@@ -21,6 +21,17 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_SRC_ROOT = _REPO_ROOT / "src"
+if str(_SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SRC_ROOT))
+
+from tpaa_canonical.byte_stability import (  # noqa: E402
+    GovernedTextLineEndingError,
+    GovernedTextLockMismatch,
+    match_governed_text_bytes,
+)
+
 EXPECTED_CORE_BASELINE = "CB-1.5.0"
 EXPECTED_BASELINE_LOCK_SHA256 = (
     "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab"
@@ -119,14 +130,23 @@ def verify(baseline_root: Path) -> tuple[dict[str, Any], list[ArtifactResult], l
 
     if not lock_path.is_file():
         raise BaselineVerificationError(f"missing BASELINE_LOCK.json: {lock_path}")
-    actual_lock_hash = _sha256_file(lock_path)
-    if actual_lock_hash != EXPECTED_BASELINE_LOCK_SHA256:
+    lock_raw = lock_path.read_bytes()
+    try:
+        canonical_lock_bytes, _lock_representation = match_governed_text_bytes(
+            lock_raw, EXPECTED_BASELINE_LOCK_SHA256
+        )
+    except (GovernedTextLineEndingError, GovernedTextLockMismatch) as exc:
+        actual_lock_hash = _sha256_file(lock_path)
         raise BaselineVerificationError(
             "BASELINE_LOCK hash mismatch: "
-            f"expected={EXPECTED_BASELINE_LOCK_SHA256} actual={actual_lock_hash}"
-        )
-
-    lock = _load_json(lock_path)
+            f"expected={EXPECTED_BASELINE_LOCK_SHA256} actual_raw={actual_lock_hash}; {exc}"
+        ) from exc
+    try:
+        lock = json.loads(canonical_lock_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise BaselineVerificationError(f"invalid JSON: {lock_path}: {exc}") from exc
+    if not isinstance(lock, dict):
+        raise BaselineVerificationError(f"expected JSON object: {lock_path}")
     metadata = lock.get("baseline")
     entries = lock.get("artifacts")
     if not isinstance(metadata, dict):
@@ -175,13 +195,18 @@ def verify(baseline_root: Path) -> tuple[dict[str, Any], list[ArtifactResult], l
                 )
             )
             continue
-        actual_bytes = artifact_path.stat().st_size
-        actual_hash = _sha256_file(artifact_path)
+        raw_artifact_bytes = artifact_path.read_bytes()
         mismatch: list[str] = []
-        if actual_bytes != expected_bytes:
-            mismatch.append(f"bytes expected={expected_bytes} actual={actual_bytes}")
-        if actual_hash != expected_hash:
-            mismatch.append(f"sha256 expected={expected_hash} actual={actual_hash}")
+        try:
+            canonical_artifact_bytes, _representation = match_governed_text_bytes(
+                raw_artifact_bytes, expected_hash, expected_bytes
+            )
+            actual_bytes = len(canonical_artifact_bytes)
+            actual_hash = hashlib.sha256(canonical_artifact_bytes).hexdigest()
+        except (GovernedTextLineEndingError, GovernedTextLockMismatch) as exc:
+            actual_bytes = len(raw_artifact_bytes)
+            actual_hash = hashlib.sha256(raw_artifact_bytes).hexdigest()
+            mismatch.append(f"locked representation mismatch: {exc}")
         if mismatch:
             errors.append(f"{file_name}: " + "; ".join(mismatch))
             results.append(

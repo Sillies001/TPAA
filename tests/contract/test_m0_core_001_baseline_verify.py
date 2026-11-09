@@ -8,6 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tpaa_canonical.byte_stability import canonicalize_governed_text_bytes
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VERIFIER_PATH = REPO_ROOT / "tools" / "baseline" / "verify_baseline.py"
 SPEC = importlib.util.spec_from_file_location("verify_baseline", VERIFIER_PATH)
@@ -97,6 +99,25 @@ class M0Core001BaselineVerifyTests(unittest.TestCase):
             "PASS",
         )
         self.assertEqual(errors, [])
+
+    def test_approved_snapshot_accepts_lf_and_crlf_checkout_representations(self) -> None:
+        for representation in ("LF", "CRLF"):
+            with self.subTest(representation=representation):
+                root = Path(self.temp_dir.name) / representation
+                shutil.copytree(self.source, root)
+                controlled = [
+                    root / "BASELINE_LOCK.json",
+                    *sorted((root / "canonical").glob("*.json")),
+                ]
+                for path in controlled:
+                    path.write_bytes(
+                        canonicalize_governed_text_bytes(path.read_bytes(), representation)
+                    )
+                lock, results, errors = VERIFY_BASELINE.verify(root)
+                self.assertEqual(lock["baseline"]["core"], "CB-1.5.0")
+                self.assertEqual(len(results), VERIFY_BASELINE.EXPECTED_CONTROLLED_ARTIFACT_COUNT)
+                self.assertTrue(all(item.status == "PASS" for item in results))
+                self.assertEqual(errors, [])
 
     def test_controlled_artifact_byte_drift_fails(self) -> None:
         target = self.baseline / "canonical" / "STAGE_REGISTRY.json"
