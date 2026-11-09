@@ -11,6 +11,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from tpaa_canonical.byte_stability import match_governed_text_bytes
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_PATH = REPO_ROOT / "docs" / "gui" / "demo-v33" / "DEMO_TARGET_BASELINE.json"
 REGISTRY_PATH = REPO_ROOT / "docs" / "gui" / "demo-v33" / "V33_FINAL_VIEW_REGISTRY.json"
@@ -63,7 +65,14 @@ def _require(condition: bool, message: str) -> None:
 
 def _check_hash(path: Path, expected: str, label: str) -> dict[str, Any]:
     _require(path.is_file(), f"missing {label}: {path}")
-    actual = _sha256(path)
+    if label.startswith("cb_"):
+        try:
+            canonical, _ = match_governed_text_bytes(path.read_bytes(), expected)
+        except ValueError as exc:
+            raise G0RVerificationError(f"{label} governed hash mismatch: {exc}") from exc
+        actual = hashlib.sha256(canonical).hexdigest()
+    else:
+        actual = _sha256(path)
     _require(actual == expected, f"{label} hash mismatch: {actual} != {expected}")
     return {"label": label, "path": str(path), "sha256": actual, "status": "PASS"}
 
