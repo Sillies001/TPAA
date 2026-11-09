@@ -29,7 +29,12 @@
     "release_claim": false
   },
   "baseline_byte_stability": {
-    "status": "PENDING_DEDICATED_F0_GATE",
+    "status": "PASS",
+    "stage": "F0_CLOSED_TECHNICALLY",
+    "closed_at": "2026-11-09",
+    "branch": "codex/v33-f0-f9-implementation-20261108",
+    "verified_code_revision": "5f336cf10b730e5c795dafa27b5876024a72c66a",
+    "local_worktree_status": "NOT_OBSERVABLE_IN_CHATGPT_GITHUB_RUNTIME",
     "scope": [
       "CB-1.5.0",
       "CB-1.9.0",
@@ -42,72 +47,72 @@
       "CB-1.16.0",
       "CB-1.17.0"
     ],
+    "controlled_artifacts_verified": 558,
+    "supported_baselines_verified": 10,
     "canonical_hash_representation": "per-artifact trusted-lock-pinned LF or CRLF",
     "accepted_checkout_line_endings": [
       "LF",
       "CRLF"
     ],
     "mixed_or_bare_line_endings": "REJECT",
-    "g12_inherited_artifacts": "preserve exact CB-1.16.0 per-file representation",
-    "g12_new_artifacts": "CRLF",
-    "cb_1_17_0_artifact_representation_counts": {
-      "LF": 27,
-      "CRLF": 42
-    },
+    "inherited_artifacts": "preserve parent trusted-lock representation",
+    "new_artifacts": "CRLF historical lock representation; repository checkout LF",
     "parent_baseline_immutable": "CB-1.17.0",
-    "verified_code_revision": "d663e0504afecf4bc1079d5f61580bf067434ae9",
-    "verification_run": {
-      "id": 42555642862,
-      "number": 730,
-      "url": "https://github.com/Sillies001/TPAA/actions/runs/42555642862"
-    },
-    "platforms": {
-      "linux": {
-        "status": "PASS",
-        "job_id": 128960601028,
-        "test_count": 22,
-        "evidence_artifact_id": 13646508889,
-        "evidence_sha256": "43f29c4ed4d26f1982d0f66e711e0224267ce15d3369022affe64fd5702d4eee"
-      },
-      "windows": {
-        "status": "PASS",
-        "job_id": 128960601203,
-        "test_count": 22,
-        "evidence_artifact_id": 13646982510,
-        "evidence_sha256": "bbccd34201e2c78eeabd943df8b0b8165bbf9f9b183cf78b0ffc968ebd1efd20"
-      }
-    },
-    "supported_baselines_verified": 10,
-    "controlled_artifacts_verified": 558,
+    "historical_baseline_mutation": false,
     "g12_successor_digest": "d1ba01c1a6aaea4652013e60b551636cdfd937a96b89ba05c31a0c782d3078e3",
     "g12_parent_lineage": "PASS",
-    "historical_baseline_mutation": false,
-    "m0_ci_orchestration_contract": {
-      "linux": "PASS",
-      "windows": "PASS"
+    "scaffolds": {
+      "successor": "tools/baseline/adopt_demo_function_successor.py",
+      "codegen": "tools/codegen/task_metric_generate.py",
+      "candidate_core_baseline": "CB-1.18.0-candidate",
+      "candidate_db_schema": "1.11.0-candidate",
+      "candidate_materialized": false,
+      "activation_allowed": false
     },
-    "unrelated_full_workflow_failure": "M0 Exit PostgreSQL M1 Batch 2 physical-schema parity: TPAA_PHYSICAL_SCHEMA_MISMATCH; outside F0 scope",
+    "exact_head_gate": {
+      "workflow": "V33 F0 Gate",
+      "run_number": 12,
+      "run_id": 42563814546,
+      "event": "push",
+      "head_sha": "5f336cf10b730e5c795dafa27b5876024a72c66a",
+      "conclusion": "success",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42563814546",
+      "linux": {
+        "job_id": 128985824808,
+        "conclusion": "success",
+        "artifact_id": 13650801672,
+        "artifact_name": "tpaa-v33-f0-linux-5f336cf10b730e5c795dafa27b5876024a72c66a",
+        "ruff": "PASS",
+        "mypy": "648 source files PASS",
+        "targeted_tests": "28 passed + 2 subtests",
+        "regression_tests": "559 passed",
+        "frontend": "typecheck/gateway/build PASS",
+        "g1_frontend_build": "PASS"
+      },
+      "windows": {
+        "job_id": 128985824990,
+        "conclusion": "success",
+        "artifact_id": 13650781993,
+        "artifact_name": "tpaa-v33-f0-windows-5f336cf10b730e5c795dafa27b5876024a72c66a",
+        "ruff": "PASS",
+        "mypy": "648 source files PASS",
+        "targeted_tests": "28 passed + 2 subtests",
+        "regression_tests": "559 passed",
+        "frontend": "typecheck/gateway/build PASS",
+        "g1_frontend_build": "PASS"
+      }
+    },
     "inherited_cross_platform_ci": {
       "base_branch": "codex/v33-g1-handoff-20261106",
       "base_run_number": 724,
       "base_run_id": 42226510758,
-      "base_failed_jobs": [
+      "pre_f0_failed_jobs": [
         "M0 linux",
         "M0 windows",
         "M0 Exit PostgreSQL"
       ],
-      "f0_runs_with_same_inherited_failures": [
-        730,
-        731,
-        734
-      ],
-      "conclusion": "PRE_EXISTING_NOT_F0_REGRESSION"
+      "conclusion": "PRE_EXISTING_NOT_F0_REGRESSION_AND_NOT_USED_AS_F0_EXIT_GATE"
     },
-    "dedicated_gate": "V33 F0 Gate",
-    "scaffolds": {
-      "successor": "tools/baseline/adopt_demo_function_successor.py",
-      "codegen": "tools/codegen/task_metric_generate.py",
-      "candidate_materialized": false
-    }
+    "next_stage": "F1"
   }
 }

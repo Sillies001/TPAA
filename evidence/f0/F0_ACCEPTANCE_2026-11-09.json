@@ -1,0 +1,80 @@
+{
+  "evidence_schema": "TPAA_V33_F0_ACCEPTANCE_V1",
+  "stage": "F0",
+  "status": "PASS",
+  "recorded_at": "2026-11-09",
+  "repository": "Sillies001/TPAA",
+  "branch": "codex/v33-f0-f9-implementation-20261108",
+  "verified_revision": "5f336cf10b730e5c795dafa27b5876024a72c66a",
+  "parent_snapshot": "270ee15344dd2ebbbbd86ec5323a8e171c453811",
+  "immutable_parent_baseline": "CB-1.17.0",
+  "candidate_scaffold": "CB-1.18.0-candidate",
+  "db_candidate_scaffold": "1.11.0-candidate",
+  "dirty_tree": {
+    "status": "NOT_OBSERVABLE",
+    "reason": "GitHub connector/runtime has no access to the user's current Windows worktree after remote changes"
+  },
+  "baseline_trust": {
+    "supported_baselines": 10,
+    "controlled_artifacts": 558,
+    "line_endings": [
+      "LF",
+      "CRLF"
+    ],
+    "mixed_or_bare_line_endings": "FAIL_CLOSED",
+    "content_drift": "FAIL_CLOSED",
+    "g12_successor_digest": "d1ba01c1a6aaea4652013e60b551636cdfd937a96b89ba05c31a0c782d3078e3",
+    "historical_bytes_rewritten": false
+  },
+  "github_gate": {
+    "workflow": "V33 F0 Gate",
+    "run_number": 12,
+    "run_id": 42563814546,
+    "event": "push",
+    "head_sha": "5f336cf10b730e5c795dafa27b5876024a72c66a",
+    "conclusion": "success",
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42563814546",
+    "linux": {
+      "job_id": 128985824808,
+      "artifact_id": 13650801672,
+      "conclusion": "success"
+    },
+    "windows": {
+      "job_id": 128985824990,
+      "artifact_id": 13650781993,
+      "conclusion": "success"
+    }
+  },
+  "tests": {
+    "ruff": "PASS",
+    "typecheck": "PASS_648_SOURCE_FILES",
+    "f0_targeted": "PASS_28_TESTS_2_SUBTESTS",
+    "required_python_regression": "PASS_559_TESTS",
+    "frontend_typecheck": "PASS",
+    "frontend_gateway": "PASS",
+    "frontend_build": "PASS",
+    "g1_frontend_build": "PASS"
+  },
+  "inherited_external_ci": {
+    "base_run": {
+      "number": 724,
+      "id": 42226510758,
+      "failed_jobs": [
+        "M0 linux",
+        "M0 windows",
+        "M0 Exit PostgreSQL"
+      ]
+    },
+    "disposition": "OPEN_PRE_EXISTING_NOT_F0_EXIT_GATE"
+  },
+  "governance": {
+    "g6_g11": "IN_PROGRESS_REMEDIATION",
+    "g12": "IN_PROGRESS_EXTERNAL_DOORS_OPEN",
+    "w9": "NO_GO",
+    "product_complete": false,
+    "release_ready": false,
+    "production_deployment": false,
+    "release_claim": false
+  },
+  "next_stage": "F1"
+}
