@@ -73,6 +73,10 @@ G12_LOCAL_BASELINE_LOCK_SHA256 = (
     "2e84be2c5b859a767f587333dd696130ff9f6af003d8cecb79e57ea929405946"
 )
 G12_LOCAL_CONTROLLED_ARTIFACT_COUNT = 69
+F1_CANDIDATE_CORE_BASELINE = "CB-1.18.0-candidate"
+F1_CANDIDATE_BASELINE_LOCK_SHA256 = "4a369b4aa2f2c0b450f98853cd5138c9dcae6caec99a1dc959d4d3017796e2b6"
+F1_CANDIDATE_CONTROLLED_ARTIFACT_COUNT = 77
+F1_CANDIDATE_DB_SCHEMA_VERSION = "1.11.0"
 UNVERSIONED_BY_AUTHORITY = "UNVERSIONED_BY_AUTHORITY"
 UNTRUSTED_NOT_PARSED = "UNTRUSTED_NOT_PARSED"
 NOT_REQUESTED = "NOT_REQUESTED"
@@ -854,5 +858,12 @@ def trusted_loader_for_baseline(baseline_root: Path | None) -> CanonicalArtifact
             expected_core_baseline=G12_LOCAL_CORE_BASELINE,
             trusted_lock_sha256=G12_LOCAL_BASELINE_LOCK_SHA256,
             expected_controlled_artifact_count=G12_LOCAL_CONTROLLED_ARTIFACT_COUNT,
+        )
+    if resolved.name == F1_CANDIDATE_CORE_BASELINE:
+        return CanonicalArtifactLoader(
+            resolved,
+            expected_core_baseline=F1_CANDIDATE_CORE_BASELINE,
+            trusted_lock_sha256=F1_CANDIDATE_BASELINE_LOCK_SHA256,
+            expected_controlled_artifact_count=F1_CANDIDATE_CONTROLLED_ARTIFACT_COUNT,
         )
     return CanonicalArtifactLoader(resolved)
