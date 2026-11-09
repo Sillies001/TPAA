@@ -136,3 +136,209 @@ jobs:
           path: evidence/f0/${{ matrix.platform }}.json
           if-no-files-found: error
           retention-days: 30
+  f0-handoff-baseline-ci:
+    name: F0 handoff baseline M0 comparison (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            runner: ubuntu-24.04
+          - platform: windows
+            runner: windows-2025
+    env:
+      POLARS_SKIP_CPU_CHECK: "1"
+      QT_QPA_PLATFORM: "offscreen"
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Checkout exact immutable F0 handoff snapshot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: 0c332a319d0853841d8158cf6d40f2690acc665b
+          path: handoff-baseline
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.17"
+          enable-cache: false
+
+      - name: Install Linux Qt runtime dependencies
+        if: matrix.platform == 'linux'
+        run: >-
+          sudo apt-get update && sudo apt-get install --no-install-recommends -y
+          fonts-dejavu-core libdbus-1-3 libegl1 libfontconfig1 libgl1 libglib2.0-0 libxkbcommon0
+
+      - name: Synchronize exact handoff dependencies
+        working-directory: handoff-baseline
+        run: uv sync --locked --python 3.13.5
+
+      - name: Verify exact handoff dependency lock
+        working-directory: handoff-baseline
+        run: uv lock --check
+
+      - name: Run exact handoff M0 CI comparison
+        id: handoff_ci
+        working-directory: handoff-baseline
+        continue-on-error: true
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py ci-check
+          --expected-platform ${{ matrix.platform }}
+          --evidence evidence/f0-baseline/ci-${{ matrix.platform }}.json
+
+      - name: Verify direct-baseline evidence identity
+        working-directory: handoff-baseline
+        run: >-
+          uv run --locked python -c "import json,pathlib; p=pathlib.Path('evidence/f0-baseline/ci-${{ matrix.platform }}.json'); d=json.loads(p.read_text(encoding='utf-8')); expected='0c332a319d0853841d8158cf6d40f2690acc665b'; assert d.get('source_revision') == expected, (d.get('source_revision'), expected); print(json.dumps({'source_revision':d['source_revision'],'status':d.get('status'),'failed_gate_names':d.get('failed_gate_names',[])},ensure_ascii=False))"
+
+      - name: Upload exact handoff M0 comparison evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-v33-f0-handoff-m0-${{ matrix.platform }}-${{ github.sha }}
+          path: handoff-baseline/evidence/f0-baseline/ci-${{ matrix.platform }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  f0-handoff-baseline-postgres:
+    name: F0 handoff baseline PostgreSQL comparison
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: tpaa
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tpaa -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout exact immutable F0 handoff snapshot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: 0c332a319d0853841d8158cf6d40f2690acc665b
+          path: handoff-baseline
+
+      - name: Set up CPython
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13.5"
+          architecture: x64
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.17"
+          enable-cache: false
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y postgresql-client libegl1
+
+      - name: Synchronize exact handoff dependencies
+        working-directory: handoff-baseline
+        run: uv sync --locked --python 3.13.5
+
+      - name: Verify exact handoff dependency lock
+        working-directory: handoff-baseline
+        run: uv lock --check
+
+      - name: Run handoff PostgreSQL clean-bootstrap acceptance
+        id: pg_bootstrap
+        working-directory: handoff-baseline
+        continue-on-error: true
+        run: |
+          mkdir -p evidence/f0-baseline/postgres
+          uv run --locked python tools/dev/tpaa_dev.py db-postgres-acceptance \
+            --user tpaa --host 127.0.0.1 --port 5432 \
+            --admin-database postgres --database tpaa_f0_handoff_bootstrap \
+            > evidence/f0-baseline/postgres/bootstrap.json
+
+      - name: Run handoff PostgreSQL Repository acceptance
+        id: pg_repository
+        working-directory: handoff-baseline
+        continue-on-error: true
+        run: |
+          uv run --locked python tools/dev/tpaa_dev.py db-postgres-repository-acceptance \
+            --user tpaa --host 127.0.0.1 --port 5432 \
+            --admin-database postgres --database tpaa_f0_handoff_repository \
+            --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}" \
+            > evidence/f0-baseline/postgres/repository.json
+
+      - name: Run handoff M1 Batch 2 SQLite PostgreSQL parity
+        id: pg_parity
+        working-directory: handoff-baseline
+        continue-on-error: true
+        run: >-
+          uv run --locked python tools/dev/tpaa_dev.py m1-batch-2-storage-parity
+          --user tpaa --host 127.0.0.1 --port 5432 --admin-database postgres
+          --database tpaa_f0_handoff_m1_batch_2
+          --conninfo-template "host=127.0.0.1 port=5432 user=tpaa dbname={database}"
+          --source-revision 0c332a319d0853841d8158cf6d40f2690acc665b
+          --evidence evidence/f0-baseline/postgres/m1-batch-2-parity.json
+
+      - name: Record direct handoff PostgreSQL comparison outcomes
+        if: always()
+        working-directory: handoff-baseline
+        env:
+          PG_BOOTSTRAP_OUTCOME: ${{ steps.pg_bootstrap.outcome }}
+          PG_REPOSITORY_OUTCOME: ${{ steps.pg_repository.outcome }}
+          PG_PARITY_OUTCOME: ${{ steps.pg_parity.outcome }}
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import subprocess
+          from pathlib import Path
+
+          root = Path.cwd()
+          revision = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+          files = [
+              Path("evidence/f0-baseline/postgres/bootstrap.json"),
+              Path("evidence/f0-baseline/postgres/repository.json"),
+              Path("evidence/f0-baseline/postgres/m1-batch-2-parity.json"),
+          ]
+          payload = {
+              "schema": "TPAA_F0_HANDOFF_BASELINE_POSTGRES_COMPARISON_V1",
+              "baseline_revision": revision,
+              "expected_revision": "0c332a319d0853841d8158cf6d40f2690acc665b",
+              "step_outcomes": {
+                  "bootstrap": __import__("os").environ["PG_BOOTSTRAP_OUTCOME"],
+                  "repository": __import__("os").environ["PG_REPOSITORY_OUTCOME"],
+                  "m1_batch_2_parity": __import__("os").environ["PG_PARITY_OUTCOME"],
+              },
+              "artifacts": {
+                  str(path): hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+                  for path in files
+              },
+          }
+          if revision != payload["expected_revision"]:
+              raise SystemExit(f"baseline revision mismatch: {revision}")
+          output = Path("evidence/f0-baseline/postgres/comparison.json")
+          output.parent.mkdir(parents=True, exist_ok=True)
+          output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload exact handoff PostgreSQL comparison evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tpaa-v33-f0-handoff-postgres-${{ github.sha }}
+          path: handoff-baseline/evidence/f0-baseline/postgres/
+          if-no-files-found: warn
+          retention-days: 30
+
