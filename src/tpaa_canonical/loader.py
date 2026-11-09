@@ -19,7 +19,8 @@ from typing import Any
 
 from .byte_stability import (
     GovernedTextLineEndingError,
-    canonicalize_governed_text_bytes,
+    GovernedTextLockMismatch,
+    match_governed_text_bytes,
 )
 
 EXPECTED_CORE_BASELINE = "CB-1.5.0"
@@ -263,7 +264,9 @@ class CanonicalArtifactLoader:
             ) from exc
 
         try:
-            canonical_lock_bytes = canonicalize_governed_text_bytes(lock_bytes)
+            canonical_lock_bytes, _lock_representation = match_governed_text_bytes(
+                lock_bytes, self.trusted_lock_sha256
+            )
         except GovernedTextLineEndingError as exc:
             raise CanonicalArtifactError(
                 reason="BASELINE_LOCK_LINE_ENDINGS_INVALID",
@@ -271,18 +274,15 @@ class CanonicalArtifactLoader:
                 actual_version=UNTRUSTED_NOT_PARSED,
                 detail=f"cannot normalize BASELINE_LOCK.json line endings: {exc}",
             ) from exc
-
-        actual_lock_hash = _sha256_bytes(canonical_lock_bytes)
-        if actual_lock_hash != self.trusted_lock_sha256:
+        except GovernedTextLockMismatch as exc:
             raise CanonicalArtifactError(
                 reason="BASELINE_LOCK_HASH_MISMATCH",
                 artifact_id="BASELINE_LOCK",
                 actual_version=UNTRUSTED_NOT_PARSED,
-                detail=(
-                    f"expected_sha256={self.trusted_lock_sha256} "
-                    f"actual_sha256={actual_lock_hash}"
-                ),
-            )
+                detail=f"trusted BASELINE_LOCK.json hash mismatch: {exc}",
+            ) from exc
+
+        actual_lock_hash = _sha256_bytes(canonical_lock_bytes)
 
         try:
             raw_lock = json.loads(lock_bytes.decode("utf-8"))
@@ -504,7 +504,9 @@ class CanonicalArtifactLoader:
         artifact_path = self.canonical_root / entry.filename
         artifact_bytes = _read_bytes(artifact_path, normalized_id, expected.version)
         try:
-            canonical_artifact_bytes = canonicalize_governed_text_bytes(artifact_bytes)
+            canonical_artifact_bytes, _locked_representation = match_governed_text_bytes(
+                artifact_bytes, entry.sha256, entry.byte_size
+            )
         except GovernedTextLineEndingError as exc:
             raise CanonicalArtifactError(
                 reason="CONTROLLED_ARTIFACT_LINE_ENDINGS_INVALID",
@@ -512,7 +514,16 @@ class CanonicalArtifactLoader:
                 expected_version=expected.version,
                 actual_version=UNTRUSTED_NOT_PARSED,
                 expected_schema_version=expected.schema_version,
-                detail=f"cannot normalize {entry.filename} line endings: {exc}",
+                detail=f"invalid {entry.filename} line endings: {exc}",
+            ) from exc
+        except GovernedTextLockMismatch as exc:
+            raise CanonicalArtifactError(
+                reason="CONTROLLED_ARTIFACT_DRIFT",
+                artifact_id=normalized_id,
+                expected_version=expected.version,
+                actual_version=UNTRUSTED_NOT_PARSED,
+                expected_schema_version=expected.schema_version,
+                detail=f"trusted lock mismatch for {entry.filename}: {exc}",
             ) from exc
 
         actual_size = len(canonical_artifact_bytes)
@@ -525,8 +536,7 @@ class CanonicalArtifactLoader:
                 actual_version=UNTRUSTED_NOT_PARSED,
                 expected_schema_version=expected.schema_version,
                 detail=(
-                    f"expected_canonical_bytes={entry.byte_size} actual_canonical_bytes={actual_size} "
-                    f"raw_checkout_bytes={len(artifact_bytes)} "
+                    f"expected_bytes={entry.byte_size} actual_bytes={actual_size} "
                     f"expected_sha256={entry.sha256} actual_sha256={actual_hash}"
                 ),
             )

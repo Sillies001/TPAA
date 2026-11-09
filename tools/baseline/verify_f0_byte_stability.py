@@ -13,7 +13,11 @@ from pathlib import Path
 from typing import Any
 
 from tpaa_canonical import trusted_loader_for_baseline
-from tpaa_canonical.byte_stability import governed_text_line_ending, governed_text_sha256
+from tpaa_canonical.byte_stability import (
+    governed_text_line_ending,
+    governed_text_sha256,
+    match_governed_text_bytes,
+)
 from tpaa_canonical.loader import G12_LOCAL_CORE_BASELINE
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,33 +76,47 @@ def verify() -> dict[str, Any]:
         if len(entries) != len(raw_entries) or len(artifacts) != len(entries):
             raise F0VerificationError(f"{baseline_id} controlled artifact count is inconsistent")
 
+        representation_counts = {"LF": 0, "CRLF": 0, "NONE": 0}
         for artifact in artifacts:
             entry = entries.get(artifact.filename)
+            if entry is None:
+                raise F0VerificationError(f"{baseline_id}/{artifact.filename} is absent from BASELINE_LOCK")
+            canonical_bytes, representation = match_governed_text_bytes(
+                (baseline_root / "canonical" / artifact.filename).read_bytes(),
+                entry["sha256"],
+                entry["bytes"],
+            )
             if (
-                entry is None
+                len(canonical_bytes) != artifact.byte_size
                 or artifact.sha256 != entry.get("sha256")
                 or artifact.byte_size != entry.get("bytes")
             ):
                 raise F0VerificationError(
                     f"{baseline_id}/{artifact.filename} differs from its canonical lock entry"
                 )
+            representation_counts[representation] += 1
 
         controlled_paths = [
             lock_path,
             *(baseline_root / "canonical" / artifact.filename for artifact in artifacts),
         ]
-        line_ending_counts = {"LF": 0, "CRLF": 0, "NONE": 0}
+        physical_line_ending_counts = {"LF": 0, "CRLF": 0, "NONE": 0}
         for path in controlled_paths:
             style = governed_text_line_ending(path.read_bytes())
-            line_ending_counts[style] += 1
+            physical_line_ending_counts[style] += 1
+        _, lock_representation = match_governed_text_bytes(
+            lock_bytes, loader.trusted_lock_sha256
+        )
 
         baseline_results.append(
             {
                 "core_baseline": baseline_id,
-                "baseline_lock_sha256": governed_text_sha256(lock_bytes),
+                "baseline_lock_sha256": loader.trusted_lock_sha256,
+                "baseline_lock_representation": lock_representation,
                 "controlled_artifact_count": len(artifacts),
                 "verified_artifact_count": len(artifacts),
-                "line_ending_counts": line_ending_counts,
+                "locked_artifact_representation_counts": representation_counts,
+                "physical_checkout_line_ending_counts": physical_line_ending_counts,
                 "status": "PASS",
             }
         )
@@ -110,7 +128,7 @@ def verify() -> dict[str, Any]:
     lineage = g12_lock.get("baseline", {}).get("lock_lineage_sha256")
     if lineage != [parent_digest]:
         raise F0VerificationError(
-            f"G12 parent lineage mismatch: expected={[parent_digest]!r} actual={lineage!r}"
+            f"G12 parent lineage mismatch: expected={[parent_digest]!r} actual={lineage!r}
         )
 
     return {
@@ -125,10 +143,10 @@ def verify() -> dict[str, Any]:
             "python": sys.version.split()[0],
         },
         "normalization": {
-            "canonical_hash_representation": "CRLF",
+            "canonical_hash_representation": "per-artifact trusted-lock-pinned LF or CRLF",
             "accepted_checkout_line_endings": ["LF", "CRLF"],
             "mixed_or_bare_line_endings": "REJECT",
-            "hash_and_byte_count": "computed over canonical CRLF bytes",
+            "hash_and_byte_count": "matched against the exact trusted lock entry",
         },
         "supported_baselines": baseline_results,
         "g12_parent_lineage": {

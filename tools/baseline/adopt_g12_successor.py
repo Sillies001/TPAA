@@ -18,9 +18,12 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, cast
 
+from tpaa_canonical import trusted_loader_for_baseline
 from tpaa_canonical.byte_stability import (
+    GovernedTextRepresentation,
     canonicalize_governed_text_bytes,
     governed_text_sha256,
+    match_governed_text_bytes,
     normalize_governed_text_to_lf,
     write_utf8_lf,
 )
@@ -52,8 +55,27 @@ def _write(path: Path, value: Mapping[str, Any]) -> None:
     write_utf8_lf(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
 
 
-def _sha256(path: Path) -> str:
-    return governed_text_sha256(path.read_bytes())
+def _sha256(path: Path, representation: GovernedTextRepresentation = "CRLF") -> str:
+    return governed_text_sha256(path.read_bytes(), representation)
+
+
+def _parent_artifact_representations() -> dict[str, GovernedTextRepresentation]:
+    """Recover each predecessor artifact representation from its trusted lock."""
+
+    loader = trusted_loader_for_baseline(PARENT)
+    artifacts = loader.load_all()
+    lock = _load(PARENT / "BASELINE_LOCK.json")
+    entries = {entry["file"]: entry for entry in lock["artifacts"]}
+    representations: dict[str, GovernedTextRepresentation] = {}
+    for artifact in artifacts:
+        entry = entries[artifact.filename]
+        _, representation = match_governed_text_bytes(
+            (PARENT / "canonical" / artifact.filename).read_bytes(),
+            entry["sha256"],
+            entry["bytes"],
+        )
+        representations[artifact.filename] = "LF" if representation == "NONE" else representation
+    return representations
 
 
 def _normalize_tree_to_lf(root: Path) -> None:
@@ -143,6 +165,7 @@ def _schema_compatibility() -> dict[str, Any]:
 def build_successor(output: Path) -> None:
     if output.exists():
         shutil.rmtree(output)
+    parent_representations = _parent_artifact_representations()
     shutil.copytree(PARENT, output)
     _normalize_tree_to_lf(output)
     canonical = output / "canonical"
@@ -235,10 +258,17 @@ def build_successor(output: Path) -> None:
     }
     for name, document in replacements.items():
         _write(canonical / name, document)
-    artifacts = [
-        {"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}
-        for path in sorted(canonical.glob("*.json"), key=lambda item: item.name)
-    ]
+    artifacts = []
+    for path in sorted(canonical.glob("*.json"), key=lambda item: item.name):
+        representation = parent_representations.get(path.name, "CRLF")
+        canonical_bytes = canonicalize_governed_text_bytes(path.read_bytes(), representation)
+        artifacts.append(
+            {
+                "file": path.name,
+                "sha256": hashlib.sha256(canonical_bytes).hexdigest(),
+                "bytes": len(canonical_bytes),
+            }
+        )
     _write(
         output / "BASELINE_LOCK.json",
         {

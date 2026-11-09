@@ -42,12 +42,18 @@
       "CB-1.16.0",
       "CB-1.17.0"
     ],
-    "canonical_hash_representation": "CRLF",
+    "canonical_hash_representation": "per-artifact trusted-lock-pinned LF or CRLF",
     "accepted_checkout_line_endings": [
       "LF",
       "CRLF"
     ],
     "mixed_or_bare_line_endings": "REJECT",
+    "g12_inherited_artifacts": "preserve exact CB-1.16.0 per-file representation",
+    "g12_new_artifacts": "CRLF",
+    "cb_1_17_0_artifact_representation_counts": {
+      "LF": 27,
+      "CRLF": 42
+    },
     "parent_baseline_immutable": "CB-1.17.0"
   }
 }
