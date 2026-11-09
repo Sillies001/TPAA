@@ -1,0 +1,584 @@
+{
+  "schema": "TPAA_TASK_METRIC_LOGICAL_TABLES_V1",
+  "db_schema_version": "1.11.0",
+  "tables": {
+    "assessment.task_metric_definition": {
+      "fields": [
+        {
+          "name": "task_metric_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "task_metric_definition_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "semantic_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "semantic_id text NOT NULL"
+        },
+        {
+          "name": "definition_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "definition_version text NOT NULL"
+        },
+        {
+          "name": "algorithm_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "algorithm_id text NOT NULL"
+        },
+        {
+          "name": "algorithm_version",
+          "type": "text",
+          "nullable": false,
+          "sql": "algorithm_version text NOT NULL"
+        },
+        {
+          "name": "name_zh",
+          "type": "text",
+          "nullable": false,
+          "sql": "name_zh text NOT NULL"
+        },
+        {
+          "name": "name_en",
+          "type": "text",
+          "nullable": false,
+          "sql": "name_en text NOT NULL"
+        },
+        {
+          "name": "value_kind",
+          "type": "text",
+          "nullable": false,
+          "sql": "value_kind text NOT NULL"
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": false,
+          "sql": "unit text NOT NULL"
+        },
+        {
+          "name": "direction",
+          "type": "text",
+          "nullable": false,
+          "sql": "direction text NOT NULL"
+        },
+        {
+          "name": "scope_contract",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "scope_contract jsonb NOT NULL"
+        },
+        {
+          "name": "input_binding",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "input_binding jsonb NOT NULL"
+        },
+        {
+          "name": "numerator_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "numerator_rule jsonb NOT NULL"
+        },
+        {
+          "name": "denominator_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "denominator_rule jsonb NOT NULL"
+        },
+        {
+          "name": "deduplication_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "deduplication_rule jsonb NOT NULL"
+        },
+        {
+          "name": "missing_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "missing_rule jsonb NOT NULL"
+        },
+        {
+          "name": "zero_denominator_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "zero_denominator_rule jsonb NOT NULL"
+        },
+        {
+          "name": "aggregation_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "aggregation_rule jsonb NOT NULL"
+        },
+        {
+          "name": "qualification_rule",
+          "type": "jsonb",
+          "nullable": false,
+          "sql": "qualification_rule jsonb NOT NULL"
+        },
+        {
+          "name": "comparison_key_fields",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "comparison_key_fields text[] NOT NULL"
+        },
+        {
+          "name": "definition_sha256",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "definition_sha256 char(64) NOT NULL"
+        },
+        {
+          "name": "admission_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "admission_status text NOT NULL CHECK (admission_status IN ('CANDIDATE_AWAITING_BUSINESS_APPROVAL','ADMITTED','RETIRED'))"
+        },
+        {
+          "name": "approved_by",
+          "type": "text",
+          "nullable": true,
+          "sql": "approved_by text NULL"
+        },
+        {
+          "name": "approved_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "sql": "approved_at timestamptz NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "constraints": [
+        "UNIQUE (semantic_id, definition_version)",
+        "UNIQUE (definition_sha256)"
+      ],
+      "source": "F1 task-metric candidate schema",
+      "schema_version": "1.11.0"
+    },
+    "assessment.task_metric_result": {
+      "fields": [
+        {
+          "name": "task_metric_result_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "task_metric_result_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "task_metric_definition_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "task_metric_definition_id uuid NOT NULL REFERENCES assessment.task_metric_definition(task_metric_definition_id)"
+        },
+        {
+          "name": "batch_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "batch_id uuid NOT NULL REFERENCES registry.batch_registration(batch_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "evaluated_side",
+          "type": "text",
+          "nullable": false,
+          "sql": "evaluated_side text NOT NULL"
+        },
+        {
+          "name": "numerator",
+          "type": "text",
+          "nullable": true,
+          "sql": "numerator text NULL"
+        },
+        {
+          "name": "denominator",
+          "type": "text",
+          "nullable": true,
+          "sql": "denominator text NULL"
+        },
+        {
+          "name": "value",
+          "type": "text",
+          "nullable": true,
+          "sql": "value text NULL"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "sql": "status text NOT NULL CHECK (status IN ('READY','PENDING','N_A','INSUFFICIENT','INVALID','ERROR'))"
+        },
+        {
+          "name": "reason_code",
+          "type": "text",
+          "nullable": true,
+          "sql": "reason_code text NULL"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": true,
+          "sql": "coverage double precision NULL CHECK (coverage IS NULL OR coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "adjudication_state",
+          "type": "text",
+          "nullable": false,
+          "sql": "adjudication_state text NOT NULL"
+        },
+        {
+          "name": "source_refs",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "source_refs text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "evidence_set_id uuid NULL REFERENCES metric.evidence_set(evidence_set_id)"
+        },
+        {
+          "name": "computed_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "computed_at timestamptz NOT NULL"
+        },
+        {
+          "name": "algorithm_sha256",
+          "type": "char(64)",
+          "nullable": false,
+          "sql": "algorithm_sha256 char(64) NOT NULL"
+        }
+      ],
+      "constraints": [
+        "UNIQUE (task_metric_definition_id, batch_id, release_id, context_id, evaluated_side)"
+      ],
+      "source": "F1 task-metric candidate schema",
+      "schema_version": "1.11.0"
+    },
+    "assessment.mission_objective_plan": {
+      "fields": [
+        {
+          "name": "objective_plan_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "objective_plan_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "mission_episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "mission_episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "evaluated_side",
+          "type": "text",
+          "nullable": false,
+          "sql": "evaluated_side text NOT NULL"
+        },
+        {
+          "name": "plan_revision",
+          "type": "text",
+          "nullable": false,
+          "sql": "plan_revision text NOT NULL"
+        },
+        {
+          "name": "objective_code",
+          "type": "text",
+          "nullable": false,
+          "sql": "objective_code text NOT NULL"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "nullable": false,
+          "sql": "required boolean NOT NULL"
+        },
+        {
+          "name": "valid_from_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "valid_from_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "valid_to_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "valid_to_session_time_us bigint NULL"
+        },
+        {
+          "name": "cancellation_time_session_time_us",
+          "type": "bigint",
+          "nullable": true,
+          "sql": "cancellation_time_session_time_us bigint NULL"
+        },
+        {
+          "name": "plan_source",
+          "type": "text",
+          "nullable": false,
+          "sql": "plan_source text NOT NULL CHECK (plan_source IN ('OFFICIAL','DERIVED','INSTRUCTOR'))"
+        },
+        {
+          "name": "source_ref",
+          "type": "text",
+          "nullable": false,
+          "sql": "source_ref text NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "created_at timestamptz NOT NULL DEFAULT now()"
+        }
+      ],
+      "constraints": [
+        "UNIQUE (mission_episode_id, plan_revision, objective_code)"
+      ],
+      "source": "F1 task-metric candidate schema",
+      "schema_version": "1.11.0"
+    },
+    "assessment.adjudicated_loss": {
+      "fields": [
+        {
+          "name": "loss_id",
+          "type": "text",
+          "nullable": false,
+          "sql": "loss_id text PRIMARY KEY"
+        },
+        {
+          "name": "subject_ref",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "subject_ref uuid NOT NULL"
+        },
+        {
+          "name": "subject_side",
+          "type": "text",
+          "nullable": false,
+          "sql": "subject_side text NOT NULL CHECK (subject_side IN ('RED','BLUE'))"
+        },
+        {
+          "name": "evaluated_side_attribution",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "evaluated_side_attribution text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "batch_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "batch_id uuid NOT NULL REFERENCES registry.batch_registration(batch_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "final_j_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "final_j_status text NOT NULL CHECK (final_j_status IN ('CONFIRMED_LOSS','CONFIRMED_SURVIVED','PENDING','UNKNOWN'))"
+        },
+        {
+          "name": "effective_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "effective_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "cause_refs",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "cause_refs text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "source_refs",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "source_refs text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "evidence_set_id uuid NULL REFERENCES metric.evidence_set(evidence_set_id)"
+        },
+        {
+          "name": "supersedes_loss_id",
+          "type": "text",
+          "nullable": true,
+          "sql": "supersedes_loss_id text NULL REFERENCES assessment.adjudicated_loss(loss_id)"
+        },
+        {
+          "name": "adjudicated_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "sql": "adjudicated_at timestamptz NOT NULL"
+        }
+      ],
+      "constraints": [],
+      "source": "F1 task-metric candidate schema",
+      "schema_version": "1.11.0"
+    },
+    "assessment.engagement_episode": {
+      "fields": [
+        {
+          "name": "engagement_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "engagement_id uuid PRIMARY KEY"
+        },
+        {
+          "name": "engagement_key",
+          "type": "text",
+          "nullable": false,
+          "sql": "engagement_key text NOT NULL"
+        },
+        {
+          "name": "episode_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "episode_id uuid NOT NULL REFERENCES episode.training_episode(episode_id)"
+        },
+        {
+          "name": "batch_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "batch_id uuid NOT NULL REFERENCES registry.batch_registration(batch_id)"
+        },
+        {
+          "name": "session_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "session_id uuid NOT NULL REFERENCES registry.training_session(session_id)"
+        },
+        {
+          "name": "release_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "release_id uuid NOT NULL REFERENCES registry.analysis_release(release_id)"
+        },
+        {
+          "name": "context_id",
+          "type": "uuid",
+          "nullable": false,
+          "sql": "context_id uuid NOT NULL REFERENCES context.evaluation_context(context_id)"
+        },
+        {
+          "name": "engagement_type",
+          "type": "text",
+          "nullable": false,
+          "sql": "engagement_type text NOT NULL CHECK (engagement_type IN ('BVR','WVR','STRIKE','OTHER'))"
+        },
+        {
+          "name": "evaluated_side",
+          "type": "text",
+          "nullable": false,
+          "sql": "evaluated_side text NOT NULL CHECK (evaluated_side IN ('RED','BLUE'))"
+        },
+        {
+          "name": "opponent_side",
+          "type": "text",
+          "nullable": false,
+          "sql": "opponent_side text NOT NULL CHECK (opponent_side IN ('RED','BLUE'))"
+        },
+        {
+          "name": "start_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "start_session_time_us bigint NOT NULL"
+        },
+        {
+          "name": "end_session_time_us",
+          "type": "bigint",
+          "nullable": false,
+          "sql": "end_session_time_us bigint NOT NULL CHECK (end_session_time_us > start_session_time_us)"
+        },
+        {
+          "name": "adjudication_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "adjudication_status text NOT NULL CHECK (adjudication_status IN ('FINAL','PENDING','UNKNOWN'))"
+        },
+        {
+          "name": "qualification_status",
+          "type": "text",
+          "nullable": false,
+          "sql": "qualification_status text NOT NULL CHECK (qualification_status IN ('QUALIFIED','UNQUALIFIED','INSUFFICIENT'))"
+        },
+        {
+          "name": "coverage",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "coverage double precision NOT NULL CHECK (coverage BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "confidence",
+          "type": "double precision",
+          "nullable": false,
+          "sql": "confidence double precision NOT NULL CHECK (confidence BETWEEN 0 AND 1)"
+        },
+        {
+          "name": "source_refs",
+          "type": "text[]",
+          "nullable": false,
+          "sql": "source_refs text[] NOT NULL DEFAULT '{}'"
+        },
+        {
+          "name": "evidence_set_id",
+          "type": "uuid",
+          "nullable": true,
+          "sql": "evidence_set_id uuid NULL REFERENCES metric.evidence_set(evidence_set_id)"
+        }
+      ],
+      "constraints": [
+        "UNIQUE (engagement_key)"
+      ],
+      "source": "F1 task-metric candidate schema",
+      "schema_version": "1.11.0"
+    }
+  }
+}

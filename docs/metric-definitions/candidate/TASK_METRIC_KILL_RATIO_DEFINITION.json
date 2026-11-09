@@ -1,0 +1,128 @@
+{
+  "authority_id": "TASK_METRIC_KILL_RATIO_DEFINITION",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "parent_core_baseline": "CB-1.17.0",
+  "decision_id": "F1-V33-METRIC-DB-1.11.0-CANDIDATE-2026-11-09",
+  "semantic_id": "TPAA-TASK-KILL_RATIO",
+  "definition_version": "1.0.0",
+  "candidate_id": "TPAA-TASK-KILL_RATIO-1.0.0-candidate",
+  "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL",
+  "algorithm": {
+    "algorithm_id": "TPAA_TASK_KILL_RATIO_V1",
+    "algorithm_version": "1.0.0"
+  },
+  "name": {
+    "zh": "击落比（任务评估）",
+    "en": "Task Kill Ratio"
+  },
+  "value": {
+    "kind": "DECIMAL_RATIO",
+    "unit": "1",
+    "direction": "HIGHER_IS_BETTER",
+    "display_precision": 3,
+    "storage_representation": "DECIMAL_STRING"
+  },
+  "formula_expression": "unique_confirmed_opponent_losses / unique_eligible_air_engagements",
+  "scope_contract": {
+    "exact_scope_fields": [
+      "batch_id",
+      "session_id",
+      "release_id",
+      "context_id",
+      "evaluated_side",
+      "opponent_side",
+      "mission_phase",
+      "start_session_time_us",
+      "end_session_time_us"
+    ],
+    "time_interval": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+    "latest_fallback": "FORBIDDEN",
+    "cross_batch_borrowing": "FORBIDDEN"
+  },
+  "input_binding": {
+    "numerator": {
+      "table": "assessment.adjudicated_loss",
+      "filters": [
+        "final_j_status=CONFIRMED_LOSS",
+        "subject_side=opponent_side",
+        "evaluated_side in evaluated_side_attribution",
+        "effective_session_time_us within exact half-open scope",
+        "not superseded"
+      ]
+    },
+    "denominator": {
+      "table": "assessment.engagement_episode",
+      "filters": [
+        "engagement_type in {BVR,WVR}",
+        "evaluated_side and opponent_side match exact scope",
+        "adjudication_status=FINAL",
+        "qualification_status=QUALIFIED",
+        "engagement interval intersects exact scope"
+      ]
+    }
+  },
+  "numerator_rule": {
+    "entity": "adjudicated_loss.loss_id",
+    "count": "distinct",
+    "eligibility": "confirmed opponent loss attributable to evaluated side in scope"
+  },
+  "denominator_rule": {
+    "entity": "engagement_episode.engagement_id",
+    "count": "distinct",
+    "eligibility": "qualified, finalized BVR or WVR air engagement with both sides participating"
+  },
+  "deduplication_rule": {
+    "loss_key": "loss_id",
+    "engagement_key": "engagement_id",
+    "superseded_records": "EXCLUDE",
+    "multiple_weapon_events_for_one_loss": "COUNT_ONCE"
+  },
+  "qualification_rule": {
+    "required_adjudication": "FINAL",
+    "required_engagement_status": "QUALIFIED",
+    "excluded_engagement_types": [
+      "STRIKE",
+      "OTHER"
+    ],
+    "unknown_side": "INVALID",
+    "unqualified_episode": "EXCLUDE"
+  },
+  "missing_rule": {
+    "pending_j": "PENDING",
+    "missing_required_source": "INSUFFICIENT",
+    "conflicting_final_adjudication": "INVALID",
+    "pending_scope_rule": "Any in-scope unresolved adjudication that could change numerator or denominator makes the result PENDING."
+  },
+  "zero_denominator_rule": {
+    "status": "N_A",
+    "reason_code": "ZERO_ELIGIBLE_AIR_ENGAGEMENTS",
+    "numeric_value": null
+  },
+  "aggregation_rule": {
+    "strategy": "SUM_NUMERATOR_AND_DENOMINATOR_THEN_DIVIDE",
+    "simple_average": false,
+    "require_same_definition_hash": true,
+    "require_comparison_key": true,
+    "ratio": "sum(unique_confirmed_opponent_losses)/sum(unique_eligible_air_engagements)"
+  },
+  "evidence_requirements": [
+    "definition_sha256",
+    "exact_scope",
+    "source_refs",
+    "evidence_set_refs",
+    "algorithm_sha256"
+  ],
+  "permission_ids": [
+    "task_metric.definition.read",
+    "task_metric.result.read",
+    "task_metric.compare"
+  ],
+  "audit_events": [
+    "task_metric.definition.candidate.read",
+    "task_metric.result.read",
+    "task_metric.compare"
+  ],
+  "release_claim": false,
+  "definition_sha256": "fa49baf195337524ffa949b757ff2007657325a88fbe22841de56cc22c88a527"
+}

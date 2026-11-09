@@ -1,0 +1,48 @@
+{
+  "authority_id": "TASK_METRIC_COMPARABILITY_AUTHORITY",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "admission_status": "CANDIDATE_TEST_ONLY",
+  "per_metric_comparison_keys": {
+    "TPAA-TASK-KILL_RATIO": [
+      "semantic_id",
+      "definition_version",
+      "definition_sha256",
+      "evaluated_side",
+      "opponent_side",
+      "training_type",
+      "mission_type",
+      "mission_phase",
+      "qualification_profile_version"
+    ],
+    "TPAA-TASK-EXCHANGE_RATIO": [
+      "semantic_id",
+      "definition_version",
+      "definition_sha256",
+      "evaluated_side",
+      "opponent_side",
+      "training_type",
+      "mission_type",
+      "mission_phase",
+      "qualification_profile_version"
+    ],
+    "TPAA-TASK-MISSION_COMPLETION_RATE": [
+      "semantic_id",
+      "definition_version",
+      "definition_sha256",
+      "evaluated_side",
+      "training_type",
+      "mission_type",
+      "objective_plan_semantics_version",
+      "qualification_profile_version"
+    ]
+  },
+  "aggregation": {
+    "strategy": "SUM_NUMERATOR_AND_DENOMINATOR_THEN_DIVIDE",
+    "simple_average": "FORBIDDEN",
+    "incomparable_status": "INCOMPARABLE",
+    "require_all_comparison_keys_equal": true,
+    "definition_hash_mismatch": "INCOMPARABLE"
+  },
+  "release_claim": false
+}

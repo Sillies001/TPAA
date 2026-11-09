@@ -1,0 +1,109 @@
+{
+  "authority_id": "TASK_METRIC_INPUT_AUTHORITY_MATRIX",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "admission_status": "CANDIDATE_TEST_ONLY",
+  "rules": {
+    "exact_scope_required": true,
+    "latest_fallback": "FORBIDDEN",
+    "cross_batch_borrowing": "FORBIDDEN",
+    "unresolved_adjudication": "PENDING",
+    "missing_required_source": "INSUFFICIENT",
+    "official_result_requires_final_adjudication": true
+  },
+  "bindings": [
+    {
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "inputs": [
+        {
+          "table": "assessment.adjudicated_loss",
+          "fields": [
+            "loss_id",
+            "subject_side",
+            "evaluated_side_attribution",
+            "final_j_status",
+            "effective_session_time_us",
+            "supersedes_loss_id",
+            "evidence_set_id"
+          ],
+          "authority": "FINAL_ADJUDICATION"
+        },
+        {
+          "table": "assessment.engagement_episode",
+          "fields": [
+            "engagement_id",
+            "engagement_type",
+            "evaluated_side",
+            "opponent_side",
+            "start_session_time_us",
+            "end_session_time_us",
+            "adjudication_status",
+            "qualification_status",
+            "evidence_set_id"
+          ],
+          "authority": "QUALIFIED_ENGAGEMENT"
+        }
+      ]
+    },
+    {
+      "semantic_id": "TPAA-TASK-EXCHANGE_RATIO",
+      "inputs": [
+        {
+          "table": "assessment.adjudicated_loss",
+          "fields": [
+            "loss_id",
+            "subject_side",
+            "final_j_status",
+            "effective_session_time_us",
+            "supersedes_loss_id",
+            "evidence_set_id"
+          ],
+          "authority": "FINAL_ADJUDICATION"
+        }
+      ]
+    },
+    {
+      "semantic_id": "TPAA-TASK-MISSION_COMPLETION_RATE",
+      "inputs": [
+        {
+          "table": "assessment.mission_objective_plan",
+          "fields": [
+            "objective_plan_id",
+            "mission_episode_id",
+            "objective_code",
+            "plan_revision",
+            "required",
+            "valid_from_session_time_us",
+            "valid_to_session_time_us",
+            "cancellation_time_session_time_us"
+          ],
+          "authority": "FROZEN_MISSION_PLAN"
+        },
+        {
+          "table": "assessment.mission_assessment",
+          "fields": [
+            "mission_assessment_id",
+            "mission_episode_id",
+            "session_id",
+            "status",
+            "supersedes_id"
+          ],
+          "authority": "FINAL_MISSION_ASSESSMENT"
+        },
+        {
+          "table": "assessment.objective_result",
+          "fields": [
+            "objective_result_id",
+            "mission_assessment_id",
+            "objective_code",
+            "achieved",
+            "adjudication_refs",
+            "evidence_set_id"
+          ],
+          "authority": "OBJECTIVE_RESULT"
+        }
+      ]
+    }
+  ],
+  "release_claim": false
+}

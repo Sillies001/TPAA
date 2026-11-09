@@ -1,0 +1,132 @@
+{
+  "authority_id": "TASK_METRIC_MISSION_COMPLETION_RATE_DEFINITION",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "parent_core_baseline": "CB-1.17.0",
+  "decision_id": "F1-V33-METRIC-DB-1.11.0-CANDIDATE-2026-11-09",
+  "semantic_id": "TPAA-TASK-MISSION_COMPLETION_RATE",
+  "definition_version": "1.0.0",
+  "candidate_id": "TPAA-TASK-MISSION_COMPLETION_RATE-1.0.0-candidate",
+  "admission_status": "CANDIDATE_AWAITING_BUSINESS_APPROVAL",
+  "algorithm": {
+    "algorithm_id": "TPAA_TASK_MISSION_COMPLETION_RATE_V1",
+    "algorithm_version": "1.0.0"
+  },
+  "name": {
+    "zh": "任务完成率",
+    "en": "Mission Completion Rate"
+  },
+  "value": {
+    "kind": "DECIMAL_PERCENTAGE",
+    "unit": "%",
+    "direction": "HIGHER_IS_BETTER",
+    "display_precision": 1,
+    "storage_representation": "DECIMAL_STRING_RATIO_0_TO_1",
+    "display_multiplier": 100
+  },
+  "formula_expression": "achieved_required_objectives / eligible_planned_required_objectives * 100",
+  "scope_contract": {
+    "exact_scope_fields": [
+      "batch_id",
+      "session_id",
+      "release_id",
+      "context_id",
+      "evaluated_side",
+      "opponent_side",
+      "mission_phase",
+      "start_session_time_us",
+      "end_session_time_us"
+    ],
+    "time_interval": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+    "latest_fallback": "FORBIDDEN",
+    "cross_batch_borrowing": "FORBIDDEN",
+    "required_additional_fields": [
+      "mission_episode_id",
+      "objective_plan_revision"
+    ],
+    "objective_plan": "FROZEN_AT_MISSION_START"
+  },
+  "input_binding": {
+    "denominator": {
+      "table": "assessment.mission_objective_plan",
+      "filters": [
+        "required=true",
+        "valid at mission start",
+        "not cancelled before mission start",
+        "frozen plan revision"
+      ]
+    },
+    "numerator": {
+      "table": "assessment.objective_result",
+      "join": [
+        "assessment.mission_assessment.mission_episode_id=mission_objective_plan.mission_episode_id",
+        "objective_result.objective_code=mission_objective_plan.objective_code"
+      ],
+      "filters": [
+        "mission_objective_plan.required=true",
+        "objective_result.achieved=true",
+        "exact mission assessment revision"
+      ]
+    }
+  },
+  "numerator_rule": {
+    "entity": "mission_objective_plan.objective_plan_id",
+    "count": "distinct",
+    "eligibility": "required planned objective with final achieved=true"
+  },
+  "denominator_rule": {
+    "entity": "mission_objective_plan.objective_plan_id",
+    "count": "distinct",
+    "eligibility": "required objective frozen at mission start and not cancelled before start"
+  },
+  "deduplication_rule": {
+    "objective_key": "objective_plan_id",
+    "plan_revision": "REQUIRED",
+    "post_start_plan_edits": "EXCLUDE_UNLESS_APPROVED_REVISION_EFFECTIVE_BEFORE_MISSION_START"
+  },
+  "qualification_rule": {
+    "optional_objectives": "EXCLUDE",
+    "weights": "NOT_APPLIED_IN_VERSION_1_0_0",
+    "required_plan_revision": "FROZEN",
+    "objective_result_join": "MISSION_EPISODE_AND_OBJECTIVE_CODE"
+  },
+  "missing_rule": {
+    "pending_j": "PENDING",
+    "missing_required_source": "INSUFFICIENT",
+    "conflicting_final_adjudication": "INVALID",
+    "unknown_required_objective": "PENDING",
+    "missing_objective_result": "INSUFFICIENT"
+  },
+  "zero_denominator_rule": {
+    "status": "N_A",
+    "reason_code": "ZERO_ELIGIBLE_REQUIRED_OBJECTIVES",
+    "numeric_value": null
+  },
+  "aggregation_rule": {
+    "strategy": "SUM_NUMERATOR_AND_DENOMINATOR_THEN_DIVIDE",
+    "simple_average": false,
+    "require_same_definition_hash": true,
+    "require_comparison_key": true,
+    "ratio": "sum(achieved_required_objectives)/sum(eligible_planned_required_objectives)",
+    "display_multiplier": 100
+  },
+  "evidence_requirements": [
+    "definition_sha256",
+    "exact_scope",
+    "source_refs",
+    "evidence_set_refs",
+    "algorithm_sha256"
+  ],
+  "permission_ids": [
+    "task_metric.definition.read",
+    "task_metric.result.read",
+    "task_metric.compare"
+  ],
+  "audit_events": [
+    "task_metric.definition.candidate.read",
+    "task_metric.result.read",
+    "task_metric.compare"
+  ],
+  "release_claim": false,
+  "definition_sha256": "2df8778ce7a2ccd3117d509953d4a8a8241b0429789d9c53e2bac073046f3450"
+}

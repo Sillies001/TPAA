@@ -1,0 +1,158 @@
+{
+  "authority_id": "TASK_METRIC_ALGORITHM_TEST_VECTORS",
+  "authority_version": "1.0.0",
+  "core_baseline": "CB-1.18.0-candidate",
+  "admission_status": "CANDIDATE_TEST_ONLY",
+  "vectors": [
+    {
+      "id": "KILL_RATIO_001",
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "input": {
+        "confirmed_opponent_losses": 3,
+        "eligible_air_engagements": 4,
+        "pending": false
+      },
+      "expected": {
+        "status": "READY",
+        "numerator": "3",
+        "denominator": "4",
+        "value": "0.75"
+      }
+    },
+    {
+      "id": "KILL_RATIO_002",
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "input": {
+        "confirmed_opponent_losses": 0,
+        "eligible_air_engagements": 0,
+        "pending": false
+      },
+      "expected": {
+        "status": "N_A",
+        "reason_code": "ZERO_ELIGIBLE_AIR_ENGAGEMENTS"
+      }
+    },
+    {
+      "id": "KILL_RATIO_003",
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "input": {
+        "confirmed_opponent_losses": 1,
+        "eligible_air_engagements": 2,
+        "pending": true
+      },
+      "expected": {
+        "status": "PENDING"
+      }
+    },
+    {
+      "id": "EXCHANGE_RATIO_001",
+      "semantic_id": "TPAA-TASK-EXCHANGE_RATIO",
+      "input": {
+        "confirmed_opponent_losses": 2,
+        "confirmed_evaluated_side_losses": 1,
+        "pending": false
+      },
+      "expected": {
+        "status": "READY",
+        "numerator": "2",
+        "denominator": "1",
+        "value": "2"
+      }
+    },
+    {
+      "id": "EXCHANGE_RATIO_002",
+      "semantic_id": "TPAA-TASK-EXCHANGE_RATIO",
+      "input": {
+        "confirmed_opponent_losses": 2,
+        "confirmed_evaluated_side_losses": 0,
+        "pending": false
+      },
+      "expected": {
+        "status": "N_A",
+        "reason_code": "ZERO_EVALUATED_SIDE_CONFIRMED_LOSSES"
+      }
+    },
+    {
+      "id": "MISSION_COMPLETION_001",
+      "semantic_id": "TPAA-TASK-MISSION_COMPLETION_RATE",
+      "input": {
+        "required_objectives": 4,
+        "achieved_required_objectives": 3,
+        "optional_objectives": 2,
+        "pending": false
+      },
+      "expected": {
+        "status": "READY",
+        "numerator": "3",
+        "denominator": "4",
+        "value": "0.75",
+        "display_value": "75"
+      }
+    },
+    {
+      "id": "MISSION_COMPLETION_002",
+      "semantic_id": "TPAA-TASK-MISSION_COMPLETION_RATE",
+      "input": {
+        "required_objectives": 4,
+        "achieved_required_objectives": 3,
+        "optional_objectives": 2,
+        "pending": true
+      },
+      "expected": {
+        "status": "PENDING"
+      }
+    },
+    {
+      "id": "MISSION_COMPLETION_003",
+      "semantic_id": "TPAA-TASK-MISSION_COMPLETION_RATE",
+      "input": {
+        "required_objectives": 0,
+        "achieved_required_objectives": 0,
+        "optional_objectives": 3,
+        "pending": false
+      },
+      "expected": {
+        "status": "N_A",
+        "reason_code": "ZERO_ELIGIBLE_REQUIRED_OBJECTIVES"
+      }
+    },
+    {
+      "id": "AGGREGATION_001",
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "input": {
+        "batches": [
+          {
+            "numerator": "1",
+            "denominator": "2"
+          },
+          {
+            "numerator": "3",
+            "denominator": "4"
+          }
+        ]
+      },
+      "expected": {
+        "status": "READY",
+        "numerator": "4",
+        "denominator": "6",
+        "value": "0.6666666666666666666666666667",
+        "simple_average_forbidden": true
+      }
+    },
+    {
+      "id": "AGGREGATION_002",
+      "semantic_id": "TPAA-TASK-KILL_RATIO",
+      "input": {
+        "definition_hashes": [
+          "a",
+          "b"
+        ]
+      },
+      "expected": {
+        "status": "INCOMPARABLE",
+        "reason_code": "DEFINITION_HASH_MISMATCH"
+      }
+    }
+  ],
+  "release_claim": false
+}
