@@ -29,7 +29,7 @@
     "release_claim": false
   },
   "baseline_byte_stability": {
-    "status": "PASS",
+    "status": "PENDING_DEDICATED_F0_GATE",
     "scope": [
       "CB-1.5.0",
       "CB-1.9.0",
@@ -86,6 +86,28 @@
       "linux": "PASS",
       "windows": "PASS"
     },
-    "unrelated_full_workflow_failure": "M0 Exit PostgreSQL M1 Batch 2 physical-schema parity: TPAA_PHYSICAL_SCHEMA_MISMATCH; outside F0 scope"
+    "unrelated_full_workflow_failure": "M0 Exit PostgreSQL M1 Batch 2 physical-schema parity: TPAA_PHYSICAL_SCHEMA_MISMATCH; outside F0 scope",
+    "inherited_cross_platform_ci": {
+      "base_branch": "codex/v33-g1-handoff-20261106",
+      "base_run_number": 724,
+      "base_run_id": 42226510758,
+      "base_failed_jobs": [
+        "M0 linux",
+        "M0 windows",
+        "M0 Exit PostgreSQL"
+      ],
+      "f0_runs_with_same_inherited_failures": [
+        730,
+        731,
+        734
+      ],
+      "conclusion": "PRE_EXISTING_NOT_F0_REGRESSION"
+    },
+    "dedicated_gate": "V33 F0 Gate",
+    "scaffolds": {
+      "successor": "tools/baseline/adopt_demo_function_successor.py",
+      "codegen": "tools/codegen/task_metric_generate.py",
+      "candidate_materialized": false
+    }
   }
 }

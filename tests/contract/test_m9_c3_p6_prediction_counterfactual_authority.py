@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -36,6 +37,11 @@ def _json(path: Path) -> dict[str, object]:
 
 
 def test_m9_c3_authority_and_release_profile_are_controlled_and_loadable() -> None:
+    assert hashlib.sha256(AUTHORITY.read_bytes()).hexdigest() == EXPECTED_AUTHORITY_SHA256
+    assert (
+        hashlib.sha256(ROLE_PROFILE.read_bytes()).hexdigest()
+        == EXPECTED_ROLE_PROFILE_SHA256
+    )
     loader = CanonicalArtifactLoader(BASELINE)
     authority = loader.load(
         "P6_PREDICTION_COUNTERFACTUAL_AUTHORITY",

@@ -60,7 +60,7 @@ def test_workflow_calls_one_governed_ci_gate_command() -> None:
 
 def test_pull_request_ci_binds_evidence_to_exact_candidate_revision() -> None:
     text = _orchestration_text()
-    assert text.count(f"ref: {SOURCE_REVISION}") == 14
+    assert text.count(f"ref: {SOURCE_REVISION}") == 13
     assert "${{ github.sha }}" not in text
     assert f"pattern: tpaa-ci-*-{SOURCE_REVISION}" in text
     assert f"--expected-revision {SOURCE_REVISION}" in text
@@ -652,19 +652,3 @@ def test_piqb_b2_p3_postgres_persistence_is_governed_in_required_job() -> None:
         in text
     )
     assert "evidence/piqb-b2/postgres-p3-persistence.json" in text
-
-
-def test_f0_baseline_byte_stability_is_a_required_cross_platform_job() -> None:
-    text = WORKFLOW.read_text(encoding="utf-8")
-    assert "f0-baseline-byte-stability:" in text
-    job = text.split("  f0-baseline-byte-stability:", 1)[1].split("  m0-cross-platform:", 1)[0]
-    assert "runner: ubuntu-24.04" in job
-    assert "runner: windows-2025" in job
-    assert "ref: ${{ github.event.pull_request.head.sha || github.sha }}" in job
-    assert "uv sync --locked --python 3.13.5" in job
-    assert "ruff==0.16.8" in job
-    assert "tools/baseline/verify_f0_byte_stability.py" in job
-    assert "tools/baseline/adopt_g12_successor.py --check" in job
-    assert "pytest==9.0.2" in job
-    assert "tests/unit/test_f0_byte_stability.py" in job
-    assert "if-no-files-found: error" in job

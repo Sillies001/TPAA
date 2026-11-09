@@ -505,11 +505,11 @@ V03 必须实现：播放/暂停、速度、时间轴、逐事件跳转、2D/3D�
 
 ### F0：基线信任与跨平台可复现性修复
 
-工作：冻结 F0 工作分支的 exact HEAD/tree；保留 CB-1.17.0 及全部历史 Baseline Lock/Canonical 原始仓库对象不变；引入唯一的受控文本字节规范化模块；修复 Canonical Loader、G12 successor 生成器和证据工具；在既有跨平台 CI 中增加独立 F0 Windows/Linux job，并同步更新精确 checkout 数量契约。
+工作：冻结 F0 工作分支的 exact HEAD/tree；保留 CB-1.17.0 及全部历史 Baseline Lock/Canonical 原始仓库对象不变；引入唯一的受控文本字节规范化模块；修复 Canonical Loader、G12 successor 生成器和证据工具；建立 `adopt_demo_function_successor.py` 与 `task_metric_generate.py` 的 F0 只读/确定性脚手架；使用独立 `V33 F0 Gate` 在实施分支 push 上执行通用复验命令和 Windows/Linux 专项验证，不改写既有 M0～M9 CI 编排。
 
 历史工件必须遵循各自已受信任 Baseline Lock 中的 SHA-256 与 bytes。CB-1.17.0 当前 69 个工件包含 27 个 LF 锁定表示和 42 个 CRLF 锁定表示；不得把所有工件强制改成同一种表示。Git checkout 由 `.gitattributes` 统一为 LF，校验时仅在锁定 SHA-256 与 bytes 精确匹配的前提下接受 LF 或 CRLF。G12 successor 对继承工件保留 CB-1.16.0 对应文件的锁定表示，新增加的工件采用 CRLF 锁定表示。混合换行和裸 CR 一律 fail-closed。
 
-退出门：CB-1.5.0 与 CB-1.9.0～CB-1.17.0 全部受支持锁定基线及其受控工件通过；同一内容的 LF/CRLF 检出形式均能匹配原有锁定值；混合或裸 CR/LF 明确拒绝；内容篡改仍 fail-closed；G12 successor 在 Windows/Linux 重建摘要一致且 `--check` 通过；Windows 与 Linux GitHub Actions F0 job 均 PASS；既有 M0～M9 门禁契约继续通过；CB-1.17.0 的历史锁、工件 Git Blob SHA 和 lineage 未被修改。不得因 F0 通过而关闭 G6～G12、改变 W9 或作出发布声明。
+退出门：CB-1.5.0 与 CB-1.9.0～CB-1.17.0 全部受支持锁定基线及其受控工件通过；同一内容的 LF/CRLF 检出形式均能匹配原有锁定值；混合或裸 CR/LF 明确拒绝；内容篡改仍 fail-closed；G12 successor 在 Windows/Linux 重建摘要一致且 `--check` 通过；`adopt_demo_function_successor.py --check` 与 `task_metric_generate.py --check` 通过；独立 `V33 F0 Gate` 在 Windows/Linux 上完成 Ruff、typecheck、规定 pytest、前端 typecheck/gateway/build、`g1_frontend_build.py` 及 F0 专项验证。既有 Cross-platform CI 的历史失败必须与直接基线 Run 对照并登记，禁止把继承故障伪报为 F0 回归或通过修改旧门绕过。CB-1.17.0 的历史锁、工件 Git Blob SHA 和 lineage 未被修改。不得因 F0 通过而关闭 G6～G12、改变 W9 或作出发布声明。
 
 ### F1：Canonical、Metric Definition 与 DB 1.11.0
 

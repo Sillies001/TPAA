@@ -1,0 +1,12 @@
+{
+  "schema": "TPAA_DEMO_FUNCTION_SUCCESSOR_SCAFFOLD_V1",
+  "stage": "F0_SCAFFOLD_ONLY",
+  "parent_core_baseline": "CB-1.17.0",
+  "parent_lock_sha256": "2e84be2c5b859a767f587333dd696130ff9f6af003d8cecb79e57ea929405946",
+  "candidate_core_baseline": "CB-1.18.0-candidate",
+  "candidate_db_schema": "1.11.0-candidate",
+  "candidate_materialized": false,
+  "activation_allowed": false,
+  "release_claim": false,
+  "next_stage": "F1"
+}

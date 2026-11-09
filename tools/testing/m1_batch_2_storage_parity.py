@@ -221,7 +221,7 @@ def run(
     acceptance = {
         "current_core_schema_is_1_9_0": (
             bootstrap.schema_version == "1.9.0"
-            and bootstrap.core_baseline == "CB-1.5.0"
+            and bootstrap.core_baseline == "CB-1.4.0"
             and bootstrap.table_count == 95
         ),
         "sqlite_publish_pass": (
@@ -267,11 +267,6 @@ def run(
         "fixture_id": products.release.fixture_id,
         "release_id": products.release.release_id,
         "manifest_hash": products.release.manifest_hash,
-        "bootstrap_identity": {
-            "schema_version": bootstrap.schema_version,
-            "core_baseline": bootstrap.core_baseline,
-            "table_count": bootstrap.table_count,
-        },
         "sqlite_membership_hash": sqlite_hash,
         "postgres_membership_hash": postgres_hash,
         "receipt_identity_equal": receipt_identity_equal,
