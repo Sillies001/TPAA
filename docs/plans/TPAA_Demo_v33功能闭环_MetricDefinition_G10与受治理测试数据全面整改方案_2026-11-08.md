@@ -505,7 +505,7 @@ V03 必须实现：播放/暂停、速度、时间轴、逐事件跳转、2D/3D�
 
 ### F0：基线信任与跨平台可复现性修复
 
-工作：冻结 F0 工作分支的 exact HEAD/tree；保留 CB-1.17.0 及全部历史 Baseline Lock/Canonical 原始仓库对象不变；引入唯一的受控文本字节规范化模块；修复 Canonical Loader、G12 successor 生成器和证据工具；建立 `adopt_demo_function_successor.py` 与 `task_metric_generate.py` 的 F0 只读/确定性脚手架；使用独立 `V33 F0 Gate` 在实施分支 push 上执行通用复验命令和 Windows/Linux 专项验证，不改写既有 M0～M9 CI 编排。
+工作：冻结 F0 工作分支的 exact HEAD/tree；保留 CB-1.17.0 及全部历史 Baseline Lock/Canonical 原始仓库对象不变；引入唯一的受控文本字节规范化模块；修复 Canonical Loader、G1 DB 1.10.0 迁移 authority 读取、G2～G12 successor 生成器和证据工具；建立 `adopt_demo_function_successor.py` 与 `task_metric_generate.py` 的 F0 只读/确定性脚手架；使用独立 `V33 F0 Gate` 在实施分支 push 上执行通用复验命令和 Windows/Linux 专项验证，不改写既有 M0～M9 CI 编排。
 
 历史工件必须遵循各自已受信任 Baseline Lock 中的 SHA-256 与 bytes。CB-1.17.0 当前 69 个工件包含 27 个 LF 锁定表示和 42 个 CRLF 锁定表示；不得把所有工件强制改成同一种表示。Git checkout 由 `.gitattributes` 统一为 LF，校验时仅在锁定 SHA-256 与 bytes 精确匹配的前提下接受 LF 或 CRLF。G12 successor 对继承工件保留 CB-1.16.0 对应文件的锁定表示，新增加的工件采用 CRLF 锁定表示。混合换行和裸 CR 一律 fail-closed。
 

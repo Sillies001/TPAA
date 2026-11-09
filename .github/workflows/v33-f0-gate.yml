@@ -67,8 +67,19 @@ jobs:
       - name: Legacy M0 baseline verification entrypoint
         run: uv run --frozen python tools/dev/tpaa_dev.py verify-baseline
 
-      - name: G12 successor reconstruction
-        run: uv run --frozen python tools/baseline/adopt_g12_successor.py --check
+      - name: G2-G12 successor reconstruction and byte-stable checks
+        run: |
+          uv run --frozen python tools/baseline/adopt_g2_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g3_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g4_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g5_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g6_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g7_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g8_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g9_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g10_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g11_successor.py --check
+          uv run --frozen python tools/baseline/adopt_g12_successor.py --check
 
       - name: Demo-function successor scaffold
         run: uv run --frozen python tools/baseline/adopt_demo_function_successor.py --check
