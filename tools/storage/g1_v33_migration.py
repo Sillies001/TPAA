@@ -3,13 +3,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import sqlite3
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from tpaa_canonical.byte_stability import match_governed_text_bytes
 from tpaa_storage.bootstrap import (
     BOOTSTRAP_MANIFEST_TABLE,
     CORE_MODEL_ARTIFACT_ID,
@@ -49,10 +49,6 @@ class MigrationError(RuntimeError):
         super().__init__(f"G1_MIGRATION_FAIL reason={reason} detail={detail}")
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def _authority(
     path: Path,
     *,
@@ -61,10 +57,50 @@ def _authority(
     core: str,
     lock_hash: str,
 ) -> _SchemaAuthority:
-    actual = _sha256(path)
-    if actual != expected_hash:
-        raise MigrationError("AUTHORITY_HASH_MISMATCH", f"path={path} actual={actual}")
-    payload: Any = json.loads(path.read_text(encoding="utf-8"))
+    baseline_root = path.parent.parent
+    lock_path = baseline_root / "BASELINE_LOCK.json"
+    try:
+        canonical_lock_bytes, _ = match_governed_text_bytes(
+            lock_path.read_bytes(), lock_hash
+        )
+        lock_payload = json.loads(canonical_lock_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        raise MigrationError(
+            "AUTHORITY_LOCK_HASH_MISMATCH", f"path={lock_path} detail={exc}"
+        ) from exc
+    baseline_metadata = lock_payload.get("baseline")
+    if not isinstance(baseline_metadata, Mapping):
+        raise MigrationError("AUTHORITY_LOCK_INVALID", f"path={lock_path}")
+    if baseline_metadata.get("core") != core or baseline_metadata.get("db_schema") != schema:
+        raise MigrationError(
+            "AUTHORITY_LOCK_SCOPE_MISMATCH",
+            f"path={lock_path} expected_core={core} expected_schema={schema}",
+        )
+    raw_entries = lock_payload.get("artifacts")
+    if not isinstance(raw_entries, list):
+        raise MigrationError("AUTHORITY_LOCK_INVALID", f"path={lock_path} artifacts")
+    entry = next(
+        (
+            item
+            for item in raw_entries
+            if isinstance(item, Mapping) and item.get("file") == path.name
+        ),
+        None,
+    )
+    if not isinstance(entry, Mapping) or entry.get("sha256") != expected_hash:
+        raise MigrationError("AUTHORITY_LOCK_ENTRY_MISMATCH", f"path={path}")
+    expected_bytes = entry.get("bytes")
+    if not isinstance(expected_bytes, int) or expected_bytes < 0:
+        raise MigrationError("AUTHORITY_LOCK_ENTRY_MISMATCH", f"path={path} bytes")
+    try:
+        canonical_authority_bytes, _ = match_governed_text_bytes(
+            path.read_bytes(), expected_hash, expected_bytes
+        )
+    except (OSError, ValueError) as exc:
+        raise MigrationError(
+            "AUTHORITY_HASH_MISMATCH", f"path={path} detail={exc}"
+        ) from exc
+    payload: Any = json.loads(canonical_authority_bytes.decode("utf-8"))
     if not isinstance(payload, Mapping) or payload.get("db_schema_version") != schema:
         raise MigrationError("AUTHORITY_SCHEMA_MISMATCH", f"path={path}")
     tables = payload.get("tables")
