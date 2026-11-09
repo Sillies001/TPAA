@@ -61,8 +61,9 @@ def _render_python() -> str:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Literal, Mapping
+from typing import Literal
 
 TaskMetricStatus = Literal[
     "READY", "PENDING", "N_A", "INSUFFICIENT", "INVALID", "ERROR", "INCOMPARABLE"
