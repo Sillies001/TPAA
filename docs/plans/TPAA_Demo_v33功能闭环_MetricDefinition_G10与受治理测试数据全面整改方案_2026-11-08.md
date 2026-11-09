@@ -503,11 +503,11 @@ V03 必须实现：播放/暂停、速度、时间轴、逐事件跳转、2D/3D�
 
 ## 11. 分阶段实施顺序与退出门
 
-### F0：状态冻结与基线脚手架
+### F0：基线信任与跨平台可复现性修复
 
-工作：保存当前 dirty-tree 清单和 hash；建立本方案状态 JSON、successor/codegen 框架、差异清单；确认 CB-1.17.0 不变。
+工作：冻结 F0 工作分支的 exact HEAD/tree；保留 CB-1.17.0 及全部历史 Baseline Lock/Canonical 原始仓库对象不变；引入唯一的受控文本字节规范化模块；修复 Canonical Loader、G12 successor 生成器和证据工具；建立 Windows/Linux GitHub Actions 专项矩阵。历史锁定 SHA-256 和 bytes 继续对应 CRLF 规范表示，Git checkout 统一保持 LF。
 
-退出门：父基线全字节 hash 一致；新计划与状态源可读；未执行 git 写操作、推送或部署。
+退出门：CB-1.5.0 与 CB-1.9.0～CB-1.17.0 全部受支持锁定基线及其受控工件通过；同一内容的 LF/CRLF 输入产生相同规范 SHA-256/bytes；混合或裸 CR/LF 明确拒绝；内容篡改仍 fail-closed；G12 successor 在 Windows/Linux 重建摘要一致且 `--check` 通过；Windows 与 Linux GitHub Actions 专项作业均 PASS；CB-1.17.0 的历史锁、工件 Git Blob SHA 和 lineage 未被修改。不得因 F0 通过而关闭 G6～G12、改变 W9 或作出发布声明。
 
 ### F1：Canonical、Metric Definition 与 DB 1.11.0
 

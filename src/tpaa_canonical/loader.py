@@ -17,6 +17,11 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
+from .byte_stability import (
+    GovernedTextLineEndingError,
+    canonicalize_governed_text_bytes,
+)
+
 EXPECTED_CORE_BASELINE = "CB-1.5.0"
 EXPECTED_BASELINE_LOCK_SHA256 = (
     "ecdb68d0aa17ad49b2b0b3bdbad0e82559cd455725a0eb2a2a4855feba99edab"
@@ -257,7 +262,17 @@ class CanonicalArtifactLoader:
                 detail=f"cannot read BASELINE_LOCK.json: {exc}",
             ) from exc
 
-        actual_lock_hash = _sha256_bytes(lock_bytes)
+        try:
+            canonical_lock_bytes = canonicalize_governed_text_bytes(lock_bytes)
+        except GovernedTextLineEndingError as exc:
+            raise CanonicalArtifactError(
+                reason="BASELINE_LOCK_LINE_ENDINGS_INVALID",
+                artifact_id="BASELINE_LOCK",
+                actual_version=UNTRUSTED_NOT_PARSED,
+                detail=f"cannot normalize BASELINE_LOCK.json line endings: {exc}",
+            ) from exc
+
+        actual_lock_hash = _sha256_bytes(canonical_lock_bytes)
         if actual_lock_hash != self.trusted_lock_sha256:
             raise CanonicalArtifactError(
                 reason="BASELINE_LOCK_HASH_MISMATCH",
@@ -488,8 +503,20 @@ class CanonicalArtifactLoader:
 
         artifact_path = self.canonical_root / entry.filename
         artifact_bytes = _read_bytes(artifact_path, normalized_id, expected.version)
-        actual_size = len(artifact_bytes)
-        actual_hash = _sha256_bytes(artifact_bytes)
+        try:
+            canonical_artifact_bytes = canonicalize_governed_text_bytes(artifact_bytes)
+        except GovernedTextLineEndingError as exc:
+            raise CanonicalArtifactError(
+                reason="CONTROLLED_ARTIFACT_LINE_ENDINGS_INVALID",
+                artifact_id=normalized_id,
+                expected_version=expected.version,
+                actual_version=UNTRUSTED_NOT_PARSED,
+                expected_schema_version=expected.schema_version,
+                detail=f"cannot normalize {entry.filename} line endings: {exc}",
+            ) from exc
+
+        actual_size = len(canonical_artifact_bytes)
+        actual_hash = _sha256_bytes(canonical_artifact_bytes)
         if actual_size != entry.byte_size or actual_hash != entry.sha256:
             raise CanonicalArtifactError(
                 reason="CONTROLLED_ARTIFACT_DRIFT",
@@ -498,7 +525,8 @@ class CanonicalArtifactLoader:
                 actual_version=UNTRUSTED_NOT_PARSED,
                 expected_schema_version=expected.schema_version,
                 detail=(
-                    f"expected_bytes={entry.byte_size} actual_bytes={actual_size} "
+                    f"expected_canonical_bytes={entry.byte_size} actual_canonical_bytes={actual_size} "
+                    f"raw_checkout_bytes={len(artifact_bytes)} "
                     f"expected_sha256={entry.sha256} actual_sha256={actual_hash}"
                 ),
             )

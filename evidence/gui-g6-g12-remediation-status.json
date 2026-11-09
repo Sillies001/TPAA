@@ -1,7 +1,7 @@
 {
   "schema": "TPAA_GUI_G6_G12_REMEDIATION_STATUS_V1",
-  "recorded_at": "2026-11-08",
-  "latest_wave": 2,
+  "recorded_at": "2026-11-09",
+  "latest_wave": 3,
   "plan": "docs/plans/TPAA_G6至G12关闭后复核缺口全面整改与再关闭方案_2026-11-08.md",
   "stages": {
     "G6": "IN_PROGRESS_REMEDIATION",
@@ -23,7 +23,31 @@
   ],
   "restrictions": {
     "push": false,
+    "feature_branch_update_authorized": true,
+    "main_push": false,
     "production_deployment": false,
     "release_claim": false
+  },
+  "baseline_byte_stability": {
+    "status": "PENDING_GITHUB_CI",
+    "scope": [
+      "CB-1.5.0",
+      "CB-1.9.0",
+      "CB-1.10.0",
+      "CB-1.11.0",
+      "CB-1.12.0",
+      "CB-1.13.0",
+      "CB-1.14.0",
+      "CB-1.15.0",
+      "CB-1.16.0",
+      "CB-1.17.0"
+    ],
+    "canonical_hash_representation": "CRLF",
+    "accepted_checkout_line_endings": [
+      "LF",
+      "CRLF"
+    ],
+    "mixed_or_bare_line_endings": "REJECT",
+    "parent_baseline_immutable": "CB-1.17.0"
   }
 }
