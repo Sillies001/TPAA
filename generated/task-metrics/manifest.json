@@ -1,0 +1,32 @@
+{
+  "business_approval": "REQUIRED",
+  "definitions": [
+    {
+      "admission_status": "CANDIDATE_TEST_ONLY",
+      "definition_sha256": "061549d4186ae2680de7207e36a2d67b7e1223e115a3e27009c1542c5e24cf39",
+      "definition_version": "1.0.0",
+      "semantic_id": "KILL_RATIO"
+    },
+    {
+      "admission_status": "CANDIDATE_TEST_ONLY",
+      "definition_sha256": "8b48cafaff405624fb7f6fcd12756d1a3166bb51a8edf71a0e1dccc59d995d02",
+      "definition_version": "1.0.0",
+      "semantic_id": "EXCHANGE_RATIO"
+    },
+    {
+      "admission_status": "CANDIDATE_TEST_ONLY",
+      "definition_sha256": "ac79959d9f7c54fd0bf60cc34402bf5deafe8f7fbca8598cc5c693b9cd4af223",
+      "definition_version": "1.0.0",
+      "semantic_id": "MISSION_COMPLETION_RATE"
+    }
+  ],
+  "outputs": {
+    "docs/metric-definitions/TASK_METRICS.md": "cde0a6e0f0e33856f903cbe73b36c5a77e59ff2ca3627e5b5638bfa1f162d87c",
+    "frontend/gui-v33/src/generated/task-metrics.ts": "9dfcd3ccda1b715e089eb86f36bbcbab056bb9ae8792d4be1d601d3e8dfba6d4",
+    "src/tpaa_generated/task_metric_dto.py": "67fdc52ef090d0a91509dd5ba0e4036cf8fb74eb45f98e265429e6fca088d941"
+  },
+  "release_claim": false,
+  "schema": "TPAA_TASK_METRIC_CODEGEN_MANIFEST_V1",
+  "source_baseline_lock_sha256": "4a369b4aa2f2c0b450f98853cd5138c9dcae6caec99a1dc959d4d3017796e2b6",
+  "source_core_baseline": "CB-1.18.0-candidate"
+}
