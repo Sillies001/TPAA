@@ -14,7 +14,6 @@ from tpaa_canonical import (
     CanonicalArtifactError,
     CanonicalArtifactLoader,
 )
-
 from tpaa_canonical.byte_stability import governed_text_sha256, governed_text_size
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
