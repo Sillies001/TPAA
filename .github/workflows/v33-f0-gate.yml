@@ -1,6 +1,7 @@
 name: V33 F0 Gate
 
 on:
+  pull_request:
   push:
     branches:
       - codex/v33-f0-f9-implementation-20261108
