@@ -128,7 +128,7 @@ def verify() -> dict[str, Any]:
     lineage = g12_lock.get("baseline", {}).get("lock_lineage_sha256")
     if lineage != [parent_digest]:
         raise F0VerificationError(
-            f"G12 parent lineage mismatch: expected={[parent_digest]!r} actual={lineage!r}
+            f"G12 parent lineage mismatch: expected={[parent_digest]!r} actual={lineage!r}"
         )
 
     return {

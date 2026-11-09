@@ -282,7 +282,6 @@ class CanonicalArtifactLoader:
                 detail=f"trusted BASELINE_LOCK.json hash mismatch: {exc}",
             ) from exc
 
-        actual_lock_hash = _sha256_bytes(canonical_lock_bytes)
 
         try:
             raw_lock = json.loads(lock_bytes.decode("utf-8"))
