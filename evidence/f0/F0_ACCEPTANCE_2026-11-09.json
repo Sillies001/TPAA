@@ -5,7 +5,7 @@
   "recorded_at": "2026-11-09",
   "repository": "Sillies001/TPAA",
   "branch": "codex/v33-f0-f9-implementation-20261108",
-  "verified_revision": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
+  "verified_revision": "46d5e745cfbbcbbf71072f605ba552dc8e1f508e",
   "parent_snapshot": "270ee15344dd2ebbbbd86ec5323a8e171c453811",
   "immutable_parent_baseline": "CB-1.17.0",
   "candidate_scaffold": "CB-1.18.0-candidate",
@@ -74,7 +74,71 @@
       ],
       "relationship": "six commits before required snapshot; historical ancestor only, not the exact F0 handoff base"
     },
-    "disposition": "OPEN_SEPARATE_FROM_F0_GATE; the exact handoff snapshot was separately measured in V33 F0 Gate run #25; see external_ci.exact_handoff_snapshot_comparison."
+    "disposition": "OPEN_SEPARATE_FROM_F0_GATE; the exact handoff snapshot was separately measured in V33 F0 Gate run #25; see external_ci.exact_handoff_snapshot_comparison.",
+    "latest_exact_handoff_comparison": {
+      "workflow": "V33 F0 Gate",
+      "run_number": 45,
+      "run_id": 42606278799,
+      "source_revision": "0c332a319d0853841d8158cf6d40f2690acc665b",
+      "evidence_capture_jobs_success": true,
+      "linux": {
+        "job_id": 129122990199,
+        "status": "FAIL_RECORDED",
+        "failed_gate_names": [
+          "verify-baseline",
+          "bootstrap-check-only",
+          "verify-canonical",
+          "generate-check",
+          "verify-generated",
+          "regenerate-diff",
+          "openapi-snapshot",
+          "migration-smoke",
+          "backup-restore-smoke",
+          "typecheck",
+          "unit",
+          "contract",
+          "migration",
+          "sqlite-repository-acceptance",
+          "sqlite-bootstrap-verify",
+          "desktop-backend-smoke",
+          "ui-automation-smoke",
+          "package-smoke",
+          "cold-start"
+        ]
+      },
+      "windows": {
+        "job_id": 129122990205,
+        "status": "FAIL_RECORDED",
+        "failed_gate_names": [
+          "verify-baseline",
+          "bootstrap-check-only",
+          "verify-canonical",
+          "generate-check",
+          "verify-generated",
+          "regenerate-diff",
+          "openapi-snapshot",
+          "migration-smoke",
+          "backup-restore-smoke",
+          "unit",
+          "contract",
+          "migration",
+          "sqlite-repository-acceptance",
+          "sqlite-bootstrap-verify",
+          "desktop-backend-smoke",
+          "ui-automation-smoke",
+          "package-smoke",
+          "cold-start"
+        ]
+      },
+      "postgres": {
+        "job_id": 129122990206,
+        "status": "FAIL_RECORDED",
+        "bootstrap": "FAIL_BASELINE_LOCK_HASH_MISMATCH",
+        "repository": "FAIL_BASELINE_LOCK_HASH_MISMATCH",
+        "m1_batch_2_parity": "FAIL_BASELINE_LOCK_HASH_MISMATCH"
+      },
+      "interpretation": "Evidence capture job SUCCESS means the exact immutable handoff baseline was successfully measured; the baseline ci-check and PostgreSQL outcomes remain FAIL."
+    }
   },
   "governance": {
     "g6_g11": "IN_PROGRESS_REMEDIATION",
@@ -273,5 +337,128 @@
     "f0_scope": "PASS",
     "legacy_full_cross_platform_ci": "OPEN_FAILURE",
     "explanation": "F0's dedicated exact-head Windows/Linux gates pass. Legacy Cross-platform CI failures remain separately recorded and are not represented as F0 passes."
+  },
+  "latest_revalidation": {
+    "date": "2026-11-09",
+    "implementation_branch": "codex/v33-f0-f9-implementation-20261108",
+    "verified_revision": "46d5e745cfbbcbbf71072f605ba552dc8e1f508e",
+    "push_gate": {
+      "workflow": "V33 F0 Gate",
+      "run_number": 44,
+      "run_id": 42606269559,
+      "event": "push",
+      "head_sha": "46d5e745cfbbcbbf71072f605ba552dc8e1f508e",
+      "conclusion": "success",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42606269559",
+      "linux": {
+        "job_id": 129122959875,
+        "conclusion": "success"
+      },
+      "windows": {
+        "job_id": 129122959845,
+        "conclusion": "success"
+      },
+      "baseline_comparison_jobs": {
+        "linux": {
+          "job_id": 129122959788,
+          "conclusion": "success",
+          "underlying_baseline_ci": "FAIL_RECORDED"
+        },
+        "windows": {
+          "job_id": 129122959659,
+          "conclusion": "success",
+          "underlying_baseline_ci": "FAIL_RECORDED"
+        },
+        "postgres": {
+          "job_id": 129122959411,
+          "conclusion": "success",
+          "underlying_baseline_ci": "FAIL_RECORDED"
+        }
+      }
+    },
+    "pull_request_gate": {
+      "workflow": "V33 F0 Gate",
+      "run_number": 45,
+      "run_id": 42606278799,
+      "event": "pull_request",
+      "head_sha": "46d5e745cfbbcbbf71072f605ba552dc8e1f508e",
+      "conclusion": "success",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42606278799",
+      "linux": {
+        "job_id": 129122989770,
+        "conclusion": "success"
+      },
+      "windows": {
+        "job_id": 129122990152,
+        "conclusion": "success"
+      },
+      "baseline_comparison_jobs": {
+        "linux": {
+          "job_id": 129122990199,
+          "conclusion": "success",
+          "underlying_baseline_ci": "FAIL_RECORDED"
+        },
+        "windows": {
+          "job_id": 129122990205,
+          "conclusion": "success",
+          "underlying_baseline_ci": "FAIL_RECORDED"
+        },
+        "postgres": {
+          "job_id": 129122990206,
+          "conclusion": "success",
+          "underlying_baseline_ci": "FAIL_RECORDED"
+        }
+      }
+    },
+    "platform_results": {
+      "linux": {
+        "ruff": "PASS",
+        "mypy": "PASS_648_SOURCE_FILES",
+        "historical_baselines": "PASS_10_BASELINES_558_ARTIFACTS",
+        "f0_targeted": "PASS_40_TESTS_2_SUBTESTS",
+        "python_regression": "PASS_559_TESTS_2_WARNINGS",
+        "frontend_typecheck": "PASS",
+        "gateway": "PASS",
+        "build": "PASS",
+        "g1_frontend_build": "PASS"
+      },
+      "windows": {
+        "ruff": "PASS",
+        "mypy": "PASS_648_SOURCE_FILES",
+        "historical_baselines": "PASS_10_BASELINES_558_ARTIFACTS",
+        "f0_targeted": "PASS_40_TESTS_2_SUBTESTS",
+        "python_regression": "PASS_559_TESTS_2_WARNINGS",
+        "frontend_typecheck": "PASS",
+        "gateway": "PASS",
+        "build": "PASS",
+        "g1_frontend_build": "PASS"
+      }
+    },
+    "f0_jobs_total": 5,
+    "f0_jobs_passed": 5
+  },
+  "stage_boundary_correction": {
+    "commit": "46d5e745cfbbcbbf71072f605ba552dc8e1f508e",
+    "restored_tree_reference": "6e67089dc160cd8792c3af3e242b4b22ff1e0c4e",
+    "paths_restored": 90,
+    "candidate_paths_removed_from_active_tree": 85,
+    "history_rewritten": false,
+    "f1_candidate_active": false,
+    "disposition": "Premature F1 candidate/DTO changes were reverted in a normal forward commit; earlier commits remain in history. Active tree is back at the known-good F0-only state."
+  },
+  "legacy_full_cross_platform_ci": {
+    "run_number": 757,
+    "run_id": 42606278806,
+    "head_sha": "46d5e745cfbbcbbf71072f605ba552dc8e1f508e",
+    "status": "IN_PROGRESS_AT_EVIDENCE_UPDATE",
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42606278806",
+    "completed_failures": [
+      "M0 linux",
+      "M0 Exit PostgreSQL"
+    ],
+    "pending": [
+      "M0 windows"
+    ],
+    "disposition": "OPEN_SEPARATE_FROM_F0_GATE"
   }
 }
