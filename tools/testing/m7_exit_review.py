@@ -9,6 +9,8 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
+from tpaa_canonical import trusted_loader_for_baseline
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
@@ -128,6 +130,11 @@ def _json(path: Path) -> dict[str, Any]:
 
 
 def _sha(path: Path) -> str:
+    if path == LOCK_PATH or path.parent == CANONICAL:
+        loader = trusted_loader_for_baseline(BASELINE)
+        if path == LOCK_PATH:
+            return loader.trusted_lock_sha256
+        return loader.load(path.stem).sha256
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 

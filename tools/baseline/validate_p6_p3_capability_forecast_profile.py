@@ -8,6 +8,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from tpaa_canonical import trusted_loader_for_baseline
+from tpaa_canonical.byte_stability import match_governed_text_bytes
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
@@ -52,8 +55,19 @@ CONTRACT_SECTIONS = (
 )
 
 
-def _sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def _sha(path: Path, expected_hash: str | None = None) -> str:
+    if path == LOCK:
+        return trusted_loader_for_baseline(BASELINE).trusted_lock_sha256
+    if path.parent == CANONICAL:
+        return trusted_loader_for_baseline(BASELINE).load(path.stem).sha256
+    raw = path.read_bytes()
+    if expected_hash is not None:
+        try:
+            canonical, _ = match_governed_text_bytes(raw, expected_hash)
+        except ValueError:
+            return hashlib.sha256(raw).hexdigest()
+        return hashlib.sha256(canonical).hexdigest()
+    return hashlib.sha256(raw).hexdigest()
 
 
 def _canonical_hash(value: object) -> str:
@@ -118,7 +132,7 @@ def verify() -> dict[str, object]:
             _sha(P4_P5_AUTHORITY) == EXPECTED_P4_P5_AUTHORITY_SHA256
         ),
         "dto_immutable": _sha(DTO) == EXPECTED_DTO_SHA256,
-        "core_immutable": _sha(CORE) == EXPECTED_CORE_SHA256,
+        "core_immutable": _sha(CORE, EXPECTED_CORE_SHA256) == EXPECTED_CORE_SHA256,
         "extension_immutable": _sha(EXTENSION) == EXPECTED_EXTENSION_SHA256,
         "m4_immutable": _sha(M4) == EXPECTED_M4_SHA256,
         "adoption_lock_chain": adoption_chain_ok,

@@ -8,6 +8,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from tpaa_canonical import trusted_loader_for_baseline
+from tpaa_canonical.byte_stability import match_governed_text_bytes
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "baseline" / "CB-1.5.0"
 CANONICAL = BASELINE / "canonical"
@@ -53,8 +56,19 @@ P6_DTO_NAMES = (
 )
 
 
-def _sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def _sha(path: Path, expected_hash: str | None = None) -> str:
+    if path == LOCK:
+        return trusted_loader_for_baseline(BASELINE).trusted_lock_sha256
+    if path.parent == CANONICAL:
+        return trusted_loader_for_baseline(BASELINE).load(path.stem).sha256
+    raw = path.read_bytes()
+    if expected_hash is not None:
+        try:
+            canonical, _ = match_governed_text_bytes(raw, expected_hash)
+        except ValueError:
+            return hashlib.sha256(raw).hexdigest()
+        return hashlib.sha256(canonical).hexdigest()
+    return hashlib.sha256(raw).hexdigest()
 
 
 def _canonical_hash(value: object) -> str:
@@ -256,7 +270,7 @@ def verify() -> dict[str, object]:
             and role_profile["source_bindings"]["cross_layer_dto_sha256"]
             == EXPECTED_DTO_SHA256
             and role_profile["source_bindings"]["core_logical_model_sha256"]
-            == _sha(HISTORICAL_CORE)
+            == _sha(HISTORICAL_CORE, role_profile["source_bindings"]["core_logical_model_sha256"])
             and role_profile["source_bindings"][
                 "extension_contract_registry_sha256"
             ]

@@ -391,12 +391,11 @@ class SQLiteMigrationService:
 
                     msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
                 else:
-                    import fcntl
-
-                    fcntl.flock(  # type: ignore[attr-defined]
-                        stream.fileno(),
-                        fcntl.LOCK_EX | fcntl.LOCK_NB,  # type: ignore[attr-defined]
-                    )
+                    fcntl = import_module("fcntl")
+                    flock = getattr(fcntl, "flock")
+                    lock_ex = getattr(fcntl, "LOCK_EX")
+                    lock_nb = getattr(fcntl, "LOCK_NB")
+                    flock(stream.fileno(), lock_ex | lock_nb)
                 locked = True
             except OSError as exc:
                 raise MigrationServiceError(
@@ -412,11 +411,10 @@ class SQLiteMigrationService:
 
                         msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
                     else:
-                        import fcntl
-
-                        fcntl.flock(  # type: ignore[attr-defined]
-                            stream.fileno(), fcntl.LOCK_UN  # type: ignore[attr-defined]
-                        )
+                        fcntl = import_module("fcntl")
+                        flock = getattr(fcntl, "flock")
+                        lock_un = getattr(fcntl, "LOCK_UN")
+                        flock(stream.fileno(), lock_un)
             finally:
                 stream.close()
 
