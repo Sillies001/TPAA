@@ -13,7 +13,7 @@ import json
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any
 
@@ -340,19 +340,28 @@ class CanonicalArtifactLoader:
             filename = entry.get("file")
             digest = entry.get("sha256")
             byte_size = entry.get("bytes")
-            if not isinstance(filename, str) or Path(filename).name != filename:
+            if not isinstance(filename, str):
                 raise CanonicalArtifactError(
                     reason="BASELINE_LOCK_SCHEMA_MISMATCH",
                     artifact_id="BASELINE_LOCK",
                     detail=f"unsafe or invalid artifact filename {filename!r}",
                 )
-            if not filename.endswith(".json"):
+            relative_path = PurePosixPath(filename)
+            if (
+                not filename
+                or "\\\\" in filename
+                or relative_path.is_absolute()
+                or relative_path.as_posix() != filename
+                or any(part in {"", ".", ".."} for part in relative_path.parts)
+                or relative_path.parts[0].endswith(":")
+                or relative_path.suffix != ".json"
+            ):
                 raise CanonicalArtifactError(
                     reason="BASELINE_LOCK_SCHEMA_MISMATCH",
                     artifact_id="BASELINE_LOCK",
-                    detail=f"controlled artifact must be JSON: {filename}",
+                    detail=f"unsafe or invalid relative Canonical path {filename!r}",
                 )
-            artifact_id = filename.removesuffix(".json")
+            artifact_id = relative_path.stem
             if not _ARTIFACT_ID_RE.fullmatch(artifact_id):
                 raise CanonicalArtifactError(
                     reason="BASELINE_LOCK_SCHEMA_MISMATCH",
@@ -398,8 +407,23 @@ class CanonicalArtifactLoader:
                 artifact_id="BASELINE_LOCK",
                 detail=f"missing canonical directory {self.canonical_root}",
             )
+        if self.canonical_root.is_symlink():
+            raise CanonicalArtifactError(
+                reason="UNCONTROLLED_CANONICAL_ARTIFACT",
+                artifact_id="BASELINE_LOCK",
+                detail="canonical root must not be a symlink",
+            )
         listed = {entry.filename for entry in entries.values()}
-        present = {path.name for path in self.canonical_root.glob("*.json") if path.is_file()}
+        present: set[str] = set()
+        for path in self.canonical_root.rglob("*.json"):
+            if path.is_symlink():
+                raise CanonicalArtifactError(
+                    reason="UNCONTROLLED_CANONICAL_ARTIFACT",
+                    artifact_id="BASELINE_LOCK",
+                    detail=f"symlinked Canonical artifact is forbidden: {path}",
+                )
+            if path.is_file():
+                present.add(path.relative_to(self.canonical_root).as_posix())
         unexpected = sorted(present - listed)
         if unexpected:
             raise CanonicalArtifactError(
@@ -500,7 +524,26 @@ class CanonicalArtifactLoader:
                 detail="artifact is not controlled by BASELINE_LOCK.json",
             )
 
-        artifact_path = self.canonical_root / entry.filename
+        artifact_path = self.canonical_root.joinpath(*PurePosixPath(entry.filename).parts)
+        current = self.canonical_root
+        for part in PurePosixPath(entry.filename).parts:
+            current = current / part
+            if current.is_symlink():
+                raise CanonicalArtifactError(
+                    reason="UNCONTROLLED_CANONICAL_ARTIFACT",
+                    artifact_id=normalized_id,
+                    expected_version=expected.version,
+                    actual_version=UNTRUSTED_NOT_PARSED,
+                    detail=f"symlinked Canonical path is forbidden: {entry.filename}",
+                )
+        try:
+            artifact_path.resolve(strict=False).relative_to(self.canonical_root.resolve())
+        except ValueError as exc:
+            raise CanonicalArtifactError(
+                reason="BASELINE_LOCK_SCHEMA_MISMATCH",
+                artifact_id=normalized_id,
+                detail=f"Canonical path escapes baseline root: {entry.filename}",
+            ) from exc
         artifact_bytes = _read_bytes(artifact_path, normalized_id, expected.version)
         try:
             canonical_artifact_bytes, _locked_representation = match_governed_text_bytes(
