@@ -5,7 +5,7 @@
   "recorded_at": "2026-11-09",
   "repository": "Sillies001/TPAA",
   "branch": "codex/v33-f0-f9-implementation-20261108",
-  "verified_revision": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+  "verified_revision": "3daa23477e510880ee4495d50295b133932d997d",
   "parent_snapshot": "270ee15344dd2ebbbbd86ec5323a8e171c453811",
   "immutable_parent_baseline": "CB-1.17.0",
   "candidate_scaffold": "CB-1.18.0-candidate",
@@ -30,22 +30,22 @@
   },
   "github_gate": {
     "workflow": "V33 F0 Gate",
-    "run_number": 18,
-    "run_id": 42568447825,
+    "run_number": 24,
+    "run_id": 42572560069,
     "event": "push",
-    "head_sha": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+    "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
     "conclusion": "success",
-    "url": "https://github.com/Sillies001/TPAA/actions/runs/42568447825",
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42572560069",
     "linux": {
-      "job_id": 129000044161,
-      "artifact_id": 13652626714,
-      "artifact_name": "tpaa-v33-f0-linux-953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+      "job_id": 129013018970,
+      "artifact_id": 13653907423,
+      "artifact_name": "tpaa-v33-f0-linux-3daa23477e510880ee4495d50295b133932d997d",
       "conclusion": "success"
     },
     "windows": {
-      "job_id": 129000043875,
-      "artifact_id": 13652042592,
-      "artifact_name": "tpaa-v33-f0-windows-953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+      "job_id": 129013020499,
+      "artifact_id": 13652969646,
+      "artifact_name": "tpaa-v33-f0-windows-3daa23477e510880ee4495d50295b133932d997d",
       "conclusion": "success"
     }
   },
@@ -69,13 +69,16 @@
     "base_run": {
       "number": 724,
       "id": 42226510758,
+      "branch": "codex/v33-g1-handoff-20261106",
+      "head_sha": "21c8567d2a8c32ca2378e3a2eb2d41d34e6f5065",
       "failed_jobs": [
         "M0 linux",
         "M0 windows",
         "M0 Exit PostgreSQL"
-      ]
+      ],
+      "relationship": "six commits before required snapshot; historical ancestor only, not the exact F0 handoff base"
     },
-    "disposition": "OPEN_PRE_EXISTING_NOT_F0_EXIT_GATE"
+    "disposition": "OPEN_SEPARATE_FROM_F0_GATE; the exact handoff snapshot was separately measured in V33 F0 Gate run #25; see external_ci.exact_handoff_snapshot_comparison."
   },
   "governance": {
     "g6_g11": "IN_PROGRESS_REMEDIATION",
@@ -119,12 +122,14 @@
   },
   "pr_merge_gate": {
     "workflow": "V33 F0 Gate",
-    "run_number": 19,
-    "run_id": 42568453167,
+    "run_number": 25,
+    "run_id": 42572564748,
     "event": "pull_request",
-    "head_sha": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+    "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
     "conclusion": "success",
-    "url": "https://github.com/Sillies001/TPAA/actions/runs/42568453167"
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42572564748",
+    "linux_job_id": 129013033146,
+    "windows_job_id": 129013032900
   },
   "external_ci": {
     "direct_handoff_base_run": {
@@ -145,15 +150,22 @@
       "relationship": "six commits before required snapshot 270ee15344dd2ebbbbd86ec5323a8e171c453811; not the exact handoff base; not used to claim inheritance"
     },
     "latest_pr_cross_platform_run": {
-      "run_number": 744,
-      "run_id": 42568453166,
-      "head_sha": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
-      "status": "IN_PROGRESS",
-      "url": "https://github.com/Sillies001/TPAA/actions/runs/42568453166",
-      "known_completed_failure": [
-        "M0 Exit PostgreSQL"
+      "run_number": 747,
+      "run_id": 42572564750,
+      "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+      "status": "FAILURE",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42572564750",
+      "failed_jobs": [
+        "M0 Exit PostgreSQL",
+        "M0 linux",
+        "M0 windows"
       ],
-      "linux_windows": "IN_PROGRESS"
+      "failure_summary": [
+        "M0 Linux and Windows each report 33 contract-test failures (845 passed, 2 warnings) across ACP-221, M1, M5, M6-M9 and W0; these remain open and must not be hidden by weakening gates.",
+        "The legacy workflow also reports one W1 service configuration test failure because the service-s3 dependency extra is not installed in that workflow; the dedicated F0 gate installs the declared service-s3 extra and its required regression set passes.",
+        "PostgreSQL M1 Batch 2 parity fails with table inventory, bootstrap manifest and physical schema mismatch evidence."
+      ],
+      "disposition": "OPEN_SEPARATE_FROM_F0_GATE; F0 Windows/Linux exact-head gate is green, but the legacy full Cross-platform CI is not green."
     },
     "previous_pr_cross_platform_run": {
       "run_number": 743,
@@ -167,6 +179,80 @@
         "PostgreSQL M1 Batch 2 parity evidence fails table inventory/bootstrap manifest/physical schema checks"
       ]
     },
-    "disposition": "OPEN_SEPARATE_FROM_F0_GATE; do not call the legacy full Cross-platform CI green; exact handoff-base comparison unavailable and explicitly recorded"
+    "disposition": "OPEN_SEPARATE_FROM_F0_GATE; do not call the legacy full Cross-platform CI green; exact handoff-base comparison unavailable and explicitly recorded",
+    "exact_handoff_snapshot_comparison": {
+      "workflow": "V33 F0 Gate",
+      "run_number": 25,
+      "run_id": 42572564748,
+      "source_branch": "codex/v33-f0-f9-handoff-20261108",
+      "source_revision": "0c332a319d0853841d8158cf6d40f2690acc665b",
+      "evidence_capture_jobs": {
+        "linux": {
+          "job_id": 129013033019,
+          "conclusion": "success",
+          "artifact_id": 13653754660
+        },
+        "windows": {
+          "job_id": 129013033118,
+          "conclusion": "success",
+          "artifact_id": 13654391135
+        },
+        "postgres": {
+          "job_id": 129013034325,
+          "conclusion": "success",
+          "artifact_id": 13654345048
+        }
+      },
+      "baseline_ci_check": {
+        "linux_status": "FAIL",
+        "linux_failed_gate_names": [
+          "verify-baseline",
+          "bootstrap-check-only",
+          "verify-canonical",
+          "generate-check",
+          "verify-generated",
+          "regenerate-diff",
+          "openapi-snapshot",
+          "migration-smoke",
+          "backup-restore-smoke",
+          "typecheck",
+          "unit",
+          "contract",
+          "migration",
+          "sqlite-repository-acceptance",
+          "sqlite-bootstrap-verify",
+          "desktop-backend-smoke",
+          "ui-automation-smoke",
+          "package-smoke"
+        ],
+        "windows_status": "FAIL",
+        "windows_failed_gate_names": [
+          "verify-baseline",
+          "bootstrap-check-only",
+          "verify-canonical",
+          "generate-check",
+          "verify-generated",
+          "regenerate-diff",
+          "openapi-snapshot",
+          "migration-smoke",
+          "backup-restore-smoke",
+          "unit",
+          "contract",
+          "migration",
+          "sqlite-repository-acceptance",
+          "sqlite-bootstrap-verify",
+          "desktop-backend-smoke",
+          "ui-automation-smoke",
+          "package-smoke"
+        ],
+        "interpretation": "The comparison job succeeded in capturing exact-handoff evidence; the baseline ci-check itself reported FAIL. This is the before-state, not a pass claim for the handoff snapshot."
+      },
+      "postgres_baseline_outcomes": {
+        "job_conclusion": "SUCCESS_EVIDENCE_CAPTURE",
+        "bootstrap": "FAIL_BASELINE_LOCK_HASH_MISMATCH",
+        "repository": "FAIL_BASELINE_LOCK_HASH_MISMATCH",
+        "m1_batch_2_parity": "FAIL_BASELINE_LOCK_HASH_MISMATCH"
+      }
+    }
   }
 }
