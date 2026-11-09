@@ -65,7 +65,7 @@ jobs:
 
       - name: Execute F0 byte-stability and loader contracts
         run: >-
-          uv run --locked python -m pytest -p no:cacheprovider
+          uv run --frozen --with pytest==9.0.2 python -m pytest -p no:cacheprovider
           tests/unit/test_f0_byte_stability.py
           tests/unit/test_m0_core_002_canonical_loader.py
           tests/contract/gui_v33/test_g12_v33_design_freeze_contract.py

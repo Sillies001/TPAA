@@ -665,5 +665,6 @@ def test_f0_baseline_byte_stability_is_a_required_cross_platform_job() -> None:
     assert "ruff==0.16.8" in job
     assert "tools/baseline/verify_f0_byte_stability.py" in job
     assert "tools/baseline/adopt_g12_successor.py --check" in job
+    assert "pytest==9.0.2" in job
     assert "tests/unit/test_f0_byte_stability.py" in job
     assert "if-no-files-found: error" in job
