@@ -29,7 +29,7 @@
     "release_claim": false
   },
   "baseline_byte_stability": {
-    "status": "PENDING_GITHUB_CI",
+    "status": "PASS",
     "scope": [
       "CB-1.5.0",
       "CB-1.9.0",
@@ -54,6 +54,38 @@
       "LF": 27,
       "CRLF": 42
     },
-    "parent_baseline_immutable": "CB-1.17.0"
+    "parent_baseline_immutable": "CB-1.17.0",
+    "verified_code_revision": "d663e0504afecf4bc1079d5f61580bf067434ae9",
+    "verification_run": {
+      "id": 42555642862,
+      "number": 730,
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42555642862"
+    },
+    "platforms": {
+      "linux": {
+        "status": "PASS",
+        "job_id": 128960601028,
+        "test_count": 22,
+        "evidence_artifact_id": 13646508889,
+        "evidence_sha256": "43f29c4ed4d26f1982d0f66e711e0224267ce15d3369022affe64fd5702d4eee"
+      },
+      "windows": {
+        "status": "PASS",
+        "job_id": 128960601203,
+        "test_count": 22,
+        "evidence_artifact_id": 13646982510,
+        "evidence_sha256": "bbccd34201e2c78eeabd943df8b0b8165bbf9f9b183cf78b0ffc968ebd1efd20"
+      }
+    },
+    "supported_baselines_verified": 10,
+    "controlled_artifacts_verified": 558,
+    "g12_successor_digest": "d1ba01c1a6aaea4652013e60b551636cdfd937a96b89ba05c31a0c782d3078e3",
+    "g12_parent_lineage": "PASS",
+    "historical_baseline_mutation": false,
+    "m0_ci_orchestration_contract": {
+      "linux": "PASS",
+      "windows": "PASS"
+    },
+    "unrelated_full_workflow_failure": "M0 Exit PostgreSQL M1 Batch 2 physical-schema parity: TPAA_PHYSICAL_SCHEMA_MISMATCH; outside F0 scope"
   }
 }
