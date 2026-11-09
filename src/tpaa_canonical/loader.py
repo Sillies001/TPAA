@@ -349,7 +349,7 @@ class CanonicalArtifactLoader:
             relative_path = PurePosixPath(filename)
             if (
                 not filename
-                or "\\\\" in filename
+                or "\\" in filename
                 or relative_path.is_absolute()
                 or relative_path.as_posix() != filename
                 or any(part in {"", ".", ".."} for part in relative_path.parts)

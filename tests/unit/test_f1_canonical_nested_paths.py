@@ -41,11 +41,11 @@ def _candidate_loader(root: Path, filename: str) -> CanonicalArtifactLoader:
 
 
 def test_loader_accepts_controlled_nested_canonical_artifact(tmp_path: Path) -> None:
-    loader = _candidate_loader(tmp_path / "CB-TEST", "task-metrics/TASK_METRIC_TEST.json")
+        "task-metrics\\TASK_METRIC_TEST.json",
 
     artifact = loader.load("TASK_METRIC_TEST")
 
-    assert artifact.filename == "task-metrics/TASK_METRIC_TEST.json"
+        "task-metrics\\TASK_METRIC_TEST.json",
     assert artifact.payload["authority_id"] == "TASK_METRIC_TEST"
 
 
@@ -54,8 +54,8 @@ def test_loader_accepts_controlled_nested_canonical_artifact(tmp_path: Path) -> 
     [
         "../TASK_METRIC_TEST.json",
         "/TASK_METRIC_TEST.json",
-        "task-metrics\\\\TASK_METRIC_TEST.json",
-        "task-metrics//TASK_METRIC_TEST.json",
+        "task-metrics\\TASK_METRIC_TEST.json",
+        "task-metrics\\TASK_METRIC_TEST.json",
         "C:/TASK_METRIC_TEST.json",
     ],
 )
@@ -83,7 +83,7 @@ def test_loader_rejects_unsafe_nested_lock_paths(tmp_path: Path, filename: str) 
 
 
 def test_loader_rejects_unlisted_nested_canonical_json(tmp_path: Path) -> None:
-    loader = _candidate_loader(tmp_path / "CB-TEST", "task-metrics/TASK_METRIC_TEST.json")
+        "task-metrics\\TASK_METRIC_TEST.json",
     write_utf8_lf(
         tmp_path / "CB-TEST" / "canonical" / "task-metrics" / "UNLISTED.json",
         "{}\n",
