@@ -5,7 +5,7 @@
   "recorded_at": "2026-11-09",
   "repository": "Sillies001/TPAA",
   "branch": "codex/v33-f0-f9-implementation-20261108",
-  "verified_revision": "5f336cf10b730e5c795dafa27b5876024a72c66a",
+  "verified_revision": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
   "parent_snapshot": "270ee15344dd2ebbbbd86ec5323a8e171c453811",
   "immutable_parent_baseline": "CB-1.17.0",
   "candidate_scaffold": "CB-1.18.0-candidate",
@@ -24,32 +24,42 @@
     "mixed_or_bare_line_endings": "FAIL_CLOSED",
     "content_drift": "FAIL_CLOSED",
     "g12_successor_digest": "d1ba01c1a6aaea4652013e60b551636cdfd937a96b89ba05c31a0c782d3078e3",
-    "historical_bytes_rewritten": false
+    "historical_bytes_rewritten": false,
+    "cb117_tree_entries_compared": 73,
+    "cb117_tree_differences": 0
   },
   "github_gate": {
     "workflow": "V33 F0 Gate",
-    "run_number": 12,
-    "run_id": 42563814546,
+    "run_number": 18,
+    "run_id": 42568447825,
     "event": "push",
-    "head_sha": "5f336cf10b730e5c795dafa27b5876024a72c66a",
+    "head_sha": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
     "conclusion": "success",
-    "url": "https://github.com/Sillies001/TPAA/actions/runs/42563814546",
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42568447825",
     "linux": {
-      "job_id": 128985824808,
-      "artifact_id": 13650801672,
+      "job_id": 129000044161,
+      "artifact_id": 13652626714,
+      "artifact_name": "tpaa-v33-f0-linux-953a883ea78b2e2d615329984cbcf9b7e3796c5b",
       "conclusion": "success"
     },
     "windows": {
-      "job_id": 128985824990,
-      "artifact_id": 13650781993,
+      "job_id": 129000043875,
+      "artifact_id": 13652042592,
+      "artifact_name": "tpaa-v33-f0-windows-953a883ea78b2e2d615329984cbcf9b7e3796c5b",
       "conclusion": "success"
     }
   },
   "tests": {
     "ruff": "PASS",
-    "typecheck": "PASS_648_SOURCE_FILES",
-    "f0_targeted": "PASS_28_TESTS_2_SUBTESTS",
-    "required_python_regression": "PASS_559_TESTS",
+    "mypy": "PASS_648_SOURCE_FILES",
+    "baseline_verification": "PASS_10_BASELINES_558_CONTROLLED_ARTIFACTS",
+    "legacy_m0_verify_baseline": "PASS_37_OF_37_CONTROLLED_ARTIFACTS",
+    "g1_db_1_10_migration": "PASS",
+    "db_1_9_sqlite_bootstrap": "PASS",
+    "migration_chain": "PASS",
+    "g2_g12_successor_checks": "PASS_ALL_11_SAME_DIGEST_ON_WINDOWS_AND_LINUX",
+    "f0_targeted": "PASS_40_TESTS_2_SUBTESTS",
+    "required_python_regression": "PASS_559_TESTS_2_WARNINGS",
     "frontend_typecheck": "PASS",
     "frontend_gateway": "PASS",
     "frontend_build": "PASS",
@@ -76,5 +86,87 @@
     "production_deployment": false,
     "release_claim": false
   },
-  "next_stage": "F1"
+  "next_stage": "F1",
+  "handoff_branch": "codex/v33-f0-f9-handoff-20261108",
+  "handoff_branch_head": "0c332a319d0853841d8158cf6d40f2690acc665b",
+  "implementation_branch_base": "codex/v33-f0-f9-handoff-20261108",
+  "pr": {
+    "number": 254,
+    "base": "codex/v33-f0-f9-handoff-20261108",
+    "head": "codex/v33-f0-f9-implementation-20261108",
+    "draft": true
+  },
+  "successor_reconstruction": {
+    "status": "PASS",
+    "platforms": [
+      "linux",
+      "windows"
+    ],
+    "all_g2_g12_same_digest": true,
+    "digests": {
+      "G2_CB-1.7.0": "deef0d23e2d9447e0ea9f25f359e7f8a78c1636ced2d5db97b20ff31cc956fb4",
+      "G3_CB-1.8.0": "ae2b6d15fb5d8fec8ae162f4facbd1a30b73f2da444b15a84e8e8c2597b7ab3e",
+      "G4_CB-1.9.0": "c4cadb4f80f1f5df8d14b0316de820030e133523a797d512e766bdc1c5583580",
+      "G5_CB-1.10.0": "07a8e92f7b8d6d9224faf34194f317b8bde391af5eba0076bdef53fdf047d962",
+      "G6_CB-1.11.0": "e35ef7e32d73e872faaa3424b85b60693c68d0c9f846b881c0890ddc1046f404",
+      "G7_CB-1.12.0": "8da1e0e4f6f0ea605e5d0acc1ba284019a92610ad39077c45de5f042cead360c",
+      "G8_CB-1.13.0": "3ec428062af4e50ad2a1fc72f2d268ab87529fb1e1d63f0d75c8f27b3082e1dd",
+      "G9_CB-1.14.0": "92b2af5922d849f360681013a9f5fdb5a7bd88ece435dfcd091f5ac44c3009c4",
+      "G10_CB-1.15.0": "fb482e03584d31114bf0528fe63adb6ef831dc705da7f619d368410dd26fd061",
+      "G11_CB-1.16.0": "e2b6a50e8672244ece0438bb6831ce26f93d4efc36a5c08083293cb115478114",
+      "G12_CB-1.17.0": "d1ba01c1a6aaea4652013e60b551636cdfd937a96b89ba05c31a0c782d3078e3"
+    }
+  },
+  "pr_merge_gate": {
+    "workflow": "V33 F0 Gate",
+    "run_number": 19,
+    "run_id": 42568453167,
+    "event": "pull_request",
+    "head_sha": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+    "conclusion": "success",
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42568453167"
+  },
+  "external_ci": {
+    "direct_handoff_base_run": {
+      "branch": "codex/v33-f0-f9-handoff-20261108",
+      "head_sha": "0c332a319d0853841d8158cf6d40f2690acc665b",
+      "status": "NO_RUN_AVAILABLE"
+    },
+    "nearest_ancestor_reference": {
+      "branch": "codex/v33-g1-handoff-20261106",
+      "head_sha": "21c8567d2a8c32ca2378e3a2eb2d41d34e6f5065",
+      "run_number": 724,
+      "run_id": 42226510758,
+      "failed_jobs": [
+        "M0 linux",
+        "M0 windows",
+        "M0 Exit PostgreSQL"
+      ],
+      "relationship": "six commits before required snapshot 270ee15344dd2ebbbbd86ec5323a8e171c453811; not the exact handoff base; not used to claim inheritance"
+    },
+    "latest_pr_cross_platform_run": {
+      "run_number": 744,
+      "run_id": 42568453166,
+      "head_sha": "953a883ea78b2e2d615329984cbcf9b7e3796c5b",
+      "status": "IN_PROGRESS",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42568453166",
+      "known_completed_failure": [
+        "M0 Exit PostgreSQL"
+      ],
+      "linux_windows": "IN_PROGRESS"
+    },
+    "previous_pr_cross_platform_run": {
+      "run_number": 743,
+      "run_id": 42567928022,
+      "head_sha": "d9db04d0afef279ee81dd9cf9511b90ae664be24",
+      "status": "FAILURE",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42567928022",
+      "failure_summary": [
+        "33 M6-M9/W0 contract assertions conflict with current G6-G11 IN_PROGRESS_REMEDIATION and G12 IN_PROGRESS_EXTERNAL_DOORS_OPEN governance state",
+        "one W1 shared service configuration unit test cannot import boto3 because legacy Cross-platform CI runs uv sync without service-s3 extra",
+        "PostgreSQL M1 Batch 2 parity evidence fails table inventory/bootstrap manifest/physical schema checks"
+      ]
+    },
+    "disposition": "OPEN_SEPARATE_FROM_F0_GATE; do not call the legacy full Cross-platform CI green; exact handoff-base comparison unavailable and explicitly recorded"
+  }
 }
