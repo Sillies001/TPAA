@@ -5,7 +5,7 @@
   "recorded_at": "2026-11-09",
   "repository": "Sillies001/TPAA",
   "branch": "codex/v33-f0-f9-implementation-20261108",
-  "verified_revision": "3daa23477e510880ee4495d50295b133932d997d",
+  "verified_revision": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
   "parent_snapshot": "270ee15344dd2ebbbbd86ec5323a8e171c453811",
   "immutable_parent_baseline": "CB-1.17.0",
   "candidate_scaffold": "CB-1.18.0-candidate",
@@ -30,22 +30,18 @@
   },
   "github_gate": {
     "workflow": "V33 F0 Gate",
-    "run_number": 24,
-    "run_id": 42572560069,
+    "run_number": 26,
+    "run_id": 42575314777,
     "event": "push",
-    "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+    "head_sha": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
     "conclusion": "success",
-    "url": "https://github.com/Sillies001/TPAA/actions/runs/42572560069",
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42575314777",
     "linux": {
-      "job_id": 129013018970,
-      "artifact_id": 13653907423,
-      "artifact_name": "tpaa-v33-f0-linux-3daa23477e510880ee4495d50295b133932d997d",
+      "job_id": 129021598422,
       "conclusion": "success"
     },
     "windows": {
-      "job_id": 129013020499,
-      "artifact_id": 13652969646,
-      "artifact_name": "tpaa-v33-f0-windows-3daa23477e510880ee4495d50295b133932d997d",
+      "job_id": 129021598714,
       "conclusion": "success"
     }
   },
@@ -122,14 +118,14 @@
   },
   "pr_merge_gate": {
     "workflow": "V33 F0 Gate",
-    "run_number": 25,
-    "run_id": 42572564748,
+    "run_number": 27,
+    "run_id": 42575319915,
     "event": "pull_request",
-    "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+    "head_sha": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
     "conclusion": "success",
-    "url": "https://github.com/Sillies001/TPAA/actions/runs/42572564748",
-    "linux_job_id": 129013033146,
-    "windows_job_id": 129013032900
+    "url": "https://github.com/Sillies001/TPAA/actions/runs/42575319915",
+    "linux_job_id": 129021614395,
+    "windows_job_id": 129021614123
   },
   "external_ci": {
     "direct_handoff_base_run": {
@@ -150,22 +146,40 @@
       "relationship": "six commits before required snapshot 270ee15344dd2ebbbbd86ec5323a8e171c453811; not the exact handoff base; not used to claim inheritance"
     },
     "latest_pr_cross_platform_run": {
-      "run_number": 747,
-      "run_id": 42572564750,
-      "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+      "run_number": 748,
+      "run_id": 42575320051,
+      "head_sha": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
       "status": "FAILURE",
-      "url": "https://github.com/Sillies001/TPAA/actions/runs/42572564750",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42575320051",
       "failed_jobs": [
         "M0 Exit PostgreSQL",
         "M0 linux",
         "M0 windows"
       ],
-      "failure_summary": [
-        "M0 Linux and Windows each report 33 contract-test failures (845 passed, 2 warnings) across ACP-221, M1, M5, M6-M9 and W0; these remain open and must not be hidden by weakening gates.",
-        "The legacy workflow also reports one W1 service configuration test failure because the service-s3 dependency extra is not installed in that workflow; the dedicated F0 gate installs the declared service-s3 extra and its required regression set passes.",
-        "PostgreSQL M1 Batch 2 parity fails with table inventory, bootstrap manifest and physical schema mismatch evidence."
-      ],
-      "disposition": "OPEN_SEPARATE_FROM_F0_GATE; F0 Windows/Linux exact-head gate is green, but the legacy full Cross-platform CI is not green."
+      "linux_windows": {
+        "failed_gate_names": [
+          "unit",
+          "contract",
+          "ui-automation-smoke",
+          "cold-start"
+        ],
+        "contract_failures": 33,
+        "contract_passed": 845,
+        "unit_failure": "tests/unit/runtime/test_production_entry_config.py::test_w1_shared_service_config_resolves_secret_references; missing boto3 because legacy workflow omits service-s3 extra",
+        "ui_automation_smoke": "FAIL",
+        "cold_start": "FAIL_AFTER_REQUIRED_GATES_FAILED"
+      },
+      "postgres": {
+        "status": "FAIL",
+        "tracking_issue": 87,
+        "failures": [
+          "TPAA_TABLE_INVENTORY_MISMATCH",
+          "TPAA_BOOTSTRAP_MANIFEST_MISMATCH",
+          "TPAA_PHYSICAL_SCHEMA_MISMATCH"
+        ],
+        "disposition": "OPEN_M1_POSTGRESQL_PARITY; not hidden by F0 gate"
+      },
+      "disposition": "OPEN_SEPARATE_FROM_F0_GATE; do not call legacy full Cross-platform CI green"
     },
     "previous_pr_cross_platform_run": {
       "run_number": 743,
@@ -182,29 +196,29 @@
     "disposition": "OPEN_SEPARATE_FROM_F0_GATE; do not call the legacy full Cross-platform CI green; exact handoff-base comparison unavailable and explicitly recorded",
     "exact_handoff_snapshot_comparison": {
       "workflow": "V33 F0 Gate",
-      "run_number": 25,
-      "run_id": 42572564748,
+      "run_number": 27,
+      "run_id": 42575319915,
       "source_branch": "codex/v33-f0-f9-handoff-20261108",
       "source_revision": "0c332a319d0853841d8158cf6d40f2690acc665b",
       "evidence_capture_jobs": {
         "linux": {
-          "job_id": 129013033019,
+          "job_id": 129021614252,
           "conclusion": "success",
-          "artifact_id": 13653754660
+          "artifact_id": 13655840191
         },
         "windows": {
-          "job_id": 129013033118,
+          "job_id": 129021614228,
           "conclusion": "success",
-          "artifact_id": 13654391135
+          "artifact_id": 13655356489
         },
         "postgres": {
-          "job_id": 129013034325,
+          "job_id": 129021614177,
           "conclusion": "success",
-          "artifact_id": 13654345048
+          "artifact_id": 13655225611
         }
       },
       "baseline_ci_check": {
-        "linux_status": "FAIL",
+        "linux_status": "FAIL_RECORDED",
         "linux_failed_gate_names": [
           "verify-baseline",
           "bootstrap-check-only",
@@ -225,7 +239,7 @@
           "ui-automation-smoke",
           "package-smoke"
         ],
-        "windows_status": "FAIL",
+        "windows_status": "FAIL_RECORDED",
         "windows_failed_gate_names": [
           "verify-baseline",
           "bootstrap-check-only",
@@ -245,7 +259,7 @@
           "ui-automation-smoke",
           "package-smoke"
         ],
-        "interpretation": "The comparison job succeeded in capturing exact-handoff evidence; the baseline ci-check itself reported FAIL. This is the before-state, not a pass claim for the handoff snapshot."
+        "interpretation": "The comparison jobs succeeded only in capturing evidence from the exact handoff SHA. The underlying baseline ci-check returned FAIL on both platforms. Job SUCCESS is not a baseline CI PASS."
       },
       "postgres_baseline_outcomes": {
         "job_conclusion": "SUCCESS_EVIDENCE_CAPTURE",
@@ -254,5 +268,10 @@
         "m1_batch_2_parity": "FAIL_BASELINE_LOCK_HASH_MISMATCH"
       }
     }
+  },
+  "status_qualification": {
+    "f0_scope": "PASS",
+    "legacy_full_cross_platform_ci": "OPEN_FAILURE",
+    "explanation": "F0's dedicated exact-head Windows/Linux gates pass. Legacy Cross-platform CI failures remain separately recorded and are not represented as F0 passes."
   }
 }

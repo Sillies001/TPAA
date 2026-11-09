@@ -35,7 +35,7 @@
     "branch": "codex/v33-f0-f9-implementation-20261108",
     "handoff_branch": "codex/v33-f0-f9-handoff-20261108",
     "handoff_branch_head": "0c332a319d0853841d8158cf6d40f2690acc665b",
-    "verified_code_revision": "3daa23477e510880ee4495d50295b133932d997d",
+    "verified_code_revision": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
     "local_worktree_status": "NOT_OBSERVABLE_IN_CHATGPT_GITHUB_RUNTIME",
     "scope": [
       "CB-1.5.0",
@@ -103,33 +103,31 @@
     },
     "exact_head_gate": {
       "workflow": "V33 F0 Gate",
-      "run_number": 24,
-      "run_id": 42572560069,
+      "run_number": 26,
+      "run_id": 42575314777,
       "event": "push",
-      "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+      "head_sha": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
       "conclusion": "success",
-      "url": "https://github.com/Sillies001/TPAA/actions/runs/42572560069",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42575314777",
       "linux": {
-        "job_id": 129013018970,
-        "artifact_id": 13653907423,
+        "job_id": 129021598422,
         "conclusion": "success"
       },
       "windows": {
-        "job_id": 129013020499,
-        "artifact_id": 13652969646,
+        "job_id": 129021598714,
         "conclusion": "success"
       }
     },
     "pr_merge_gate": {
       "workflow": "V33 F0 Gate",
-      "run_number": 25,
-      "run_id": 42572564748,
+      "run_number": 27,
+      "run_id": 42575319915,
       "event": "pull_request",
-      "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+      "head_sha": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
       "conclusion": "success",
-      "url": "https://github.com/Sillies001/TPAA/actions/runs/42572564748",
-      "linux_job_id": 129013033146,
-      "windows_job_id": 129013032900
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42575319915",
+      "linux_job_id": 129021614395,
+      "windows_job_id": 129021614123
     },
     "tests": {
       "ruff": "PASS",
@@ -192,69 +190,53 @@
     },
     "next_stage": "F1",
     "exact_handoff_snapshot_comparison": {
+      "run_number": 27,
+      "run_id": 42575319915,
       "source_revision": "0c332a319d0853841d8158cf6d40f2690acc665b",
-      "workflow_run_id": 42572564748,
-      "workflow_run_number": 25,
-      "evidence_capture": "PASS",
-      "baseline_ci_check": "FAIL_RECORDED",
-      "linux_failed_gates": [
-        "verify-baseline",
-        "bootstrap-check-only",
-        "verify-canonical",
-        "generate-check",
-        "verify-generated",
-        "regenerate-diff",
-        "openapi-snapshot",
-        "migration-smoke",
-        "backup-restore-smoke",
-        "typecheck",
-        "unit",
-        "contract",
-        "migration",
-        "sqlite-repository-acceptance",
-        "sqlite-bootstrap-verify",
-        "desktop-backend-smoke",
-        "ui-automation-smoke",
-        "package-smoke"
-      ],
-      "windows_failed_gates": [
-        "verify-baseline",
-        "bootstrap-check-only",
-        "verify-canonical",
-        "generate-check",
-        "verify-generated",
-        "regenerate-diff",
-        "openapi-snapshot",
-        "migration-smoke",
-        "backup-restore-smoke",
-        "unit",
-        "contract",
-        "migration",
-        "sqlite-repository-acceptance",
-        "sqlite-bootstrap-verify",
-        "desktop-backend-smoke",
-        "ui-automation-smoke",
-        "package-smoke"
-      ],
+      "linux_baseline_ci": "FAIL_RECORDED",
+      "windows_baseline_ci": "FAIL_RECORDED",
+      "linux_failed_gate_count": 18,
+      "windows_failed_gate_count": 17,
       "postgres_baseline_outcomes": {
-        "job_conclusion": "SUCCESS_EVIDENCE_CAPTURE",
         "bootstrap": "FAIL_BASELINE_LOCK_HASH_MISMATCH",
         "repository": "FAIL_BASELINE_LOCK_HASH_MISMATCH",
         "m1_batch_2_parity": "FAIL_BASELINE_LOCK_HASH_MISMATCH"
-      }
+      },
+      "evidence_capture_jobs_success": true,
+      "interpretation": "Evidence-capture job SUCCESS means evidence was collected; the baseline test outcomes remain FAIL."
     },
     "legacy_cross_platform_ci": {
-      "run_number": 747,
-      "run_id": 42572564750,
-      "head_sha": "3daa23477e510880ee4495d50295b133932d997d",
+      "run_number": 748,
+      "run_id": 42575320051,
+      "head_sha": "d704592fd359d43a17bba6a45fccbb0abb1ceb84",
       "conclusion": "FAILURE",
-      "url": "https://github.com/Sillies001/TPAA/actions/runs/42572564750",
+      "url": "https://github.com/Sillies001/TPAA/actions/runs/42575320051",
       "failed_jobs": [
         "M0 Exit PostgreSQL",
         "M0 linux",
         "M0 windows"
       ],
+      "linux_windows_failed_gates": [
+        "unit",
+        "contract",
+        "ui-automation-smoke",
+        "cold-start"
+      ],
+      "contract_failures": 33,
+      "contract_passed": 845,
+      "unit_failure": "W1 shared service config test cannot import boto3 because legacy workflow omits service-s3 extra",
+      "postgres_failures": [
+        "TPAA_TABLE_INVENTORY_MISMATCH",
+        "TPAA_BOOTSTRAP_MANIFEST_MISMATCH",
+        "TPAA_PHYSICAL_SCHEMA_MISMATCH"
+      ],
       "disposition": "OPEN_SEPARATE_FROM_F0_GATE"
+    },
+    "status_qualification": {
+      "f0_scope": "PASS",
+      "legacy_full_cross_platform_ci": "OPEN_FAILURE",
+      "next_stage": "F1",
+      "note": "Do not interpret legacy full Cross-platform CI failure as an F0 byte-stability failure; do not hide or close the legacy failures."
     }
   }
 }
